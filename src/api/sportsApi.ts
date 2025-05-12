@@ -27,9 +27,22 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
 
 export const fetchStream = async (source: string, id: string): Promise<Stream> => {
   try {
+    console.log(`Fetching stream from: ${API_BASE}/stream/${source}/${id}`);
     const response = await fetch(`${API_BASE}/stream/${source}/${id}`);
+    
     if (!response.ok) throw new Error('Failed to fetch stream');
-    return await response.json();
+    
+    const data = await response.json();
+    console.log('Stream data:', data);
+    
+    // The API returns an array of stream options
+    if (Array.isArray(data) && data.length > 0) {
+      // Prefer HD stream if available
+      const hdStream = data.find(stream => stream.hd === true);
+      return hdStream || data[0];
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error fetching stream:', error);
     return {};

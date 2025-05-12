@@ -92,7 +92,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <header className="bg-sports-dark text-white">
         <div className="container py-6">
           <h1 className="text-3xl font-bold">Live Sports Streaming</h1>
@@ -108,9 +108,19 @@ const Index = () => {
           isLoading={loadingSports}
         />
         
+        {(selectedMatch || loadingStream) && (
+          <>
+            <Separator className="my-4 bg-gray-700" />
+            <StreamPlayer
+              stream={stream}
+              isLoading={loadingStream}
+            />
+          </>
+        )}
+        
         {(selectedSport || loadingMatches) && (
           <>
-            <Separator className="my-4" />
+            <Separator className="my-4 bg-gray-700" />
             <MatchesList
               matches={matches}
               onSelectMatch={handleSelectMatch}
@@ -118,22 +128,12 @@ const Index = () => {
             />
           </>
         )}
-        
-        {(stream || loadingStream || (selectedMatch && selectedMatch.sources.length > 0)) && (
-          <>
-            <Separator className="my-4" />
-            <StreamPlayer
-              stream={stream}
-              isLoading={loadingStream}
-            />
-          </>
-        )}
       </main>
       
-      <footer className="bg-sports-dark text-white py-6 mt-12">
+      <footer className="bg-gray-950 text-gray-300 py-6 mt-12">
         <div className="container text-center">
           <p>© 2025 Live Sports Streaming - All rights reserved</p>
-          <p className="text-sm text-gray-400 mt-2">
+          <p className="text-sm text-gray-500 mt-2">
             This service is for demonstration purposes only.
           </p>
         </div>

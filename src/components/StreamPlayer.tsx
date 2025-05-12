@@ -11,36 +11,57 @@ interface StreamPlayerProps {
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">Live Stream</h2>
-        <div className="relative w-full bg-gray-800 rounded-lg overflow-hidden" style={{ height: '500px' }}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-white">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-sports-primary"></div>
-              <p className="mt-4 text-lg">Loading stream...</p>
+      <Card className="bg-gray-900 border-gray-800">
+        <CardContent className="p-4">
+          <h2 className="text-xl font-bold mb-4 text-white">Live Stream</h2>
+          <div className="relative w-full bg-gray-900 rounded-lg overflow-hidden" style={{ height: '500px' }}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-white">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-sports-primary"></div>
+                <p className="mt-4 text-lg">Loading stream...</p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (!stream || !stream.embedUrl) {
+  if (!stream) {
     return null;
   }
 
+  // Check if we have a valid stream URL
+  const validEmbedUrl = stream.embedUrl && stream.embedUrl.startsWith('http');
+  
+  if (!validEmbedUrl) {
+    return (
+      <Card className="bg-gray-900 border-gray-800">
+        <CardContent className="p-4">
+          <h2 className="text-xl font-bold mb-4 text-white">Live Stream</h2>
+          <div className="flex items-center justify-center p-8 text-white">
+            <p>No valid stream available. Please try another source.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Live Stream</h2>
-      <div className="relative w-full bg-gray-800 rounded-lg overflow-hidden">
-        <iframe 
-          src={stream.embedUrl}
-          className="w-full h-[500px] md:h-[600px] lg:h-[700px]"
-          allowFullScreen
-          title="Live Sports Stream"
-        ></iframe>
-      </div>
-    </div>
+    <Card className="bg-gray-900 border-gray-800">
+      <CardContent className="p-4">
+        <h2 className="text-xl font-bold mb-4 text-white">Live Stream</h2>
+        <div className="relative w-full bg-gray-900 rounded-lg overflow-hidden">
+          <iframe 
+            src={stream.embedUrl}
+            className="w-full h-[400px] md:h-[500px] lg:h-[600px]"
+            allowFullScreen
+            title="Live Sports Stream"
+            sandbox="allow-scripts allow-same-origin"
+          ></iframe>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
