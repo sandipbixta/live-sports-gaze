@@ -20,6 +20,7 @@ const Match = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStream, setLoadingStream] = useState(false);
   const [activeTab, setActiveTab] = useState('stream');
+  const [activeSource, setActiveSource] = useState<string | null>(null);
   
   useEffect(() => {
     const loadMatch = async () => {
@@ -32,10 +33,11 @@ const Match = () => {
         
         // Auto-load stream if available
         if (matchData?.sources?.length > 0) {
-          setLoadingStream(true);
           const { source, id } = matchData.sources[0];
+          setActiveSource(`${source}/${id}`);
           
           try {
+            setLoadingStream(true);
             const streamData = await fetchStream(source, id);
             setStream(streamData);
           } catch (error) {
@@ -61,6 +63,23 @@ const Match = () => {
 
     loadMatch();
   }, [sportId, matchId, toast]);
+
+  const handleSourceChange = async (source: string, id: string) => {
+    setActiveSource(`${source}/${id}`);
+    setLoadingStream(true);
+    try {
+      const streamData = await fetchStream(source, id);
+      setStream(streamData);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load stream data.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingStream(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -115,7 +134,7 @@ const Match = () => {
                 Back
               </Button>
             </Link>
-            <h1 className="text-xl font-bold">{match.title}</h1>
+            <h1 className="text-xl font-bold text-white">{match.title}</h1>
           </div>
         </div>
       </header>
@@ -138,10 +157,10 @@ const Match = () => {
                   />
                 ) : (
                   <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
-                    <span className="text-3xl font-bold">{home.charAt(0)}</span>
+                    <span className="text-3xl font-bold text-white">{home.charAt(0)}</span>
                   </div>
                 )}
-                <h2 className="text-xl font-bold">{home}</h2>
+                <h2 className="text-xl font-bold text-white">{home}</h2>
               </div>
               
               <div className="flex flex-col items-center">
@@ -168,16 +187,16 @@ const Match = () => {
                   />
                 ) : (
                   <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
-                    <span className="text-3xl font-bold">{away.charAt(0)}</span>
+                    <span className="text-3xl font-bold text-white">{away.charAt(0)}</span>
                   </div>
                 )}
-                <h2 className="text-xl font-bold">{away}</h2>
+                <h2 className="text-xl font-bold text-white">{away}</h2>
               </div>
             </div>
             
             {stream && (
               <div className="flex justify-center mt-8">
-                <Badge className="bg-[#1EAEDB] px-3 py-1 text-base">LIVE NOW</Badge>
+                <Badge variant="live" className="px-3 py-1 text-base">LIVE NOW</Badge>
               </div>
             )}
           </div>
@@ -227,6 +246,73 @@ const Match = () => {
                 isLoading={loadingStream}
               />
               
+              {/* Stream Sources */}
+              <div className="mt-6">
+                <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
+                <div className="flex flex-wrap gap-3">
+                  {match.sources.map(({ source, id }) => (
+                    <Badge
+                      key={`${source}-${id}`}
+                      variant="source"
+                      className={`cursor-pointer text-sm py-2 px-4 ${
+                        activeSource === `${source}/${id}` 
+                          ? 'bg-[#343a4d] border-[#9b87f5]' 
+                          : ''
+                      }`}
+                      onClick={() => handleSourceChange(source, id)}
+                    >
+                      {source.charAt(0).toUpperCase() + source.slice(1)}
+                    </Badge>
+                  ))}
+                </div>
+                
+                {/* Additional Stream Options */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("alpha", match.sources[0].id)}
+                  >
+                    Alpha
+                  </Badge>
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("bravo", match.sources[0].id)}
+                  >
+                    Bravo
+                  </Badge>
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("charlie", match.sources[0].id)}
+                  >
+                    Charlie
+                  </Badge>
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("delta", match.sources[0].id)}
+                  >
+                    Delta
+                  </Badge>
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("echo", match.sources[0].id)}
+                  >
+                    Echo
+                  </Badge>
+                  <Badge 
+                    variant="source" 
+                    className="cursor-pointer text-sm py-2 px-4"
+                    onClick={() => match.sources.length > 0 && handleSourceChange("foxtrot", match.sources[0].id)}
+                  >
+                    Foxtrot
+                  </Badge>
+                </div>
+              </div>
+              
               {!stream && !loadingStream && (
                 <Card className="bg-[#242836] border-[#343a4d] mt-6">
                   <CardContent className="p-6 text-center">
@@ -236,29 +322,29 @@ const Match = () => {
               )}
               
               <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4">More {match.title} Content</h3>
+                <h3 className="text-xl font-bold mb-4 text-white">More {match.title} Content</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
-                      <h4 className="font-bold">Pre-match Analysis</h4>
+                      <h4 className="font-bold text-white">Pre-match Analysis</h4>
                       <p className="text-sm text-gray-400 mt-1">Expert insights and predictions</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
-                      <h4 className="font-bold">Team News</h4>
+                      <h4 className="font-bold text-white">Team News</h4>
                       <p className="text-sm text-gray-400 mt-1">Latest updates from both camps</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
-                      <h4 className="font-bold">Head-to-Head</h4>
+                      <h4 className="font-bold text-white">Head-to-Head</h4>
                       <p className="text-sm text-gray-400 mt-1">Previous encounters and stats</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
-                      <h4 className="font-bold">Venue Info</h4>
+                      <h4 className="font-bold text-white">Venue Info</h4>
                       <p className="text-sm text-gray-400 mt-1">Stadium details and conditions</p>
                     </CardContent>
                   </Card>
