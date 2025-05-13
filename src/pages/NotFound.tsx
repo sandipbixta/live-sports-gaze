@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react';
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-gray-100 flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-sports-dark text-sports-light flex flex-col justify-center items-center p-4">
       <div className="text-center max-w-md">
         <div className="mb-8">
           <h1 className="text-6xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] bg-clip-text text-transparent">

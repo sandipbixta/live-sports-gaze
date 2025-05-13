@@ -26,10 +26,10 @@ export interface Match {
 }
 
 export interface Stream {
-  id?: string;
-  streamNo?: number;
-  language?: string;
-  hd?: boolean;
-  embedUrl?: string;
-  source?: string;
+  id: string;
+  streamNo: number;
+  language: string;
+  hd: boolean;
+  embedUrl: string;
+  source: string;
 }

@@ -83,12 +83,12 @@ const Match = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#1A1F2C] text-gray-100">
+      <div className="min-h-screen bg-sports-dark text-sports-light">
         <div className="animate-pulse">
-          <div className="h-96 bg-[#242836]"></div>
+          <div className="h-96 bg-sports-card"></div>
           <div className="container mx-auto px-4 py-8">
-            <div className="h-8 bg-[#242836] w-1/3 rounded mb-4"></div>
-            <div className="h-64 bg-[#242836] rounded"></div>
+            <div className="h-8 bg-sports-card w-1/3 rounded mb-4"></div>
+            <div className="h-64 bg-sports-card rounded"></div>
           </div>
         </div>
       </div>
@@ -97,9 +97,9 @@ const Match = () => {
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-[#1A1F2C] text-gray-100">
+      <div className="min-h-screen bg-sports-dark text-sports-light">
         <div className="container mx-auto px-4 py-16">
-          <Card className="bg-[#242836] border-[#343a4d]">
+          <Card className="bg-sports-card border-sports">
             <CardContent className="p-8 text-center">
               <h2 className="text-xl font-bold text-gray-300">Match Not Found</h2>
               <p className="mt-2 text-gray-400">The match you're looking for doesn't exist or has ended.</p>
@@ -121,11 +121,18 @@ const Match = () => {
   const awayBadge = match.teams?.away?.badge 
     ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
     : '';
+    
+  // Function to generate stream ID from match ID if needed
+  const getStreamId = () => {
+    return match?.sources?.length > 0 ? match.sources[0].id : matchId;
+  };
+  
+  const streamId = getStreamId();
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-gray-100">
+    <div className="min-h-screen bg-sports-dark text-sports-light">
       {/* Header with navigation */}
-      <header className="bg-[#151922] shadow-md">
+      <header className="bg-sports-darker shadow-md">
         <div className="container mx-auto py-4 px-4">
           <div className="flex items-center">
             <Link to="/" className="text-gray-300 hover:text-white mr-4">
@@ -203,7 +210,7 @@ const Match = () => {
         </div>
         
         {/* Tabs navigation */}
-        <div className="bg-[#242836] sticky top-0 z-10 border-b border-[#343a4d]">
+        <div className="bg-sports-card sticky top-0 z-10 border-b border-sports">
           <div className="container mx-auto">
             <div className="flex overflow-x-auto scrollbar-none">
               <Button 
@@ -266,47 +273,47 @@ const Match = () => {
                   ))}
                 </div>
                 
-                {/* Additional Stream Options */}
+                {/* Additional Stream Options - Now fully functional */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("alpha", match.sources[0].id)}
+                    onClick={() => handleSourceChange("alpha", streamId)}
                   >
                     Alpha
                   </Badge>
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("bravo", match.sources[0].id)}
+                    onClick={() => handleSourceChange("bravo", streamId)}
                   >
                     Bravo
                   </Badge>
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("charlie", match.sources[0].id)}
+                    onClick={() => handleSourceChange("charlie", streamId)}
                   >
                     Charlie
                   </Badge>
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("delta", match.sources[0].id)}
+                    onClick={() => handleSourceChange("delta", streamId)}
                   >
                     Delta
                   </Badge>
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("echo", match.sources[0].id)}
+                    onClick={() => handleSourceChange("echo", streamId)}
                   >
                     Echo
                   </Badge>
                   <Badge 
                     variant="source" 
                     className="cursor-pointer text-sm py-2 px-4"
-                    onClick={() => match.sources.length > 0 && handleSourceChange("foxtrot", match.sources[0].id)}
+                    onClick={() => handleSourceChange("foxtrot", streamId)}
                   >
                     Foxtrot
                   </Badge>
@@ -314,7 +321,7 @@ const Match = () => {
               </div>
               
               {!stream && !loadingStream && (
-                <Card className="bg-[#242836] border-[#343a4d] mt-6">
+                <Card className="bg-sports-card border-sports mt-6">
                   <CardContent className="p-6 text-center">
                     <p className="text-gray-400">Stream will be available closer to match time.</p>
                   </CardContent>
@@ -324,25 +331,25 @@ const Match = () => {
               <div className="mt-8">
                 <h3 className="text-xl font-bold mb-4 text-white">More {match.title} Content</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
+                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
                       <h4 className="font-bold text-white">Pre-match Analysis</h4>
                       <p className="text-sm text-gray-400 mt-1">Expert insights and predictions</p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
+                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
                       <h4 className="font-bold text-white">Team News</h4>
                       <p className="text-sm text-gray-400 mt-1">Latest updates from both camps</p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
+                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
                       <h4 className="font-bold text-white">Head-to-Head</h4>
                       <p className="text-sm text-gray-400 mt-1">Previous encounters and stats</p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-[#242836] border-[#343a4d] hover:border-[#9b87f5]/30 transition-all">
+                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
                     <CardContent className="p-4">
                       <h4 className="font-bold text-white">Venue Info</h4>
                       <p className="text-sm text-gray-400 mt-1">Stadium details and conditions</p>
@@ -354,13 +361,13 @@ const Match = () => {
           )}
           
           {activeTab === 'stats' && (
-            <Card className="bg-[#242836] border-[#343a4d]">
+            <Card className="bg-sports-card border-sports">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6 text-center">Match Statistics</h3>
+                <h3 className="text-xl font-bold mb-6 text-center text-white">Match Statistics</h3>
                 
                 <div className="space-y-6">
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-sm mb-2 text-gray-200">
                       <span>61%</span>
                       <span className="font-medium">Possession</span>
                       <span>39%</span>
@@ -372,7 +379,7 @@ const Match = () => {
                   </div>
                   
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-sm mb-2 text-gray-200">
                       <span>8</span>
                       <span className="font-medium">Shots on Target</span>
                       <span>5</span>
@@ -384,7 +391,7 @@ const Match = () => {
                   </div>
                   
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-sm mb-2 text-gray-200">
                       <span>4</span>
                       <span className="font-medium">Corners</span>
                       <span>7</span>
@@ -396,7 +403,7 @@ const Match = () => {
                   </div>
                   
                   <div>
-                    <div className="flex justify-between text-sm mb-2">
+                    <div className="flex justify-between text-sm mb-2 text-gray-200">
                       <span>2</span>
                       <span className="font-medium">Yellow Cards</span>
                       <span>3</span>
@@ -416,13 +423,13 @@ const Match = () => {
           )}
           
           {activeTab === 'lineups' && (
-            <Card className="bg-[#242836] border-[#343a4d]">
+            <Card className="bg-sports-card border-sports">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6 text-center">Team Lineups</h3>
+                <h3 className="text-xl font-bold mb-6 text-center text-white">Team Lineups</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-bold mb-4 flex items-center">
+                    <h4 className="font-bold mb-4 flex items-center text-gray-200">
                       {homeBadge && (
                         <img src={homeBadge} alt={home} className="w-6 h-6 mr-2" onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
@@ -430,13 +437,13 @@ const Match = () => {
                       )}
                       {home} - Starting XI
                     </h4>
-                    <div className="bg-[#1A1F2C] rounded-lg p-4 space-y-2">
+                    <div className="bg-sports-darker rounded-lg p-4 space-y-2">
                       <p className="text-gray-400">Lineup data will appear before match start</p>
                     </div>
                   </div>
                   
                   <div>
-                    <h4 className="font-bold mb-4 flex items-center">
+                    <h4 className="font-bold mb-4 flex items-center text-gray-200">
                       {awayBadge && (
                         <img src={awayBadge} alt={away} className="w-6 h-6 mr-2" onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
@@ -444,7 +451,7 @@ const Match = () => {
                       )}
                       {away} - Starting XI
                     </h4>
-                    <div className="bg-[#1A1F2C] rounded-lg p-4 space-y-2">
+                    <div className="bg-sports-darker rounded-lg p-4 space-y-2">
                       <p className="text-gray-400">Lineup data will appear before match start</p>
                     </div>
                   </div>
@@ -454,9 +461,9 @@ const Match = () => {
           )}
           
           {activeTab === 'highlights' && (
-            <Card className="bg-[#242836] border-[#343a4d]">
+            <Card className="bg-sports-card border-sports">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6 text-center">Match Highlights</h3>
+                <h3 className="text-xl font-bold mb-6 text-center text-white">Match Highlights</h3>
                 <div className="text-center py-8">
                   <Film className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400">Highlights will be available after the match</p>
@@ -467,7 +474,7 @@ const Match = () => {
         </div>
       </main>
       
-      <footer className="bg-[#151922] text-gray-400 py-6 mt-10">
+      <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
         <div className="container mx-auto px-4 text-center">
           <p>© 2025 SPORTSTREAM - All rights reserved</p>
         </div>
