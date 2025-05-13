@@ -57,7 +57,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
             className="w-full h-[400px] md:h-[500px] lg:h-[600px]"
             allowFullScreen
             title="Live Sports Stream"
-            sandbox="allow-scripts allow-same-origin"
           ></iframe>
         </div>
       </CardContent>
