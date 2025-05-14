@@ -20,7 +20,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6">Live & Upcoming Matches</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
@@ -33,10 +33,10 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   if (matches.length === 0) {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6">Live & Upcoming Matches</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
         <Card className="bg-[#242836] border-[#343a4d]">
           <CardContent className="p-8 text-center">
-            <p className="text-gray-400">No matches available for this sport right now.</p>
+            <p className="text-gray-300">No matches available for this sport right now.</p>
           </CardContent>
         </Card>
       </div>
@@ -45,7 +45,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Live & Upcoming Matches</h2>
+      <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {matches.map((match) => {
           const homeBadge = match.teams?.home?.badge 
@@ -76,15 +76,15 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                         />
                       ) : (
                         <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold">{home.charAt(0)}</span>
+                          <span className="font-bold text-white">{home.charAt(0)}</span>
                         </div>
                       )}
-                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center">{home}</span>
+                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{home}</span>
                     </div>
                     
                     <div className="mx-4">
                       <div className="w-10 h-10 rounded-full bg-[#343a4d] flex items-center justify-center">
-                        <span className="font-bold text-gray-400">VS</span>
+                        <span className="font-bold text-gray-300">VS</span>
                       </div>
                     </div>
                     
@@ -100,10 +100,10 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                         />
                       ) : (
                         <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold">{away.charAt(0)}</span>
+                          <span className="font-bold text-white">{away.charAt(0)}</span>
                         </div>
                       )}
-                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center">{away}</span>
+                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{away}</span>
                     </div>
                   </div>
                   
@@ -113,8 +113,8 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                 </div>
                 
                 <CardContent className="p-4">
-                  <h3 className="font-bold mb-2 line-clamp-1">{match.title}</h3>
-                  <p className="text-xs text-gray-400 mb-3">{formatDate(match.date)}</p>
+                  <h3 className="font-bold mb-2 line-clamp-1 text-white">{match.title}</h3>
+                  <p className="text-xs text-gray-300 mb-3">{formatDate(match.date)}</p>
                   
                   <div className="flex justify-between items-center mt-4">
                     {hasStream ? (
@@ -122,7 +122,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                         Watch <ArrowRight className="h-3 w-3" />
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-transparent text-gray-400 border-gray-600">
+                      <Badge variant="outline" className="bg-transparent text-gray-300 border-gray-600">
                         Coming soon
                       </Badge>
                     )}

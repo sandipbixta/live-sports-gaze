@@ -14,19 +14,30 @@ const Index = () => {
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Fetch sports on mount
+  // Fetch sports on mount and sort them with football first
   useEffect(() => {
     const loadSports = async () => {
       setLoadingSports(true);
       try {
-        const sportsData = await fetchSports();
+        let sportsData = await fetchSports();
+        
+        // Sort sports to put football first, then basketball
+        sportsData = sportsData.sort((a, b) => {
+          if (a.name.toLowerCase() === 'football') return -1;
+          if (b.name.toLowerCase() === 'football') return 1;
+          if (a.name.toLowerCase() === 'basketball') return -1;
+          if (b.name.toLowerCase() === 'basketball') return 1;
+          return a.name.localeCompare(b.name);
+        });
+        
         setSports(sportsData);
         
-        // Auto-select first sport if available
+        // Auto-select first sport (should be football after sorting)
         if (sportsData.length > 0) {
           handleSelectSport(sportsData[0].id);
         }
@@ -50,8 +61,19 @@ const Index = () => {
     setLoadingMatches(true);
     
     try {
-      const matchesData = await fetchMatches(sportId);
-      setMatches(matchesData);
+      // Check if we already have matches for this sport
+      if (allMatches[sportId]) {
+        setMatches(allMatches[sportId]);
+      } else {
+        const matchesData = await fetchMatches(sportId);
+        setMatches(matchesData);
+        
+        // Store the matches for this sport
+        setAllMatches(prev => ({
+          ...prev,
+          [sportId]: matchesData
+        }));
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -64,7 +86,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] text-gray-100">
+    <div className="min-h-screen bg-[#1A1F2C] text-white">
       <header className="bg-[#151922] shadow-md">
         <div className="container mx-auto py-4 px-4">
           <div className="flex justify-between items-center">
@@ -73,7 +95,7 @@ const Index = () => {
                 <MenuIcon className="h-6 w-6" />
               </Button>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] bg-clip-text text-transparent">
-                SPORTSTREAM
+                DAMITV
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -82,7 +104,7 @@ const Index = () => {
                 <input 
                   type="text" 
                   placeholder="Search events..." 
-                  className="bg-[#242836] border border-[#343a4d] rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#9b87f5] w-64"
+                  className="bg-[#242836] border border-[#343a4d] rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#9b87f5] w-64 text-white"
                 />
               </div>
               <Button className="bg-[#9b87f5] hover:bg-[#8a75e8] text-white">
@@ -118,24 +140,24 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4">Live Now</h3>
-            <p className="text-gray-400">Discover events happening right now across different sports.</p>
+            <h3 className="text-xl font-bold mb-4 text-white">Live Now</h3>
+            <p className="text-gray-300">Discover events happening right now across different sports.</p>
             <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
           </div>
           
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4">Coming Up</h3>
-            <p className="text-gray-400">Get ready for upcoming matches and tournaments.</p>
+            <h3 className="text-xl font-bold mb-4 text-white">Coming Up</h3>
+            <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
             <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
           </div>
         </div>
       </main>
       
-      <footer className="bg-[#151922] text-gray-400 py-10 mt-20">
+      <footer className="bg-[#151922] text-gray-300 py-10 mt-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h4 className="font-bold text-white mb-4">SPORTSTREAM</h4>
+              <h4 className="font-bold text-white mb-4">DAMITV</h4>
               <p className="text-sm">Your premium destination for live sports streaming.</p>
             </div>
             <div>
@@ -175,7 +197,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-[#343a4d] mt-8 pt-8 text-center text-sm">
-            <p>© 2025 SPORTSTREAM - All rights reserved</p>
+            <p>© 2025 DAMITV - All rights reserved</p>
           </div>
         </div>
       </footer>

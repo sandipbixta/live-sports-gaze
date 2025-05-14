@@ -56,9 +56,23 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       return hdStream || data[0];
     }
     
-    return data;
+    // If it's not an array, but a single object, return it
+    if (data && typeof data === 'object' && data.id) {
+      return data as Stream;
+    }
+    
+    // If we get here, we couldn't get a valid stream object
+    throw new Error('Invalid stream data received');
   } catch (error) {
     console.error('Error fetching stream:', error);
-    return {};
+    // Return a default stream object that indicates an error
+    return {
+      id: "error",
+      streamNo: 0,
+      language: "unknown",
+      hd: false,
+      embedUrl: "",
+      source: "error"
+    };
   }
 };
