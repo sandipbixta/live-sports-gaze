@@ -9,14 +9,19 @@ import MatchesList from '../components/MatchesList';
 import { Separator } from '../components/ui/separator';
 import { Search, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import MainNav from '../components/MainNav';
+import { isPopularLeague } from '../utils/popularLeagues';
 
 const Index = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [popularMatches, setPopularMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -57,6 +62,26 @@ const Index = () => {
     loadSports();
   }, [toast]);
 
+  // Handle search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    if (!value.trim()) {
+      setFilteredMatches(matches);
+      return;
+    }
+    
+    const lowercaseSearch = value.toLowerCase();
+    const results = matches.filter(match => {
+      return match.title.toLowerCase().includes(lowercaseSearch) || 
+        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+    });
+    
+    setFilteredMatches(results);
+  };
+
   // Fetch matches when a sport is selected
   const handleSelectSport = async (sportId: string) => {
     setSelectedSport(sportId);
@@ -66,9 +91,19 @@ const Index = () => {
       // Check if we already have matches for this sport
       if (allMatches[sportId]) {
         setMatches(allMatches[sportId]);
+        setFilteredMatches(allMatches[sportId]);
+        
+        // Find popular matches from major leagues
+        const popular = allMatches[sportId].filter(match => isPopularLeague(match.title));
+        setPopularMatches(popular);
       } else {
         const matchesData = await fetchMatches(sportId);
         setMatches(matchesData);
+        setFilteredMatches(matchesData);
+        
+        // Find popular matches from major leagues
+        const popular = matchesData.filter(match => isPopularLeague(match.title));
+        setPopularMatches(popular);
         
         // Store the matches for this sport
         setAllMatches(prev => ({
@@ -94,12 +129,14 @@ const Index = () => {
           <div className="flex justify-between items-center">
             <MainNav />
             <div className="flex items-center space-x-4">
-              <div className="relative hidden md:flex items-center">
+              <div className="relative md:flex items-center">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input 
+                <Input 
                   type="text" 
                   placeholder="Search events..." 
                   className="bg-[#242836] border border-[#343a4d] rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#9b87f5] w-64 text-white"
+                  value={searchTerm}
+                  onChange={handleSearch}
                 />
               </div>
               <Button className="bg-[#9b87f5] hover:bg-[#8a75e8] text-white">
@@ -128,12 +165,79 @@ const Index = () => {
           />
         </div>
         
-        <Separator className="my-8 bg-[#343a4d]" />
+        {popularMatches.length > 0 && (
+          <>
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-6 text-white">Popular Games</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {popularMatches.slice(0, 6).map((match) => {
+                  const homeBadge = match.teams?.home?.badge 
+                    ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` 
+                    : '';
+                  const awayBadge = match.teams?.away?.badge 
+                    ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
+                    : '';
+                  const home = match.teams?.home?.name || 'Team A';
+                  const away = match.teams?.away?.name || 'Team B';
+                  
+                  return (
+                    <Link to={`/match/${selectedSport}/${match.id}`} key={`popular-${match.id}`} className="group">
+                      <div className="bg-[#242836] border border-[#9b87f5]/30 rounded-xl p-4 h-full hover:shadow-lg hover:shadow-[#9b87f5]/10 transition-all duration-300 hover:-translate-y-1">
+                        <div className="flex items-center justify-center mb-4">
+                          <div className="flex flex-col items-center">
+                            {homeBadge ? (
+                              <img 
+                                src={homeBadge} 
+                                alt={home} 
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center">
+                                <span className="font-bold text-white">{home.charAt(0)}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="mx-4">
+                            <span className="text-sm text-gray-300">vs</span>
+                          </div>
+                          
+                          <div className="flex flex-col items-center">
+                            {awayBadge ? (
+                              <img 
+                                src={awayBadge} 
+                                alt={away} 
+                                className="w-10 h-10 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center">
+                                <span className="font-bold text-white">{away.charAt(0)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <h3 className="font-bold text-center text-white">{match.title}</h3>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+            <Separator className="my-8 bg-[#343a4d]" />
+          </>
+        )}
         
         <div className="mb-8">
           {(selectedSport || loadingMatches) && (
             <MatchesList
-              matches={matches}
+              matches={searchTerm ? filteredMatches : matches}
               sportId={selectedSport || ""}
               isLoading={loadingMatches}
             />
