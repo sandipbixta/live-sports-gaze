@@ -10,7 +10,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { MenuIcon, Home, CalendarDays, LiveIcon } from "lucide-react";
+import { MenuIcon, Home, CalendarDays, Tv2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 
@@ -49,6 +49,18 @@ const MainNav = () => {
               )}>
                 <CalendarDays className="mr-2 h-4 w-4" />
                 Schedule
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          
+          <NavigationMenuItem>
+            <Link to="/live">
+              <NavigationMenuLink className={cn(
+                navigationMenuTriggerStyle(),
+                "bg-transparent hover:bg-[#242836] text-white"
+              )}>
+                <Tv2 className="mr-2 h-4 w-4" />
+                Live
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
