@@ -1,45 +1,53 @@
 
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import MatchesList from '../components/MatchesList';
 import { Separator } from '../components/ui/separator';
-import { Search, Calendar } from 'lucide-react';
+import { Calendar, MenuIcon, Search } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import MainNav from '../components/MainNav';
+import { format, addDays, subDays } from 'date-fns';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '../components/ui/pagination';
 
-const Index = () => {
+const Schedule = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
+  const [currentDate, setCurrentDate] = useState(new Date());
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Fetch sports on mount and sort them with football first
+  // Generate dates for pagination
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(currentDate, i - 3);
+    return {
+      date,
+      formatted: format(date, 'MMM d'),
+      isToday: format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'),
+    };
+  });
+
+  // Fetch sports on mount
   useEffect(() => {
     const loadSports = async () => {
       setLoadingSports(true);
       try {
-        let sportsData = await fetchSports();
-        
-        // Sort sports to put football first, then basketball
-        sportsData = sportsData.sort((a, b) => {
-          if (a.name.toLowerCase() === 'football') return -1;
-          if (b.name.toLowerCase() === 'football') return 1;
-          if (a.name.toLowerCase() === 'basketball') return -1;
-          if (b.name.toLowerCase() === 'basketball') return 1;
-          return a.name.localeCompare(b.name);
-        });
-        
+        const sportsData = await fetchSports();
         setSports(sportsData);
         
-        // Auto-select first sport (should be football after sorting)
+        // Auto-select first sport
         if (sportsData.length > 0) {
           handleSelectSport(sportsData[0].id);
         }
@@ -57,25 +65,29 @@ const Index = () => {
     loadSports();
   }, [toast]);
 
-  // Fetch matches when a sport is selected
+  // Fetch matches when a sport is selected or date changes
+  useEffect(() => {
+    if (selectedSport) {
+      handleSelectSport(selectedSport);
+    }
+  }, [currentDate, selectedSport]);
+
+  // Handle sport selection
   const handleSelectSport = async (sportId: string) => {
     setSelectedSport(sportId);
     setLoadingMatches(true);
     
     try {
-      // Check if we already have matches for this sport
-      if (allMatches[sportId]) {
-        setMatches(allMatches[sportId]);
-      } else {
-        const matchesData = await fetchMatches(sportId);
-        setMatches(matchesData);
-        
-        // Store the matches for this sport
-        setAllMatches(prev => ({
-          ...prev,
-          [sportId]: matchesData
-        }));
-      }
+      const matchesData = await fetchMatches(sportId);
+      
+      // Filter matches by date if needed
+      const dateStr = format(currentDate, 'yyyy-MM-dd');
+      const filtered = matchesData.filter(match => {
+        const matchDate = new Date(match.date);
+        return format(matchDate, 'yyyy-MM-dd') === dateStr;
+      });
+      
+      setMatches(filtered);
     } catch (error) {
       toast({
         title: "Error",
@@ -87,12 +99,24 @@ const Index = () => {
     }
   };
 
+  // Handle date navigation
+  const navigateDate = (days: number) => {
+    setCurrentDate(prev => addDays(prev, days));
+  };
+
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
       <header className="bg-[#151922] shadow-md">
         <div className="container mx-auto py-4 px-4">
           <div className="flex justify-between items-center">
-            <MainNav />
+            <div className="flex items-center">
+              <Button variant="ghost" size="icon" className="mr-2 md:hidden">
+                <MenuIcon className="h-6 w-6" />
+              </Button>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] bg-clip-text text-transparent">
+                DAMITV
+              </h1>
+            </div>
             <div className="flex items-center space-x-4">
               <div className="relative hidden md:flex items-center">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -111,15 +135,44 @@ const Index = () => {
       </header>
       
       <main className="container mx-auto py-6 px-4">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-white">Featured Sports</h2>
-            <Link to="/schedule">
-              <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
-                <Calendar className="mr-2 h-4 w-4" /> View Schedule
-              </Button>
-            </Link>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Schedule</h1>
+            <p className="text-gray-300">Find upcoming matches and events</p>
           </div>
+          
+          <div className="flex items-center mt-4 md:mt-0">
+            <Calendar className="h-5 w-5 mr-2 text-gray-300" />
+            <span className="text-white font-medium">{format(currentDate, 'MMMM d, yyyy')}</span>
+          </div>
+        </div>
+        
+        <div className="mb-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious onClick={() => navigateDate(-1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
+              </PaginationItem>
+              
+              {dates.map((date, i) => (
+                <PaginationItem key={i} className="hidden md:block">
+                  <PaginationLink 
+                    className={`cursor-pointer ${date.isToday ? 'bg-[#9b87f5] text-white' : 'text-white hover:bg-[#343a4d]'}`}
+                    onClick={() => setCurrentDate(date.date)}
+                  >
+                    {date.formatted}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext onClick={() => navigateDate(1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+        
+        <div className="mb-8">
           <SportsList 
             sports={sports}
             onSelectSport={handleSelectSport}
@@ -138,20 +191,6 @@ const Index = () => {
               isLoading={loadingMatches}
             />
           )}
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-          <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4 text-white">Live Now</h3>
-            <p className="text-gray-300">Discover events happening right now across different sports.</p>
-            <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
-          </div>
-          
-          <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4 text-white">Coming Up</h3>
-            <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
-            <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
-          </div>
         </div>
       </main>
       
@@ -207,4 +246,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Schedule;
