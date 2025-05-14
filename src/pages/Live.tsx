@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
-import { Match } from '../types/sports';
-import { fetchMatches } from '../api/sportsApi';
+import { Match, Stream, Source } from '../types/sports';
+import { fetchMatches, fetchStream } from '../api/sportsApi';
 import MatchesList from '../components/MatchesList';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
@@ -14,6 +14,8 @@ const Live = () => {
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [featuredMatch, setFeaturedMatch] = useState<Match | null>(null);
+  const [currentStream, setCurrentStream] = useState<Stream | null>(null);
+  const [streamLoading, setStreamLoading] = useState(false);
 
   useEffect(() => {
     const fetchLiveContent = async () => {
@@ -36,6 +38,11 @@ const Live = () => {
         // Set featured match (first one with sources)
         if (allLiveMatches.length > 0) {
           setFeaturedMatch(allLiveMatches[0]);
+          
+          // Fetch the stream for the featured match
+          if (allLiveMatches[0].sources && allLiveMatches[0].sources.length > 0) {
+            loadStream(allLiveMatches[0].sources[0]);
+          }
         }
       } catch (error) {
         toast({
@@ -50,6 +57,24 @@ const Live = () => {
 
     fetchLiveContent();
   }, [toast]);
+
+  // Function to load stream from a source
+  const loadStream = async (source: Source) => {
+    setStreamLoading(true);
+    try {
+      const stream = await fetchStream(source.source, source.id);
+      setCurrentStream(stream);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load stream.",
+        variant: "destructive",
+      });
+      setCurrentStream(null);
+    } finally {
+      setStreamLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
@@ -79,8 +104,8 @@ const Live = () => {
             <div className="mb-8">
               <h2 className="text-xl font-bold mb-4 text-white">{featuredMatch.title}</h2>
               <StreamPlayer 
-                stream={featuredMatch.sources && featuredMatch.sources.length > 0 ? featuredMatch.sources[0] : null} 
-                isLoading={false} 
+                stream={currentStream} 
+                isLoading={streamLoading} 
               />
             </div>
           ) : (
@@ -103,7 +128,16 @@ const Live = () => {
           ) : liveMatches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {liveMatches.map((match) => (
-                <div key={match.id} className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden">
+                <div 
+                  key={match.id} 
+                  className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
+                  onClick={() => {
+                    setFeaturedMatch(match);
+                    if (match.sources && match.sources.length > 0) {
+                      loadStream(match.sources[0]);
+                    }
+                  }}
+                >
                   <div className="p-4">
                     <h3 className="font-bold mb-2 text-white">{match.title}</h3>
                     <p className="text-sm text-gray-300">Live Now</p>
