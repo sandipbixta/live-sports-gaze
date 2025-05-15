@@ -1,24 +1,18 @@
 
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { MenuIcon, Home, CalendarDays, Tv2, Radio, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Home, CalendarDays, Tv2, Radio } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const MainNav = () => {
   const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
     { title: "Home", icon: Home, path: "/" },
@@ -29,41 +23,6 @@ const MainNav = () => {
 
   return (
     <div className="flex items-center gap-6 w-full md:w-auto">
-      {isMobile ? (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="mr-2 md:hidden">
-              <MenuIcon className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="bg-[#151922] text-white w-[250px] p-0">
-            <div className="flex flex-col h-full">
-              <div className="p-4 border-b border-[#343a4d]">
-                <Link to="/" onClick={() => setIsOpen(false)}>
-                  <h1 className="text-2xl font-bold text-white">
-                    DAMITV
-                  </h1>
-                </Link>
-              </div>
-              
-              <div className="py-4 flex-1">
-                {menuItems.map((item) => (
-                  <Link 
-                    key={item.path}
-                    to={item.path} 
-                    className="flex items-center px-4 py-3 hover:bg-[#242836]"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <item.icon className="mr-3 h-5 w-5" />
-                    <span>{item.title}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
-      ) : null}
-      
       <Link to="/">
         <h1 className="text-2xl font-bold text-white">
           DAMITV

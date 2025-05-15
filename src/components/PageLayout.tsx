@@ -1,8 +1,10 @@
 
 import React from 'react';
 import MainNav from './MainNav';
+import MobileBottomNav from './MobileBottomNav';
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -15,6 +17,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   searchTerm,
   onSearch
 }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
       <header className="bg-[#151922] shadow-md">
@@ -37,11 +41,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </header>
       
-      <main className="container mx-auto py-4 px-2">
+      <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
       </main>
       
-      <footer className="bg-[#151922] text-gray-300 py-6 mt-10">
+      <footer className="bg-[#151922] text-gray-300 py-6 mt-10 pb-20 md:pb-6">
         <div className="container mx-auto px-2">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -51,19 +55,41 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             <div>
               <h5 className="font-semibold text-white mb-2">Sports</h5>
               <ul className="space-y-1 text-xs">
-                <li>Football</li>
-                <li>Basketball</li>
-                <li>Tennis</li>
-                <li>Racing</li>
+                <li>
+                  <Link to="/" className="flex items-center gap-1 hover:text-white">
+                    <span className="i-lucide-football w-3 h-3"></span>
+                    Football
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/" className="flex items-center gap-1 hover:text-white">
+                    <span className="i-lucide-basketball w-3 h-3"></span>
+                    Basketball
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/">Tennis</Link>
+                </li>
+                <li>
+                  <Link to="/">Racing</Link>
+                </li>
               </ul>
             </div>
             <div>
               <h5 className="font-semibold text-white mb-2">Help</h5>
               <ul className="space-y-1 text-xs">
-                <li>FAQ</li>
-                <li>Contact Us</li>
-                <li>Terms of Service</li>
-                <li>Privacy Policy</li>
+                <li>
+                  <Link to="/">FAQ</Link>
+                </li>
+                <li>
+                  <Link to="/">Contact Us</Link>
+                </li>
+                <li>
+                  <Link to="/">Terms of Service</Link>
+                </li>
+                <li>
+                  <Link to="/">Privacy Policy</Link>
+                </li>
               </ul>
             </div>
             <div>
@@ -89,6 +115,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </div>
         </div>
       </footer>
+      
+      <MobileBottomNav />
     </div>
   );
 };
