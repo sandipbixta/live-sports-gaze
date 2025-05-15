@@ -35,65 +35,65 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
           
           {/* Match Time */}
-          <div className="absolute top-1.5 left-2 z-20">
-            <div className="bg-black/70 text-white px-1.5 py-0.5 rounded-full text-[10px] font-semibold">
+          <div className="absolute top-1 left-1 z-20">
+            <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold">
               {formatTime(match.date)}
             </div>
           </div>
           
-          {/* Streaming Badge - Updated color from purple to #fa2d04 */}
+          {/* Streaming Badge - Updated color */}
           {hasStream && (
-            <div className="absolute top-1.5 right-2 z-20">
-              <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-2 py-0.5 rounded-md">
-                <Eye className="w-3 h-3" />
-                <span className="text-xs font-medium">WATCH LIVE</span>
+            <div className="absolute top-1 right-1 z-20">
+              <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-1 py-0.5 rounded-md">
+                <Eye className="w-2 h-2" />
+                <span className="text-[8px] font-medium">LIVE</span>
               </div>
             </div>
           )}
           
           {/* Teams or DAMITV */}
-          <div className="absolute bottom-0 inset-x-0 z-20 p-2 flex flex-col">
+          <div className="absolute bottom-0 inset-x-0 z-20 p-1 flex flex-col">
             {hasTeamLogos ? (
-              <div className="flex items-center justify-center mb-1">
+              <div className="flex items-center justify-center">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={homeBadge} 
                       alt={home} 
-                      className="w-8 h-8 object-contain"
+                      className="w-5 h-5 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[8px]">D</span></div>';
                       }}
                     />
                   </div>
                 </div>
-                <div className="mx-2 text-white text-xs font-medium">vs</div>
+                <div className="mx-1 text-white text-[8px] font-medium">vs</div>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={awayBadge} 
                       alt={away} 
-                      className="w-8 h-8 object-contain"
+                      className="w-5 h-5 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[8px]">D</span></div>';
                       }}
                     />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center mb-1">
-                <div className="bg-[#343a4d] px-3 py-1 rounded-md">
-                  <span className="font-bold text-white text-sm">DAMITV</span>
+              <div className="flex items-center justify-center">
+                <div className="bg-[#343a4d] px-2 py-0.5 rounded-md">
+                  <span className="font-bold text-white text-[8px]">DAMITV</span>
                 </div>
               </div>
             )}
-            <h3 className="font-semibold text-center text-white text-xs truncate px-1 mt-1">
-              {match.title.length > 24 ? `${match.title.substring(0, 24)}...` : match.title}
+            <h3 className="font-semibold text-center text-white text-[8px] md:text-xs truncate px-1 mt-1">
+              {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
             </h3>
-            <p className="text-center text-gray-300 text-[10px] truncate px-1">
+            <p className="text-center text-gray-300 text-[6px] md:text-[10px] truncate px-1">
               {match.title.split('-').pop()?.trim() || 'Football'}
             </p>
           </div>

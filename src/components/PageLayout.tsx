@@ -22,7 +22,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
             <MainNav />
-            <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end space-x-2 sm:space-x-4 mt-2 sm:mt-0">
+            <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end space-x-2 mt-2 sm:mt-0">
               {onSearch && (
                 <div className="relative flex items-center w-full sm:w-auto">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -35,7 +35,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                   />
                 </div>
               )}
-              <Button className="bg-[#fa2d04] hover:bg-[#e02703] text-white whitespace-nowrap">
+              <Button className="bg-[#fa2d04] hover:bg-[#e02703] text-white text-xs whitespace-nowrap px-3 py-1 h-auto">
                 Sign In
               </Button>
             </div>

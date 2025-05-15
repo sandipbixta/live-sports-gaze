@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -5,7 +6,7 @@ import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
-import PopularGames from '../components/PopularGames';
+import PopularMatches from '../components/PopularMatches';
 import { Separator } from '../components/ui/separator';
 import { Search, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';

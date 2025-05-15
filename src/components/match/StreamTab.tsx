@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
-import PopularGames from '@/components/PopularGames';
+import PopularMatches from '@/components/PopularMatches';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 interface StreamTabProps {
@@ -54,15 +54,22 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Popular Games Section */}
+      {/* Popular Matches Section */}
       <div className="mt-8">
         <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
         {popularMatches.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PopularGames 
-              popularMatches={popularMatches} 
-              selectedSport={sportId} 
-            />
+          <div className="grid grid-cols-3 gap-2">
+            {popularMatches.map((match) => (
+              <div 
+                key={match.id} 
+                className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
+              >
+                <div className="p-4">
+                  <h3 className="font-bold mb-2 text-white text-xs truncate">{match.title}</h3>
+                  <p className="text-xs text-gray-300">Related Match</p>
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <Card className="bg-sports-card border-sports">
