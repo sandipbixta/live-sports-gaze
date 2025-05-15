@@ -2,9 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Match } from '../types/sports';
-import { Card, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
-import { ArrowRight } from 'lucide-react';
+import { Star } from 'lucide-react';
+import { AspectRatio } from './ui/aspect-ratio';
 
 interface MatchesListProps {
   matches: Match[];
@@ -13,8 +12,9 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   if (isLoading) {
@@ -34,11 +34,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
     return (
       <div>
         <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-        <Card className="bg-[#242836] border-[#343a4d]">
-          <CardContent className="p-8 text-center">
-            <p className="text-gray-300">No matches available for this sport right now.</p>
-          </CardContent>
-        </Card>
+        <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
+          <p className="text-gray-300">No matches available for this sport right now.</p>
+        </div>
       </div>
     );
   }
@@ -56,81 +54,88 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
             : '';
           const home = match.teams?.home?.name || 'Team A';
           const away = match.teams?.away?.name || 'Team B';
-          
           const hasStream = match.sources?.length > 0;
-
+          
           return (
-            <Link to={`/match/${sportId}/${match.id}`} key={match.id} className="group">
-              <Card className="bg-[#242836] border-[#343a4d] h-full overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#9b87f5]/10 group-hover:border-[#9b87f5]/30 group-hover:-translate-y-1">
-                <div className="h-32 bg-gradient-to-r from-[#151922] to-[#242836] relative flex items-center justify-center p-4">
-                  <div className="flex items-center justify-center w-full">
-                    <div className="flex flex-col items-center">
-                      {homeBadge ? (
-                        <img 
-                          src={homeBadge} 
-                          alt={home} 
-                          className="w-12 h-12 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold text-white text-xs">damitv</span>
-                        </div>
-                      )}
-                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{home}</span>
+            <Link to={`/match/${sportId}/${match.id}`} key={match.id} className="group block">
+              <div className="relative rounded-xl overflow-hidden h-full transition-all duration-300 hover:shadow-lg hover:shadow-[#9b87f5]/10 group-hover:-translate-y-1">
+                <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
+                  
+                  {/* Match Time */}
+                  <div className="absolute top-3 left-4 z-20">
+                    <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      {formatTime(match.date)}
                     </div>
-                    
-                    <div className="mx-4">
-                      <div className="w-10 h-10 rounded-full bg-[#343a4d] flex items-center justify-center">
-                        <span className="font-bold text-gray-300">VS</span>
+                  </div>
+                  
+                  {/* Favorite Button */}
+                  <div className="absolute top-3 right-4 z-20">
+                    <div className="bg-amber-500 hover:bg-amber-600 text-white p-2 rounded-full">
+                      <Star className="w-4 h-4" />
+                    </div>
+                  </div>
+                  
+                  {/* Streaming Badge */}
+                  {hasStream && (
+                    <div className="absolute top-1/3 left-4 z-20">
+                      <div className="flex items-center gap-2 bg-black/70 text-white px-3 py-1 rounded-full">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 15L8 12M8 12L12 9M8 12H16M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span className="text-xs font-medium">Streamed</span>
                       </div>
                     </div>
-                    
-                    <div className="flex flex-col items-center">
-                      {awayBadge ? (
-                        <img 
-                          src={awayBadge} 
-                          alt={away} 
-                          className="w-12 h-12 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold text-white text-xs">damitv</span>
-                        </div>
-                      )}
-                      <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{away}</span>
-                    </div>
-                  </div>
-                  
-                  {hasStream && (
-                    <Badge className="absolute top-3 left-3 bg-[#1EAEDB]">LIVE</Badge>
                   )}
-                </div>
-                
-                <CardContent className="p-4">
-                  <h3 className="font-bold mb-2 line-clamp-1 text-white">{match.title}</h3>
-                  <p className="text-xs text-gray-300 mb-3">{formatDate(match.date)}</p>
                   
-                  <div className="flex justify-between items-center mt-4">
-                    {hasStream ? (
-                      <Badge variant="outline" className="bg-transparent text-[#1EAEDB] border-[#1EAEDB] flex items-center gap-1">
-                        Watch <ArrowRight className="h-3 w-3" />
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-transparent text-gray-300 border-gray-600">
-                        Coming soon
-                      </Badge>
-                    )}
+                  {/* Teams */}
+                  <div className="absolute bottom-0 inset-x-0 z-20 p-4 flex flex-col">
+                    <div className="flex items-center justify-center mb-2">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                          {homeBadge ? (
+                            <img 
+                              src={homeBadge} 
+                              alt={home} 
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
+                              <span className="font-bold text-white text-xs">D</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mx-3 text-white">vs</div>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                          {awayBadge ? (
+                            <img 
+                              src={awayBadge} 
+                              alt={away} 
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                                (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
+                              <span className="font-bold text-white text-xs">D</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <h3 className="font-semibold text-center text-white text-sm">{match.title}</h3>
+                    <p className="text-center text-gray-300 text-xs mt-1">{match.title.split('-').pop()?.trim() || 'Football'}</p>
                   </div>
-                </CardContent>
-              </Card>
+                </AspectRatio>
+              </div>
             </Link>
           );
         })}
