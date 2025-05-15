@@ -2,13 +2,10 @@
 // Utility function to identify popular leagues and tournaments
 export const isPopularLeague = (title: string): boolean => {
   const popularKeywords = [
-    // Top 5 leagues
+    // Top leagues
     'premier league', 
     'epl',
-    'la liga',
-    'laliga',
     'serie a',
-    'bundesliga',
     'ligue 1',
     
     // Additional major competitions
