@@ -26,6 +26,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
   const home = match.teams?.home?.name || 'Team A';
   const away = match.teams?.away?.name || 'Team B';
   const hasStream = match.sources?.length > 0;
+  const hasTeamLogos = homeBadge && awayBadge;
   
   return (
     <Link to={`/match/${sportId}/${match.id}`} key={`${isPriority ? 'popular-' : ''}${match.id}`} className="group block">
@@ -59,49 +60,45 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             </div>
           )}
           
-          {/* Teams */}
+          {/* Teams or DAMITV */}
           <div className="absolute bottom-0 inset-x-0 z-20 p-4 flex flex-col">
-            <div className="flex items-center justify-center mb-2">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                  {homeBadge ? (
+            {hasTeamLogos ? (
+              <div className="flex items-center justify-center mb-2">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={homeBadge} 
                       alt={home} 
                       className="w-8 h-8 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">DAMITV</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
                       }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
-                      <span className="font-bold text-white text-xs">DAMITV</span>
-                    </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-              <div className="mx-3 text-white">vs</div>
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                  {awayBadge ? (
+                <div className="mx-3 text-white">vs</div>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={awayBadge} 
                       alt={away} 
                       className="w-8 h-8 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">DAMITV</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
                       }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
-                      <span className="font-bold text-white text-xs">DAMITV</span>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center justify-center mb-4">
+                <div className="bg-[#343a4d] px-6 py-3 rounded-lg">
+                  <span className="font-bold text-white text-xl">DAMITV</span>
+                </div>
+              </div>
+            )}
             <h3 className="font-semibold text-center text-white text-sm">{match.title}</h3>
             <p className="text-center text-gray-300 text-xs mt-1">{match.title.split('-').pop()?.trim() || 'Football'}</p>
           </div>
