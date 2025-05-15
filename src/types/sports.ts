@@ -23,6 +23,7 @@ export interface Match {
     away?: Team;
   };
   sources: Source[];
+  related?: Match[]; // Add the related property as an optional array of Match
 }
 
 export interface Stream {
