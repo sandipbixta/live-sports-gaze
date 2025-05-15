@@ -259,11 +259,6 @@ const Live = () => {
                   </div>
                 </div>
               )}
-              
-              {/* Ad placement after stream player */}
-              <div className="mt-6">
-                <Advertisement type="banner" className="w-full" />
-              </div>
             </div>
           ) : (
             <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
@@ -304,10 +299,10 @@ const Live = () => {
           )}
         </h2>
         
-        {/* Ad placement above match grid */}
+        {/* Single ad placement */}
         {!loading && filteredMatches.length > 0 && (
           <div className="mb-6">
-            <Advertisement type="video" className="w-full" />
+            <Advertisement type="banner" className="w-full" />
           </div>
         )}
         

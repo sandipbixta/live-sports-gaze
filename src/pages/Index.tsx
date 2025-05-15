@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -135,7 +134,7 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <main className="py-4">
-        {/* Top Banner Ad */}
+        {/* Single top banner ad */}
         <Advertisement type="banner" className="mb-6 w-full" />
         
         <div className="mb-8">
@@ -162,9 +161,6 @@ const Index = () => {
               selectedSport={selectedSport}
             />
             
-            {/* Ad placement after popular matches */}
-            <Advertisement type="video" className="my-6 w-full" />
-            
             <Separator className="my-8 bg-[#343a4d]" />
           </>
         )}
@@ -179,17 +175,12 @@ const Index = () => {
           )}
         </div>
         
-        {/* Side-by-side promotion boxes with ad in between */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        {/* Side-by-side promotion boxes without ad in between */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
             <h3 className="text-xl font-bold mb-4 text-white">Live Now</h3>
             <p className="text-gray-300">Discover events happening right now across different sports.</p>
             <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
-          </div>
-          
-          {/* Sidebar Ad */}
-          <div className="flex justify-center items-center">
-            <Advertisement type="sidebar" />
           </div>
           
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">

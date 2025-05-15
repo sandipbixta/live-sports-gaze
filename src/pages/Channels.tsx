@@ -3,7 +3,6 @@ import React from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
-import PopupAd from '../components/PopupAd';
 import SocialBar from '../components/SocialBar';
 
 const Channels = () => {
@@ -15,7 +14,7 @@ const Channels = () => {
           Watch international sports channels from around the world. Select a country and channel to start streaming.
         </p>
         
-        {/* Ad placement before channel grid */}
+        {/* Single ad placement before channel grid */}
         <div className="mb-6">
           <Advertisement type="banner" className="w-full" />
         </div>
@@ -24,9 +23,6 @@ const Channels = () => {
         
         {/* Social sharing bar */}
         <SocialBar />
-        
-        {/* Popup ad */}
-        <PopupAd />
       </div>
     </PageLayout>
   );
