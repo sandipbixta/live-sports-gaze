@@ -23,7 +23,8 @@ export interface Match {
     away?: Team;
   };
   sources: Source[];
-  related?: Match[]; // Add the related property as an optional array of Match
+  related?: Match[]; // Related matches
+  sportId?: string;  // Added sportId to identify which sport the match belongs to
 }
 
 export interface Stream {

@@ -32,7 +32,12 @@ const Live = () => {
           // Filter for matches with sources (live streams)
           const livesFromSport = matches.filter(match => 
             match.sources && match.sources.length > 0);
-          allLiveMatches = [...allLiveMatches, ...livesFromSport];
+          // Add sport ID as a property to each match for reference
+          const matchesWithSportId = livesFromSport.map(match => ({
+            ...match,
+            sportId
+          }));
+          allLiveMatches = [...allLiveMatches, ...matchesWithSportId];
         }
         
         // Filter out advertisement matches (like Sky Sports News)
@@ -161,7 +166,7 @@ const Live = () => {
               >
                 <MatchCard 
                   match={match}
-                  sportId={match.category || "1"}
+                  sportId={match.sportId || "1"}
                 />
               </div>
             ))}
