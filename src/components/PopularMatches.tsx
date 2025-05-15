@@ -3,12 +3,12 @@ import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 
-interface PopularGamesProps {
+interface PopularMatchesProps {
   popularMatches: Match[];
   selectedSport: string | null;
 }
 
-const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSport }) => {
+const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selectedSport }) => {
   // Filter out advertisement matches (Sky Sports News in this case)
   const filteredMatches = popularMatches.filter(match => 
     !match.title.toLowerCase().includes('sky sports news') && 
@@ -21,7 +21,7 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-3 text-white">Popular Games</h2>
+      <h2 className="text-xl font-bold mb-3 text-white">Popular Matches</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {filteredMatches.slice(0, 4).map((match) => (
           <MatchCard 
@@ -36,4 +36,4 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
   );
 };
 
-export default PopularGames;
+export default PopularMatches;
