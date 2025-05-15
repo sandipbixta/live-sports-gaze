@@ -2,7 +2,6 @@
 import React from 'react';
 import MainNav from './MainNav';
 import { Input } from './ui/input';
-import { Button } from './ui/button';
 import { Search } from 'lucide-react';
 
 interface PageLayoutProps {
@@ -22,23 +21,18 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
             <MainNav />
-            <div className="flex items-center w-full sm:w-auto justify-between sm:justify-end space-x-2 mt-2 sm:mt-0">
-              {onSearch && (
-                <div className="relative flex items-center w-full sm:w-auto">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Search events..." 
-                    className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] w-full sm:w-64 text-white"
-                    value={searchTerm}
-                    onChange={onSearch}
-                  />
-                </div>
-              )}
-              <Button className="bg-[#fa2d04] hover:bg-[#e02703] text-white text-xs whitespace-nowrap px-3 py-1 h-auto">
-                Sign In
-              </Button>
-            </div>
+            {onSearch && (
+              <div className="relative flex items-center w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input 
+                  type="text" 
+                  placeholder="Search events..." 
+                  className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] w-full sm:w-64 text-white"
+                  value={searchTerm}
+                  onChange={onSearch}
+                />
+              </div>
+            )}
           </div>
         </div>
       </header>

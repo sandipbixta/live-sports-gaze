@@ -28,7 +28,7 @@ const MainNav = () => {
   ];
 
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-6 w-full md:w-auto">
       {isMobile ? (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
@@ -58,12 +58,6 @@ const MainNav = () => {
                     <span>{item.title}</span>
                   </Link>
                 ))}
-              </div>
-              
-              <div className="p-4 border-t border-[#343a4d]">
-                <Button className="w-full bg-[#fa2d04] hover:bg-[#e02703] text-white">
-                  Sign In
-                </Button>
               </div>
             </div>
           </SheetContent>

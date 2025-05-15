@@ -56,28 +56,28 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             {hasTeamLogos ? (
               <div className="flex items-center justify-center">
                 <div className="flex items-center">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={homeBadge} 
                       alt={home} 
-                      className="w-5 h-5 object-contain"
+                      className="w-7 h-7 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[8px]">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
                       }}
                     />
                   </div>
                 </div>
-                <div className="mx-1 text-white text-[8px] font-medium">vs</div>
+                <div className="mx-2 text-white text-xs font-medium">vs</div>
                 <div className="flex items-center">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={awayBadge} 
                       alt={away} 
-                      className="w-5 h-5 object-contain"
+                      className="w-7 h-7 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[8px]">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
                       }}
                     />
                   </div>
@@ -86,14 +86,14 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             ) : (
               <div className="flex items-center justify-center">
                 <div className="bg-[#343a4d] px-2 py-0.5 rounded-md">
-                  <span className="font-bold text-white text-[8px]">DAMITV</span>
+                  <span className="font-bold text-white text-[10px]">DAMITV</span>
                 </div>
               </div>
             )}
-            <h3 className="font-semibold text-center text-white text-[8px] md:text-xs truncate px-1 mt-1">
+            <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1 mt-1">
               {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
             </h3>
-            <p className="text-center text-gray-300 text-[6px] md:text-[10px] truncate px-1">
+            <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
               {match.title.split('-').pop()?.trim() || 'Football'}
             </p>
           </div>
