@@ -10,20 +10,26 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
+  // Filter out advertisement matches (Sky Sports News in this case)
+  const filteredMatches = matches.filter(match => 
+    !match.title.toLowerCase().includes('sky sports news') && 
+    !match.id.includes('sky-sports-news')
+  );
+
   if (isLoading) {
     return (
       <div>
         <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="h-48 bg-[#242836] rounded-xl animate-pulse"></div>
           ))}
         </div>
       </div>
     );
   }
 
-  if (matches.length === 0) {
+  if (filteredMatches.length === 0) {
     return (
       <div>
         <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
@@ -37,8 +43,8 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {matches.map((match) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filteredMatches.map((match) => (
           <MatchCard 
             key={match.id}
             match={match}

@@ -9,15 +9,21 @@ interface PopularGamesProps {
 }
 
 const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSport }) => {
-  if (popularMatches.length === 0) {
+  // Filter out advertisement matches (Sky Sports News in this case)
+  const filteredMatches = popularMatches.filter(match => 
+    !match.title.toLowerCase().includes('sky sports news') && 
+    !match.id.includes('sky-sports-news')
+  );
+  
+  if (filteredMatches.length === 0) {
     return null;
   }
 
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-6 text-white">Popular Games</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {popularMatches.map((match) => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filteredMatches.map((match) => (
           <MatchCard 
             key={`popular-${match.id}`}
             match={match}
