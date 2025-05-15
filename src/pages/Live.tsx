@@ -2,12 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
-import { fetchMatches, fetchStream } from '../api/sportsApi';
+import { fetchMatches, fetchStream, fetchSports } from '../api/sportsApi';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import StreamPlayer from '../components/StreamPlayer';
 import { Link } from 'react-router-dom';
-import { Radio, Tv } from 'lucide-react';
+import { Radio, Tv, RefreshCcw, Calendar } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 
@@ -18,17 +18,26 @@ const Live = () => {
   const [featuredMatch, setFeaturedMatch] = useState<Match | null>(null);
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [streamLoading, setStreamLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     const fetchLiveContent = async () => {
       setLoading(true);
       try {
+        console.log('Fetching live matches...');
+        // Get sports data to show proper sport names
+        const sports = await fetchSports();
+        console.log('Sports data:', sports);
+        
         // Fetch from multiple sports to find live matches
-        const sportIds = ['1', '2', '3', '4']; // Common sport IDs: basketball, football, american-football, hockey
+        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey']; // Extended sport IDs
         let allLiveMatches: Match[] = [];
         
         for (const sportId of sportIds) {
+          console.log(`Fetching matches for sport ID: ${sportId}`);
           const matches = await fetchMatches(sportId);
+          console.log(`Matches for ${sportId}:`, matches ? matches.length : 0);
+          
           // Filter for matches with sources (live streams)
           const livesFromSport = matches.filter(match => 
             match.sources && match.sources.length > 0);
@@ -40,12 +49,15 @@ const Live = () => {
           allLiveMatches = [...allLiveMatches, ...matchesWithSportId];
         }
         
+        console.log('All live matches before filtering:', allLiveMatches.length);
+        
         // Filter out advertisement matches (like Sky Sports News)
         allLiveMatches = allLiveMatches.filter(match => 
           !match.title.toLowerCase().includes('sky sports news') && 
           !match.id.includes('sky-sports-news')
         );
         
+        console.log('Live matches after filtering:', allLiveMatches.length);
         setLiveMatches(allLiveMatches);
         
         // Set featured match (first one with sources)
@@ -56,11 +68,15 @@ const Live = () => {
           if (allLiveMatches[0].sources && allLiveMatches[0].sources.length > 0) {
             loadStream(allLiveMatches[0].sources[0]);
           }
+        } else {
+          setFeaturedMatch(null);
+          setCurrentStream(null);
         }
       } catch (error) {
+        console.error('Error fetching live content:', error);
         toast({
           title: "Error",
-          description: "Failed to load live content.",
+          description: "Failed to load live content. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -69,7 +85,7 @@ const Live = () => {
     };
 
     fetchLiveContent();
-  }, [toast]);
+  }, [toast, retryCount]);
 
   // Function to load stream from a source
   const loadStream = async (source: Source) => {
@@ -78,6 +94,7 @@ const Live = () => {
       const stream = await fetchStream(source.source, source.id);
       setCurrentStream(stream);
     } catch (error) {
+      console.error('Error loading stream:', error);
       toast({
         title: "Error",
         description: "Failed to load stream.",
@@ -89,14 +106,30 @@ const Live = () => {
     }
   };
 
+  // Function to retry loading content
+  const handleRetryLoading = () => {
+    setRetryCount(prev => prev + 1);
+  };
+
   return (
     <PageLayout>
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-white">Live Now</h1>
-          <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
-            <Tv size={16} className="text-[#fa2d04] animate-pulse" />
-            <span className="text-sm font-medium text-white">{liveMatches.length} Live Broadcasts</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
+              <Tv size={16} className="text-[#fa2d04] animate-pulse" />
+              <span className="text-sm font-medium text-white">{liveMatches.length} Live Broadcasts</span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f]"
+              onClick={handleRetryLoading}
+            >
+              <RefreshCcw size={14} className="mr-1" />
+              Refresh
+            </Button>
           </div>
         </div>
         
@@ -128,7 +161,21 @@ const Live = () => {
           </div>
         ) : (
           <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-            <p className="text-gray-300">No live streams available at the moment.</p>
+            <Tv size={48} className="text-[#343a4d] mx-auto mb-4" />
+            <p className="text-gray-300 text-lg mb-2">No live streams available at the moment.</p>
+            <p className="text-gray-400 text-sm mb-4">Check back later or view scheduled matches.</p>
+            <div className="flex gap-4 justify-center mt-2">
+              <Button onClick={handleRetryLoading} className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                <RefreshCcw size={16} className="mr-2" />
+                Refresh
+              </Button>
+              <Link to="/schedule">
+                <Button variant="outline" className="bg-transparent border border-[#343a4d]">
+                  <Calendar size={16} className="mr-2" />
+                  View Schedule
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>
@@ -138,7 +185,9 @@ const Live = () => {
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
           All Live Matches
-          <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+          {liveMatches.length > 0 && (
+            <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+          )}
         </h2>
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
@@ -172,8 +221,12 @@ const Live = () => {
             ))}
           </div>
         ) : (
-          <div className="w-full bg-[#242836] rounded-xl p-6 text-center">
-            <p className="text-gray-300">No live matches currently available.</p>
+          <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
+            <p className="text-gray-300 mb-3">No live matches currently available.</p>
+            <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+              <RefreshCcw size={14} className="mr-1" />
+              Refresh
+            </Button>
           </div>
         )}
       </div>
