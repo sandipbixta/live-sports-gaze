@@ -20,9 +20,9 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
   }
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-6 text-white">Popular Games</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="mb-6 sm:mb-8">
+      <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-6 text-white">Popular Games</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
         {filteredMatches.map((match) => (
           <MatchCard 
             key={`popular-${match.id}`}

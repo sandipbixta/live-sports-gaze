@@ -21,7 +21,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     <Card 
       className={`overflow-hidden cursor-pointer transition-all duration-200 ${
         isActive 
-          ? 'bg-[#242836] border-[#9b87f5]' 
+          ? 'bg-[#242836] border-[#fa2d04]' 
           : 'bg-[#1A1F2C] border-[#343a4d] hover:bg-[#242836]'
       }`}
       onClick={onClick}

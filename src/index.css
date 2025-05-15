@@ -123,4 +123,34 @@
   .text-sports-title {
     @apply text-white font-bold;
   }
+
+  /* Make mobile responsive classes */
+  .mobile-container {
+    @apply px-2 md:px-4;
+  }
+  
+  .mobile-padding {
+    @apply p-2 md:p-4;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-2 sm:grid-cols-3 md:grid-cols-4;
+  }
+
+  .mobile-text {
+    @apply text-sm md:text-base;
+  }
+}
+
+/* Additional responsive styles */
+@media (max-width: 640px) {
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  .mobile-hidden {
+    @apply hidden;
+  }
 }
