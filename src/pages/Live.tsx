@@ -11,6 +11,7 @@ import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
+import Advertisement from '../components/Advertisement';
 
 const Live = () => {
   const { toast } = useToast();
@@ -258,6 +259,11 @@ const Live = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Ad placement after stream player */}
+              <div className="mt-6">
+                <Advertisement type="banner" className="w-full" />
+              </div>
             </div>
           ) : (
             <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
@@ -297,6 +303,14 @@ const Live = () => {
             </div>
           )}
         </h2>
+        
+        {/* Ad placement above match grid */}
+        {!loading && filteredMatches.length > 0 && (
+          <div className="mb-6">
+            <Advertisement type="video" className="w-full" />
+          </div>
+        )}
+        
         {loading ? (
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
             {[1, 2, 3, 4, 5, 6].map((i) => (
