@@ -14,6 +14,7 @@ import { Radio } from 'lucide-react';
 const Live = () => {
   const { toast } = useToast();
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [featuredMatch, setFeaturedMatch] = useState<Match | null>(null);
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
@@ -26,16 +27,24 @@ const Live = () => {
         // Fetch from multiple sports to find live matches
         const sportIds = ['1', '2', '3', '4']; // Common sport IDs
         let allLiveMatches: Match[] = [];
+        let allUpcomingMatches: Match[] = [];
         
         for (const sportId of sportIds) {
           const matches = await fetchMatches(sportId);
           // Filter for matches with sources (live streams)
           const livesFromSport = matches.filter(match => 
             match.sources && match.sources.length > 0);
+          
+          // Filter upcoming matches (no sources or scheduled for later)
+          const upcomingFromSport = matches.filter(match => 
+            !match.sources || match.sources.length === 0);
+            
           allLiveMatches = [...allLiveMatches, ...livesFromSport];
+          allUpcomingMatches = [...allUpcomingMatches, ...upcomingFromSport];
         }
         
         setLiveMatches(allLiveMatches);
+        setUpcomingMatches(allUpcomingMatches);
         
         // Set featured match (first one with sources)
         if (allLiveMatches.length > 0) {
@@ -85,7 +94,7 @@ const Live = () => {
           <div className="flex justify-between items-center">
             <MainNav />
             <div className="hidden md:flex items-center space-x-4">
-              <Button className="bg-[#9b87f5] hover:bg-[#8a75e8] text-white">
+              <Button className="bg-[#fa2d04] hover:bg-[#e02903] text-white">
                 Sign In
               </Button>
             </div>
@@ -99,7 +108,7 @@ const Live = () => {
           
           {loading ? (
             <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9b87f5] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fa2d04] mx-auto"></div>
               <p className="mt-4 text-gray-300">Loading live streams...</p>
             </div>
           ) : featuredMatch ? (
@@ -120,15 +129,15 @@ const Live = () => {
         <Separator className="my-8 bg-[#343a4d]" />
         
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-6 text-white">All Live Matches</h2>
+          <h2 className="text-2xl font-bold mb-6 text-white">Live Matches</h2>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
               ))}
             </div>
           ) : liveMatches.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {liveMatches.map((match) => (
                 <div 
                   key={match.id} 
@@ -142,7 +151,10 @@ const Live = () => {
                 >
                   <div className="p-4">
                     <h3 className="font-bold mb-2 text-white">{match.title}</h3>
-                    <p className="text-sm text-gray-300">Live Now</p>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-[#fa2d04] rounded-full mr-2"></span>
+                      <p className="text-sm text-gray-300">Live Now</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -154,12 +166,46 @@ const Live = () => {
           )}
         </div>
         
+        <Separator className="my-8 bg-[#343a4d]" />
+        
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6 text-white">Upcoming Matches</h2>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
+              ))}
+            </div>
+          ) : upcomingMatches.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {upcomingMatches.map((match) => (
+                <div 
+                  key={match.id} 
+                  className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
+                >
+                  <div className="p-4">
+                    <h3 className="font-bold mb-2 text-white">{match.title}</h3>
+                    <div className="flex items-center">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                      <p className="text-sm text-gray-300">Coming soon</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full bg-[#242836] rounded-xl p-6 text-center">
+              <p className="text-gray-300">No upcoming matches currently scheduled.</p>
+            </div>
+          )}
+        </div>
+        
         <Link to="/channels" className="block w-full">
           <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">
-            <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" />
+            <Radio className="h-10 w-10 text-[#fa2d04] mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white">Live TV Channels</h3>
             <p className="text-gray-300 mt-2">Access 70+ international sports channels from around the world</p>
-            <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
+            <Button className="mt-4 bg-[#fa2d04] hover:bg-[#e02903]">Browse Channels</Button>
           </div>
         </Link>
       </main>
