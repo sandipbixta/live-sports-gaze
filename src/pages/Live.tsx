@@ -6,8 +6,7 @@ import AppFooter from '../components/layout/AppFooter';
 import LiveFeaturedMatch from '../components/live/LiveFeaturedMatch';
 import LiveChannelsPromo from '../components/live/LiveChannelsPromo';
 import LiveMatchesContainer from '../components/live/LiveMatchesContainer';
-import LiveMatches from '../components/live/LiveMatches';
-import UpcomingMatches from '../components/live/UpcomingMatches';
+import LiveMatchesGrid from '../components/live/LiveMatchesGrid';
 import PopularMatches from '../components/PopularMatches';
 
 const Live = () => {
@@ -43,14 +42,16 @@ const Live = () => {
               
               {/* LIVE MATCHES SECTION */}
               <div className="mb-10">
-                <LiveMatches 
-                  liveMatches={liveMatches}
-                  selectedSport="1" // Default to football
+                <h2 className="text-2xl font-bold mb-4 text-white">Live Matches</h2>
+                <LiveMatchesGrid 
+                  matches={liveMatches}
+                  isLoading={loading}
                   onSelectMatch={handleSelectMatch}
+                  isLive={true}
                 />
               </div>
               
-              {/* Popular Matches Section - If we have popular matches data */}
+              {/* Popular Matches Section */}
               {liveMatches.length > 0 && (
                 <>
                   <Separator className="my-8 bg-[#343a4d]" />
@@ -69,9 +70,12 @@ const Live = () => {
               {/* UPCOMING MATCHES SECTION */}
               <Separator className="my-8 bg-[#343a4d]" />
               <div className="mb-10">
-                <UpcomingMatches 
-                  upcomingMatches={upcomingMatches}
-                  selectedSport="1" // Default to football
+                <h2 className="text-2xl font-bold mb-4 text-white">Upcoming Matches</h2>
+                <LiveMatchesGrid 
+                  matches={upcomingMatches}
+                  isLoading={loading}
+                  isLive={false}
+                  className="upcoming-matches-grid"
                 />
               </div>
               
