@@ -9,8 +9,8 @@ interface MatchCardProps {
   match: Match;
   sportId: string;
   isPriority?: boolean;
-  onClick?: () => void;  // New prop for handling clicks inline
-  preventNavigation?: boolean; // New prop to prevent navigation
+  onClick?: () => void;
+  preventNavigation?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({ 
@@ -59,33 +59,33 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         )}
         
-        {/* Teams or DAMITV */}
+        {/* Teams or DAMITV - Updated with bigger logos */}
         <div className="absolute bottom-0 inset-x-0 z-20 p-1 flex flex-col">
           {hasTeamLogos ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
                   <img 
                     src={homeBadge} 
                     alt={home} 
-                    className="w-7 h-7 object-contain"
+                    className="w-9 h-9 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
                     }}
                   />
                 </div>
               </div>
               <div className="mx-2 text-white text-xs font-medium">vs</div>
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
                   <img 
                     src={awayBadge} 
                     alt={away} 
-                    className="w-7 h-7 object-contain"
+                    className="w-9 h-9 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-[10px]">D</span></div>';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
                     }}
                   />
                 </div>

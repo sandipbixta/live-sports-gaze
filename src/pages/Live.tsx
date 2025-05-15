@@ -10,6 +10,7 @@ import { Radio, Tv, RefreshCcw, Calendar, Search } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const Live = () => {
   const { toast } = useToast();
@@ -22,7 +23,10 @@ const Live = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSource, setActiveSource] = useState<string | null>(null);
-
+  
+  // Determine if we're on mobile
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
     const fetchLiveContent = async () => {
       setLoading(true);
@@ -294,13 +298,13 @@ const Live = () => {
           )}
         </h2>
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-36 bg-[#242836] rounded-xl animate-pulse"></div>
             ))}
           </div>
         ) : filteredMatches.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
             {filteredMatches.map((match) => (
               <div 
                 key={match.id} 
