@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
@@ -21,6 +22,7 @@ const Live = () => {
   const [streamLoading, setStreamLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeSource, setActiveSource] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLiveContent = async () => {
@@ -108,9 +110,15 @@ const Live = () => {
   // Function to load stream from a source
   const loadStream = async (source: Source) => {
     setStreamLoading(true);
+    setActiveSource(`${source.source}/${source.id}`);
     try {
       const stream = await fetchStream(source.source, source.id);
       setCurrentStream(stream);
+      // Scroll to player if not in view
+      const playerElement = document.getElementById('stream-player');
+      if (playerElement) {
+        playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     } catch (error) {
       console.error('Error loading stream:', error);
       toast({
@@ -124,9 +132,31 @@ const Live = () => {
     }
   };
 
+  // Function to handle match selection
+  const handleMatchSelect = (match: Match) => {
+    setFeaturedMatch(match);
+    if (match.sources && match.sources.length > 0) {
+      loadStream(match.sources[0]);
+    } else {
+      setCurrentStream(null);
+      toast({
+        title: "No Stream",
+        description: "This match has no available streams.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Function to retry loading content
   const handleRetryLoading = () => {
     setRetryCount(prev => prev + 1);
+  };
+
+  // Function to handle source change for the current match
+  const handleSourceChange = (source: string, id: string) => {
+    if (featuredMatch) {
+      loadStream({ source, id });
+    }
   };
 
   // Handle search form submit
@@ -175,51 +205,77 @@ const Live = () => {
           </div>
         </div>
         
-        {loading ? (
-          <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9b87f5] mx-auto"></div>
-            <p className="mt-4 text-gray-300">Loading live streams...</p>
-          </div>
-        ) : featuredMatch ? (
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-white">{featuredMatch.title}</h2>
-              {streamLoading ? (
-                <div className="text-sm text-[#9b87f5] flex items-center gap-1">
-                  <span className="inline-block h-2 w-2 bg-[#9b87f5] rounded-full animate-pulse"></span>
-                  Loading stream...
-                </div>
-              ) : currentStream ? (
-                <div className="text-sm text-[#fa2d04] flex items-center gap-1">
-                  <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
-                  Live now
-                </div>
-              ) : null}
+        <div id="stream-player">
+          {loading ? (
+            <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9b87f5] mx-auto"></div>
+              <p className="mt-4 text-gray-300">Loading live streams...</p>
             </div>
-            <StreamPlayer 
-              stream={currentStream} 
-              isLoading={streamLoading} 
-            />
-          </div>
-        ) : (
-          <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-            <Tv size={48} className="text-[#343a4d] mx-auto mb-4" />
-            <p className="text-gray-300 text-lg mb-2">No live streams available at the moment.</p>
-            <p className="text-gray-400 text-sm mb-4">Check back later or view scheduled matches.</p>
-            <div className="flex gap-4 justify-center mt-2">
-              <Button onClick={handleRetryLoading} className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                <RefreshCcw size={16} className="mr-2" />
-                Refresh
-              </Button>
-              <Link to="/schedule">
-                <Button variant="outline" className="bg-transparent border border-[#343a4d]">
-                  <Calendar size={16} className="mr-2" />
-                  View Schedule
+          ) : featuredMatch ? (
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">{featuredMatch.title}</h2>
+                {streamLoading ? (
+                  <div className="text-sm text-[#9b87f5] flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 bg-[#9b87f5] rounded-full animate-pulse"></span>
+                    Loading stream...
+                  </div>
+                ) : currentStream ? (
+                  <div className="text-sm text-[#fa2d04] flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+                    Live now
+                  </div>
+                ) : null}
+              </div>
+              <StreamPlayer 
+                stream={currentStream} 
+                isLoading={streamLoading} 
+              />
+              
+              {/* Stream Sources */}
+              {featuredMatch.sources && featuredMatch.sources.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {featuredMatch.sources.map(({ source, id }) => (
+                      <Button
+                        key={`${source}-${id}`}
+                        variant="outline"
+                        size="sm"
+                        className={`${
+                          activeSource === `${source}/${id}` 
+                            ? 'bg-[#343a4d] border-[#9b87f5]' 
+                            : 'bg-[#242836] border-[#343a4d]'
+                        } text-white`}
+                        onClick={() => handleSourceChange(source, id)}
+                      >
+                        {source.charAt(0).toUpperCase() + source.slice(1)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
+              <Tv size={48} className="text-[#343a4d] mx-auto mb-4" />
+              <p className="text-gray-300 text-lg mb-2">No live streams available at the moment.</p>
+              <p className="text-gray-400 text-sm mb-4">Check back later or view scheduled matches.</p>
+              <div className="flex gap-4 justify-center mt-2">
+                <Button onClick={handleRetryLoading} className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                  <RefreshCcw size={16} className="mr-2" />
+                  Refresh
                 </Button>
-              </Link>
+                <Link to="/schedule">
+                  <Button variant="outline" className="bg-transparent border border-[#343a4d]">
+                    <Calendar size={16} className="mr-2" />
+                    View Schedule
+                  </Button>
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
@@ -250,17 +306,7 @@ const Live = () => {
               <div 
                 key={match.id} 
                 className="cursor-pointer"
-                onClick={() => {
-                  setFeaturedMatch(match);
-                  if (match.sources && match.sources.length > 0) {
-                    loadStream(match.sources[0]);
-                  }
-                  // Scroll to top
-                  window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                  });
-                }}
+                onClick={() => handleMatchSelect(match)}
               >
                 <MatchCard 
                   match={match}
