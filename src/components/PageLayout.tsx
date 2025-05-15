@@ -114,6 +114,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
               </div>
             </div>
           </div>
+          
+          {/* Disclaimer Section */}
+          <div className="border-t border-[#343a4d] mt-4 pt-4">
+            <h6 className="text-xs font-semibold text-white mb-1">Disclaimer:</h6>
+            <p className="text-[11px] leading-tight text-gray-400">
+              Our platform merely displays links to audiovisual content located on servers of third parties and provided and/or transmitted by third parties. We DO NOT host nor transmit any audiovisual content itself and DO NOT control nor influence such content. We cannot accept any liability for the content transmitted by others. Any responsibility for this content lies with those who host or transmit it. We are not affiliated nor claim to be affiliated with any of the owners of streams and/or videos. All content is copyright of their respective owner.
+            </p>
+          </div>
+          
           <div className="border-t border-[#343a4d] mt-4 pt-4 text-center text-xs">
             <p>© 2025 DAMITV - All rights reserved</p>
           </div>
