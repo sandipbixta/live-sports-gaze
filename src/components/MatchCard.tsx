@@ -57,28 +57,28 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             {hasTeamLogos ? (
               <div className="flex items-center justify-center mb-2">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={homeBadge} 
                       alt={home} 
-                      className="w-8 h-8 object-contain"
+                      className="w-12 h-12 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-sm">D</span></div>';
                       }}
                     />
                   </div>
                 </div>
-                <div className="mx-3 text-white">vs</div>
+                <div className="mx-4 text-white font-medium">vs</div>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                  <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center overflow-hidden">
                     <img 
                       src={awayBadge} 
                       alt={away} 
-                      className="w-8 h-8 object-contain"
+                      className="w-12 h-12 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                        (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-sm">D</span></div>';
                       }}
                     />
                   </div>
