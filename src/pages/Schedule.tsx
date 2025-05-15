@@ -5,7 +5,7 @@ import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import { Separator } from '../components/ui/separator';
-import { format, addDays } from 'date-fns';
+import { format, addDays, startOfDay } from 'date-fns';
 import MatchesList from '../components/MatchesList';
 import PageLayout from '../components/PageLayout';
 import PageHeader from '../components/PageHeader';
@@ -19,7 +19,7 @@ const Schedule = () => {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [popularMatches, setPopularMatches] = useState<Match[]>([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date())); // Ensure we start at beginning of day
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   
@@ -67,7 +67,7 @@ const Schedule = () => {
     try {
       const matchesData = await fetchMatches(sportId);
       
-      // Filter matches by date if needed
+      // Filter matches by date
       const dateStr = format(currentDate, 'yyyy-MM-dd');
       const filtered = matchesData.filter(match => {
         const matchDate = new Date(match.date);
@@ -95,7 +95,7 @@ const Schedule = () => {
 
   // Handle date navigation
   const navigateDate = (days: number) => {
-    setCurrentDate(prev => addDays(prev, days));
+    setCurrentDate(prev => startOfDay(addDays(prev, days)));
   };
 
   // Handle search
