@@ -3,14 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
 import { fetchMatches, fetchStream } from '../api/sportsApi';
-import MatchesList from '../components/MatchesList';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import StreamPlayer from '../components/StreamPlayer';
-import MainNav from '../components/MainNav';
 import { Link } from 'react-router-dom';
-import { Radio } from 'lucide-react';
+import { Radio, Tv } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
+import MatchCard from '../components/MatchCard';
 
 const Live = () => {
   const { toast } = useToast();
@@ -25,7 +24,7 @@ const Live = () => {
       setLoading(true);
       try {
         // Fetch from multiple sports to find live matches
-        const sportIds = ['1', '2', '3', '4']; // Common sport IDs
+        const sportIds = ['1', '2', '3', '4']; // Common sport IDs: basketball, football, american-football, hockey
         let allLiveMatches: Match[] = [];
         
         for (const sportId of sportIds) {
@@ -35,6 +34,12 @@ const Live = () => {
             match.sources && match.sources.length > 0);
           allLiveMatches = [...allLiveMatches, ...livesFromSport];
         }
+        
+        // Filter out advertisement matches (like Sky Sports News)
+        allLiveMatches = allLiveMatches.filter(match => 
+          !match.title.toLowerCase().includes('sky sports news') && 
+          !match.id.includes('sky-sports-news')
+        );
         
         setLiveMatches(allLiveMatches);
         
@@ -82,7 +87,13 @@ const Live = () => {
   return (
     <PageLayout>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-6">Live Now</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-white">Live Now</h1>
+          <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
+            <Tv size={16} className="text-[#fa2d04] animate-pulse" />
+            <span className="text-sm font-medium text-white">{liveMatches.length} Live Broadcasts</span>
+          </div>
+        </div>
         
         {loading ? (
           <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
@@ -91,7 +102,20 @@ const Live = () => {
           </div>
         ) : featuredMatch ? (
           <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4 text-white">{featuredMatch.title}</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-white">{featuredMatch.title}</h2>
+              {streamLoading ? (
+                <div className="text-sm text-[#9b87f5] flex items-center gap-1">
+                  <span className="inline-block h-2 w-2 bg-[#9b87f5] rounded-full animate-pulse"></span>
+                  Loading stream...
+                </div>
+              ) : currentStream ? (
+                <div className="text-sm text-[#fa2d04] flex items-center gap-1">
+                  <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+                  Live now
+                </div>
+              ) : null}
+            </div>
             <StreamPlayer 
               stream={currentStream} 
               isLoading={streamLoading} 
@@ -107,30 +131,38 @@ const Live = () => {
       <Separator className="my-8 bg-[#343a4d]" />
       
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6 text-white">All Live Matches</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+          All Live Matches
+          <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+        </h2>
         {loading ? (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-36 bg-[#242836] rounded-xl animate-pulse"></div>
             ))}
           </div>
         ) : liveMatches.length > 0 ? (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {liveMatches.map((match) => (
               <div 
                 key={match.id} 
-                className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
+                className="cursor-pointer"
                 onClick={() => {
                   setFeaturedMatch(match);
                   if (match.sources && match.sources.length > 0) {
                     loadStream(match.sources[0]);
                   }
+                  // Scroll to top
+                  window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                  });
                 }}
               >
-                <div className="p-4">
-                  <h3 className="font-bold mb-2 text-white text-xs md:text-sm truncate">{match.title}</h3>
-                  <p className="text-xs text-gray-300">Live Now</p>
-                </div>
+                <MatchCard 
+                  match={match}
+                  sportId={match.category || "1"}
+                />
               </div>
             ))}
           </div>
