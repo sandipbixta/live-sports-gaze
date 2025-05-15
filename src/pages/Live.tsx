@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
@@ -7,18 +6,21 @@ import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import StreamPlayer from '../components/StreamPlayer';
 import { Link } from 'react-router-dom';
-import { Radio, Tv, RefreshCcw, Calendar } from 'lucide-react';
+import { Radio, Tv, RefreshCcw, Calendar, Search } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
+import SearchBar from '../components/SearchBar';
 
 const Live = () => {
   const { toast } = useToast();
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [featuredMatch, setFeaturedMatch] = useState<Match | null>(null);
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [streamLoading, setStreamLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchLiveContent = async () => {
@@ -59,6 +61,7 @@ const Live = () => {
         
         console.log('Live matches after filtering:', allLiveMatches.length);
         setLiveMatches(allLiveMatches);
+        setFilteredMatches(allLiveMatches);
         
         // Set featured match (first one with sources)
         if (allLiveMatches.length > 0) {
@@ -87,6 +90,21 @@ const Live = () => {
     fetchLiveContent();
   }, [toast, retryCount]);
 
+  // Update filtered matches when search query changes
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredMatches(liveMatches);
+    } else {
+      const query = searchQuery.toLowerCase();
+      const filtered = liveMatches.filter(match => 
+        match.title.toLowerCase().includes(query) || 
+        match.teams?.home?.name?.toLowerCase().includes(query) || 
+        match.teams?.away?.name?.toLowerCase().includes(query)
+      );
+      setFilteredMatches(filtered);
+    }
+  }, [searchQuery, liveMatches]);
+
   // Function to load stream from a source
   const loadStream = async (source: Source) => {
     setStreamLoading(true);
@@ -111,25 +129,49 @@ const Live = () => {
     setRetryCount(prev => prev + 1);
   };
 
+  // Handle search form submit
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // The filtering is already handled by the useEffect
+    
+    // Show a toast to confirm search
+    if (searchQuery.trim() !== '') {
+      toast({
+        title: "Searching",
+        description: `Finding matches for "${searchQuery}"`,
+      });
+    }
+  };
+
   return (
     <PageLayout>
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
           <h1 className="text-3xl font-bold text-white">Live Now</h1>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
-              <Tv size={16} className="text-[#fa2d04] animate-pulse" />
-              <span className="text-sm font-medium text-white">{liveMatches.length} Live Broadcasts</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+            <SearchBar
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onSubmit={handleSearchSubmit}
+              placeholder="Search live games..."
+              className="w-full sm:w-64"
+              showButton={true}
+            />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
+                <Tv size={16} className="text-[#fa2d04] animate-pulse" />
+                <span className="text-sm font-medium text-white">{filteredMatches.length} Live Broadcasts</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f]"
+                onClick={handleRetryLoading}
+              >
+                <RefreshCcw size={14} className="mr-1" />
+                Refresh
+              </Button>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f]"
-              onClick={handleRetryLoading}
-            >
-              <RefreshCcw size={14} className="mr-1" />
-              Refresh
-            </Button>
           </div>
         </div>
         
@@ -183,10 +225,17 @@ const Live = () => {
       <Separator className="my-8 bg-[#343a4d]" />
       
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-          All Live Matches
-          {liveMatches.length > 0 && (
-            <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+        <h2 className="text-2xl font-bold mb-6 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            All Live Matches
+            {filteredMatches.length > 0 && (
+              <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="text-sm text-gray-300">
+              {filteredMatches.length === 0 ? 'No matches found' : `Found ${filteredMatches.length} matches`}
+            </div>
           )}
         </h2>
         {loading ? (
@@ -195,9 +244,9 @@ const Live = () => {
               <div key={i} className="h-36 bg-[#242836] rounded-xl animate-pulse"></div>
             ))}
           </div>
-        ) : liveMatches.length > 0 ? (
+        ) : filteredMatches.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {liveMatches.map((match) => (
+            {filteredMatches.map((match) => (
               <div 
                 key={match.id} 
                 className="cursor-pointer"
@@ -222,11 +271,23 @@ const Live = () => {
           </div>
         ) : (
           <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
-            <p className="text-gray-300 mb-3">No live matches currently available.</p>
-            <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-              <RefreshCcw size={14} className="mr-1" />
-              Refresh
-            </Button>
+            {searchQuery ? (
+              <div>
+                <Search size={40} className="mx-auto mb-3 text-gray-400" />
+                <p className="text-gray-300 mb-3">No matches found for "{searchQuery}"</p>
+                <Button onClick={() => setSearchQuery('')} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                  Clear Search
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-gray-300 mb-3">No live matches currently available.</p>
+                <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                  <RefreshCcw size={14} className="mr-1" />
+                  Refresh
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
