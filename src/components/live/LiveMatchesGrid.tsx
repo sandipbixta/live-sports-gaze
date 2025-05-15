@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Match, Source } from '../../types/sports';
+import { Match } from '../../types/sports';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 interface LiveMatchesGridProps {
@@ -20,7 +20,7 @@ const LiveMatchesGrid: React.FC<LiveMatchesGridProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="mb-8">
+      <div className="w-full">
         <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -33,7 +33,7 @@ const LiveMatchesGrid: React.FC<LiveMatchesGridProps> = ({
 
   if (matches.length === 0) {
     return (
-      <div className="mb-8">
+      <div className="w-full">
         <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
         <div className="w-full bg-[#242836] rounded-xl p-6 text-center">
           <p className="text-gray-300">No {isLive ? 'live' : 'upcoming'} matches currently available.</p>
@@ -43,11 +43,11 @@ const LiveMatchesGrid: React.FC<LiveMatchesGridProps> = ({
   }
 
   return (
-    <Card className="mb-8 bg-[#1A1F2C] border-[#343a4d]">
+    <Card className="bg-[#1A1F2C] border-[#343a4d]">
       <CardHeader className="pb-2">
         <CardTitle className="text-2xl font-bold text-white">
           {title}
-          <div className="h-1 w-20 bg-[#fa2d04] mt-2 rounded-full"></div>
+          <div className={`h-1 w-20 ${isLive ? 'bg-[#fa2d04]' : 'bg-gray-400'} mt-2 rounded-full`}></div>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-4">

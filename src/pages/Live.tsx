@@ -25,6 +25,7 @@ const Live = () => {
             loadStream
           }) => (
             <>
+              {/* Featured Match Section */}
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white mb-6">Live Now</h1>
                 <LiveFeaturedMatch
@@ -37,23 +38,33 @@ const Live = () => {
               
               <Separator className="my-8 bg-[#343a4d]" />
               
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-6 text-white">Live Matches</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {loading ? (
-                    Array(4).fill(0).map((_, i) => (
+              {/* Live Matches Section - Complete standalone section */}
+              <section className="mb-12">
+                <div className="mb-2">
+                  <h2 className="text-3xl font-bold text-white inline-block">
+                    Live Matches
+                    <div className="h-1 w-20 bg-[#fa2d04] mt-2 rounded-full"></div>
+                  </h2>
+                </div>
+                
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+                    {Array(4).fill(0).map((_, i) => (
                       <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
-                    ))
-                  ) : liveMatches.length === 0 ? (
-                    <div className="col-span-4 w-full bg-[#242836] rounded-xl p-6 text-center">
-                      <p className="text-gray-300">No live matches currently available.</p>
-                    </div>
-                  ) : (
-                    liveMatches.map((match) => (
+                    ))}
+                  </div>
+                ) : liveMatches.length === 0 ? (
+                  <div className="w-full bg-[#242836] rounded-xl p-6 text-center mt-6">
+                    <p className="text-gray-300">No live matches currently available.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+                    {liveMatches.map((match) => (
                       <div 
                         key={match.id} 
                         className="bg-[#242836] border-[#343a4d] border rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
                         onClick={() => {
+                          setFeaturedMatch(match);
                           if (match.sources && match.sources.length > 0) {
                             loadStream(match.sources[0]);
                             return;
@@ -68,26 +79,33 @@ const Live = () => {
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
+                    ))}
+                  </div>
+                )}
+              </section>
+              
+              {/* Separate section for Upcoming Matches */}
+              <section className="mb-12">
+                <div className="mb-2">
+                  <h2 className="text-3xl font-bold text-white inline-block">
+                    Upcoming Matches
+                    <div className="h-1 w-20 bg-gray-400 mt-2 rounded-full"></div>
+                  </h2>
                 </div>
-              </div>
-              
-              <Separator className="my-8 bg-[#343a4d]" />
-              
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-6 text-white">Upcoming Matches</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {loading ? (
-                    Array(4).fill(0).map((_, i) => (
+                
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+                    {Array(4).fill(0).map((_, i) => (
                       <div key={i} className="h-64 bg-[#242836] rounded-xl animate-pulse"></div>
-                    ))
-                  ) : upcomingMatches.length === 0 ? (
-                    <div className="col-span-4 w-full bg-[#242836] rounded-xl p-6 text-center">
-                      <p className="text-gray-300">No upcoming matches currently available.</p>
-                    </div>
-                  ) : (
-                    upcomingMatches.map((match) => (
+                    ))}
+                  </div>
+                ) : upcomingMatches.length === 0 ? (
+                  <div className="w-full bg-[#242836] rounded-xl p-6 text-center mt-6">
+                    <p className="text-gray-300">No upcoming matches currently available.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
+                    {upcomingMatches.map((match) => (
                       <div 
                         key={match.id} 
                         className="bg-[#242836] border-[#343a4d] border rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
@@ -101,10 +119,10 @@ const Live = () => {
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
+                    ))}
+                  </div>
+                )}
+              </section>
               
               <LiveChannelsPromo />
             </>
