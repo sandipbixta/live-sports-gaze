@@ -124,7 +124,7 @@ const Schedule = () => {
         title="Schedule" 
         subtitle="Find upcoming matches and events" 
         currentDate={currentDate}
-        showCalendar={true}
+        showCalendar={false}
       />
       
       <div className="mb-6">

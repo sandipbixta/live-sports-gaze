@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tv } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ChannelsGrid = () => {
   const countries = getCountries();
@@ -55,42 +56,35 @@ const ChannelsGrid = () => {
       
       <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden">
         <div className="p-4 border-b border-[#343a4d]">
-          <h3 className="font-semibold text-white">Live Sports Channels</h3>
+          <h3 className="font-semibold text-white mb-2">Live Sports Channels</h3>
+          
+          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <SelectTrigger className="w-full bg-[#242836] border-[#343a4d] text-white">
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#242836] border-[#343a4d] text-white">
+              {countries.map(country => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
-        <Tabs defaultValue={countries[0]} value={selectedCountry} onValueChange={setSelectedCountry} className="w-full">
-          <div className="px-4 pt-4">
-            <TabsList className="bg-[#242836] w-full h-auto flex overflow-x-auto">
-              {countries.map(country => (
-                <TabsTrigger 
-                  key={country} 
-                  value={country} 
-                  className="text-xs py-2 px-3 data-[state=active]:bg-[#9b87f5]"
-                >
-                  {country}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        <ScrollArea className="h-[600px] px-4 py-4">
+          <div className="grid grid-cols-1 gap-2">
+            {channelsByCountry[selectedCountry]?.map(channel => (
+              <ChannelCard
+                key={channel.id}
+                title={channel.title}
+                embedUrl={channel.embedUrl}
+                onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                isActive={selectedChannelUrl === channel.embedUrl}
+              />
+            ))}
           </div>
-          
-          {countries.map(country => (
-            <TabsContent key={country} value={country} className="mt-0">
-              <ScrollArea className="h-[600px] px-4 py-4">
-                <div className="grid grid-cols-1 gap-2">
-                  {channelsByCountry[country]?.map(channel => (
-                    <ChannelCard
-                      key={channel.id}
-                      title={channel.title}
-                      embedUrl={channel.embedUrl}
-                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                      isActive={selectedChannelUrl === channel.embedUrl}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          ))}
-        </Tabs>
+        </ScrollArea>
       </div>
     </div>
   );

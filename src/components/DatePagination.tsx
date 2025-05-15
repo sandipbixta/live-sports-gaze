@@ -9,6 +9,11 @@ import {
   PaginationNext, 
   PaginationPrevious 
 } from './ui/pagination';
+import { Calendar } from './ui/calendar';
+import { Button } from './ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DatePaginationProps {
   currentDate: Date;
@@ -28,28 +33,48 @@ const DatePagination: React.FC<DatePaginationProps> = ({ currentDate, setCurrent
   });
 
   return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious onClick={() => navigateDate(-1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
-        </PaginationItem>
-        
-        {dates.map((date, i) => (
-          <PaginationItem key={i} className="hidden md:block">
-            <PaginationLink 
-              className={`cursor-pointer ${date.isToday ? 'bg-[#9b87f5] text-white' : 'text-white hover:bg-[#343a4d]'}`}
-              onClick={() => setCurrentDate(date.date)}
-            >
-              {date.formatted}
-            </PaginationLink>
+    <div className="flex items-center justify-between w-full">
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious onClick={() => navigateDate(-1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
           </PaginationItem>
-        ))}
-        
-        <PaginationItem>
-          <PaginationNext onClick={() => navigateDate(1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+          
+          {dates.map((date, i) => (
+            <PaginationItem key={i} className="hidden md:block">
+              <PaginationLink 
+                className={`cursor-pointer ${date.isToday ? 'bg-[#9b87f5] text-white' : 'text-white hover:bg-[#343a4d]'}`}
+                onClick={() => setCurrentDate(date.date)}
+              >
+                {date.formatted}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+          
+          <PaginationItem>
+            <PaginationNext onClick={() => navigateDate(1)} className="cursor-pointer text-white hover:bg-[#343a4d]" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+      
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="ml-auto bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]">
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {format(currentDate, 'MMMM d, yyyy')}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0 bg-[#242836] border-[#343a4d]" align="end">
+          <Calendar
+            mode="single"
+            selected={currentDate}
+            onSelect={(date) => date && setCurrentDate(date)}
+            initialFocus
+            className={cn("p-3 pointer-events-auto")}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 
