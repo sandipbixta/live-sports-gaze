@@ -13,6 +13,7 @@ interface LiveMatchesContainerProps {
     currentStream: Stream | null;
     streamLoading: boolean;
     loadStream: (source: Source) => void;
+    handleSelectMatch: (match: Match) => void;
   }) => React.ReactNode;
 }
 
@@ -108,7 +109,8 @@ const LiveMatchesContainer: React.FC<LiveMatchesContainerProps> = ({ children })
         featuredMatch,
         currentStream,
         streamLoading,
-        loadStream
+        loadStream,
+        handleSelectMatch
       })}
     </>
   );

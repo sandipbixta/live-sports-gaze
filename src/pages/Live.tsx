@@ -22,7 +22,8 @@ const Live = () => {
             featuredMatch, 
             currentStream, 
             streamLoading,
-            loadStream
+            loadStream,
+            handleSelectMatch
           }) => (
             <>
               {/* Featured Match Section */}
@@ -63,13 +64,7 @@ const Live = () => {
                       <div 
                         key={match.id} 
                         className="bg-[#242836] border-[#343a4d] border rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
-                        onClick={() => {
-                          setFeaturedMatch(match);
-                          if (match.sources && match.sources.length > 0) {
-                            loadStream(match.sources[0]);
-                            return;
-                          }
-                        }}
+                        onClick={() => handleSelectMatch(match)}
                       >
                         <div className="p-4">
                           <h3 className="font-bold mb-2 text-white">{match.title}</h3>
@@ -109,7 +104,6 @@ const Live = () => {
                       <div 
                         key={match.id} 
                         className="bg-[#242836] border-[#343a4d] border rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
-                        onClick={() => {}}
                       >
                         <div className="p-4">
                           <h3 className="font-bold mb-2 text-white">{match.title}</h3>
