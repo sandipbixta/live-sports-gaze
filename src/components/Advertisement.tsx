@@ -10,42 +10,49 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   const adContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Safety check to prevent script injection attacks
     if (!adContainerRef.current) return;
     
     // Clear any previous content
     adContainerRef.current.innerHTML = '';
     
-    // Only in production or with proper validation should actual ad scripts be loaded
-    const adPlaceholder = document.createElement('div');
+    // Create script element
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
     
     switch (type) {
       case 'banner':
-        adPlaceholder.className = 'bg-[#242836] border border-[#343a4d] rounded-md p-2 text-center';
-        adPlaceholder.innerHTML = '<p class="text-gray-400 text-xs">Advertisement</p>';
-        adPlaceholder.style.width = '100%';
-        adPlaceholder.style.height = '90px';
+        // Set script for banner ad
+        script.innerHTML = `
+          atOptions = {
+            'key' : '7c589340b2a1155dcea92f44cc468438',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        `;
+        adContainerRef.current.appendChild(script);
+        
+        // Create the invoke script
+        const invokeScript = document.createElement('script');
+        invokeScript.type = 'text/javascript';
+        invokeScript.src = '//monkeyhundredsarmed.com/7c589340b2a1155dcea92f44cc468438/invoke.js';
+        adContainerRef.current.appendChild(invokeScript);
         break;
+        
       case 'sidebar':
-        adPlaceholder.className = 'bg-[#242836] border border-[#343a4d] rounded-md p-2 text-center';
-        adPlaceholder.innerHTML = '<p class="text-gray-400 text-xs">Advertisement</p>';
-        adPlaceholder.style.width = '300px';
-        adPlaceholder.style.height = '250px';
+        // Set script for sidebar ad
+        script.src = '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js';
+        adContainerRef.current.appendChild(script);
         break;
+        
       case 'video':
-        adPlaceholder.className = 'bg-[#242836] border border-[#343a4d] rounded-md p-2 text-center';
-        adPlaceholder.innerHTML = '<p class="text-gray-400 text-xs">Video Advertisement</p>';
-        adPlaceholder.style.width = '100%';
-        adPlaceholder.style.height = '250px';
+        // Set script for video ad
+        script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+        adContainerRef.current.appendChild(script);
         break;
     }
-    
-    adContainerRef.current.appendChild(adPlaceholder);
-    
-    // This is where you would safely initialize your ad scripts in a production environment
-    // Do NOT paste third-party scripts directly as it poses security risks
-    console.log(`Ad of type ${type} would be initialized here in production`);
-    
+
     // Clean up function
     return () => {
       if (adContainerRef.current) {
