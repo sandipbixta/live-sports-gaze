@@ -26,12 +26,12 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       }`}
       onClick={onClick}
     >
-      <CardContent className="p-3">
-        <div className="flex items-center gap-3">
-          <div className="bg-[#343a4d] rounded-full p-2">
-            <Tv className="h-12 w-12 text-gray-300" />
+      <CardContent className="p-2">
+        <div className="flex items-center gap-2">
+          <div className="bg-[#343a4d] rounded-full p-1">
+            <Tv className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
           </div>
-          <div className="font-medium text-white truncate">{title}</div>
+          <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
         </div>
       </CardContent>
     </Card>

@@ -3,6 +3,8 @@ import React from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
+import PopupAd from '../components/PopupAd';
+import SocialBar from '../components/SocialBar';
 
 const Channels = () => {
   return (
@@ -19,6 +21,12 @@ const Channels = () => {
         </div>
         
         <ChannelsGrid />
+        
+        {/* Social sharing bar */}
+        <SocialBar />
+        
+        {/* Popup ad */}
+        <PopupAd />
       </div>
     </PageLayout>
   );
