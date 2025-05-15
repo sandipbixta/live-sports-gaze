@@ -8,6 +8,8 @@ import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import StreamPlayer from '../components/StreamPlayer';
 import MainNav from '../components/MainNav';
+import { Link } from 'react-router-dom';
+import { Radio } from 'lucide-react';
 
 const Live = () => {
   const { toast } = useToast();
@@ -151,6 +153,15 @@ const Live = () => {
             </div>
           )}
         </div>
+        
+        <Link to="/channels" className="block w-full">
+          <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">
+            <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white">Live TV Channels</h3>
+            <p className="text-gray-300 mt-2">Access 70+ international sports channels from around the world</p>
+            <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
+          </div>
+        </Link>
       </main>
       
       <footer className="bg-[#151922] text-gray-300 py-10 mt-20">

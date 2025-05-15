@@ -11,7 +11,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { MenuIcon, Home, CalendarDays, Tv2, X } from "lucide-react";
+import { MenuIcon, Home, CalendarDays, Tv2, Radio, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -24,6 +24,7 @@ const MainNav = () => {
     { title: "Home", icon: Home, path: "/" },
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
     { title: "Live", icon: Tv2, path: "/live" },
+    { title: "Channels", icon: Radio, path: "/channels" }
   ];
 
   return (
