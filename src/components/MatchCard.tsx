@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
+import { Eye } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
@@ -40,14 +41,12 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             </div>
           </div>
           
-          {/* Streaming Badge */}
+          {/* Streaming Badge - Moved to upper right corner and made more prominent */}
           {hasStream && (
-            <div className="absolute top-1/3 left-2 z-20">
-              <div className="flex items-center gap-1 bg-black/70 text-white px-1.5 py-0.5 rounded-full">
-                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 15L8 12M8 12L12 9M8 12H16M7 3.33782C8.47087 2.48697 10.1786 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 10.1786 2.48697 8.47087 3.33782 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span className="text-[8px] font-medium">Watch Now</span>
+            <div className="absolute top-1.5 right-2 z-20">
+              <div className="flex items-center gap-1.5 bg-[#9b87f5] text-white px-2.5 py-1 rounded-md shadow-sm">
+                <Eye className="w-3.5 h-3.5" />
+                <span className="text-xs font-semibold">WATCH LIVE</span>
               </div>
             </div>
           )}
