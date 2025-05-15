@@ -40,7 +40,7 @@ const MainNav = () => {
             <div className="flex flex-col h-full">
               <div className="p-4 border-b border-[#343a4d]">
                 <Link to="/" onClick={() => setIsOpen(false)}>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold text-white">
                     DAMITV
                   </h1>
                 </Link>
@@ -71,7 +71,7 @@ const MainNav = () => {
       ) : null}
       
       <Link to="/">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#1EAEDB] bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold text-white">
           DAMITV
         </h1>
       </Link>

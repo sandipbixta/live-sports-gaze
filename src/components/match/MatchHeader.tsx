@@ -1,9 +1,9 @@
-
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Match } from '@/types/sports';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MatchHeaderProps {
   match: Match;
@@ -11,6 +11,7 @@ interface MatchHeaderProps {
 }
 
 const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
+  const isMobile = useIsMobile();
   const home = match.teams?.home?.name || 'Home Team';
   const away = match.teams?.away?.name || 'Away Team';
   const homeBadge = match.teams?.home?.badge 
@@ -37,58 +38,124 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
         </div>
       </header>
       
-      {/* Match banner */}
-      <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-10 px-4">
+      {/* Match banner - Mobile Horizontal Layout / Desktop Vertical Layout */}
+      <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-6 md:py-10 px-4">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-20">
-            <div className="flex flex-col items-center text-center">
-              {homeBadge ? (
-                <img 
-                  src={homeBadge} 
-                  alt={home} 
-                  className="w-24 h-24 mb-3 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
-                  <span className="text-3xl font-bold text-white">{home.charAt(0)}</span>
-                </div>
-              )}
-              <h2 className="text-xl font-bold text-white">{home}</h2>
-            </div>
-            
+          {isMobile ? (
+            // Mobile horizontal layout
             <div className="flex flex-col items-center">
-              <div className="text-4xl font-bold text-white mb-3">VS</div>
-              <div className="flex items-center space-x-2 text-gray-400 text-sm">
-                <span>{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              {/* Teams row */}
+              <div className="flex items-center justify-center w-full mb-4">
+                {/* Home team */}
+                <div className="flex flex-col items-center text-center w-1/3">
+                  {homeBadge ? (
+                    <img 
+                      src={homeBadge} 
+                      alt={home} 
+                      className="w-16 h-16 mb-2 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-2">
+                      <span className="text-xl font-bold text-white">{home.charAt(0)}</span>
+                    </div>
+                  )}
+                  <h2 className="text-sm font-bold text-white">{home}</h2>
+                </div>
+
+                {/* VS section */}
+                <div className="flex flex-col items-center w-1/3">
+                  <div className="text-2xl font-bold text-white mb-1">VS</div>
+                  <div className="text-gray-400 text-xs">
+                    {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                  <div className="text-gray-400 text-xs">
+                    {new Date(match.date).toLocaleDateString()}
+                  </div>
+                </div>
+
+                {/* Away team */}
+                <div className="flex flex-col items-center text-center w-1/3">
+                  {awayBadge ? (
+                    <img 
+                      src={awayBadge} 
+                      alt={away} 
+                      className="w-16 h-16 mb-2 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-2">
+                      <span className="text-xl font-bold text-white">{away.charAt(0)}</span>
+                    </div>
+                  )}
+                  <h2 className="text-sm font-bold text-white">{away}</h2>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 text-gray-400 text-sm mt-1">
-                <span>{new Date(match.date).toLocaleDateString()}</span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center text-center">
-              {awayBadge ? (
-                <img 
-                  src={awayBadge} 
-                  alt={away} 
-                  className="w-24 h-24 mb-3 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
-                  <span className="text-3xl font-bold text-white">{away.charAt(0)}</span>
+                
+              {/* Live badge for mobile */}
+              {streamAvailable && (
+                <div className="mt-3">
+                  <Badge variant="live" className="px-3 py-1 text-sm">LIVE NOW</Badge>
                 </div>
               )}
-              <h2 className="text-xl font-bold text-white">{away}</h2>
             </div>
-          </div>
+          ) : (
+            // Desktop layout - keep the original
+            <div className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-20">
+              <div className="flex flex-col items-center text-center">
+                {homeBadge ? (
+                  <img 
+                    src={homeBadge} 
+                    alt={home} 
+                    className="w-24 h-24 mb-3 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
+                    <span className="text-3xl font-bold text-white">{home.charAt(0)}</span>
+                  </div>
+                )}
+                <h2 className="text-xl font-bold text-white">{home}</h2>
+              </div>
+              
+              <div className="flex flex-col items-center">
+                <div className="text-4xl font-bold text-white mb-3">VS</div>
+                <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                  <span>{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-gray-400 text-sm mt-1">
+                  <span>{new Date(match.date).toLocaleDateString()}</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center text-center">
+                {awayBadge ? (
+                  <img 
+                    src={awayBadge} 
+                    alt={away} 
+                    className="w-24 h-24 mb-3 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-3">
+                    <span className="text-3xl font-bold text-white">{away.charAt(0)}</span>
+                  </div>
+                )}
+                <h2 className="text-xl font-bold text-white">{away}</h2>
+              </div>
+            </div>
+          )}
           
-          {streamAvailable && (
+          {/* Live badge for desktop */}
+          {!isMobile && streamAvailable && (
             <div className="flex justify-center mt-8">
               <Badge variant="live" className="px-3 py-1 text-base">LIVE NOW</Badge>
             </div>
