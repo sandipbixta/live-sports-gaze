@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
@@ -311,6 +310,8 @@ const Live = () => {
                 <MatchCard 
                   match={match}
                   sportId={match.sportId || "1"}
+                  onClick={() => handleMatchSelect(match)}
+                  preventNavigation={true} // This prevents navigation to match page
                 />
               </div>
             ))}
