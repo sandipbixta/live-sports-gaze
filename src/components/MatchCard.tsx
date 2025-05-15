@@ -68,11 +68,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasTeamLogos ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={homeBadge} 
                     alt={home} 
-                    className={`${isMobile ? 'w-7 h-7' : 'w-11 h-11'} object-contain`}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-13 h-13'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
@@ -82,11 +82,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
               <div className="mx-2 text-white text-xs font-medium">vs</div>
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={awayBadge} 
                     alt={away}
-                    className={`${isMobile ? 'w-7 h-7' : 'w-11 h-11'} object-contain`}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-13 h-13'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
