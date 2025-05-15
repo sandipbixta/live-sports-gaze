@@ -5,6 +5,7 @@ import ChannelCard from './ChannelCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Tv } from 'lucide-react';
 
 const ChannelsGrid = () => {
   const countries = getCountries();
