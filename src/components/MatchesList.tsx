@@ -72,11 +72,12 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                           className="w-12 h-12 object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
                           }}
                         />
                       ) : (
                         <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold text-white">{home.charAt(0)}</span>
+                          <span className="font-bold text-white text-xs">damitv</span>
                         </div>
                       )}
                       <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{home}</span>
@@ -96,11 +97,12 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
                           className="w-12 h-12 object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
                           }}
                         />
                       ) : (
                         <div className="w-12 h-12 bg-[#343a4d] rounded-full flex items-center justify-center">
-                          <span className="font-bold text-white">{away.charAt(0)}</span>
+                          <span className="font-bold text-white text-xs">damitv</span>
                         </div>
                       )}
                       <span className="mt-2 font-semibold text-sm whitespace-nowrap text-center text-white">{away}</span>

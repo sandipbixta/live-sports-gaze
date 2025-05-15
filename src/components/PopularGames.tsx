@@ -39,11 +39,12 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
                         className="w-10 h-10 object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
                         }}
                       />
                     ) : (
                       <div className="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center">
-                        <span className="font-bold text-white">{home.charAt(0)}</span>
+                        <span className="font-bold text-white text-xs">damitv</span>
                       </div>
                     )}
                   </div>
@@ -60,11 +61,12 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
                         className="w-10 h-10 object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">damitv</span></div>';
                         }}
                       />
                     ) : (
                       <div className="w-10 h-10 bg-[#343a4d] rounded-full flex items-center justify-center">
-                        <span className="font-bold text-white">{away.charAt(0)}</span>
+                        <span className="font-bold text-white text-xs">damitv</span>
                       </div>
                     )}
                   </div>
