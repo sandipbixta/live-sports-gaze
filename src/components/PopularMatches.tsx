@@ -2,6 +2,7 @@
 import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -9,6 +10,9 @@ interface PopularMatchesProps {
 }
 
 const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selectedSport }) => {
+  // Check if we're on mobile
+  const isMobile = useIsMobile();
+  
   // Filter out advertisement matches (Sky Sports News in this case)
   const filteredMatches = popularMatches.filter(match => 
     !match.title.toLowerCase().includes('sky sports news') && 
@@ -22,7 +26,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selecte
   return (
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-3 text-white">Popular Matches</h2>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3'} gap-2`}>
         {filteredMatches.slice(0, 6).map((match) => (
           <MatchCard 
             key={`popular-${match.id}`}

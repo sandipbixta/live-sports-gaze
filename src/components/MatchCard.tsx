@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
 import { Eye } from 'lucide-react';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface MatchCardProps {
   match: Match;
@@ -20,6 +21,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   onClick,
   preventNavigation = false
 }) => {
+  // Check if we're on mobile
+  const isMobile = useIsMobile();
+  
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -49,9 +53,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         </div>
         
-        {/* Streaming Badge - Updated color */}
+        {/* Streaming Badge - Adjusted for mobile */}
         {hasStream && (
-          <div className="absolute top-1 right-1 z-20">
+          <div className="absolute top-1 right-1 z-30">
             <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-1 py-0.5 rounded-md">
               <Eye className="w-2 h-2" />
               <span className="text-[8px] font-medium">LIVE</span>
@@ -59,16 +63,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         )}
         
-        {/* Teams or DAMITV - Updated with bigger logos */}
+        {/* Teams or DAMITV - Adjusted for mobile */}
         <div className="absolute bottom-0 inset-x-0 z-20 p-1 flex flex-col">
           {hasTeamLogos ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={homeBadge} 
                     alt={home} 
-                    className="w-9 h-9 object-contain"
+                    className={`${isMobile ? 'w-7 h-7' : 'w-9 h-9'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
@@ -78,11 +82,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
               <div className="mx-2 text-white text-xs font-medium">vs</div>
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-10 h-10'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={awayBadge} 
-                    alt={away} 
-                    className="w-9 h-9 object-contain"
+                    alt={away}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-9 h-9'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
