@@ -13,7 +13,7 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: '2rem',
+      padding: '1rem',
       screens: {
         '2xl': '1400px'
       }
@@ -65,9 +65,9 @@ export default {
         },
         // Adding sports-specific colors
         sports: {
-          primary: '#0ea5e9',  // Sky blue
+          primary: '#fa2d04',  // Changed from sky blue to red
           secondary: '#0c4a6e', // Darker blue
-          accent: '#f43f5e',   // Red for highlights
+          accent: '#fa2d04',   // Changed to red for highlights
           dark: '#111827',     // Almost black for backgrounds
           light: '#f1f5f9',    // Very light gray for contrast
         }

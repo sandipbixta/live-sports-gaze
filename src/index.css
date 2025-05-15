@@ -126,29 +126,29 @@
 
   /* Make mobile responsive classes */
   .mobile-container {
-    @apply px-2 md:px-4;
+    @apply px-2;
   }
   
   .mobile-padding {
-    @apply p-2 md:p-4;
+    @apply p-2;
   }
   
   .mobile-grid {
-    @apply grid-cols-2 sm:grid-cols-3 md:grid-cols-4;
+    @apply grid-cols-2;
   }
 
   .mobile-text {
-    @apply text-sm md:text-base;
+    @apply text-xs;
   }
 }
 
 /* Additional responsive styles */
 @media (max-width: 640px) {
   h1 {
-    @apply text-2xl;
+    @apply text-xl;
   }
   h2 {
-    @apply text-xl;
+    @apply text-lg;
   }
   .mobile-hidden {
     @apply hidden;

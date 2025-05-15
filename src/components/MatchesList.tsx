@@ -19,10 +19,10 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <h2 className="text-xl font-bold mb-3 text-white">Live & Upcoming Matches</h2>
+        <div className="grid grid-cols-2 gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="h-48 bg-[#242836] rounded-xl animate-pulse"></div>
+            <div key={i} className="h-36 bg-[#242836] rounded-xl animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -32,9 +32,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   if (filteredMatches.length === 0) {
     return (
       <div>
-        <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-        <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
-          <p className="text-gray-300">No matches available for this sport right now.</p>
+        <h2 className="text-xl font-bold mb-3 text-white">Live & Upcoming Matches</h2>
+        <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center">
+          <p className="text-gray-300 text-sm">No matches available for this sport right now.</p>
         </div>
       </div>
     );
@@ -42,8 +42,8 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6 text-white">Live & Upcoming Matches</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <h2 className="text-xl font-bold mb-3 text-white">Live & Upcoming Matches</h2>
+      <div className="grid grid-cols-2 gap-2">
         {filteredMatches.map((match) => (
           <MatchCard 
             key={match.id}

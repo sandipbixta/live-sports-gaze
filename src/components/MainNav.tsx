@@ -61,7 +61,7 @@ const MainNav = () => {
               </div>
               
               <div className="p-4 border-t border-[#343a4d]">
-                <Button className="w-full bg-[#9b87f5] hover:bg-[#8a75e8] text-white">
+                <Button className="w-full bg-[#fa2d04] hover:bg-[#e02703] text-white">
                   Sign In
                 </Button>
               </div>
