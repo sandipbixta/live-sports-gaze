@@ -91,6 +91,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 <li>
                   <Link to="/">Privacy Policy</Link>
                 </li>
+                <li>
+                  <Link to="/dmca">DMCA Notice</Link>
+                </li>
               </ul>
             </div>
             <div>
