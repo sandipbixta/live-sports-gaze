@@ -30,7 +30,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
   
   return (
     <Link to={`/match/${sportId}/${match.id}`} key={`${isPriority ? 'popular-' : ''}${match.id}`} className="group block">
-      <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 hover:shadow-md hover:shadow-[#9b87f5]/10 group-hover:-translate-y-1">
+      <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 hover:shadow-md hover:shadow-[#fa2d04]/10 group-hover:-translate-y-1">
         <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
           
@@ -41,10 +41,10 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, sportId, isPriority = fals
             </div>
           </div>
           
-          {/* Streaming Badge - Moved to upper right corner and made more prominent */}
+          {/* Streaming Badge - Updated color from #9b87f5 to #fa2d04 */}
           {hasStream && (
             <div className="absolute top-1.5 right-2 z-20">
-              <div className="flex items-center gap-1.5 bg-[#9b87f5] text-white px-2.5 py-1 rounded-md shadow-sm">
+              <div className="flex items-center gap-1.5 bg-[#fa2d04] text-white px-2.5 py-1 rounded-md shadow-sm">
                 <Eye className="w-3.5 h-3.5" />
                 <span className="text-xs font-semibold">WATCH LIVE</span>
               </div>
