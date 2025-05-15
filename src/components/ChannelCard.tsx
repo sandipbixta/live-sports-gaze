@@ -28,8 +28,8 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     >
       <CardContent className="p-3">
         <div className="flex items-center gap-3">
-          <div className="bg-[#343a4d] rounded-full p-3">
-            <Tv className="h-8 w-8 text-gray-300" />
+          <div className="bg-[#343a4d] rounded-full p-2">
+            <Tv className="h-12 w-12 text-gray-300" />
           </div>
           <div className="font-medium text-white truncate">{title}</div>
         </div>
