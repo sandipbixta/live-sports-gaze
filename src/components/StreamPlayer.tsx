@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video } from 'lucide-react';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -10,6 +10,33 @@ interface StreamPlayerProps {
 }
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
+  const videoRef = useRef<HTMLIFrameElement>(null);
+  const [isPictureInPicture, setIsPictureInPicture] = useState(false);
+  
+  const togglePictureInPicture = async () => {
+    try {
+      // For modern browsers with PiP API
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        setIsPictureInPicture(false);
+      } else if (videoRef.current) {
+        // Try to enter PiP mode - this is tricky with iframes but we'll try
+        // We need to access the video element inside the iframe
+        const iframeDocument = videoRef.current.contentDocument || videoRef.current.contentWindow?.document;
+        const videoElement = iframeDocument?.querySelector('video');
+        
+        if (videoElement && videoElement.requestPictureInPicture) {
+          await videoElement.requestPictureInPicture();
+          setIsPictureInPicture(true);
+        } else {
+          console.error('Picture-in-picture not supported or video element not found in iframe');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to toggle picture-in-picture mode:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden" style={{ height: '600px' }}>
@@ -54,13 +81,28 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
   }
 
   return (
-    <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl">
+    <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
       <iframe 
+        ref={videoRef}
         src={stream.embedUrl}
         className="w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]"
         allowFullScreen
         title="Live Sports Stream"
       ></iframe>
+      
+      {/* Controls overlay */}
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button 
+          onClick={togglePictureInPicture}
+          className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+          title={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
+        >
+          {isPictureInPicture ? 
+            <Minimize className="h-5 w-5" /> : 
+            <Maximize className="h-5 w-5" />
+          }
+        </button>
+      </div>
     </div>
   );
 };

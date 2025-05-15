@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -11,6 +10,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Separator } from '../components/ui/separator';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
+import PopularGames from '../components/PopularGames';
 
 const Match = () => {
   const { toast } = useToast();
@@ -21,6 +21,7 @@ const Match = () => {
   const [loadingStream, setLoadingStream] = useState(false);
   const [activeTab, setActiveTab] = useState('stream');
   const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
   
   useEffect(() => {
     const loadMatch = async () => {
@@ -49,6 +50,11 @@ const Match = () => {
           } finally {
             setLoadingStream(false);
           }
+        }
+        
+        // Load popular matches (limited to 3)
+        if (matchData?.related?.length > 0) {
+          setPopularMatches(matchData.related.slice(0, 3));
         }
       } catch (error) {
         toast({
@@ -222,20 +228,6 @@ const Match = () => {
               </Button>
               <Button 
                 variant="ghost" 
-                onClick={() => setActiveTab('stats')}
-                className={`py-4 px-6 rounded-none ${activeTab === 'stats' ? 'border-b-2 border-[#9b87f5] text-white' : 'text-gray-400'}`}
-              >
-                Stats
-              </Button>
-              <Button 
-                variant="ghost" 
-                onClick={() => setActiveTab('lineups')}
-                className={`py-4 px-6 rounded-none ${activeTab === 'lineups' ? 'border-b-2 border-[#9b87f5] text-white' : 'text-gray-400'}`}
-              >
-                Lineups
-              </Button>
-              <Button 
-                variant="ghost" 
                 onClick={() => setActiveTab('highlights')}
                 className={`py-4 px-6 rounded-none ${activeTab === 'highlights' ? 'border-b-2 border-[#9b87f5] text-white' : 'text-gray-400'}`}
               >
@@ -273,7 +265,7 @@ const Match = () => {
                   ))}
                 </div>
                 
-                {/* Additional Stream Options - Now fully functional */}
+                {/* Additional Stream Options */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
                   <Badge 
                     variant="source" 
@@ -328,136 +320,25 @@ const Match = () => {
                 </Card>
               )}
               
+              {/* Popular Games Section - Replacing fake content sections */}
               <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4 text-white">More {match.title} Content</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
-                    <CardContent className="p-4">
-                      <h4 className="font-bold text-white">Pre-match Analysis</h4>
-                      <p className="text-sm text-gray-400 mt-1">Expert insights and predictions</p>
+                <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
+                {popularMatches.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <PopularGames 
+                      popularMatches={popularMatches} 
+                      selectedSport={sportId || ''} 
+                    />
+                  </div>
+                ) : (
+                  <Card className="bg-sports-card border-sports">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-gray-400">No related matches available at this time.</p>
                     </CardContent>
                   </Card>
-                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
-                    <CardContent className="p-4">
-                      <h4 className="font-bold text-white">Team News</h4>
-                      <p className="text-sm text-gray-400 mt-1">Latest updates from both camps</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
-                    <CardContent className="p-4">
-                      <h4 className="font-bold text-white">Head-to-Head</h4>
-                      <p className="text-sm text-gray-400 mt-1">Previous encounters and stats</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-sports-card border-sports hover:border-[#9b87f5]/30 transition-all">
-                    <CardContent className="p-4">
-                      <h4 className="font-bold text-white">Venue Info</h4>
-                      <p className="text-sm text-gray-400 mt-1">Stadium details and conditions</p>
-                    </CardContent>
-                  </Card>
-                </div>
+                )}
               </div>
             </div>
-          )}
-          
-          {activeTab === 'stats' && (
-            <Card className="bg-sports-card border-sports">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6 text-center text-white">Match Statistics</h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2 text-gray-200">
-                      <span>61%</span>
-                      <span className="font-medium">Possession</span>
-                      <span>39%</span>
-                    </div>
-                    <div className="flex h-2 overflow-hidden bg-[#343a4d] rounded">
-                      <div className="bg-[#9b87f5]" style={{ width: '61%' }}></div>
-                      <div className="bg-[#1EAEDB]" style={{ width: '39%' }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-2 text-gray-200">
-                      <span>8</span>
-                      <span className="font-medium">Shots on Target</span>
-                      <span>5</span>
-                    </div>
-                    <div className="flex h-2 overflow-hidden bg-[#343a4d] rounded">
-                      <div className="bg-[#9b87f5]" style={{ width: '62%' }}></div>
-                      <div className="bg-[#1EAEDB]" style={{ width: '38%' }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-2 text-gray-200">
-                      <span>4</span>
-                      <span className="font-medium">Corners</span>
-                      <span>7</span>
-                    </div>
-                    <div className="flex h-2 overflow-hidden bg-[#343a4d] rounded">
-                      <div className="bg-[#9b87f5]" style={{ width: '36%' }}></div>
-                      <div className="bg-[#1EAEDB]" style={{ width: '64%' }}></div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between text-sm mb-2 text-gray-200">
-                      <span>2</span>
-                      <span className="font-medium">Yellow Cards</span>
-                      <span>3</span>
-                    </div>
-                    <div className="flex h-2 overflow-hidden bg-[#343a4d] rounded">
-                      <div className="bg-[#9b87f5]" style={{ width: '40%' }}></div>
-                      <div className="bg-[#1EAEDB]" style={{ width: '60%' }}></div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-center text-sm text-gray-400 mt-8">
-                    Statistics are updated in real-time during the match
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          
-          {activeTab === 'lineups' && (
-            <Card className="bg-sports-card border-sports">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-6 text-center text-white">Team Lineups</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-bold mb-4 flex items-center text-gray-200">
-                      {homeBadge && (
-                        <img src={homeBadge} alt={home} className="w-6 h-6 mr-2" onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }} />
-                      )}
-                      {home} - Starting XI
-                    </h4>
-                    <div className="bg-sports-darker rounded-lg p-4 space-y-2">
-                      <p className="text-gray-400">Lineup data will appear before match start</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-bold mb-4 flex items-center text-gray-200">
-                      {awayBadge && (
-                        <img src={awayBadge} alt={away} className="w-6 h-6 mr-2" onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }} />
-                      )}
-                      {away} - Starting XI
-                    </h4>
-                    <div className="bg-sports-darker rounded-lg p-4 space-y-2">
-                      <p className="text-gray-400">Lineup data will appear before match start</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           )}
           
           {activeTab === 'highlights' && (
