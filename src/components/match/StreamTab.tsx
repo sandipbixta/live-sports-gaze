@@ -1,7 +1,8 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
-import PopularMatches from '@/components/PopularMatches';
+import PopularGames from '@/components/PopularGames';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 interface StreamTabProps {
@@ -53,12 +54,12 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Popular Matches Section */}
+      {/* Popular Games Section */}
       <div className="mt-8">
         <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
         {popularMatches.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <PopularMatches 
+            <PopularGames 
               popularMatches={popularMatches} 
               selectedSport={sportId} 
             />

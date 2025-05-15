@@ -10,7 +10,7 @@ import MatchesList from '../components/MatchesList';
 import PageLayout from '../components/PageLayout';
 import PageHeader from '../components/PageHeader';
 import DatePagination from '../components/DatePagination';
-import PopularMatches from '../components/PopularMatches';
+import PopularGames from '../components/PopularGames';
 import { isPopularLeague } from '../utils/popularLeagues';
 
 const Schedule = () => {
@@ -144,7 +144,7 @@ const Schedule = () => {
         />
       </div>
 
-      <PopularMatches 
+      <PopularGames 
         popularMatches={popularMatches}
         selectedSport={selectedSport}
       />
