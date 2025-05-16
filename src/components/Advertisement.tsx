@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video';
+  type: 'banner' | 'sidebar' | 'video' | 'popunder';
   className?: string;
 }
 
@@ -50,6 +50,12 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
         
       case 'video':
         // Set script for video ad
+        script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+        adContainerRef.current.appendChild(script);
+        break;
+        
+      case 'popunder':
+        // Only load the popunder script, actual pop will be managed in PopunderAd component
         script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
         adContainerRef.current.appendChild(script);
         break;

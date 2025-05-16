@@ -3,7 +3,7 @@ import React from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
-import SocialBar from '../components/SocialBar';
+import PopunderAd from '../components/PopunderAd';
 
 const Channels = () => {
   return (
@@ -21,8 +21,8 @@ const Channels = () => {
         
         <ChannelsGrid />
         
-        {/* Social sharing bar */}
-        <SocialBar />
+        {/* Non-intrusive popunder ad component */}
+        <PopunderAd frequency={1800} /> {/* Show at most once every 30 minutes */}
       </div>
     </PageLayout>
   );

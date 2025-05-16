@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '../types/sports';
 import { fetchMatch, fetchStream } from '../api/sportsApi';
 import { Helmet } from 'react-helmet-async';
