@@ -3,6 +3,7 @@ import React from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
+import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 
 const Channels = () => {
@@ -22,6 +23,11 @@ const Channels = () => {
         </div>
         
         <ChannelsGrid />
+        
+        {/* Sports News section */}
+        <div className="mt-8">
+          <NewsSection />
+        </div>
       </div>
     </PageLayout>
   );

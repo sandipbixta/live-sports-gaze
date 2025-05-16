@@ -14,6 +14,7 @@ import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
+import NewsSection from '../components/NewsSection';
 
 const Index = () => {
   const { toast } = useToast();
@@ -203,6 +204,11 @@ const Index = () => {
               isLoading={loadingMatches}
             />
           )}
+        </div>
+        
+        {/* Sports News Section */}
+        <div className="mb-8">
+          <NewsSection />
         </div>
         
         {/* Side-by-side promotion boxes with non-intrusive sidebar ad */}
