@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -14,6 +13,7 @@ import { Input } from '../components/ui/input';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
+import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
   const { toast } = useToast();
@@ -134,13 +134,42 @@ const Index = () => {
 
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+      <Helmet>
+        <title>DamiTV - Watch Live Football & Sports Streams | Free Football Streaming</title>
+        <meta name="description" content="Watch free live football streams, soccer matches, and sports TV online on DamiTV. Access hundreds of free sports streaming channels with no registration required." />
+        <meta name="keywords" content="live football streaming, watch football online, free sports streams, live matches today, free football tv" />
+        <link rel="canonical" href="https://damitv.pro/" />
+        {/* Schema.org structured data for sports events */}
+        <script type="application/ld+json">
+        {`
+          {
+            "@context": "https://schema.org",
+            "@type": "SportsEvent",
+            "name": "Live Sports Streaming",
+            "description": "Watch live football and sports streams online for free",
+            "url": "https://damitv.pro/",
+            "location": {
+              "@type": "VirtualLocation",
+              "name": "DamiTV Streaming Platform"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          }
+        `}
+        </script>
+      </Helmet>
+      
       <main className="py-4">
         {/* Single top banner ad */}
         <Advertisement type="banner" className="mb-6 w-full" />
         
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-white">Featured Sports</h2>
+            <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
             <Link to="/schedule">
               <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
                 <Calendar className="mr-2 h-4 w-4" /> View Schedule
@@ -179,15 +208,19 @@ const Index = () => {
         {/* Side-by-side promotion boxes with sidebar ad */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4 text-white">Live Now</h3>
+            <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
             <p className="text-gray-300">Discover events happening right now across different sports.</p>
-            <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
+            <Link to="/live" aria-label="View all live sports events">
+              <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
+            </Link>
           </div>
           
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h3 className="text-xl font-bold mb-4 text-white">Coming Up</h3>
+            <h2 className="text-xl font-bold mb-4 text-white">Coming Up</h2>
             <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
-            <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
+            <Link to="/schedule" aria-label="View upcoming matches schedule">
+              <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
+            </Link>
           </div>
         </div>
         

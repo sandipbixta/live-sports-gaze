@@ -12,6 +12,7 @@ import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
 import Advertisement from '../components/Advertisement';
+import { Helmet } from 'react-helmet-async';
 
 const Live = () => {
   const { toast } = useToast();
@@ -179,6 +180,32 @@ const Live = () => {
 
   return (
     <PageLayout>
+      <Helmet>
+        <title>Live Sports Streaming | Watch Live Football Matches Online Free | DamiTV</title>
+        <meta name="description" content="Watch live football matches, soccer games, and sports events streaming online for free. No registration required to stream live sports on DamiTV." />
+        <meta name="keywords" content="live football streaming, live soccer matches, watch sports online, free live sports, stream football live" />
+        <link rel="canonical" href="https://damitv.pro/live" />
+        {/* Schema.org structured data for live sports events */}
+        <script type="application/ld+json">
+        {`
+          {
+            "@context": "https://schema.org",
+            "@type": "BroadcastEvent",
+            "name": "Live Sports Streaming",
+            "description": "Watch live football matches and sports events online",
+            "url": "https://damitv.pro/live",
+            "isLiveBroadcast": true,
+            "startDate": "${new Date().toISOString()}",
+            "broadcastOfEvent": {
+              "@type": "SportsEvent",
+              "name": "Live Football Matches"
+            },
+            "videoFormat": "HD"
+          }
+        `}
+        </script>
+      </Helmet>
+      
       <div className="mb-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
           <h1 className="text-3xl font-bold text-white">Live Now</h1>
@@ -194,13 +221,14 @@ const Live = () => {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
                 <Tv size={16} className="text-[#fa2d04] animate-pulse" />
-                <span className="text-sm font-medium text-white">{filteredMatches.length} Live Broadcasts</span>
+                <span className="text-sm font-medium text-white" aria-live="polite">{filteredMatches.length} Live Broadcasts</span>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f]"
                 onClick={handleRetryLoading}
+                aria-label="Refresh live matches"
               >
                 <RefreshCcw size={14} className="mr-1" />
                 Refresh
@@ -289,11 +317,11 @@ const Live = () => {
           <div className="flex items-center gap-2">
             All Live Matches
             {filteredMatches.length > 0 && (
-              <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
+              <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse" aria-hidden="true"></span>
             )}
           </div>
           {searchQuery && (
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-gray-300" aria-live="polite">
               {filteredMatches.length === 0 ? 'No matches found' : `Found ${filteredMatches.length} matches`}
             </div>
           )}
@@ -354,7 +382,7 @@ const Live = () => {
       
       <Link to="/channels" className="block w-full">
         <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">
-          <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" />
+          <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" aria-hidden="true" />
           <h3 className="text-xl font-semibold text-white">Live TV Channels</h3>
           <p className="text-gray-300 mt-2">Access 70+ international sports channels from around the world</p>
           <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
