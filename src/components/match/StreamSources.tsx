@@ -19,25 +19,42 @@ const StreamSources = ({
     return null;
   }
 
+  // Group sources by source name (Alpha, Bravo, Charlie, etc.)
+  const groupedSources = sources.reduce((groups: Record<string, Source[]>, source) => {
+    const groupName = source.source;
+    if (!groups[groupName]) {
+      groups[groupName] = [];
+    }
+    groups[groupName].push(source);
+    return groups;
+  }, {});
+
   return (
     <div className="mt-6">
       <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
-      <div className="flex flex-wrap gap-3">
-        {sources.map(({ source, id }) => (
-          <Badge
-            key={`${source}-${id}`}
-            variant="source"
-            className={`cursor-pointer text-sm py-2 px-4 ${
-              activeSource === `${source}/${id}` 
-                ? 'bg-[#343a4d] border-[#9b87f5]' 
-                : ''
-            }`}
-            onClick={() => onSourceChange(source, id)}
-          >
-            {source.charAt(0).toUpperCase() + source.slice(1)}
-          </Badge>
-        ))}
-      </div>
+      
+      {/* Display grouped sources */}
+      {Object.entries(groupedSources).map(([groupName, groupSources]) => (
+        <div key={groupName} className="mb-4">
+          <h4 className="text-md font-semibold mb-2 text-gray-300 capitalize">{groupName}</h4>
+          <div className="flex flex-wrap gap-3">
+            {groupSources.map((source) => (
+              <Badge
+                key={`${source.source}-${source.id}`}
+                variant="source"
+                className={`cursor-pointer text-sm py-2 px-4 ${
+                  activeSource === `${source.source}/${source.id}` 
+                    ? 'bg-[#343a4d] border-[#9b87f5]' 
+                    : ''
+                }`}
+                onClick={() => onSourceChange(source.source, source.id)}
+              >
+                {source.id}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

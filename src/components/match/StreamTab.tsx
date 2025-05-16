@@ -56,9 +56,9 @@ const StreamTab = ({
       )}
       
       {/* Popular Matches Section */}
-      <div className="mt-8">
-        <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
-        {popularMatches.length > 0 ? (
+      {popularMatches.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularMatches.map((match) => (
               <Link 
@@ -73,14 +73,19 @@ const StreamTab = ({
               </Link>
             ))}
           </div>
-        ) : (
+        </div>
+      )}
+      
+      {popularMatches.length === 0 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
           <Card className="bg-sports-card border-sports">
             <CardContent className="p-6 text-center">
               <p className="text-gray-400">No related matches available at this time.</p>
             </CardContent>
           </Card>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -81,6 +81,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   />
                 </div>
               </div>
+              {/* Only show VS when both teams exist */}
               {hasTeams && (
                 <div className="mx-2 text-white text-xs font-bold">VS</div>
               )}
