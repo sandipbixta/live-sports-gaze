@@ -1,5 +1,11 @@
-
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+
+// Extend the Window interface to include our custom property
+declare global {
+  interface Window {
+    _useAlternateServer?: boolean;
+  }
+}
 
 interface AccessibilityContextType {
   isUsingAlternateServer: boolean;
@@ -84,11 +90,9 @@ const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ children 
   useEffect(() => {
     if (isUsingAlternateServer) {
       // Apply alternate API endpoints or CDN paths
-      // This is where you'd configure your API to use backup servers/CDNs
-      // We won't modify the actual API calls since that's in read-only files
       console.log('Using alternate server configuration');
       
-      // For demonstration - we add this to window so other components can detect it
+      // Set the property on window after declaring its type
       window._useAlternateServer = true;
     } else {
       window._useAlternateServer = false;
