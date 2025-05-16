@@ -11,7 +11,7 @@ import TabsNavigation from '@/components/match/TabsNavigation';
 import StreamTab from '@/components/match/StreamTab';
 import HighlightsTab from '@/components/match/HighlightsTab';
 import LoadingState from '@/components/match/LoadingState';
-import NotFoundState from '@/components/NotFoundState';
+import NotFoundState from '@/components/match/NotFoundState';
 
 const Match = () => {
   const { toast } = useToast();
