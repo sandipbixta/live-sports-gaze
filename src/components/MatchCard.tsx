@@ -63,16 +63,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         )}
         
-        {/* Teams or DAMITV - Adjusted for mobile */}
-        <div className="absolute bottom-0 inset-x-0 z-20 p-1 flex flex-col">
+        {/* Teams or DAMITV - Centered in the card */}
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">
           {hasTeamLogos ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-16 h-16'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={homeBadge} 
                     alt={home} 
-                    className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
@@ -80,13 +80,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   />
                 </div>
               </div>
-              <div className="mx-2 text-white text-xs font-medium">vs</div>
+              <div className="mx-2 text-white text-xs font-bold">vs</div>
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-16 h-16'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={awayBadge} 
                     alt={away}
-                    className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
@@ -102,7 +102,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
             </div>
           )}
-          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1 mt-1">
+          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1 mt-2">
             {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
           </h3>
           <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
