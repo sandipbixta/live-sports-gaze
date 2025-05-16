@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { ChevronRight, ImageOff } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Match } from '@/types/sports';
@@ -15,15 +15,12 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
   const isMobile = useIsMobile();
   const home = match.teams?.home?.name || 'Home Team';
   const away = match.teams?.away?.name || 'Away Team';
-  
-  // Use proper image URL format with proper error handling
-  const getTeamBadgeUrl = (badge?: string) => {
-    if (!badge) return null;
-    return `https://streamed.su/api/images/badge/${badge}.webp`;
-  };
-
-  const homeBadge = getTeamBadgeUrl(match.teams?.home?.badge);
-  const awayBadge = getTeamBadgeUrl(match.teams?.away?.badge);
+  const homeBadge = match.teams?.home?.badge 
+    ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` 
+    : '';
+  const awayBadge = match.teams?.away?.badge 
+    ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
+    : '';
     
   return (
     <>
@@ -57,12 +54,8 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
                       src={homeBadge} 
                       alt={home} 
                       className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
-                      loading="lazy"
                       onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // Prevent infinite callbacks
-                        target.src = '/placeholder.svg';
-                        target.classList.add('p-1');
+                        (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
                   ) : (
@@ -91,12 +84,8 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
                       src={awayBadge} 
                       alt={away} 
                       className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
-                      loading="lazy"
                       onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // Prevent infinite callbacks
-                        target.src = '/placeholder.svg';
-                        target.classList.add('p-1');
+                        (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
                   ) : (
@@ -124,12 +113,8 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
                     src={homeBadge} 
                     alt={home} 
                     className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
-                    loading="lazy"
                     onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null; // Prevent infinite callbacks
-                      target.src = '/placeholder.svg';
-                      target.classList.add('p-2');
+                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 ) : (
@@ -156,12 +141,8 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
                     src={awayBadge} 
                     alt={away} 
                     className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
-                    loading="lazy"
                     onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.onerror = null; // Prevent infinite callbacks
-                      target.src = '/placeholder.svg';
-                      target.classList.add('p-2');
+                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 ) : (

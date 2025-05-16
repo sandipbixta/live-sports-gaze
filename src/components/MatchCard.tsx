@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
-import { Eye, ImageOff } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface MatchCardProps {
@@ -29,18 +29,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Use proper image URL format
-  const getTeamBadgeUrl = (badge?: string) => {
-    if (!badge) return null;
-    return `https://streamed.su/api/images/badge/${badge}.webp`;
-  };
-
-  const homeBadge = getTeamBadgeUrl(match.teams?.home?.badge);
-  const awayBadge = getTeamBadgeUrl(match.teams?.away?.badge);
+  const homeBadge = match.teams?.home?.badge 
+    ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` 
+    : '';
+  const awayBadge = match.teams?.away?.badge 
+    ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
+    : '';
   const home = match.teams?.home?.name || 'Team A';
   const away = match.teams?.away?.name || 'Team B';
   const hasStream = match.sources?.length > 0;
-  const hasTeamLogos = !!homeBadge && !!awayBadge;
+  const hasTeamLogos = homeBadge && awayBadge;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -71,47 +69,29 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-16 h-16'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
-                  {homeBadge ? (
-                    <img 
-                      src={homeBadge} 
-                      alt={home} 
-                      className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // Prevent infinite callbacks
-                        target.src = '/placeholder.svg';
-                        target.classList.add('p-1');
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
-                      <span className="font-bold text-white text-xs">{home.charAt(0)}</span>
-                    </div>
-                  )}
+                  <img 
+                    src={homeBadge} 
+                    alt={home} 
+                    className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                    }}
+                  />
                 </div>
               </div>
               <div className="mx-2 text-white text-xs font-medium">vs</div>
               <div className="flex items-center">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-16 h-16'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
-                  {awayBadge ? (
-                    <img 
-                      src={awayBadge} 
-                      alt={away}
-                      className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // Prevent infinite callbacks
-                        target.src = '/placeholder.svg';
-                        target.classList.add('p-1');
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center">
-                      <span className="font-bold text-white text-xs">{away.charAt(0)}</span>
-                    </div>
-                  )}
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-14 h-14'} object-contain`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
+                    }}
+                  />
                 </div>
               </div>
             </div>

@@ -6,9 +6,6 @@ import MobileBottomNav from './MobileBottomNav';
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAccessibility } from '@/providers/AccessibilityProvider';
-import { Button } from './ui/button';
-import { Globe, Wifi, WifiOff } from 'lucide-react';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -22,7 +19,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onSearch
 }) => {
   const isMobile = useIsMobile();
-  const { connectionQuality, isUsingAlternateServer, toggleServer } = useAccessibility();
   
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
@@ -30,44 +26,18 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
             <MainNav />
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {onSearch && (
-                <div className="relative flex items-center w-full sm:w-auto">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input 
-                    type="text" 
-                    placeholder="Search events..." 
-                    className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] w-full sm:w-64 text-white"
-                    value={searchTerm}
-                    onChange={onSearch}
-                  />
-                </div>
-              )}
-              
-              {/* Connection quality indicator */}
-              <div 
-                className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border" 
-                title={`Using ${isUsingAlternateServer ? 'alternate' : 'primary'} server`}
-              >
-                <Globe size={12} />
-                <span className="hidden md:inline">
-                  {isUsingAlternateServer ? 'Alternate' : 'Primary'} Server
-                </span>
-                {connectionQuality === 'good' && <Wifi className="text-green-400" size={12} />}
-                {connectionQuality === 'fair' && <Wifi className="text-amber-400" size={12} />}
-                {connectionQuality === 'poor' && <WifiOff className="text-red-400" size={12} />}
+            {onSearch && (
+              <div className="relative flex items-center w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input 
+                  type="text" 
+                  placeholder="Search events..." 
+                  className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] w-full sm:w-64 text-white"
+                  value={searchTerm}
+                  onChange={onSearch}
+                />
               </div>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                title="Switch servers if you're having trouble accessing content"
-                onClick={toggleServer}
-                className="hidden sm:flex text-xs border border-[#343a4d] bg-[#242836] hover:bg-[#2a2f3f]"
-              >
-                Switch Server
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       </header>
@@ -155,20 +125,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           
           <div className="border-t border-[#343a4d] mt-4 pt-4 text-center text-xs">
             <p>© 2025 DAMITV - All rights reserved</p>
-            {/* Add connection control in footer for mobile */}
-            {isMobile && (
-              <div className="mt-2 flex justify-center">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={toggleServer}
-                  className="text-xs border border-[#343a4d] bg-[#242836] hover:bg-[#2a2f3f]"
-                >
-                  <Globe size={12} className="mr-1" />
-                  Switch to {isUsingAlternateServer ? 'Primary' : 'Alternate'} Server
-                </Button>
-              </div>
-            )}
           </div>
         </div>
       </footer>
