@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -12,7 +11,7 @@ import TabsNavigation from '@/components/match/TabsNavigation';
 import StreamTab from '@/components/match/StreamTab';
 import HighlightsTab from '@/components/match/HighlightsTab';
 import LoadingState from '@/components/match/LoadingState';
-import NotFoundState from '@/components/match/NotFoundState';
+import NotFoundState from '@/components/NotFoundState';
 
 const Match = () => {
   const { toast } = useToast();

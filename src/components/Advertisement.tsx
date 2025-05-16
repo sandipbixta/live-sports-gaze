@@ -11,64 +11,8 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   const adContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    if (!adContainerRef.current) return;
-    
-    // Clear any previous content
-    adContainerRef.current.innerHTML = '';
-    
-    // Create script element
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    
-    switch (type) {
-      case 'banner':
-        // Set script for new banner ad
-        script.innerHTML = `
-          atOptions = {
-            'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
-            'format' : 'iframe',
-            'height' : 90,
-            'width' : 728,
-            'params' : {}
-          };
-        `;
-        adContainerRef.current.appendChild(script);
-        
-        // Create the invoke script
-        const invokeScript = document.createElement('script');
-        invokeScript.type = 'text/javascript';
-        invokeScript.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
-        adContainerRef.current.appendChild(invokeScript);
-        break;
-        
-      case 'sidebar':
-        // Set script for sidebar ad
-        script.src = '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js';
-        adContainerRef.current.appendChild(script);
-        break;
-        
-      case 'video':
-        // Set script for video ad
-        script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
-        adContainerRef.current.appendChild(script);
-        break;
-        
-      case 'popunder':
-        // Only load the popunder script, actual pop will be managed in PopunderAd component
-        script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
-        adContainerRef.current.appendChild(script);
-        break;
-    }
-
-    // Clean up function
-    return () => {
-      if (adContainerRef.current) {
-        adContainerRef.current.innerHTML = '';
-      }
-    };
-  }, [type]);
-
+  // This component now renders only a placeholder div
+  // All intrusive ad scripts have been removed
   return (
     <div 
       ref={adContainerRef} 
@@ -78,7 +22,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
         type === 'banner' && isMobile ? 'max-w-full scale-90 origin-center transform mx-auto' : ''
       }`}
       data-ad-type={type}
-    />
+    >
+      <div className="bg-[#242836] p-4 text-center rounded-lg text-gray-400 w-full">
+        <p>Ad space - Social Bar ads only</p>
+      </div>
+    </div>
   );
 };
 

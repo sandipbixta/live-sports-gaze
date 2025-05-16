@@ -327,7 +327,7 @@ const Live = () => {
           )}
         </h2>
         
-        {/* Single ad placement */}
+        {/* Single ad placement - modified to be non-intrusive */}
         {!loading && filteredMatches.length > 0 && (
           <div className="mb-6">
             <Advertisement type="banner" className="w-full" />

@@ -164,7 +164,7 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Single top banner ad */}
+        {/* Non-intrusive banner ad replacement */}
         <Advertisement type="banner" className="mb-6 w-full" />
         
         <div className="mb-8">
@@ -205,7 +205,7 @@ const Index = () => {
           )}
         </div>
         
-        {/* Side-by-side promotion boxes with sidebar ad */}
+        {/* Side-by-side promotion boxes with non-intrusive sidebar ad */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
             <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
@@ -224,7 +224,7 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Add sidebar ad below the promotion boxes */}
+        {/* Non-intrusive sidebar ad */}
         <div className="mt-6">
           <Advertisement type="sidebar" className="w-full" />
         </div>
