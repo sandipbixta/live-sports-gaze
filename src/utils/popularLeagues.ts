@@ -1,3 +1,4 @@
+
 // Utility function to identify popular leagues and tournaments
 export const isPopularLeague = (title: string): boolean => {
   // First-division leagues
@@ -23,6 +24,17 @@ export const isPopularLeague = (title: string): boolean => {
     'copa libertadores',
     'copa america',
     'fa cup',
+    'super copa',
+    'fifa world cup',
+    'club world cup',
+    'supercup',
+    'super cup',
+    'nations league',
+    'copa del rey',
+    'dfb pokal',
+    'coppa italia',
+    'carabao cup',
+    'community shield',
   ];
   
   // Top clubs that typically play in first-division leagues
