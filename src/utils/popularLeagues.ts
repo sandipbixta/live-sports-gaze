@@ -1,40 +1,71 @@
-
 // Utility function to identify popular leagues and tournaments
 export const isPopularLeague = (title: string): boolean => {
-  const popularKeywords = [
-    // Top leagues
+  // First-division leagues
+  const topLeagues = [
+    // Top European leagues
     'premier league', 
     'epl',
+    'la liga',
     'serie a',
+    'bundesliga',
     'ligue 1',
     
-    // Additional major competitions
+    // UEFA Competitions
     'champions league',
     'ucl',
     'europa league',
+    'conference league',
+    'uefa',
     'euro', 
     'world cup',
-    'uefa',
     
-    // Top clubs often featured in major leagues
+    // Other major competitions
+    'copa libertadores',
+    'copa america',
+    'fa cup',
+  ];
+  
+  // Top clubs that typically play in first-division leagues
+  const topClubs = [
+    // Premier League
     'manchester united',
     'manchester city',
     'chelsea',
     'arsenal',
     'liverpool',
+    'tottenham',
+    
+    // La Liga
     'barcelona',
     'real madrid',
+    'atletico madrid',
+    
+    // Serie A
     'juventus',
-    'bayern munich',
-    'psg',
-    'paris saint-germain',
     'ac milan',
     'inter milan',
-    'atletico madrid',
-    'dortmund',
     'napoli',
+    'roma',
+    
+    // Bundesliga
+    'bayern munich',
+    'dortmund',
+    'rb leipzig',
+    
+    // Ligue 1
+    'psg',
+    'paris saint-germain',
+    'marseille',
+    'lyon',
   ];
   
   const lowerTitle = title.toLowerCase();
-  return popularKeywords.some(keyword => lowerTitle.includes(keyword));
+  
+  // Check if any top league keyword is in the title
+  const isTopLeague = topLeagues.some(keyword => lowerTitle.includes(keyword));
+  
+  // Check if any top club is in the title
+  const hasTopClub = topClubs.some(club => lowerTitle.includes(club));
+  
+  return isTopLeague || hasTopClub;
 };
