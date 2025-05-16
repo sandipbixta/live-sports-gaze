@@ -35,10 +35,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const awayBadge = match.teams?.away?.badge 
     ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
     : '';
-  const home = match.teams?.home?.name || 'Team A';
-  const away = match.teams?.away?.name || 'Team B';
+  const home = match.teams?.home?.name || '';
+  const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
   const hasTeamLogos = homeBadge && awayBadge;
+  const hasTeams = !!home && !!away;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -65,7 +66,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
         
         {/* Teams or DAMITV - Centered in the card */}
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">
-          {hasTeamLogos ? (
+          {hasTeamLogos && hasTeams ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
@@ -80,7 +81,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   />
                 </div>
               </div>
-              <div className="mx-2 text-white text-xs font-bold">vs</div>
+              {hasTeams && (
+                <div className="mx-2 text-white text-xs font-bold">VS</div>
+              )}
               <div className="flex items-center">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 

@@ -15,6 +15,10 @@ const StreamSources = ({
   onSourceChange, 
   streamId 
 }: StreamSourcesProps) => {
+  if (!sources || sources.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mt-6">
       <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
@@ -29,20 +33,6 @@ const StreamSources = ({
                 : ''
             }`}
             onClick={() => onSourceChange(source, id)}
-          >
-            {source.charAt(0).toUpperCase() + source.slice(1)}
-          </Badge>
-        ))}
-      </div>
-      
-      {/* Additional Stream Options */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
-        {['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'].map((source) => (
-          <Badge 
-            key={source}
-            variant="source" 
-            className="cursor-pointer text-sm py-2 px-4"
-            onClick={() => onSourceChange(source, streamId)}
           >
             {source.charAt(0).toUpperCase() + source.slice(1)}
           </Badge>

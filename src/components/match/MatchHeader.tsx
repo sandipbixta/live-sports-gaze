@@ -13,8 +13,9 @@ interface MatchHeaderProps {
 
 const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
   const isMobile = useIsMobile();
-  const home = match.teams?.home?.name || 'Home Team';
-  const away = match.teams?.away?.name || 'Away Team';
+  const home = match.teams?.home?.name || '';
+  const away = match.teams?.away?.name || '';
+  const hasTeams = !!home && !!away;
   const homeBadge = match.teams?.home?.badge 
     ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` 
     : '';
@@ -45,57 +46,67 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
           {isMobile ? (
             // Mobile horizontal layout
             <div className="flex flex-col items-center">
-              {/* Teams row */}
-              <div className="flex items-center justify-center w-full mb-3 sm:mb-4">
-                {/* Home team */}
-                <div className="flex flex-col items-center text-center w-1/3">
-                  {homeBadge ? (
-                    <img 
-                      src={homeBadge} 
-                      alt={home} 
-                      className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2">
-                      <span className="text-lg sm:text-xl font-bold text-white">{home.charAt(0)}</span>
-                    </div>
-                  )}
-                  <h2 className="text-xs sm:text-sm font-bold text-white">{home}</h2>
-                </div>
-
-                {/* VS section */}
-                <div className="flex flex-col items-center w-1/3">
-                  <div className="text-xl sm:text-2xl font-bold text-white mb-0 sm:mb-1">VS</div>
-                  <div className="text-gray-400 text-[10px] sm:text-xs">
-                    {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              {hasTeams ? (
+                // Teams row - Only show if we have both teams
+                <div className="flex items-center justify-center w-full mb-3 sm:mb-4">
+                  {/* Home team */}
+                  <div className="flex flex-col items-center text-center w-1/3">
+                    {homeBadge ? (
+                      <img 
+                        src={homeBadge} 
+                        alt={home} 
+                        className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2">
+                        <span className="text-lg sm:text-xl font-bold text-white">{home.charAt(0)}</span>
+                      </div>
+                    )}
+                    <h2 className="text-xs sm:text-sm font-bold text-white">{home}</h2>
                   </div>
-                  <div className="text-gray-400 text-[10px] sm:text-xs">
-                    {new Date(match.date).toLocaleDateString()}
+
+                  {/* VS section */}
+                  <div className="flex flex-col items-center w-1/3">
+                    <div className="text-xl sm:text-2xl font-bold text-white mb-0 sm:mb-1">VS</div>
+                    <div className="text-gray-400 text-[10px] sm:text-xs">
+                      {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="text-gray-400 text-[10px] sm:text-xs">
+                      {new Date(match.date).toLocaleDateString()}
+                    </div>
+                  </div>
+
+                  {/* Away team */}
+                  <div className="flex flex-col items-center text-center w-1/3">
+                    {awayBadge ? (
+                      <img 
+                        src={awayBadge} 
+                        alt={away} 
+                        className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2">
+                        <span className="text-lg sm:text-xl font-bold text-white">{away.charAt(0)}</span>
+                      </div>
+                    )}
+                    <h2 className="text-xs sm:text-sm font-bold text-white">{away}</h2>
                   </div>
                 </div>
-
-                {/* Away team */}
-                <div className="flex flex-col items-center text-center w-1/3">
-                  {awayBadge ? (
-                    <img 
-                      src={awayBadge} 
-                      alt={away} 
-                      className="w-12 h-12 sm:w-16 sm:h-16 mb-1 sm:mb-2 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2">
-                      <span className="text-lg sm:text-xl font-bold text-white">{away.charAt(0)}</span>
-                    </div>
-                  )}
-                  <h2 className="text-xs sm:text-sm font-bold text-white">{away}</h2>
+              ) : (
+                // Non-team content (e.g., motorsports)
+                <div className="flex flex-col items-center justify-center mb-3 sm:mb-4">
+                  <h2 className="text-base sm:text-lg font-bold text-white mb-1">{match.title}</h2>
+                  <div className="text-gray-400 text-[10px] sm:text-xs">
+                    {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(match.date).toLocaleDateString()}
+                  </div>
                 </div>
-              </div>
+              )}
                 
               {/* Live badge for mobile */}
               {streamAvailable && (
@@ -107,51 +118,69 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
           ) : (
             // Desktop layout 
             <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-16 lg:space-x-20">
-              <div className="flex flex-col items-center text-center">
-                {homeBadge ? (
-                  <img 
-                    src={homeBadge} 
-                    alt={home} 
-                    className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-20 h-20 md:w-24 md:h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-2 md:mb-3">
-                    <span className="text-2xl md:text-3xl font-bold text-white">{home.charAt(0)}</span>
+              {hasTeams ? (
+                // Team-based layout for desktop
+                <>
+                  <div className="flex flex-col items-center text-center">
+                    {homeBadge ? (
+                      <img 
+                        src={homeBadge} 
+                        alt={home} 
+                        className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 md:w-24 md:h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-2 md:mb-3">
+                        <span className="text-2xl md:text-3xl font-bold text-white">{home.charAt(0)}</span>
+                      </div>
+                    )}
+                    <h2 className="text-lg md:text-xl font-bold text-white">{home}</h2>
                   </div>
-                )}
-                <h2 className="text-lg md:text-xl font-bold text-white">{home}</h2>
-              </div>
-              
-              <div className="flex flex-col items-center">
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2 md:mb-3">VS</div>
-                <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm">
-                  <span>{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm mt-1">
-                  <span>{new Date(match.date).toLocaleDateString()}</span>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-center text-center">
-                {awayBadge ? (
-                  <img 
-                    src={awayBadge} 
-                    alt={away} 
-                    className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-20 h-20 md:w-24 md:h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-2 md:mb-3">
-                    <span className="text-2xl md:text-3xl font-bold text-white">{away.charAt(0)}</span>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl md:text-4xl font-bold text-white mb-2 md:mb-3">VS</div>
+                    <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm">
+                      <span>{new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm mt-1">
+                      <span>{new Date(match.date).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                )}
-                <h2 className="text-lg md:text-xl font-bold text-white">{away}</h2>
-              </div>
+                  
+                  <div className="flex flex-col items-center text-center">
+                    {awayBadge ? (
+                      <img 
+                        src={awayBadge} 
+                        alt={away} 
+                        className="w-20 h-20 md:w-24 md:h-24 mb-2 md:mb-3 object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-20 h-20 md:w-24 md:h-24 bg-[#343a4d] rounded-full flex items-center justify-center mb-2 md:mb-3">
+                        <span className="text-2xl md:text-3xl font-bold text-white">{away.charAt(0)}</span>
+                      </div>
+                    )}
+                    <h2 className="text-lg md:text-xl font-bold text-white">{away}</h2>
+                  </div>
+                </>
+              ) : (
+                // Non-team content for desktop (e.g., motorsports)
+                <div className="flex flex-col items-center justify-center">
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-2">{match.title}</h2>
+                  <div className="flex flex-col items-center space-y-1">
+                    <div className="text-gray-400 text-sm md:text-base">
+                      {new Date(match.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <div className="text-gray-400 text-sm md:text-base">
+                      {new Date(match.date).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
