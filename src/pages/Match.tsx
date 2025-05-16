@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { fetchMatch, fetchStream } from '@/api/sportsApi';
 import { Helmet } from 'react-helmet-async';
+import Advertisement from '@/components/Advertisement';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -151,6 +152,11 @@ const Match = () => {
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="container mx-auto px-4 py-8">
+        {/* Non-intrusive ad placement */}
+        <div className="mb-6">
+          <Advertisement type="banner" className="w-full" />
+        </div>
+        
         {activeTab === 'stream' && (
           <StreamTab
             match={match}
