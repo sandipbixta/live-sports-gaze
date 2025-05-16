@@ -36,7 +36,7 @@ const StreamSources = ({
       {/* Display grouped sources */}
       {Object.entries(groupedSources).map(([groupName, groupSources]) => (
         <div key={groupName} className="mb-4">
-          <h4 className="text-md font-semibold mb-2 text-gray-300 capitalize">{groupName}</h4>
+          <h4 className="text-md font-semibold mb-2 text-gray-300 first-letter:uppercase">{groupName}</h4>
           <div className="flex flex-wrap gap-3">
             {groupSources.map((source) => (
               <Badge
