@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface AdvertisementProps {
   type: 'banner' | 'sidebar' | 'video';
@@ -8,6 +9,7 @@ interface AdvertisementProps {
 
 const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!adContainerRef.current) return;
@@ -64,7 +66,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   return (
     <div 
       ref={adContainerRef} 
-      className={`ad-container ${className}`}
+      className={`ad-container ${className} ${
+        type === 'banner' ? 'flex justify-center overflow-hidden' : ''
+      } ${
+        type === 'banner' && isMobile ? 'max-w-full scale-75 origin-top transform -mt-5 -mb-5' : ''
+      }`}
       data-ad-type={type}
     />
   );
