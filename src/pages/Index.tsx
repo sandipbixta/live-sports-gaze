@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -175,7 +176,7 @@ const Index = () => {
           )}
         </div>
         
-        {/* Side-by-side promotion boxes without ad in between */}
+        {/* Side-by-side promotion boxes with sidebar ad */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
             <h3 className="text-xl font-bold mb-4 text-white">Live Now</h3>
@@ -188,6 +189,11 @@ const Index = () => {
             <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
             <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
           </div>
+        </div>
+        
+        {/* Add sidebar ad below the promotion boxes */}
+        <div className="mt-6">
+          <Advertisement type="sidebar" className="w-full" />
         </div>
       </main>
     </PageLayout>

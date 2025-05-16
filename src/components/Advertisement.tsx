@@ -69,7 +69,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container ${className} ${
         type === 'banner' ? 'flex justify-center overflow-hidden' : ''
       } ${
-        type === 'banner' && isMobile ? 'max-w-full scale-75 origin-top transform -mt-5 -mb-5' : ''
+        type === 'banner' && isMobile ? 'max-w-full scale-90 origin-center transform mx-auto' : ''
       }`}
       data-ad-type={type}
     />
