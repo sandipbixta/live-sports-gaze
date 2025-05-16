@@ -21,13 +21,13 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     
     switch (type) {
       case 'banner':
-        // Set script for banner ad
+        // Set script for new banner ad
         script.innerHTML = `
           atOptions = {
-            'key' : '7c589340b2a1155dcea92f44cc468438',
+            'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
             'format' : 'iframe',
-            'height' : 250,
-            'width' : 300,
+            'height' : 90,
+            'width' : 728,
             'params' : {}
           };
         `;
@@ -36,7 +36,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
         // Create the invoke script
         const invokeScript = document.createElement('script');
         invokeScript.type = 'text/javascript';
-        invokeScript.src = '//monkeyhundredsarmed.com/7c589340b2a1155dcea92f44cc468438/invoke.js';
+        invokeScript.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
         adContainerRef.current.appendChild(invokeScript);
         break;
         
