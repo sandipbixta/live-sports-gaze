@@ -5,8 +5,10 @@ import StreamSources from './StreamSources';
 import PopularMatches from '@/components/PopularMatches';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { fetchStream } from '@/api/sportsApi';
+import { useToast } from '@/hooks/use-toast';
 
 interface StreamTabProps {
   match: MatchType;
@@ -27,6 +29,9 @@ const StreamTab = ({
   popularMatches,
   sportId 
 }: StreamTabProps) => {
+  const { toast } = useToast();
+  const [retryCount, setRetryCount] = useState(0);
+  
   // Function to generate stream ID from match ID if needed
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -44,11 +49,30 @@ const StreamTab = ({
   // Check if stream has error
   const hasStreamError = stream?.id === "error";
 
+  // Handle retry function
+  const handleRetry = async () => {
+    if (!activeSource) return;
+    
+    // Parse source and id from activeSource string
+    const [source, id] = activeSource.split('/');
+    
+    if (source && id) {
+      toast({
+        title: "Retrying stream",
+        description: "Attempting to reconnect to the stream...",
+      });
+      
+      setRetryCount(prev => prev + 1); // This will trigger the parent component to refetch
+      handleSourceChange(source, id);
+    }
+  };
+
   return (
     <div>
       <StreamPlayer
         stream={stream}
         isLoading={loadingStream}
+        onRetry={handleRetry}
       />
       
       {/* Stream Sources */}

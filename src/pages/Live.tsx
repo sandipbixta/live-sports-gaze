@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source } from '../types/sports';
 import { fetchMatches, fetchStream, fetchSports } from '../api/sportsApi';
@@ -28,6 +29,33 @@ const Live = () => {
   
   // Determine if we're on mobile
   const isMobile = useIsMobile();
+  
+  // Memoized stream fetching function
+  const fetchStreamData = useCallback(async (source: Source) => {
+    setStreamLoading(true);
+    setActiveSource(`${source.source}/${source.id}`);
+    try {
+      console.log(`Fetching stream data: source=${source.source}, id=${source.id}`);
+      const stream = await fetchStream(source.source, source.id);
+      console.log('Stream data received:', stream);
+      setCurrentStream(stream);
+      // Scroll to player if not in view
+      const playerElement = document.getElementById('stream-player');
+      if (playerElement) {
+        playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    } catch (error) {
+      console.error('Error loading stream:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load stream.",
+        variant: "destructive",
+      });
+      setCurrentStream(null);
+    } finally {
+      setStreamLoading(false);
+    }
+  }, [toast]);
   
   useEffect(() => {
     const fetchLiveContent = async () => {
@@ -76,7 +104,7 @@ const Live = () => {
           
           // Fetch the stream for the featured match
           if (allLiveMatches[0].sources && allLiveMatches[0].sources.length > 0) {
-            loadStream(allLiveMatches[0].sources[0]);
+            await fetchStreamData(allLiveMatches[0].sources[0]);
           }
         } else {
           setFeaturedMatch(null);
@@ -95,7 +123,7 @@ const Live = () => {
     };
 
     fetchLiveContent();
-  }, [toast, retryCount]);
+  }, [toast, retryCount, fetchStreamData]);
 
   // Update filtered matches when search query changes
   useEffect(() => {
@@ -112,36 +140,11 @@ const Live = () => {
     }
   }, [searchQuery, liveMatches]);
 
-  // Function to load stream from a source
-  const loadStream = async (source: Source) => {
-    setStreamLoading(true);
-    setActiveSource(`${source.source}/${source.id}`);
-    try {
-      const stream = await fetchStream(source.source, source.id);
-      setCurrentStream(stream);
-      // Scroll to player if not in view
-      const playerElement = document.getElementById('stream-player');
-      if (playerElement) {
-        playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    } catch (error) {
-      console.error('Error loading stream:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load stream.",
-        variant: "destructive",
-      });
-      setCurrentStream(null);
-    } finally {
-      setStreamLoading(false);
-    }
-  };
-
   // Function to handle match selection
   const handleMatchSelect = (match: Match) => {
     setFeaturedMatch(match);
     if (match.sources && match.sources.length > 0) {
-      loadStream(match.sources[0]);
+      fetchStreamData(match.sources[0]);
     } else {
       setCurrentStream(null);
       toast({
@@ -160,7 +163,14 @@ const Live = () => {
   // Function to handle source change for the current match
   const handleSourceChange = (source: string, id: string) => {
     if (featuredMatch) {
-      loadStream({ source, id });
+      fetchStreamData({ source, id });
+    }
+  };
+
+  // Handle stream retry
+  const handleStreamRetry = () => {
+    if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
+      fetchStreamData(featuredMatch.sources[0]);
     }
   };
 
@@ -261,7 +271,8 @@ const Live = () => {
               </div>
               <StreamPlayer 
                 stream={currentStream} 
-                isLoading={streamLoading} 
+                isLoading={streamLoading}
+                onRetry={handleStreamRetry} 
               />
               
               {/* Stream Sources */}

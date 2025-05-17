@@ -41,22 +41,31 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 
 export const fetchStream = async (source: string, id: string): Promise<Stream> => {
   try {
-    // Improved logging
+    // More detailed logging
     console.log(`Fetching stream from source: ${source}, id: ${id}`);
     console.log(`Full API URL: ${API_BASE}/stream/${source}/${id}`);
     
-    // Handle potential CORS issues with retry mechanism
+    // Enhanced fetch with more aggressive retry and better error handling
     const fetchWithRetry = async (attempts = 3): Promise<Response> => {
       try {
+        // Adding a more robust set of headers
         const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
           headers: {
             'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
           },
           // Adding cache control to avoid stale responses
           cache: 'no-cache',
+          // Add credential mode to handle potential CORS issues
+          credentials: 'omit',
         });
         
         if (!response.ok) {
+          const errorText = await response.text().catch(() => 'No error details');
+          console.error(`Stream fetch failed (${response.status}): ${errorText}`);
           throw new Error(`Failed to fetch stream: ${response.status} ${response.statusText}`);
         }
         
@@ -64,7 +73,9 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       } catch (error) {
         if (attempts > 1) {
           console.log(`Retry attempt ${4 - attempts} for stream fetch...`);
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          // Exponential backoff with jitter
+          const delay = Math.floor(1000 * Math.random()) + 1000 * (4 - attempts);
+          await new Promise(resolve => setTimeout(resolve, delay));
           return fetchWithRetry(attempts - 1);
         }
         throw error;
@@ -72,21 +83,50 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     };
     
     const response = await fetchWithRetry();
-    const data = await response.json();
+    let data;
     
-    console.log('Stream API response:', data);
+    try {
+      data = await response.json();
+      console.log('Stream API response data:', data);
+    } catch (parseError) {
+      console.error('Error parsing stream JSON response:', parseError);
+      // Return a default error stream
+      return {
+        id: "error",
+        streamNo: 0,
+        language: "unknown",
+        hd: false,
+        embedUrl: "",
+        source: "error"
+      };
+    }
     
     // Better handling of different response formats
     if (Array.isArray(data) && data.length > 0) {
       // Prefer HD stream if available
       const hdStream = data.find(stream => stream.hd === true);
-      console.log('Selected stream (from array):', hdStream || data[0]);
-      return hdStream || data[0];
+      const selectedStream = hdStream || data[0];
+      console.log('Selected stream (from array):', selectedStream);
+      
+      // Validate that we have an embedUrl
+      if (!selectedStream.embedUrl || typeof selectedStream.embedUrl !== 'string') {
+        console.error('Invalid embedUrl in stream data:', selectedStream);
+        throw new Error('Stream data missing valid embedUrl');
+      }
+      
+      return selectedStream;
     }
     
     // If it's not an array, but a single object, return it
     if (data && typeof data === 'object' && data.id) {
       console.log('Selected stream (single object):', data);
+      
+      // Validate that we have an embedUrl
+      if (!data.embedUrl || typeof data.embedUrl !== 'string') {
+        console.error('Invalid embedUrl in stream data:', data);
+        throw new Error('Stream data missing valid embedUrl');
+      }
+      
       return data as Stream;
     }
     

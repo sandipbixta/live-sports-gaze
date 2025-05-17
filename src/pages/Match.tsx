@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
@@ -24,6 +25,35 @@ const Match = () => {
   const [activeTab, setActiveTab] = useState('stream');
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
+  const [retryCounter, setRetryCounter] = useState(0);
+  
+  // Memoized stream fetching function to prevent recreation on every render
+  const fetchStreamData = useCallback(async (source: string, id: string) => {
+    setLoadingStream(true);
+    try {
+      console.log(`Fetching stream data: source=${source}, id=${id}, retry=${retryCounter}`);
+      const streamData = await fetchStream(source, id);
+      console.log('Stream data received:', streamData);
+      setStream(streamData);
+    } catch (error) {
+      console.error('Error in fetchStreamData:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load stream data.",
+        variant: "destructive",
+      });
+      setStream({
+        id: "error",
+        streamNo: 0,
+        language: "unknown",
+        hd: false,
+        embedUrl: "",
+        source: "error"
+      });
+    } finally {
+      setLoadingStream(false);
+    }
+  }, [toast, retryCounter]);
   
   useEffect(() => {
     const loadMatch = async () => {
@@ -31,7 +61,9 @@ const Match = () => {
       
       setIsLoading(true);
       try {
+        console.log(`Loading match: sportId=${sportId}, matchId=${matchId}`);
         const matchData = await fetchMatch(sportId, matchId);
+        console.log('Match data loaded:', matchData);
         setMatch(matchData);
         
         // Auto-load stream if available
@@ -39,19 +71,7 @@ const Match = () => {
           const { source, id } = matchData.sources[0];
           setActiveSource(`${source}/${id}`);
           
-          try {
-            setLoadingStream(true);
-            const streamData = await fetchStream(source, id);
-            setStream(streamData);
-          } catch (error) {
-            toast({
-              title: "Error",
-              description: "Failed to load stream data.",
-              variant: "destructive",
-            });
-          } finally {
-            setLoadingStream(false);
-          }
+          await fetchStreamData(source, id);
         }
         
         // Load popular matches (limited to 3)
@@ -59,6 +79,7 @@ const Match = () => {
           setPopularMatches(matchData.related.slice(0, 3));
         }
       } catch (error) {
+        console.error('Error in loadMatch:', error);
         toast({
           title: "Error",
           description: "Failed to load match data.",
@@ -70,23 +91,13 @@ const Match = () => {
     };
 
     loadMatch();
-  }, [sportId, matchId, toast]);
+  }, [sportId, matchId, toast, fetchStreamData]);
 
   const handleSourceChange = async (source: string, id: string) => {
+    console.log(`Source change: source=${source}, id=${id}`);
     setActiveSource(`${source}/${id}`);
-    setLoadingStream(true);
-    try {
-      const streamData = await fetchStream(source, id);
-      setStream(streamData);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load stream data.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingStream(false);
-    }
+    setRetryCounter(prev => prev + 1); // Increase retry counter to force refetch
+    await fetchStreamData(source, id);
   };
 
   if (isLoading) {
@@ -148,7 +159,7 @@ const Match = () => {
         </script>
       </Helmet>
       
-      <MatchHeader match={match} streamAvailable={!!stream} />
+      <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="container mx-auto px-4 py-8">
