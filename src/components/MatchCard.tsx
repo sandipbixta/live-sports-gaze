@@ -5,6 +5,7 @@ import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
 import { Eye, Clock } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
+import { format } from 'date-fns';
 
 interface MatchCardProps {
   match: Match;
@@ -41,6 +42,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, 'EEEE, MMM d');
   };
 
   const homeBadge = match.teams?.home?.badge 
@@ -133,6 +139,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
           <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
             {match.title.split('-').pop()?.trim() || 'Football'}
           </p>
+          
+          {/* Add date for upcoming matches */}
+          {!isLive && (
+            <p className="text-center text-[#1EAEDB] text-[8px] md:text-[10px] mt-1">
+              {formatDate(match.date)}
+            </p>
+          )}
         </div>
       </AspectRatio>
     </div>

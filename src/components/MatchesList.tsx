@@ -3,6 +3,7 @@ import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
+import { format } from 'date-fns';
 
 interface MatchesListProps {
   matches: Match[];
@@ -68,7 +69,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             <span className="inline-block h-3 w-3 bg-[#fa2d04] rounded-full animate-pulse"></span>
-            🔴 Live Matches
+            Live Matches
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
             {liveMatches.map((match) => (
@@ -86,7 +87,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
       {upcomingMatches.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
-            📅 Upcoming Matches
+            Upcoming Matches
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
             {upcomingMatches.map((match) => (
@@ -105,7 +106,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             <span className="inline-block h-3 w-3 bg-[#fa2d04] rounded-full"></span>
-            🔴 Live Matches
+            Live Matches
           </h2>
           <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center mb-8">
             <p className="text-gray-300 text-sm">No live matches available right now.</p>
@@ -117,7 +118,7 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
       {upcomingMatches.length === 0 && liveMatches.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
-            📅 Upcoming Matches
+            Upcoming Matches
           </h2>
           <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center">
             <p className="text-gray-300 text-sm">No upcoming matches scheduled at this time.</p>
