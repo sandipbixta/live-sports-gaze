@@ -179,7 +179,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           title="Live Sports Stream"
           onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups"
         ></iframe>
       </AspectRatio>
       
