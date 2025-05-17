@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, CalendarDays, Tv2, Radio } from "lucide-react";
@@ -12,7 +11,8 @@ const MobileBottomNav = () => {
     { title: "Home", icon: Home, path: "/" },
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
     { title: "Live", icon: Tv2, path: "/live" },
-    { title: "Channels", icon: Radio, path: "/channels" }
+    { title: "Channels", icon: Radio, path: "/channels" },
+    { title: "News", icon: Radio, path: "/news" }
   ];
 
   return (

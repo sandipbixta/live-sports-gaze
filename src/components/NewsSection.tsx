@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface NewsItem {
   title: string;
@@ -80,6 +81,9 @@ const NewsSection = () => {
     <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
       <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
         Sports News
+        <Link to="/news" className="text-sm text-[#9b87f5] font-normal ml-2 hover:underline">
+          View All →
+        </Link>
       </h2>
       
       {loading && (
