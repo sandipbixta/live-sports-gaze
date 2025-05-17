@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -6,7 +5,7 @@ import PopularMatches from '@/components/PopularMatches';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Clock } from 'lucide-react';
 import { fetchStream } from '@/api/sportsApi';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -79,10 +78,24 @@ const StreamTab = ({
     }
   };
 
-  // Format match date to display time
+  // Format match time to display time
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+  
+  // Helper function to determine if a match is likely live
+  const isMatchLive = (): boolean => {
+    // A match is considered live if it has sources AND the match time is within 2 hours of now
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    
+    return (
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < twoHoursInMs
+    );
   };
 
   return (
@@ -104,13 +117,14 @@ const StreamTab = ({
       {/* Match status - Live or Upcoming */}
       {!loadingStream && (
         <div className="flex justify-center mt-4">
-          {stream ? (
+          {isMatchLive() ? (
             <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
               <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
               LIVE NOW
             </Badge>
           ) : (
-            <Badge variant="info" className="px-3 py-1">
+            <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1">
+              <Clock size={14} />
               Starts at {formatMatchTime(match.date)}
             </Badge>
           )}
