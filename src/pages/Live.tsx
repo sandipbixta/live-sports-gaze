@@ -1,20 +1,21 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
-import { Match, Stream, Source } from '../types/sports';
+import { Match, Stream, Source, Sport } from '../types/sports';
 import { fetchMatches, fetchStream, fetchSports } from '../api/sportsApi';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import StreamPlayer from '../components/StreamPlayer';
 import { Link } from 'react-router-dom';
-import { Radio, Tv, RefreshCcw, Calendar, Search, Clock } from 'lucide-react';
+import { Radio, Tv, RefreshCcw, Calendar, Search, Clock, Football, Basketball } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
+import { Badge } from '../components/ui/badge';
 
 const Live = () => {
   const { toast } = useToast();
@@ -22,6 +23,7 @@ const Live = () => {
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
+  const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
   const [featuredMatch, setFeaturedMatch] = useState<Match | null>(null);
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
@@ -30,6 +32,7 @@ const Live = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [activeSportFilter, setActiveSportFilter] = useState<string>("all");
   
   // Determine if we're on mobile
   const isMobile = useIsMobile();
@@ -46,6 +49,54 @@ const Live = () => {
       match.sources.length > 0 && 
       Math.abs(matchTime - now) < twoHoursInMs
     );
+  };
+
+  // Helper function to group matches by sport
+  const groupMatchesBySport = (matches: Match[]) => {
+    const groupedMatches: Record<string, Match[]> = {};
+    
+    matches.forEach(match => {
+      const sportId = match.sportId || "unknown";
+      if (!groupedMatches[sportId]) {
+        groupedMatches[sportId] = [];
+      }
+      groupedMatches[sportId].push(match);
+    });
+    
+    return groupedMatches;
+  };
+  
+  // Get sport name by ID
+  const getSportName = (sportId: string): string => {
+    const sport = sports.find(s => s.id === sportId);
+    if (sport) return sport.name;
+    
+    // Default mappings for common sport IDs
+    const sportMappings: Record<string, string> = {
+      '1': 'Football',
+      '2': 'Basketball',
+      '3': 'Ice Hockey',
+      '4': 'Tennis',
+      'football': 'Football',
+      'basketball': 'Basketball',
+      'hockey': 'Ice Hockey'
+    };
+    
+    return sportMappings[sportId] || 'Other Sports';
+  };
+  
+  // Get sport icon by ID
+  const getSportIcon = (sportId: string) => {
+    switch(sportId) {
+      case '1':
+      case 'football':
+        return <Football size={16} />;
+      case '2':
+      case 'basketball':
+        return <Basketball size={16} />;
+      default:
+        return null;
+    }
   };
   
   // Memoized stream fetching function
@@ -81,8 +132,9 @@ const Live = () => {
       try {
         console.log('Fetching live matches...');
         // Get sports data to show proper sport names
-        const sports = await fetchSports();
-        console.log('Sports data:', sports);
+        const sportsData = await fetchSports();
+        setSports(sportsData);
+        console.log('Sports data:', sportsData);
         
         // Fetch from multiple sports to find live matches
         const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey']; // Extended sport IDs
@@ -156,7 +208,7 @@ const Live = () => {
     fetchLiveContent();
   }, [toast, retryCount, fetchStreamData]);
 
-  // Update filtered matches when search query or active tab changes
+  // Update filtered matches when search query or active tab or sport filter changes
   useEffect(() => {
     let matchesToFilter = allMatches;
     
@@ -165,6 +217,11 @@ const Live = () => {
       matchesToFilter = liveMatches;
     } else if (activeTab === "upcoming") {
       matchesToFilter = upcomingMatches;
+    }
+    
+    // Then filter by sport if not "all"
+    if (activeSportFilter !== "all") {
+      matchesToFilter = matchesToFilter.filter(match => match.sportId === activeSportFilter);
     }
     
     // Then filter by search query
@@ -179,7 +236,7 @@ const Live = () => {
       );
       setFilteredMatches(filtered);
     }
-  }, [searchQuery, activeTab, allMatches, liveMatches, upcomingMatches]);
+  }, [searchQuery, activeTab, activeSportFilter, allMatches, liveMatches, upcomingMatches]);
 
   // Function to handle match selection
   const handleMatchSelect = (match: Match) => {
@@ -233,6 +290,53 @@ const Live = () => {
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // Get unique sport IDs from matches
+  const getUniqueSportIds = (): string[] => {
+    const sportIds = new Set<string>();
+    allMatches.forEach(match => {
+      if (match.sportId) sportIds.add(match.sportId);
+    });
+    return Array.from(sportIds);
+  };
+
+  // Render matches by sport
+  const renderMatchesBySport = (matches: Match[]) => {
+    if (matches.length === 0) return null;
+    
+    // Group matches by sport
+    const groupedMatches = groupMatchesBySport(matches);
+    const sportIds = Object.keys(groupedMatches);
+    
+    return sportIds.map(sportId => (
+      <div key={`sport-${sportId}`} className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          {getSportIcon(sportId)}
+          <h3 className="text-xl font-bold text-white">{getSportName(sportId)}</h3>
+          <Badge variant="outline" className="ml-2 bg-[#242836] text-xs">
+            {groupedMatches[sportId].length} {groupedMatches[sportId].length === 1 ? 'match' : 'matches'}
+          </Badge>
+        </div>
+        
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+          {groupedMatches[sportId].map((match) => (
+            <div 
+              key={`${sportId}-${match.id}`} 
+              className="cursor-pointer"
+              onClick={() => handleMatchSelect(match)}
+            >
+              <MatchCard 
+                match={match}
+                sportId={match.sportId || "1"}
+                onClick={() => handleMatchSelect(match)}
+                preventNavigation={true}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    ));
   };
 
   return (
@@ -377,6 +481,42 @@ const Live = () => {
       
       <Separator className="my-8 bg-[#343a4d]" />
       
+      {/* Sport Filter Pills */}
+      {!loading && allMatches.length > 0 && (
+        <div className="mb-6 overflow-x-auto pb-2">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className={`${
+                activeSportFilter === 'all' 
+                  ? 'bg-[#343a4d] border-[#9b87f5]' 
+                  : 'bg-[#242836] border-[#343a4d]'
+              } whitespace-nowrap`}
+              onClick={() => setActiveSportFilter('all')}
+            >
+              All Sports
+            </Button>
+            {getUniqueSportIds().map(sportId => (
+              <Button
+                key={`filter-${sportId}`}
+                variant="outline"
+                size="sm"
+                className={`${
+                  activeSportFilter === sportId 
+                    ? 'bg-[#343a4d] border-[#9b87f5]' 
+                    : 'bg-[#242836] border-[#343a4d]'
+                } whitespace-nowrap flex items-center gap-1`}
+                onClick={() => setActiveSportFilter(sportId)}
+              >
+                {getSportIcon(sportId)}
+                {getSportName(sportId)}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Tabs Navigation for All/Live/Upcoming */}
       <Tabs 
         defaultValue="all" 
@@ -396,13 +536,15 @@ const Live = () => {
               value="live" 
               className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
             >
-              🔴 Live Now ({liveMatches.length})
+              <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse mr-1"></span>
+              Live Now ({liveMatches.length})
             </TabsTrigger>
             <TabsTrigger 
               value="upcoming" 
               className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
             >
-              📅 Upcoming ({upcomingMatches.length})
+              <Clock size={14} className="mr-1" />
+              Upcoming ({upcomingMatches.length})
             </TabsTrigger>
           </TabsList>
           
@@ -421,25 +563,28 @@ const Live = () => {
                 <span className="inline-block h-3 w-3 bg-[#fa2d04] rounded-full animate-pulse"></span>
                 Live Matches
               </h2>
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
-                {liveMatches
-                  .filter(match => filteredMatches.some(fm => fm.id === match.id))
-                  .map((match) => (
-                    <div 
-                      key={`live-${match.id}`} 
-                      className="cursor-pointer"
-                      onClick={() => handleMatchSelect(match)}
-                    >
-                      <MatchCard 
-                        match={match}
-                        sportId={match.sportId || "1"}
+              {activeSportFilter === "all" ? 
+                renderMatchesBySport(liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id))) :
+                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                  {liveMatches
+                    .filter(match => filteredMatches.some(fm => fm.id === match.id))
+                    .map((match) => (
+                      <div 
+                        key={`live-${match.id}`} 
+                        className="cursor-pointer"
                         onClick={() => handleMatchSelect(match)}
-                        preventNavigation={true}
-                      />
-                    </div>
-                  ))
-                }
-              </div>
+                      >
+                        <MatchCard 
+                          match={match}
+                          sportId={match.sportId || "1"}
+                          onClick={() => handleMatchSelect(match)}
+                          preventNavigation={true}
+                        />
+                      </div>
+                    ))
+                  }
+                </div>
+              }
             </div>
           )}
           
@@ -447,29 +592,32 @@ const Live = () => {
           {upcomingMatches.length > 0 && (
             <div>
               <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
-                <Calendar size={18} className="text-[#1EAEDB]" />
+                <Clock size={18} className="text-[#1EAEDB]" />
                 Upcoming Matches
               </h2>
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
-                {upcomingMatches
-                  .filter(match => filteredMatches.some(fm => fm.id === match.id))
-                  .slice(0, 12) // Limit to avoid too many cards
-                  .map((match) => (
-                    <div 
-                      key={`upcoming-${match.id}`} 
-                      className="cursor-pointer"
-                      onClick={() => handleMatchSelect(match)}
-                    >
-                      <MatchCard 
-                        match={match}
-                        sportId={match.sportId || "1"}
+              {activeSportFilter === "all" ? 
+                renderMatchesBySport(upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id)).slice(0, 24)) :
+                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                  {upcomingMatches
+                    .filter(match => filteredMatches.some(fm => fm.id === match.id))
+                    .slice(0, 12) // Limit to avoid too many cards
+                    .map((match) => (
+                      <div 
+                        key={`upcoming-${match.id}`} 
+                        className="cursor-pointer"
                         onClick={() => handleMatchSelect(match)}
-                        preventNavigation={true}
-                      />
-                    </div>
-                  ))
-                }
-              </div>
+                      >
+                        <MatchCard 
+                          match={match}
+                          sportId={match.sportId || "1"}
+                          onClick={() => handleMatchSelect(match)}
+                          preventNavigation={true}
+                        />
+                      </div>
+                    ))
+                  }
+                </div>
+              }
             </div>
           )}
           
@@ -499,22 +647,24 @@ const Live = () => {
         
         <TabsContent value="live" className="mt-0">
           {filteredMatches.length > 0 ? (
-            <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
-              {filteredMatches.map((match) => (
-                <div 
-                  key={`live-tab-${match.id}`} 
-                  className="cursor-pointer"
-                  onClick={() => handleMatchSelect(match)}
-                >
-                  <MatchCard 
-                    match={match}
-                    sportId={match.sportId || "1"}
+            activeSportFilter === "all" ? 
+              renderMatchesBySport(filteredMatches) :
+              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                {filteredMatches.map((match) => (
+                  <div 
+                    key={`live-tab-${match.id}`} 
+                    className="cursor-pointer"
                     onClick={() => handleMatchSelect(match)}
-                    preventNavigation={true}
-                  />
-                </div>
-              ))}
-            </div>
+                  >
+                    <MatchCard 
+                      match={match}
+                      sportId={match.sportId || "1"}
+                      onClick={() => handleMatchSelect(match)}
+                      preventNavigation={true}
+                    />
+                  </div>
+                ))}
+              </div>
           ) : (
             <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
               {searchQuery ? (
@@ -541,22 +691,24 @@ const Live = () => {
         
         <TabsContent value="upcoming" className="mt-0">
           {filteredMatches.length > 0 ? (
-            <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
-              {filteredMatches.map((match) => (
-                <div 
-                  key={`upcoming-tab-${match.id}`} 
-                  className="cursor-pointer"
-                  onClick={() => handleMatchSelect(match)}
-                >
-                  <MatchCard 
-                    match={match}
-                    sportId={match.sportId || "1"}
+            activeSportFilter === "all" ? 
+              renderMatchesBySport(filteredMatches) :
+              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                {filteredMatches.map((match) => (
+                  <div 
+                    key={`upcoming-tab-${match.id}`} 
+                    className="cursor-pointer"
                     onClick={() => handleMatchSelect(match)}
-                    preventNavigation={true}
-                  />
-                </div>
-              ))}
-            </div>
+                  >
+                    <MatchCard 
+                      match={match}
+                      sportId={match.sportId || "1"}
+                      onClick={() => handleMatchSelect(match)}
+                      preventNavigation={true}
+                    />
+                  </div>
+                ))}
+              </div>
           ) : (
             <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
               {searchQuery ? (
