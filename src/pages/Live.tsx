@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -8,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import StreamPlayer from '../components/StreamPlayer';
 import { Link } from 'react-router-dom';
-import { Radio, Tv, RefreshCcw, Calendar, Search, Clock, Football, Basketball } from 'lucide-react';
+import { Radio, Tv, RefreshCcw, Calendar, Search, Clock, CircleDot, Dribbble } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
@@ -90,10 +89,10 @@ const Live = () => {
     switch(sportId) {
       case '1':
       case 'football':
-        return <Football size={16} />;
+        return <CircleDot size={16} />;
       case '2':
       case 'basketball':
-        return <Basketball size={16} />;
+        return <Dribbble size={16} />;
       default:
         return null;
     }
