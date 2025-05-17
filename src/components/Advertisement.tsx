@@ -44,8 +44,27 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       // Add invoke script
       script.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
     } else if (type === 'sidebar') {
-      // Social bar script
+      // Social bar script - updated to use the provided script
       script.src = '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js';
+    } else if (type === 'video') {
+      // Video ad script (placeholder for future implementation)
+      script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+    } else if (type === 'popunder') {
+      // Popunder ad script (placeholder for future implementation)
+      const configScript = document.createElement('script');
+      configScript.type = 'text/javascript';
+      configScript.text = `
+        var adConfig = {
+          'sub1': '',
+          'sub2': '',
+          'sub3': '',
+          'sub4': '',
+          'sub5': ''
+        };
+      `;
+      adContainerRef.current.appendChild(configScript);
+      
+      script.src = '//monkeyhundredsarmed.com/d7/42/96/d74296ac748d679dcec1c53a6cc49398.js';
     }
 
     adContainerRef.current.appendChild(script);
