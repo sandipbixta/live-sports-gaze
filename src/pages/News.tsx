@@ -76,7 +76,7 @@ const News = () => {
         
         {/* Categories section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {['Football', 'Basketball', 'Tennis', 'Formula 1'].map((sport) => (
+          {['Football', 'Basketball', 'Baseball', 'Tennis'].map((sport) => (
             <div key={sport} className="bg-[#242836] rounded-lg p-4 text-center border border-[#343a4d] hover:bg-[#2a2f3f] cursor-pointer transition-all">
               <h3 className="font-bold text-white">{sport}</h3>
               <p className="text-xs text-gray-300 mt-1">Latest news</p>
