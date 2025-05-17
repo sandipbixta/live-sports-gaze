@@ -5,6 +5,8 @@ import StreamSources from './StreamSources';
 import PopularMatches from '@/components/PopularMatches';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface StreamTabProps {
   match: MatchType;
@@ -31,6 +33,16 @@ const StreamTab = ({
   };
   
   const streamId = getStreamId();
+  
+  // Logging for debugging
+  useEffect(() => {
+    console.log('Match sources:', match.sources);
+    console.log('Active source:', activeSource);
+    console.log('Current stream:', stream);
+  }, [match.sources, activeSource, stream]);
+
+  // Check if stream has error
+  const hasStreamError = stream?.id === "error";
 
   return (
     <div>
@@ -47,7 +59,20 @@ const StreamTab = ({
         streamId={streamId}
       />
       
-      {!stream && !loadingStream && (
+      {/* Stream Error Message */}
+      {hasStreamError && !loadingStream && (
+        <Card className="bg-sports-card border-sports mt-6">
+          <CardContent className="p-6 text-center">
+            <div className="flex justify-center mb-3">
+              <AlertCircle className="h-10 w-10 text-red-500" />
+            </div>
+            <p className="text-gray-400">Stream error. Please try another source.</p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* No Stream Available Message */}
+      {!stream && !loadingStream && !hasStreamError && (
         <Card className="bg-sports-card border-sports mt-6">
           <CardContent className="p-6 text-center">
             <p className="text-gray-400">Stream will be available closer to match time.</p>

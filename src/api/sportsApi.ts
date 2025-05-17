@@ -41,23 +41,52 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 
 export const fetchStream = async (source: string, id: string): Promise<Stream> => {
   try {
-    console.log(`Fetching stream from: ${API_BASE}/stream/${source}/${id}`);
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`);
+    // Improved logging
+    console.log(`Fetching stream from source: ${source}, id: ${id}`);
+    console.log(`Full API URL: ${API_BASE}/stream/${source}/${id}`);
     
-    if (!response.ok) throw new Error('Failed to fetch stream');
+    // Handle potential CORS issues with retry mechanism
+    const fetchWithRetry = async (attempts = 3): Promise<Response> => {
+      try {
+        const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+          // Adding cache control to avoid stale responses
+          cache: 'no-cache',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch stream: ${response.status} ${response.statusText}`);
+        }
+        
+        return response;
+      } catch (error) {
+        if (attempts > 1) {
+          console.log(`Retry attempt ${4 - attempts} for stream fetch...`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+          return fetchWithRetry(attempts - 1);
+        }
+        throw error;
+      }
+    };
     
+    const response = await fetchWithRetry();
     const data = await response.json();
-    console.log('Stream data:', data);
     
-    // The API returns an array of stream options
+    console.log('Stream API response:', data);
+    
+    // Better handling of different response formats
     if (Array.isArray(data) && data.length > 0) {
       // Prefer HD stream if available
       const hdStream = data.find(stream => stream.hd === true);
+      console.log('Selected stream (from array):', hdStream || data[0]);
       return hdStream || data[0];
     }
     
     // If it's not an array, but a single object, return it
     if (data && typeof data === 'object' && data.id) {
+      console.log('Selected stream (single object):', data);
       return data as Stream;
     }
     

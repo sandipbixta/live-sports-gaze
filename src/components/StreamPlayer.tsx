@@ -1,8 +1,8 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
@@ -15,6 +15,7 @@ interface StreamPlayerProps {
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
   const videoRef = useRef<HTMLIFrameElement>(null);
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const isMobile = useIsMobile();
   
   const togglePictureInPicture = async () => {
@@ -40,6 +41,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
       console.error('Failed to toggle picture-in-picture mode:', error);
     }
   };
+  
+  // Reset load error when stream changes
+  useEffect(() => {
+    if (stream) {
+      setLoadError(false);
+    }
+  }, [stream]);
 
   if (isLoading) {
     return (
@@ -57,15 +65,25 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
     );
   }
 
-  if (!stream) {
+  if (!stream || stream.id === "error") {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
-              <Video className="h-10 w-10 sm:h-12 sm:w-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-lg sm:text-xl">No live stream available</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Check back closer to match time</p>
+              {stream?.id === "error" ? (
+                <>
+                  <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3" />
+                  <p className="text-lg sm:text-xl">Stream unavailable</p>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please try another source</p>
+                </>
+              ) : (
+                <>
+                  <Video className="h-10 w-10 sm:h-12 sm:w-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-lg sm:text-xl">No live stream available</p>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Check back closer to match time</p>
+                </>
+              )}
             </div>
           </div>
         </AspectRatio>
@@ -82,8 +100,31 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
-              <p className="text-lg sm:text-xl">Stream unavailable</p>
+              <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
+              <p className="text-lg sm:text-xl">Stream URL invalid</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please try another source</p>
+            </div>
+          </div>
+        </AspectRatio>
+      </div>
+    );
+  }
+
+  // Handle iframe load error
+  const handleIframeError = () => {
+    console.error('Failed to load iframe content');
+    setLoadError(true);
+  };
+
+  if (loadError) {
+    return (
+      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
+        <AspectRatio ratio={16 / 9}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-white text-center">
+              <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
+              <p className="text-lg sm:text-xl">Stream failed to load</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please refresh or try another source</p>
             </div>
           </div>
         </AspectRatio>
@@ -100,6 +141,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
           className="w-full h-full absolute inset-0"
           allowFullScreen
           title="Live Sports Stream"
+          onError={handleIframeError}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         ></iframe>
       </AspectRatio>
       
