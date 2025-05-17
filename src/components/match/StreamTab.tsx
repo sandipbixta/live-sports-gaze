@@ -46,9 +46,6 @@ const StreamTab = ({
     console.log('Current stream:', stream);
   }, [match.sources, activeSource, stream]);
 
-  // Check if stream has error
-  const hasStreamError = stream?.id === "error";
-
   // Handle retry function
   const handleRetry = async () => {
     if (!activeSource) return;
@@ -57,13 +54,27 @@ const StreamTab = ({
     const [source, id] = activeSource.split('/');
     
     if (source && id) {
+      setRetryCount(prev => prev + 1); // This will trigger a refresh
+      
       toast({
         title: "Retrying stream",
         description: "Attempting to reconnect to the stream...",
       });
       
-      setRetryCount(prev => prev + 1); // This will trigger the parent component to refetch
       handleSourceChange(source, id);
+    } else {
+      // If we can't get source/id from activeSource, try the first available source
+      if (match.sources && match.sources.length > 0) {
+        const { source, id } = match.sources[0];
+        setRetryCount(prev => prev + 1);
+        
+        toast({
+          title: "Trying another source",
+          description: "Attempting to connect to a different stream source...",
+        });
+        
+        handleSourceChange(source, id);
+      }
     }
   };
 
@@ -83,20 +94,8 @@ const StreamTab = ({
         streamId={streamId}
       />
       
-      {/* Stream Error Message */}
-      {hasStreamError && !loadingStream && (
-        <Card className="bg-sports-card border-sports mt-6">
-          <CardContent className="p-6 text-center">
-            <div className="flex justify-center mb-3">
-              <AlertCircle className="h-10 w-10 text-red-500" />
-            </div>
-            <p className="text-gray-400">Stream error. Please try another source.</p>
-          </CardContent>
-        </Card>
-      )}
-      
       {/* No Stream Available Message */}
-      {!stream && !loadingStream && !hasStreamError && (
+      {!stream && !loadingStream && (
         <Card className="bg-sports-card border-sports mt-6">
           <CardContent className="p-6 text-center">
             <p className="text-gray-400">Stream will be available closer to match time.</p>
