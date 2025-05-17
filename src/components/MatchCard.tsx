@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
-import { Eye } from 'lucide-react';
+import { Eye, Clock } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface MatchCardProps {
@@ -24,6 +24,20 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Check if we're on mobile
   const isMobile = useIsMobile();
   
+  // Helper function to determine if a match is likely live
+  const isMatchLive = (match: Match): boolean => {
+    // A match is considered live if it has sources AND the match time is within 2 hours of now
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    
+    return (
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < twoHoursInMs
+    );
+  };
+  
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -40,6 +54,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
+  const isLive = isMatchLive(match);
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -49,20 +64,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
         
         {/* Match Time */}
         <div className="absolute top-1 left-1 z-20">
-          <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold">
+          <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1">
+            {!isLive && <Clock className="w-2.5 h-2.5" />}
             {formatTime(match.date)}
           </div>
         </div>
         
-        {/* Streaming Badge - Adjusted for mobile */}
-        {hasStream && (
-          <div className="absolute top-1 right-1 z-30">
+        {/* Live/Upcoming Badge - Adjusted for mobile */}
+        <div className="absolute top-1 right-1 z-30">
+          {isLive ? (
             <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-1 py-0.5 rounded-md">
               <Eye className="w-2 h-2" />
               <span className="text-[8px] font-medium">LIVE</span>
             </div>
-          </div>
-        )}
+          ) : hasStream ? (
+            <div className="flex items-center gap-1 bg-[#1EAEDB] text-white px-1 py-0.5 rounded-md">
+              <Clock className="w-2 h-2" />
+              <span className="text-[8px] font-medium">UPCOMING</span>
+            </div>
+          ) : null}
+        </div>
         
         {/* Teams or DAMITV - Centered in the card */}
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">

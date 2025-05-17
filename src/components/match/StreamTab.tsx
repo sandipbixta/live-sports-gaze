@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { fetchStream } from '@/api/sportsApi';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface StreamTabProps {
   match: MatchType;
@@ -78,6 +79,12 @@ const StreamTab = ({
     }
   };
 
+  // Format match date to display time
+  const formatMatchTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
     <div>
       <StreamPlayer
@@ -93,6 +100,22 @@ const StreamTab = ({
         onSourceChange={handleSourceChange}
         streamId={streamId}
       />
+      
+      {/* Match status - Live or Upcoming */}
+      {!loadingStream && (
+        <div className="flex justify-center mt-4">
+          {stream ? (
+            <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
+              <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+              LIVE NOW
+            </Badge>
+          ) : (
+            <Badge variant="info" className="px-3 py-1">
+              Starts at {formatMatchTime(match.date)}
+            </Badge>
+          )}
+        </div>
+      )}
       
       {/* No Stream Available Message */}
       {!stream && !loadingStream && (
