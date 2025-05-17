@@ -45,22 +45,21 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     console.log(`Fetching stream from source: ${source}, id: ${id}`);
     console.log(`Full API URL: ${API_BASE}/stream/${source}/${id}`);
     
-    // Enhanced fetch with more aggressive retry and better error handling
+    // Modified fetch with better error handling
     const fetchWithRetry = async (attempts = 3): Promise<Response> => {
       try {
-        // Adding a more robust set of headers
+        // Using a more streamlined set of headers - removing potential restrictive headers
         const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
           headers: {
             'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
+            'Cache-Control': 'no-cache'
           },
-          // Adding cache control to avoid stale responses
+          // Cache control
           cache: 'no-cache',
-          // Add credential mode to handle potential CORS issues
-          credentials: 'omit',
+          // Handle CORS mode - changing to cors to better handle restrictions
+          mode: 'cors',
+          // Reduced credential mode to avoid CORS issues
+          credentials: 'same-origin',
         });
         
         if (!response.ok) {
@@ -82,7 +81,26 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       }
     };
     
-    const response = await fetchWithRetry();
+    // Try alternative endpoint if primary fails
+    const tryFetchStream = async () => {
+      try {
+        return await fetchWithRetry();
+      } catch (error) {
+        console.log('Primary endpoint failed, trying backup...');
+        
+        // If we failed with the standard endpoint, try an alternative approach
+        // For example, using a different format or path structure
+        const altResponse = await fetch(`${API_BASE}/streams/${source}/${id}`, {
+          cache: 'no-cache',
+          mode: 'cors',
+        });
+        
+        if (!altResponse.ok) throw new Error('Both primary and backup endpoints failed');
+        return altResponse;
+      }
+    };
+    
+    const response = await tryFetchStream();
     let data;
     
     try {
