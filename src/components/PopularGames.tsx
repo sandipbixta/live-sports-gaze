@@ -2,6 +2,8 @@
 import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
+import { useIsMobile } from '../hooks/use-mobile';
+import { isTrendingMatch } from '../utils/popularLeagues';
 
 interface PopularGamesProps {
   popularMatches: Match[];
@@ -9,11 +11,20 @@ interface PopularGamesProps {
 }
 
 const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSport }) => {
-  // Filter out advertisement matches (Sky Sports News in this case)
-  const filteredMatches = popularMatches.filter(match => 
-    !match.title.toLowerCase().includes('sky sports news') && 
-    !match.id.includes('sky-sports-news')
-  );
+  const isMobile = useIsMobile();
+  
+  // Filter out advertisement matches and prioritize trending matches
+  const filteredMatches = popularMatches
+    .filter(match => 
+      !match.title.toLowerCase().includes('sky sports news') && 
+      !match.id.includes('sky-sports-news')
+    )
+    .sort((a, b) => {
+      // Sort by trending score (higher score first)
+      const aTrending = isTrendingMatch(a.title);
+      const bTrending = isTrendingMatch(b.title);
+      return bTrending.score - aTrending.score;
+    });
   
   if (filteredMatches.length === 0) {
     return null;
@@ -21,8 +32,8 @@ const PopularGames: React.FC<PopularGamesProps> = ({ popularMatches, selectedSpo
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-3 text-white">Popular Games</h2>
-      <div className="grid grid-cols-2 gap-2">
+      <h2 className="text-xl font-bold mb-3 text-white">Trending Games</h2>
+      <div className={`grid grid-cols-2 ${!isMobile ? 'md:grid-cols-4' : ''} gap-2`}>
         {filteredMatches.slice(0, 4).map((match) => (
           <MatchCard 
             key={`popular-${match.id}`}
