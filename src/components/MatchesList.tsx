@@ -34,79 +34,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
     );
   };
 
-  // Function to extract league name from match title
-  const getLeagueName = (title: string): string => {
-    // Common league names and their variations
-    const leagueKeywords = {
-      'premier league': 'Premier League',
-      'epl': 'Premier League',
-      'la liga': 'La Liga',
-      'laliga': 'La Liga',
-      'serie a': 'Serie A',
-      'bundesliga': 'Bundesliga',
-      'ligue 1': 'Ligue 1',
-      'champions league': 'Champions League',
-      'ucl': 'Champions League',
-      'europa league': 'Europa League',
-      'conference league': 'Conference League',
-      'copa libertadores': 'Copa Libertadores',
-      'copa america': 'Copa America',
-      'fa cup': 'FA Cup',
-      'carabao cup': 'Carabao Cup',
-      'efl cup': 'Carabao Cup',
-      'community shield': 'Community Shield',
-      'super cup': 'Super Cup'
-    };
-
-    const lowercaseTitle = title.toLowerCase();
-    
-    // Check for league keywords in the title
-    for (const [keyword, leagueName] of Object.entries(leagueKeywords)) {
-      if (lowercaseTitle.includes(keyword)) {
-        return leagueName;
-      }
-    }
-
-    // If no specific league is identified, try to extract from the title
-    // Many titles follow the format "Team vs Team - League Name"
-    const parts = title.split('-');
-    if (parts.length > 1) {
-      return parts[parts.length - 1].trim();
-    }
-
-    // Default case if no league can be determined
-    return 'Other Competitions';
-  };
-  
   // Separate matches into live and upcoming
   const liveMatches = filteredMatches.filter(isMatchLive);
   const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
-  
-  // Group football matches by league
-  const groupMatchesByLeague = (matches: Match[]) => {
-    // Only group if this is football/soccer
-    if (sportId !== 'football') {
-      return { 'All Matches': matches };
-    }
-    
-    const groupedMatches: Record<string, Match[]> = {};
-    
-    matches.forEach(match => {
-      const leagueName = getLeagueName(match.title);
-      
-      if (!groupedMatches[leagueName]) {
-        groupedMatches[leagueName] = [];
-      }
-      
-      groupedMatches[leagueName].push(match);
-    });
-    
-    return groupedMatches;
-  };
-
-  // Group the matches
-  const groupedLiveMatches = groupMatchesByLeague(liveMatches);
-  const groupedUpcomingMatches = groupMatchesByLeague(upcomingMatches);
 
   if (isLoading) {
     return (
@@ -141,26 +71,15 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
             <span className="inline-block h-3 w-3 bg-[#fa2d04] rounded-full animate-pulse"></span>
             Live Matches
           </h2>
-          
-          {Object.entries(groupedLiveMatches).map(([leagueName, leagueMatches]) => (
-            <div key={`live-${leagueName}`} className="mb-6">
-              {/* Only show league headings for football */}
-              {sportId === 'football' && (
-                <h3 className="text-xl font-semibold mb-3 text-gray-200 border-l-4 border-[#9b87f5] pl-2">
-                  {leagueName}
-                </h3>
-              )}
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
-                {leagueMatches.map((match) => (
-                  <MatchCard 
-                    key={match.id}
-                    match={match}
-                    sportId={sportId}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
+            {liveMatches.map((match) => (
+              <MatchCard 
+                key={match.id}
+                match={match}
+                sportId={sportId}
+              />
+            ))}
+          </div>
         </div>
       )}
       
@@ -170,26 +89,15 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             Upcoming Matches
           </h2>
-          
-          {Object.entries(groupedUpcomingMatches).map(([leagueName, leagueMatches]) => (
-            <div key={`upcoming-${leagueName}`} className="mb-6">
-              {/* Only show league headings for football */}
-              {sportId === 'football' && (
-                <h3 className="text-xl font-semibold mb-3 text-gray-200 border-l-4 border-[#9b87f5] pl-2">
-                  {leagueName}
-                </h3>
-              )}
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
-                {leagueMatches.map((match) => (
-                  <MatchCard 
-                    key={match.id}
-                    match={match}
-                    sportId={sportId}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
+            {upcomingMatches.map((match) => (
+              <MatchCard 
+                key={match.id}
+                match={match}
+                sportId={sportId}
+              />
+            ))}
+          </div>
         </div>
       )}
       
