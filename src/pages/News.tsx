@@ -53,7 +53,7 @@ const News = () => {
         <title>Football & Sports News | DamiTV - Latest Updates and Headlines</title>
         <meta name="description" content="Stay updated with the latest football/soccer news, transfers, match reports, and analysis from around the world. Get breaking news in football, basketball, tennis and more." />
         <meta name="keywords" content="football news, soccer news, premier league, la liga, champions league, basketball news, latest sports updates, sports headlines, match reports" />
-        <meta name="canonical" href="https://damitv.pro/news" />
+        <meta name="canonical" content="https://damitv.pro/news" />
         <script type="application/ld+json">
         {`
           {
