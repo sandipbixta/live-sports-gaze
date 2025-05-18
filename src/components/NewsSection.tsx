@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink } from 'lucide-react';
@@ -273,53 +272,35 @@ const NewsSection = () => {
         
         {filteredNews.map((item, index) => (
           <Card key={index} className="bg-[#1A1F2C] border-[#343a4d]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* News image */}
-              <div className="md:col-span-1">
-                {item.imageUrl && (
-                  <img 
-                    src={item.imageUrl} 
-                    alt={item.title} 
-                    className="w-full h-48 object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none" 
-                    onError={(e) => {
-                      // Fallback image if the original one fails to load
-                      (e.target as HTMLImageElement).src = `https://loremflickr.com/480/240/${item.category || 'sports'}`;
-                    }}
-                  />
-                )}
-              </div>
-              
-              {/* News content */}
-              <div className="md:col-span-2 p-4">
-                <CardHeader className="pb-2 px-0 pt-0">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg font-semibold text-white">{item.title}</CardTitle>
-                    {item.category && (
-                      <Badge variant="source" className={`${getCategoryColor(item.category)} ml-2 whitespace-nowrap`}>
-                        {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
-                      </Badge>
-                    )}
-                  </div>
-                  <CardDescription className="text-xs text-gray-400">
-                    {new Date(item.pubDate).toLocaleDateString(undefined, { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-gray-300 pb-2 px-0">
-                  {stripHtml(item.description).slice(0, 150)}
-                  {stripHtml(item.description).length > 150 ? '...' : ''}
-                </CardContent>
-                <CardFooter className="px-0">
-                  <a href={item.link} target="_blank" rel="noopener noreferrer">
-                    <Button variant="link" className="px-0 text-[#9b87f5]" size="sm">
-                      Read More <ExternalLink className="ml-1 h-3 w-3" />
-                    </Button>
-                  </a>
-                </CardFooter>
-              </div>
+            <div className="p-4">
+              <CardHeader className="pb-2 px-0 pt-0">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg font-semibold text-white">{item.title}</CardTitle>
+                  {item.category && (
+                    <Badge variant="source" className={`${getCategoryColor(item.category)} ml-2 whitespace-nowrap`}>
+                      {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="text-xs text-gray-400">
+                  {new Date(item.pubDate).toLocaleDateString(undefined, { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm text-gray-300 pb-2 px-0">
+                {stripHtml(item.description).slice(0, 150)}
+                {stripHtml(item.description).length > 150 ? '...' : ''}
+              </CardContent>
+              <CardFooter className="px-0">
+                <a href={item.link} target="_blank" rel="noopener noreferrer">
+                  <Button variant="link" className="px-0 text-[#9b87f5]" size="sm">
+                    Read More <ExternalLink className="ml-1 h-3 w-3" />
+                  </Button>
+                </a>
+              </CardFooter>
             </div>
           </Card>
         ))}
