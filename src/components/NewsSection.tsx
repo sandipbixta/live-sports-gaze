@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '../hooks/use-toast';
 
 interface NewsItem {
   title: string;
@@ -19,6 +21,8 @@ const NewsSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const { toast } = useToast();
 
   const sportCategories = [
     { name: "All", value: null },
@@ -27,134 +31,168 @@ const NewsSection = () => {
     { name: "Baseball", value: "baseball" },
     { name: "Tennis", value: "tennis" }
   ];
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        // Use a CORS proxy to fetch multiple RSS feeds for better coverage
-        const feedUrls = [
-          'https://api.allorigins.win/raw?url=https://www.espn.com/espn/rss/soccer/news', // Soccer/football specific
-          'https://api.allorigins.win/raw?url=https://www.espn.com/espn/rss/news', // General sports
-          'https://api.allorigins.win/raw?url=https://www.goal.com/feeds/news?fmt=rss', // Soccer/football specific
-        ];
-        
-        const allItems: NewsItem[] = [];
-        
-        for (const url of feedUrls) {
-          try {
-            const response = await fetch(url);
+  
+  // Move fetchNews to useCallback to prevent unnecessary re-creation
+  const fetchNews = useCallback(async () => {
+    console.log('Fetching news data at:', new Date().toLocaleTimeString());
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Use a CORS proxy to fetch multiple RSS feeds for better coverage
+      const feedUrls = [
+        'https://api.allorigins.win/raw?url=https://www.espn.com/espn/rss/soccer/news', // Soccer/football specific
+        'https://api.allorigins.win/raw?url=https://www.espn.com/espn/rss/news', // General sports
+        'https://api.allorigins.win/raw?url=https://www.goal.com/feeds/news?fmt=rss', // Soccer/football specific
+      ];
+      
+      const allItems: NewsItem[] = [];
+      
+      for (const url of feedUrls) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          
+          const response = await fetch(url, { 
+            signal: controller.signal,
+            cache: 'no-store' // Force fresh data
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            console.warn(`Failed to fetch from ${url}: ${response.status}`);
+            continue;
+          }
+          
+          const data = await response.text();
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(data, 'application/xml');
+          const items = xml.querySelectorAll('item');
+          
+          // Process all items and categorize them
+          items.forEach((item) => {
+            const title = item.querySelector('title')?.textContent || '';
+            const description = item.querySelector('description')?.textContent || '';
+            const link = item.querySelector('link')?.textContent || '';
+            const pubDate = item.querySelector('pubDate')?.textContent || '';
             
-            if (!response.ok) {
-              console.warn(`Failed to fetch from ${url}`);
-              continue;
+            // Skip NFL news
+            if (
+              title.toLowerCase().includes('nfl') || 
+              description.toLowerCase().includes('nfl') ||
+              title.toLowerCase().includes('american football') ||
+              description.toLowerCase().includes('american football')
+            ) {
+              return;
             }
             
-            const data = await response.text();
-            const parser = new DOMParser();
-            const xml = parser.parseFromString(data, 'application/xml');
-            const items = xml.querySelectorAll('item');
+            // Find image in media:content or enclosure tags or within description
+            let imageUrl = '';
+            const mediaContent = item.querySelector('media\\:content, content');
+            const enclosure = item.querySelector('enclosure');
             
-            // Process all items and categorize them
-            items.forEach((item) => {
-              const title = item.querySelector('title')?.textContent || '';
-              const description = item.querySelector('description')?.textContent || '';
-              const link = item.querySelector('link')?.textContent || '';
-              const pubDate = item.querySelector('pubDate')?.textContent || '';
-              
-              // Skip NFL news
-              if (
-                title.toLowerCase().includes('nfl') || 
-                description.toLowerCase().includes('nfl') ||
-                title.toLowerCase().includes('american football') ||
-                description.toLowerCase().includes('american football')
-              ) {
-                return;
+            if (mediaContent && mediaContent.getAttribute('url')) {
+              imageUrl = mediaContent.getAttribute('url') || '';
+            } else if (enclosure && enclosure.getAttribute('url') && enclosure.getAttribute('type')?.startsWith('image/')) {
+              imageUrl = enclosure.getAttribute('url') || '';
+            } else {
+              // Try to extract image from description
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = description;
+              const img = tempDiv.querySelector('img');
+              if (img && img.src) {
+                imageUrl = img.src;
               }
-              
-              // Find image in media:content or enclosure tags or within description
-              let imageUrl = '';
-              const mediaContent = item.querySelector('media\\:content, content');
-              const enclosure = item.querySelector('enclosure');
-              
-              if (mediaContent && mediaContent.getAttribute('url')) {
-                imageUrl = mediaContent.getAttribute('url') || '';
-              } else if (enclosure && enclosure.getAttribute('url') && enclosure.getAttribute('type')?.startsWith('image/')) {
-                imageUrl = enclosure.getAttribute('url') || '';
-              } else {
-                // Try to extract image from description
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = description;
-                const img = tempDiv.querySelector('img');
-                if (img && img.src) {
-                  imageUrl = img.src;
-                }
-              }
-              
-              // Set default placeholder image if none found
-              if (!imageUrl) {
-                imageUrl = 'https://loremflickr.com/480/240/' + 
-                  (title.toLowerCase().includes('soccer') || title.toLowerCase().includes('football') ? 'soccer' : 'sports');
-              }
-              
-              // Categorize the news item
-              let category = "other";
-              const lowerTitle = title.toLowerCase();
-              const lowerDesc = description.toLowerCase();
-              
-              if ((lowerTitle.includes('football') && !lowerTitle.includes('nfl')) || 
-                  lowerTitle.includes('soccer') || 
-                  lowerTitle.includes('premier league') || 
-                  lowerTitle.includes('uefa') || 
-                  lowerTitle.includes('la liga') || 
-                  (lowerDesc.includes('football') && !lowerDesc.includes('nfl')) || 
-                  lowerDesc.includes('soccer')) {
-                category = "football";
-              } else if (lowerTitle.includes('basketball') || 
-                         lowerTitle.includes('nba') || 
-                         lowerTitle.includes('ncaa') || 
-                         lowerDesc.includes('basketball')) {
-                category = "basketball";
-              } else if (lowerTitle.includes('baseball') || 
-                         lowerTitle.includes('mlb') || 
-                         lowerDesc.includes('baseball')) {
-                category = "baseball";
-              } else if (lowerTitle.includes('tennis') || 
-                         lowerDesc.includes('tennis')) {
-                category = "tennis";
-              }
-              
-              allItems.push({
-                title,
-                description,
-                link,
-                pubDate,
-                category,
-                imageUrl
-              });
+            }
+            
+            // Set default placeholder image if none found
+            if (!imageUrl) {
+              imageUrl = 'https://loremflickr.com/480/240/' + 
+                (title.toLowerCase().includes('soccer') || title.toLowerCase().includes('football') ? 'soccer' : 'sports');
+            }
+            
+            // Categorize the news item
+            let category = "other";
+            const lowerTitle = title.toLowerCase();
+            const lowerDesc = description.toLowerCase();
+            
+            if ((lowerTitle.includes('football') && !lowerTitle.includes('nfl')) || 
+                lowerTitle.includes('soccer') || 
+                lowerTitle.includes('premier league') || 
+                lowerTitle.includes('uefa') || 
+                lowerTitle.includes('la liga') || 
+                (lowerDesc.includes('football') && !lowerDesc.includes('nfl')) || 
+                lowerDesc.includes('soccer')) {
+              category = "football";
+            } else if (lowerTitle.includes('basketball') || 
+                       lowerTitle.includes('nba') || 
+                       lowerTitle.includes('ncaa') || 
+                       lowerDesc.includes('basketball')) {
+              category = "basketball";
+            } else if (lowerTitle.includes('baseball') || 
+                       lowerTitle.includes('mlb') || 
+                       lowerDesc.includes('baseball')) {
+              category = "baseball";
+            } else if (lowerTitle.includes('tennis') || 
+                       lowerDesc.includes('tennis')) {
+              category = "tennis";
+            }
+            
+            allItems.push({
+              title,
+              description,
+              link,
+              pubDate,
+              category,
+              imageUrl
             });
-          } catch (err) {
-            console.error(`Error processing feed ${url}:`, err);
-          }
+          });
+        } catch (err) {
+          console.error(`Error processing feed ${url}:`, err);
         }
-        
+      }
+      
+      if (allItems.length === 0) {
+        setError('No news items found. Please try again later.');
+      } else {
         // Ensure we have a diverse set of categories when possible
         const diverseItems = getDiverseNewsSet(allItems);
         setNewsItems(diverseItems);
-      } catch (err) {
-        console.error('Error fetching news:', err);
-        setError('Failed to load news. Please try again later.');
-      } finally {
-        setLoading(false);
+        setLastUpdated(new Date());
       }
-    };
-    
+    } catch (err) {
+      console.error('Error fetching news:', err);
+      setError('Failed to load news. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Initial fetch
     fetchNews();
     
-    // Set up auto-refresh every 30 minutes (lightweight approach)
-    const refreshInterval = setInterval(fetchNews, 30 * 60 * 1000);
+    // Set up auto-refresh every 30 minutes
+    const refreshIntervalId = setInterval(() => {
+      console.log('Auto-refreshing news');
+      fetchNews();
+    }, 30 * 60 * 1000);
     
-    return () => clearInterval(refreshInterval);
-  }, []);
+    // Cleanup function to clear interval when component unmounts
+    return () => {
+      console.log('Cleaning up news refresh interval');
+      clearInterval(refreshIntervalId);
+    };
+  }, [fetchNews]);
+
+  const handleManualRefresh = () => {
+    toast({
+      title: "Refreshing News",
+      description: "Fetching the latest sports updates...",
+    });
+    fetchNews();
+  };
 
   // Function to get a diverse set of news items across categories
   const getDiverseNewsSet = (items: NewsItem[]): NewsItem[] => {
@@ -229,12 +267,29 @@ const NewsSection = () => {
 
   return (
     <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-      <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-        Sports News
-        <Link to="/news" className="text-sm text-[#9b87f5] font-normal ml-2 hover:underline">
-          View All →
-        </Link>
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          Sports News
+          <Link to="/news" className="text-sm text-[#9b87f5] font-normal ml-2 hover:underline">
+            View All →
+          </Link>
+        </h2>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-gray-400">
+            Updated: {lastUpdated.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+            onClick={handleManualRefresh}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </div>
       
       {/* Category filters */}
       <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
