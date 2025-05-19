@@ -124,6 +124,15 @@
     @apply text-white font-bold;
   }
 
+  /* Navigation bar styles */
+  header.bg-\[\#fa2d04\] {
+    background-color: #fa2d04 !important;
+  }
+
+  .navigation-menu-item:hover {
+    background-color: #e02703 !important;
+  }
+
   /* Make mobile responsive classes */
   .mobile-container {
     @apply px-2;
@@ -178,14 +187,16 @@
 [class*="button-sports"],
 .search-button,
 button[class*="bg-[#9C89FF]"],
-[class*="border-[#9C89FF]"] {
+[class*="border-[#9C89FF]"],
+header {
   background-color: #fa2d04 !important;
   border-color: #fa2d04 !important;
 }
 
 .search-button svg,
 button[class*="hover:bg-[#9C89FF]"]:hover,
-[class*="hover:border-[#9C89FF]"]:hover {
+[class*="hover:border-[#9C89FF]"]:hover,
+.navigation-menu-item:hover {
   background-color: #e02703 !important;
   border-color: #e02703 !important;
 }
