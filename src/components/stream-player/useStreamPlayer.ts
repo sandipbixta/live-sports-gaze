@@ -19,6 +19,12 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
       // Log stream info for debugging
       console.log('Stream player received stream:', stream);
       console.log('Stream embed URL:', stream.embedUrl);
+      
+      // Check if stream has an error flag
+      if (stream.error) {
+        console.error('Stream has error flag set');
+        setLoadError(true);
+      }
     }
   }, [stream]);
 
@@ -44,13 +50,14 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
           // Don't set error here as the stream might still be working despite the error
         }
       }
-    }, 1000);
+    }, 2000); // Increased timeout to give iframe more time to load
   };
   
   // Handle iframe error
   const handleIframeError = (e: React.SyntheticEvent<HTMLIFrameElement, Event>) => {
     console.error('Stream iframe failed to load:', e);
     setLoadError(true);
+    setIsContentLoaded(false);
   };
   
   // Modify iframe URL to ensure cross-browser compatibility
@@ -74,13 +81,23 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
       if (!modifiedUrl.includes('?')) modifiedUrl += '?';
       if (!modifiedUrl.includes('autoplay=')) modifiedUrl += '&autoplay=1';
       if (!modifiedUrl.includes('controls=')) modifiedUrl += '&controls=1';
+      if (!modifiedUrl.includes('origin=')) {
+        modifiedUrl += `&origin=${encodeURIComponent(window.location.origin)}`;
+      }
     }
     
-    // Add any required parameters
-    if (!modifiedUrl.includes('autoplay=')) {
-      modifiedUrl = modifiedUrl.includes('?') ? 
-        `${modifiedUrl}&autoplay=1` : 
-        `${modifiedUrl}?autoplay=1`;
+    // Add any required parameters for other providers
+    if (modifiedUrl.includes('player.') || modifiedUrl.includes('/embed/')) {
+      if (!modifiedUrl.includes('autoplay=')) {
+        modifiedUrl = modifiedUrl.includes('?') ? 
+          `${modifiedUrl}&autoplay=1` : 
+          `${modifiedUrl}?autoplay=1`;
+      }
+      
+      // Referrer policy might help with some providers
+      if (!modifiedUrl.includes('referrerpolicy=')) {
+        modifiedUrl += '&referrerpolicy=origin';
+      }
     }
     
     console.log('Modified URL:', modifiedUrl);

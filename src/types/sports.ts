@@ -1,4 +1,3 @@
-
 export interface Sport {
   id: string;
   name: string;
@@ -37,6 +36,7 @@ export interface Stream {
   hd: boolean;
   embedUrl: string;
   source: string;
+  error?: boolean; // Added error flag for better error handling
 }
 
 // New interfaces for streams API usage
@@ -60,4 +60,3 @@ export interface ApiStream {
   iframe?: string;
   allowPastStreams: boolean;
 }
-

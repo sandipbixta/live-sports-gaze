@@ -32,6 +32,32 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
       let processedUrl = url.includes('?') ? url : `${url}?`;
       if (!processedUrl.includes('autoplay=')) processedUrl += '&autoplay=1';
       if (!processedUrl.includes('controls=')) processedUrl += '&controls=1';
+      if (!processedUrl.includes('origin=')) {
+        processedUrl += `&origin=${encodeURIComponent(window.location.origin)}`;
+      }
+      console.log('Processed YouTube URL:', processedUrl);
+      return processedUrl;
+    }
+    
+    // Handle direct source URLs
+    if (url.includes('/embed/') || url.includes('player.')) {
+      let processedUrl = url
+        .replace(/&amp;/g, '&')  // Fix encoded ampersands
+        .replace(/^\s+|\s+$/g, ''); // Trim whitespace
+        
+      // Add autoplay parameter if not present
+      if (!processedUrl.includes('autoplay=')) {
+        processedUrl = processedUrl.includes('?') ? 
+          `${processedUrl}&autoplay=1` : 
+          `${processedUrl}?autoplay=1`;
+      }
+      
+      // Add allow=autoplay for browsers that require it
+      if (!processedUrl.includes('allow=')) {
+        processedUrl = `${processedUrl}&allow=autoplay`;
+      }
+      
+      console.log('Processed embed URL:', processedUrl);
       return processedUrl;
     }
     
@@ -40,6 +66,13 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
       .replace(/&amp;/g, '&')  // Fix encoded ampersands
       .replace(/^\s+|\s+$/g, ''); // Trim whitespace
       
+    // Ensure URL has proper protocol
+    if (!processedUrl.startsWith('http')) {
+      processedUrl = processedUrl.startsWith('//') ? 
+        `https:${processedUrl}` : 
+        `https://${processedUrl}`;
+    }
+      
     // Add autoplay parameter if not present
     if (!processedUrl.includes('autoplay=')) {
       processedUrl = processedUrl.includes('?') ? 
@@ -47,13 +80,12 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
         `${processedUrl}?autoplay=1`;
     }
     
+    console.log('Final processed URL:', processedUrl);
     return processedUrl;
   };
   
   // Clean and prepare the embed URL
   const embedUrl = processEmbedUrl(stream.embedUrl);
-  
-  console.log('Final processed URL:', embedUrl);
   
   return (
     <AspectRatio ratio={16 / 9} className="w-full">

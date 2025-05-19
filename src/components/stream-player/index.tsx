@@ -72,14 +72,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     );
   }
 
-  // Check if we have a valid stream URL
-  const hasValidEmbedUrl = stream.embedUrl && stream.embedUrl.length > 5;
-  
-  if (!hasValidEmbedUrl) {
+  // Check if stream has error flag or no valid embed URL
+  if (stream.error || !stream.embedUrl || stream.embedUrl.length < 5) {
     return (
       <ErrorState 
-        message="Stream URL not available"
-        subMessage="Please try another source"
+        message="Stream unavailable"
+        subMessage="This stream source may be temporarily unavailable"
         onRetry={onRetry}
       />
     );
