@@ -1,7 +1,6 @@
-
 import { StreamsApiResponse, StreamInfo } from './types';
 import { Match } from '../types/sports';
-import { STREAMS_API, REQUEST_TIMEOUT } from './constants';
+import { API_BASE, STREAMS_API, REQUEST_TIMEOUT } from './constants';
 
 /**
  * Fetches all available streams from the streams API endpoint
