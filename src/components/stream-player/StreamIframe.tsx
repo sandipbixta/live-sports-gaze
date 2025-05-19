@@ -16,16 +16,38 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  // Clean up the URL to improve compatibility
-  const cleanUrl = stream.embedUrl
-    .replace('autoplay=1', 'autoplay=0') // Set autoplay off by default
-    .replace('muted=1', 'muted=0');      // Unmute by default
+  // Enhanced URL processing - fix common issues with embed URLs
+  const processEmbedUrl = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle YouTube URLs specifically
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      // Ensure autoplay and controls are enabled for YouTube
+      let processedUrl = url.includes('?') ? url : `${url}?`;
+      if (!processedUrl.includes('autoplay=')) processedUrl += '&autoplay=1';
+      if (!processedUrl.includes('controls=')) processedUrl += '&controls=1';
+      return processedUrl;
+    }
+    
+    // General URL processing
+    return url
+      .replace(/&amp;/g, '&')  // Fix encoded ampersands
+      .replace(/^\s+|\s+$/g, ''); // Trim whitespace
+  };
+  
+  // Clean and prepare the embed URL
+  const embedUrl = processEmbedUrl(stream.embedUrl);
+  
+  console.log('Processing stream URL:', {
+    original: stream.embedUrl,
+    processed: embedUrl
+  });
   
   return (
     <AspectRatio ratio={16 / 9} className="w-full">
       <iframe 
         ref={iframeRef}
-        src={cleanUrl}
+        src={embedUrl}
         className="w-full h-full absolute inset-0"
         allowFullScreen={true}
         title="Live Sports Stream"

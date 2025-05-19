@@ -15,13 +15,19 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     console.log(`Stream endpoint: ${endpoint}`);
     
     // Make the request with additional headers for troubleshooting
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    
     const response = await fetch(endpoint, {
       headers: {
         'Accept': 'application/json',
         'Cache-Control': 'no-cache',
       },
       cache: 'no-store', // Always get fresh content
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
     
     // Check if response is successful
     if (!response.ok) {
@@ -57,8 +63,8 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    // Return a demo stream with basic embed for troubleshooting
-    return getDemoStreamData(source, id);
+    // Return a demo stream with embedded video for fallback
+    return getFallbackStreamData(source, id);
   }
 };
 
@@ -70,27 +76,32 @@ function processStreamData(data: any, source: string, id: string): Stream {
       // Find HD stream if available, otherwise take the first one
       const hdStream = data.find(stream => stream.hd === true) || data[0];
       
-      // Validate required properties
+      // Validate and clean up the embedUrl
       if (!hdStream.embedUrl) {
-        throw new Error('Stream data missing embedUrl');
+        console.warn('Stream data missing embedUrl, attempting to construct one');
+        // Attempt to construct a valid embedUrl if missing
+        hdStream.embedUrl = constructEmbedUrl(source, id);
+      } else {
+        hdStream.embedUrl = cleanEmbedUrl(hdStream.embedUrl);
       }
       
       console.log('Using stream data:', hdStream);
-      
-      // Ensure the embedUrl is properly formatted (starts with http/https)
-      const embedUrl = ensureValidUrl(hdStream.embedUrl);
       return {
         ...hdStream,
-        embedUrl
+        source: source
       };
     } 
     // Handle object response format
-    else if (data && typeof data === 'object' && data.embedUrl) {
+    else if (data && typeof data === 'object') {
       console.log('Using single object stream data');
-      const embedUrl = ensureValidUrl(data.embedUrl);
+      const embedUrl = data.embedUrl ? cleanEmbedUrl(data.embedUrl) : constructEmbedUrl(source, id);
       return {
-        ...data,
-        embedUrl
+        id: data.id || `${source}-${id}`,
+        streamNo: data.streamNo || 1,
+        language: data.language || "English",
+        hd: data.hd || true,
+        embedUrl: embedUrl,
+        source: source
       };
     }
     
@@ -99,48 +110,60 @@ function processStreamData(data: any, source: string, id: string): Stream {
   } catch (innerError) {
     console.error('Error processing stream data:', innerError);
     // Return fallback stream for troubleshooting
-    return getDemoStreamData(source, id);
+    return getFallbackStreamData(source, id);
   }
 }
 
-// Ensure URL is valid and has proper protocol
-function ensureValidUrl(url: string): string {
+// Clean up embed URL and ensure it's valid
+function cleanEmbedUrl(url: string): string {
   if (!url) return '';
   
-  // Check if URL already has protocol
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
+  // Fix common URL issues
+  let cleanUrl = url
+    .replace(/&amp;/g, '&')  // Fix encoded ampersands
+    .replace(/^\s+|\s+$/g, ''); // Trim whitespace
   
-  // If URL starts with //, add https:
-  if (url.startsWith('//')) {
-    return `https:${url}`;
-  }
-  
-  // If URL is relative, convert to absolute
-  if (url.startsWith('/')) {
-    try {
-      const baseUrl = new URL(API_BASE).origin;
-      return `${baseUrl}${url}`;
-    } catch (e) {
-      console.error('Error converting relative URL:', e);
-      return `https://streamed.su${url}`;
+  // Ensure URL has proper protocol
+  if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+    if (cleanUrl.startsWith('//')) {
+      cleanUrl = `https:${cleanUrl}`;
+    } else {
+      cleanUrl = `https://${cleanUrl}`;
     }
   }
   
-  // Default case - assume https
-  return `https://${url}`;
+  return cleanUrl;
 }
 
-// Fallback demo stream data
-function getDemoStreamData(source: string, id: string): Stream {
-  console.log('Using demo stream data');
+// Attempt to construct a valid embed URL when none is provided
+function constructEmbedUrl(source: string, id: string): string {
+  // This is a fallback mechanism when API doesn't provide embedUrl
+  const sourceToEmbed: Record<string, string> = {
+    'alpha': `https://embedstream.me/stream/${id}`,
+    'bravo': `https://embedder.live/e/${id}`,
+    'charlie': `https://weblivehdplay.ru/p/frame.html?id=${id}`,
+    'delta': `https://www.techoreels.com/embed/${id}`,
+    // Add more sources as needed
+  };
+  
+  return sourceToEmbed[source] || 
+    // Default fallback to a known working stream (for demo/testing)
+    "https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1";
+}
+
+// Fallback stream data with reliable embed source
+function getFallbackStreamData(source: string, id: string): Stream {
+  console.log('Using fallback stream data for source:', source, 'id:', id);
+  
+  // Try to use a source-specific fallback if available
+  const fallbackUrl = constructEmbedUrl(source, id);
+  
   return {
-    id: `demo-${id}`,
+    id: `${source}-${id}`,
     streamNo: 1,
     language: "English",
     hd: true,
-    embedUrl: "https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw",
-    source: source || "demo"
+    embedUrl: fallbackUrl,
+    source: source
   };
 }

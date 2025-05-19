@@ -7,12 +7,14 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
+  const [loadAttempts, setLoadAttempts] = useState(0);
   
   // Reset load error when stream changes
   useEffect(() => {
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
+      setLoadAttempts(prev => prev + 1);
       
       // Log stream info for debugging
       console.log('StreamPlayer received stream:', stream);
@@ -24,6 +26,22 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
   const handleIframeLoad = () => {
     console.log('Stream iframe loaded successfully');
     setIsContentLoaded(true);
+    
+    // Check if iframe is actually working after a brief delay
+    setTimeout(() => {
+      const iframe = videoRef.current;
+      if (iframe) {
+        try {
+          // Try to access iframe to see if it's working
+          const iframeWindow = iframe.contentWindow;
+          if (!iframeWindow) {
+            console.warn('Iframe content window not available - possible CORS issue');
+          }
+        } catch (error) {
+          console.error('Error accessing iframe content:', error);
+        }
+      }
+    }, 2000);
   };
   
   // Handle iframe error
@@ -34,16 +52,23 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
   
   // Modify iframe URL to ensure cross-browser compatibility
   const getModifiedEmbedUrl = (url: string) => {
-    // Remove autoplay parameters that might cause fullscreen issues in some browsers
+    if (!url) return '';
+    
+    // Fix common URL issues
     let modifiedUrl = url
-      .replace('autoplay=1', 'autoplay=0')
-      .replace('&autoplay=1', '')
-      .replace('?autoplay=1&', '?')
-      .replace('?autoplay=1', '');
+      .replace(/&amp;/g, '&')  // Fix encoded ampersands
+      .replace(/^\s+|\s+$/g, ''); // Trim whitespace
       
-    // Ensure URL has a protocol
+    // Ensure URL has proper protocol
     if (!modifiedUrl.startsWith('http')) {
       modifiedUrl = modifiedUrl.startsWith('//') ? `https:${modifiedUrl}` : `https://${modifiedUrl}`;
+    }
+    
+    // Handle YouTube URLs for better compatibility
+    if (modifiedUrl.includes('youtube.com')) {
+      if (!modifiedUrl.includes('?')) modifiedUrl += '?';
+      if (!modifiedUrl.includes('autoplay=')) modifiedUrl += '&autoplay=1';
+      if (!modifiedUrl.includes('controls=')) modifiedUrl += '&controls=1';
     }
     
     return modifiedUrl;
@@ -55,6 +80,7 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
     loadError,
     setLoadError,
     isContentLoaded,
+    loadAttempts,
     handleIframeLoad,
     handleIframeError,
     getModifiedEmbedUrl

@@ -28,7 +28,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({ message, subMessage, onRetry })
                 onClick={onRetry}
                 className="mt-4 border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
               >
-                <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
+                <RefreshCcw className="h-4 w-4 mr-2" /> Try Another Source
               </Button>
             )}
           </div>

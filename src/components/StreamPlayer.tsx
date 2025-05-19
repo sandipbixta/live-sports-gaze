@@ -1,3 +1,19 @@
 
 import StreamPlayer from './stream-player';
-export default StreamPlayer;
+import { Stream } from '../types/sports';
+
+interface StreamPlayerProps {
+  stream: Stream | null;
+  isLoading: boolean;
+  onRetry?: () => void;
+}
+
+const StreamPlayerWrapper = ({ 
+  stream, 
+  isLoading, 
+  onRetry 
+}: StreamPlayerProps) => {
+  return <StreamPlayer stream={stream} isLoading={isLoading} onRetry={onRetry} />;
+};
+
+export default StreamPlayerWrapper;

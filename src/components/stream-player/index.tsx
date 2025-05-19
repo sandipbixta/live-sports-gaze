@@ -35,6 +35,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     playerContainerRef,
     loadError,
     isContentLoaded,
+    loadAttempts,
     handleIframeLoad,
     handleIframeError,
     getModifiedEmbedUrl
@@ -63,13 +64,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   }
 
   // Check if we have a valid stream URL
-  const validEmbedUrl = stream.embedUrl && (stream.embedUrl.startsWith('http://') || stream.embedUrl.startsWith('https://'));
+  const hasValidEmbedUrl = stream.embedUrl && stream.embedUrl.length > 5;
   
-  if (!validEmbedUrl) {
+  if (!hasValidEmbedUrl) {
     return (
       <ErrorState 
-        message="Invalid stream URL"
-        subMessage={stream.embedUrl ? stream.embedUrl.substring(0, 50) + '...' : 'empty'}
+        message="Stream URL not available"
+        subMessage="Please try another source"
         onRetry={onRetry}
       />
     );
@@ -78,8 +79,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   if (loadError) {
     return (
       <ErrorState 
-        message="Stream failed to load"
-        subMessage="The stream might be temporarily unavailable"
+        message="Stream unavailable"
+        subMessage="This stream source may be temporarily unavailable"
         onRetry={handleRetry}
       />
     );
@@ -132,7 +133,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
       {/* Browser compatibility notice */}
       <Alert variant="default" className="bg-[#242836] border-[#343a4d] text-gray-300">
         <AlertDescription className="text-center text-xs sm:text-sm">
-          If the stream is not working in Google Chrome or Safari, please view it in the Brave browser for better compatibility.
+          If the stream is not working, please try another source or reload the page. For better compatibility, try using the Brave browser.
         </AlertDescription>
       </Alert>
     </div>
