@@ -7,6 +7,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
+import { Alert, AlertDescription } from './ui/alert';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -48,27 +49,34 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
 
-  // Toggle fullscreen mode
+  // Enhanced fullscreen handling with better cross-browser support
   const toggleFullscreen = () => {
     try {
       if (!playerContainerRef.current) return;
       
-      if (!document.fullscreenElement) {
-        // Enter fullscreen
+      if (!document.fullscreenElement && 
+          !(document as any).webkitFullscreenElement && 
+          !(document as any).mozFullScreenElement && 
+          !(document as any).msFullscreenElement) {
+        // Enter fullscreen with cross-browser support
         if (playerContainerRef.current.requestFullscreen) {
           playerContainerRef.current.requestFullscreen();
         } else if ((playerContainerRef.current as any).webkitRequestFullscreen) { // Safari
           (playerContainerRef.current as any).webkitRequestFullscreen();
+        } else if ((playerContainerRef.current as any).mozRequestFullScreen) { // Firefox
+          (playerContainerRef.current as any).mozRequestFullScreen();
         } else if ((playerContainerRef.current as any).msRequestFullscreen) { // IE11
           (playerContainerRef.current as any).msRequestFullscreen();
         }
         setIsFullscreen(true);
       } else {
-        // Exit fullscreen
+        // Exit fullscreen with cross-browser support
         if (document.exitFullscreen) {
           document.exitFullscreen();
         } else if ((document as any).webkitExitFullscreen) { // Safari
           (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) { // Firefox
+          (document as any).mozCancelFullScreen();
         } else if ((document as any).msExitFullscreen) { // IE11
           (document as any).msExitFullscreen();
         }
@@ -82,7 +90,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   // Update fullscreen state when changed outside our component
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      setIsFullscreen(
+        !!document.fullscreenElement || 
+        !!(document as any).webkitFullscreenElement || 
+        !!(document as any).mozFullScreenElement || 
+        !!(document as any).msFullscreenElement
+      );
     };
     
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -238,69 +251,78 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const processedEmbedUrl = stream.embedUrl ? getModifiedEmbedUrl(stream.embedUrl) : '';
 
   return (
-    <div 
-      ref={playerContainerRef}
-      className={cn(
-        "relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group",
-        isFullscreen && "fixed inset-0 z-50"
-      )}
-    >
-      <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads */}
-        {!isContentLoaded && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
-            <div className="text-white text-center">
-              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
-              <p className="text-lg sm:text-xl">Loading stream...</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">
-                Loading from: {stream.source}
-              </p>
-            </div>
-          </div>
+    <div className="space-y-3">
+      <div 
+        ref={playerContainerRef}
+        className={cn(
+          "relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group",
+          isFullscreen && "fixed inset-0 z-50"
         )}
+      >
+        <AspectRatio ratio={16 / 9} className="w-full">
+          {/* Loading overlay shown until iframe loads */}
+          {!isContentLoaded && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
+              <div className="text-white text-center">
+                <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
+                <p className="text-lg sm:text-xl">Loading stream...</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">
+                  Loading from: {stream.source}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <iframe 
+            ref={videoRef}
+            src={processedEmbedUrl}
+            className="w-full h-full absolute inset-0"
+            allowFullScreen={true}
+            title="Live Sports Stream"
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+            loading="lazy"
+          ></iframe>
+        </AspectRatio>
         
-        <iframe 
-          ref={videoRef}
-          src={processedEmbedUrl}
-          className="w-full h-full absolute inset-0"
-          allowFullScreen={true}
-          title="Live Sports Stream"
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
-          loading="lazy"
-        ></iframe>
-      </AspectRatio>
-      
-      {/* Controls overlay */}
-      <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity flex space-x-2",
-        isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-      )}>
-        {/* Fullscreen button */}
-        <button 
-          onClick={toggleFullscreen}
-          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
-          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-        >
-          <Fullscreen className="h-4 w-4 sm:h-5 sm:w-5" />
-        </button>
-        
-        {/* Picture-in-picture button */}
-        <button 
-          onClick={togglePictureInPicture}
-          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
-          title={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
-          aria-label={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
-        >
-          {isPictureInPicture ? 
-            <Minimize className="h-4 w-4 sm:h-5 sm:w-5" /> : 
-            <Maximize className="h-4 w-4 sm:h-5 sm:w-5" />
-          }
-        </button>
+        {/* Controls overlay with improved fullscreen button */}
+        <div className={cn(
+          "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity flex space-x-2",
+          isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+        )}>
+          {/* Fullscreen button with better visibility */}
+          <button 
+            onClick={toggleFullscreen}
+            className="bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full transition-colors"
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            <Fullscreen className="h-5 w-5 sm:h-6 sm:w-6" />
+          </button>
+          
+          {/* Picture-in-picture button */}
+          <button 
+            onClick={togglePictureInPicture}
+            className="bg-black/60 hover:bg-black/80 text-white p-2 sm:p-3 rounded-full transition-colors"
+            title={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
+            aria-label={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
+          >
+            {isPictureInPicture ? 
+              <Minimize className="h-5 w-5 sm:h-6 sm:w-6" /> : 
+              <Maximize className="h-5 w-5 sm:h-6 sm:w-6" />
+            }
+          </button>
+        </div>
       </div>
+      
+      {/* Browser compatibility notice */}
+      <Alert variant="default" className="bg-[#242836] border-[#343a4d] text-gray-300">
+        <AlertDescription className="text-center text-xs sm:text-sm">
+          If the stream is not working in Google Chrome or Safari, please view it in the Brave browser for better compatibility.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

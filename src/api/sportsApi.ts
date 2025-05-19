@@ -51,16 +51,24 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     const endpoint = `${API_BASE}/stream/${source}/${id}`;
     console.log(`Stream endpoint: ${endpoint}`);
     
+    // Add user-agent and origin headers to help with CORS and browser compatibility
+    const headers = {
+      'Accept': 'application/json',
+      'Cache-Control': 'no-cache',
+      'Origin': window.location.origin,
+      'Referer': window.location.href,
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'cross-site',
+    };
+    
     // Make the request with additional headers and options for troubleshooting
     const response = await fetch(endpoint, {
-      headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Origin': window.location.origin, // Add origin for CORS
-      },
+      headers,
       cache: 'no-store', // Always get fresh content
       mode: 'cors',
       credentials: 'omit', // Don't send cookies to avoid CORS issues
+      referrerPolicy: 'no-referrer-when-downgrade'
     });
     
     // Check if response is successful
@@ -71,10 +79,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       // Try fallback API if main API fails
       console.log('Trying fallback API endpoint...');
       const fallbackResponse = await fetch(`${FALLBACK_API_BASE}/stream/${source}/${id}`, {
-        headers: { 
-          'Accept': 'application/json',
-          'Origin': window.location.origin,
-        },
+        headers, 
         cache: 'no-store',
       });
       
@@ -103,7 +108,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       streamNo: 1,
       language: "English",
       hd: true,
-      embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`,
+      embedUrl: generateCrossBrowserUrl(`https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`),
       source: source || "demo"
     };
   }
@@ -125,7 +130,7 @@ function processStreamData(data: any, source: string, id: string): Stream {
       console.log('Using stream data:', hdStream);
       
       // Ensure the embedUrl is properly formatted (starts with http/https)
-      const embedUrl = ensureValidUrl(hdStream.embedUrl);
+      const embedUrl = generateCrossBrowserUrl(hdStream.embedUrl);
       return {
         ...hdStream,
         embedUrl
@@ -134,7 +139,7 @@ function processStreamData(data: any, source: string, id: string): Stream {
     // Handle object response format
     else if (data && typeof data === 'object' && data.embedUrl) {
       console.log('Using single object stream data');
-      const embedUrl = ensureValidUrl(data.embedUrl);
+      const embedUrl = generateCrossBrowserUrl(data.embedUrl);
       return {
         ...data,
         embedUrl
@@ -150,33 +155,54 @@ function processStreamData(data: any, source: string, id: string): Stream {
   }
 }
 
-// Helper to ensure URL is valid
-function ensureValidUrl(url: string): string {
+// Enhanced URL validation and transformation for cross-browser compatibility
+function generateCrossBrowserUrl(url: string): string {
   if (!url) return '';
   
+  let processedUrl = url;
+  
+  // Remove any parameters that might cause issues in some browsers
+  const problematicParams = ['autoplay=1', 'mute=1', 'allowfullscreen=true'];
+  problematicParams.forEach(param => {
+    processedUrl = processedUrl
+      .replace(`${param}&`, '')  // Middle of query string
+      .replace(`&${param}`, '')  // End of query string
+      .replace(`?${param}`, '?') // Start of query string
+      .replace(param, '');       // Only param
+  });
+  
+  // Fix query string if it's malformed after removing parameters
+  if (processedUrl.endsWith('?')) {
+    processedUrl = processedUrl.slice(0, -1);
+  }
+  
+  // Add necessary parameters for better compatibility
+  const separator = processedUrl.includes('?') ? '&' : '?';
+  processedUrl = `${processedUrl}${separator}autoplay=0&mute=0&allowfullscreen=true`;
+  
   // Check if URL already has protocol
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
+  if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
+    return processedUrl;
   }
   
   // If URL starts with //, add https:
-  if (url.startsWith('//')) {
-    return `https:${url}`;
+  if (processedUrl.startsWith('//')) {
+    return `https:${processedUrl}`;
   }
   
   // If URL is relative, convert to absolute
-  if (url.startsWith('/')) {
+  if (processedUrl.startsWith('/')) {
     try {
       const baseUrl = new URL(API_BASE).origin;
-      return `${baseUrl}${url}`;
+      return `${baseUrl}${processedUrl}`;
     } catch (e) {
       console.error('Error converting relative URL:', e);
-      return `https://streamed.su${url}`;
+      return `https://streamed.su${processedUrl}`;
     }
   }
   
   // Default case - assume https
-  return `https://${url}`;
+  return `https://${processedUrl}`;
 }
 
 // Fallback demo stream data
@@ -187,7 +213,7 @@ function getDemoStreamData(source: string, id: string): Stream {
     streamNo: 1,
     language: "English",
     hd: true,
-    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`,
+    embedUrl: "https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0&allowfullscreen=true",
     source: source || "demo"
   };
 }
