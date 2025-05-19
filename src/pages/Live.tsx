@@ -1,20 +1,25 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
-import { Match, Stream, Source, Sport } from '../types/sports';
+import { Match, Stream, Sport } from '../types/sports';
 import { fetchMatches, fetchStream, fetchSports } from '../api/sportsApi';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import StreamPlayer from '../components/StreamPlayer';
 import { Link } from 'react-router-dom';
-import { Radio, Tv, RefreshCcw, Calendar, Search, Clock, CircleDot, Dribbble } from 'lucide-react';
+import { Radio, Tv, RefreshCcw, Clock } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
-import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
-import { Badge } from '../components/ui/badge';
+import { isMatchLive } from '../utils/matchUtils';
+
+// Import refactored components
+import LiveStreamPlayer from '../components/live/LiveStreamPlayer';
+import NoMatchesState from '../components/live/NoMatchesState';
+import LiveMatchesList from '../components/live/LiveMatchesList';
+import SportFilter from '../components/live/SportFilter';
 
 const Live = () => {
   const { toast } = useToast();
@@ -36,70 +41,8 @@ const Live = () => {
   // Determine if we're on mobile
   const isMobile = useIsMobile();
   
-  // Check if a match is currently live
-  const isMatchLive = (match: Match): boolean => {
-    // A match is considered live if it has sources AND the match time is within 2 hours of now
-    const matchTime = new Date(match.date).getTime();
-    const now = new Date().getTime();
-    const twoHoursInMs = 2 * 60 * 60 * 1000;
-    
-    return (
-      match.sources && 
-      match.sources.length > 0 && 
-      Math.abs(matchTime - now) < twoHoursInMs
-    );
-  };
-
-  // Helper function to group matches by sport
-  const groupMatchesBySport = (matches: Match[]) => {
-    const groupedMatches: Record<string, Match[]> = {};
-    
-    matches.forEach(match => {
-      const sportId = match.sportId || "unknown";
-      if (!groupedMatches[sportId]) {
-        groupedMatches[sportId] = [];
-      }
-      groupedMatches[sportId].push(match);
-    });
-    
-    return groupedMatches;
-  };
-  
-  // Get sport name by ID
-  const getSportName = (sportId: string): string => {
-    const sport = sports.find(s => s.id === sportId);
-    if (sport) return sport.name;
-    
-    // Default mappings for common sport IDs
-    const sportMappings: Record<string, string> = {
-      '1': 'Football',
-      '2': 'Basketball',
-      '3': 'Ice Hockey',
-      '4': 'Tennis',
-      'football': 'Football',
-      'basketball': 'Basketball',
-      'hockey': 'Ice Hockey'
-    };
-    
-    return sportMappings[sportId] || 'Other Sports';
-  };
-  
-  // Get sport icon by ID
-  const getSportIcon = (sportId: string) => {
-    switch(sportId) {
-      case '1':
-      case 'football':
-        return <CircleDot size={16} />;
-      case '2':
-      case 'basketball':
-        return <Dribbble size={16} />;
-      default:
-        return null;
-    }
-  };
-  
   // Memoized stream fetching function
-  const fetchStreamData = useCallback(async (source: Source) => {
+  const fetchStreamData = useCallback(async (source: { source: string, id: string }) => {
     setStreamLoading(true);
     setActiveSource(`${source.source}/${source.id}`);
     try {
@@ -257,20 +200,6 @@ const Live = () => {
     setRetryCount(prev => prev + 1);
   };
 
-  // Function to handle source change for the current match
-  const handleSourceChange = (source: string, id: string) => {
-    if (featuredMatch) {
-      fetchStreamData({ source, id });
-    }
-  };
-
-  // Handle stream retry
-  const handleStreamRetry = () => {
-    if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
-      fetchStreamData(featuredMatch.sources[0]);
-    }
-  };
-
   // Handle search form submit
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -285,58 +214,8 @@ const Live = () => {
     }
   };
 
-  // Format match time
-  const formatMatchTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  };
-
-  // Get unique sport IDs from matches
-  const getUniqueSportIds = (): string[] => {
-    const sportIds = new Set<string>();
-    allMatches.forEach(match => {
-      if (match.sportId) sportIds.add(match.sportId);
-    });
-    return Array.from(sportIds);
-  };
-
-  // Render matches by sport
-  const renderMatchesBySport = (matches: Match[]) => {
-    if (matches.length === 0) return null;
-    
-    // Group matches by sport
-    const groupedMatches = groupMatchesBySport(matches);
-    const sportIds = Object.keys(groupedMatches);
-    
-    return sportIds.map(sportId => (
-      <div key={`sport-${sportId}`} className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          {getSportIcon(sportId)}
-          <h3 className="text-xl font-bold text-white">{getSportName(sportId)}</h3>
-          <Badge variant="outline" className="ml-2 bg-[#242836] text-xs text-white">
-            {groupedMatches[sportId].length} {groupedMatches[sportId].length === 1 ? 'match' : 'matches'}
-          </Badge>
-        </div>
-        
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
-          {groupedMatches[sportId].map((match) => (
-            <div 
-              key={`${sportId}-${match.id}`} 
-              className="cursor-pointer"
-              onClick={() => handleMatchSelect(match)}
-            >
-              <MatchCard 
-                match={match}
-                sportId={match.sportId || "1"}
-                onClick={() => handleMatchSelect(match)}
-                preventNavigation={true}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    ));
-  };
+  // Clear search query
+  const handleSearchClear = () => setSearchQuery('');
 
   return (
     <PageLayout>
@@ -388,7 +267,7 @@ const Live = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f]"
+                className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f] text-white"
                 onClick={handleRetryLoading}
                 aria-label="Refresh live matches"
               >
@@ -406,74 +285,20 @@ const Live = () => {
               <p className="mt-4 text-gray-300">Loading live streams...</p>
             </div>
           ) : featuredMatch ? (
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">{featuredMatch.title}</h2>
-                {streamLoading ? (
-                  <div className="text-sm text-[#fa2d04] flex items-center gap-1">
-                    <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
-                    Loading stream...
-                  </div>
-                ) : isMatchLive(featuredMatch) ? (
-                  <div className="text-sm text-[#fa2d04] flex items-center gap-1">
-                    <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
-                    Live now
-                  </div>
-                ) : (
-                  <div className="text-sm text-[#1EAEDB] flex items-center gap-1">
-                    <Clock size={14} />
-                    Starts at {formatMatchTime(featuredMatch.date)}
-                  </div>
-                )}
-              </div>
-              <StreamPlayer 
-                stream={currentStream} 
-                isLoading={streamLoading}
-                onRetry={handleStreamRetry} 
-              />
-              
-              {/* Stream Sources */}
-              {featuredMatch.sources && featuredMatch.sources.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {featuredMatch.sources.map(({ source, id }) => (
-                      <Button
-                        key={`${source}-${id}`}
-                        variant="outline"
-                        size="sm"
-                        className={`${
-                          activeSource === `${source}/${id}` 
-                            ? 'bg-[#343a4d] border-[#fa2d04]' 
-                            : 'bg-[#242836] border-[#343a4d]'
-                        } text-white`}
-                        onClick={() => handleSourceChange(source, id)}
-                      >
-                        {source.charAt(0).toUpperCase() + source.slice(1)}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <LiveStreamPlayer 
+              featuredMatch={featuredMatch}
+              currentStream={currentStream}
+              streamLoading={streamLoading}
+              activeSource={activeSource}
+              setActiveSource={setActiveSource}
+              setCurrentStream={setCurrentStream}
+            />
           ) : (
-            <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-              <Tv size={48} className="text-[#343a4d] mx-auto mb-4" />
-              <p className="text-gray-300 text-lg mb-2">No live streams available at the moment.</p>
-              <p className="text-gray-400 text-sm mb-4">Check back later or view scheduled matches.</p>
-              <div className="flex gap-4 justify-center mt-2">
-                <Button onClick={handleRetryLoading} className="bg-[#fa2d04] hover:bg-[#e02703]">
-                  <RefreshCcw size={16} className="mr-2" />
-                  Refresh
-                </Button>
-                <Link to="/schedule">
-                  <Button variant="outline" className="bg-transparent border border-[#343a4d]">
-                    <Calendar size={16} className="mr-2" />
-                    View Schedule
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <NoMatchesState 
+              icon="tv"
+              message="No live streams available at the moment."
+              onRefresh={handleRetryLoading}
+            />
           )}
         </div>
       </div>
@@ -482,38 +307,11 @@ const Live = () => {
       
       {/* Sport Filter Pills */}
       {!loading && allMatches.length > 0 && (
-        <div className="mb-6 overflow-x-auto pb-2">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className={`${
-                activeSportFilter === 'all' 
-                  ? 'bg-[#343a4d] border-[#fa2d04]' 
-                  : 'bg-[#242836] border-[#343a4d]'
-              } whitespace-nowrap`}
-              onClick={() => setActiveSportFilter('all')}
-            >
-              All Sports
-            </Button>
-            {getUniqueSportIds().map(sportId => (
-              <Button
-                key={`filter-${sportId}`}
-                variant="outline"
-                size="sm"
-                className={`${
-                  activeSportFilter === sportId 
-                    ? 'bg-[#343a4d] border-[#fa2d04]' 
-                    : 'bg-[#242836] border-[#343a4d]'
-                } whitespace-nowrap flex items-center gap-1`}
-                onClick={() => setActiveSportFilter(sportId)}
-              >
-                {getSportIcon(sportId)}
-                {getSportName(sportId)}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <SportFilter 
+          allMatches={allMatches}
+          activeSportFilter={activeSportFilter}
+          setActiveSportFilter={setActiveSportFilter}
+        />
       )}
       
       {/* Tabs Navigation for All/Live/Upcoming */}
@@ -527,20 +325,20 @@ const Live = () => {
           <TabsList className="bg-[#242836] border border-[#343a4d]">
             <TabsTrigger 
               value="all" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white text-white"
             >
               All Matches
             </TabsTrigger>
             <TabsTrigger 
               value="live" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white text-white"
             >
               <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse mr-1"></span>
               Live Now ({liveMatches.length})
             </TabsTrigger>
             <TabsTrigger 
               value="upcoming" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white text-white"
             >
               <Clock size={14} className="mr-1" />
               Upcoming ({upcomingMatches.length})
@@ -563,8 +361,12 @@ const Live = () => {
                 Live Matches
               </h2>
               {activeSportFilter === "all" ? 
-                renderMatchesBySport(liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id))) :
-                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                <LiveMatchesList 
+                  matches={liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id))} 
+                  sports={sports}
+                  onMatchSelect={handleMatchSelect}
+                /> :
+                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
                   {liveMatches
                     .filter(match => filteredMatches.some(fm => fm.id === match.id))
                     .map((match) => (
@@ -595,8 +397,14 @@ const Live = () => {
                 Upcoming Matches
               </h2>
               {activeSportFilter === "all" ? 
-                renderMatchesBySport(upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id)).slice(0, 24)) :
-                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+                <LiveMatchesList 
+                  matches={upcomingMatches
+                    .filter(match => filteredMatches.some(fm => fm.id === match.id))
+                    .slice(0, 24)} 
+                  sports={sports}
+                  onMatchSelect={handleMatchSelect}
+                /> :
+                <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
                   {upcomingMatches
                     .filter(match => filteredMatches.some(fm => fm.id === match.id))
                     .slice(0, 12) // Limit to avoid too many cards
@@ -622,33 +430,23 @@ const Live = () => {
           
           {/* No matches message */}
           {filteredMatches.length === 0 && (
-            <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
-              {searchQuery ? (
-                <div>
-                  <Search size={40} className="mx-auto mb-3 text-gray-400" />
-                  <p className="text-gray-300 mb-3">No matches found for "{searchQuery}"</p>
-                  <Button onClick={() => setSearchQuery('')} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    Clear Search
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-gray-300 mb-3">No matches currently available.</p>
-                  <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    <RefreshCcw size={14} className="mr-1" />
-                    Refresh
-                  </Button>
-                </div>
-              )}
-            </div>
+            <NoMatchesState 
+              searchQuery={searchQuery}
+              onSearchClear={handleSearchClear}
+              onRefresh={handleRetryLoading}
+            />
           )}
         </TabsContent>
         
         <TabsContent value="live" className="mt-0">
           {filteredMatches.length > 0 ? (
             activeSportFilter === "all" ? 
-              renderMatchesBySport(filteredMatches) :
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+              <LiveMatchesList 
+                matches={filteredMatches} 
+                sports={sports}
+                onMatchSelect={handleMatchSelect}
+              /> :
+              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
                 {filteredMatches.map((match) => (
                   <div 
                     key={`live-tab-${match.id}`} 
@@ -665,34 +463,25 @@ const Live = () => {
                 ))}
               </div>
           ) : (
-            <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
-              {searchQuery ? (
-                <div>
-                  <Search size={40} className="mx-auto mb-3 text-gray-400" />
-                  <p className="text-gray-300 mb-3">No live matches found for "{searchQuery}"</p>
-                  <Button onClick={() => setSearchQuery('')} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    Clear Search
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <Tv size={40} className="mx-auto mb-3 text-gray-400" />
-                  <p className="text-gray-300 mb-3">No live matches currently available.</p>
-                  <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    <RefreshCcw size={14} className="mr-1" />
-                    Refresh
-                  </Button>
-                </div>
-              )}
-            </div>
+            <NoMatchesState 
+              searchQuery={searchQuery}
+              onSearchClear={handleSearchClear}
+              onRefresh={handleRetryLoading}
+              icon="tv"
+              message="No live matches currently available."
+            />
           )}
         </TabsContent>
         
         <TabsContent value="upcoming" className="mt-0">
           {filteredMatches.length > 0 ? (
             activeSportFilter === "all" ? 
-              renderMatchesBySport(filteredMatches) :
-              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
+              <LiveMatchesList 
+                matches={filteredMatches} 
+                sports={sports}
+                onMatchSelect={handleMatchSelect}
+              /> :
+              <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
                 {filteredMatches.map((match) => (
                   <div 
                     key={`upcoming-tab-${match.id}`} 
@@ -709,26 +498,13 @@ const Live = () => {
                 ))}
               </div>
           ) : (
-            <div className="w-full bg-[#242836] rounded-xl p-8 text-center">
-              {searchQuery ? (
-                <div>
-                  <Search size={40} className="mx-auto mb-3 text-gray-400" />
-                  <p className="text-gray-300 mb-3">No upcoming matches found for "{searchQuery}"</p>
-                  <Button onClick={() => setSearchQuery('')} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    Clear Search
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <Calendar size={40} className="mx-auto mb-3 text-gray-400" />
-                  <p className="text-gray-300 mb-3">No upcoming matches scheduled.</p>
-                  <Button onClick={handleRetryLoading} size="sm" className="bg-[#9b87f5] hover:bg-[#8a75e8]">
-                    <RefreshCcw size={14} className="mr-1" />
-                    Refresh
-                  </Button>
-                </div>
-              )}
-            </div>
+            <NoMatchesState 
+              searchQuery={searchQuery}
+              onSearchClear={handleSearchClear}
+              onRefresh={handleRetryLoading}
+              icon="calendar"
+              message="No upcoming matches scheduled."
+            />
           )}
         </TabsContent>
       </Tabs>
