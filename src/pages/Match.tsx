@@ -34,6 +34,27 @@ const Match = () => {
       console.log(`Fetching stream data: source=${source}, id=${id}, retry=${retryCounter}`);
       const streamData = await fetchStream(source, id);
       console.log('Stream data received:', streamData);
+      
+      // Validate the stream data
+      if (!streamData || !streamData.embedUrl) {
+        console.error('Invalid stream data received:', streamData);
+        toast({
+          title: "Stream Error",
+          description: "This stream source may not be available. Try another source.",
+          variant: "destructive",
+        });
+        // Still set the stream to show the error UI in the player
+        setStream({
+          id: "error",
+          streamNo: 0,
+          language: "unknown",
+          hd: false,
+          embedUrl: "",
+          source: source
+        });
+        return;
+      }
+      
       setStream(streamData);
     } catch (error) {
       console.error('Error in fetchStreamData:', error);

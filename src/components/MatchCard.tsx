@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
 import { Eye, Clock } from 'lucide-react';
@@ -164,9 +164,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
     );
   }
   
-  // Default behavior with Link navigation
+  // Default behavior with Link navigation - use state to preserve navigation history
   return (
-    <Link to={`/match/${sportId}/${match.id}`} key={`${isPriority ? 'popular-' : ''}${match.id}`} className="group block">
+    <Link 
+      to={`/match/${sportId}/${match.id}`}
+      key={`${isPriority ? 'popular-' : ''}${match.id}`} 
+      className="group block"
+    >
       {cardContent}
     </Link>
   );
