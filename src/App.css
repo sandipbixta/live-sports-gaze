@@ -44,6 +44,17 @@
   color: #888;
 }
 
+/* Force color overrides to fix caching issues */
+button.bg-sports-primary,
+.sports-accent,
+.sports-highlight {
+  background-color: #fa2d04 !important;
+}
+
+.border-sports-accent {
+  border-color: #fa2d04 !important;
+}
+
 /* Mobile-specific styles */
 @media (max-width: 640px) {
   h1 {

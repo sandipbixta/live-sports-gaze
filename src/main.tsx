@@ -3,6 +3,12 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Force cache invalidation by adding a timestamp to CSS
+const link = document.createElement('link');
+link.rel = 'stylesheet';
+link.href = `./index.css?v=${new Date().getTime()}`;
+document.head.appendChild(link);
+
 // Create a meta tag for viewport if it doesn't exist
 const viewportMeta = document.querySelector('meta[name="viewport"]');
 if (!viewportMeta) {

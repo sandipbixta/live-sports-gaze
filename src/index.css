@@ -168,3 +168,38 @@
     @apply hidden;
   }
 }
+
+/* Force color override for specific elements - added to fix caching issues */
+.sport-filter button,
+[class*="sport-filter"] button,
+.stream-sources button,
+[class*="stream-sources"] button,
+.tabs-navigation button,
+[class*="button-sports"],
+.search-button,
+button[class*="bg-[#9C89FF]"],
+[class*="border-[#9C89FF]"] {
+  background-color: #fa2d04 !important;
+  border-color: #fa2d04 !important;
+}
+
+.search-button svg,
+button[class*="hover:bg-[#9C89FF]"]:hover,
+[class*="hover:border-[#9C89FF]"]:hover {
+  background-color: #e02703 !important;
+  border-color: #e02703 !important;
+}
+
+.live-indicator,
+.match-live-indicator,
+[class*="animate-pulse"] {
+  background-color: #fa2d04 !important;
+}
+
+/* Override text colors to white in dark backgrounds */
+.live-text,
+.matches-text,
+.match-title,
+.sport-name {
+  color: #ffffff !important;
+}
