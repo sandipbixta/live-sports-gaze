@@ -17,7 +17,7 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
       setLoadAttempts(prev => prev + 1);
       
       // Log stream info for debugging
-      console.log('StreamPlayer received stream:', stream);
+      console.log('Stream player received stream:', stream);
       console.log('Stream embed URL:', stream.embedUrl);
     }
   }, [stream]);
@@ -26,6 +26,7 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
   const handleIframeLoad = () => {
     console.log('Stream iframe loaded successfully');
     setIsContentLoaded(true);
+    setLoadError(false);
     
     // Check if iframe is actually working after a brief delay
     setTimeout(() => {
@@ -36,12 +37,14 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
           const iframeWindow = iframe.contentWindow;
           if (!iframeWindow) {
             console.warn('Iframe content window not available - possible CORS issue');
+            // Don't set error here as some valid streams still work even with CORS restrictions
           }
         } catch (error) {
           console.error('Error accessing iframe content:', error);
+          // Don't set error here as the stream might still be working despite the error
         }
       }
-    }, 2000);
+    }, 1000);
   };
   
   // Handle iframe error
@@ -54,6 +57,8 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
   const getModifiedEmbedUrl = (url: string) => {
     if (!url) return '';
     
+    console.log('Modifying embed URL:', url);
+    
     // Fix common URL issues
     let modifiedUrl = url
       .replace(/&amp;/g, '&')  // Fix encoded ampersands
@@ -65,12 +70,26 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
     }
     
     // Handle YouTube URLs for better compatibility
-    if (modifiedUrl.includes('youtube.com')) {
+    if (modifiedUrl.includes('youtube.com') || modifiedUrl.includes('youtu.be')) {
       if (!modifiedUrl.includes('?')) modifiedUrl += '?';
       if (!modifiedUrl.includes('autoplay=')) modifiedUrl += '&autoplay=1';
       if (!modifiedUrl.includes('controls=')) modifiedUrl += '&controls=1';
     }
     
+    // Special handling for streaming sites
+    if (modifiedUrl.includes('streamed.su') || 
+        modifiedUrl.includes('streamhd.') || 
+        modifiedUrl.includes('embedder.') || 
+        modifiedUrl.includes('embedstream.')) {
+      // Add any required parameters
+      if (!modifiedUrl.includes('autoplay=')) {
+        modifiedUrl = modifiedUrl.includes('?') ? 
+          `${modifiedUrl}&autoplay=1` : 
+          `${modifiedUrl}?autoplay=1`;
+      }
+    }
+    
+    console.log('Modified URL:', modifiedUrl);
     return modifiedUrl;
   };
   

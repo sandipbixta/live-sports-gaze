@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { cn } from '../../lib/utils';
 import { Stream } from '../../types/sports';
 import { Alert, AlertDescription } from '../ui/alert';
@@ -35,6 +35,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     playerContainerRef,
     loadError,
     isContentLoaded,
+    setLoadError,
     loadAttempts,
     handleIframeLoad,
     handleIframeError,
@@ -44,9 +45,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   const { isFullscreen, toggleFullscreen } = useFullscreen(playerContainerRef);
   const { isPictureInPicture, togglePictureInPicture } = usePictureInPicture(videoRef);
 
+  // Reset error state if stream changes
+  useEffect(() => {
+    if (stream) {
+      setLoadError(false);
+    }
+  }, [stream, setLoadError]);
+
   // Handle retry action
   const handleRetry = () => {
     console.log('Retrying stream playback...');
+    setLoadError(false);
     if (onRetry) onRetry();
   };
 
@@ -90,7 +99,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   const processedEmbedUrl = stream.embedUrl ? getModifiedEmbedUrl(stream.embedUrl) : '';
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" id="stream-player">
       <div 
         ref={playerContainerRef}
         className={cn(
@@ -133,7 +142,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
       {/* Browser compatibility notice */}
       <Alert variant="default" className="bg-[#242836] border-[#343a4d] text-gray-300">
         <AlertDescription className="text-center text-xs sm:text-sm">
-          If the stream is not working, please try another source or reload the page. For better compatibility, try using the Brave browser.
+          If the stream is not working, please try another source or reload the page. For better compatibility, try using Chrome or Firefox.
         </AlertDescription>
       </Alert>
     </div>

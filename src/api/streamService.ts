@@ -36,7 +36,10 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       
       // Try fallback API if main API fails
       console.log('Trying fallback API endpoint...');
-      const fallbackResponse = await fetch(`${FALLBACK_API_BASE}/stream/${source}/${id}`, {
+      const fallbackEndpoint = `${FALLBACK_API_BASE}/stream/${source}/${id}`;
+      console.log(`Fallback endpoint: ${fallbackEndpoint}`);
+      
+      const fallbackResponse = await fetch(fallbackEndpoint, {
         headers: {
           'Accept': 'application/json',
           'Cache-Control': 'no-cache',
@@ -46,6 +49,11 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       
       if (!fallbackResponse.ok) {
         console.error(`Fallback API also failed with status ${fallbackResponse.status}`);
+        // Instead of throwing, return direct stream data if we can construct it
+        const directStream = getDirectStreamData(source, id);
+        if (directStream.embedUrl) {
+          return directStream;
+        }
         throw new Error(`All API attempts failed`);
       }
       
@@ -63,8 +71,8 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    // Return a demo stream with embedded video for fallback
-    return getFallbackStreamData(source, id);
+    // Return a direct stream with embedded video for fallback
+    return getDirectStreamData(source, id);
   }
 };
 
@@ -105,12 +113,12 @@ function processStreamData(data: any, source: string, id: string): Stream {
       };
     }
     
-    // If data structure is unexpected, throw error
-    throw new Error('Unexpected stream data format');
+    // If data structure is unexpected, use direct URL
+    return getDirectStreamData(source, id);
   } catch (innerError) {
     console.error('Error processing stream data:', innerError);
-    // Return fallback stream for troubleshooting
-    return getFallbackStreamData(source, id);
+    // Return direct stream for troubleshooting
+    return getDirectStreamData(source, id);
   }
 }
 
@@ -137,33 +145,35 @@ function cleanEmbedUrl(url: string): string {
 
 // Attempt to construct a valid embed URL when none is provided
 function constructEmbedUrl(source: string, id: string): string {
+  // Check if we can use the streamed.su API directly for embedding
+  const streamedSuEmbed = `https://streamed.su/embed/${source}/${id}`;
+  
   // This is a fallback mechanism when API doesn't provide embedUrl
   const sourceToEmbed: Record<string, string> = {
     'alpha': `https://embedstream.me/stream/${id}`,
     'bravo': `https://embedder.live/e/${id}`,
     'charlie': `https://weblivehdplay.ru/p/frame.html?id=${id}`,
     'delta': `https://www.techoreels.com/embed/${id}`,
-    // Add more sources as needed
+    // Use streamed.su as the default for all sources
+    'default': streamedSuEmbed
   };
   
-  return sourceToEmbed[source] || 
-    // Default fallback to a known working stream (for demo/testing)
-    "https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1";
+  return sourceToEmbed[source] || sourceToEmbed['default'];
 }
 
-// Fallback stream data with reliable embed source
-function getFallbackStreamData(source: string, id: string): Stream {
-  console.log('Using fallback stream data for source:', source, 'id:', id);
+// Get direct stream data using known patterns for stream URLs
+function getDirectStreamData(source: string, id: string): Stream {
+  console.log('Using direct stream data for source:', source, 'id:', id);
   
-  // Try to use a source-specific fallback if available
-  const fallbackUrl = constructEmbedUrl(source, id);
+  // First try to use streamed.su direct embed
+  const streamedSuEmbed = `https://streamed.su/embed/${source}/${id}`;
   
   return {
     id: `${source}-${id}`,
     streamNo: 1,
     language: "English",
     hd: true,
-    embedUrl: fallbackUrl,
+    embedUrl: streamedSuEmbed,
     source: source
   };
 }
