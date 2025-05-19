@@ -140,6 +140,20 @@
   .mobile-text {
     @apply text-xs;
   }
+  
+  /* Ensure text in live matches is white */
+  .live-matches-grid h3,
+  .live-matches-grid p,
+  .upcoming-matches-grid h3,
+  .upcoming-matches-grid p {
+    @apply text-white;
+  }
+  
+  /* Ensure badge text is white */
+  .badge, 
+  [class*="badge"] {
+    @apply text-white;
+  }
 }
 
 /* Additional responsive styles */

@@ -313,7 +313,7 @@ const Live = () => {
         <div className="flex items-center gap-2 mb-4">
           {getSportIcon(sportId)}
           <h3 className="text-xl font-bold text-white">{getSportName(sportId)}</h3>
-          <Badge variant="outline" className="ml-2 bg-[#242836] text-xs">
+          <Badge variant="outline" className="ml-2 bg-[#242836] text-xs text-white">
             {groupedMatches[sportId].length} {groupedMatches[sportId].length === 1 ? 'match' : 'matches'}
           </Badge>
         </div>
@@ -402,7 +402,7 @@ const Live = () => {
         <div id="stream-player">
           {loading ? (
             <div className="w-full bg-[#242836] rounded-xl p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#9b87f5] mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#fa2d04] mx-auto"></div>
               <p className="mt-4 text-gray-300">Loading live streams...</p>
             </div>
           ) : featuredMatch ? (
@@ -410,8 +410,8 @@ const Live = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-white">{featuredMatch.title}</h2>
                 {streamLoading ? (
-                  <div className="text-sm text-[#9b87f5] flex items-center gap-1">
-                    <span className="inline-block h-2 w-2 bg-[#9b87f5] rounded-full animate-pulse"></span>
+                  <div className="text-sm text-[#fa2d04] flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse"></span>
                     Loading stream...
                   </div>
                 ) : isMatchLive(featuredMatch) ? (
@@ -444,7 +444,7 @@ const Live = () => {
                         size="sm"
                         className={`${
                           activeSource === `${source}/${id}` 
-                            ? 'bg-[#343a4d] border-[#9b87f5]' 
+                            ? 'bg-[#343a4d] border-[#fa2d04]' 
                             : 'bg-[#242836] border-[#343a4d]'
                         } text-white`}
                         onClick={() => handleSourceChange(source, id)}
@@ -462,7 +462,7 @@ const Live = () => {
               <p className="text-gray-300 text-lg mb-2">No live streams available at the moment.</p>
               <p className="text-gray-400 text-sm mb-4">Check back later or view scheduled matches.</p>
               <div className="flex gap-4 justify-center mt-2">
-                <Button onClick={handleRetryLoading} className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                <Button onClick={handleRetryLoading} className="bg-[#fa2d04] hover:bg-[#e02703]">
                   <RefreshCcw size={16} className="mr-2" />
                   Refresh
                 </Button>
@@ -489,7 +489,7 @@ const Live = () => {
               size="sm"
               className={`${
                 activeSportFilter === 'all' 
-                  ? 'bg-[#343a4d] border-[#9b87f5]' 
+                  ? 'bg-[#343a4d] border-[#fa2d04]' 
                   : 'bg-[#242836] border-[#343a4d]'
               } whitespace-nowrap`}
               onClick={() => setActiveSportFilter('all')}
@@ -503,7 +503,7 @@ const Live = () => {
                 size="sm"
                 className={`${
                   activeSportFilter === sportId 
-                    ? 'bg-[#343a4d] border-[#9b87f5]' 
+                    ? 'bg-[#343a4d] border-[#fa2d04]' 
                     : 'bg-[#242836] border-[#343a4d]'
                 } whitespace-nowrap flex items-center gap-1`}
                 onClick={() => setActiveSportFilter(sportId)}
@@ -742,10 +742,10 @@ const Live = () => {
       
       <Link to="/channels" className="block w-full">
         <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">
-          <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" aria-hidden="true" />
+          <Radio className="h-10 w-10 text-[#fa2d04] mx-auto mb-4" aria-hidden="true" />
           <h3 className="text-xl font-semibold text-white">Live TV Channels</h3>
           <p className="text-gray-300 mt-2">Access 70+ international sports channels from around the world</p>
-          <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
+          <Button className="mt-4 bg-[#fa2d04] hover:bg-[#e02703]">Browse Channels</Button>
         </div>
       </Link>
     </PageLayout>
