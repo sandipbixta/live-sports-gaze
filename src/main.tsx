@@ -22,7 +22,7 @@ if (!viewportMeta) {
 if (window.performance && 
     window.performance.navigation && 
     window.performance.navigation.type === 1) {
-  window.location.reload();
+  window.location.reload(); // Remove the argument to fix TS2554 error
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
