@@ -14,6 +14,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import { isMatchLive } from '../utils/matchUtils';
+import MatchCard from '../components/MatchCard'; // Add this import
 
 // Import refactored components
 import LiveStreamPlayer from '../components/live/LiveStreamPlayer';
