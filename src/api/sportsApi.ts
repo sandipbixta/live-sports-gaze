@@ -1,10 +1,42 @@
-
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
 
 // Adding a fallback base URL for cases where primary API is down
 const FALLBACK_API_BASE = 'https://sports-api.backup-domain.com/api';
+
+// New API endpoint for fetching streams
+const STREAMS_API = 'https://api.streamed.su/api/streams';
+
+// Interface for the streams API response
+export interface StreamsApiResponse {
+  success: boolean;
+  timestamp: number;
+  READ_ME: string;
+  performance: number;
+  streams: StreamCategory[];
+}
+
+export interface StreamCategory {
+  category: string;
+  id: number;
+  always_live: number; // 0 = no, 1 = yes
+  streams: StreamInfo[];
+}
+
+export interface StreamInfo {
+  id: number;
+  name: string;
+  tag: string;
+  poster: string;
+  uri_name: string;
+  starts_at: number;
+  ends_at: number;
+  always_live: number; // 0 = no, 1 = yes
+  category_name: string;
+  iframe?: string; // Optional iframe for direct embedding
+  allowpaststreams: number; // 0 = no, 1 = yes
+}
 
 export const fetchSports = async (): Promise<Sport[]> => {
   try {
@@ -217,3 +249,87 @@ function getDemoStreamData(source: string, id: string): Stream {
     source: source || "demo"
   };
 }
+
+/**
+ * Fetches all available streams from the streams API endpoint
+ * Response includes categorized streams with detailed information
+ * @returns Promise with StreamsApiResponse containing all stream categories and their streams
+ */
+export const fetchStreamsApi = async (): Promise<StreamsApiResponse> => {
+  try {
+    console.log('Fetching streams from API:', STREAMS_API);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(STREAMS_API, {
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+      },
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'No error details');
+      console.error(`Streams API error (${response.status}): ${errorText}`);
+      throw new Error(`Failed to fetch streams: ${response.status}`);
+    }
+    
+    const data: StreamsApiResponse = await response.json();
+    console.log('Streams API response:', data);
+    
+    // Validate response structure
+    if (!data.success || !Array.isArray(data.streams)) {
+      console.error('Invalid streams API response format:', data);
+      throw new Error('Invalid streams API response format');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error fetching streams API:', error);
+    
+    // Return a minimal valid response structure with empty streams
+    return {
+      success: false,
+      timestamp: Math.floor(Date.now() / 1000),
+      READ_ME: "API request failed. Please try again later.",
+      performance: 0,
+      streams: []
+    };
+  }
+};
+
+/**
+ * Converts a StreamInfo object to our app's Match format
+ * @param streamInfo StreamInfo object from the API
+ * @returns Match object compatible with our app
+ */
+export const convertStreamInfoToMatch = (streamInfo: StreamInfo): Match => {
+  // Extract team names from the stream name if possible
+  const teamNames = streamInfo.name.split(' at ');
+  const hasTeams = teamNames.length === 2;
+  
+  return {
+    id: streamInfo.id.toString(),
+    title: streamInfo.name,
+    date: new Date(streamInfo.starts_at * 1000).toISOString(),
+    teams: hasTeams ? {
+      home: { name: teamNames[1].trim() },
+      away: { name: teamNames[0].trim() }
+    } : undefined,
+    sources: [
+      {
+        source: streamInfo.category_name.toLowerCase(),
+        id: streamInfo.uri_name
+      }
+    ],
+    sportId: streamInfo.category_name.toLowerCase(),
+    // If iframe is directly provided in the API, we can use it for embedding
+    ...(streamInfo.iframe && {
+      embedUrl: streamInfo.iframe
+    })
+  };
+};
