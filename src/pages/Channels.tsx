@@ -57,7 +57,7 @@ const Channels = () => {
             <p className="text-sm text-gray-300">Get breaking news and match reports</p>
           </div>
           <Link to="/news">
-            <Button className="bg-[#9b87f5] hover:bg-[#8a74e9]">
+            <Button className="bg-[#fa2d04] hover:bg-[#e02703]">
               Visit News Section
             </Button>
           </Link>

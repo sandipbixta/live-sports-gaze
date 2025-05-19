@@ -15,14 +15,14 @@ const TabsNavigation = ({ activeTab, setActiveTab }: TabsNavigationProps) => {
           <Button 
             variant="ghost" 
             onClick={() => setActiveTab('stream')}
-            className={`py-4 px-6 rounded-none ${activeTab === 'stream' ? 'border-b-2 border-[#9b87f5] text-white' : 'text-gray-400'}`}
+            className={`py-4 px-6 rounded-none ${activeTab === 'stream' ? 'border-b-2 border-[#fa2d04] text-white' : 'text-gray-400'}`}
           >
             <Video className="h-4 w-4 mr-2" /> Stream
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => setActiveTab('highlights')}
-            className={`py-4 px-6 rounded-none ${activeTab === 'highlights' ? 'border-b-2 border-[#9b87f5] text-white' : 'text-gray-400'}`}
+            className={`py-4 px-6 rounded-none ${activeTab === 'highlights' ? 'border-b-2 border-[#fa2d04] text-white' : 'text-gray-400'}`}
           >
             <Film className="h-4 w-4 mr-2" /> Highlights
           </Button>
