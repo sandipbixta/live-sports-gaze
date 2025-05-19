@@ -1,3 +1,4 @@
+
 export interface Sport {
   id: string;
   name: string;
@@ -28,6 +29,17 @@ export interface Match {
   embedUrl?: string; // Direct embedding URL if provided by the API
   poster?: string;   // Added poster image URL from the streams API
   error?: boolean;   // Added error flag for better error handling
+}
+
+// Adding back the Stream interface that was accidentally removed
+export interface Stream {
+  id: string;
+  streamNo: number;
+  language: string;
+  hd: boolean;
+  embedUrl: string;
+  source: string;
+  error?: boolean; // Added error flag for better error handling
 }
 
 // New interfaces for streams API usage
