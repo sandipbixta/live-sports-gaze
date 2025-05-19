@@ -32,14 +32,34 @@ const LiveStreamPlayer: React.FC<LiveStreamPlayerProps> = ({
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Function to fetch stream data
+  // Function to fetch stream data with improved error handling
   const fetchStreamData = async (source: Source) => {
     setActiveSource(`${source.source}/${source.id}`);
     try {
       console.log(`Fetching stream data: source=${source.source}, id=${source.id}`);
+      toast({
+        title: "Loading Stream",
+        description: `Loading stream from ${source.source}...`,
+      });
+      
       const stream = await fetchStream(source.source, source.id);
       console.log('Stream data received:', stream);
+      
+      if (stream.error || !stream.embedUrl) {
+        toast({
+          title: "Stream Issues",
+          description: "This stream source may not be available. Try another source.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Stream Ready",
+          description: `Stream from ${source.source} loaded successfully!`,
+        });
+      }
+      
       setCurrentStream(stream);
+      
       // Scroll to player if not in view
       const playerElement = document.getElementById('stream-player');
       if (playerElement) {
@@ -49,7 +69,7 @@ const LiveStreamPlayer: React.FC<LiveStreamPlayerProps> = ({
       console.error('Error loading stream:', error);
       toast({
         title: "Error",
-        description: "Failed to load stream.",
+        description: "Failed to load stream. Please try another source.",
         variant: "destructive",
       });
       setCurrentStream(null);
@@ -114,7 +134,7 @@ const LiveStreamPlayer: React.FC<LiveStreamPlayerProps> = ({
         onRetry={handleStreamRetry} 
       />
       
-      {/* Stream Sources */}
+      {/* Stream Sources with improved UI */}
       {featuredMatch.sources && featuredMatch.sources.length > 0 && (
         <div className="mt-6">
           <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
@@ -122,16 +142,16 @@ const LiveStreamPlayer: React.FC<LiveStreamPlayerProps> = ({
             {featuredMatch.sources.map(({ source, id }) => (
               <Button
                 key={`${source}-${id}`}
-                variant="outline"
+                variant={activeSource === `${source}/${id}` ? "default" : "outline"}
                 size="sm"
                 className={`${
                   activeSource === `${source}/${id}` 
-                    ? 'bg-[#343a4d] border-[#fa2d04]' 
-                    : 'bg-[#242836] border-[#343a4d]'
-                } text-white`}
+                    ? 'bg-[#343a4d] border-[#fa2d04] text-white' 
+                    : 'bg-[#242836] border-[#343a4d] text-gray-300'
+                } hover:bg-[#343a4d] hover:text-white transition-colors`}
                 onClick={() => handleSourceChange(source, id)}
               >
-                {source.charAt(0).toUpperCase() + source.slice(1)}
+                {source.charAt(0).toUpperCase() + source.slice(1)} {id}
               </Button>
             ))}
           </div>

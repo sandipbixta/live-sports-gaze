@@ -19,64 +19,53 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
   
   useEffect(() => {
     console.log('StreamIframe mounted with URL:', stream.embedUrl);
-    // Generate a new key when stream changes to force iframe reload
+    // Force iframe reload when stream changes
     setIframeKey(`${stream.source}-${stream.id}-${Date.now()}`);
-  }, [stream.embedUrl, stream.source, stream.id]);
+    
+    // Add event listeners to detect when iframe is fully loaded
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener('load', onLoad);
+    }
+    
+    return () => {
+      if (iframe) {
+        iframe.removeEventListener('load', onLoad);
+      }
+    };
+  }, [stream.embedUrl, stream.source, stream.id, onLoad]);
   
-  // Enhanced URL processing - fix common issues with embed URLs
+  // Enhanced URL processing for better cross-browser compatibility
   const processEmbedUrl = (url: string): string => {
     if (!url) return '';
     
     console.log('Processing embed URL:', url);
     
+    // Decode URL
+    let processedUrl = decodeURIComponent(url);
+    
     // Handle YouTube URLs specifically
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    if (processedUrl.includes('youtube.com') || processedUrl.includes('youtu.be')) {
       // Ensure autoplay and controls are enabled for YouTube
-      let processedUrl = url.includes('?') ? url : `${url}?`;
-      if (!processedUrl.includes('autoplay=')) processedUrl += '&autoplay=1';
-      if (!processedUrl.includes('controls=')) processedUrl += '&controls=1';
-      if (!processedUrl.includes('origin=')) {
-        processedUrl += `&origin=${encodeURIComponent(window.location.origin)}`;
+      let ytUrl = processedUrl.includes('?') ? processedUrl : `${processedUrl}?`;
+      if (!ytUrl.includes('autoplay=')) ytUrl += '&autoplay=1';
+      if (!ytUrl.includes('controls=')) ytUrl += '&controls=1';
+      if (!ytUrl.includes('origin=')) {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        ytUrl += `&origin=${encodeURIComponent(origin)}`;
       }
-      console.log('Processed YouTube URL:', processedUrl);
-      return processedUrl;
+      console.log('Processed YouTube URL:', ytUrl);
+      return ytUrl;
     }
     
-    // Handle direct source URLs
-    if (url.includes('/embed/') || url.includes('player.')) {
-      let processedUrl = url
-        .replace(/&amp;/g, '&')  // Fix encoded ampersands
-        .replace(/^\s+|\s+$/g, ''); // Trim whitespace
-        
-      // Add autoplay parameter if not present
-      if (!processedUrl.includes('autoplay=')) {
-        processedUrl = processedUrl.includes('?') ? 
-          `${processedUrl}&autoplay=1` : 
-          `${processedUrl}?autoplay=1`;
-      }
-      
-      // Add allow=autoplay for browsers that require it
-      if (!processedUrl.includes('allow=')) {
-        processedUrl = `${processedUrl}&allow=autoplay`;
-      }
-      
-      console.log('Processed embed URL:', processedUrl);
-      return processedUrl;
-    }
-    
-    // General URL processing
-    let processedUrl = url
-      .replace(/&amp;/g, '&')  // Fix encoded ampersands
-      .replace(/^\s+|\s+$/g, ''); // Trim whitespace
-      
     // Ensure URL has proper protocol
     if (!processedUrl.startsWith('http')) {
       processedUrl = processedUrl.startsWith('//') ? 
         `https:${processedUrl}` : 
         `https://${processedUrl}`;
     }
-      
-    // Add autoplay parameter if not present
+    
+    // Add autoplay parameter if not present for other types of embeds
     if (!processedUrl.includes('autoplay=')) {
       processedUrl = processedUrl.includes('?') ? 
         `${processedUrl}&autoplay=1` : 
@@ -96,14 +85,14 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
         key={iframeKey}
         ref={iframeRef}
         src={embedUrl}
-        className="w-full h-full absolute inset-0"
+        className="w-full h-full absolute inset-0 border-0"
         allowFullScreen={true}
         title="Live Sports Stream"
         onLoad={onLoad}
         onError={onError}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
-        loading="lazy"
+        loading="eager"
         referrerPolicy="origin"
       ></iframe>
     </AspectRatio>

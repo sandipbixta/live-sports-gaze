@@ -36,10 +36,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     loadError,
     isContentLoaded,
     setLoadError,
-    loadAttempts,
     handleIframeLoad,
-    handleIframeError,
-    getModifiedEmbedUrl
+    handleIframeError
   } = useStreamPlayer(stream, isLoading);
   
   const { isFullscreen, toggleFullscreen } = useFullscreen(playerContainerRef);
@@ -49,6 +47,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   useEffect(() => {
     if (stream) {
       setLoadError(false);
+      console.log('Stream changed, reset errors');
     }
   }, [stream, setLoadError]);
 
@@ -93,23 +92,20 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     );
   }
 
-  // Process the embed URL for better cross-browser compatibility
-  const processedEmbedUrl = stream.embedUrl ? getModifiedEmbedUrl(stream.embedUrl) : '';
-
   return (
     <div className="space-y-3" id="stream-player">
       <div 
         ref={playerContainerRef}
         className={cn(
           "relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group",
-          isFullscreen && "fixed inset-0 z-50"
+          isFullscreen && "fixed inset-0 z-50 bg-black"
         )}
       >
         {/* Loading overlay shown until iframe loads */}
         {!isContentLoaded && <LoadingState source={stream.source} />}
         
         <StreamIframe
-          stream={{...stream, embedUrl: processedEmbedUrl}}
+          stream={stream}
           onLoad={handleIframeLoad}
           onError={handleIframeError}
         />
@@ -140,7 +136,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
       {/* Browser compatibility notice */}
       <Alert variant="default" className="bg-[#242836] border-[#343a4d] text-gray-300">
         <AlertDescription className="text-center text-xs sm:text-sm">
-          If the stream is not working, please try another source or reload the page. For better compatibility, try using Chrome or Firefox.
+          If the stream is not working, try another source or reload the page. For better compatibility, use Chrome or Firefox.
         </AlertDescription>
       </Alert>
     </div>
