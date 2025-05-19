@@ -50,6 +50,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
+      
+      // Log stream info for debugging
+      console.log('StreamPlayer received stream:', stream);
+      console.log('Stream embed URL:', stream.embedUrl);
     }
   }, [stream]);
 
@@ -57,6 +61,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const handleRetry = () => {
     setLoadError(false);
     setIsContentLoaded(false);
+    console.log('Retrying stream playback...');
     if (onRetry) onRetry();
   };
 
@@ -64,6 +69,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const handleIframeLoad = () => {
     console.log('Stream iframe loaded successfully');
     setIsContentLoaded(true);
+  };
+  
+  // Handle iframe error
+  const handleIframeError = (e: React.SyntheticEvent<HTMLIFrameElement, Event>) => {
+    console.error('Stream iframe failed to load:', e);
+    setLoadError(true);
   };
 
   if (isLoading) {
@@ -99,7 +110,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   }
 
   // Check if we have a valid stream URL
-  const validEmbedUrl = stream.embedUrl && stream.embedUrl.startsWith('http');
+  const validEmbedUrl = stream.embedUrl && (stream.embedUrl.startsWith('http://') || stream.embedUrl.startsWith('https://'));
   
   if (!validEmbedUrl) {
     return (
@@ -109,7 +120,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             <div className="text-white text-center">
               <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
               <p className="text-lg sm:text-xl">Invalid stream URL</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please try another source</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">
+                URL: {stream.embedUrl ? stream.embedUrl.substring(0, 50) + '...' : 'empty'}
+              </p>
               {onRetry && (
                 <Button 
                   variant="outline" 
@@ -117,7 +130,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
                   onClick={onRetry}
                   className="mt-4 border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
                 >
-                  <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
+                  <RefreshCcw className="h-4 w-4 mr-2" /> Try Another Source
                 </Button>
               )}
             </div>
@@ -135,7 +148,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             <div className="text-white text-center">
               <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
               <p className="text-lg sm:text-xl">Stream failed to load</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please refresh or try another source</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">The stream might be temporarily unavailable</p>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -160,7 +173,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             <div className="text-white text-center">
               <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
               <p className="text-lg sm:text-xl">Loading stream...</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">
+                Loading from: {stream.source}
+              </p>
             </div>
           </div>
         )}
@@ -172,8 +187,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           allowFullScreen
           title="Live Sports Stream"
           onLoad={handleIframeLoad}
-          onError={() => setLoadError(true)}
+          onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
         ></iframe>
       </AspectRatio>
       
