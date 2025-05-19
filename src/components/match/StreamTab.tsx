@@ -9,6 +9,7 @@ import { AlertCircle, Clock } from 'lucide-react';
 import { fetchStream } from '@/api/sportsApi';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { isTrendingMatch } from '@/utils/popularLeagues';
 
 interface StreamTabProps {
   match: MatchType;
@@ -98,6 +99,13 @@ const StreamTab = ({
     );
   };
 
+  // Sort related matches by trending score
+  const sortedPopularMatches = [...popularMatches].sort((a, b) => {
+    const aTrending = isTrendingMatch(a.title);
+    const bTrending = isTrendingMatch(b.title);
+    return bTrending.score - aTrending.score;
+  });
+
   return (
     <div>
       <StreamPlayer
@@ -140,12 +148,12 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Popular Matches Section */}
-      {popularMatches.length > 0 && (
+      {/* Popular Matches Section - Now using trending data */}
+      {sortedPopularMatches.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
+          <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {popularMatches.map((match) => (
+            {sortedPopularMatches.map((match) => (
               <Link 
                 key={match.id} 
                 to={`/match/${sportId}/${match.id}`}
@@ -153,7 +161,12 @@ const StreamTab = ({
               >
                 <div className="p-4">
                   <h3 className="font-bold mb-2 text-white text-xs truncate">{match.title}</h3>
-                  <p className="text-xs text-gray-300">Related Match</p>
+                  <p className="text-xs text-gray-300">
+                    {isTrendingMatch(match.title).score >= 8 ? 
+                      '🔥 Highly Trending' : 
+                      isTrendingMatch(match.title).score >= 5 ? 
+                      '📈 Trending' : 'Related Match'}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -161,9 +174,10 @@ const StreamTab = ({
         </div>
       )}
       
-      {popularMatches.length === 0 && (
+      {/* No matches message */}
+      {sortedPopularMatches.length === 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold mb-4 text-white">More {match.title.split('-')[0].trim()} Matches</h3>
+          <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
           <Card className="bg-sports-card border-sports">
             <CardContent className="p-6 text-center">
               <p className="text-gray-400">No related matches available at this time.</p>

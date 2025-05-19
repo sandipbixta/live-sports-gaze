@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import NewsSection from '../components/NewsSection';
 import { useToast } from '../hooks/use-toast';
@@ -7,10 +7,11 @@ import { Helmet } from 'react-helmet-async';
 import Advertisement from '../components/Advertisement';
 import SocialBar from '../components/SocialBar';
 import { Button } from '@/components/ui/button';
-import { Share } from 'lucide-react';
+import { RefreshCw, Share } from 'lucide-react';
 
 const News = () => {
   const { toast } = useToast();
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   
   const handleSubscribe = () => {
     toast({
@@ -19,13 +20,40 @@ const News = () => {
     });
   };
   
+  const handleManualRefresh = useCallback(() => {
+    // Force page reload to refresh all content
+    window.location.reload();
+    toast({
+      title: "Refreshing News",
+      description: "Getting the latest sports updates...",
+    });
+  }, [toast]);
+  
+  // Set up regular page refresh in background
+  useEffect(() => {
+    const refreshIntervalId = setInterval(() => {
+      console.log("News page auto-refresh triggered");
+      setLastRefreshed(new Date());
+      
+      // Get any NewsSection components and trigger their refresh logic
+      const newsComponents = document.querySelectorAll('.news-section-component button[aria-label="Refresh news"]');
+      if (newsComponents.length > 0) {
+        (newsComponents[0] as HTMLButtonElement).click();
+      }
+    }, 15 * 60 * 1000); // Every 15 minutes
+    
+    return () => {
+      clearInterval(refreshIntervalId);
+    };
+  }, []);
+  
   return (
     <PageLayout>
       <Helmet>
         <title>Football & Sports News | DamiTV - Latest Updates and Headlines</title>
         <meta name="description" content="Stay updated with the latest football/soccer news, transfers, match reports, and analysis from around the world. Get breaking news in football, basketball, tennis and more." />
         <meta name="keywords" content="football news, soccer news, premier league, la liga, champions league, basketball news, latest sports updates, sports headlines, match reports" />
-        <link rel="canonical" href="https://damitv.pro/news" />
+        <meta name="canonical" content="https://damitv.pro/news" />
         <script type="application/ld+json">
         {`
           {
@@ -41,10 +69,21 @@ const News = () => {
       </Helmet>
       
       <div className="py-4">
-        <h1 className="text-3xl font-bold text-white mb-2">Football & Sports News</h1>
-        <p className="text-gray-300 mb-6">
-          The latest updates, transfers, and match reports from around the football world and beyond.
-        </p>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Football & Sports News</h1>
+            <p className="text-gray-300">
+              The latest updates, transfers, and match reports from around the football world and beyond.
+            </p>
+          </div>
+          <Button 
+            onClick={handleManualRefresh} 
+            variant="outline" 
+            className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" /> Refresh News
+          </Button>
+        </div>
         
         {/* Prominent ad placement */}
         <div className="mb-6">
@@ -70,7 +109,7 @@ const News = () => {
         </div>
         
         {/* Featured news section with enhanced SEO */}
-        <div className="mb-8">
+        <div className="mb-8 news-section-component">
           <NewsSection />
         </div>
         
