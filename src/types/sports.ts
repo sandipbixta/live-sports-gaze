@@ -27,16 +27,7 @@ export interface Match {
   sportId?: string;  // Added sportId to identify which sport the match belongs to
   embedUrl?: string; // Direct embedding URL if provided by the API
   poster?: string;   // Added poster image URL from the streams API
-}
-
-export interface Stream {
-  id: string;
-  streamNo: number;
-  language: string;
-  hd: boolean;
-  embedUrl: string;
-  source: string;
-  error?: boolean; // Added error flag for better error handling
+  error?: boolean;   // Added error flag for better error handling
 }
 
 // New interfaces for streams API usage
