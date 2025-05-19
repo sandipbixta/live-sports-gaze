@@ -1,6 +1,6 @@
 
 import { Stream } from '../types/sports';
-import { API_BASE, FALLBACK_API_BASE, REQUEST_TIMEOUT } from './constants';
+import { API_BASE, FALLBACK_API_BASE, STREAM_API, REQUEST_TIMEOUT } from './constants';
 
 /**
  * Fetches stream data for a specific source and ID
@@ -11,7 +11,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     console.log(`Attempting to fetch stream: source=${source}, id=${id}`);
     
     // Define the API endpoint for stream data
-    const endpoint = `${API_BASE}/stream/${source}/${id}`;
+    const endpoint = `${STREAM_API}/${source}/${id}`;
     console.log(`Stream endpoint: ${endpoint}`);
     
     // Make the request with additional headers for troubleshooting
@@ -49,11 +49,6 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       
       if (!fallbackResponse.ok) {
         console.error(`Fallback API also failed with status ${fallbackResponse.status}`);
-        // Instead of throwing, return direct stream data if we can construct it
-        const directStream = getDirectStreamData(source, id);
-        if (directStream.embedUrl) {
-          return directStream;
-        }
         throw new Error(`All API attempts failed`);
       }
       
@@ -71,8 +66,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    // Return a direct stream with embedded video for fallback
-    return getDirectStreamData(source, id);
+    throw new Error(`Failed to fetch stream data: ${error}`);
   }
 };
 
@@ -86,9 +80,8 @@ function processStreamData(data: any, source: string, id: string): Stream {
       
       // Validate and clean up the embedUrl
       if (!hdStream.embedUrl) {
-        console.warn('Stream data missing embedUrl, attempting to construct one');
-        // Attempt to construct a valid embedUrl if missing
-        hdStream.embedUrl = constructEmbedUrl(source, id);
+        console.warn('Stream data missing embedUrl');
+        throw new Error('Stream data missing embedUrl');
       } else {
         hdStream.embedUrl = cleanEmbedUrl(hdStream.embedUrl);
       }
@@ -102,7 +95,10 @@ function processStreamData(data: any, source: string, id: string): Stream {
     // Handle object response format
     else if (data && typeof data === 'object') {
       console.log('Using single object stream data');
-      const embedUrl = data.embedUrl ? cleanEmbedUrl(data.embedUrl) : constructEmbedUrl(source, id);
+      if (!data.embedUrl) {
+        throw new Error('Stream data missing embedUrl');
+      }
+      const embedUrl = cleanEmbedUrl(data.embedUrl);
       return {
         id: data.id || `${source}-${id}`,
         streamNo: data.streamNo || 1,
@@ -113,12 +109,11 @@ function processStreamData(data: any, source: string, id: string): Stream {
       };
     }
     
-    // If data structure is unexpected, use direct URL
-    return getDirectStreamData(source, id);
+    // If data structure is unexpected, throw error
+    throw new Error('Invalid stream data format received');
   } catch (innerError) {
     console.error('Error processing stream data:', innerError);
-    // Return direct stream for troubleshooting
-    return getDirectStreamData(source, id);
+    throw innerError;
   }
 }
 
@@ -141,39 +136,4 @@ function cleanEmbedUrl(url: string): string {
   }
   
   return cleanUrl;
-}
-
-// Attempt to construct a valid embed URL when none is provided
-function constructEmbedUrl(source: string, id: string): string {
-  // Check if we can use the streamed.su API directly for embedding
-  const streamedSuEmbed = `https://streamed.su/embed/${source}/${id}`;
-  
-  // This is a fallback mechanism when API doesn't provide embedUrl
-  const sourceToEmbed: Record<string, string> = {
-    'alpha': `https://embedstream.me/stream/${id}`,
-    'bravo': `https://embedder.live/e/${id}`,
-    'charlie': `https://weblivehdplay.ru/p/frame.html?id=${id}`,
-    'delta': `https://www.techoreels.com/embed/${id}`,
-    // Use streamed.su as the default for all sources
-    'default': streamedSuEmbed
-  };
-  
-  return sourceToEmbed[source] || sourceToEmbed['default'];
-}
-
-// Get direct stream data using known patterns for stream URLs
-function getDirectStreamData(source: string, id: string): Stream {
-  console.log('Using direct stream data for source:', source, 'id:', id);
-  
-  // First try to use streamed.su direct embed
-  const streamedSuEmbed = `https://streamed.su/embed/${source}/${id}`;
-  
-  return {
-    id: `${source}-${id}`,
-    streamNo: 1,
-    language: "English",
-    hd: true,
-    embedUrl: streamedSuEmbed,
-    source: source
-  };
 }

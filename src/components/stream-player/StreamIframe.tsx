@@ -35,23 +35,19 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
       return processedUrl;
     }
     
-    // Special handling for streamed.su embedded URLs
-    if (url.includes('streamed.su') || url.includes('streamhd.')) {
-      // Make sure HTTPS protocol is used
-      if (url.startsWith('http:')) {
-        url = url.replace('http:', 'https:');
-      }
-      
-      // Add any necessary parameters
-      if (!url.includes('autoplay=')) {
-        url = url.includes('?') ? `${url}&autoplay=1` : `${url}?autoplay=1`;
-      }
-    }
-    
     // General URL processing
-    return url
+    let processedUrl = url
       .replace(/&amp;/g, '&')  // Fix encoded ampersands
       .replace(/^\s+|\s+$/g, ''); // Trim whitespace
+      
+    // Add autoplay parameter if not present
+    if (!processedUrl.includes('autoplay=')) {
+      processedUrl = processedUrl.includes('?') ? 
+        `${processedUrl}&autoplay=1` : 
+        `${processedUrl}?autoplay=1`;
+    }
+    
+    return processedUrl;
   };
   
   // Clean and prepare the embed URL

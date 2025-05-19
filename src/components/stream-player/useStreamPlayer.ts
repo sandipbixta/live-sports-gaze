@@ -76,17 +76,11 @@ export const useStreamPlayer = (stream: Stream | null, isLoading: boolean) => {
       if (!modifiedUrl.includes('controls=')) modifiedUrl += '&controls=1';
     }
     
-    // Special handling for streaming sites
-    if (modifiedUrl.includes('streamed.su') || 
-        modifiedUrl.includes('streamhd.') || 
-        modifiedUrl.includes('embedder.') || 
-        modifiedUrl.includes('embedstream.')) {
-      // Add any required parameters
-      if (!modifiedUrl.includes('autoplay=')) {
-        modifiedUrl = modifiedUrl.includes('?') ? 
-          `${modifiedUrl}&autoplay=1` : 
-          `${modifiedUrl}?autoplay=1`;
-      }
+    // Add any required parameters
+    if (!modifiedUrl.includes('autoplay=')) {
+      modifiedUrl = modifiedUrl.includes('?') ? 
+        `${modifiedUrl}&autoplay=1` : 
+        `${modifiedUrl}?autoplay=1`;
     }
     
     console.log('Modified URL:', modifiedUrl);

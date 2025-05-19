@@ -1,3 +1,4 @@
+
 import { StreamsApiResponse, StreamInfo } from './types';
 import { Match } from '../types/sports';
 import { API_BASE, STREAMS_API, REQUEST_TIMEOUT } from './constants';
@@ -79,10 +80,6 @@ export const convertStreamInfoToMatch = (streamInfo: StreamInfo): Match => {
       }
     ],
     sportId: streamInfo.category_name.toLowerCase(),
-    // If iframe is directly provided in the API, we can use it for embedding
-    ...(streamInfo.iframe && {
-      embedUrl: streamInfo.iframe
-    }),
     // Add poster image from stream info
     poster: streamInfo.poster
   };
