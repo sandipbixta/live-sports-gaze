@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Stream } from '../../types/sports';
 import { AspectRatio } from '../ui/aspect-ratio';
 
@@ -15,10 +15,13 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
   onError
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeKey, setIframeKey] = useState<string>(`${stream.source}-${stream.id}`);
   
   useEffect(() => {
     console.log('StreamIframe mounted with URL:', stream.embedUrl);
-  }, [stream.embedUrl]);
+    // Generate a new key when stream changes to force iframe reload
+    setIframeKey(`${stream.source}-${stream.id}-${Date.now()}`);
+  }, [stream.embedUrl, stream.source, stream.id]);
   
   // Enhanced URL processing - fix common issues with embed URLs
   const processEmbedUrl = (url: string): string => {
@@ -90,6 +93,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
   return (
     <AspectRatio ratio={16 / 9} className="w-full">
       <iframe 
+        key={iframeKey}
         ref={iframeRef}
         src={embedUrl}
         className="w-full h-full absolute inset-0"
@@ -100,6 +104,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
         loading="lazy"
+        referrerPolicy="origin"
       ></iframe>
     </AspectRatio>
   );

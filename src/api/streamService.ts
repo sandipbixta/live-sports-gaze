@@ -35,6 +35,13 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
         throw new Error(`API responded with status ${response.status}`);
       }
       
+      // Verify content-type to ensure we're getting JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Stream API returned non-JSON response:', contentType);
+        throw new Error('Invalid content type received');
+      }
+      
       // Parse response and validate the data structure
       const data = await response.json();
       console.log('Stream API response:', data);
@@ -50,19 +57,38 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       const proxyEndpoint = `${PROXY_STREAM_API}/${source}/${id}`;
       console.log(`Proxy endpoint: ${proxyEndpoint}`);
       
-      const proxyResponse = await fetch(proxyEndpoint, {
-        headers: {
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-        },
-        cache: 'no-store'
-      });
+      const proxyController = new AbortController();
+      const proxyTimeoutId = setTimeout(() => proxyController.abort(), REQUEST_TIMEOUT);
       
-      if (!proxyResponse.ok) {
-        // Try fallback API if main API fails
+      try {
+        const proxyResponse = await fetch(proxyEndpoint, {
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
+          cache: 'no-store',
+          signal: proxyController.signal
+        });
+        
+        clearTimeout(proxyTimeoutId);
+        
+        if (!proxyResponse.ok) {
+          throw new Error(`Proxy API responded with status ${proxyResponse.status}`);
+        }
+        
+        const proxyData = await proxyResponse.json();
+        console.log('Proxy API response:', proxyData);
+        return processStreamData(proxyData, source, id);
+      } catch (proxyError) {
+        console.error('Proxy API request failed:', proxyError);
+        
+        // Try fallback API if proxy API also fails
         console.log('Trying fallback API endpoint...');
         const fallbackEndpoint = `${FALLBACK_API_BASE}/stream/${source}/${id}`;
         console.log(`Fallback endpoint: ${fallbackEndpoint}`);
+        
+        const fallbackController = new AbortController();
+        const fallbackTimeoutId = setTimeout(() => fallbackController.abort(), REQUEST_TIMEOUT);
         
         const fallbackResponse = await fetch(fallbackEndpoint, {
           headers: {
@@ -70,7 +96,10 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
             'Cache-Control': 'no-cache',
           }, 
           cache: 'no-store',
+          signal: fallbackController.signal
         });
+        
+        clearTimeout(fallbackTimeoutId);
         
         if (!fallbackResponse.ok) {
           console.error(`Fallback API also failed with status ${fallbackResponse.status}`);
@@ -81,10 +110,6 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
         console.log('Fallback API response:', fallbackData);
         return processStreamData(fallbackData, source, id);
       }
-      
-      const proxyData = await proxyResponse.json();
-      console.log('Proxy API response:', proxyData);
-      return processStreamData(proxyData, source, id);
     }
     
   } catch (error) {
@@ -106,6 +131,12 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
 // Helper function to process different stream data formats
 function processStreamData(data: any, source: string, id: string): Stream {
   try {
+    // Check for empty or null data
+    if (!data) {
+      console.error('Stream data is empty or null');
+      throw new Error('Empty stream data received');
+    }
+    
     // Handle array response format
     if (Array.isArray(data) && data.length > 0) {
       // Find HD stream if available, otherwise take the first one
@@ -154,6 +185,8 @@ function processStreamData(data: any, source: string, id: string): Stream {
 function cleanEmbedUrl(url: string): string {
   if (!url) return '';
   
+  console.log('Cleaning embed URL:', url);
+  
   // Fix common URL issues
   let cleanUrl = url
     .replace(/&amp;/g, '&')  // Fix encoded ampersands
@@ -173,5 +206,14 @@ function cleanEmbedUrl(url: string): string {
     cleanUrl = `https://${cleanUrl}`;
   }
   
+  // Fix common URL problems with specific domains
+  if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
+    // Ensure proper YouTube embed parameters
+    if (!cleanUrl.includes('autoplay=')) {
+      cleanUrl += cleanUrl.includes('?') ? '&autoplay=1' : '?autoplay=1';
+    }
+  }
+  
+  console.log('Cleaned embed URL:', cleanUrl);
   return cleanUrl;
 }
