@@ -56,6 +56,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       headers: {
         'Accept': 'application/json',
         'Cache-Control': 'no-cache',
+        'Origin': window.location.origin, // Add origin for CORS
       },
       cache: 'no-store', // Always get fresh content
       mode: 'cors',
@@ -70,7 +71,10 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       // Try fallback API if main API fails
       console.log('Trying fallback API endpoint...');
       const fallbackResponse = await fetch(`${FALLBACK_API_BASE}/stream/${source}/${id}`, {
-        headers: { 'Accept': 'application/json' },
+        headers: { 
+          'Accept': 'application/json',
+          'Origin': window.location.origin,
+        },
         cache: 'no-store',
       });
       
@@ -99,7 +103,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
       streamNo: 1,
       language: "English",
       hd: true,
-      embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1&mute=0`,
+      embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`,
       source: source || "demo"
     };
   }
@@ -155,6 +159,11 @@ function ensureValidUrl(url: string): string {
     return url;
   }
   
+  // If URL starts with //, add https:
+  if (url.startsWith('//')) {
+    return `https:${url}`;
+  }
+  
   // If URL is relative, convert to absolute
   if (url.startsWith('/')) {
     try {
@@ -178,7 +187,7 @@ function getDemoStreamData(source: string, id: string): Stream {
     streamNo: 1,
     language: "English",
     hd: true,
-    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1&mute=0`,
+    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`,
     source: source || "demo"
   };
 }

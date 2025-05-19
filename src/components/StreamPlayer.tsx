@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, Fullscreen } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
@@ -16,11 +16,14 @@ interface StreamPlayerProps {
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
   const videoRef = useRef<HTMLIFrameElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const isMobile = useIsMobile();
   
+  // Toggle picture-in-picture mode
   const togglePictureInPicture = async () => {
     try {
       // For modern browsers with PiP API
@@ -44,6 +47,56 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       console.error('Failed to toggle picture-in-picture mode:', error);
     }
   };
+
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    try {
+      if (!playerContainerRef.current) return;
+      
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        if (playerContainerRef.current.requestFullscreen) {
+          playerContainerRef.current.requestFullscreen();
+        } else if ((playerContainerRef.current as any).webkitRequestFullscreen) { // Safari
+          (playerContainerRef.current as any).webkitRequestFullscreen();
+        } else if ((playerContainerRef.current as any).msRequestFullscreen) { // IE11
+          (playerContainerRef.current as any).msRequestFullscreen();
+        }
+        setIsFullscreen(true);
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) { // Safari
+          (document as any).webkitExitFullscreen();
+        } else if ((document as any).msExitFullscreen) { // IE11
+          (document as any).msExitFullscreen();
+        }
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error('Failed to toggle fullscreen mode:', error);
+    }
+  };
+  
+  // Update fullscreen state when changed outside our component
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
   
   // Reset load error when stream changes
   useEffect(() => {
@@ -75,6 +128,23 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const handleIframeError = (e: React.SyntheticEvent<HTMLIFrameElement, Event>) => {
     console.error('Stream iframe failed to load:', e);
     setLoadError(true);
+  };
+
+  // Modify iframe URL to ensure cross-browser compatibility
+  const getModifiedEmbedUrl = (url: string) => {
+    // Remove autoplay parameters that might cause fullscreen issues in some browsers
+    let modifiedUrl = url
+      .replace('autoplay=1', 'autoplay=0')
+      .replace('&autoplay=1', '')
+      .replace('?autoplay=1&', '?')
+      .replace('?autoplay=1', '');
+      
+    // Ensure URL has a protocol
+    if (!modifiedUrl.startsWith('http')) {
+      modifiedUrl = modifiedUrl.startsWith('//') ? `https:${modifiedUrl}` : `https://${modifiedUrl}`;
+    }
+    
+    return modifiedUrl;
   };
 
   if (isLoading) {
@@ -164,8 +234,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
+  // Process the embed URL for better cross-browser compatibility
+  const processedEmbedUrl = stream.embedUrl ? getModifiedEmbedUrl(stream.embedUrl) : '';
+
   return (
-    <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
+    <div 
+      ref={playerContainerRef}
+      className={cn(
+        "relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group",
+        isFullscreen && "fixed inset-0 z-50"
+      )}
+    >
       <AspectRatio ratio={16 / 9} className="w-full">
         {/* Loading overlay shown until iframe loads */}
         {!isContentLoaded && (
@@ -182,22 +261,34 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         
         <iframe 
           ref={videoRef}
-          src={stream.embedUrl}
+          src={processedEmbedUrl}
           className="w-full h-full absolute inset-0"
-          allowFullScreen
+          allowFullScreen={true}
           title="Live Sports Stream"
           onLoad={handleIframeLoad}
           onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+          loading="lazy"
         ></iframe>
       </AspectRatio>
       
       {/* Controls overlay */}
       <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity",
+        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity flex space-x-2",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
+        {/* Fullscreen button */}
+        <button 
+          onClick={toggleFullscreen}
+          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          <Fullscreen className="h-4 w-4 sm:h-5 sm:w-5" />
+        </button>
+        
+        {/* Picture-in-picture button */}
         <button 
           onClick={togglePictureInPicture}
           className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
