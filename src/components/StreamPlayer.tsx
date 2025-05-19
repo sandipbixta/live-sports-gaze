@@ -2,20 +2,23 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video, AlertTriangle } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 
 interface StreamPlayerProps {
   stream: Stream | null;
   isLoading: boolean;
+  onRetry?: () => void;
 }
 
-const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
+const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
   const videoRef = useRef<HTMLIFrameElement>(null);
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
   const isMobile = useIsMobile();
   
   const togglePictureInPicture = async () => {
@@ -46,8 +49,22 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
   useEffect(() => {
     if (stream) {
       setLoadError(false);
+      setIsContentLoaded(false);
     }
   }, [stream]);
+
+  // Handle retry action
+  const handleRetry = () => {
+    setLoadError(false);
+    setIsContentLoaded(false);
+    if (onRetry) onRetry();
+  };
+
+  // Handle iframe load event
+  const handleIframeLoad = () => {
+    console.log('Stream iframe loaded successfully');
+    setIsContentLoaded(true);
+  };
 
   if (isLoading) {
     return (
@@ -65,25 +82,15 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
     );
   }
 
-  if (!stream || stream.id === "error") {
+  if (!stream) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
-              {stream?.id === "error" ? (
-                <>
-                  <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-500 mx-auto mb-3" />
-                  <p className="text-lg sm:text-xl">Stream unavailable</p>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please try another source</p>
-                </>
-              ) : (
-                <>
-                  <Video className="h-10 w-10 sm:h-12 sm:w-12 text-gray-600 mx-auto mb-3" />
-                  <p className="text-lg sm:text-xl">No live stream available</p>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Check back closer to match time</p>
-                </>
-              )}
+              <Video className="h-10 w-10 sm:h-12 sm:w-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-lg sm:text-xl">No live stream available</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Check back closer to match time</p>
             </div>
           </div>
         </AspectRatio>
@@ -101,20 +108,24 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
               <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
-              <p className="text-lg sm:text-xl">Stream URL invalid</p>
+              <p className="text-lg sm:text-xl">Invalid stream URL</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please try another source</p>
+              {onRetry && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={onRetry}
+                  className="mt-4 border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
+                >
+                  <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
+                </Button>
+              )}
             </div>
           </div>
         </AspectRatio>
       </div>
     );
   }
-
-  // Handle iframe load error
-  const handleIframeError = () => {
-    console.error('Failed to load iframe content');
-    setLoadError(true);
-  };
 
   if (loadError) {
     return (
@@ -125,6 +136,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
               <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
               <p className="text-lg sm:text-xl">Stream failed to load</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please refresh or try another source</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetry}
+                className="mt-4 border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
+              >
+                <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
+              </Button>
             </div>
           </div>
         </AspectRatio>
@@ -135,14 +154,26 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading }) => {
   return (
     <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
       <AspectRatio ratio={16 / 9} className="w-full">
+        {/* Loading overlay shown until iframe loads */}
+        {!isContentLoaded && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
+            <div className="text-white text-center">
+              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
+              <p className="text-lg sm:text-xl">Loading stream...</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
+            </div>
+          </div>
+        )}
+        
         <iframe 
           ref={videoRef}
           src={stream.embedUrl}
           className="w-full h-full absolute inset-0"
           allowFullScreen
           title="Live Sports Stream"
-          onError={handleIframeError}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+          onLoad={handleIframeLoad}
+          onError={() => setLoadError(true)}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         ></iframe>
       </AspectRatio>
       
