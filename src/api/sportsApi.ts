@@ -1,4 +1,3 @@
-
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
@@ -44,176 +43,134 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 
 export const fetchStream = async (source: string, id: string): Promise<Stream> => {
   try {
-    // More detailed logging for debugging
-    console.log(`Attempting to fetch stream: source=${source}, id=${id}`);
+    // More detailed logging
+    console.log(`Fetching stream data: source=${source}, id=${id}`);
     
-    // Define the API endpoint for stream data
-    const endpoint = `${API_BASE}/stream/${source}/${id}`;
-    console.log(`Stream endpoint: ${endpoint}`);
+    // Define potential API endpoints to try - in order of preference
+    const endpoints = [
+      `${API_BASE}/stream/${source}/${id}`,
+      `${API_BASE}/streams/${source}/${id}`,
+      `${FALLBACK_API_BASE}/stream/${source}/${id}`
+    ];
     
-    // Add user-agent and origin headers to help with CORS and browser compatibility
-    const headers = {
-      'Accept': 'application/json',
-      'Cache-Control': 'no-cache',
-      'Origin': window.location.origin,
-      'Referer': window.location.href,
-      'Sec-Fetch-Dest': 'empty',
-      'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Site': 'cross-site',
-    };
-    
-    // Make the request with additional headers and options for troubleshooting
-    const response = await fetch(endpoint, {
-      headers,
-      cache: 'no-store', // Always get fresh content
-      mode: 'cors',
-      credentials: 'omit', // Don't send cookies to avoid CORS issues
-      referrerPolicy: 'no-referrer-when-downgrade'
-    });
-    
-    // Check if response is successful
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => 'No error details');
-      console.error(`Stream API error (${response.status}): ${errorText}`);
+    // Enhanced fetch with better retry and error handling
+    const fetchFromEndpoint = async (url: string, attemptNumber: number): Promise<Response> => {
+      console.log(`Trying endpoint ${attemptNumber}: ${url}`);
       
-      // Try fallback API if main API fails
-      console.log('Trying fallback API endpoint...');
-      const fallbackResponse = await fetch(`${FALLBACK_API_BASE}/stream/${source}/${id}`, {
-        headers, 
-        cache: 'no-store',
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+        },
+        cache: 'no-store', // Always get fresh content
+        mode: 'cors',
+        credentials: 'omit', // Don't send cookies to avoid CORS issues
       });
       
-      if (!fallbackResponse.ok) {
-        console.error(`Fallback API also failed with status ${fallbackResponse.status}`);
-        throw new Error(`All API attempts failed`);
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No error details');
+        console.error(`Stream API error (${response.status}): ${errorText}`);
+        throw new Error(`Failed with status ${response.status}`);
       }
       
-      const fallbackData = await fallbackResponse.json();
-      console.log('Fallback API response:', fallbackData);
-      return processStreamData(fallbackData, source, id);
+      return response;
+    };
+    
+    // Try each endpoint with retries
+    let lastError: Error | null = null;
+    
+    for (let i = 0; i < endpoints.length; i++) {
+      try {
+        // Try each endpoint up to 2 times before moving to next
+        const MAX_RETRIES = 2;
+        
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            const response = await fetchFromEndpoint(endpoints[i], i + 1);
+            console.log(`Successfully fetched stream from endpoint ${i + 1}`);
+            
+            // Parse and validate response
+            const data = await response.json();
+            console.log('Stream API response data:', data);
+            
+            // Format handling for different response formats
+            if (Array.isArray(data) && data.length > 0) {
+              // Prefer HD stream if available
+              const hdStream = data.find(stream => stream.hd === true);
+              const selectedStream = hdStream || data[0];
+              
+              if (selectedStream.embedUrl) {
+                return {
+                  ...selectedStream,
+                  // Ensure embed URL is properly formatted
+                  embedUrl: ensureValidEmbedUrl(selectedStream.embedUrl)
+                };
+              }
+            } else if (data && typeof data === 'object' && data.embedUrl) {
+              return {
+                ...data,
+                embedUrl: ensureValidEmbedUrl(data.embedUrl)
+              };
+            }
+            
+            // If we get here, data format was unexpected
+            throw new Error('Unexpected data format from API');
+            
+          } catch (error) {
+            console.warn(`Attempt ${attempt} failed for endpoint ${i + 1}: ${(error as Error).message}`);
+            lastError = error as Error;
+            
+            // Only retry after a delay
+            if (attempt < MAX_RETRIES) {
+              const delay = 1000 * attempt;
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
+          }
+        }
+      } catch (endpointError) {
+        console.error(`All attempts failed for endpoint ${i + 1}`);
+        lastError = endpointError as Error;
+      }
     }
     
-    // Parse response and validate the data structure
-    const data = await response.json();
-    console.log('Stream API response:', data);
+    // If we get here, we've tried all endpoints
+    console.error('All stream endpoints failed:', lastError);
     
-    // Process the stream data based on its format
-    return processStreamData(data, source, id);
+    // Return demo stream data if all endpoints fail
+    return getDemoStreamData(source, id);
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    // Return a demo stream with YouTube embed for testing/fallback
-    return {
-      id: `demo-${id}`,
-      streamNo: 1,
-      language: "English",
-      hd: true,
-      embedUrl: generateCrossBrowserUrl(`https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0`),
-      source: source || "demo"
-    };
+    return getDemoStreamData(source, id);
   }
 };
 
-// Helper function to process different stream data formats
-function processStreamData(data: any, source: string, id: string): Stream {
-  try {
-    // Handle array response format
-    if (Array.isArray(data) && data.length > 0) {
-      // Find HD stream if available, otherwise take the first one
-      const hdStream = data.find(stream => stream.hd === true) || data[0];
-      
-      // Validate required properties
-      if (!hdStream.embedUrl) {
-        throw new Error('Stream data missing embedUrl');
-      }
-      
-      console.log('Using stream data:', hdStream);
-      
-      // Ensure the embedUrl is properly formatted (starts with http/https)
-      const embedUrl = generateCrossBrowserUrl(hdStream.embedUrl);
-      return {
-        ...hdStream,
-        embedUrl
-      };
-    } 
-    // Handle object response format
-    else if (data && typeof data === 'object' && data.embedUrl) {
-      console.log('Using single object stream data');
-      const embedUrl = generateCrossBrowserUrl(data.embedUrl);
-      return {
-        ...data,
-        embedUrl
-      };
-    }
-    
-    // If data structure is unexpected, throw error
-    throw new Error('Unexpected stream data format');
-  } catch (innerError) {
-    console.error('Error processing stream data:', innerError);
-    // Return fallback stream for troubleshooting
-    return getDemoStreamData(source, id);
+// Helper function to ensure embed URL is valid
+function ensureValidEmbedUrl(url: string): string {
+  // Return the provided URL if it seems valid
+  if (url && url.startsWith('http')) {
+    return url;
   }
+  
+  // Otherwise return a demo URL
+  return getDemoStreamData("default", "demo").embedUrl;
 }
 
-// Enhanced URL validation and transformation for cross-browser compatibility
-function generateCrossBrowserUrl(url: string): string {
-  if (!url) return '';
-  
-  let processedUrl = url;
-  
-  // Remove any parameters that might cause issues in some browsers
-  const problematicParams = ['autoplay=1', 'mute=1', 'allowfullscreen=true'];
-  problematicParams.forEach(param => {
-    processedUrl = processedUrl
-      .replace(`${param}&`, '')  // Middle of query string
-      .replace(`&${param}`, '')  // End of query string
-      .replace(`?${param}`, '?') // Start of query string
-      .replace(param, '');       // Only param
-  });
-  
-  // Fix query string if it's malformed after removing parameters
-  if (processedUrl.endsWith('?')) {
-    processedUrl = processedUrl.slice(0, -1);
-  }
-  
-  // Add necessary parameters for better compatibility
-  const separator = processedUrl.includes('?') ? '&' : '?';
-  processedUrl = `${processedUrl}${separator}autoplay=0&mute=0&allowfullscreen=true`;
-  
-  // Check if URL already has protocol
-  if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
-    return processedUrl;
-  }
-  
-  // If URL starts with //, add https:
-  if (processedUrl.startsWith('//')) {
-    return `https:${processedUrl}`;
-  }
-  
-  // If URL is relative, convert to absolute
-  if (processedUrl.startsWith('/')) {
-    try {
-      const baseUrl = new URL(API_BASE).origin;
-      return `${baseUrl}${processedUrl}`;
-    } catch (e) {
-      console.error('Error converting relative URL:', e);
-      return `https://streamed.su${processedUrl}`;
-    }
-  }
-  
-  // Default case - assume https
-  return `https://${processedUrl}`;
-}
-
-// Fallback demo stream data
+// Provides a demo stream when actual stream isn't available
 function getDemoStreamData(source: string, id: string): Stream {
   console.log('Using demo stream data');
+  
+  // Select an appropriate demo stream based on source/id
+  const sportType = id.includes('football') || source.includes('football') ? 'football' : 
+                    id.includes('basketball') || source.includes('basketball') ? 'basketball' : 'sports';
+  
+  // Return demo stream object with appropriate embed URL
   return {
     id: `demo-${id}`,
     streamNo: 1,
     language: "English",
     hd: true,
-    embedUrl: "https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=0&mute=0&allowfullscreen=true",
+    // Use publicly available sports stream embed for demo
+    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1&mute=0`,
     source: source || "demo"
   };
 }

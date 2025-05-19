@@ -32,7 +32,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
             onClick={() => onSelectSport(sport.id)}
             className={`px-6 py-2 rounded-lg transition-all whitespace-nowrap ${
               selectedSport === sport.id
-                ? 'bg-[#fa2d04] text-white shadow-lg shadow-[#fa2d04]/20'
+                ? 'bg-[#9b87f5] text-white shadow-lg shadow-[#9b87f5]/20'
                 : 'bg-[#242836] text-white hover:bg-[#343a4d]'
             }`}
             variant={selectedSport === sport.id ? "default" : "outline"}

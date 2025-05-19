@@ -30,14 +30,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <Input 
         type="text" 
         placeholder={placeholder} 
-        className="bg-[#242836] border border-[#343a4d] rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] text-white flex-grow"
+        className="bg-[#242836] border border-[#343a4d] rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#9b87f5] text-white flex-grow"
         value={value}
         onChange={onChange}
       />
       {showButton && (
         <Button 
           type="submit" 
-          className="ml-2 bg-[#fa2d04] hover:bg-[#e02703] rounded-full"
+          className="ml-2 bg-[#9b87f5] hover:bg-[#8a75e8] rounded-full"
         >
           <Search className="h-4 w-4" />
           <span className="sr-only">Search</span>

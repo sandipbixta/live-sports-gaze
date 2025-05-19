@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink, RefreshCw } from 'lucide-react';
@@ -269,7 +270,7 @@ const NewsSection = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           Sports News
-          <Link to="/news" className="text-sm text-[#fa2d04] font-normal ml-2 hover:underline">
+          <Link to="/news" className="text-sm text-[#9b87f5] font-normal ml-2 hover:underline">
             View All →
           </Link>
         </h2>
@@ -298,7 +299,7 @@ const NewsSection = () => {
             onClick={() => setActiveCategory(category.value)}
             className={`px-3 py-1 rounded-full text-sm whitespace-nowrap ${
               activeCategory === category.value 
-                ? 'bg-[#fa2d04] text-white' 
+                ? 'bg-[#9b87f5] text-white' 
                 : 'bg-[#1A1F2C] text-gray-300 hover:bg-[#343a4d]'
             }`}
           >

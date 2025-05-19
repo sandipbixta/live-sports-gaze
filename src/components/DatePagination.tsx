@@ -61,7 +61,7 @@ const DatePagination: React.FC<DatePaginationProps> = ({ currentDate, setCurrent
                 <PaginationLink 
                   className={cn(
                     "cursor-pointer w-full justify-center text-center px-1 py-2 rounded-md transition-all",
-                    date.isToday ? "bg-[#fa2d04] text-white" : 
+                    date.isToday ? "bg-[#9b87f5] text-white" : 
                     date.isCurrent ? "bg-[#343a4d] text-white" : 
                     "text-white hover:bg-[#343a4d]"
                   )}
