@@ -37,7 +37,7 @@ const MainNav = () => {
               <Link to={item.path}>
                 <NavigationMenuLink className={cn(
                   navigationMenuTriggerStyle(),
-                  "bg-transparent hover:bg-[#fa2d04] text-white"
+                  "bg-transparent hover:bg-[#242836] text-white"
                 )}>
                   <item.icon className="mr-2 h-4 w-4" />
                   {item.title}
