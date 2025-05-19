@@ -63,13 +63,13 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
         },
-        // Setting sports colors with !important flag in the color values
+        // Adding sports-specific colors
         sports: {
-          primary: '#fa2d04',  // Red color
-          secondary: '#0c4a6e', 
-          accent: '#fa2d04',   // Red for highlights
-          dark: '#111827',    
-          light: '#f1f5f9',    
+          primary: '#fa2d04',  // Changed from sky blue to red
+          secondary: '#0c4a6e', // Darker blue
+          accent: '#fa2d04',   // Changed to red for highlights
+          dark: '#111827',     // Almost black for backgrounds
+          light: '#f1f5f9',    // Very light gray for contrast
         }
       },
       borderRadius: {

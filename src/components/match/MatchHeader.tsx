@@ -1,6 +1,6 @@
 
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Match } from '@/types/sports';
@@ -12,7 +12,6 @@ interface MatchHeaderProps {
 }
 
 const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
@@ -23,10 +22,6 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
   const awayBadge = match.teams?.away?.badge 
     ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
     : '';
-  
-  const handleGoBack = () => {
-    navigate(-1); // Navigate back to the previous page
-  };
     
   return (
     <>
@@ -34,15 +29,12 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
       <header className="bg-sports-darker shadow-md">
         <div className="container mx-auto py-2 sm:py-4 px-2 sm:px-4">
           <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleGoBack}
-              className="text-gray-300 hover:text-white mr-2 sm:mr-4"
-            >
-              <ChevronLeft className="mr-1" />
-              Back
-            </Button>
+            <Link to="/" className="text-gray-300 hover:text-white mr-2 sm:mr-4">
+              <Button variant="ghost" size="sm">
+                <ChevronRight className="rotate-180 mr-1" />
+                Back
+              </Button>
+            </Link>
             <h1 className="text-base sm:text-xl font-bold text-white truncate">{match.title}</h1>
           </div>
         </div>

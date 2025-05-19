@@ -26,12 +26,8 @@ export interface Match {
   sources: Source[];
   related?: Match[]; // Related matches
   sportId?: string;  // Added sportId to identify which sport the match belongs to
-  embedUrl?: string; // Direct embedding URL if provided by the API
-  poster?: string;   // Added poster image URL from the streams API
-  error?: boolean;   // Added error flag for better error handling
 }
 
-// Adding back the Stream interface that was accidentally removed
 export interface Stream {
   id: string;
   streamNo: number;
@@ -39,27 +35,4 @@ export interface Stream {
   hd: boolean;
   embedUrl: string;
   source: string;
-  error?: boolean; // Added error flag for better error handling
-}
-
-// New interfaces for streams API usage
-export interface ApiStreamsCategory {
-  name: string;
-  id: string;
-  isAlwaysLive: boolean;
-  streams: ApiStream[];
-}
-
-export interface ApiStream {
-  id: string;
-  name: string;
-  tag: string;
-  poster: string;
-  uriName: string;
-  startsAt: Date;
-  endsAt: Date;
-  isAlwaysLive: boolean;
-  categoryName: string;
-  iframe?: string;
-  allowPastStreams: boolean;
 }

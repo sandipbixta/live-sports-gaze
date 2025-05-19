@@ -14,14 +14,7 @@ import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1
-    }
-  }
-});
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
