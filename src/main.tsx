@@ -22,7 +22,7 @@ if (!viewportMeta) {
 if (window.performance && 
     window.performance.navigation && 
     window.performance.navigation.type === 1) {
-  window.location.reload(true);
+  window.location.reload();
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
