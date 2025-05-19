@@ -9,20 +9,20 @@ interface TabsNavigationProps {
 
 const TabsNavigation = ({ activeTab, setActiveTab }: TabsNavigationProps) => {
   return (
-    <div className="bg-sports-card sticky top-0 z-10 border-b border-sports">
+    <div className="bg-[#fa2d04] sticky top-0 z-10 border-b border-sports">
       <div className="container mx-auto">
         <div className="flex overflow-x-auto scrollbar-none">
           <Button 
             variant="ghost" 
             onClick={() => setActiveTab('stream')}
-            className={`py-4 px-6 rounded-none ${activeTab === 'stream' ? 'border-b-2 border-[#fa2d04] text-white' : 'text-gray-400'}`}
+            className={`py-4 px-6 rounded-none ${activeTab === 'stream' ? 'border-b-2 border-white text-white font-bold' : 'text-gray-200'}`}
           >
             <Video className="h-4 w-4 mr-2" /> Stream
           </Button>
           <Button 
             variant="ghost" 
             onClick={() => setActiveTab('highlights')}
-            className={`py-4 px-6 rounded-none ${activeTab === 'highlights' ? 'border-b-2 border-[#fa2d04] text-white' : 'text-gray-400'}`}
+            className={`py-4 px-6 rounded-none ${activeTab === 'highlights' ? 'border-b-2 border-white text-white font-bold' : 'text-gray-200'}`}
           >
             <Film className="h-4 w-4 mr-2" /> Highlights
           </Button>
