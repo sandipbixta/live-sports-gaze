@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, Eye } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
@@ -19,7 +19,31 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
+  const [viewerCount, setViewerCount] = useState<number>(0);
   const isMobile = useIsMobile();
+  
+  // Generate a random but realistic viewer count between 500 and 15000
+  useEffect(() => {
+    if (stream && !isLoading) {
+      // Generate viewer count based on time of day (more viewers during evenings)
+      const hour = new Date().getHours();
+      const baseViewers = hour >= 18 || hour <= 2 ? 5000 : 2000; // Prime time vs non-prime time
+      const randomFactor = Math.random() * 0.5 + 0.75; // 0.75 to 1.25 multiplier for variety
+      const calculatedViewers = Math.floor(baseViewers * randomFactor);
+      
+      // Add a small random increase every few seconds to simulate real-time changes
+      const interval = setInterval(() => {
+        setViewerCount(current => {
+          const change = Math.floor(Math.random() * 10) - 3; // -3 to +6 viewers
+          return Math.max(500, current + change); // Never go below 500 viewers
+        });
+      }, 5000);
+      
+      setViewerCount(calculatedViewers);
+      
+      return () => clearInterval(interval);
+    }
+  }, [stream, isLoading]);
   
   const togglePictureInPicture = async () => {
     try {
@@ -72,7 +96,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
-              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
+              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#ff5a36]" />
               <p className="text-lg sm:text-xl">Loading stream...</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
             </div>
@@ -158,7 +182,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         {!isContentLoaded && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
-              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#9b87f5]" />
+              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#ff5a36]" />
               <p className="text-lg sm:text-xl">Loading stream...</p>
               <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
             </div>
@@ -175,6 +199,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           onError={() => setLoadError(true)}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         ></iframe>
+
+        {/* Live viewer count overlay */}
+        <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 bg-black/70 px-2 py-1 rounded-full">
+          <Eye className="w-3.5 h-3.5 text-[#ff5a36]" />
+          <span className="text-xs font-medium text-white">
+            {viewerCount.toLocaleString()} watching
+          </span>
+        </div>
       </AspectRatio>
       
       {/* Controls overlay */}

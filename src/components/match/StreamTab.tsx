@@ -6,7 +6,7 @@ import PopularMatches from '@/components/PopularMatches';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { AlertCircle, Clock } from 'lucide-react';
+import { AlertCircle, Clock, Eye } from 'lucide-react';
 import { fetchStream } from '@/api/sportsApi';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +33,7 @@ const StreamTab = ({
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
+  const [viewerCount, setViewerCount] = useState<number>(0);
   
   // Function to generate stream ID from match ID if needed
   const getStreamId = () => {
@@ -40,6 +41,31 @@ const StreamTab = ({
   };
   
   const streamId = getStreamId();
+  
+  // Generate viewer count for this match
+  useEffect(() => {
+    if (match && isMatchLive()) {
+      // Base count on popularity of the match
+      const trendinScore = isTrendingMatch(match.title).score;
+      const baseViewers = trendinScore >= 8 ? 10000 : 
+                          trendinScore >= 5 ? 5000 : 2000;
+                          
+      // Add some randomness
+      const randomFactor = Math.random() * 0.5 + 0.75; // 0.75 to 1.25
+      const initialCount = Math.floor(baseViewers * randomFactor);
+      setViewerCount(initialCount);
+      
+      // Simulate small changes in viewer count
+      const interval = setInterval(() => {
+        setViewerCount(current => {
+          const change = Math.floor(Math.random() * 10) - 3; // -3 to +6 viewers
+          return Math.max(500, current + change);
+        });
+      }, 5000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [match]);
   
   // Logging for debugging
   useEffect(() => {
@@ -123,16 +149,20 @@ const StreamTab = ({
         streamId={streamId}
       />
       
-      {/* Match status - Live or Upcoming */}
+      {/* Match status - Live or Upcoming with viewer count */}
       {!loadingStream && (
         <div className="flex justify-center mt-4">
           {isMatchLive() ? (
             <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
               <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
               LIVE NOW
+              <span className="flex items-center ml-2 text-white">
+                <Eye size={12} className="mr-1" />
+                {viewerCount.toLocaleString()}
+              </span>
             </Badge>
           ) : (
-            <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1">
+            <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
               <Clock size={14} />
               Starts at {formatMatchTime(match.date)}
             </Badge>
