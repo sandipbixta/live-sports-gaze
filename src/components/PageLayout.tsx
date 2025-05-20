@@ -22,7 +22,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   
   return (
     <div className="min-h-screen bg-[#1A1F2C] text-white">
-      <header className="bg-[#151922] shadow-md">
+      <header className="bg-[#ff5a36] shadow-md">
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
             <MainNav />
