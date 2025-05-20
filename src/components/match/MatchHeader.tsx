@@ -195,7 +195,7 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
           {/* Live badge for desktop */}
           {!isMobile && streamAvailable && (
             <div className="flex justify-center mt-6 md:mt-8">
-              <Badge variant="live" className="px-3 py-1 text-sm md:text-base bg-[#fa2d04]">LIVE NOW</Badge>
+              <Badge variant="live" className="px-3 py-1 text-sm md:text-base bg-[#ff5a36]">LIVE NOW</Badge>
             </div>
           )}
         </div>

@@ -32,7 +32,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 <Input 
                   type="text" 
                   placeholder="Search events..." 
-                  className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#fa2d04] w-full sm:w-64 text-white"
+                  className="bg-[#242836] border border-[#343a4d] rounded-full py-1 sm:py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-[#ff5a36] w-full sm:w-64 text-white"
                   value={searchTerm}
                   onChange={onSearch}
                 />
