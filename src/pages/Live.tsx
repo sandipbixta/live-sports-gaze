@@ -318,7 +318,7 @@ const Live = () => {
         <div className="flex items-center gap-2 mb-4">
           {getSportIcon(sportId)}
           <h3 className="text-xl font-bold text-white">{getSportName(sportId)}</h3>
-          <Badge variant="outline" className="ml-2 bg-[#242836] text-xs">
+          <Badge variant="outline" className="ml-2 bg-[#242836] text-white text-xs">
             {groupedMatches[sportId].length} {groupedMatches[sportId].length === 1 ? 'match' : 'matches'}
           </Badge>
         </div>
