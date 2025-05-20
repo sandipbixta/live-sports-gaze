@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -36,17 +37,16 @@ const Live = () => {
   // Determine if we're on mobile
   const isMobile = useIsMobile();
   
-  // Check if a match is currently live
+  // Check if a match is currently live - Modified criteria to include more matches
   const isMatchLive = (match: Match): boolean => {
-    // A match is considered live if it has sources AND the match time is within 2 hours of now
+    // A match is considered live if it has sources OR the match time is within 3 hours of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
-    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    const threeHoursInMs = 3 * 60 * 60 * 1000; // Increased window from 2 to 3 hours
     
     return (
-      match.sources && 
-      match.sources.length > 0 && 
-      Math.abs(matchTime - now) < twoHoursInMs
+      (match.sources && match.sources.length > 0) || 
+      Math.abs(matchTime - now) < threeHoursInMs
     );
   };
 
@@ -136,20 +136,24 @@ const Live = () => {
         console.log('Sports data:', sportsData);
         
         // Fetch from multiple sports to find live matches
-        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey']; // Extended sport IDs
+        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey', 'tennis', 'baseball', 'cricket', 'rugby', 'golf']; // Extended sport IDs
         let allFetchedMatches: Match[] = [];
         
         for (const sportId of sportIds) {
           console.log(`Fetching matches for sport ID: ${sportId}`);
-          const matches = await fetchMatches(sportId);
-          console.log(`Matches for ${sportId}:`, matches ? matches.length : 0);
-          
-          // Add sport ID as a property to each match for reference
-          const matchesWithSportId = matches.map(match => ({
-            ...match,
-            sportId
-          }));
-          allFetchedMatches = [...allFetchedMatches, ...matchesWithSportId];
+          try {
+            const matches = await fetchMatches(sportId);
+            console.log(`Matches for ${sportId}:`, matches ? matches.length : 0);
+            
+            // Add sport ID as a property to each match for reference
+            const matchesWithSportId = matches.map(match => ({
+              ...match,
+              sportId
+            }));
+            allFetchedMatches = [...allFetchedMatches, ...matchesWithSportId];
+          } catch (error) {
+            console.error(`Error fetching matches for sport ${sportId}:`, error);
+          }
         }
         
         console.log('All matches before filtering:', allFetchedMatches.length);
@@ -162,7 +166,7 @@ const Live = () => {
         
         console.log('Matches after filtering ads:', allFetchedMatches.length);
         
-        // Separate matches into live and upcoming
+        // Separate matches into live and upcoming using modified isMatchLive criteria
         const live = allFetchedMatches.filter(isMatchLive);
         const upcoming = allFetchedMatches.filter(match => !isMatchLive(match));
         
@@ -175,7 +179,8 @@ const Live = () => {
         setFilteredMatches(allFetchedMatches);
         
         // Set featured match (first live one with sources if available, otherwise first match)
-        const firstLiveMatch = live.length > 0 ? live[0] : null;
+        const liveWithSources = live.filter(match => match.sources && match.sources.length > 0);
+        const firstLiveMatch = liveWithSources.length > 0 ? liveWithSources[0] : null;
         const firstMatch = allFetchedMatches.length > 0 ? allFetchedMatches[0] : null;
         const matchToFeature = firstLiveMatch || firstMatch;
         
@@ -380,7 +385,7 @@ const Live = () => {
             />
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 bg-[#242836] px-3 py-1.5 rounded-full">
-                <Tv size={16} className="text-[#fa2d04] animate-pulse" />
+                <Tv size={16} className="text-[#ff5a36] animate-pulse" />
                 <span className="text-sm font-medium text-white" aria-live="polite">
                   {liveMatches.length} Live Now
                 </span>
@@ -489,7 +494,7 @@ const Live = () => {
               size="sm"
               className={`${
                 activeSportFilter === 'all' 
-                  ? 'bg-[#343a4d] border-[#9b87f5]' 
+                  ? 'bg-[#343a4d] border-[#ff5a36]' 
                   : 'bg-[#242836] border-[#343a4d]'
               } whitespace-nowrap`}
               onClick={() => setActiveSportFilter('all')}
@@ -503,7 +508,7 @@ const Live = () => {
                 size="sm"
                 className={`${
                   activeSportFilter === sportId 
-                    ? 'bg-[#343a4d] border-[#9b87f5]' 
+                    ? 'bg-[#343a4d] border-[#ff5a36]' 
                     : 'bg-[#242836] border-[#343a4d]'
                 } whitespace-nowrap flex items-center gap-1`}
                 onClick={() => setActiveSportFilter(sportId)}
@@ -535,7 +540,7 @@ const Live = () => {
               value="live" 
               className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
             >
-              <span className="inline-block h-2 w-2 bg-[#fa2d04] rounded-full animate-pulse mr-1"></span>
+              <span className="inline-block h-2 w-2 bg-[#ff5a36] rounded-full animate-pulse mr-1"></span>
               Live Now ({liveMatches.length})
             </TabsTrigger>
             <TabsTrigger 

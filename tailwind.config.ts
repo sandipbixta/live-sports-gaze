@@ -63,11 +63,11 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
         },
-        // Adding sports-specific colors
+        // Updating sports-specific colors
         sports: {
-          primary: '#fa2d04',  // Changed from sky blue to red
+          primary: '#ff5a36',  // Changed to #ff5a36
           secondary: '#0c4a6e', // Darker blue
-          accent: '#fa2d04',   // Changed to red for highlights
+          accent: '#ff5a36',   // Changed to #ff5a36
           dark: '#111827',     // Almost black for backgrounds
           light: '#f1f5f9',    // Very light gray for contrast
         }
