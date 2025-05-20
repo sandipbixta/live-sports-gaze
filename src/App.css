@@ -14,11 +14,11 @@
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em #fa2d04aa);
+  filter: drop-shadow(0 0 2em #ff5a36);
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #fa2d04aa);
+  filter: drop-shadow(0 0 2em #ff5a36);
 }
 
 @keyframes logo-spin {
