@@ -30,7 +30,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                   value={searchTerm || ''}
                   onChange={onSearch}
                   placeholder="Search events..."
-                  className="w-full sm:w-64"
+                  className="w-40 sm:w-64"
                 />
               </div>
             )}
