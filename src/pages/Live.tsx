@@ -37,16 +37,17 @@ const Live = () => {
   // Determine if we're on mobile
   const isMobile = useIsMobile();
   
-  // Check if a match is currently live - Modified criteria to include more matches
+  // Check if a match is currently live - More strict criteria
   const isMatchLive = (match: Match): boolean => {
-    // A match is considered live if it has sources OR the match time is within 3 hours of now
+    // A match is considered live only if it has sources AND the match time is within 1 hour of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
-    const threeHoursInMs = 3 * 60 * 60 * 1000; // Increased window from 2 to 3 hours
+    const oneHourInMs = 60 * 60 * 1000;
     
     return (
-      (match.sources && match.sources.length > 0) || 
-      Math.abs(matchTime - now) < threeHoursInMs
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < oneHourInMs
     );
   };
 
@@ -166,9 +167,21 @@ const Live = () => {
         
         console.log('Matches after filtering ads:', allFetchedMatches.length);
         
-        // Separate matches into live and upcoming using modified isMatchLive criteria
-        const live = allFetchedMatches.filter(isMatchLive);
-        const upcoming = allFetchedMatches.filter(match => !isMatchLive(match));
+        // Separate matches into live and upcoming using strict criteria
+        const live = allFetchedMatches.filter(match => {
+          const matchTime = new Date(match.date).getTime();
+          const now = new Date().getTime();
+          const oneHourInMs = 60 * 60 * 1000;
+          
+          return match.sources && 
+                 match.sources.length > 0 && 
+                 matchTime - now < oneHourInMs && // Match hasn't started more than an hour in the future
+                 now - matchTime < oneHourInMs;   // Match hasn't ended more than an hour ago
+        });
+        
+        const upcoming = allFetchedMatches.filter(match => 
+          !live.some(liveMatch => liveMatch.id === match.id)
+        );
         
         console.log('Live matches:', live.length);
         console.log('Upcoming matches:', upcoming.length);
