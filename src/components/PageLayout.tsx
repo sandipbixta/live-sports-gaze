@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import MainNav from './MainNav';
@@ -22,17 +23,39 @@ const PageLayout: React.FC<PageLayoutProps> = ({
     <div className="min-h-screen bg-[#1A1F2C] text-white">
       <header className="bg-[#ff5a36] shadow-md">
         <div className="container mx-auto py-2 px-2">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
-            <MainNav />
-            {onSearch && (
-              <div className="relative w-full sm:w-auto">
-                <SearchBar
-                  value={searchTerm || ''}
-                  onChange={onSearch}
-                  placeholder="Search events..."
-                  className="w-40 sm:w-64"
-                />
-              </div>
+          <div className="flex flex-row justify-between items-center gap-2">
+            {isMobile ? (
+              <>
+                <Link to="/" className="flex-shrink-0">
+                  <h1 className="text-2xl font-bold text-white">
+                    DAMITV
+                  </h1>
+                </Link>
+                {onSearch && (
+                  <div className="relative">
+                    <SearchBar
+                      value={searchTerm || ''}
+                      onChange={onSearch}
+                      placeholder="Search events..."
+                      className="w-32"
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <MainNav />
+                {onSearch && (
+                  <div className="relative w-full sm:w-auto">
+                    <SearchBar
+                      value={searchTerm || ''}
+                      onChange={onSearch}
+                      placeholder="Search events..."
+                      className="w-64"
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
