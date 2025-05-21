@@ -34,9 +34,19 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
     );
   };
 
-  // Separate matches into live and upcoming
-  const liveMatches = filteredMatches.filter(isMatchLive);
-  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
+  // Separate matches into live and upcoming more strictly
+  const liveMatches = filteredMatches.filter(match => {
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    // Only consider it live if it's happening now (within last hour to next hour)
+    const oneHourInMs = 60 * 60 * 1000;
+    return match.sources && 
+           match.sources.length > 0 && 
+           matchTime - now < oneHourInMs && // Match hasn't started more than an hour in the future
+           now - matchTime < oneHourInMs;   // Match hasn't ended more than an hour ago
+  });
+  
+  const upcomingMatches = filteredMatches.filter(match => !liveMatches.includes(match));
 
   if (isLoading) {
     return (
@@ -69,7 +79,10 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             <span className="inline-block h-3 w-3 bg-[#ff5a36] rounded-full animate-pulse"></span>
-            Live Matches
+            Live Matches 
+            <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+              {liveMatches.length} {liveMatches.length === 1 ? 'match' : 'matches'}
+            </span>
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
             {liveMatches.map((match) => (
@@ -87,7 +100,10 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
       {upcomingMatches.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
-            Upcoming Matches
+            Upcoming Matches 
+            <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+              {upcomingMatches.length} {upcomingMatches.length === 1 ? 'match' : 'matches'}
+            </span>
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
             {upcomingMatches.map((match) => (
@@ -107,6 +123,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             <span className="inline-block h-3 w-3 bg-[#ff5a36] rounded-full"></span>
             Live Matches
+            <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+              0 matches
+            </span>
           </h2>
           <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center mb-8">
             <p className="text-gray-300 text-sm">No live matches available right now.</p>
@@ -119,6 +138,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
         <div>
           <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
             Upcoming Matches
+            <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+              0 matches
+            </span>
           </h2>
           <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center">
             <p className="text-gray-300 text-sm">No upcoming matches scheduled at this time.</p>
