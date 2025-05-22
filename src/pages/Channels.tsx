@@ -8,6 +8,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
+import { Tv, Calendar } from 'lucide-react';
 
 const Channels = () => {
   const isMobile = useIsMobile();
@@ -17,7 +18,7 @@ const Channels = () => {
       <Helmet>
         <title>Live TV Channels | DamiTV - Stream International Sports</title>
         <meta name="description" content="Watch live international sports TV channels from around the world. Stream football, basketball, tennis and more sports channels in HD quality for free." />
-        <meta name="keywords" content="live tv channels, sports tv, international channels, football streaming, basketball streaming, free sports channels" />
+        <meta name="keywords" content="live tv channels, sports tv, international channels, football streaming, basketball streaming, free sports channels, tv guide, epg" />
         <link rel="canonical" href="https://damitv.pro/channels" />
         <script type="application/ld+json">
         {`
@@ -38,9 +39,17 @@ const Channels = () => {
       </Helmet>
       
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-4">Live TV Channels</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold text-white">Live TV Channels</h1>
+          <Link to="/schedule" className="hidden sm:flex items-center gap-2">
+            <Button variant="outline" size="sm" className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]">
+              <Calendar className="h-4 w-4 mr-2" />
+              Full Schedule
+            </Button>
+          </Link>
+        </div>
         <p className="text-gray-300 mb-6">
-          Watch international sports channels from around the world. Select a country and channel to start streaming.
+          Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
         {/* Single ad placement before channel grid - responsive */}

@@ -17,6 +17,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
   onClick,
   isActive = false
 }) => {
+  // Generate a logo from the title
+  const generateInitials = () => {
+    return title
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
+  };
+  
   return (
     <Card 
       className={`overflow-hidden cursor-pointer transition-all duration-200 ${
@@ -28,8 +37,16 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
-          <div className="bg-[#343a4d] rounded-full p-1">
-            <Tv className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
+          <div className={`rounded-full p-1.5 flex items-center justify-center ${
+            isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]'
+          }`}>
+            {isActive ? (
+              <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+            ) : (
+              <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-gray-300">
+                {generateInitials()}
+              </div>
+            )}
           </div>
           <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
         </div>
