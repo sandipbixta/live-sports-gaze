@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader } from 'lucide-react';
+import { getCountries } from '@/data/tvChannels';
 
 interface Program {
   id: string;
@@ -24,47 +25,99 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   const [programData, setProgramData] = useState<ChannelProgram[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [allEpgData, setAllEpgData] = useState<Record<string, ChannelProgram[]>>({});
+  const countries = getCountries();
 
-  // Fetch TV guide data
+  // Fetch ALL TV guide data for all countries
   useEffect(() => {
-    const fetchEpgData = async () => {
+    const fetchAllEpgData = async () => {
       setIsLoading(true);
+      
       try {
-        // Format country name for URL (lowercase, replace spaces with hyphens)
-        const formattedCountry = selectedCountry.toLowerCase().replace(/\s+/g, '-');
-        console.log(`Fetching EPG data for: ${formattedCountry}`);
+        console.log('Fetching ALL EPG data for all countries');
         
-        // First try the GitHub raw content direct URL
-        let response = await fetch(`https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-${formattedCountry}.json`)
+        // First try to fetch the combined EPG data
+        let combinedResponse = await fetch('https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-all.json')
           .catch(() => {
-            console.log('Failed with first URL, trying alternative location');
-            return fetch(`https://sandipbixta.github.io/epg-damitv/epg-${formattedCountry}.json`);
+            console.log('Failed with combined EPG URL, trying alternative location');
+            return fetch('https://sandipbixta.github.io/epg-damitv/epg-all.json');
           });
+          
+        // If combined data exists and is valid, use it
+        if (combinedResponse.ok) {
+          const combinedData = await combinedResponse.json();
+          console.log('Combined EPG data fetched successfully');
+          setAllEpgData(combinedData);
+          
+          // Set initial data to match selected country
+          if (combinedData[selectedCountry]) {
+            setProgramData(combinedData[selectedCountry]);
+          } else {
+            setProgramData([]);
+          }
+          
+          setIsLoading(false);
+          return;
+        }
+
+        // If combined data doesn't exist, fetch individual country data
+        console.log('Combined EPG not found, fetching individual country EPGs');
+        const epgByCountry: Record<string, ChannelProgram[]> = {};
         
-        // If both fail, try the default EPG
-        if (!response.ok) {
-          console.log('Country-specific EPG failed, trying default EPG');
-          response = await fetch('https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-default.json')
-            .catch(() => fetch('https://sandipbixta.github.io/epg-damitv/epg-default.json'));
+        // Create array of fetch promises for all countries
+        const fetchPromises = countries.map(async (country) => {
+          const formattedCountry = country.toLowerCase().replace(/\s+/g, '-');
+          
+          try {
+            // Try both potential URLs for each country
+            let response = await fetch(`https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-${formattedCountry}.json`)
+              .catch(() => fetch(`https://sandipbixta.github.io/epg-damitv/epg-${formattedCountry}.json`));
+            
+            if (response.ok) {
+              const data = await response.json();
+              epgByCountry[country] = data;
+              console.log(`EPG for ${country} fetched successfully: ${data.length} channels`);
+            } else {
+              console.log(`No EPG found for ${country}`);
+              epgByCountry[country] = [];
+            }
+          } catch (error) {
+            console.error(`Error fetching EPG for ${country}:`, error);
+            epgByCountry[country] = [];
+          }
+        });
+        
+        // Wait for all fetches to complete
+        await Promise.allSettled(fetchPromises);
+        
+        // Try to get default EPG for countries with empty data
+        const defaultResponse = await fetch('https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-default.json')
+          .catch(() => fetch('https://sandipbixta.github.io/epg-damitv/epg-default.json'));
+          
+        if (defaultResponse.ok) {
+          const defaultData = await defaultResponse.json();
+          countries.forEach(country => {
+            if (!epgByCountry[country] || epgByCountry[country].length === 0) {
+              console.log(`Using default EPG for ${country}`);
+              epgByCountry[country] = defaultData;
+            }
+          });
         }
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log('EPG data fetched successfully:', data.length, 'channels');
-          setProgramData(data);
-        } else {
-          console.error('Failed to fetch EPG data');
-          setProgramData([]);
-        }
+        setAllEpgData(epgByCountry);
+        
+        // Set initial data to match selected country
+        setProgramData(epgByCountry[selectedCountry] || []);
+        
       } catch (error) {
-        console.error('Error fetching EPG data:', error);
+        console.error('Error in EPG data fetching process:', error);
         setProgramData([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchEpgData();
+    fetchAllEpgData();
     
     // Update current time every minute
     const intervalId = setInterval(() => {
@@ -72,7 +125,16 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
     }, 60000);
     
     return () => clearInterval(intervalId);
-  }, [selectedCountry]);
+  }, []); // Only fetch on initial load
+  
+  // Update displayed program data when selected country changes
+  useEffect(() => {
+    if (allEpgData[selectedCountry]) {
+      setProgramData(allEpgData[selectedCountry]);
+    } else {
+      setProgramData([]);
+    }
+  }, [selectedCountry, allEpgData]);
 
   // Format time for display
   const formatTime = (timeString: string) => {
@@ -98,7 +160,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         <CardContent className="p-6 flex justify-center items-center">
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
-            <p className="text-white">Loading TV guide...</p>
+            <p className="text-white">Loading complete TV guide...</p>
           </div>
         </CardContent>
       </Card>
@@ -110,7 +172,10 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
       <Card className="bg-[#151922] border-[#343a4d] mt-6">
         <CardContent className="p-6 text-center">
           <p className="text-gray-400">No TV guide available for {selectedCountry} channels.</p>
-          <p className="text-gray-500 mt-2 text-sm">The guide data may be temporarily unavailable. Please try again later.</p>
+          <p className="text-gray-500 mt-2 text-sm">
+            The guide data for {selectedCountry} may be temporarily unavailable. 
+            Try selecting a different country or check again later.
+          </p>
         </CardContent>
       </Card>
     );

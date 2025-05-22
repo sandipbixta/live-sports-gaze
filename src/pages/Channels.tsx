@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
@@ -14,7 +14,10 @@ const Channels = () => {
   const isMobile = useIsMobile();
   
   // Log when the Channels page loads
-  console.log('Channels page loaded', new Date().toISOString());
+  useEffect(() => {
+    console.log('Channels page loaded', new Date().toISOString());
+    console.log('EPG data will be loaded for all available countries');
+  }, []);
   
   return (
     <PageLayout>
