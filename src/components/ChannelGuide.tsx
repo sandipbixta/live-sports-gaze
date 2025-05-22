@@ -30,13 +30,27 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
     const fetchEpgData = async () => {
       setIsLoading(true);
       try {
-        // Simulate fetching EPG data for the selected country
-        // In production, this would be a real API call to the EPG service
-        const response = await fetch(`https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-${selectedCountry.toLowerCase().replace(/\s+/g, '-')}.json`)
-          .catch(() => fetch('https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-default.json'));
+        // Format country name for URL (lowercase, replace spaces with hyphens)
+        const formattedCountry = selectedCountry.toLowerCase().replace(/\s+/g, '-');
+        console.log(`Fetching EPG data for: ${formattedCountry}`);
+        
+        // First try the GitHub raw content direct URL
+        let response = await fetch(`https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-${formattedCountry}.json`)
+          .catch(() => {
+            console.log('Failed with first URL, trying alternative location');
+            return fetch(`https://sandipbixta.github.io/epg-damitv/epg-${formattedCountry}.json`);
+          });
+        
+        // If both fail, try the default EPG
+        if (!response.ok) {
+          console.log('Country-specific EPG failed, trying default EPG');
+          response = await fetch('https://raw.githubusercontent.com/sandipbixta/epg-damitv/main/epg-default.json')
+            .catch(() => fetch('https://sandipbixta.github.io/epg-damitv/epg-default.json'));
+        }
         
         if (response.ok) {
           const data = await response.json();
+          console.log('EPG data fetched successfully:', data.length, 'channels');
           setProgramData(data);
         } else {
           console.error('Failed to fetch EPG data');
@@ -96,6 +110,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
       <Card className="bg-[#151922] border-[#343a4d] mt-6">
         <CardContent className="p-6 text-center">
           <p className="text-gray-400">No TV guide available for {selectedCountry} channels.</p>
+          <p className="text-gray-500 mt-2 text-sm">The guide data may be temporarily unavailable. Please try again later.</p>
         </CardContent>
       </Card>
     );

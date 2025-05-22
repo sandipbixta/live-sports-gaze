@@ -13,6 +13,9 @@ import { Tv, Calendar } from 'lucide-react';
 const Channels = () => {
   const isMobile = useIsMobile();
   
+  // Log when the Channels page loads
+  console.log('Channels page loaded', new Date().toISOString());
+  
   return (
     <PageLayout>
       <Helmet>
