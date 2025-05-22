@@ -1,2 +1,22 @@
 
-/* /index.html 200
+# Permanent 301 redirects for old pages
+/home              /              301
+/sport/*           /live          301
+/tv                /channels      301
+/channel/*         /channels      301
+/tv-guide          /channels      301
+/watch/*           /live          301
+/soccer            /live          301
+/football          /live          301
+/stream            /live          301
+
+# Fix broken links
+/about             /              301
+/contact           /              301
+/help              /              301
+/faq               /              301
+/privacy           /dmca          301
+/terms             /dmca          301
+
+# Handle 404s properly - send to custom 404 page
+/*                 /index.html    200

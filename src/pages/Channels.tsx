@@ -23,6 +23,8 @@ const Channels = () => {
         <meta name="description" content="Watch live international sports TV channels from around the world. Stream football, basketball, tennis and more sports channels in HD quality for free." />
         <meta name="keywords" content="live tv channels, sports tv, international channels, football streaming, basketball streaming, free sports channels, tv guide, epg" />
         <link rel="canonical" href="https://damitv.pro/channels" />
+        {/* Prevent duplicate content issues by explicitly indicating that this is the canonical version */}
+        <meta name="robots" content="index, follow" />
         <script type="application/ld+json">
         {`
           {
@@ -34,7 +36,16 @@ const Channels = () => {
             "broadcastTimezone": "UTC",
             "broadcaster": {
               "@type": "Organization",
-              "name": "DamiTV Sports"
+              "name": "DamiTV Sports",
+              "url": "https://damitv.pro"
+            },
+            "inLanguage": "en",
+            "potentialAction": {
+              "@type": "WatchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://damitv.pro/channels"
+              }
             }
           }
         `}

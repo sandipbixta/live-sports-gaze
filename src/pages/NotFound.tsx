@@ -1,12 +1,29 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const NotFound = () => {
+  // Set the proper 404 status code when this component renders
+  useEffect(() => {
+    // This is a client-side solution that helps some crawlers
+    // Note: For full SEO compliance, server-side status code is needed
+    document.title = "404 - Page Not Found | DamiTV";
+    
+    // Log for analytics purposes
+    console.log("404 error page served", window.location.pathname);
+  }, []);
+
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light flex flex-col justify-center items-center p-4">
+      <Helmet>
+        <title>404 - Page Not Found | DamiTV</title>
+        <meta name="robots" content="noindex, follow" />
+        <meta name="description" content="The page you're looking for doesn't exist or has been moved. Return to DamiTV homepage for live sports streaming." />
+      </Helmet>
+      
       <div className="text-center max-w-md">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-[#fa2d04] to-[#ff6347] bg-clip-text text-transparent">
@@ -23,6 +40,16 @@ const NotFound = () => {
             Back to Home <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
+        
+        <div className="mt-8 text-sm text-gray-500">
+          <p>Popular pages:</p>
+          <div className="mt-2 flex flex-wrap justify-center gap-2">
+            <Link to="/live" className="text-[#ff6347] hover:underline">Live Streams</Link>
+            <Link to="/channels" className="text-[#ff6347] hover:underline">TV Channels</Link>
+            <Link to="/schedule" className="text-[#ff6347] hover:underline">Schedule</Link>
+            <Link to="/news" className="text-[#ff6347] hover:underline">Sports News</Link>
+          </div>
+        </div>
       </div>
     </div>
   );

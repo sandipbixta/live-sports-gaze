@@ -1,11 +1,13 @@
+
 User-agent: *
 Allow: /
 
 Sitemap: https://damitv.pro/sitemap.xml
 
-# Allow specific bots
+# Allow specific bots with explicit permissions
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
@@ -22,3 +24,10 @@ Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
+
+# Explicitly allow important directories
+Allow: /channels
+Allow: /live
+Allow: /news
+Allow: /schedule
+Allow: /match
