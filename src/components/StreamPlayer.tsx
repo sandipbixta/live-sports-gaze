@@ -1,12 +1,12 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, Eye } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, Eye, ArrowLeft } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -15,12 +15,17 @@ interface StreamPlayerProps {
 }
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLIFrameElement>(null);
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [viewerCount, setViewerCount] = useState<number>(0);
   const isMobile = useIsMobile();
+  
+  const handleGoBack = () => {
+    navigate(-1);
+  };
   
   // Generate a random but realistic viewer count between 500 and 15000
   useEffect(() => {
@@ -93,6 +98,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (isLoading) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
+        <div className="absolute top-2 left-2 z-30">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            onClick={handleGoBack}
+          >
+            <ArrowLeft className="h-4 w-4 text-white" />
+          </Button>
+        </div>
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
@@ -109,6 +124,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (!stream) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
+        <div className="absolute top-2 left-2 z-30">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            onClick={handleGoBack}
+          >
+            <ArrowLeft className="h-4 w-4 text-white" />
+          </Button>
+        </div>
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
@@ -128,6 +153,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (!validEmbedUrl) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
+        <div className="absolute top-2 left-2 z-30">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            onClick={handleGoBack}
+          >
+            <ArrowLeft className="h-4 w-4 text-white" />
+          </Button>
+        </div>
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
@@ -154,6 +189,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (loadError) {
     return (
       <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
+        <div className="absolute top-2 left-2 z-30">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            onClick={handleGoBack}
+          >
+            <ArrowLeft className="h-4 w-4 text-white" />
+          </Button>
+        </div>
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-white text-center">
@@ -177,6 +222,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   return (
     <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
+      <div className="absolute top-2 left-2 z-30">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+          onClick={handleGoBack}
+        >
+          <ArrowLeft className="h-4 w-4 text-white" />
+        </Button>
+      </div>
+      
       <AspectRatio ratio={16 / 9} className="w-full">
         {/* Loading overlay shown until iframe loads */}
         {!isContentLoaded && (
@@ -201,7 +257,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         ></iframe>
 
         {/* Live viewer count overlay */}
-        <div className="absolute top-2 left-2 z-20 flex items-center gap-1.5 bg-black/70 px-2 py-1 rounded-full">
+        <div className="absolute top-2 left-12 z-20 flex items-center gap-1.5 bg-black/70 px-2 py-1 rounded-full">
           <Eye className="w-3.5 h-3.5 text-[#ff5a36]" />
           <span className="text-xs font-medium text-white">
             {viewerCount.toLocaleString()} watching
