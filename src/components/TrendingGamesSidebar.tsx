@@ -55,7 +55,7 @@ const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ matches, sp
 
   if (trendingMatches.length === 0) {
     return (
-      <Sidebar className="w-80 border-l border-[#343a4d]">
+      <Sidebar side="right" className="w-80 border-l border-[#343a4d]">
         <SidebarContent className="bg-[#1a1f2e]">
           <SidebarGroup>
             <SidebarGroupLabel className="text-white flex items-center gap-2">
@@ -74,7 +74,7 @@ const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ matches, sp
   }
 
   return (
-    <Sidebar className="w-80 border-l border-[#343a4d]">
+    <Sidebar side="right" className="w-80 border-l border-[#343a4d]">
       <SidebarContent className="bg-[#1a1f2e]">
         <SidebarGroup>
           <SidebarGroupLabel className="text-white flex items-center gap-2">

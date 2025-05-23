@@ -120,8 +120,8 @@ const Match = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-sports-dark text-sports-light w-full flex">
-        {/* Main Content */}
-        <div className="flex-1">
+        {/* Main Content - Takes remaining space */}
+        <div className="flex-1 min-w-0">
           <Helmet>
             <title>{pageTitle}</title>
             <meta name="description" content={pageDescription} />
@@ -194,7 +194,7 @@ const Match = () => {
           </footer>
         </div>
 
-        {/* Trending Games Sidebar */}
+        {/* Trending Games Sidebar - Fixed on the right */}
         <TrendingGamesSidebar 
           matches={popularMatches} 
           sportId={sportId || ''} 
