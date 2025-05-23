@@ -8,8 +8,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
-import { Tv, Calendar, TrendingUp } from 'lucide-react';
-import { isTrendingMatch } from '../utils/popularLeagues';
+import { Calendar } from 'lucide-react';
 
 const Channels = () => {
   const isMobile = useIsMobile();
@@ -18,61 +17,17 @@ const Channels = () => {
   useEffect(() => {
     console.log('Channels page loaded', new Date().toISOString());
     console.log('EPG data will be loaded for all available countries');
-    
-    // Log trending info for SEO analysis
-    console.log('Current trending topics for SEO optimization:', getTrendingSeoTerms());
   }, []);
-  
-  // Function to get trending search terms based on our trending match data
-  const getTrendingSeoTerms = () => {
-    const todaysDate = new Date().toISOString().split('T')[0];
-    
-    // Common search patterns people use when looking for sports streams
-    const searchPatterns = [
-      'watch {team} live stream free',
-      '{team} vs {team} live stream',
-      'free {league} streams',
-      'how to watch {team} game today',
-      '{league} live free online',
-      '{team} match streaming',
-      'live football streams today'
-    ];
-    
-    // High-value trending keywords based on our data
-    const trendingKeywords = [
-      { term: 'premier league streams', score: 10 },
-      { term: 'champions league live stream', score: 10 },
-      { term: 'el clasico stream free', score: 9 },
-      { term: 'manchester united live stream', score: 9 },
-      { term: 'real madrid barcelona stream', score: 9 },
-      { term: 'chelsea arsenal stream', score: 8 },
-      { term: 'liverpool stream today', score: 8 },
-      { term: 'psg live stream', score: 8 },
-      { term: 'bayern munich stream', score: 7 },
-      { term: 'juventus stream', score: 7 },
-      { term: 'world cup qualifiers stream', score: 9 },
-      { term: 'euro qualifiers live stream', score: 8 },
-      { term: 'football streams today', score: 10 },
-      { term: `football streams ${todaysDate}`, score: 9 }
-    ];
-    
-    return trendingKeywords.sort((a, b) => b.score - a.score);
-  };
-  
-  // Get trending search terms for dynamic SEO
-  const trendingSearchTerms = getTrendingSeoTerms();
   
   return (
     <PageLayout>
       <Helmet>
         <title>Live TV Channels | Watch Football Streams | DamiTV - Stream International Sports</title>
         <meta name="description" content="Watch free live football TV channels, Premier League, Champions League, La Liga streams and more. Stream international sports TV channels in HD quality - updated daily with trending games." />
-        <meta name="keywords" content={`live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg, ${trendingSearchTerms.slice(0, 5).map(k => k.term).join(', ')}`} />
+        <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg" />
         <link rel="canonical" href="https://damitv.pro/channels" />
-        {/* Prevent duplicate content issues by explicitly indicating that this is the canonical version */}
         <meta name="robots" content="index, follow, max-image-preview:large" />
         
-        {/* Additional SEO meta tags for search engines */}
         <meta property="og:title" content="Live TV Channels & Football Streams | DamiTV Sports" />
         <meta property="og:description" content="Watch free live football streams, Premier League, Champions League, La Liga and all major sports. Updated with trending games daily." />
         <meta property="og:url" content="https://damitv.pro/channels" />
@@ -114,7 +69,6 @@ const Channels = () => {
         `}
         </script>
         
-        {/* Sport Event list for rich results */}
         <script type="application/ld+json">
         {`
           {
@@ -180,24 +134,8 @@ const Channels = () => {
           </Link>
         </div>
         <p className="text-gray-300 mb-6">
-          Watch international sports channels from around the world with our comprehensive TV guide and live streams. 
-          Updated daily with trending matches and leagues.
+          Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
-        
-        {/* Trending matches highlight for SEO visibility */}
-        <div className="bg-[#242836] border border-[#343a4d] rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="h-5 w-5 text-[#ff5a36]" />
-            <h2 className="text-xl font-bold text-white">Trending Today</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {trendingSearchTerms.slice(0, 6).map((keyword, index) => (
-              <div key={index} className="text-gray-300 text-sm bg-[#1A1F2C] px-3 py-2 rounded-md">
-                {keyword.term}
-              </div>
-            ))}
-          </div>
-        </div>
         
         {/* Single ad placement before channel grid - responsive */}
         <div className={`mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
