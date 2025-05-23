@@ -23,8 +23,18 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const isMobile = useIsMobile();
   
-  const handleGoBack = () => {
-    navigate(-1);
+  const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Back button clicked on mobile:', isMobile);
+    
+    // For mobile, try different navigation methods
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to channels page if no history
+      navigate('/channels');
+    }
   };
   
   const togglePictureInPicture = async () => {
@@ -79,10 +89,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
             onClick={handleGoBack}
+            onTouchEnd={handleGoBack}
           >
-            <ArrowLeft className="h-4 w-4 text-white" />
+            <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
         </div>
         <AspectRatio ratio={16 / 9}>
@@ -105,10 +116,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
             onClick={handleGoBack}
+            onTouchEnd={handleGoBack}
           >
-            <ArrowLeft className="h-4 w-4 text-white" />
+            <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
         </div>
         <AspectRatio ratio={16 / 9}>
@@ -134,10 +146,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
             onClick={handleGoBack}
+            onTouchEnd={handleGoBack}
           >
-            <ArrowLeft className="h-4 w-4 text-white" />
+            <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
         </div>
         <AspectRatio ratio={16 / 9}>
@@ -170,10 +183,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           <Button
             variant="ghost"
             size="sm"
-            className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+            className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
             onClick={handleGoBack}
+            onTouchEnd={handleGoBack}
           >
-            <ArrowLeft className="h-4 w-4 text-white" />
+            <ArrowLeft className="h-5 w-5 text-white" />
           </Button>
         </div>
         <AspectRatio ratio={16 / 9}>
@@ -203,10 +217,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         <Button
           variant="ghost"
           size="sm"
-          className="bg-black/50 hover:bg-black/70 rounded-full h-8 w-8 p-0"
+          className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
           onClick={handleGoBack}
+          onTouchEnd={handleGoBack}
         >
-          <ArrowLeft className="h-4 w-4 text-white" />
+          <ArrowLeft className="h-5 w-5 text-white" />
         </Button>
       </div>
       
@@ -241,7 +256,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       )}>
         <button 
           onClick={togglePictureInPicture}
-          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors"
+          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors touch-manipulation"
           title={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
           aria-label={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
         >

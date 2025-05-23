@@ -24,8 +24,18 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
     ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` 
     : '';
   
-  const handleGoBack = () => {
-    navigate(-1); // Navigate back to the previous page
+  const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Header back button clicked on mobile:', isMobile);
+    
+    // For mobile, try different navigation methods
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // Fallback to channels page if no history
+      navigate('/channels');
+    }
   };
     
   return (
@@ -38,7 +48,8 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
               variant="ghost" 
               size="sm" 
               onClick={handleGoBack}
-              className="text-gray-300 hover:text-white mr-2 sm:mr-4"
+              onTouchEnd={handleGoBack}
+              className="text-gray-300 hover:text-white mr-2 sm:mr-4 touch-manipulation min-h-[44px] min-w-[44px]"
             >
               <ChevronLeft className="mr-1" />
               Back
