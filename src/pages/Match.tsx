@@ -3,9 +3,10 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
-import { fetchMatch, fetchStream } from '@/api/sportsApi';
+import { fetchMatch, fetchStream, fetchMatches } from '@/api/sportsApi';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
+import { isTrendingMatch } from '@/utils/popularLeagues';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -14,6 +15,7 @@ import StreamTab from '@/components/match/StreamTab';
 import HighlightsTab from '@/components/match/HighlightsTab';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
+import MatchCard from '@/components/MatchCard';
 
 const Match = () => {
   const { toast } = useToast();
@@ -25,6 +27,7 @@ const Match = () => {
   const [activeTab, setActiveTab] = useState('stream');
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
+  const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
   const [retryCounter, setRetryCounter] = useState(0);
   
   // Memoized stream fetching function to prevent recreation on every render
@@ -78,6 +81,27 @@ const Match = () => {
         if (matchData?.related?.length > 0) {
           setPopularMatches(matchData.related.slice(0, 3));
         }
+
+        // Load trending matches from all sports
+        const allMatches = await fetchMatches(sportId);
+        
+        // Filter and sort by trending score
+        const trending = allMatches
+          .filter(match => 
+            !match.title.toLowerCase().includes('sky sports news') && 
+            !match.id.includes('sky-sports-news') &&
+            match.id !== matchId // Don't show current match
+          )
+          .map(match => ({
+            ...match,
+            trendingData: isTrendingMatch(match.title)
+          }))
+          .filter(match => match.trendingData.score >= 5)
+          .sort((a, b) => b.trendingData.score - a.trendingData.score)
+          .slice(0, 6); // Show top 6 trending matches
+        
+        setTrendingMatches(trending);
+        
       } catch (error) {
         console.error('Error in loadMatch:', error);
         toast({
@@ -181,6 +205,27 @@ const Match = () => {
         )}
         
         {activeTab === 'highlights' && <HighlightsTab />}
+
+        {/* Trending Matches Section */}
+        {trendingMatches.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+              🔥 Trending Matches
+              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+                {trendingMatches.length} matches
+              </span>
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+              {trendingMatches.map((trendingMatch) => (
+                <MatchCard 
+                  key={trendingMatch.id}
+                  match={trendingMatch}
+                  sportId={sportId || ''}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
