@@ -1,12 +1,15 @@
 
+# DamiTV Robots.txt - Updated for optimal indexing
 User-agent: *
 Allow: /
 
+# Sitemap location
 Sitemap: https://damitv.pro/sitemap.xml
 
-# Allow specific bots with explicit permissions
+# Allow specific bots with enhanced crawl permissions
 User-agent: Googlebot
 Allow: /
+# Indicate moderate crawl rate to ensure full content indexing
 Crawl-delay: 1
 
 User-agent: Bingbot
@@ -18,16 +21,20 @@ Allow: /
 User-agent: DuckDuckBot
 Allow: /
 
-# Social media bots
+# Social media bots for improved sharing
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
-# Explicitly allow important directories
+# Explicitly allow important content directories with high priority
 Allow: /channels
 Allow: /live
 Allow: /news
 Allow: /schedule
 Allow: /match
+
+# Ensure important paths are not blocked
+Disallow: /api/
+Disallow: /admin/

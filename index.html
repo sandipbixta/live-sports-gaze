@@ -5,9 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="clckd" content="99c839829682c33562483de7c51cc477" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DamiTV - Free Live Football Streaming | Watch Live Sports Online Free</title>
-    <meta name="description" content="Watch free live football streaming, live soccer matches and all sports TV online at DamiTV. Access the best free sports streaming sites with hundreds of live matches today. No registration required." />
-    <meta name="keywords" content="free live football streaming, watch live football online, free sports streaming sites, live sports TV online, stream football matches live, live matches today, free soccer streams, DamiTV live football" />
+    <title>DamiTV - Free Live Football Streaming & Sports TV Online | Premier League, Champions League</title>
+    <meta name="description" content="Watch free live football streaming with Premier League, Champions League, La Liga matches and all sports TV online at DamiTV. Access hundreds of free sports channels with no registration required." />
+    <meta name="keywords" content="free live football streaming, premier league stream, champions league stream, watch live football online, free sports streaming sites, live sports TV online, stream football matches live, live matches today, free soccer streams, DamiTV live football" />
     <meta name="author" content="DamiTV" />
     
     <!-- Favicon -->
@@ -21,8 +21,8 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://damitv.pro/" />
-    <meta property="og:title" content="DamiTV - Watch Live Football & Sports Streams For Free" />
-    <meta property="og:description" content="Stream live football matches, basketball, hockey and more sports for free. No registration, no VPN needed - just click and watch on DamiTV." />
+    <meta property="og:title" content="DamiTV - Watch Free Live Football Streams - Premier League, Champions League & More" />
+    <meta property="og:description" content="Stream live football matches, Premier League, Champions League, basketball, hockey and more sports for free. No registration, no VPN needed - just click and watch." />
     <meta property="og:image" content="https://i.imgur.com/m4nV9S8.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -31,8 +31,8 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@damitv_official" />
-    <meta name="twitter:title" content="DamiTV - Watch Live Football & Sports Streams For Free" />
-    <meta name="twitter:description" content="Stream live football matches, basketball, hockey and more sports for free. No registration, no VPN needed - just click and watch." />
+    <meta name="twitter:title" content="DamiTV - Watch Free Live Football & Sports Streams - Premier League, Champions League" />
+    <meta name="twitter:description" content="Stream live football matches, Premier League, Champions League, basketball, hockey and more sports for free. No registration, no VPN needed." />
     <meta name="twitter:image" content="https://i.imgur.com/m4nV9S8.png" />
     
     <!-- Mobile Web App -->
@@ -40,6 +40,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="DamiTV Sports">
     <link rel="apple-touch-icon" href="https://i.imgur.com/m4nV9S8.png" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="alternate" hreflang="x-default" href="https://damitv.pro/" />
+    <link rel="alternate" hreflang="en" href="https://damitv.pro/" />
     
     <!-- Schema.org markup for Google -->
     <script type="application/ld+json">
@@ -53,7 +58,7 @@
         "https://twitter.com/damitv_official",
         "https://facebook.com/damitv.pro"
       ],
-      "description": "Watch free live football streaming, sports TV online and stream football matches live on DamiTV. Access the best free sports streaming sites with no registration required."
+      "description": "Watch free live football streaming including Premier League, Champions League, La Liga and all sports TV online on DamiTV. Access free sports streaming with hundreds of live matches daily."
     }
     </script>
     
@@ -70,7 +75,7 @@
     }
     </script>
     
-    <!-- Additional sports content markup for SEO -->
+    <!-- Enhanced sports content markup for SEO -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -81,8 +86,10 @@
           "position": 1,
           "item": {
             "@type": "SportsEvent",
-            "name": "Live Football Matches",
-            "url": "https://damitv.pro/live"
+            "name": "Premier League Live Streams",
+            "url": "https://damitv.pro/live",
+            "description": "Watch free Premier League football streams - Manchester United, Liverpool, Arsenal, Chelsea and all EPL teams",
+            "eventStatus": "https://schema.org/EventScheduled"
           }
         },
         {
@@ -90,17 +97,71 @@
           "position": 2,
           "item": {
             "@type": "SportsEvent",
-            "name": "Sports TV Channels",
-            "url": "https://damitv.pro/channels"
+            "name": "Champions League Live Streams",
+            "url": "https://damitv.pro/live",
+            "description": "UEFA Champions League free streaming for all matches including knockout rounds and final",
+            "eventStatus": "https://schema.org/EventScheduled"
           }
         },
         {
           "@type": "ListItem",
           "position": 3,
           "item": {
+            "@type": "BroadcastService",
+            "name": "Sports TV Channels",
+            "url": "https://damitv.pro/channels",
+            "broadcastDisplayName": "DamiTV Sports Channels",
+            "broadcaster": {
+              "@type": "Organization",
+              "name": "DamiTV"
+            }
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "item": {
             "@type": "Article",
-            "name": "Sports News",
-            "url": "https://damitv.pro/news"
+            "name": "Latest Football News",
+            "url": "https://damitv.pro/news",
+            "headline": "Football News, Transfers and Match Reports",
+            "description": "Get the latest football news, match reports and transfer updates from around the world",
+            "datePublished": "2025-05-23T08:00:00+00:00",
+            "dateModified": "2025-05-23T10:00:00+00:00"
+          }
+        }
+      ]
+    }
+    </script>
+    
+    <!-- Sport Events FAQPage for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How can I watch Premier League streams for free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can watch Premier League streams for free on DamiTV. Simply visit our website, navigate to the live section or channels page, and select the Premier League match you want to watch. No registration is required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I watch Champions League matches online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, all UEFA Champions League matches are available to stream on DamiTV. We provide multiple streaming sources for each Champions League game with HD quality options."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I find today's football matches?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Visit DamiTV's live section or schedule page to see all of today's football matches. You can filter by competitions like Premier League, La Liga, Serie A, and more to find exactly what you're looking for."
           }
         }
       ]

@@ -15,6 +15,7 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "upgrade-insecure-requests"
     
 # Add proper cache control for static assets
 [[headers]]
@@ -42,3 +43,23 @@
   for = "/channels"
   [headers.values]
     Link = "</channels>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-image-preview:large"
+
+[[headers]]
+  for = "/live"
+  [headers.values]
+    Link = "</live>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-image-preview:large"
+
+[[headers]]
+  for = "/news"
+  [headers.values]
+    Link = "</news>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-snippet:-1, max-image-preview:large"
+
+# Add SEO-optimized headers for trending content
+[[headers]]
+  for = "/schedule"
+  [headers.values]
+    Link = "</schedule>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-image-preview:large"
