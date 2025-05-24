@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader, Wifi, WifiOff } from 'lucide-react';
 import { getCountries, getChannelsByCountry } from '@/data/tvChannels';
-import { EPGChannel } from '@/services/epgService';
+import { EPGChannel } from '@/services/epgApiService';
+import { epgApiService } from '@/services/epgApiService';
 import { mockEpgService } from '@/services/mockEpgService';
 
 const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
@@ -15,25 +16,26 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   
   const channelsByCountry = getChannelsByCountry();
 
-  // Fetch mock EPG data for all countries
+  // Fetch EPG data - real API for Canada, mock for others
   useEffect(() => {
     const fetchAllEpgData = async () => {
       setIsLoading(true);
       
       try {
-        console.log('Loading demo EPG data...');
-        const epgData = await mockEpgService.getAllEPGData(channelsByCountry);
-        setAllEpgData(epgData);
-        
-        // Set initial data to match selected country
-        if (epgData[selectedCountry]) {
-          setProgramData(epgData[selectedCountry]);
+        if (selectedCountry === 'Canada') {
+          console.log('Loading real EPG data for Canada...');
+          const canadianEpgData = await epgApiService.getAllEPGData(channelsByCountry);
+          setAllEpgData(canadianEpgData);
+          setProgramData(canadianEpgData['Canada'] || []);
         } else {
-          setProgramData([]);
+          console.log(`Loading demo EPG data for ${selectedCountry}...`);
+          const epgData = await mockEpgService.getAllEPGData(channelsByCountry);
+          setAllEpgData(epgData);
+          setProgramData(epgData[selectedCountry] || []);
         }
         
       } catch (error) {
-        console.error('Error loading mock EPG data:', error);
+        console.error('Error loading EPG data:', error);
         setProgramData([]);
       } finally {
         setIsLoading(false);
@@ -48,16 +50,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
     }, 60000);
     
     return () => clearInterval(intervalId);
-  }, []);
-  
-  // Update displayed program data when selected country changes
-  useEffect(() => {
-    if (allEpgData[selectedCountry]) {
-      setProgramData(allEpgData[selectedCountry]);
-    } else {
-      setProgramData([]);
-    }
-  }, [selectedCountry, allEpgData]);
+  }, [selectedCountry]);
 
   // Format time for display
   const formatTime = (timeString: string) => {
@@ -78,6 +71,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   };
 
   const hasRealEPG = programData.length > 0;
+  const isCanada = selectedCountry === 'Canada';
 
   if (isLoading) {
     return (
@@ -86,7 +80,9 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
             <p className="text-white">Loading TV Guide...</p>
-            <p className="text-gray-400 text-sm mt-1">Demo data with realistic programs</p>
+            <p className="text-gray-400 text-sm mt-1">
+              {isCanada ? 'Real EPG data from epg.pw' : 'Demo data with realistic programs'}
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -116,7 +112,10 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
               TV Guide - {selectedCountry}
             </CardTitle>
             <p className="text-gray-400 text-sm">
-              Demo EPG data ({programData.length} channels) - Realistic program schedule
+              {isCanada ? 
+                `Real EPG data (${programData.length} channels) - Live from epg.pw API` :
+                `Demo EPG data (${programData.length} channels) - Realistic program schedule`
+              }
             </p>
           </div>
         </div>

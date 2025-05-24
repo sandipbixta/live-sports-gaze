@@ -1,4 +1,3 @@
-
 interface Channel {
   id: string;
   title: string;
@@ -94,6 +93,20 @@ export const tvChannels: Channel[] = [
   { id: "sky-sport8-nz", title: "Sky Sport 8", country: "New Zealand", embedUrl: "https://topembed.pw/channel/SkySport8%5BNewZealand%5D", category: "sports" },
   { id: "sky-sport9-nz", title: "Sky Sport 9", country: "New Zealand", embedUrl: "https://topembed.pw/channel/SkySport9%5BNewZealand%5D", category: "sports" },
   { id: "sky-sport-select-nz", title: "Sky Sport Select", country: "New Zealand", embedUrl: "https://topembed.pw/channel/SkySportSelect%5BNewZealand%5D", category: "sports" },
+  
+  // Canada Channels
+  { id: "tsn1-canada", title: "TSN1", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN1%5BCanada%5D", category: "sports" },
+  { id: "tsn2-canada", title: "TSN2", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN2%5BCanada%5D", category: "sports" },
+  { id: "tsn3-canada", title: "TSN3", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN3%5BCanada%5D", category: "sports" },
+  { id: "tsn4-canada", title: "TSN4", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN4%5BCanada%5D", category: "sports" },
+  { id: "tsn5-canada", title: "TSN5", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN5%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-one-canada", title: "Sportsnet One", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOne%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-pacific-canada", title: "Sportsnet Pacific", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetPacific%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-east-canada", title: "Sportsnet East", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetEast%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-west-canada", title: "Sportsnet West", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetWest%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-world-canada", title: "Sportsnet World", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetWorld%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-360-canada", title: "Sportsnet 360", country: "Canada", embedUrl: "https://topembed.pw/channel/Sportsnet360%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-ontario-canada", title: "Sportsnet Ontario", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOntario%5BCanada%5D", category: "sports" },
   
   // Add remaining channels for other countries
   // Poland, Portugal, Romania, Serbia, South Africa, Spain, USA...
