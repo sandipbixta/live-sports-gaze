@@ -23,9 +23,9 @@ const Clock = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 text-white bg-[#242836] px-3 py-1 rounded-md">
+    <div className="flex items-center gap-2 text-white">
       <ClockIcon className="h-4 w-4" />
-      <span className="text-sm font-mono">{formatTime(time)}</span>
+      <span className="text-lg font-bold">{formatTime(time)}</span>
     </div>
   );
 };
