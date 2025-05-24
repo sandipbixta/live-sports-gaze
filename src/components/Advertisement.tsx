@@ -3,11 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video' | 'popunder';
+  type: 'banner' | 'sidebar' | 'video' | 'popunder' | 'native';
+  adId?: string;
   className?: string;
 }
 
-const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) => {
+const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '' }) => {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -17,16 +18,63 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     // Clean up previous ad content
     adContainerRef.current.innerHTML = '';
 
-    // Create iframe for direct ad link
-    const iframe = document.createElement('iframe');
-    iframe.src = 'https://monkeyhundredsarmed.com/s1ifcs09n5?key=b58e42fd958110825c568cf8a198606e';
-    iframe.width = type === 'banner' ? (isMobile ? '320' : '728') : '300';
-    iframe.height = type === 'banner' ? (isMobile ? '50' : '90') : '250';
-    iframe.frameBorder = '0';
-    iframe.scrolling = 'no';
-    iframe.style.overflow = 'hidden';
-    
-    adContainerRef.current.appendChild(iframe);
+    let script: HTMLScriptElement;
+    let container: HTMLDivElement | null = null;
+
+    // Configure ads based on type
+    switch (type) {
+      case 'banner':
+        // Banner ad - top of page
+        script = document.createElement('script');
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.src = '//monkeyhundredsarmed.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+        
+        container = document.createElement('div');
+        container.id = 'container-a873bc1d3d203f2f13c32a99592441b8';
+        
+        adContainerRef.current.appendChild(script);
+        adContainerRef.current.appendChild(container);
+        break;
+
+      case 'sidebar':
+        // Sidebar ad - less intrusive
+        script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js';
+        adContainerRef.current.appendChild(script);
+        break;
+
+      case 'native':
+        // Native ad - blends with content
+        script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+        adContainerRef.current.appendChild(script);
+        break;
+
+      case 'popunder':
+        // Popunder ad - less intrusive than popup
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37';
+        iframe.width = '1';
+        iframe.height = '1';
+        iframe.style.border = 'none';
+        iframe.style.position = 'absolute';
+        iframe.style.left = '-9999px';
+        iframe.style.visibility = 'hidden';
+        adContainerRef.current.appendChild(iframe);
+        break;
+
+      default:
+        // Fallback to banner
+        script = document.createElement('script');
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.src = '//monkeyhundredsarmed.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+        adContainerRef.current.appendChild(script);
+        break;
+    }
 
     return () => {
       // Cleanup on unmount
@@ -36,22 +84,46 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     };
   }, [type, isMobile]);
 
+  // Different styling for different ad types
+  const getAdStyles = () => {
+    const baseStyles = "ad-container";
+    
+    switch (type) {
+      case 'banner':
+        return `${baseStyles} ${className} flex justify-center mb-6 ${
+          isMobile ? 'px-2' : 'px-0'
+        }`;
+      
+      case 'sidebar':
+        return `${baseStyles} ${className} w-full my-4 ${
+          isMobile ? 'px-2' : ''
+        }`;
+      
+      case 'native':
+        return `${baseStyles} ${className} w-full my-6 ${
+          isMobile ? 'px-2' : ''
+        }`;
+      
+      case 'popunder':
+        return `${baseStyles} ${className} hidden`;
+      
+      default:
+        return `${baseStyles} ${className}`;
+    }
+  };
+
   return (
     <div 
       ref={adContainerRef} 
-      className={`ad-container ${className} ${
-        type === 'banner' ? 'flex justify-center overflow-hidden mb-6' : ''
-      } ${
-        type === 'sidebar' ? 'w-full my-4' : ''
-      } ${
-        type === 'banner' && isMobile ? 'scale-90 origin-center transform mx-auto' : ''
-      }`}
+      className={getAdStyles()}
       data-ad-type={type}
     >
       {/* Placeholder that will be replaced by the ad */}
-      <div className="bg-[#242836] p-3 text-center rounded-lg text-gray-400 w-full">
-        <p className="text-xs">Advertisement loading...</p>
-      </div>
+      {type !== 'popunder' && (
+        <div className="bg-[#242836] p-3 text-center rounded-lg text-gray-400 w-full max-w-full overflow-hidden">
+          <p className="text-xs">Advertisement loading...</p>
+        </div>
+      )}
     </div>
   );
 };

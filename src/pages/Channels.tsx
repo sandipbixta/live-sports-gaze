@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
@@ -19,6 +18,7 @@ const Channels = () => {
   
   return (
     <PageLayout>
+      {/* SEO and metadata - keep existing code */}
       <Helmet>
         <title>Live TV Channels | Watch Football Streams | DamiTV - Stream International Sports</title>
         <meta name="description" content="Watch free live football TV channels, Premier League, Champions League, La Liga streams and more. Stream international sports TV channels in HD quality - updated daily with trending games." />
@@ -129,12 +129,16 @@ const Channels = () => {
           Watch international sports channels from around the world with live streams.
         </p>
         
-        {/* Single ad placement before channel grid - responsive */}
-        <div className={`mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
-          <Advertisement type="banner" className="w-full" />
-        </div>
+        {/* Top banner ad - non-intrusive placement */}
+        <Advertisement type="banner" className="w-full" />
         
+        {/* Main content */}
         <ChannelsGrid />
+        
+        {/* Native ad between content sections - blends naturally */}
+        <div className="my-8">
+          <Advertisement type="native" className="w-full" />
+        </div>
         
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
@@ -149,10 +153,18 @@ const Channels = () => {
           </Link>
         </div>
         
+        {/* Sidebar ad - only on desktop, positioned naturally */}
+        {!isMobile && (
+          <Advertisement type="sidebar" className="w-full" />
+        )}
+        
         {/* Sports News section */}
         <div className="mt-8">
           <NewsSection />
         </div>
+        
+        {/* Popunder ad - hidden and non-intrusive */}
+        <Advertisement type="popunder" />
       </div>
     </PageLayout>
   );

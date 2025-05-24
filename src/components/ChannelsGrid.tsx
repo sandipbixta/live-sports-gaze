@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
+import Advertisement from './Advertisement';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -9,6 +10,7 @@ import { Tv, Loader } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const ChannelsGrid = () => {
   const countries = getCountries();
@@ -19,6 +21,7 @@ const ChannelsGrid = () => {
   const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
   const [useEnhancedView, setUseEnhancedView] = useState(false);
+  const isMobile = useIsMobile();
 
   // Load enhanced channel data
   useEffect(() => {
@@ -168,28 +171,35 @@ const ChannelsGrid = () => {
           
           <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
             <div className="grid grid-cols-1 gap-1 sm:gap-2">
-              {currentChannels.map(channel => (
-                useEnhancedView && channel.enhanced ? (
-                  <EnhancedChannelCard
-                    key={channel.id}
-                    title={channel.title}
-                    embedUrl={channel.embedUrl}
-                    logo={channel.logo}
-                    website={channel.website}
-                    network={channel.network}
-                    categories={channel.categories}
-                    onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                    isActive={selectedChannelUrl === channel.embedUrl}
-                  />
-                ) : (
-                  <ChannelCard
-                    key={channel.id}
-                    title={channel.title}
-                    embedUrl={channel.embedUrl}
-                    onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                    isActive={selectedChannelUrl === channel.embedUrl}
-                  />
-                )
+              {currentChannels.map((channel, index) => (
+                <React.Fragment key={channel.id}>
+                  {useEnhancedView && channel.enhanced ? (
+                    <EnhancedChannelCard
+                      title={channel.title}
+                      embedUrl={channel.embedUrl}
+                      logo={channel.logo}
+                      website={channel.website}
+                      network={channel.network}
+                      categories={channel.categories}
+                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                      isActive={selectedChannelUrl === channel.embedUrl}
+                    />
+                  ) : (
+                    <ChannelCard
+                      title={channel.title}
+                      embedUrl={channel.embedUrl}
+                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                      isActive={selectedChannelUrl === channel.embedUrl}
+                    />
+                  )}
+                  
+                  {/* Insert native ad every 8 channels on mobile, every 12 on desktop */}
+                  {index > 0 && index % (isMobile ? 8 : 12) === 0 && (
+                    <div className="my-2">
+                      <Advertisement type="native" className="w-full text-center" />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </ScrollArea>
