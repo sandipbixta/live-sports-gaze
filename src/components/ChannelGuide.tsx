@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +20,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
       setIsLoading(true);
       
       try {
-        console.log('Loading real EPG data from IPTV-ORG API...');
+        console.log('Loading real XMLTV EPG data from epg.pw...');
         const epgData = await epgService.getAllEPGData(channelsByCountry);
         setAllEpgData(epgData);
         
@@ -33,7 +32,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         }
         
       } catch (error) {
-        console.error('Error fetching EPG data:', error);
+        console.error('Error fetching XMLTV EPG data:', error);
         setProgramData([]);
       } finally {
         setIsLoading(false);
@@ -85,7 +84,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         <CardContent className="p-6 flex justify-center items-center">
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
-            <p className="text-white">Loading real EPG data from IPTV-ORG...</p>
+            <p className="text-white">Loading real XMLTV EPG data from epg.pw...</p>
             <p className="text-gray-400 text-sm mt-1">This may take a moment</p>
           </div>
         </CardContent>
@@ -100,9 +99,9 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <div className="flex items-center justify-center mb-2">
             <WifiOff className="h-6 w-6 text-gray-400 mr-2" />
           </div>
-          <p className="text-gray-400">No real EPG data available for {selectedCountry} channels.</p>
+          <p className="text-gray-400">No XMLTV EPG data available for {selectedCountry} channels.</p>
           <p className="text-gray-500 mt-2 text-sm">
-            IPTV-ORG doesn't have program guide data for this country, or no channels matched our database.
+            epg.pw doesn't have program guide data for this country, or no channels matched our database.
           </p>
         </CardContent>
       </Card>
@@ -119,7 +118,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
               TV Guide - {selectedCountry}
             </CardTitle>
             <p className="text-gray-400 text-sm">
-              Real EPG data from IPTV-ORG ({programData.length} channels)
+              Real XMLTV EPG data from epg.pw ({programData.length} channels)
             </p>
           </div>
         </div>
