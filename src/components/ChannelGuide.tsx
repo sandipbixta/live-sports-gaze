@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader } from 'lucide-react';
+import { Loader, Wifi, WifiOff } from 'lucide-react';
 import { getCountries, getChannelsByCountry } from '@/data/tvChannels';
 import { epgService, EPGChannel } from '@/services/epgService';
 
@@ -12,6 +11,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [allEpgData, setAllEpgData] = useState<Record<string, EPGChannel[]>>({});
+  const [hasRealEPG, setHasRealEPG] = useState(false);
   
   const channelsByCountry = getChannelsByCountry();
 
@@ -21,8 +21,19 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
       setIsLoading(true);
       
       try {
+        console.log('Loading EPG data from IPTV-ORG API...');
         const epgData = await epgService.getAllEPGData(channelsByCountry);
         setAllEpgData(epgData);
+        
+        // Check if we have real EPG data (not just fallback)
+        const hasReal = Object.values(epgData).some(countryData => 
+          countryData.some(channel => 
+            channel.programs.some(program => 
+              !program.id.startsWith('fallback-')
+            )
+          )
+        );
+        setHasRealEPG(hasReal);
         
         // Set initial data to match selected country
         if (epgData[selectedCountry]) {
@@ -34,6 +45,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
       } catch (error) {
         console.error('Error fetching EPG data:', error);
         setProgramData([]);
+        setHasRealEPG(false);
       } finally {
         setIsLoading(false);
       }
@@ -82,7 +94,8 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         <CardContent className="p-6 flex justify-center items-center">
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
-            <p className="text-white">Loading TV guide...</p>
+            <p className="text-white">Loading real EPG data from IPTV-ORG...</p>
+            <p className="text-gray-400 text-sm mt-1">This may take a moment</p>
           </div>
         </CardContent>
       </Card>
@@ -93,9 +106,12 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
     return (
       <Card className="bg-[#151922] border-[#343a4d] mt-6">
         <CardContent className="p-6 text-center">
+          <div className="flex items-center justify-center mb-2">
+            <WifiOff className="h-6 w-6 text-gray-400 mr-2" />
+          </div>
           <p className="text-gray-400">No TV guide available for {selectedCountry} channels.</p>
           <p className="text-gray-500 mt-2 text-sm">
-            EPG data is being generated. Please try again in a moment.
+            EPG data could not be loaded from IPTV-ORG. Please try again later.
           </p>
         </CardContent>
       </Card>
@@ -105,8 +121,21 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   return (
     <Card className="bg-[#151922] border-[#343a4d] mt-6">
       <CardHeader>
-        <CardTitle className="text-white text-lg">TV Guide - {selectedCountry}</CardTitle>
-        <p className="text-gray-400 text-sm">Live and upcoming programs</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-white text-lg flex items-center">
+              {hasRealEPG ? (
+                <Wifi className="h-5 w-5 text-green-500 mr-2" />
+              ) : (
+                <WifiOff className="h-5 w-5 text-yellow-500 mr-2" />
+              )}
+              TV Guide - {selectedCountry}
+            </CardTitle>
+            <p className="text-gray-400 text-sm">
+              {hasRealEPG ? 'Real EPG data from IPTV-ORG' : 'Fallback program data'}
+            </p>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <ScrollArea className="h-[400px]">
@@ -145,6 +174,9 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
                               </div>
                               {program.description && (
                                 <div className="text-gray-400 text-sm mt-0.5 line-clamp-1">{program.description}</div>
+                              )}
+                              {program.category && (
+                                <div className="text-gray-500 text-xs mt-0.5">{program.category}</div>
                               )}
                             </div>
                           </div>
