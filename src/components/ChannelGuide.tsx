@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader, Wifi, WifiOff } from 'lucide-react';
 import { getCountries, getChannelsByCountry } from '@/data/tvChannels';
-import { epgService, EPGChannel } from '@/services/epgService';
+import { EPGChannel } from '@/services/epgService';
+import { mockEpgService } from '@/services/mockEpgService';
 
 const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   const [programData, setProgramData] = useState<EPGChannel[]>([]);
@@ -14,14 +15,14 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   
   const channelsByCountry = getChannelsByCountry();
 
-  // Fetch EPG data for all countries
+  // Fetch mock EPG data for all countries
   useEffect(() => {
     const fetchAllEpgData = async () => {
       setIsLoading(true);
       
       try {
-        console.log('Loading real XMLTV EPG data from epg.pw...');
-        const epgData = await epgService.getAllEPGData(channelsByCountry);
+        console.log('Loading demo EPG data...');
+        const epgData = await mockEpgService.getAllEPGData(channelsByCountry);
         setAllEpgData(epgData);
         
         // Set initial data to match selected country
@@ -32,7 +33,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         }
         
       } catch (error) {
-        console.error('Error fetching XMLTV EPG data:', error);
+        console.error('Error loading mock EPG data:', error);
         setProgramData([]);
       } finally {
         setIsLoading(false);
@@ -70,7 +71,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
 
   // Check if a program is currently airing
   const isCurrentlyAiring = (startTime: string, endTime: string) => {
-    const now = currentTime.getTime();
+    const now = new Date().getTime();
     const start = new Date(startTime).getTime();
     const end = new Date(endTime).getTime();
     return now >= start && now <= end;
@@ -84,8 +85,8 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         <CardContent className="p-6 flex justify-center items-center">
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
-            <p className="text-white">Loading real XMLTV EPG data from epg.pw...</p>
-            <p className="text-gray-400 text-sm mt-1">This may take a moment</p>
+            <p className="text-white">Loading TV Guide...</p>
+            <p className="text-gray-400 text-sm mt-1">Demo data with realistic programs</p>
           </div>
         </CardContent>
       </Card>
@@ -99,10 +100,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <div className="flex items-center justify-center mb-2">
             <WifiOff className="h-6 w-6 text-gray-400 mr-2" />
           </div>
-          <p className="text-gray-400">No XMLTV EPG data available for {selectedCountry} channels.</p>
-          <p className="text-gray-500 mt-2 text-sm">
-            epg.pw doesn't have program guide data for this country, or no channels matched our database.
-          </p>
+          <p className="text-gray-400">No program data available for {selectedCountry}.</p>
         </CardContent>
       </Card>
     );
@@ -118,7 +116,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
               TV Guide - {selectedCountry}
             </CardTitle>
             <p className="text-gray-400 text-sm">
-              Real XMLTV EPG data from epg.pw ({programData.length} channels)
+              Demo EPG data ({programData.length} channels) - Realistic program schedule
             </p>
           </div>
         </div>
