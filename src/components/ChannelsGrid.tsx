@@ -171,36 +171,44 @@ const ChannelsGrid = () => {
           
           <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
             <div className="grid grid-cols-1 gap-1 sm:gap-2">
-              {currentChannels.map((channel, index) => (
-                <React.Fragment key={channel.id}>
-                  {useEnhancedView && channel.enhanced ? (
-                    <EnhancedChannelCard
-                      title={channel.title}
-                      embedUrl={channel.embedUrl}
-                      logo={channel.logo}
-                      website={channel.website}
-                      network={channel.network}
-                      categories={channel.categories}
-                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                      isActive={selectedChannelUrl === channel.embedUrl}
-                    />
-                  ) : (
-                    <ChannelCard
-                      title={channel.title}
-                      embedUrl={channel.embedUrl}
-                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                      isActive={selectedChannelUrl === channel.embedUrl}
-                    />
-                  )}
-                  
-                  {/* Insert native ad every 8 channels on mobile, every 12 on desktop */}
-                  {index > 0 && index % (isMobile ? 8 : 12) === 0 && (
-                    <div className="my-2">
-                      <Advertisement type="native" className="w-full text-center" />
+              {currentChannels.map((channel, index) => {
+                const channelElement = useEnhancedView && channel.enhanced ? (
+                  <EnhancedChannelCard
+                    key={channel.id}
+                    title={channel.title}
+                    embedUrl={channel.embedUrl}
+                    logo={channel.logo}
+                    website={channel.website}
+                    network={channel.network}
+                    categories={channel.categories}
+                    onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                    isActive={selectedChannelUrl === channel.embedUrl}
+                  />
+                ) : (
+                  <ChannelCard
+                    key={channel.id}
+                    title={channel.title}
+                    embedUrl={channel.embedUrl}
+                    logo={channel.logo}
+                    onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                    isActive={selectedChannelUrl === channel.embedUrl}
+                  />
+                );
+
+                // Insert native ad every 8 channels on mobile, every 12 on desktop
+                if (index > 0 && index % (isMobile ? 8 : 12) === 0) {
+                  return (
+                    <div key={`channel-with-ad-${index}`}>
+                      {channelElement}
+                      <div className="my-2">
+                        <Advertisement type="native" className="w-full text-center" />
+                      </div>
                     </div>
-                  )}
-                </React.Fragment>
-              ))}
+                  );
+                }
+
+                return channelElement;
+              })}
             </div>
           </ScrollArea>
         </div>

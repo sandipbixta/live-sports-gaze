@@ -107,16 +107,30 @@ class EPGService {
       throw new Error(`No EPG data available for ${country}`);
     }
 
-    const url = `${this.baseUrl}/epg_${countryCode}.xml.gz`;
+    // Special handling for Canada to use .xml instead of .xml.gz
+    const extension = country === 'Canada' ? '.xml' : '.xml.gz';
+    const url = `${this.baseUrl}/epg_${countryCode}${extension}`;
     console.log(`Fetching XMLTV EPG data from: ${url}`);
     
-    const response = await fetch(url);
+    // Use proxy for CORS issues
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    console.log(`Using proxy URL: ${proxyUrl}`);
+    
+    const response = await fetch(proxyUrl);
     if (!response.ok) {
       throw new Error(`Failed to fetch EPG data: ${response.status}`);
     }
     
     const xmlText = await response.text();
-    return this.parser.parse(xmlText) as XMLTVData;
+    console.log(`Received XMLTV data for ${country}, length: ${xmlText.length}`);
+    
+    const parsed = this.parser.parse(xmlText) as XMLTVData;
+    console.log(`Parsed XMLTV data for ${country}:`, {
+      channels: parsed?.tv?.channel?.length || 0,
+      programmes: parsed?.tv?.programme?.length || 0
+    });
+    
+    return parsed;
   }
 
   private extractText(value: string | { '#text': string } | Array<string | { '#text': string }>): string {
@@ -134,6 +148,7 @@ class EPGService {
     const epgChannels: EPGChannel[] = [];
     
     if (!xmltvData.tv || !xmltvData.tv.channel || !xmltvData.tv.programme) {
+      console.log('Invalid XMLTV data structure');
       return epgChannels;
     }
 
@@ -144,20 +159,41 @@ class EPGService {
       xmltvChannelMap.set(channel['@_id'], displayName);
     });
 
+    console.log('XMLTV channels found:', Array.from(xmltvChannelMap.entries()));
+
     // Try to match our channels with XMLTV channels
     for (const channel of channels) {
       const channelNameLower = channel.title.toLowerCase();
+      console.log(`Trying to match channel: ${channel.title}`);
       
       // Find matching XMLTV channel
       let matchingChannelId: string | null = null;
       
+      // Enhanced matching for Canadian channels
       for (const [xmltvId, displayName] of xmltvChannelMap.entries()) {
-        if (
-          displayName.includes(channelNameLower.replace(/\s+/g, '')) ||
-          channelNameLower.includes(displayName.replace(/\s+/g, '')) ||
-          displayName.replace(/\s+/g, '').includes(channelNameLower.replace(/\s+/g, ''))
-        ) {
+        // Direct name matching
+        if (displayName.includes(channelNameLower.replace(/\s+/g, '')) ||
+            channelNameLower.includes(displayName.replace(/\s+/g, '')) ||
+            displayName.replace(/\s+/g, '').includes(channelNameLower.replace(/\s+/g, ''))) {
           matchingChannelId = xmltvId;
+          console.log(`Matched ${channel.title} with ${xmltvId} (${displayName})`);
+          break;
+        }
+        
+        // Special matching for TSN channels
+        if (channel.title.startsWith('TSN') && displayName.includes('tsn')) {
+          const tsnNumber = channel.title.match(/\d+/);
+          if (tsnNumber && displayName.includes(tsnNumber[0])) {
+            matchingChannelId = xmltvId;
+            console.log(`Matched TSN channel ${channel.title} with ${xmltvId}`);
+            break;
+          }
+        }
+        
+        // Special matching for Sportsnet channels
+        if (channel.title.includes('Sportsnet') && displayName.includes('sportsnet')) {
+          matchingChannelId = xmltvId;
+          console.log(`Matched Sportsnet channel ${channel.title} with ${xmltvId}`);
           break;
         }
       }
@@ -182,7 +218,10 @@ class EPGService {
             channelName: channel.title,
             programs: channelPrograms
           });
+          console.log(`Added EPG data for ${channel.title} with ${channelPrograms.length} programs`);
         }
+      } else {
+        console.log(`No match found for channel: ${channel.title}`);
       }
     }
 
