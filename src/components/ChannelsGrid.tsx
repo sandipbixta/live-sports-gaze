@@ -3,24 +3,14 @@ import React, { useState, useEffect } from 'react';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
 import Advertisement from './Advertisement';
-import ChannelCategoryFilter from './ChannelCategoryFilter';
-import RecentlyWatchedChannels from './RecentlyWatchedChannels';
-import ChannelSearchBar from './ChannelSearchBar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Tv, Loader, TrendingUp } from 'lucide-react';
+import { Tv, Loader } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '../hooks/use-mobile';
-import { 
-  filterChannelsBySearch, 
-  filterChannelsByCategory, 
-  getCategoryCounts,
-  getRecommendedChannels
-} from '@/utils/channelUtils';
-import { Badge } from '@/components/ui/badge';
 
 const ChannelsGrid = () => {
   const countries = getCountries();
@@ -31,8 +21,6 @@ const ChannelsGrid = () => {
   const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
   const [useEnhancedView, setUseEnhancedView] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const isMobile = useIsMobile();
 
   // Load enhanced channel data
@@ -43,16 +31,19 @@ const ChannelsGrid = () => {
         console.log('Loading enhanced channel data from IPTV-ORG...');
         const iptvChannelsByCountry = await iptvOrgService.getChannelsForOurCountries();
         
+        // Convert to our format and merge with existing data
         const enhanced: Record<string, any[]> = {};
         
         Object.keys(channelsByCountry).forEach(country => {
           const existingChannels = channelsByCountry[country];
           const iptvChannels = iptvChannelsByCountry[country] || [];
           
+          // Convert IPTV channels to our format
           const convertedChannels = iptvChannels.map(iptvChannel => 
             iptvOrgService.convertToOurFormat(iptvChannel, country)
           );
           
+          // Merge existing channels with enhanced data
           enhanced[country] = [
             ...existingChannels.map(channel => ({
               ...channel,
@@ -69,6 +60,7 @@ const ChannelsGrid = () => {
         console.log('Enhanced channel data loaded:', enhanced);
       } catch (error) {
         console.error('Failed to load enhanced channels:', error);
+        // Fall back to original data
         const fallback: Record<string, any[]> = {};
         Object.keys(channelsByCountry).forEach(country => {
           fallback[country] = channelsByCountry[country].map(channel => ({
@@ -88,28 +80,11 @@ const ChannelsGrid = () => {
   const handleSelectChannel = (embedUrl: string, title: string) => {
     setSelectedChannelUrl(embedUrl);
     setSelectedChannelTitle(title);
-    
-    // Add to recently watched
-    if ((window as any).addRecentChannel) {
-      (window as any).addRecentChannel(title, embedUrl);
-    }
   };
 
-  const baseChannels = useEnhancedView ? 
+  const currentChannels = useEnhancedView ? 
     (enhancedChannels[selectedCountry] || []) : 
     (channelsByCountry[selectedCountry] || []).map(channel => ({ ...channel, enhanced: false }));
-
-  // Apply filters
-  const filteredByCategory = filterChannelsByCategory(baseChannels, selectedCategory);
-  const filteredBySearch = filterChannelsBySearch(filteredByCategory, searchQuery);
-  const currentChannels = filteredBySearch;
-
-  // Get category counts for current country
-  const categoryCounts = getCategoryCounts(baseChannels);
-
-  // Get recommended channels
-  const recommendedChannels = selectedChannelTitle ? 
-    getRecommendedChannels(selectedChannelTitle, baseChannels) : [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -146,22 +121,6 @@ const ChannelsGrid = () => {
         </Select>
       </div>
 
-      {/* Search Bar */}
-      <ChannelSearchBar 
-        onSearch={setSearchQuery}
-        placeholder={`Search channels in ${selectedCountry}...`}
-      />
-
-      {/* Category Filter */}
-      <ChannelCategoryFilter
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        categoryCounts={categoryCounts}
-      />
-
-      {/* Recently Watched Channels */}
-      <RecentlyWatchedChannels onSelectChannel={handleSelectChannel} />
-
       {/* Live Channels Section */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
         {/* Video player - moved to top on mobile */}
@@ -181,30 +140,7 @@ const ChannelsGrid = () => {
                 </AspectRatio>
               </div>
               <div className="p-2 sm:p-4 border-t border-[#343a4d]">
-                <h3 className="text-sm sm:text-lg font-semibold text-white mb-2">{selectedChannelTitle}</h3>
-                
-                {/* Recommended Channels */}
-                {recommendedChannels.length > 0 && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-4 w-4 text-[#ff5a36]" />
-                      <span className="text-sm text-gray-300">You might also like:</span>
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto">
-                      {recommendedChannels.map(channel => (
-                        <Button
-                          key={channel.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                          className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs whitespace-nowrap"
-                        >
-                          {channel.title}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <h3 className="text-sm sm:text-lg font-semibold text-white">{selectedChannelTitle}</h3>
               </div>
             </>
           ) : (
@@ -223,77 +159,48 @@ const ChannelsGrid = () => {
         {/* Channel list */}
         <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden order-2 lg:order-2">
           <div className="p-2 sm:p-4 border-b border-[#343a4d]">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-white text-sm">
-                Live Sports Channels 
-                {useEnhancedView && (
-                  <span className="text-xs text-gray-400 ml-1">
-                    (Enhanced)
-                  </span>
-                )}
-              </h3>
-              <Badge variant="secondary" className="text-xs bg-[#343a4d] text-gray-300">
-                {currentChannels.length}
-              </Badge>
-            </div>
-            {(searchQuery || selectedCategory !== 'all') && (
-              <p className="text-xs text-gray-400">
-                {searchQuery && `Searching for "${searchQuery}"`}
-                {searchQuery && selectedCategory !== 'all' && ' in '}
-                {selectedCategory !== 'all' && `${selectedCategory} channels`}
-              </p>
-            )}
+            <h3 className="font-semibold text-white mb-2 text-sm">
+              Live Sports Channels 
+              {useEnhancedView && (
+                <span className="text-xs text-gray-400 ml-1">
+                  (Enhanced with IPTV-ORG)
+                </span>
+              )}
+            </h3>
           </div>
           
           <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
             <div className="grid grid-cols-1 gap-1 sm:gap-2">
-              {currentChannels.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-400 text-sm">No channels found</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('all');
-                    }}
-                    className="mt-2 bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs"
-                  >
-                    Clear Filters
-                  </Button>
-                </div>
-              ) : (
-                currentChannels.map((channel, index) => (
-                  <React.Fragment key={channel.id}>
-                    {useEnhancedView && channel.enhanced ? (
-                      <EnhancedChannelCard
-                        title={channel.title}
-                        embedUrl={channel.embedUrl}
-                        logo={channel.logo}
-                        website={channel.website}
-                        network={channel.network}
-                        categories={channel.categories}
-                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                        isActive={selectedChannelUrl === channel.embedUrl}
-                      />
-                    ) : (
-                      <ChannelCard
-                        title={channel.title}
-                        embedUrl={channel.embedUrl}
-                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                        isActive={selectedChannelUrl === channel.embedUrl}
-                      />
-                    )}
-                    
-                    {/* Insert native ad every 8 channels on mobile, every 12 on desktop */}
-                    {index > 0 && index % (isMobile ? 8 : 12) === 0 && (
-                      <div className="my-2">
-                        <Advertisement type="native" className="w-full text-center" />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))
-              )}
+              {currentChannels.map((channel, index) => (
+                <React.Fragment key={channel.id}>
+                  {useEnhancedView && channel.enhanced ? (
+                    <EnhancedChannelCard
+                      title={channel.title}
+                      embedUrl={channel.embedUrl}
+                      logo={channel.logo}
+                      website={channel.website}
+                      network={channel.network}
+                      categories={channel.categories}
+                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                      isActive={selectedChannelUrl === channel.embedUrl}
+                    />
+                  ) : (
+                    <ChannelCard
+                      title={channel.title}
+                      embedUrl={channel.embedUrl}
+                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                      isActive={selectedChannelUrl === channel.embedUrl}
+                    />
+                  )}
+                  
+                  {/* Insert native ad every 8 channels on mobile, every 12 on desktop */}
+                  {index > 0 && index % (isMobile ? 8 : 12) === 0 && (
+                    <div className="my-2">
+                      <Advertisement type="native" className="w-full text-center" />
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </ScrollArea>
         </div>

@@ -5,7 +5,7 @@ import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
-import EnhancedPopularMatches from '../components/EnhancedPopularMatches';
+import PopularMatches from '../components/PopularMatches';
 import { Separator } from '../components/ui/separator';
 import { Calendar, Search } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -15,7 +15,6 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import NewsSection from '../components/NewsSection';
-import LiveNotifications from '../components/LiveNotifications';
 
 const Index = () => {
   const { toast } = useToast();
@@ -165,8 +164,6 @@ const Index = () => {
         </script>
       </Helmet>
       
-      <LiveNotifications />
-      
       <main className="py-4">
         {/* Non-intrusive banner ad replacement */}
         <Advertisement type="banner" className="mb-6 w-full" />
@@ -190,7 +187,7 @@ const Index = () => {
         
         {popularMatches.length > 0 && (
           <>
-            <EnhancedPopularMatches 
+            <PopularMatches 
               popularMatches={popularMatches} 
               selectedSport={selectedSport}
             />
