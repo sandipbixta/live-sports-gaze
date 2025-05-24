@@ -165,8 +165,8 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Non-intrusive banner ad replacement */}
-        <Advertisement type="banner" className="mb-6 w-full" />
+        {/* Responsive banner ad replacement */}
+        <Advertisement type="responsive-banner" className="mb-6 w-full" />
         
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">

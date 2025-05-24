@@ -1,9 +1,8 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video' | 'popunder' | 'native';
+  type: 'banner' | 'sidebar' | 'video' | 'popunder' | 'native' | 'responsive-banner';
   adId?: string;
   className?: string;
 }
@@ -23,6 +22,29 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
 
     // Configure ads based on type
     switch (type) {
+      case 'responsive-banner':
+        // Create the atOptions script
+        const atOptionsScript = document.createElement('script');
+        atOptionsScript.type = 'text/javascript';
+        atOptionsScript.innerHTML = `
+          atOptions = {
+            'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
+            'format' : 'iframe',
+            'height' : ${isMobile ? 250 : 90},
+            'width' : ${isMobile ? 300 : 728},
+            'params' : {}
+          };
+        `;
+        
+        // Create the invoke script
+        script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
+        
+        adContainerRef.current.appendChild(atOptionsScript);
+        adContainerRef.current.appendChild(script);
+        break;
+
       case 'banner':
         // Banner ad - top of page
         script = document.createElement('script');
@@ -89,6 +111,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
     const baseStyles = "ad-container";
     
     switch (type) {
+      case 'responsive-banner':
+        return `${baseStyles} ${className} flex justify-center items-center mb-6 ${
+          isMobile ? 'px-2 w-full max-w-[300px] mx-auto' : 'px-0 w-full max-w-[728px] mx-auto'
+        }`;
+      
       case 'banner':
         return `${baseStyles} ${className} flex justify-center mb-6 ${
           isMobile ? 'px-2' : 'px-0'
@@ -117,19 +144,18 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
       ref={adContainerRef} 
       className={getAdStyles()}
       data-ad-type={type}
-      style={type === 'native' && isMobile ? { 
-        maxHeight: '120px', 
-        overflow: 'hidden',
-        transform: 'scale(0.85)',
-        transformOrigin: 'center top'
+      style={type === 'responsive-banner' ? {
+        minHeight: isMobile ? '250px' : '90px',
+        width: '100%'
       } : {}}
     >
       {/* Placeholder that will be replaced by the ad */}
       {type !== 'popunder' && (
         <div className={`bg-[#242836] p-3 text-center rounded-lg text-gray-400 w-full max-w-full overflow-hidden ${
-          isMobile && type === 'native' ? 'p-2 text-xs' : ''
+          isMobile && type === 'responsive-banner' ? 'p-2 text-xs min-h-[250px] flex items-center justify-center' : 
+          type === 'responsive-banner' ? 'min-h-[90px] flex items-center justify-center' : ''
         }`}>
-          <p className={isMobile && type === 'native' ? "text-[10px]" : "text-xs"}>
+          <p className={type === 'responsive-banner' ? "text-xs" : "text-xs"}>
             Advertisement loading...
           </p>
         </div>
