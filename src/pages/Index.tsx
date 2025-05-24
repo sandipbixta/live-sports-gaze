@@ -15,6 +15,7 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import NewsSection from '../components/NewsSection';
+import ScrollToTop from '../components/ScrollToTop';
 
 const Index = () => {
   const { toast } = useToast();
@@ -235,6 +236,9 @@ const Index = () => {
           <Advertisement type="sidebar" className="w-full" />
         </div>
       </main>
+      
+      {/* Scroll to top button */}
+      <ScrollToTop />
     </PageLayout>
   );
 };
