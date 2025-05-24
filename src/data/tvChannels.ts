@@ -1,4 +1,3 @@
-
 interface Channel {
   id: string;
   title: string;
@@ -53,6 +52,20 @@ export const tvChannels: Channel[] = [
   { id: "fox-504", title: "Fox 504", country: "Australia", embedUrl: "https://topembed.pw/channel/Fox504%5BAustralia%5D", category: "sports" },
   { id: "fox-506", title: "Fox 506", country: "Australia", embedUrl: "https://topembed.pw/channel/Fox506%5BAustralia%5D", category: "sports" },
   { id: "fox-507", title: "Fox 507", country: "Australia", embedUrl: "https://topembed.pw/channel/Fox507%5BAustralia%5D", category: "sports" },
+  
+  // Canada Channels
+  { id: "tsn1-canada", title: "TSN 1", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN1%5BCanada%5D", category: "sports" },
+  { id: "tsn2-canada", title: "TSN 2", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN2%5BCanada%5D", category: "sports" },
+  { id: "tsn3-canada", title: "TSN 3", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN3%5BCanada%5D", category: "sports" },
+  { id: "tsn4-canada", title: "TSN 4", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN4%5BCanada%5D", category: "sports" },
+  { id: "tsn5-canada", title: "TSN 5", country: "Canada", embedUrl: "https://topembed.pw/channel/TSN5%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-one-canada", title: "Sportsnet One", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOne%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-pacific-canada", title: "Sportsnet Pacific", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetPacific%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-east-canada", title: "Sportsnet East", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetEast%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-west-canada", title: "Sportsnet West", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetWest%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-world-canada", title: "Sportsnet World", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetWorld%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-360-canada", title: "Sportsnet 360", country: "Canada", embedUrl: "https://topembed.pw/channel/Sportsnet360%5BCanada%5D", category: "sports" },
+  { id: "sportsnet-ontario-canada", title: "Sportsnet Ontario", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOntario%5BCanada%5D", category: "sports" },
   
   // France Channels
   { id: "bein-sport1-france", title: "BeIN Sport 1", country: "France", embedUrl: "https://topembed.pw/channel/BeINSport1%5BFrance%5D", category: "sports" },
