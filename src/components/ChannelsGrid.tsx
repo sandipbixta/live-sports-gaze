@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
@@ -190,6 +191,13 @@ const ChannelsGrid = () => {
                       onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
                       isActive={selectedChannelUrl === channel.embedUrl}
                     />
+                  )}
+                  
+                  {/* Insert native ad every 8 channels on mobile, every 12 on desktop */}
+                  {index > 0 && index % (isMobile ? 8 : 12) === 0 && (
+                    <div className="my-2">
+                      <Advertisement type="native" className="w-full text-center" />
+                    </div>
                   )}
                 </React.Fragment>
               ))}
