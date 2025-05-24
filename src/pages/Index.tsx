@@ -134,7 +134,7 @@ const Index = () => {
   };
 
   return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+    <PageLayout searchTerm={searchTerm} onSearch={handleSearch} showSearch={true}>
       <Helmet>
         <title>DamiTV - Watch Live Football & Sports Streams | Free Football Streaming</title>
         <meta name="description" content="Watch free live football streams, soccer matches, and sports TV online on DamiTV. Access hundreds of free sports streaming channels with no registration required." />

@@ -10,12 +10,14 @@ interface PageLayoutProps {
   children: React.ReactNode;
   searchTerm?: string;
   onSearch?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  showSearch?: boolean;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({ 
   children,
   searchTerm,
-  onSearch
+  onSearch,
+  showSearch = false
 }) => {
   const isMobile = useIsMobile();
   
@@ -31,7 +33,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                     DAMITV
                   </h1>
                 </Link>
-                {onSearch && (
+                {showSearch && onSearch && (
                   <div className="relative">
                     <SearchBar
                       value={searchTerm || ''}
@@ -45,7 +47,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             ) : (
               <>
                 <MainNav />
-                {onSearch && (
+                {showSearch && onSearch && (
                   <div className="relative w-full sm:w-auto">
                     <SearchBar
                       value={searchTerm || ''}
