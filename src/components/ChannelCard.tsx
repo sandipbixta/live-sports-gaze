@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tv } from 'lucide-react';
+import ChannelQualityBadge from './ChannelQualityBadge';
+import { generateViewerCount, getChannelQuality, isChannelLive } from '@/utils/channelUtils';
 
 interface ChannelCardProps {
   title: string;
@@ -17,7 +18,6 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
   onClick,
   isActive = false
 }) => {
-  // Generate a logo from the title
   const generateInitials = () => {
     return title
       .split(' ')
@@ -25,6 +25,10 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       .slice(0, 2)
       .join('');
   };
+
+  const quality = getChannelQuality(title);
+  const live = isChannelLive(title);
+  const viewerCount = generateViewerCount(title);
   
   return (
     <Card 
@@ -36,7 +40,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       onClick={onClick}
     >
       <CardContent className="p-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-2">
           <div className={`rounded-full p-1.5 flex items-center justify-center ${
             isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]'
           }`}>
@@ -48,8 +52,14 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
               </div>
             )}
           </div>
-          <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
+          <div className="font-medium text-xs sm:text-sm text-white truncate flex-1">{title}</div>
         </div>
+        
+        <ChannelQualityBadge 
+          quality={quality}
+          isLive={live}
+          viewerCount={viewerCount}
+        />
       </CardContent>
     </Card>
   );
