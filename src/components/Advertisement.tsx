@@ -84,7 +84,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
     };
   }, [type, isMobile]);
 
-  // Different styling for different ad types with mobile optimization
+  // Different styling for different ad types
   const getAdStyles = () => {
     const baseStyles = "ad-container";
     
@@ -96,12 +96,12 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
       
       case 'sidebar':
         return `${baseStyles} ${className} w-full my-4 ${
-          isMobile ? 'px-2 max-w-full' : ''
+          isMobile ? 'px-2' : ''
         }`;
       
       case 'native':
-        return `${baseStyles} ${className} w-full ${
-          isMobile ? 'px-2 my-3 max-w-full' : 'my-6'
+        return `${baseStyles} ${className} w-full my-6 ${
+          isMobile ? 'px-2' : ''
         }`;
       
       case 'popunder':
@@ -117,21 +117,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, adId, className = '
       ref={adContainerRef} 
       className={getAdStyles()}
       data-ad-type={type}
-      style={type === 'native' && isMobile ? { 
-        maxHeight: '120px', 
-        overflow: 'hidden',
-        transform: 'scale(0.85)',
-        transformOrigin: 'center top'
-      } : {}}
     >
       {/* Placeholder that will be replaced by the ad */}
       {type !== 'popunder' && (
-        <div className={`bg-[#242836] p-3 text-center rounded-lg text-gray-400 w-full max-w-full overflow-hidden ${
-          isMobile && type === 'native' ? 'p-2 text-xs' : ''
-        }`}>
-          <p className={isMobile && type === 'native' ? "text-[10px]" : "text-xs"}>
-            Advertisement loading...
-          </p>
+        <div className="bg-[#242836] p-3 text-center rounded-lg text-gray-400 w-full max-w-full overflow-hidden">
+          <p className="text-xs">Advertisement loading...</p>
         </div>
       )}
     </div>
