@@ -25,24 +25,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Check if we're on mobile
   const isMobile = useIsMobile();
   
-  // Helper function to determine if a match is likely live - Updated logic
+  // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {
-    // First check if match has sources (required for streaming)
-    if (!match.sources || match.sources.length === 0) {
-      return false;
-    }
-    
+    // A match is considered live if it has sources AND the match time is within 2 hours of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
     const twoHoursInMs = 2 * 60 * 60 * 1000;
-    const threeHoursInMs = 3 * 60 * 60 * 1000;
     
-    // A match is considered live if:
-    // 1. It has sources AND
-    // 2. The match started within the last 3 hours OR will start within the next 2 hours
     return (
-      (now - matchTime) < threeHoursInMs && // Started less than 3 hours ago
-      (matchTime - now) < twoHoursInMs      // Or starts within 2 hours
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < twoHoursInMs
     );
   };
   

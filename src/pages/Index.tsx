@@ -15,7 +15,6 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import NewsSection from '../components/NewsSection';
-import ScrollToTop from '../components/ScrollToTop';
 
 const Index = () => {
   const { toast } = useToast();
@@ -135,7 +134,7 @@ const Index = () => {
   };
 
   return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch} showSearch={true}>
+    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
         <title>DamiTV - Watch Live Football & Sports Streams | Free Football Streaming</title>
         <meta name="description" content="Watch free live football streams, soccer matches, and sports TV online on DamiTV. Access hundreds of free sports streaming channels with no registration required." />
@@ -166,8 +165,8 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Responsive banner ad replacement */}
-        <Advertisement type="responsive-banner" className="mb-6 w-full" />
+        {/* Non-intrusive banner ad replacement */}
+        <Advertisement type="banner" className="mb-6 w-full" />
         
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -236,9 +235,6 @@ const Index = () => {
           <Advertisement type="sidebar" className="w-full" />
         </div>
       </main>
-      
-      {/* Scroll to top button */}
-      <ScrollToTop />
     </PageLayout>
   );
 };

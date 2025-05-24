@@ -20,39 +20,33 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
 
   const isMobile = useIsMobile();
   
-  // Helper function to determine if a match is likely live - Updated logic
+  // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {
-    // First check if match has sources (required for streaming)
-    if (!match.sources || match.sources.length === 0) {
-      return false;
-    }
-    
+    // A match is considered live if it has sources AND the match time is within 2 hours of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
     const twoHoursInMs = 2 * 60 * 60 * 1000;
-    const threeHoursInMs = 3 * 60 * 60 * 1000;
     
-    // A match is considered live if:
-    // 1. It has sources AND
-    // 2. The match started within the last 3 hours OR will start within the next 2 hours
-    // This covers pre-match coverage, live action, and post-match analysis
     return (
-      (now - matchTime) < threeHoursInMs && // Started less than 3 hours ago
-      (matchTime - now) < twoHoursInMs      // Or starts within 2 hours
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < twoHoursInMs
     );
   };
 
-  // Separate matches into live and upcoming with updated logic
+  // Separate matches into live and upcoming more strictly
   const liveMatches = filteredMatches.filter(match => {
-    console.log(`Checking match: ${match.title}, Date: ${match.date}, Sources: ${match.sources?.length || 0}`);
-    const isLive = isMatchLive(match);
-    console.log(`Match ${match.title} is ${isLive ? 'LIVE' : 'UPCOMING'}`);
-    return isLive;
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    // Only consider it live if it's happening now (within last hour to next hour)
+    const oneHourInMs = 60 * 60 * 1000;
+    return match.sources && 
+           match.sources.length > 0 && 
+           matchTime - now < oneHourInMs && // Match hasn't started more than an hour in the future
+           now - matchTime < oneHourInMs;   // Match hasn't ended more than an hour ago
   });
   
   const upcomingMatches = filteredMatches.filter(match => !liveMatches.includes(match));
-
-  console.log(`Total matches: ${filteredMatches.length}, Live: ${liveMatches.length}, Upcoming: ${upcomingMatches.length}`);
 
   if (isLoading) {
     return (

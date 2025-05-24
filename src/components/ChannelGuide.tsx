@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader, Wifi, WifiOff } from 'lucide-react';
 import { getCountries, getChannelsByCountry } from '@/data/tvChannels';
-import { EPGChannel } from '@/services/epgApiService';
-import { epgApiService } from '@/services/epgApiService';
+import { EPGChannel } from '@/services/epgService';
+import { mockEpgService } from '@/services/mockEpgService';
 
 const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   const [programData, setProgramData] = useState<EPGChannel[]>([]);
@@ -16,14 +15,14 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
   
   const channelsByCountry = getChannelsByCountry();
 
-  // Fetch EPG data for all countries
+  // Fetch mock EPG data for all countries
   useEffect(() => {
     const fetchAllEpgData = async () => {
       setIsLoading(true);
       
       try {
-        console.log('Loading EPG data from API...');
-        const epgData = await epgApiService.getAllEPGData(channelsByCountry);
+        console.log('Loading demo EPG data...');
+        const epgData = await mockEpgService.getAllEPGData(channelsByCountry);
         setAllEpgData(epgData);
         
         // Set initial data to match selected country
@@ -34,7 +33,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
         }
         
       } catch (error) {
-        console.error('Error loading EPG data:', error);
+        console.error('Error loading mock EPG data:', error);
         setProgramData([]);
       } finally {
         setIsLoading(false);
@@ -78,6 +77,8 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
     return now >= start && now <= end;
   };
 
+  const hasRealEPG = programData.length > 0;
+
   if (isLoading) {
     return (
       <Card className="bg-[#151922] border-[#343a4d] mt-6">
@@ -85,7 +86,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <div className="flex flex-col items-center">
             <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
             <p className="text-white">Loading TV Guide...</p>
-            <p className="text-gray-400 text-sm mt-1">Fetching real EPG data</p>
+            <p className="text-gray-400 text-sm mt-1">Demo data with realistic programs</p>
           </div>
         </CardContent>
       </Card>
@@ -99,10 +100,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <div className="flex items-center justify-center mb-2">
             <WifiOff className="h-6 w-6 text-gray-400 mr-2" />
           </div>
-          <p className="text-gray-400">No TV guide data available for {selectedCountry}.</p>
-          {selectedCountry === 'Canada' && (
-            <p className="text-gray-500 text-sm mt-1">EPG data is only available for Canadian channels</p>
-          )}
+          <p className="text-gray-400">No program data available for {selectedCountry}.</p>
         </CardContent>
       </Card>
     );
@@ -118,7 +116,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
               TV Guide - {selectedCountry}
             </CardTitle>
             <p className="text-gray-400 text-sm">
-              Real EPG data ({programData.length} channels with programs)
+              Demo EPG data ({programData.length} channels) - Realistic program schedule
             </p>
           </div>
         </div>
