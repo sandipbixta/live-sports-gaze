@@ -8,7 +8,6 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
-import { Calendar } from 'lucide-react';
 
 const Channels = () => {
   const isMobile = useIsMobile();
@@ -16,7 +15,6 @@ const Channels = () => {
   // Log when the Channels page loads
   useEffect(() => {
     console.log('Channels page loaded', new Date().toISOString());
-    console.log('EPG data will be loaded for all available countries');
   }, []);
   
   return (
@@ -24,7 +22,7 @@ const Channels = () => {
       <Helmet>
         <title>Live TV Channels | Watch Football Streams | DamiTV - Stream International Sports</title>
         <meta name="description" content="Watch free live football TV channels, Premier League, Champions League, La Liga streams and more. Stream international sports TV channels in HD quality - updated daily with trending games." />
-        <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg" />
+        <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels" />
         <link rel="canonical" href="https://damitv.pro/channels" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         
@@ -126,15 +124,9 @@ const Channels = () => {
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-white">Live TV Channels</h1>
-          <Link to="/schedule" className="hidden sm:flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]">
-              <Calendar className="h-4 w-4 mr-2" />
-              Full Schedule
-            </Button>
-          </Link>
         </div>
         <p className="text-gray-300 mb-6">
-          Watch international sports channels from around the world with our comprehensive TV guide and live streams.
+          Watch international sports channels from around the world with live streams.
         </p>
         
         {/* Single ad placement before channel grid - responsive */}
