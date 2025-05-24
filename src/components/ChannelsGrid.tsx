@@ -1,13 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
+import EnhancedChannelCard from './EnhancedChannelCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Tv } from 'lucide-react';
+import { Tv, Loader } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ChannelGuide from './ChannelGuide';
+import { iptvOrgService } from '@/services/iptvOrgService';
+import { Button } from '@/components/ui/button';
 
 const ChannelsGrid = () => {
   const countries = getCountries();
@@ -16,17 +19,93 @@ const ChannelsGrid = () => {
   const [selectedChannelUrl, setSelectedChannelUrl] = useState<string | null>(null);
   const [selectedChannelTitle, setSelectedChannelTitle] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("channels");
+  const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
+  const [loadingEnhanced, setLoadingEnhanced] = useState(false);
+  const [useEnhancedView, setUseEnhancedView] = useState(false);
+
+  // Load enhanced channel data
+  useEffect(() => {
+    const loadEnhancedChannels = async () => {
+      setLoadingEnhanced(true);
+      try {
+        console.log('Loading enhanced channel data from IPTV-ORG...');
+        const iptvChannelsByCountry = await iptvOrgService.getChannelsForOurCountries();
+        
+        // Convert to our format and merge with existing data
+        const enhanced: Record<string, any[]> = {};
+        
+        Object.keys(channelsByCountry).forEach(country => {
+          const existingChannels = channelsByCountry[country];
+          const iptvChannels = iptvChannelsByCountry[country] || [];
+          
+          // Convert IPTV channels to our format
+          const convertedChannels = iptvChannels.map(iptvChannel => 
+            iptvOrgService.convertToOurFormat(iptvChannel, country)
+          );
+          
+          // Merge existing channels with enhanced data
+          enhanced[country] = [
+            ...existingChannels.map(channel => ({
+              ...channel,
+              enhanced: false
+            })),
+            ...convertedChannels.map(channel => ({
+              ...channel,
+              enhanced: true
+            }))
+          ];
+        });
+        
+        setEnhancedChannels(enhanced);
+        console.log('Enhanced channel data loaded:', enhanced);
+      } catch (error) {
+        console.error('Failed to load enhanced channels:', error);
+        // Fall back to original data
+        const fallback: Record<string, any[]> = {};
+        Object.keys(channelsByCountry).forEach(country => {
+          fallback[country] = channelsByCountry[country].map(channel => ({
+            ...channel,
+            enhanced: false
+          }));
+        });
+        setEnhancedChannels(fallback);
+      } finally {
+        setLoadingEnhanced(false);
+      }
+    };
+
+    loadEnhancedChannels();
+  }, []);
 
   const handleSelectChannel = (embedUrl: string, title: string) => {
     setSelectedChannelUrl(embedUrl);
     setSelectedChannelTitle(title);
   };
 
+  const currentChannels = useEnhancedView ? 
+    (enhancedChannels[selectedCountry] || []) : 
+    (channelsByCountry[selectedCountry] || []).map(channel => ({ ...channel, enhanced: false }));
+
   return (
     <div className="flex flex-col gap-4">
       {/* Country Selector */}
       <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
-        <h3 className="font-semibold text-white mb-2 text-sm">Select Country</h3>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-semibold text-white text-sm">Select Country</h3>
+          {Object.keys(enhancedChannels).length > 0 && (
+            <div className="flex items-center gap-2">
+              {loadingEnhanced && <Loader className="h-4 w-4 animate-spin text-[#ff5a36]" />}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setUseEnhancedView(!useEnhancedView)}
+                className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs"
+              >
+                {useEnhancedView ? 'Basic View' : 'Enhanced View'}
+              </Button>
+            </div>
+          )}
+        </div>
         <Select value={selectedCountry} onValueChange={setSelectedCountry}>
           <SelectTrigger className="w-full bg-[#242836] border-[#343a4d] text-white text-xs sm:text-sm">
             <SelectValue placeholder="Select country" />
@@ -34,7 +113,8 @@ const ChannelsGrid = () => {
           <SelectContent className="bg-[#242836] border-[#343a4d] text-white">
             {countries.map(country => (
               <SelectItem key={country} value={country}>
-                {country}
+                {country} {useEnhancedView && enhancedChannels[country] && 
+                  `(${enhancedChannels[country].length} channels)`}
               </SelectItem>
             ))}
           </SelectContent>
@@ -86,19 +166,40 @@ const ChannelsGrid = () => {
             {/* Channel list */}
             <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden order-2 lg:order-2">
               <div className="p-2 sm:p-4 border-b border-[#343a4d]">
-                <h3 className="font-semibold text-white mb-2 text-sm">Live Sports Channels</h3>
+                <h3 className="font-semibold text-white mb-2 text-sm">
+                  Live Sports Channels 
+                  {useEnhancedView && (
+                    <span className="text-xs text-gray-400 ml-1">
+                      (Enhanced with IPTV-ORG)
+                    </span>
+                  )}
+                </h3>
               </div>
               
               <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
                 <div className="grid grid-cols-1 gap-1 sm:gap-2">
-                  {channelsByCountry[selectedCountry]?.map(channel => (
-                    <ChannelCard
-                      key={channel.id}
-                      title={channel.title}
-                      embedUrl={channel.embedUrl}
-                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                      isActive={selectedChannelUrl === channel.embedUrl}
-                    />
+                  {currentChannels.map(channel => (
+                    useEnhancedView && channel.enhanced ? (
+                      <EnhancedChannelCard
+                        key={channel.id}
+                        title={channel.title}
+                        embedUrl={channel.embedUrl}
+                        logo={channel.logo}
+                        website={channel.website}
+                        network={channel.network}
+                        categories={channel.categories}
+                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                        isActive={selectedChannelUrl === channel.embedUrl}
+                      />
+                    ) : (
+                      <ChannelCard
+                        key={channel.id}
+                        title={channel.title}
+                        embedUrl={channel.embedUrl}
+                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                        isActive={selectedChannelUrl === channel.embedUrl}
+                      />
+                    )
                   ))}
                 </div>
               </ScrollArea>
