@@ -41,7 +41,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
             isActive ? 'ring-2 ring-[#ff5a36]' : ''
-          } ${logo ? 'bg-white p-0.5' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
+          } ${logo ? 'bg-black p-0.5' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
             {logo ? (
               <img 
                 src={logo} 
@@ -52,7 +52,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                   const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
                   if (fallback) {
                     fallback.classList.remove('hidden');
-                    fallback.parentElement!.classList.remove('bg-white', 'p-0.5');
+                    fallback.parentElement!.classList.remove('bg-black', 'p-0.5');
                     fallback.parentElement!.classList.add(isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]');
                   }
                 }}
