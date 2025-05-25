@@ -7,6 +7,7 @@ import { Tv } from 'lucide-react';
 interface ChannelCardProps {
   title: string;
   embedUrl: string;
+  logo?: string;
   onClick?: () => void;
   isActive?: boolean;
 }
@@ -14,6 +15,7 @@ interface ChannelCardProps {
 const ChannelCard: React.FC<ChannelCardProps> = ({ 
   title, 
   embedUrl, 
+  logo,
   onClick,
   isActive = false
 }) => {
@@ -37,16 +39,31 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
-          <div className={`rounded-full p-1.5 flex items-center justify-center ${
-            isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]'
+          <div className={`rounded-full overflow-hidden flex-shrink-0 ${
+            isActive ? 'ring-2 ring-[#ff5a36]' : ''
           }`}>
-            {isActive ? (
-              <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
-            ) : (
-              <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-gray-300">
-                {generateInitials()}
-              </div>
-            )}
+            {logo ? (
+              <img 
+                src={logo} 
+                alt={title}
+                className="w-8 h-8 sm:w-10 sm:h-10 object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 p-1.5 flex items-center justify-center ${
+              isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]'
+            } ${logo ? 'hidden' : ''}`}>
+              {isActive ? (
+                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+              ) : (
+                <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-gray-300">
+                  {generateInitials()}
+                </div>
+              )}
+            </div>
           </div>
           <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
         </div>

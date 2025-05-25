@@ -196,6 +196,7 @@ const ChannelsGrid = () => {
                         key={channel.id}
                         title={channel.title}
                         embedUrl={channel.embedUrl}
+                        logo={channel.logo}
                         onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
                         isActive={selectedChannelUrl === channel.embedUrl}
                       />
