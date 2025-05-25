@@ -4,12 +4,13 @@ interface Channel {
   country: string;
   embedUrl: string;
   category: 'sports' | 'news' | 'entertainment';
+  logo?: string;
 }
 
 // Group channels by country
 export const tvChannels: Channel[] = [
   // UK Channels
-  { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews%5BUK%5D", category: "sports" },
+  { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews%5BUK%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-news-uk.png?raw=true" },
   { id: "sky-sports-main-event", title: "Sky Sports Main Event", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsMainEvent%5BUK%5D", category: "sports" },
   { id: "sky-sports-action", title: "Sky Sports Action", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsAction%5BUK%5D", category: "sports" },
   { id: "sky-sports-arena", title: "Sky Sports Arena", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsArena%5BUK%5D", category: "sports" },
@@ -34,16 +35,16 @@ export const tvChannels: Channel[] = [
   { id: "tnt-sports-ultimate", title: "TNT Sports Ultimate", country: "UK", embedUrl: "https://topembed.pw/channel/TNTSportsUltimate%5BUK%5D", category: "sports" },
   
   // Argentina Channels
-  { id: "espn-argentina", title: "ESPN", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN%5BArgentina%5D", category: "sports" },
-  { id: "espn2-argentina", title: "ESPN2", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN2%5BArgentina%5D", category: "sports" },
-  { id: "espn3-argentina", title: "ESPN3", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN3%5BArgentina%5D", category: "sports" },
-  { id: "espn-premium-argentina", title: "ESPN Premium", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPNPremium%5BArgentina%5D", category: "sports" },
+  { id: "espn-argentina", title: "ESPN", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/espn-ar.png?raw=true" },
+  { id: "espn2-argentina", title: "ESPN2", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN2%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/espn-2-ar.png?raw=true" },
+  { id: "espn3-argentina", title: "ESPN3", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPN3%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/espn-3-ar.png?raw=true" },
+  { id: "espn-premium-argentina", title: "ESPN Premium", country: "Argentina", embedUrl: "https://topembed.pw/channel/ESPNPremium%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/espn-premium-ar.png?raw=true" },
   { id: "directv-sports-argentina", title: "DirecTV Sports", country: "Argentina", embedUrl: "https://topembed.pw/channel/DirecTVSports%5BArgentina%5D", category: "sports" },
   { id: "directv-sports2-argentina", title: "DirecTV Sports 2", country: "Argentina", embedUrl: "https://topembed.pw/channel/DirecTVSports2%5BArgentina%5D", category: "sports" },
-  { id: "fox-sports1-argentina", title: "FOX Sports 1", country: "Argentina", embedUrl: "https://topembed.pw/channel/FOXSports1%5BArgentina%5D", category: "sports" },
-  { id: "fox-sports2-argentina", title: "FOX Sports 2", country: "Argentina", embedUrl: "https://topembed.pw/channel/FOXSports2%5BArgentina%5D", category: "sports" },
-  { id: "tnt-sports-argentina", title: "TNT Sports", country: "Argentina", embedUrl: "https://topembed.pw/channel/TNTSports%5BArgentina%5D", category: "sports" },
-  { id: "bein-sports-mena3", title: "BeIN Sports MENA 3", country: "Argentina", embedUrl: "https://topembed.pw/channel/BeinSportsMENA3%5BArgentina%5D", category: "sports" },
+  { id: "fox-sports1-argentina", title: "FOX Sports 1", country: "Argentina", embedUrl: "https://topembed.pw/channel/FOXSports1%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/fox-sports-ar.png?raw=true" },
+  { id: "fox-sports2-argentina", title: "FOX Sports 2", country: "Argentina", embedUrl: "https://topembed.pw/channel/FOXSports2%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/fox-sports-2-ar.png?raw=true" },
+  { id: "tnt-sports-argentina", title: "TNT Sports", country: "Argentina", embedUrl: "https://topembed.pw/channel/TNTSports%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/argentina/tnt-sports-ar.png?raw=true" },
+  { id: "bein-sports-mena3", title: "BeIN Sports MENA 3", country: "Argentina", embedUrl: "https://topembed.pw/channel/BeinSportsMENA3%5BArgentina%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/world-middle-east/bein-sports/bein-sports-mea.png?raw=true" },
   
   // Australia Channels
   { id: "fox-501", title: "Fox 501", country: "Australia", embedUrl: "https://topembed.pw/channel/Fox501%5BAustralia%5D", category: "sports" },
