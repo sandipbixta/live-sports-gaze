@@ -129,9 +129,9 @@ const ChannelsGrid = () => {
         </TabsList>
 
         <TabsContent value="channels" className="mt-0">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-            {/* Video player - moved to top on mobile */}
-            <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+            {/* Video player */}
+            <div className="col-span-1 lg:col-span-2 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
               {selectedChannelUrl ? (
                 <>
                   <div className="relative w-full bg-[#151922]">
@@ -163,7 +163,7 @@ const ChannelsGrid = () => {
               )}
             </div>
             
-            {/* Channel list */}
+            {/* Channel grid */}
             <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden order-2 lg:order-2">
               <div className="p-2 sm:p-4 border-b border-[#343a4d]">
                 <h3 className="font-semibold text-white mb-2 text-sm">
@@ -176,8 +176,8 @@ const ChannelsGrid = () => {
                 </h3>
               </div>
               
-              <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
-                <div className="grid grid-cols-1 gap-1 sm:gap-2">
+              <ScrollArea className="h-[300px] sm:h-[600px] p-2 sm:p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-1 gap-2">
                   {currentChannels.map(channel => (
                     useEnhancedView && channel.enhanced ? (
                       <EnhancedChannelCard
