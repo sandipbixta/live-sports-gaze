@@ -39,23 +39,26 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
-          <div className={`rounded-full overflow-hidden flex-shrink-0 ${
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
             isActive ? 'ring-2 ring-[#ff5a36]' : ''
-          }`}>
+          } ${logo ? 'bg-white p-0.5' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
             {logo ? (
               <img 
                 src={logo} 
                 alt={title}
-                className="w-8 h-8 sm:w-10 sm:h-10 object-cover"
+                className="w-full h-full object-contain rounded-full"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                  const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                  if (fallback) {
+                    fallback.classList.remove('hidden');
+                    fallback.parentElement!.classList.remove('bg-white', 'p-0.5');
+                    fallback.parentElement!.classList.add(isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]');
+                  }
                 }}
               />
             ) : null}
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 p-1.5 flex items-center justify-center ${
-              isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]'
-            } ${logo ? 'hidden' : ''}`}>
+            <div className={`w-full h-full flex items-center justify-center ${logo ? 'hidden' : ''}`}>
               {isActive ? (
                 <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               ) : (
