@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tv } from 'lucide-react';
 
 interface ChannelCardProps {
@@ -18,6 +19,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
   onClick,
   isActive = false
 }) => {
+  // Generate a logo from the title
   const generateInitials = () => {
     return title
       .split(' ')
@@ -36,10 +38,10 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       onClick={onClick}
     >
       <CardContent className="p-2">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className={`w-12 h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
+        <div className="flex items-center gap-2">
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
             isActive ? 'ring-2 ring-[#ff5a36]' : ''
-          } ${logo ? 'bg-white p-1' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
+          } ${logo ? 'bg-white p-0.5' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
             {logo ? (
               <img 
                 src={logo} 
@@ -50,7 +52,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                   const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
                   if (fallback) {
                     fallback.classList.remove('hidden');
-                    fallback.parentElement!.classList.remove('bg-white', 'p-1');
+                    fallback.parentElement!.classList.remove('bg-white', 'p-0.5');
                     fallback.parentElement!.classList.add(isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]');
                   }
                 }}
@@ -58,15 +60,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
             ) : null}
             <div className={`w-full h-full flex items-center justify-center ${logo ? 'hidden' : ''}`}>
               {isActive ? (
-                <Tv className="h-5 w-5 text-white" />
+                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               ) : (
-                <div className="text-xs font-bold text-gray-300">
+                <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-gray-300">
                   {generateInitials()}
                 </div>
               )}
             </div>
           </div>
-          <div className="font-medium text-xs text-white truncate w-full px-1">{title}</div>
+          <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
         </div>
       </CardContent>
     </Card>
