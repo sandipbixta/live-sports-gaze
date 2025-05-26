@@ -120,6 +120,9 @@ export const tvChannels: Channel[] = [
   { id: "fox-sports2-usa", title: "FOX Sports 2", country: "USA", embedUrl: "https://topembed.pw/channel/FOXSports2%5BUSA%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/fox-sports-2-us.png?raw=true" },
   { id: "espn-usa", title: "ESPN", country: "USA", embedUrl: "https://topembed.pw/channel/ESPN%5BUSA%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/espn-us.png?raw=true" },
   { id: "espn2-usa", title: "ESPN 2", country: "USA", embedUrl: "https://topembed.pw/channel/ESPN2%5BUSA%5D", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/espn-2-us.png?raw=true" },
+  
+  // Wrestling/UFC/Boxing Channels
+  { id: "wwe-ufc-boxing", title: "WWE/UFC/Boxing", country: "USA", embedUrl: "https://topembed.pw/channel/fight", category: "sports" },
 ];
 
 export const getChannelsByCountry = () => {

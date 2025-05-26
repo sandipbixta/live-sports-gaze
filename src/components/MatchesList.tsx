@@ -12,7 +12,7 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
-  // Filter out advertisement matches (Sky Sports News in this case)
+  // Filter out advertisement matches (Sky Sports News in this case) but include wrestling/combat sports
   const filteredMatches = matches.filter(match => 
     !match.title.toLowerCase().includes('sky sports news') && 
     !match.id.includes('sky-sports-news')

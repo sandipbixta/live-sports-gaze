@@ -136,8 +136,8 @@ const Live = () => {
         setSports(sportsData);
         console.log('Sports data:', sportsData);
         
-        // Fetch from multiple sports to find live matches
-        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey', 'tennis', 'baseball', 'cricket', 'rugby', 'golf']; // Extended sport IDs
+        // Fetch from multiple sports to find live matches including wrestling/combat sports
+        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey', 'tennis', 'baseball', 'cricket', 'rugby', 'golf', 'fight', 'wrestling', 'ufc', 'boxing']; // Extended sport IDs with combat sports
         let allFetchedMatches: Match[] = [];
         
         for (const sportId of sportIds) {
@@ -159,7 +159,7 @@ const Live = () => {
         
         console.log('All matches before filtering:', allFetchedMatches.length);
         
-        // Filter out advertisement matches (like Sky Sports News)
+        // Filter out advertisement matches (like Sky Sports News) but include wrestling/combat sports
         allFetchedMatches = allFetchedMatches.filter(match => 
           !match.title.toLowerCase().includes('sky sports news') && 
           !match.id.includes('sky-sports-news')
