@@ -17,31 +17,38 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     // Clear any existing content
     adRef.current.innerHTML = '';
 
-    // Create the ad configuration
-    (window as any).atOptions = {
-      'key': '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
-      'format': 'iframe',
-      'height': 90,
-      'width': 728,
-      'params': {}
-    };
-
-    // Create and load the ad script
+    // Create and load the Google AdSense script
     const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
     script.async = true;
+    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5505494656170063';
+    script.crossOrigin = 'anonymous';
 
     // Add script to the ad container
     adRef.current.appendChild(script);
+
+    // Create the ad unit
+    const adUnit = document.createElement('ins');
+    adUnit.className = 'adsbygoogle';
+    adUnit.style.display = 'block';
+    adUnit.setAttribute('data-ad-client', 'ca-pub-5505494656170063');
+    adUnit.setAttribute('data-ad-slot', '1234567890'); // You'll need to replace this with your actual ad slot ID
+    adUnit.setAttribute('data-ad-format', 'auto');
+    adUnit.setAttribute('data-full-width-responsive', 'true');
+
+    adRef.current.appendChild(adUnit);
+
+    // Initialize the ad
+    try {
+      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+    } catch (e) {
+      console.error('AdSense error:', e);
+    }
 
     return () => {
       // Cleanup on unmount
       if (adRef.current) {
         adRef.current.innerHTML = '';
       }
-      // Clean up global atOptions
-      delete (window as any).atOptions;
     };
   }, [type]);
 
@@ -80,7 +87,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       data-ad-type={type}
     >
       {type === 'banner' ? (
-        // Banner ad with script
+        // Banner ad with Google AdSense script
         <div ref={adRef} className="w-full flex justify-center" />
       ) : (
         // Placeholder for other ad types
