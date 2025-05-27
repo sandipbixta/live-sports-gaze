@@ -13,11 +13,7 @@ const FeaturedChannels = () => {
     tvChannels.find(ch => ch.id === 'sky-sports-premier-league'),
     tvChannels.find(ch => ch.id === 'espn-usa'),
     tvChannels.find(ch => ch.id === 'fox-sports1-usa'),
-    tvChannels.find(ch => ch.id === 'tnt-sports-1'),
-    tvChannels.find(ch => ch.id === 'star-sports1-india'),
-    tvChannels.find(ch => ch.id === 'bein-sport1-france'),
-    tvChannels.find(ch => ch.id === 'fox-501'),
-  ].filter(Boolean).slice(0, 8);
+  ].filter(Boolean).slice(0, 4);
 
   return (
     <div className="mb-8">
