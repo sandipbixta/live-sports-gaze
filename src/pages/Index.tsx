@@ -15,6 +15,7 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import NewsSection from '../components/NewsSection';
+import FeaturedChannels from '../components/FeaturedChannels';
 
 const Index = () => {
   const { toast } = useToast();
@@ -184,6 +185,11 @@ const Index = () => {
             isLoading={loadingSports}
           />
         </div>
+        
+        {/* Featured Channels Section */}
+        <FeaturedChannels />
+        
+        <Separator className="my-8 bg-[#343a4d]" />
         
         {popularMatches.length > 0 && (
           <>
