@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import MainNav from './MainNav';
 import MobileBottomNav from './MobileBottomNav';
+import ScrollToTop from './ScrollToTop';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 
@@ -162,6 +163,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       </footer>
       
       <MobileBottomNav />
+      <ScrollToTop />
     </div>
   );
 };
