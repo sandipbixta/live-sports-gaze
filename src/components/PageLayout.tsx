@@ -67,11 +67,20 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       <footer className="bg-[#151922] text-gray-300 py-6 mt-10 pb-20 md:pb-6">
         <div className="container mx-auto px-2">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <h4 className="font-bold text-white mb-2">DAMITV</h4>
               <p className="text-xs">Your premium destination for live sports streaming.</p>
             </div>
+            
+            <div>
+              <h5 className="font-semibold text-white mb-2">About Us</h5>
+              <div className="space-y-1 text-xs">
+                <p>DamiTV is your ultimate destination for free live sports streaming. We provide access to hundreds of sports channels and live events from around the world.</p>
+                <p>Watch Premier League, Champions League, basketball, tennis, and more - all for free with no registration required.</p>
+              </div>
+            </div>
+            
             <div>
               <h5 className="font-semibold text-white mb-2">Sports</h5>
               <ul className="space-y-1 text-xs">
@@ -95,6 +104,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 </li>
               </ul>
             </div>
+            
             <div>
               <h5 className="font-semibold text-white mb-2">Help</h5>
               <ul className="space-y-1 text-xs">
@@ -115,6 +125,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                 </li>
               </ul>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
               <h5 className="font-semibold text-white mb-2">Follow Us</h5>
               <div className="flex space-x-2">
