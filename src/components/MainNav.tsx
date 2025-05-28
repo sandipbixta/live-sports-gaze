@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Home, CalendarDays, Tv2, Radio, Mail } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Clock from "./Clock";
 
 const MainNav = () => {
   const isMobile = useIsMobile();
@@ -47,6 +48,10 @@ const MainNav = () => {
           ))}
         </NavigationMenuList>
       </NavigationMenu>
+      
+      <div className="hidden md:block ml-auto">
+        <Clock />
+      </div>
     </div>
   );
 };

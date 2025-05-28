@@ -6,6 +6,7 @@ import MobileBottomNav from './MobileBottomNav';
 import ScrollToTop from './ScrollToTop';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
+import Clock from './Clock';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -32,16 +33,19 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                     DAMITV
                   </h1>
                 </Link>
-                {onSearch && (
-                  <div className="relative">
-                    <SearchBar
-                      value={searchTerm || ''}
-                      onChange={onSearch}
-                      placeholder="Search events..."
-                      className="w-32"
-                    />
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <Clock />
+                  {onSearch && (
+                    <div className="relative">
+                      <SearchBar
+                        value={searchTerm || ''}
+                        onChange={onSearch}
+                        placeholder="Search events..."
+                        className="w-32"
+                      />
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <>
