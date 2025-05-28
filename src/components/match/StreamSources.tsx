@@ -55,17 +55,19 @@ const StreamSources = ({
           let streams: DetailedStream[] = [];
           
           if (Array.isArray(streamData)) {
+            // Multiple streams returned - each with unique embed URL
             streams = streamData.map((stream, index) => ({
-              id: `${source.id}-${index}-${stream.language || index}`,
+              id: `${source.id}-${stream.language || index}-${Date.now()}`, // Unique ID with timestamp
               language: stream.language || `Stream ${index + 1}`,
               hd: stream.hd || false,
               source: source.source,
-              embedUrl: stream.embedUrl,
+              embedUrl: stream.embedUrl, // Each stream should have its own unique embedUrl
               streamNo: stream.streamNo || index + 1
             }));
           } else if (streamData && streamData.embedUrl) {
+            // Single stream object
             streams = [{
-              id: source.id,
+              id: `${source.id}-${streamData.language || 'default'}-${Date.now()}`,
               language: streamData.language || 'Default',
               hd: streamData.hd || false,
               source: source.source,
@@ -132,23 +134,28 @@ const StreamSources = ({
               ) : streams.length > 0 ? (
                 streams.map((stream) => {
                   const streamKey = `${stream.source}/${stream.id}`;
+                  const isActive = activeSource === streamKey;
+                  
                   return (
                     <Badge
-                      key={streamKey}
+                      key={stream.id} // Use unique stream ID as key
                       variant="source"
-                      className={`cursor-pointer text-sm py-2 px-4 ${
-                        activeSource === streamKey 
-                          ? 'bg-[#343a4d] border-[#9b87f5]' 
-                          : ''
+                      className={`cursor-pointer text-sm py-2 px-4 transition-all ${
+                        isActive 
+                          ? 'bg-[#343a4d] border-[#9b87f5] ring-2 ring-[#9b87f5]/50' 
+                          : 'hover:bg-[#343a4d] hover:border-[#9b87f5]'
                       }`}
                       onClick={() => {
-                        console.log(`Clicking stream: ${stream.language} with unique URL: ${stream.embedUrl}`);
+                        console.log(`Selecting stream: ${stream.language} from ${stream.source} with unique URL: ${stream.embedUrl}`);
                         // Pass the SPECIFIC embed URL for this language stream
                         onSourceChange(stream.source, stream.id, stream.embedUrl);
                       }}
                     >
-                      {stream.language}
-                      {stream.hd && <span className="ml-1 text-xs">HD</span>}
+                      <div className="flex items-center gap-2">
+                        <span>{stream.language}</span>
+                        {stream.hd && <span className="text-xs bg-green-500 px-1 rounded">HD</span>}
+                        <span className="text-xs text-gray-400">#{stream.streamNo}</span>
+                      </div>
                     </Badge>
                   );
                 })

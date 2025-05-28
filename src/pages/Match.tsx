@@ -36,14 +36,14 @@ const Match = () => {
       console.log(`Fetching stream data: source=${source}, id=${id}, specificEmbedUrl=${specificEmbedUrl}, retry=${retryCounter}`);
       
       if (specificEmbedUrl) {
-        // Use the specific embed URL directly
-        console.log('Using specific embed URL:', specificEmbedUrl);
+        // Use the specific embed URL directly - this ensures unique streams for different languages
+        console.log('Using specific embed URL for unique stream:', specificEmbedUrl);
         const customStream: Stream = {
-          id: `custom-${id}`,
+          id: `custom-${id}-${Date.now()}`, // Unique ID with timestamp
           streamNo: 1,
           language: "Selected Language",
           hd: true,
-          embedUrl: specificEmbedUrl,
+          embedUrl: specificEmbedUrl, // This is the key - unique URL for each language
           source: source
         };
         setStream(customStream);
@@ -137,8 +137,11 @@ const Match = () => {
 
   const handleSourceChange = async (source: string, id: string, embedUrl?: string) => {
     console.log(`Source change: source=${source}, id=${id}, embedUrl=${embedUrl}`);
-    setActiveSource(`${source}/${id}`);
+    const newActiveSource = `${source}/${id}`;
+    setActiveSource(newActiveSource);
     setRetryCounter(prev => prev + 1);
+    
+    // Pass the embedUrl to ensure we get the specific stream for the selected language
     await fetchStreamData(source, id, embedUrl);
   };
 

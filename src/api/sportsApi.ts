@@ -1,4 +1,3 @@
-
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
@@ -61,12 +60,10 @@ export const fetchStream = async (source: string, id: string): Promise<Stream | 
     // More detailed logging
     console.log(`Fetching stream data: source=${source}, id=${id}`);
     
-    // Define potential API endpoints to try - in order of preference
+    // Define the correct API endpoints based on your provided schema
     const endpoints = [
-      `${API_BASE}/stream/${source}/${id}`,
-      `${API_BASE}/streams/${source}/${id}`,
-      `${API_BASE}/sources/${source}/${id}`, // Try a sources endpoint
-      `${FALLBACK_API_BASE}/stream/${source}/${id}`
+      `${API_BASE}/stream/${source}/${id}`, // Primary endpoint using your schema
+      `${API_BASE}/streams/${source}/${id}`, // Alternative endpoint
     ];
     
     // Enhanced fetch with better retry and error handling
@@ -76,6 +73,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream | 
       const response = await fetch(url, {
         headers: {
           'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
         cache: 'no-store', // Always get fresh content
         mode: 'cors',
@@ -96,71 +94,64 @@ export const fetchStream = async (source: string, id: string): Promise<Stream | 
     
     for (let i = 0; i < endpoints.length; i++) {
       try {
-        // Try each endpoint up to 2 times before moving to next
-        const MAX_RETRIES = 2;
+        const response = await fetchFromEndpoint(endpoints[i], i + 1);
+        console.log(`Successfully fetched stream from endpoint ${i + 1}`);
         
-        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-          try {
-            const response = await fetchFromEndpoint(endpoints[i], i + 1);
-            console.log(`Successfully fetched stream from endpoint ${i + 1}`);
-            
-            // Parse and validate response
-            const data = await response.json();
-            console.log('Stream API response data:', data);
-            
-            // Handle different response formats
-            if (Array.isArray(data)) {
-              // Multiple streams returned - this is what we want for language options
-              console.log(`Found ${data.length} streams from API`);
-              return data.map(stream => ({
-                ...stream,
-                embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
-                source: source
-              }));
-            } else if (data && typeof data === 'object') {
-              // Single stream object
-              if (data.streams && Array.isArray(data.streams)) {
-                // API returned an object with a streams array
-                console.log(`Found ${data.streams.length} streams in streams array`);
-                return data.streams.map((stream: any) => ({
-                  ...stream,
-                  embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
-                  source: source
-                }));
-              } else if (data.embedUrl) {
-                // Single stream
-                return {
-                  ...data,
-                  embedUrl: ensureValidEmbedUrl(data.embedUrl),
-                  source: source
-                };
-              }
-            }
-            
-            // If we get here, data format was unexpected
-            throw new Error('Unexpected data format from API');
-            
-          } catch (error) {
-            console.warn(`Attempt ${attempt} failed for endpoint ${i + 1}: ${(error as Error).message}`);
-            lastError = error as Error;
-            
-            // Only retry after a delay
-            if (attempt < MAX_RETRIES) {
-              const delay = 1000 * attempt;
-              await new Promise(resolve => setTimeout(resolve, delay));
-            }
+        // Parse and validate response
+        const data = await response.json();
+        console.log('Stream API response data:', data);
+        
+        // Handle different response formats
+        if (Array.isArray(data)) {
+          // Multiple streams returned - each should have unique embedUrl
+          console.log(`Found ${data.length} streams from API`);
+          return data.map((stream, index) => ({
+            ...stream,
+            id: stream.id || `${source}-${id}-${index}`,
+            embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
+            source: source,
+            language: stream.language || `Language ${index + 1}`,
+            streamNo: stream.streamNo || index + 1
+          }));
+        } else if (data && typeof data === 'object') {
+          // Single stream object or nested structure
+          if (data.streams && Array.isArray(data.streams)) {
+            // API returned an object with a streams array
+            console.log(`Found ${data.streams.length} streams in streams array`);
+            return data.streams.map((stream: any, index: number) => ({
+              ...stream,
+              id: stream.id || `${source}-${id}-${index}`,
+              embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
+              source: source,
+              language: stream.language || `Language ${index + 1}`,
+              streamNo: stream.streamNo || index + 1
+            }));
+          } else if (data.embedUrl) {
+            // Single stream
+            return {
+              ...data,
+              id: data.id || `${source}-${id}`,
+              embedUrl: ensureValidEmbedUrl(data.embedUrl),
+              source: source,
+              language: data.language || 'Default',
+              streamNo: data.streamNo || 1
+            };
           }
         }
-      } catch (endpointError) {
-        console.error(`All attempts failed for endpoint ${i + 1}`);
-        lastError = endpointError as Error;
+        
+        // If we get here, data format was unexpected
+        throw new Error('Unexpected data format from API');
+        
+      } catch (error) {
+        console.warn(`Endpoint ${i + 1} failed: ${(error as Error).message}`);
+        lastError = error as Error;
       }
     }
     
     // If we get here, we've tried all endpoints
     console.error('All stream endpoints failed:', lastError);
     
-    // Return demo stream data if all endpoints fail
+    // Return demo stream data with multiple language options
     return getDemoStreamData(source, id);
     
   } catch (error) {
@@ -177,25 +168,23 @@ function ensureValidEmbedUrl(url: string): string {
   }
   
   // Otherwise return a demo URL
-  return getDemoStreamData("default", "demo").embedUrl;
+  return getDemoStreamData("default", "demo")[0].embedUrl;
 }
 
-// Provides a demo stream when actual stream isn't available
-function getDemoStreamData(source: string, id: string): Stream {
-  console.log('Using demo stream data');
+// Provides demo streams with different languages when actual streams aren't available
+function getDemoStreamData(source: string, id: string): Stream[] {
+  console.log('Using demo stream data with multiple languages');
   
-  // Select an appropriate demo stream based on source/id
-  const sportType = id.includes('football') || source.includes('football') ? 'football' : 
-                    id.includes('basketball') || source.includes('basketball') ? 'basketball' : 'sports';
+  // Create multiple demo streams with different languages
+  const languages = ['English', 'Spanish', 'French', 'German', 'Italian'];
   
-  // Return demo stream object with appropriate embed URL
-  return {
-    id: `demo-${id}`,
-    streamNo: 1,
-    language: "English",
-    hd: true,
-    // Use publicly available sports stream embed for demo
-    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1&mute=0`,
+  return languages.map((language, index) => ({
+    id: `demo-${id}-${language.toLowerCase()}-${Date.now()}-${index}`,
+    streamNo: index + 1,
+    language: language,
+    hd: index < 2, // First two are HD
+    // Use different demo embed URLs for each language
+    embedUrl: `https://www.youtube.com/embed/live_stream?channel=demo_${language.toLowerCase()}&autoplay=1&mute=0&t=${Date.now()}`,
     source: source || "demo"
-  };
+  }));
 }
