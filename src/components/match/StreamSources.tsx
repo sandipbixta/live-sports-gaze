@@ -8,7 +8,7 @@ import { Loader } from 'lucide-react';
 interface StreamSourcesProps {
   sources: Source[];
   activeSource: string | null;
-  onSourceChange: (source: string, id: string) => void;
+  onSourceChange: (source: string, id: string, embedUrl?: string) => void;
   streamId: string;
 }
 
@@ -50,16 +50,13 @@ const StreamSources = ({
         try {
           console.log(`Fetching detailed streams for ${source.source}/${source.id}`);
           
-          // Try to fetch the stream data which might contain multiple language options
           const streamData = await fetchStream(source.source, source.id);
           
-          // The API might return an array of streams or a single stream
-          // We need to handle both cases
           let streams: DetailedStream[] = [];
           
           if (Array.isArray(streamData)) {
             streams = streamData.map((stream, index) => ({
-              id: `${source.id}-${index}`,
+              id: `${source.id}-${index}-${stream.language || index}`,
               language: stream.language || `Stream ${index + 1}`,
               hd: stream.hd || false,
               source: source.source,
@@ -67,7 +64,6 @@ const StreamSources = ({
               streamNo: stream.streamNo || index + 1
             }));
           } else if (streamData && streamData.embedUrl) {
-            // Single stream - but let's check if there are language variants
             streams = [{
               id: source.id,
               language: streamData.language || 'Default',
@@ -87,7 +83,6 @@ const StreamSources = ({
           
         } catch (error) {
           console.error(`Error fetching detailed streams for ${sourceKey}:`, error);
-          // Set empty array to indicate we tried but failed
           setDetailedStreams(prev => ({
             ...prev,
             [sourceKey]: []
@@ -135,21 +130,27 @@ const StreamSources = ({
                   Loading streams...
                 </Badge>
               ) : streams.length > 0 ? (
-                streams.map((stream) => (
-                  <Badge
-                    key={`${stream.source}-${stream.id}-${stream.streamNo}`}
-                    variant="source"
-                    className={`cursor-pointer text-sm py-2 px-4 ${
-                      activeSource === `${stream.source}/${stream.id}` 
-                        ? 'bg-[#343a4d] border-[#9b87f5]' 
-                        : ''
-                    }`}
-                    onClick={() => onSourceChange(stream.source, stream.id)}
-                  >
-                    {stream.language}
-                    {stream.hd && <span className="ml-1 text-xs">HD</span>}
-                  </Badge>
-                ))
+                streams.map((stream) => {
+                  const streamKey = `${stream.source}/${stream.id}`;
+                  return (
+                    <Badge
+                      key={streamKey}
+                      variant="source"
+                      className={`cursor-pointer text-sm py-2 px-4 ${
+                        activeSource === streamKey 
+                          ? 'bg-[#343a4d] border-[#9b87f5]' 
+                          : ''
+                      }`}
+                      onClick={() => {
+                        console.log(`Clicking stream: ${stream.language} with URL: ${stream.embedUrl}`);
+                        onSourceChange(stream.source, stream.id, stream.embedUrl);
+                      }}
+                    >
+                      {stream.language}
+                      {stream.hd && <span className="ml-1 text-xs">HD</span>}
+                    </Badge>
+                  );
+                })
               ) : (
                 <Badge
                   variant="source"

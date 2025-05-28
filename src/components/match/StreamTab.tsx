@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -56,7 +55,7 @@ const StreamTab = ({
     const [source, id] = activeSource.split('/');
     
     if (source && id) {
-      setRetryCount(prev => prev + 1); // This will trigger a refresh
+      setRetryCount(prev => prev + 1);
       
       toast({
         title: "Retrying stream",
@@ -65,7 +64,6 @@ const StreamTab = ({
       
       handleSourceChange(source, id);
     } else {
-      // If we can't get source/id from activeSource, try the first available source
       if (match.sources && match.sources.length > 0) {
         const { source, id } = match.sources[0];
         setRetryCount(prev => prev + 1);
@@ -78,6 +76,12 @@ const StreamTab = ({
         handleSourceChange(source, id);
       }
     }
+  };
+
+  // Updated handleSourceChangeWithUrl to accept specific embed URL
+  const handleSourceChangeWithUrl = (source: string, id: string, embedUrl?: string) => {
+    console.log(`StreamTab - Source change with URL: source=${source}, id=${id}, embedUrl=${embedUrl}`);
+    handleSourceChange(source, id, embedUrl);
   };
 
   // Format match time to display time
@@ -119,7 +123,7 @@ const StreamTab = ({
       <StreamSources
         sources={match.sources}
         activeSource={activeSource}
-        onSourceChange={handleSourceChange}
+        onSourceChange={handleSourceChangeWithUrl}
         streamId={streamId}
       />
       

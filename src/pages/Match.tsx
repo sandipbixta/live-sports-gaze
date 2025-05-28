@@ -29,17 +29,33 @@ const Match = () => {
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
   const [retryCounter, setRetryCounter] = useState(0);
   
-  // Memoized stream fetching function to prevent recreation on every render
-  const fetchStreamData = useCallback(async (source: string, id: string) => {
+  // Memoized stream fetching function with support for specific embed URLs
+  const fetchStreamData = useCallback(async (source: string, id: string, specificEmbedUrl?: string) => {
     setLoadingStream(true);
     try {
-      console.log(`Fetching stream data: source=${source}, id=${id}, retry=${retryCounter}`);
-      const streamData = await fetchStream(source, id);
-      console.log('Stream data received:', streamData);
+      console.log(`Fetching stream data: source=${source}, id=${id}, specificEmbedUrl=${specificEmbedUrl}, retry=${retryCounter}`);
       
-      // Handle both single stream and array of streams
-      const stream = Array.isArray(streamData) ? streamData[0] : streamData;
-      setStream(stream);
+      if (specificEmbedUrl) {
+        // Use the specific embed URL directly
+        console.log('Using specific embed URL:', specificEmbedUrl);
+        const customStream: Stream = {
+          id: `custom-${id}`,
+          streamNo: 1,
+          language: "Selected Language",
+          hd: true,
+          embedUrl: specificEmbedUrl,
+          source: source
+        };
+        setStream(customStream);
+      } else {
+        // Fetch stream data from API
+        const streamData = await fetchStream(source, id);
+        console.log('Stream data received:', streamData);
+        
+        // Handle both single stream and array of streams
+        const stream = Array.isArray(streamData) ? streamData[0] : streamData;
+        setStream(stream);
+      }
     } catch (error) {
       console.error('Error in fetchStreamData:', error);
       toast({
@@ -119,11 +135,11 @@ const Match = () => {
     loadMatch();
   }, [sportId, matchId, toast, fetchStreamData]);
 
-  const handleSourceChange = async (source: string, id: string) => {
-    console.log(`Source change: source=${source}, id=${id}`);
+  const handleSourceChange = async (source: string, id: string, embedUrl?: string) => {
+    console.log(`Source change: source=${source}, id=${id}, embedUrl=${embedUrl}`);
     setActiveSource(`${source}/${id}`);
-    setRetryCounter(prev => prev + 1); // Increase retry counter to force refetch
-    await fetchStreamData(source, id);
+    setRetryCounter(prev => prev + 1);
+    await fetchStreamData(source, id, embedUrl);
   };
 
   if (isLoading) {
