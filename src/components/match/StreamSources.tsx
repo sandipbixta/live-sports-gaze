@@ -19,8 +19,20 @@ const StreamSources = ({
     return null;
   }
 
-  // Group sources by source name (Alpha, Bravo, Charlie, etc.)
-  const groupedSources = sources.reduce((groups: Record<string, Source[]>, source) => {
+  // Filter to only show main sources (Alpha, Bravo, Charlie, etc.)
+  // Remove language-specific duplicates and limit to primary sources
+  const mainSources = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot'];
+  
+  const filteredSources = sources.filter(source => {
+    const sourceName = source.source.toLowerCase();
+    return mainSources.some(main => sourceName.includes(main.toLowerCase()));
+  });
+
+  // If no main sources found, take only the first 2-3 sources to avoid clutter
+  const displaySources = filteredSources.length > 0 ? filteredSources : sources.slice(0, 3);
+
+  // Group sources by source name (Alpha, Bravo, etc.)
+  const groupedSources = displaySources.reduce((groups: Record<string, Source[]>, source) => {
     const groupName = source.source;
     if (!groups[groupName]) {
       groups[groupName] = [];
