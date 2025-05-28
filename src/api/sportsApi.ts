@@ -56,7 +56,7 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   }
 };
 
-export const fetchStream = async (source: string, id: string): Promise<Stream> => {
+export const fetchStream = async (source: string, id: string): Promise<Stream | Stream[]> => {
   try {
     // More detailed logging
     console.log(`Fetching stream data: source=${source}, id=${id}`);
@@ -65,6 +65,7 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     const endpoints = [
       `${API_BASE}/stream/${source}/${id}`,
       `${API_BASE}/streams/${source}/${id}`,
+      `${API_BASE}/sources/${source}/${id}`, // Try a sources endpoint
       `${FALLBACK_API_BASE}/stream/${source}/${id}`
     ];
     
@@ -107,24 +108,33 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
             const data = await response.json();
             console.log('Stream API response data:', data);
             
-            // Format handling for different response formats
-            if (Array.isArray(data) && data.length > 0) {
-              // Prefer HD stream if available
-              const hdStream = data.find(stream => stream.hd === true);
-              const selectedStream = hdStream || data[0];
-              
-              if (selectedStream.embedUrl) {
+            // Handle different response formats
+            if (Array.isArray(data)) {
+              // Multiple streams returned - this is what we want for language options
+              console.log(`Found ${data.length} streams from API`);
+              return data.map(stream => ({
+                ...stream,
+                embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
+                source: source
+              }));
+            } else if (data && typeof data === 'object') {
+              // Single stream object
+              if (data.streams && Array.isArray(data.streams)) {
+                // API returned an object with a streams array
+                console.log(`Found ${data.streams.length} streams in streams array`);
+                return data.streams.map((stream: any) => ({
+                  ...stream,
+                  embedUrl: ensureValidEmbedUrl(stream.embedUrl || ''),
+                  source: source
+                }));
+              } else if (data.embedUrl) {
+                // Single stream
                 return {
-                  ...selectedStream,
-                  // Ensure embed URL is properly formatted
-                  embedUrl: ensureValidEmbedUrl(selectedStream.embedUrl)
+                  ...data,
+                  embedUrl: ensureValidEmbedUrl(data.embedUrl),
+                  source: source
                 };
               }
-            } else if (data && typeof data === 'object' && data.embedUrl) {
-              return {
-                ...data,
-                embedUrl: ensureValidEmbedUrl(data.embedUrl)
-              };
             }
             
             // If we get here, data format was unexpected
