@@ -64,19 +64,88 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300">
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group hover:scale-105">
       <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
+        {/* Full background design for teams with logos */}
+        {hasTeamLogos && hasTeams ? (
+          <div className="absolute inset-0 flex">
+            {/* Home team side */}
+            <div className="w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden mb-1 shadow-lg`}>
+                  <img 
+                    src={homeBadge} 
+                    alt={home} 
+                    className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} object-contain`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">H</span></div>';
+                    }}
+                  />
+                </div>
+                <span className="text-white text-[8px] md:text-[10px] font-semibold text-center leading-tight">
+                  {home.length > 8 ? `${home.substring(0, 8)}...` : home}
+                </span>
+              </div>
+            </div>
+            
+            {/* Away team side */}
+            <div className="w-1/2 bg-gradient-to-bl from-red-600 to-red-800 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden mb-1 shadow-lg`}>
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} object-contain`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">A</span></div>';
+                    }}
+                  />
+                </div>
+                <span className="text-white text-[8px] md:text-[10px] font-semibold text-center leading-tight">
+                  {away.length > 8 ? `${away.substring(0, 8)}...` : away}
+                </span>
+              </div>
+            </div>
+            
+            {/* VS circle in the center */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-gray-200">
+                <span className="text-gray-800 text-[8px] md:text-[10px] font-bold">VS</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Fallback for non-team matches
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
+              <div className="flex items-center justify-center mb-2">
+                <div className="bg-[#343a4d] px-2 py-0.5 rounded-md">
+                  <span className="font-bold text-white text-[10px]">DAMITV</span>
+                </div>
+              </div>
+              <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1">
+                {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
+              </h3>
+              <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
+                {match.title.split('-').pop()?.trim() || 'Football'}
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Match Time */}
-        <div className="absolute top-1 left-1 z-20">
+        <div className="absolute top-1 left-1 z-30">
           <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1">
             {!isLive && <Clock className="w-2.5 h-2.5" />}
             {formatTime(match.date)}
           </div>
         </div>
         
-        {/* Live/Upcoming Badge - Adjusted for mobile */}
+        {/* Live/Upcoming Badge */}
         <div className="absolute top-1 right-1 z-30">
           {isLive ? (
             <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-1 py-0.5 rounded-md">
@@ -91,56 +160,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
           ) : null}
         </div>
         
-        {/* Teams or DAMITV - Centered in the card */}
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">
-          {hasTeamLogos && hasTeams ? (
-            <div className="flex items-center justify-center">
-              <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
-                  <img 
-                    src={homeBadge} 
-                    alt={home} 
-                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
-                    }}
-                  />
-                </div>
-              </div>
-              {/* Only show VS when both teams exist */}
-              {hasTeams && (
-                <div className="mx-2 text-white text-xs font-bold">VS</div>
-              )}
-              <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
-                  <img 
-                    src={awayBadge} 
-                    alt={away}
-                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center">
-              <div className="bg-[#343a4d] px-2 py-0.5 rounded-md">
-                <span className="font-bold text-white text-[10px]">DAMITV</span>
-              </div>
-            </div>
-          )}
-          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1 mt-2">
-            {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
+        {/* Match title and date at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 z-20">
+          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate">
+            {match.title.length > 25 ? `${match.title.substring(0, 25)}...` : match.title}
           </h3>
-          <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
-            {match.title.split('-').pop()?.trim() || 'Football'}
-          </p>
-          
-          {/* Add date for upcoming matches */}
           {!isLive && (
             <p className="text-center text-[#1EAEDB] text-[8px] md:text-[10px] mt-1">
               {formatDate(match.date)}
