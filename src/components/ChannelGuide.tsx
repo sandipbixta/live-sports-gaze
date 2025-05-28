@@ -1,177 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader, Wifi, WifiOff } from 'lucide-react';
-import { getCountries, getChannelsByCountry } from '@/data/tvChannels';
-import { EPGChannel } from '@/services/epgApiService';
-import { epgApiService } from '@/services/epgApiService';
-import { mockEpgService } from '@/services/mockEpgService';
+import { Tv } from 'lucide-react';
 
 const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
-  const [programData, setProgramData] = useState<EPGChannel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [allEpgData, setAllEpgData] = useState<Record<string, EPGChannel[]>>({});
-  
-  const channelsByCountry = getChannelsByCountry();
-
-  // Fetch EPG data - real API for Canada, mock for others
-  useEffect(() => {
-    const fetchAllEpgData = async () => {
-      setIsLoading(true);
-      
-      try {
-        if (selectedCountry === 'Canada') {
-          console.log('Loading real EPG data for Canada...');
-          const canadianEpgData = await epgApiService.getAllEPGData(channelsByCountry);
-          setAllEpgData(canadianEpgData);
-          setProgramData(canadianEpgData['Canada'] || []);
-        } else {
-          console.log(`Loading demo EPG data for ${selectedCountry}...`);
-          const epgData = await mockEpgService.getAllEPGData(channelsByCountry);
-          setAllEpgData(epgData);
-          setProgramData(epgData[selectedCountry] || []);
-        }
-        
-      } catch (error) {
-        console.error('Error loading EPG data:', error);
-        setProgramData([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAllEpgData();
-    
-    // Update current time every minute
-    const intervalId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    
-    return () => clearInterval(intervalId);
-  }, [selectedCountry]);
-
-  // Format time for display
-  const formatTime = (timeString: string) => {
-    const date = new Date(timeString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
-
-  // Check if a program is currently airing
-  const isCurrentlyAiring = (startTime: string, endTime: string) => {
-    const now = new Date().getTime();
-    const start = new Date(startTime).getTime();
-    const end = new Date(endTime).getTime();
-    return now >= start && now <= end;
-  };
-
-  const hasRealEPG = programData.length > 0;
-  const isCanada = selectedCountry === 'Canada';
-
-  if (isLoading) {
-    return (
-      <Card className="bg-[#151922] border-[#343a4d] mt-6">
-        <CardContent className="p-6 flex justify-center items-center">
-          <div className="flex flex-col items-center">
-            <Loader className="h-8 w-8 animate-spin text-[#ff5a36] mb-2" />
-            <p className="text-white">Loading TV Guide...</p>
-            <p className="text-gray-400 text-sm mt-1">
-              {isCanada ? 'Real EPG data from epg.pw' : 'Demo data with realistic programs'}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!programData.length) {
-    return (
-      <Card className="bg-[#151922] border-[#343a4d] mt-6">
-        <CardContent className="p-6 text-center">
-          <div className="flex items-center justify-center mb-2">
-            <WifiOff className="h-6 w-6 text-gray-400 mr-2" />
-          </div>
-          <p className="text-gray-400">No program data available for {selectedCountry}.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="bg-[#151922] border-[#343a4d] mt-6">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-white text-lg flex items-center">
-              <Wifi className="h-5 w-5 text-green-500 mr-2" />
-              TV Guide - {selectedCountry}
-            </CardTitle>
-            <p className="text-gray-400 text-sm">
-              {isCanada ? 
-                `Real EPG data (${programData.length} channels) - Live from epg.pw API` :
-                `Demo EPG data (${programData.length} channels) - Realistic program schedule`
-              }
-            </p>
-          </div>
-        </div>
+        <CardTitle className="text-white text-lg flex items-center">
+          <Tv className="h-5 w-5 text-[#ff5a36] mr-2" />
+          Live Sports TV Guide
+        </CardTitle>
+        <p className="text-gray-400 text-sm">
+          Real-time sports schedule and TV guide for all major sports
+        </p>
       </CardHeader>
       <CardContent className="p-0">
-        <ScrollArea className="h-[400px]">
-          <Table className="border-collapse">
-            <TableHeader className="sticky top-0 bg-[#242836] z-10">
-              <TableRow className="border-b border-[#343a4d]">
-                <TableHead className="text-white w-1/4">Channel</TableHead>
-                <TableHead className="text-white">Current & Upcoming Programs</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {programData.map((channel) => (
-                <TableRow key={channel.channelId} className="border-b border-[#343a4d]">
-                  <TableCell className="font-medium text-white">{channel.channelName}</TableCell>
-                  <TableCell className="p-0">
-                    <div className="flex flex-col">
-                      {channel.programs.slice(0, 5).map((program) => (
-                        <div 
-                          key={program.id} 
-                          className={`p-3 border-t first:border-t-0 border-[#343a4d] ${
-                            isCurrentlyAiring(program.startTime, program.endTime) 
-                              ? 'bg-[#343a4d]/40' 
-                              : ''
-                          }`}
-                        >
-                          <div className="flex items-start space-x-2">
-                            <div className="text-gray-400 text-sm whitespace-nowrap">
-                              {formatTime(program.startTime)}
-                            </div>
-                            <div>
-                              <div className="font-medium text-white">
-                                {program.title}
-                                {isCurrentlyAiring(program.startTime, program.endTime) && (
-                                  <span className="ml-2 bg-red-600 text-white text-xs px-1 py-0.5 rounded">LIVE</span>
-                                )}
-                              </div>
-                              {program.description && (
-                                <div className="text-gray-400 text-sm mt-0.5 line-clamp-1">{program.description}</div>
-                              )}
-                              {program.category && (
-                                <div className="text-gray-500 text-xs mt-0.5">{program.category}</div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
+        <div className="w-full">
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              .containerFrame {width: 100%;}
+              .frameData {width: 100%;}
+              .hosting{margin:20px; font-size:70%; padding:6px; border:1px solid #17628b; margin-bottom:10px;}
+              .hosting a{font-weight:bold;color:#17628b;}
+              .dataList{padding:20px;}
+            `
+          }} />
+          
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+              var eventer = window[eventMethod];
+              var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+              eventer(messageEvent,function(e) {
+                if(typeof e.data == "number" && e.data > 100)
+                  document.getElementById("outputFrame").height = e.data + "px";
+              },false);
+            `
+          }} />
+          
+          <iframe
+            className="frameData"
+            id="outputFrame"
+            src="https://sport-tv-guide.live/sportwidget/e6e4e24bc2b1?time_zone=Australia%2FSydney&fc=3,29,102,16,2,1,7,18&time12=0&sports=28,29,1,5,18,7,8,10,39,40,13&bg=f8f8f9&bgs=b7b7b7&grp=1&sd=0&lng=1"
+            style={{
+              position: 'relative',
+              border: 'none',
+              width: '100%',
+              minHeight: '600px'
+            }}
+            frameBorder="0"
+            title="Live Sports TV Guide"
+          />
+          
+          <div className="p-2 text-center text-xs text-gray-400">
+            Powered by{' '}
+            <a 
+              href="https://sport-tv-guide.live" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-[#ff5a36] hover:underline"
+            >
+              Live Sports TV Guide
+            </a>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
