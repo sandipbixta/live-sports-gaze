@@ -70,7 +70,7 @@ const Sports = ({ onClose }: SportsProps) => {
   ].filter((match, index, self) => index === self.findIndex(m => m.id === match.id));
 
   // Get available sports from all matches and put football first
-  const availableSports = Array.from(new Set(combinedMatches.map(match => match.category?.toLowerCase() || match.sportId)))
+  const availableSports = Array.from(new Set(combinedMatches.map(match => match.sportId)))
     .sort((a, b) => {
       if (a === 'football') return -1;
       if (b === 'football') return 1;
@@ -80,11 +80,11 @@ const Sports = ({ onClose }: SportsProps) => {
   // Filter matches by selected sport
   const filteredMatches = selectedSport === 'all' 
     ? combinedMatches 
-    : combinedMatches.filter(match => (match.category?.toLowerCase() || match.sportId) === selectedSport);
+    : combinedMatches.filter(match => match.sportId === selectedSport);
 
   // Get match count by sport
   const getMatchCountBySport = (sport: string) => {
-    return combinedMatches.filter(match => (match.category?.toLowerCase() || match.sportId) === sport).length;
+    return combinedMatches.filter(match => match.sportId === sport).length;
   };
 
   const formatDate = (timestamp: number | string) => {
@@ -134,7 +134,7 @@ const Sports = ({ onClose }: SportsProps) => {
 
   const handleMatchClick = (match: any) => {
     // Navigate to the actual match page where streams are handled
-    const sportId = match.sportId || match.category?.toLowerCase() || 'football';
+    const sportId = match.sportId || 'football';
     navigate(`/match/${sportId}/${match.id}`);
     onClose(); // Close the sports modal
   };
@@ -223,19 +223,14 @@ const Sports = ({ onClose }: SportsProps) => {
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline" className="border-gray-600 text-gray-300 text-xs">
-                          <span className="mr-1">{getSportIcon(match.category || match.sportId)}</span>
-                          {match.category || match.sportId}
+                          <span className="mr-1">{getSportIcon(match.sportId)}</span>
+                          {match.sportId}
                         </Badge>
                         <div className="flex space-x-1">
                           {isLive(match.date) && (
                             <Badge className="bg-red-600 text-white text-xs px-2 py-1 flex items-center gap-1">
                               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                               LIVE
-                            </Badge>
-                          )}
-                          {match.popular && (
-                            <Badge className="bg-orange-600 text-white text-xs px-2 py-1">
-                              Popular
                             </Badge>
                           )}
                         </div>
