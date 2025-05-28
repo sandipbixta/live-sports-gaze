@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -16,7 +17,7 @@ interface StreamTabProps {
   stream: Stream | null;
   loadingStream: boolean;
   activeSource: string | null;
-  handleSourceChange: (source: string, id: string) => void;
+  handleSourceChange: (source: string, id: string, embedUrl?: string) => void;
   popularMatches: MatchType[];
   sportId: string;
 }
