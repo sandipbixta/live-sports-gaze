@@ -42,7 +42,7 @@ const ChannelGuide = ({ selectedCountry }: { selectedCountry: string }) => {
           <iframe
             className="frameData"
             id="outputFrame"
-            src="https://sport-tv-guide.live/sportwidget/e6e4e24bc2b1?time_zone=Australia%2FSydney&fc=3,29,102,16,2,1,7,18&time12=0&sports=28,29,1,5,18,7,8,10,39,40,13&bg=f8f8f9&bgs=b7b7b7&grp=1&sd=0&lng=1"
+            src="https://sport-tv-guide.live/sportwidget/e56305453cb8?time_zone=Australia%2FSydney&fc=102,16,2,1,7,18&time12=0&sports=28,29,1,5,18,7,8,10,39,40,13&bg=f8f8f9&bgs=b7b7b7&grp=1&sd=0&lng=1"
             style={{
               position: 'relative',
               border: 'none',
