@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -37,7 +36,10 @@ const Match = () => {
       console.log(`Fetching stream data: source=${source}, id=${id}, retry=${retryCounter}`);
       const streamData = await fetchStream(source, id);
       console.log('Stream data received:', streamData);
-      setStream(streamData);
+      
+      // Handle both single stream and array of streams
+      const stream = Array.isArray(streamData) ? streamData[0] : streamData;
+      setStream(stream);
     } catch (error) {
       console.error('Error in fetchStreamData:', error);
       toast({

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -105,9 +104,13 @@ const Live = () => {
     setActiveSource(`${source.source}/${source.id}`);
     try {
       console.log(`Fetching stream data: source=${source.source}, id=${source.id}`);
-      const stream = await fetchStream(source.source, source.id);
-      console.log('Stream data received:', stream);
+      const streamData = await fetchStream(source.source, source.id);
+      console.log('Stream data received:', streamData);
+      
+      // Handle both single stream and array of streams
+      const stream = Array.isArray(streamData) ? streamData[0] : streamData;
       setCurrentStream(stream);
+      
       // Scroll to player if not in view
       const playerElement = document.getElementById('stream-player');
       if (playerElement) {
@@ -125,7 +128,7 @@ const Live = () => {
       setStreamLoading(false);
     }
   }, [toast]);
-  
+
   useEffect(() => {
     const fetchLiveContent = async () => {
       setLoading(true);
