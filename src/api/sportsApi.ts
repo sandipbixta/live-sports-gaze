@@ -1,4 +1,3 @@
-
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
@@ -23,11 +22,8 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!response.ok) throw new Error('Failed to fetch matches');
     const matches = await response.json();
     
-    // Filter sources to only include main ones (Alpha, Bravo, etc.)
-    return matches.map((match: Match) => ({
-      ...match,
-      sources: filterMainSources(match.sources || [])
-    }));
+    // Return all sources without filtering to show different languages
+    return matches;
   } catch (error) {
     console.error('Error fetching matches:', error);
     return [];
@@ -46,19 +42,6 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
     console.error('Error fetching match:', error);
     throw error;
   }
-};
-
-// Filter sources to only show main sources like Alpha, Bravo, etc.
-const filterMainSources = (sources: any[]): any[] => {
-  const mainSourceNames = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'];
-  
-  const filteredSources = sources.filter(source => {
-    const sourceName = source.source?.toLowerCase() || '';
-    return mainSourceNames.some(main => sourceName.includes(main));
-  });
-  
-  // If no main sources found, return only first 2 sources to avoid clutter
-  return filteredSources.length > 0 ? filteredSources : sources.slice(0, 2);
 };
 
 export const fetchStream = async (source: string, id: string): Promise<Stream> => {
