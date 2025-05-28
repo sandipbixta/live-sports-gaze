@@ -142,7 +142,8 @@ const StreamSources = ({
                           : ''
                       }`}
                       onClick={() => {
-                        console.log(`Clicking stream: ${stream.language} with URL: ${stream.embedUrl}`);
+                        console.log(`Clicking stream: ${stream.language} with unique URL: ${stream.embedUrl}`);
+                        // Pass the SPECIFIC embed URL for this language stream
                         onSourceChange(stream.source, stream.id, stream.embedUrl);
                       }}
                     >

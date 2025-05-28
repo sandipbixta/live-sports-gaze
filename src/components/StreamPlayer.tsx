@@ -21,6 +21,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
+  const [currentEmbedUrl, setCurrentEmbedUrl] = useState<string>('');
   const isMobile = useIsMobile();
   
   const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
@@ -61,13 +62,15 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  // Reset load error when stream changes
+  // Reset load error and content loaded when stream changes
   useEffect(() => {
-    if (stream) {
+    if (stream && stream.embedUrl !== currentEmbedUrl) {
+      console.log('Stream changed, resetting player state. New URL:', stream.embedUrl);
       setLoadError(false);
       setIsContentLoaded(false);
+      setCurrentEmbedUrl(stream.embedUrl);
     }
-  }, [stream]);
+  }, [stream, currentEmbedUrl]);
 
   // Handle retry action
   const handleRetry = () => {
@@ -78,8 +81,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   // Handle iframe load event
   const handleIframeLoad = () => {
-    console.log('Stream iframe loaded successfully');
+    console.log('Stream iframe loaded successfully for URL:', currentEmbedUrl);
     setIsContentLoaded(true);
+  };
+
+  // Handle iframe error
+  const handleIframeError = () => {
+    console.error('Stream iframe failed to load for URL:', currentEmbedUrl);
+    setLoadError(true);
   };
 
   if (isLoading) {
@@ -238,15 +247,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         )}
         
         <iframe 
+          key={stream.embedUrl} // Force re-render when URL changes
           ref={videoRef}
           src={stream.embedUrl}
           className="w-full h-full absolute inset-0"
           allowFullScreen
-          title="Live Sports Stream"
+          title={`Live Sports Stream - ${stream.language || 'Default'}`}
           onLoad={handleIframeLoad}
-          onError={() => setLoadError(true)}
+          onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        ></iframe>
+        />
       </AspectRatio>
       
       {/* Controls overlay */}
