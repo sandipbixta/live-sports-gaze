@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -11,6 +10,7 @@ import PageLayout from '../components/PageLayout';
 import PageHeader from '../components/PageHeader';
 import DatePagination from '../components/DatePagination';
 import PopularGames from '../components/PopularGames';
+import LiveGamesWidget from '../components/LiveGamesWidget';
 import { isPopularLeague } from '../utils/popularLeagues';
 
 const Schedule = () => {
@@ -133,6 +133,11 @@ const Schedule = () => {
           setCurrentDate={setCurrentDate} 
           navigateDate={navigateDate} 
         />
+      </div>
+
+      {/* Live Games Widget - prominently placed */}
+      <div className="mb-8">
+        <LiveGamesWidget />
       </div>
       
       <div className="mb-8">

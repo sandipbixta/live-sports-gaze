@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
@@ -11,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ChannelGuide from './ChannelGuide';
 import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'react-router-dom';
 
 const ChannelsGrid = () => {
+  const location = useLocation();
   const countries = getCountries();
   const channelsByCountry = getChannelsByCountry();
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
@@ -22,6 +23,25 @@ const ChannelsGrid = () => {
   const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
   const [useEnhancedView, setUseEnhancedView] = useState(false);
+
+  // Handle navigation from live games widget
+  useEffect(() => {
+    if (location.state?.selectedChannel && location.state?.fromLiveMatch) {
+      const { selectedChannel, matchTitle } = location.state;
+      setSelectedChannelUrl(selectedChannel.embedUrl);
+      setSelectedChannelTitle(`${selectedChannel.title} - ${matchTitle}`);
+      
+      // Find the country for this channel
+      Object.entries(channelsByCountry).forEach(([country, channels]) => {
+        if (channels.some(ch => ch.id === selectedChannel.id)) {
+          setSelectedCountry(country);
+        }
+      });
+      
+      // Clear the navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, channelsByCountry]);
 
   // Load enhanced channel data
   useEffect(() => {
@@ -88,6 +108,18 @@ const ChannelsGrid = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Show live match info if coming from live games */}
+      {location.state?.fromLiveMatch && (
+        <div className="bg-[#ff5a36] text-white p-3 rounded-lg mb-4">
+          <div className="flex items-center gap-2">
+            <Tv className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Now watching: {location.state.matchTitle}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Country Selector */}
       <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
         <div className="flex justify-between items-center mb-2">
