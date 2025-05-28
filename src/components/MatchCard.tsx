@@ -25,6 +25,32 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Check if we're on mobile
   const isMobile = useIsMobile();
   
+  // Color combinations for different cards
+  const colorCombinations = [
+    { home: 'from-blue-600 to-blue-800', away: 'from-red-600 to-red-800' },
+    { home: 'from-green-600 to-green-800', away: 'from-purple-600 to-purple-800' },
+    { home: 'from-orange-600 to-orange-800', away: 'from-indigo-600 to-indigo-800' },
+    { home: 'from-teal-600 to-teal-800', away: 'from-pink-600 to-pink-800' },
+    { home: 'from-cyan-600 to-cyan-800', away: 'from-amber-600 to-amber-800' },
+    { home: 'from-emerald-600 to-emerald-800', away: 'from-rose-600 to-rose-800' },
+    { home: 'from-violet-600 to-violet-800', away: 'from-lime-600 to-lime-800' },
+    { home: 'from-sky-600 to-sky-800', away: 'from-fuchsia-600 to-fuchsia-800' },
+  ];
+  
+  // Get color combination based on match ID hash
+  const getColorCombination = (matchId: string) => {
+    let hash = 0;
+    for (let i = 0; i < matchId.length; i++) {
+      const char = matchId.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    const index = Math.abs(hash) % colorCombinations.length;
+    return colorCombinations[index];
+  };
+  
+  const colors = getColorCombination(match.id);
+  
   // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {
     // A match is considered live if it has sources AND the match time is within 2 hours of now
@@ -70,7 +96,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {hasTeamLogos && hasTeams ? (
           <div className="absolute inset-0 flex">
             {/* Home team side */}
-            <div className="w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden">
+            <div className={`w-1/2 bg-gradient-to-br ${colors.home} relative overflow-hidden`}>
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden mb-1 shadow-lg`}>
@@ -91,7 +117,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
             
             {/* Away team side */}
-            <div className="w-1/2 bg-gradient-to-bl from-red-600 to-red-800 relative overflow-hidden">
+            <div className={`w-1/2 bg-gradient-to-bl ${colors.away} relative overflow-hidden`}>
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
               <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
                 <div className={`${isMobile ? 'w-8 h-8' : 'w-12 h-12'} bg-white rounded-full flex items-center justify-center overflow-hidden mb-1 shadow-lg`}>
