@@ -41,9 +41,9 @@ const SocialBar = () => {
   
   return (
     <>
-      {/* Social bar ad integration */}
+      {/* Social bar ad integration with video ad */}
       <div className="hidden md:block">
-        <Advertisement type="sidebar" className="mt-2" />
+        <Advertisement type="video" className="mt-2" />
       </div>
       
       {/* Share button with popover */}
@@ -100,7 +100,7 @@ const SocialBar = () => {
       
       {/* Mobile social bar placement */}
       <div className="md:hidden">
-        <Advertisement type="sidebar" className="mt-4 mb-6" />
+        <Advertisement type="video" className="mt-4 mb-6" />
       </div>
     </>
   );

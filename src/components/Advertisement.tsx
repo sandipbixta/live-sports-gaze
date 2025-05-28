@@ -12,36 +12,46 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!adRef.current || type !== 'banner') return;
+    if (!adRef.current) return;
 
     // Clear any existing content
     adRef.current.innerHTML = '';
 
-    // Create and load the Google AdSense script
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5505494656170063';
-    script.crossOrigin = 'anonymous';
+    if (type === 'banner') {
+      // Create the banner ad with the provided script
+      const atOptionsScript = document.createElement('script');
+      atOptionsScript.type = 'text/javascript';
+      atOptionsScript.text = `
+        atOptions = {
+          'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      `;
+      
+      const invokeScript = document.createElement('script');
+      invokeScript.type = 'text/javascript';
+      invokeScript.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
+      invokeScript.async = true;
 
-    // Add script to the ad container
-    adRef.current.appendChild(script);
+      adRef.current.appendChild(atOptionsScript);
+      adRef.current.appendChild(invokeScript);
+    } else if (type === 'video') {
+      // Create the video ad with the provided script
+      const videoScript = document.createElement('script');
+      videoScript.type = 'text/javascript';
+      videoScript.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+      videoScript.async = true;
 
-    // Create the ad unit
-    const adUnit = document.createElement('ins');
-    adUnit.className = 'adsbygoogle';
-    adUnit.style.display = 'block';
-    adUnit.setAttribute('data-ad-client', 'ca-pub-5505494656170063');
-    adUnit.setAttribute('data-ad-slot', '1234567890'); // You'll need to replace this with your actual ad slot ID
-    adUnit.setAttribute('data-ad-format', 'auto');
-    adUnit.setAttribute('data-full-width-responsive', 'true');
-
-    adRef.current.appendChild(adUnit);
-
-    // Initialize the ad
-    try {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    } catch (e) {
-      console.error('AdSense error:', e);
+      adRef.current.appendChild(videoScript);
+    } else if (type === 'popunder') {
+      // Handle popunder ad - this should be loaded once per session
+      if (!sessionStorage.getItem('popunder_loaded')) {
+        window.open('https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37', '_blank');
+        sessionStorage.setItem('popunder_loaded', 'true');
+      }
     }
 
     return () => {
@@ -55,6 +65,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   // Fallback dimensions for non-banner ads
   const getAdDimensions = () => {
     switch (type) {
+      case 'banner':
+        return {
+          width: isMobile ? '320px' : '728px',
+          height: '90px'
+        };
       case 'sidebar':
         return {
           width: '300px',
@@ -75,6 +90,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
 
   const dimensions = getAdDimensions();
 
+  if (type === 'popunder') {
+    // Popunder doesn't need visible content
+    return null;
+  }
+
   return (
     <div 
       className={`ad-container ${className} ${
@@ -86,11 +106,11 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       }`}
       data-ad-type={type}
     >
-      {type === 'banner' ? (
-        // Banner ad with Google AdSense script
+      {(type === 'banner' || type === 'video') ? (
+        // Real ad with provided scripts
         <div ref={adRef} className="w-full flex justify-center" />
       ) : (
-        // Placeholder for other ad types
+        // Placeholder for sidebar ads
         <div 
           className="bg-[#242836] border border-[#343a4d] rounded-lg flex items-center justify-center text-gray-400"
           style={{
