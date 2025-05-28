@@ -26,10 +26,18 @@ const ChannelsGrid = () => {
 
   // Handle navigation from live games widget
   useEffect(() => {
-    if (location.state?.selectedChannel && location.state?.fromLiveMatch) {
-      const { selectedChannel, matchTitle } = location.state;
+    if (location.state?.selectedChannel) {
+      const { selectedChannel, fromLiveWidget, currentShow } = location.state;
       setSelectedChannelUrl(selectedChannel.embedUrl);
-      setSelectedChannelTitle(`${selectedChannel.title} - ${matchTitle}`);
+      
+      // Set title based on source
+      if (fromLiveWidget && currentShow) {
+        setSelectedChannelTitle(`${selectedChannel.title} - ${currentShow}`);
+      } else if (location.state?.fromLiveMatch && location.state?.matchTitle) {
+        setSelectedChannelTitle(`${selectedChannel.title} - ${location.state.matchTitle}`);
+      } else {
+        setSelectedChannelTitle(selectedChannel.title);
+      }
       
       // Find the country for this channel
       Object.entries(channelsByCountry).forEach(([country, channels]) => {
@@ -108,7 +116,19 @@ const ChannelsGrid = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Show live match info if coming from live games */}
+      {/* Show live widget info if coming from live games widget */}
+      {location.state?.fromLiveWidget && location.state?.currentShow && (
+        <div className="bg-[#ff5a36] text-white p-3 rounded-lg mb-4">
+          <div className="flex items-center gap-2">
+            <Tv className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Now watching: {location.state.currentShow} on {location.state.selectedChannel?.title}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Show live match info if coming from live games (keep existing) */}
       {location.state?.fromLiveMatch && (
         <div className="bg-[#ff5a36] text-white p-3 rounded-lg mb-4">
           <div className="flex items-center gap-2">
