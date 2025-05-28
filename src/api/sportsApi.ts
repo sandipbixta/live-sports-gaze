@@ -1,3 +1,4 @@
+
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
@@ -22,8 +23,16 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!response.ok) throw new Error('Failed to fetch matches');
     const matches = await response.json();
     
-    // Return all sources without filtering to show different languages
-    return matches;
+    // Log the raw response to see what we're getting
+    console.log('fetchMatches - Raw API response:', matches);
+    
+    // Return ALL sources without any filtering
+    const processedMatches = matches.map((match: Match) => {
+      console.log(`Match ${match.id} has ${match.sources?.length || 0} sources:`, match.sources);
+      return match;
+    });
+    
+    return processedMatches;
   } catch (error) {
     console.error('Error fetching matches:', error);
     return [];
@@ -37,6 +46,9 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
     // Then find the specific match by ID
     const match = matches.find(m => m.id === matchId);
     if (!match) throw new Error('Match not found');
+    
+    console.log(`fetchMatch - Found match with ${match.sources?.length || 0} sources:`, match.sources);
+    
     return match;
   } catch (error) {
     console.error('Error fetching match:', error);
