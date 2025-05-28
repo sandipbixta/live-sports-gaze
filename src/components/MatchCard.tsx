@@ -25,16 +25,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Check if we're on mobile
   const isMobile = useIsMobile();
   
-  // Color combinations for different cards
+  // Softer color combinations for different cards
   const colorCombinations = [
-    { home: 'from-blue-600 to-blue-800', away: 'from-red-600 to-red-800' },
-    { home: 'from-green-600 to-green-800', away: 'from-purple-600 to-purple-800' },
-    { home: 'from-orange-600 to-orange-800', away: 'from-indigo-600 to-indigo-800' },
-    { home: 'from-teal-600 to-teal-800', away: 'from-pink-600 to-pink-800' },
-    { home: 'from-cyan-600 to-cyan-800', away: 'from-amber-600 to-amber-800' },
-    { home: 'from-emerald-600 to-emerald-800', away: 'from-rose-600 to-rose-800' },
-    { home: 'from-violet-600 to-violet-800', away: 'from-lime-600 to-lime-800' },
-    { home: 'from-sky-600 to-sky-800', away: 'from-fuchsia-600 to-fuchsia-800' },
+    { home: 'from-blue-400 to-blue-500', away: 'from-slate-400 to-slate-500' },
+    { home: 'from-emerald-400 to-emerald-500', away: 'from-purple-400 to-purple-500' },
+    { home: 'from-orange-400 to-orange-500', away: 'from-indigo-400 to-indigo-500' },
+    { home: 'from-teal-400 to-teal-500', away: 'from-rose-400 to-rose-500' },
+    { home: 'from-cyan-400 to-cyan-500', away: 'from-amber-400 to-amber-500' },
+    { home: 'from-green-400 to-green-500', away: 'from-pink-400 to-pink-500' },
+    { home: 'from-violet-400 to-violet-500', away: 'from-lime-400 to-lime-500' },
+    { home: 'from-sky-400 to-sky-500', away: 'from-red-400 to-red-500' },
   ];
   
   // Get color combination based on match ID hash
