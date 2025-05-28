@@ -18,7 +18,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     adRef.current.innerHTML = '';
 
     if (type === 'banner') {
-      // Create the banner ad with the provided script
+      // Create the banner ad with your provided script
       const atOptionsScript = document.createElement('script');
       atOptionsScript.type = 'text/javascript';
       atOptionsScript.text = `
@@ -39,19 +39,13 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adRef.current.appendChild(atOptionsScript);
       adRef.current.appendChild(invokeScript);
     } else if (type === 'video') {
-      // Create the video ad with the provided script
+      // Create the video ad with your provided script
       const videoScript = document.createElement('script');
       videoScript.type = 'text/javascript';
       videoScript.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
       videoScript.async = true;
 
       adRef.current.appendChild(videoScript);
-    } else if (type === 'popunder') {
-      // Handle popunder ad - this should be loaded once per session
-      if (!sessionStorage.getItem('popunder_loaded')) {
-        window.open('https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37', '_blank');
-        sessionStorage.setItem('popunder_loaded', 'true');
-      }
     }
 
     return () => {
