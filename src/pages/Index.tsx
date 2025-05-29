@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -30,107 +29,6 @@ const Index = () => {
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
-
-  // Ad loading effect
-  useEffect(() => {
-    console.log('Initializing ads...');
-    
-    // Clean up any existing ads and scripts
-    const existingScripts = document.querySelectorAll('script[src*="monkeyhundredsarmed.com"]') as NodeListOf<HTMLScriptElement>;
-    existingScripts.forEach(script => {
-      console.log('Removing existing script:', script.src);
-      script.remove();
-    });
-
-    // Clear existing ad containers
-    const bannerContainer = document.getElementById('banner-ad-container');
-    const secondAdContainer = document.getElementById('ad-container-2');
-    
-    if (bannerContainer) {
-      bannerContainer.innerHTML = '';
-    }
-    if (secondAdContainer) {
-      secondAdContainer.innerHTML = '';
-    }
-
-    // Load banner ad with iframe format
-    const loadBannerAd = () => {
-      console.log('Loading banner ad...');
-      
-      // Set global options for banner ad
-      (window as any).atOptions = {
-        'key': 'c1e53781576d5b60a3b876b73a99b3b3',
-        'format': 'iframe',
-        'height': 90,
-        'width': 728,
-        'params': {}
-      };
-
-      const bannerScript = document.createElement('script');
-      bannerScript.type = 'text/javascript';
-      bannerScript.src = '//monkeyhundredsarmed.com/c1e53781576d5b60a3b876b73a99b3b3/invoke.js';
-      bannerScript.async = true;
-      
-      bannerScript.onload = () => {
-        console.log('Banner ad script loaded successfully');
-      };
-      
-      bannerScript.onerror = (error) => {
-        console.error('Failed to load banner ad script:', error);
-        const container = document.getElementById('banner-ad-container');
-        if (container) {
-          container.innerHTML = '<div style="width: 728px; height: 90px; background: #1f2937; border: 1px solid #374151; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; border-radius: 8px;">Banner Advertisement</div>';
-        }
-      };
-
-      // Append to container instead of head
-      const container = document.getElementById('banner-ad-container');
-      if (container) {
-        container.appendChild(bannerScript);
-      }
-    };
-
-    // Load second ad (direct script)
-    const loadSecondAd = () => {
-      setTimeout(() => {
-        console.log('Loading second ad...');
-        
-        const secondScript = document.createElement('script');
-        secondScript.type = 'text/javascript';
-        secondScript.src = 'https://monkeyhundredsarmed.com/hphkx2a736?key=e47f05e9f941285596e13ec2b499358d';
-        secondScript.async = true;
-        
-        secondScript.onload = () => {
-          console.log('Second ad script loaded successfully');
-        };
-        
-        secondScript.onerror = (error) => {
-          console.error('Failed to load second ad script:', error);
-          const container = document.getElementById('ad-container-2');
-          if (container) {
-            container.innerHTML = '<div style="width: 100%; height: 90px; background: #1f2937; border: 1px solid #374151; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; border-radius: 8px;">Advertisement Space</div>';
-          }
-        };
-
-        // Append to container instead of head
-        const container = document.getElementById('ad-container-2');
-        if (container) {
-          container.appendChild(secondScript);
-        }
-      }, 1000);
-    };
-
-    // Initialize both ads
-    loadBannerAd();
-    loadSecondAd();
-
-    // Cleanup function
-    return () => {
-      const scripts = document.querySelectorAll('script[src*="monkeyhundredsarmed.com"]') as NodeListOf<HTMLScriptElement>;
-      scripts.forEach(script => script.remove());
-      delete (window as any).atOptions;
-    };
-  }, []);
 
   // Fetch sports on mount and sort them with football first
   useEffect(() => {
@@ -268,20 +166,8 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Banner Ad Section - Top of page */}
-        <div className="w-full bg-gray-900/50 border-b border-gray-700/50 py-2 md:py-3 mb-6">
-          <div className="flex justify-center px-2 md:px-4">
-            <div className="bg-gray-800/60 rounded-lg p-2 md:p-3 border border-orange-500/30 shadow-lg w-full max-w-[320px] md:max-w-[760px] min-h-[90px] md:min-h-[100px] flex items-center justify-center">
-              <div 
-                id="banner-ad-container" 
-                className="text-center w-full min-h-[70px] md:min-h-[90px] flex items-center justify-center"
-                style={{ minWidth: '300px', minHeight: '90px' }}
-              >
-                <div className="text-gray-400 text-xs md:text-sm">Loading Banner Advertisement...</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Non-intrusive banner ad replacement */}
+        <Advertisement type="banner" className="mb-6 w-full" />
         
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -324,19 +210,6 @@ const Index = () => {
               isLoading={loadingMatches}
             />
           )}
-        </div>
-
-        {/* Second Ad Section - Middle of content */}
-        <div className="flex justify-center px-2 md:px-4 py-2 md:py-4 mb-8">
-          <div className="bg-gray-900/30 rounded-lg p-2 md:p-4 border border-gray-600/30 min-h-[90px] md:min-h-[110px] w-full max-w-[320px] md:max-w-[760px] flex items-center justify-center">
-            <div 
-              id="ad-container-2" 
-              className="text-center w-full min-h-[70px] md:min-h-[90px] flex items-center justify-center"
-              style={{ minWidth: '300px', minHeight: '90px' }}
-            >
-              <div className="text-gray-400 text-xs md:text-sm">Loading Advertisement...</div>
-            </div>
-          </div>
         </div>
         
         {/* Sports News Section */}

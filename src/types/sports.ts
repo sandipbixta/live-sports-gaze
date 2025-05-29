@@ -35,5 +35,4 @@ export interface Stream {
   hd: boolean;
   embedUrl: string;
   source: string;
-  streams?: Stream[]; // For cases where API returns nested streams
 }
