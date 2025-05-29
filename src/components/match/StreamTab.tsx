@@ -17,7 +17,7 @@ interface StreamTabProps {
   stream: Stream | null;
   loadingStream: boolean;
   activeSource: string | null;
-  handleSourceChange: (source: string, id: string) => void;
+  handleSourceChange: (source: string, id: string, streamNo?: number) => void;
   popularMatches: MatchType[];
   sportId: string;
 }

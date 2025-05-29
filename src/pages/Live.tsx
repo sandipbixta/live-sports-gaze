@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -105,9 +104,18 @@ const Live = () => {
     setActiveSource(`${source.source}/${source.id}`);
     try {
       console.log(`Fetching stream data: source=${source.source}, id=${source.id}`);
-      const stream = await fetchStream(source.source, source.id);
-      console.log('Stream data received:', stream);
-      setCurrentStream(stream);
+      const streamData = await fetchStream(source.source, source.id);
+      console.log('Stream data received:', streamData);
+      
+      // Handle both single stream and array of streams
+      if (Array.isArray(streamData)) {
+        // If array, pick the first HD stream or just the first one
+        const selectedStream = streamData.find(s => s.hd) || streamData[0];
+        setCurrentStream(selectedStream || null);
+      } else {
+        setCurrentStream(streamData);
+      }
+      
       // Scroll to player if not in view
       const playerElement = document.getElementById('stream-player');
       if (playerElement) {
