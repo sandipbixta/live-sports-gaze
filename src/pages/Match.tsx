@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -31,13 +30,24 @@ const Match = () => {
   const [retryCounter, setRetryCounter] = useState(0);
   
   // Memoized stream fetching function to prevent recreation on every render
-  const fetchStreamData = useCallback(async (source: string, id: string) => {
+  const fetchStreamData = useCallback(async (source: string, id: string, streamNo?: number) => {
     setLoadingStream(true);
     try {
-      console.log(`Fetching stream data: source=${source}, id=${id}, retry=${retryCounter}`);
-      const streamData = await fetchStream(source, id);
+      console.log(`Fetching stream data: source=${source}, id=${id}, streamNo=${streamNo}, retry=${retryCounter}`);
+      const streamData = await fetchStream(source, id, streamNo);
       console.log('Stream data received:', streamData);
-      setStream(streamData);
+      
+      // Handle both single stream and array of streams
+      if (Array.isArray(streamData)) {
+        // If array, pick the requested streamNo or the first HD stream
+        const selectedStream = streamNo 
+          ? streamData.find(s => s.streamNo === streamNo)
+          : streamData.find(s => s.hd) || streamData[0];
+        
+        setStream(selectedStream || null);
+      } else {
+        setStream(streamData);
+      }
     } catch (error) {
       console.error('Error in fetchStreamData:', error);
       toast({
@@ -45,14 +55,7 @@ const Match = () => {
         description: "Failed to load stream data.",
         variant: "destructive",
       });
-      setStream({
-        id: "error",
-        streamNo: 0,
-        language: "unknown",
-        hd: false,
-        embedUrl: "",
-        source: "error"
-      });
+      setStream(null);
     } finally {
       setLoadingStream(false);
     }
@@ -117,11 +120,14 @@ const Match = () => {
     loadMatch();
   }, [sportId, matchId, toast, fetchStreamData]);
 
-  const handleSourceChange = async (source: string, id: string) => {
-    console.log(`Source change: source=${source}, id=${id}`);
-    setActiveSource(`${source}/${id}`);
-    setRetryCounter(prev => prev + 1); // Increase retry counter to force refetch
-    await fetchStreamData(source, id);
+  const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
+    console.log(`Source change: source=${source}, id=${id}, streamNo=${streamNo}`);
+    const sourceKey = streamNo 
+      ? `${source}/${id}/${streamNo}` 
+      : `${source}/${id}`;
+    setActiveSource(sourceKey);
+    setRetryCounter(prev => prev + 1);
+    await fetchStreamData(source, id, streamNo);
   };
 
   if (isLoading) {

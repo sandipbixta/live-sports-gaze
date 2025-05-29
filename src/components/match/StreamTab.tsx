@@ -52,18 +52,19 @@ const StreamTab = ({
   const handleRetry = async () => {
     if (!activeSource) return;
     
-    // Parse source and id from activeSource string
-    const [source, id] = activeSource.split('/');
+    // Parse source, id, and streamNo from activeSource string
+    const parts = activeSource.split('/');
+    const [source, id, streamNo] = parts;
     
     if (source && id) {
-      setRetryCount(prev => prev + 1); // This will trigger a refresh
+      setRetryCount(prev => prev + 1);
       
       toast({
         title: "Retrying stream",
         description: "Attempting to reconnect to the stream...",
       });
       
-      handleSourceChange(source, id);
+      handleSourceChange(source, id, streamNo ? parseInt(streamNo) : undefined);
     } else {
       // If we can't get source/id from activeSource, try the first available source
       if (match.sources && match.sources.length > 0) {

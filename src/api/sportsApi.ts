@@ -1,3 +1,4 @@
+
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.su/api';
@@ -44,10 +45,10 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   }
 };
 
-export const fetchStream = async (source: string, id: string): Promise<Stream> => {
+export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
   try {
     // More detailed logging
-    console.log(`Fetching stream data: source=${source}, id=${id}`);
+    console.log(`Fetching stream data: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     // Define potential API endpoints to try - in order of preference
     const endpoints = [
@@ -97,26 +98,35 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
             
             // Format handling for different response formats
             if (Array.isArray(data) && data.length > 0) {
-              // Prefer HD stream if available
-              const hdStream = data.find(stream => stream.hd === true);
-              const selectedStream = hdStream || data[0];
+              // If a specific streamNo is requested, return that stream
+              if (streamNo !== undefined) {
+                const specificStream = data.find(stream => stream.streamNo === streamNo);
+                if (specificStream && isValidStreamUrl(specificStream.embedUrl)) {
+                  return {
+                    ...specificStream,
+                    embedUrl: ensureValidEmbedUrl(specificStream.embedUrl)
+                  };
+                }
+              }
               
-              if (selectedStream.embedUrl) {
+              // Return all streams if no specific streamNo requested
+              return data
+                .filter(stream => isValidStreamUrl(stream.embedUrl))
+                .map(stream => ({
+                  ...stream,
+                  embedUrl: ensureValidEmbedUrl(stream.embedUrl)
+                }));
+            } else if (data && typeof data === 'object' && data.embedUrl) {
+              if (isValidStreamUrl(data.embedUrl)) {
                 return {
-                  ...selectedStream,
-                  // Ensure embed URL is properly formatted
-                  embedUrl: ensureValidEmbedUrl(selectedStream.embedUrl)
+                  ...data,
+                  embedUrl: ensureValidEmbedUrl(data.embedUrl)
                 };
               }
-            } else if (data && typeof data === 'object' && data.embedUrl) {
-              return {
-                ...data,
-                embedUrl: ensureValidEmbedUrl(data.embedUrl)
-              };
             }
             
-            // If we get here, data format was unexpected
-            throw new Error('Unexpected data format from API');
+            // If we get here, no valid streams found
+            throw new Error('No valid streams found in API response');
             
           } catch (error) {
             console.warn(`Attempt ${attempt} failed for endpoint ${i + 1}: ${(error as Error).message}`);
@@ -137,43 +147,36 @@ export const fetchStream = async (source: string, id: string): Promise<Stream> =
     
     // If we get here, we've tried all endpoints
     console.error('All stream endpoints failed:', lastError);
-    
-    // Return demo stream data if all endpoints fail
-    return getDemoStreamData(source, id);
+    throw new Error('No valid streams available from API');
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    return getDemoStreamData(source, id);
+    throw error;
   }
 };
 
+// Helper function to check if URL is a valid stream (not demo/YouTube)
+function isValidStreamUrl(url: string): boolean {
+  if (!url || !url.startsWith('http')) return false;
+  
+  // Reject YouTube and demo URLs
+  const invalidDomains = [
+    'youtube.com',
+    'youtu.be',
+    'demo',
+    'example.com'
+  ];
+  
+  return !invalidDomains.some(domain => url.includes(domain));
+}
+
 // Helper function to ensure embed URL is valid
 function ensureValidEmbedUrl(url: string): string {
-  // Return the provided URL if it seems valid
-  if (url && url.startsWith('http')) {
+  // Return the provided URL if it seems valid and not a demo
+  if (url && url.startsWith('http') && isValidStreamUrl(url)) {
     return url;
   }
   
-  // Otherwise return a demo URL
-  return getDemoStreamData("default", "demo").embedUrl;
-}
-
-// Provides a demo stream when actual stream isn't available
-function getDemoStreamData(source: string, id: string): Stream {
-  console.log('Using demo stream data');
-  
-  // Select an appropriate demo stream based on source/id
-  const sportType = id.includes('football') || source.includes('football') ? 'football' : 
-                    id.includes('basketball') || source.includes('basketball') ? 'basketball' : 'sports';
-  
-  // Return demo stream object with appropriate embed URL
-  return {
-    id: `demo-${id}`,
-    streamNo: 1,
-    language: "English",
-    hd: true,
-    // Use publicly available sports stream embed for demo
-    embedUrl: `https://www.youtube.com/embed/live_stream?channel=UCb3c6rB0Ru1i9jmbyj6f7uw&autoplay=1&mute=0`,
-    source: source || "demo"
-  };
+  // If URL is invalid, throw error instead of returning demo
+  throw new Error('Invalid or demo stream URL provided');
 }
