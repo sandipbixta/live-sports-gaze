@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -107,10 +108,6 @@ const StreamTab = ({
     return bTrending.score - aTrending.score;
   });
 
-  // Get trending matches using Google trends simulation
-  const { getGoogleTrendingMatches, getTrendingIndicator } = require('../services/trendingService');
-  const trendingMatches = getGoogleTrendingMatches(popularMatches).slice(0, 6);
-
   return (
     <div>
       <StreamPlayer
@@ -153,51 +150,28 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Trending Matches Section - Updated with Google trends */}
-      {trendingMatches.length > 0 && (
+      {/* Popular Matches Section - Now using trending data */}
+      {sortedPopularMatches.length > 0 && (
         <div className="mt-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="text-xl font-bold text-white">🔥 Trending {match.title.split('-')[0].trim()} Matches</h3>
-            <Badge variant="live" className="text-xs">GOOGLE TRENDS</Badge>
-          </div>
+          <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {trendingMatches.map((trendingMatch) => {
-              const indicator = getTrendingIndicator(trendingMatch.trendingData.trendingScore);
-              return (
-                <Link 
-                  key={trendingMatch.id} 
-                  to={`/match/${sportId}/${trendingMatch.id}`}
-                  className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all relative"
-                >
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-white text-xs truncate flex-1">{trendingMatch.title}</h3>
-                      <div className={`flex items-center gap-1 ml-2 ${indicator.color}`}>
-                        <span className="text-sm">{indicator.icon}</span>
-                        <span className="text-[10px] font-medium">{indicator.label}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-300">
-                        {trendingMatch.trendingData.searchVolume > 1000 ? 
-                          `${Math.round(trendingMatch.trendingData.searchVolume / 1000)}K` : 
-                          trendingMatch.trendingData.searchVolume
-                        } searches
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <span className="text-[10px] text-blue-400">
-                          {trendingMatch.trendingData.trend === 'rising' ? '📈' : 
-                           trendingMatch.trendingData.trend === 'falling' ? '📉' : '➡️'}
-                        </span>
-                        <span className="text-[10px] text-gray-400">
-                          {trendingMatch.trendingData.regionInterest[0]}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+            {sortedPopularMatches.map((match) => (
+              <Link 
+                key={match.id} 
+                to={`/match/${sportId}/${match.id}`}
+                className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
+              >
+                <div className="p-4">
+                  <h3 className="font-bold mb-2 text-white text-xs truncate">{match.title}</h3>
+                  <p className="text-xs text-gray-300">
+                    {isTrendingMatch(match.title).score >= 8 ? 
+                      '🔥 Highly Trending' : 
+                      isTrendingMatch(match.title).score >= 5 ? 
+                      '📈 Trending' : 'Related Match'}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       )}
