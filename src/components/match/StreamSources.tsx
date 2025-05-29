@@ -30,53 +30,47 @@ const StreamSources = ({
   const [detailedStreams, setDetailedStreams] = useState<Record<string, DetailedStream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
 
-  // Debug logging
   console.log('StreamSources - All sources received:', sources);
-  console.log('StreamSources - Number of sources:', sources?.length || 0);
 
   useEffect(() => {
     const fetchDetailedStreams = async () => {
       if (!sources || sources.length === 0) return;
 
-      // Fetch detailed stream data for each source
       for (const source of sources) {
         const sourceKey = `${source.source}/${source.id}`;
         
-        // Skip if already loading or loaded
         if (loadingStreams[sourceKey] || detailedStreams[sourceKey]) continue;
 
         setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
 
         try {
-          console.log(`Fetching detailed streams for ${source.source}/${source.id}`);
+          console.log(`Fetching streams for ${source.source}/${source.id}`);
           
           const streamData = await fetchStream(source.source, source.id);
           
           let streams: DetailedStream[] = [];
           
           if (Array.isArray(streamData)) {
-            // Multiple streams returned - each with unique embed URL
             streams = streamData.map((stream, index) => ({
-              id: `${source.id}-${stream.language || index}-${Date.now()}`, // Unique ID with timestamp
+              id: stream.id,
               language: stream.language || `Stream ${index + 1}`,
               hd: stream.hd || false,
-              source: source.source,
-              embedUrl: stream.embedUrl, // Each stream should have its own unique embedUrl
+              source: stream.source,
+              embedUrl: stream.embedUrl,
               streamNo: stream.streamNo || index + 1
             }));
           } else if (streamData && streamData.embedUrl) {
-            // Single stream object
             streams = [{
-              id: `${source.id}-${streamData.language || 'default'}-${Date.now()}`,
+              id: streamData.id,
               language: streamData.language || 'Default',
               hd: streamData.hd || false,
-              source: source.source,
+              source: streamData.source,
               embedUrl: streamData.embedUrl,
               streamNo: streamData.streamNo || 1
             }];
           }
 
-          console.log(`Found ${streams.length} detailed streams for ${source.source}:`, streams);
+          console.log(`Found ${streams.length} streams for ${source.source}:`, streams);
           
           setDetailedStreams(prev => ({
             ...prev,
@@ -84,7 +78,7 @@ const StreamSources = ({
           }));
           
         } catch (error) {
-          console.error(`Error fetching detailed streams for ${sourceKey}:`, error);
+          console.error(`Error fetching streams for ${sourceKey}:`, error);
           setDetailedStreams(prev => ({
             ...prev,
             [sourceKey]: []
@@ -99,11 +93,14 @@ const StreamSources = ({
   }, [sources]);
 
   if (!sources || sources.length === 0) {
-    console.log('StreamSources - No sources available');
-    return null;
+    return (
+      <div className="mt-6">
+        <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
+        <p className="text-gray-400">No stream sources available for this match.</p>
+      </div>
+    );
   }
 
-  // Calculate total available streams
   const totalStreams = Object.values(detailedStreams).reduce((total, streams) => total + streams.length, 0);
 
   return (
@@ -112,7 +109,6 @@ const StreamSources = ({
         Stream Sources ({totalStreams > 0 ? totalStreams : sources.length} available)
       </h3>
       
-      {/* Display sources with their detailed streams */}
       {sources.map((source) => {
         const sourceKey = `${source.source}/${source.id}`;
         const isLoading = loadingStreams[sourceKey];
@@ -120,8 +116,8 @@ const StreamSources = ({
         
         return (
           <div key={sourceKey} className="mb-4">
-            <h4 className="text-md font-semibold mb-2 text-gray-300 first-letter:uppercase">
-              {source.source} 
+            <h4 className="text-md font-semibold mb-2 text-gray-300 capitalize">
+              {source.source} Source
               {isLoading && <Loader className="inline-block ml-2 h-4 w-4 animate-spin" />}
               {!isLoading && streams.length > 0 && ` (${streams.length} streams)`}
             </h4>
@@ -138,7 +134,7 @@ const StreamSources = ({
                   
                   return (
                     <Badge
-                      key={stream.id} // Use unique stream ID as key
+                      key={stream.id}
                       variant="source"
                       className={`cursor-pointer text-sm py-2 px-4 transition-all ${
                         isActive 
@@ -146,8 +142,7 @@ const StreamSources = ({
                           : 'hover:bg-[#343a4d] hover:border-[#9b87f5]'
                       }`}
                       onClick={() => {
-                        console.log(`Selecting stream: ${stream.language} from ${stream.source} with unique URL: ${stream.embedUrl}`);
-                        // Pass the SPECIFIC embed URL for this language stream
+                        console.log(`Selecting stream: ${stream.language} with URL: ${stream.embedUrl}`);
                         onSourceChange(stream.source, stream.id, stream.embedUrl);
                       }}
                     >
