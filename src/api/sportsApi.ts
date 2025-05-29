@@ -55,33 +55,55 @@ export const fetchStream = async (source: string, id: string): Promise<Stream | 
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
       cache: 'no-store',
       mode: 'cors',
     });
     
     if (!response.ok) {
-      console.error(`Stream API error: ${response.status}`);
-      throw new Error(`Failed with status ${response.status}`);
+      console.error(`Stream API error: ${response.status} - ${response.statusText}`);
+      throw new Error(`Failed with status ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
     console.log('Stream API response:', data);
     
+    // Validate the response has actual stream data
+    if (!data) {
+      throw new Error('No stream data received from API');
+    }
+    
     // Handle array of streams
     if (Array.isArray(data)) {
-      return data.map((stream, index) => ({
-        id: `${source}-${id}-${stream.language || index}-${Date.now()}`,
-        streamNo: stream.streamNo || index + 1,
-        language: stream.language || `Stream ${index + 1}`,
-        hd: stream.hd || false,
-        embedUrl: stream.embedUrl || '',
-        source: source
-      }));
+      if (data.length === 0) {
+        throw new Error('No streams available in response');
+      }
+      
+      return data.map((stream, index) => {
+        if (!stream.embedUrl || stream.embedUrl.includes('youtube.com') || stream.embedUrl.includes('demo')) {
+          console.warn(`Invalid stream URL detected: ${stream.embedUrl}`);
+        }
+        
+        return {
+          id: `${source}-${id}-${stream.language || index}-${Date.now()}`,
+          streamNo: stream.streamNo || index + 1,
+          language: stream.language || `Stream ${index + 1}`,
+          hd: stream.hd || false,
+          embedUrl: stream.embedUrl || '',
+          source: source
+        };
+      }).filter(stream => stream.embedUrl && !stream.embedUrl.includes('youtube.com')); // Filter out YouTube/demo streams
     }
     
     // Handle single stream object
     if (data && data.embedUrl) {
+      // Reject YouTube or demo URLs
+      if (data.embedUrl.includes('youtube.com') || data.embedUrl.includes('demo')) {
+        console.warn(`Demo/YouTube URL detected, rejecting: ${data.embedUrl}`);
+        throw new Error('Only demo stream available, no real stream found');
+      }
+      
       return {
         id: `${source}-${id}-${Date.now()}`,
         streamNo: data.streamNo || 1,
@@ -92,20 +114,14 @@ export const fetchStream = async (source: string, id: string): Promise<Stream | 
       };
     }
     
-    // If embedUrl is missing, throw error
-    throw new Error('No valid stream URL found');
+    // If no valid embedUrl, throw error
+    throw new Error('No valid stream URL found in API response');
     
   } catch (error) {
     console.error('Error fetching stream:', error);
     
-    // Return a working demo stream as fallback
-    return {
-      id: `demo-${source}-${id}-${Date.now()}`,
-      streamNo: 1,
-      language: 'Demo Stream',
-      hd: false,
-      embedUrl: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1',
-      source: source
-    };
+    // Re-throw the error instead of returning a fallback
+    // This will allow the UI to handle the error appropriately
+    throw new Error(`Stream unavailable: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };

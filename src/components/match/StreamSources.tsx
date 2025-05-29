@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Source } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader } from 'lucide-react';
+import { Loader, AlertTriangle } from 'lucide-react';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -29,6 +29,7 @@ const StreamSources = ({
 }: StreamSourcesProps) => {
   const [detailedStreams, setDetailedStreams] = useState<Record<string, DetailedStream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
+  const [streamErrors, setStreamErrors] = useState<Record<string, string>>({});
 
   console.log('StreamSources - All sources received:', sources);
 
@@ -42,9 +43,10 @@ const StreamSources = ({
         if (loadingStreams[sourceKey] || detailedStreams[sourceKey]) continue;
 
         setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
+        setStreamErrors(prev => ({ ...prev, [sourceKey]: '' }));
 
         try {
-          console.log(`Fetching streams for ${source.source}/${source.id}`);
+          console.log(`Fetching real streams for ${source.source}/${source.id}`);
           
           const streamData = await fetchStream(source.source, source.id);
           
@@ -70,7 +72,11 @@ const StreamSources = ({
             }];
           }
 
-          console.log(`Found ${streams.length} streams for ${source.source}:`, streams);
+          console.log(`Found ${streams.length} real streams for ${source.source}:`, streams);
+          
+          if (streams.length === 0) {
+            setStreamErrors(prev => ({ ...prev, [sourceKey]: 'No real streams available' }));
+          }
           
           setDetailedStreams(prev => ({
             ...prev,
@@ -79,6 +85,8 @@ const StreamSources = ({
           
         } catch (error) {
           console.error(`Error fetching streams for ${sourceKey}:`, error);
+          const errorMessage = error instanceof Error ? error.message : 'Failed to load stream';
+          setStreamErrors(prev => ({ ...prev, [sourceKey]: errorMessage }));
           setDetailedStreams(prev => ({
             ...prev,
             [sourceKey]: []
@@ -106,26 +114,29 @@ const StreamSources = ({
   return (
     <div className="mt-6">
       <h3 className="text-xl font-bold mb-4 text-white">
-        Stream Sources ({totalStreams > 0 ? totalStreams : sources.length} available)
+        Stream Sources ({totalStreams > 0 ? `${totalStreams} real streams` : `${sources.length} sources`} available)
       </h3>
       
       {sources.map((source) => {
         const sourceKey = `${source.source}/${source.id}`;
         const isLoading = loadingStreams[sourceKey];
         const streams = detailedStreams[sourceKey] || [];
+        const error = streamErrors[sourceKey];
         
         return (
           <div key={sourceKey} className="mb-4">
-            <h4 className="text-md font-semibold mb-2 text-gray-300 capitalize">
+            <h4 className="text-md font-semibold mb-2 text-gray-300 capitalize flex items-center gap-2">
               {source.source} Source
-              {isLoading && <Loader className="inline-block ml-2 h-4 w-4 animate-spin" />}
-              {!isLoading && streams.length > 0 && ` (${streams.length} streams)`}
+              {isLoading && <Loader className="h-4 w-4 animate-spin" />}
+              {error && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
+              {!isLoading && streams.length > 0 && <span className="text-green-400">({streams.length} real streams)</span>}
+              {!isLoading && error && <span className="text-red-400 text-sm">({error})</span>}
             </h4>
             
             <div className="flex flex-wrap gap-3">
               {isLoading ? (
                 <Badge variant="secondary" className="cursor-not-allowed opacity-50">
-                  Loading streams...
+                  Loading real streams...
                 </Badge>
               ) : streams.length > 0 ? (
                 streams.map((stream) => {
@@ -142,7 +153,7 @@ const StreamSources = ({
                           : 'hover:bg-[#343a4d] hover:border-[#9b87f5]'
                       }`}
                       onClick={() => {
-                        console.log(`Selecting stream: ${stream.language} with URL: ${stream.embedUrl}`);
+                        console.log(`Selecting real stream: ${stream.language} with URL: ${stream.embedUrl}`);
                         onSourceChange(stream.source, stream.id, stream.embedUrl);
                       }}
                     >
@@ -150,21 +161,18 @@ const StreamSources = ({
                         <span>{stream.language}</span>
                         {stream.hd && <span className="text-xs bg-green-500 px-1 rounded">HD</span>}
                         <span className="text-xs text-gray-400">#{stream.streamNo}</span>
+                        <span className="text-xs bg-blue-500 px-1 rounded">REAL</span>
                       </div>
                     </Badge>
                   );
                 })
+              ) : error ? (
+                <Badge variant="destructive" className="cursor-not-allowed opacity-75">
+                  {error}
+                </Badge>
               ) : (
-                <Badge
-                  variant="source"
-                  className={`cursor-pointer text-sm py-2 px-4 ${
-                    activeSource === sourceKey 
-                      ? 'bg-[#343a4d] border-[#9b87f5]' 
-                      : ''
-                  }`}
-                  onClick={() => onSourceChange(source.source, source.id)}
-                >
-                  {source.source} - {source.id}
+                <Badge variant="secondary" className="cursor-not-allowed opacity-50">
+                  No real streams found
                 </Badge>
               )}
             </div>
