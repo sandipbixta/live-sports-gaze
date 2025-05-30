@@ -6,6 +6,7 @@ import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import StreamPlayer from '../components/StreamPlayer';
+import StreamSources from '../components/match/StreamSources';
 import { Link } from 'react-router-dom';
 import { Radio, Tv, RefreshCcw, Calendar, Search, Clock, CircleDot, Dribbble } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
@@ -99,18 +100,25 @@ const Live = () => {
   };
   
   // Memoized stream fetching function
-  const fetchStreamData = useCallback(async (source: Source) => {
+  const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
     setStreamLoading(true);
-    setActiveSource(`${source.source}/${source.id}`);
+    const sourceKey = streamNo 
+      ? `${source.source}/${source.id}/${streamNo}` 
+      : `${source.source}/${source.id}`;
+    setActiveSource(sourceKey);
+    
     try {
-      console.log(`Fetching stream data: source=${source.source}, id=${source.id}`);
-      const streamData = await fetchStream(source.source, source.id);
+      console.log(`Fetching stream data: source=${source.source}, id=${source.id}, streamNo=${streamNo}`);
+      const streamData = await fetchStream(source.source, source.id, streamNo);
       console.log('Stream data received:', streamData);
       
       // Handle both single stream and array of streams
       if (Array.isArray(streamData)) {
-        // If array, pick the first HD stream or just the first one
-        const selectedStream = streamData.find(s => s.hd) || streamData[0];
+        // If array, pick the requested streamNo or the first HD stream
+        const selectedStream = streamNo 
+          ? streamData.find(s => s.streamNo === streamNo)
+          : streamData.find(s => s.hd) || streamData[0];
+        
         setCurrentStream(selectedStream || null);
       } else {
         setCurrentStream(streamData);
@@ -284,9 +292,9 @@ const Live = () => {
   };
 
   // Function to handle source change for the current match
-  const handleSourceChange = (source: string, id: string) => {
+  const handleSourceChange = (source: string, id: string, streamNo?: number) => {
     if (featuredMatch) {
-      fetchStreamData({ source, id });
+      fetchStreamData({ source, id }, streamNo);
     }
   };
 
@@ -458,28 +466,14 @@ const Live = () => {
                 onRetry={handleStreamRetry} 
               />
               
-              {/* Stream Sources */}
+              {/* Stream Sources with substreams */}
               {featuredMatch.sources && featuredMatch.sources.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
-                  <div className="flex flex-wrap gap-3">
-                    {featuredMatch.sources.map(({ source, id }) => (
-                      <Button
-                        key={`${source}-${id}`}
-                        variant="outline"
-                        size="sm"
-                        className={`${
-                          activeSource === `${source}/${id}` 
-                            ? 'bg-[#343a4d] border-[#9b87f5]' 
-                            : 'bg-[#242836] border-[#343a4d]'
-                        } text-white`}
-                        onClick={() => handleSourceChange(source, id)}
-                      >
-                        {source.charAt(0).toUpperCase() + source.slice(1)}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <StreamSources
+                  sources={featuredMatch.sources}
+                  activeSource={activeSource}
+                  onSourceChange={handleSourceChange}
+                  streamId={featuredMatch.id}
+                />
               )}
             </div>
           ) : (
