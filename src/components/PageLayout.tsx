@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import MainNav from './MainNav';
@@ -7,6 +8,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import Clock from './Clock';
 import PopunderAd from './PopunderAd';
+import ThemeToggle from './ThemeToggle';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -37,6 +39,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
                   </h1>
                 </Link>
                 <div className="flex items-center gap-2">
+                  <ThemeToggle />
                   <Clock />
                   {onSearch && (
                     <div className="relative">
