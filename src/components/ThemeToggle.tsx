@@ -10,7 +10,9 @@ const ThemeToggle = () => {
     setIsDark(!isDark);
     if (isDark) {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
     } else {
+      document.documentElement.classList.remove('light');
       document.documentElement.classList.add('dark');
     }
   };
@@ -25,7 +27,11 @@ const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-8 w-8 text-white hover:bg-[#242836]"
+      className={`h-8 w-8 transition-colors ${
+        isDark 
+          ? 'text-white hover:bg-white hover:text-black' 
+          : 'text-black hover:bg-black hover:text-white'
+      }`}
     >
       {isDark ? (
         <Sun className="h-4 w-4" />
