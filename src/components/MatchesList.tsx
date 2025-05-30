@@ -12,10 +12,36 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
-  // Filter out advertisement matches (Sky Sports News in this case) but include wrestling/combat sports
-  const filteredMatches = matches.filter(match => 
-    !match.title.toLowerCase().includes('sky sports news') && 
-    !match.id.includes('sky-sports-news')
+  // Helper function to remove duplicates and prioritize matches with team logos
+  const removeDuplicatesAndPrioritizeLogos = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
+    
+    matches.forEach(match => {
+      const normalizedTitle = match.title.toLowerCase().trim();
+      const hasTeamLogos = match.teams?.home?.badge && match.teams?.away?.badge;
+      
+      if (!matchMap.has(normalizedTitle)) {
+        matchMap.set(normalizedTitle, match);
+      } else {
+        const existing = matchMap.get(normalizedTitle)!;
+        const existingHasLogos = existing.teams?.home?.badge && existing.teams?.away?.badge;
+        
+        // Replace with current match if it has logos and existing doesn't
+        if (hasTeamLogos && !existingHasLogos) {
+          matchMap.set(normalizedTitle, match);
+        }
+      }
+    });
+    
+    return Array.from(matchMap.values());
+  };
+
+  // Filter out advertisement matches and remove duplicates
+  const filteredMatches = removeDuplicatesAndPrioritizeLogos(
+    matches.filter(match => 
+      !match.title.toLowerCase().includes('sky sports news') && 
+      !match.id.includes('sky-sports-news')
+    )
   );
 
   const isMobile = useIsMobile();

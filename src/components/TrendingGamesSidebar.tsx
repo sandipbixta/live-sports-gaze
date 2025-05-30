@@ -21,19 +21,43 @@ interface TrendingGamesSidebarProps {
 }
 
 const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ matches, sportId }) => {
+  // Helper function to remove duplicates and prioritize matches with team logos
+  const removeDuplicatesAndPrioritizeLogos = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
+    
+    matches.forEach(match => {
+      const normalizedTitle = match.title.toLowerCase().trim();
+      const hasTeamLogos = match.teams?.home?.badge && match.teams?.away?.badge;
+      
+      if (!matchMap.has(normalizedTitle)) {
+        matchMap.set(normalizedTitle, match);
+      } else {
+        const existing = matchMap.get(normalizedTitle)!;
+        const existingHasLogos = existing.teams?.home?.badge && existing.teams?.away?.badge;
+        
+        // Replace with current match if it has logos and existing doesn't
+        if (hasTeamLogos && !existingHasLogos) {
+          matchMap.set(normalizedTitle, match);
+        }
+      }
+    });
+    
+    return Array.from(matchMap.values());
+  };
+
   // Filter and sort matches by trending score
-  const trendingMatches = matches
-    .filter(match => 
+  const trendingMatches = removeDuplicatesAndPrioritizeLogos(
+    matches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     )
-    .map(match => ({
-      ...match,
-      trendingData: isTrendingMatch(match.title)
-    }))
-    .filter(match => match.trendingData.score >= 5)
-    .sort((a, b) => b.trendingData.score - a.trendingData.score)
-    .slice(0, 8);
+  ).map(match => ({
+    ...match,
+    trendingData: isTrendingMatch(match.title)
+  }))
+  .filter(match => match.trendingData.score >= 5)
+  .sort((a, b) => b.trendingData.score - a.trendingData.score)
+  .slice(0, 8);
 
   // Helper function to determine if a match is live
   const isMatchLive = (match: Match): boolean => {

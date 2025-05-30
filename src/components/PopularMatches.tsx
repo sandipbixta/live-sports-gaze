@@ -14,18 +14,42 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selecte
   // Check if we're on mobile
   const isMobile = useIsMobile();
   
-  // Filter out advertisement matches and prioritize trending matches
-  const filteredMatches = popularMatches
-    .filter(match => 
+  // Helper function to remove duplicates and prioritize matches with team logos
+  const removeDuplicatesAndPrioritizeLogos = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
+    
+    matches.forEach(match => {
+      const normalizedTitle = match.title.toLowerCase().trim();
+      const hasTeamLogos = match.teams?.home?.badge && match.teams?.away?.badge;
+      
+      if (!matchMap.has(normalizedTitle)) {
+        matchMap.set(normalizedTitle, match);
+      } else {
+        const existing = matchMap.get(normalizedTitle)!;
+        const existingHasLogos = existing.teams?.home?.badge && existing.teams?.away?.badge;
+        
+        // Replace with current match if it has logos and existing doesn't
+        if (hasTeamLogos && !existingHasLogos) {
+          matchMap.set(normalizedTitle, match);
+        }
+      }
+    });
+    
+    return Array.from(matchMap.values());
+  };
+  
+  // Filter out advertisement matches and remove duplicates
+  const filteredMatches = removeDuplicatesAndPrioritizeLogos(
+    popularMatches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     )
-    .sort((a, b) => {
-      // Sort by trending score (higher score first)
-      const aTrending = isTrendingMatch(a.title);
-      const bTrending = isTrendingMatch(b.title);
-      return bTrending.score - aTrending.score;
-    });
+  ).sort((a, b) => {
+    // Sort by trending score (higher score first)
+    const aTrending = isTrendingMatch(a.title);
+    const bTrending = isTrendingMatch(b.title);
+    return bTrending.score - aTrending.score;
+  });
   
   if (filteredMatches.length === 0) {
     return null;
