@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, CalendarDays, Tv2, Radio } from "lucide-react";
@@ -16,7 +17,7 @@ const MobileBottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[#151922] border-t border-[#343a4d] shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-black border-t border-black dark:border-white shadow-lg">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = currentPath === item.path;
@@ -29,12 +30,12 @@ const MobileBottomNav = () => {
               <item.icon 
                 className={cn(
                   "h-5 w-5 transition-colors", 
-                  isActive ? "text-white" : "text-gray-400"
+                  isActive ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"
                 )} 
               />
               <span className={cn(
                 "text-xs mt-1 transition-colors",
-                isActive ? "text-white font-medium" : "text-gray-400"
+                isActive ? "text-black dark:text-white font-medium" : "text-black/60 dark:text-white/60"
               )}>
                 {item.title}
               </span>

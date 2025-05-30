@@ -6,9 +6,9 @@ const DMCANotice = () => {
   return (
     <PageLayout>
       <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-bold text-white mb-6">DMCA NOTICE – NOTICE OF ALLEGED ILLEGAL CONTENT</h1>
+        <h1 className="text-3xl font-bold text-black dark:text-white mb-6">DMCA NOTICE – NOTICE OF ALLEGED ILLEGAL CONTENT</h1>
         
-        <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d] text-gray-300 space-y-6 mb-8">
+        <div className="bg-white dark:bg-black rounded-xl p-6 border border-black dark:border-white text-black dark:text-white space-y-6 mb-8">
           <p>
             DamiTV.pro is an Internet Service Provider offering a platform that merely displays links to audiovisual content located on servers of third parties and provided and/or transmitted by third parties. DamiTV.pro does not host nor transmit any audiovisual content itself and does not control nor influence such content. DamiTV.pro cannot accept any liability for the content transmitted by others. Any responsibility for this content lies with those who host or transmit it.
           </p>
@@ -22,9 +22,9 @@ const DMCANotice = () => {
           </p>
         </div>
         
-        <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d] text-gray-300 space-y-6 mb-8">
+        <div className="bg-white dark:bg-black rounded-xl p-6 border border-black dark:border-white text-black dark:text-white space-y-6 mb-8">
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">1. Identity of the content</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white mb-2">1. Identity of the content</h2>
             <p>That you claim to be illegal and the grounds for the illegality. Examples include:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Offensive, slanderous, or abusive language</li>
@@ -38,7 +38,7 @@ const DMCANotice = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">2. Identification of the location</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white mb-2">2. Identification of the location</h2>
             <p>Of the content that you claim to be illegal, including:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>The exact URL of the webpage where the content is found</li>
@@ -48,7 +48,7 @@ const DMCANotice = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">3. Identification of the link</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white mb-2">3. Identification of the link</h2>
             <p>Displayed on our site that leads to the illegal content, including:</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>The exact URL of the page on DamiTV.pro where the link is found</li>
@@ -57,7 +57,7 @@ const DMCANotice = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">4. Your contact information</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white mb-2">4. Your contact information</h2>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Full name</li>
               <li>Street or mailing address</li>
@@ -67,7 +67,7 @@ const DMCANotice = () => {
           </div>
           
           <div>
-            <h2 className="text-xl font-bold text-white mb-2">5. A formal declaration stating that:</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white mb-2">5. A formal declaration stating that:</h2>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>You have a good faith belief that the disputed use is unauthorized.</li>
               <li>The disputed use is not permitted by law, such as under copyright law.</li>
@@ -79,8 +79,8 @@ const DMCANotice = () => {
           </div>
         </div>
         
-        <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d] text-gray-300">
-          <h2 className="text-xl font-bold text-white mb-4">Contact Information</h2>
+        <div className="bg-white dark:bg-black rounded-xl p-6 border border-black dark:border-white text-black dark:text-white">
+          <h2 className="text-xl font-bold text-black dark:text-white mb-4">Contact Information</h2>
           <p>DamiTV.pro</p>
         </div>
       </div>

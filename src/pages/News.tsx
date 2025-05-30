@@ -71,15 +71,15 @@ const News = () => {
       <div className="py-4">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Football & Sports News</h1>
-            <p className="text-gray-300">
+            <h1 className="text-3xl font-bold text-black dark:text-white mb-2">Football & Sports News</h1>
+            <p className="text-black dark:text-white">
               The latest updates, transfers, and match reports from around the football world and beyond.
             </p>
           </div>
           <Button 
             onClick={handleManualRefresh} 
             variant="outline" 
-            className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+            className="text-black dark:text-white border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black bg-transparent"
           >
             <RefreshCw className="h-4 w-4 mr-2" /> Refresh News
           </Button>
@@ -91,16 +91,16 @@ const News = () => {
         </div>
         
         {/* Email signup for returning visitors */}
-        <div className="bg-[#242836] rounded-xl p-5 border border-[#343a4d] mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="bg-white dark:bg-black rounded-xl p-5 border border-black dark:border-white mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <h3 className="text-xl font-bold text-white">Get Daily Football Updates</h3>
-            <p className="text-sm text-gray-300">Delivered straight to your inbox</p>
+            <h3 className="text-xl font-bold text-black dark:text-white">Get Daily Football Updates</h3>
+            <p className="text-sm text-black dark:text-white">Delivered straight to your inbox</p>
           </div>
           <div className="flex gap-2">
             <input 
               type="email" 
               placeholder="Your email" 
-              className="px-4 py-2 rounded bg-[#1A1F2C] border border-[#343a4d] text-white"
+              className="px-4 py-2 rounded bg-white dark:bg-black border border-black dark:border-white text-black dark:text-white"
             />
             <Button onClick={handleSubscribe} className="bg-[#fa2d04] hover:bg-[#e02700]">
               Subscribe
@@ -116,18 +116,18 @@ const News = () => {
         {/* Categories section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {['Football/Soccer', 'Basketball', 'Baseball', 'Tennis'].map((sport) => (
-            <div key={sport} className="bg-[#242836] rounded-lg p-4 text-center border border-[#343a4d] hover:bg-[#2a2f3f] cursor-pointer transition-all">
-              <h3 className="font-bold text-white">{sport}</h3>
-              <p className="text-xs text-gray-300 mt-1">Latest news</p>
+            <div key={sport} className="bg-white dark:bg-black rounded-lg p-4 text-center border border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black cursor-pointer transition-all">
+              <h3 className="font-bold">{sport}</h3>
+              <p className="text-xs mt-1">Latest news</p>
             </div>
           ))}
         </div>
         
         {/* Social sharing prompt */}
-        <div className="bg-[#242836] rounded-xl p-5 border border-[#343a4d] mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="bg-white dark:bg-black rounded-xl p-5 border border-black dark:border-white mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <h3 className="text-xl font-bold text-white">Share with fellow fans</h3>
-            <p className="text-sm text-gray-300">Help others discover DamiTV</p>
+            <h3 className="text-xl font-bold text-black dark:text-white">Share with fellow fans</h3>
+            <p className="text-sm text-black dark:text-white">Help others discover DamiTV</p>
           </div>
           <Button className="bg-[#9b87f5] hover:bg-[#8a74e9]">
             <Share className="mr-2 h-4 w-4" /> Share DamiTV

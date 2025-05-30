@@ -150,7 +150,7 @@ const Schedule = () => {
       />
 
       {popularMatches.length > 0 && (
-        <Separator className="my-8 bg-[#343a4d]" />
+        <Separator className="my-8 bg-black dark:bg-white" />
       )}
       
       <div className="mb-8">

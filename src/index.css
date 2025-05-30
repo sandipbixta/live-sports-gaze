@@ -17,20 +17,20 @@
     --primary: 0 0 0;
     --primary-foreground: 255 255 255;
 
-    --secondary: 245 245 245;
+    --secondary: 255 255 255;
     --secondary-foreground: 0 0 0;
 
-    --muted: 245 245 245;
-    --muted-foreground: 115 115 115;
+    --muted: 255 255 255;
+    --muted-foreground: 0 0 0;
 
-    --accent: 245 245 245;
+    --accent: 255 255 255;
     --accent-foreground: 0 0 0;
 
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
 
-    --border: 229 229 229;
-    --input: 229 229 229;
+    --border: 0 0 0;
+    --input: 255 255 255;
     --ring: 0 0 0;
 
     --radius: 0.5rem;
@@ -39,9 +39,9 @@
     --sidebar-foreground: 0 0 0;
     --sidebar-primary: 0 0 0;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 245 245 245;
+    --sidebar-accent: 255 255 255;
     --sidebar-accent-foreground: 0 0 0;
-    --sidebar-border: 229 229 229;
+    --sidebar-border: 0 0 0;
     --sidebar-ring: 0 0 0;
   }
 
@@ -58,28 +58,28 @@
     --primary: 255 255 255;
     --primary-foreground: 0 0 0;
 
-    --secondary: 38 38 38;
+    --secondary: 0 0 0;
     --secondary-foreground: 255 255 255;
 
-    --muted: 38 38 38;
-    --muted-foreground: 163 163 163;
+    --muted: 0 0 0;
+    --muted-foreground: 255 255 255;
 
-    --accent: 38 38 38;
+    --accent: 0 0 0;
     --accent-foreground: 255 255 255;
 
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
 
-    --border: 38 38 38;
-    --input: 38 38 38;
+    --border: 255 255 255;
+    --input: 0 0 0;
     --ring: 255 255 255;
     --sidebar-background: 0 0 0;
     --sidebar-foreground: 255 255 255;
     --sidebar-primary: 255 255 255;
     --sidebar-primary-foreground: 0 0 0;
-    --sidebar-accent: 38 38 38;
+    --sidebar-accent: 0 0 0;
     --sidebar-accent-foreground: 255 255 255;
-    --sidebar-border: 38 38 38;
+    --sidebar-border: 255 255 255;
     --sidebar-ring: 255 255 255;
   }
 
@@ -96,28 +96,28 @@
     --primary: 0 0 0;
     --primary-foreground: 255 255 255;
 
-    --secondary: 245 245 245;
+    --secondary: 255 255 255;
     --secondary-foreground: 0 0 0;
 
-    --muted: 245 245 245;
-    --muted-foreground: 115 115 115;
+    --muted: 255 255 255;
+    --muted-foreground: 0 0 0;
 
-    --accent: 245 245 245;
+    --accent: 255 255 255;
     --accent-foreground: 0 0 0;
 
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
 
-    --border: 229 229 229;
-    --input: 229 229 229;
+    --border: 0 0 0;
+    --input: 255 255 255;
     --ring: 0 0 0;
     --sidebar-background: 255 255 255;
     --sidebar-foreground: 0 0 0;
     --sidebar-primary: 0 0 0;
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 245 245 245;
+    --sidebar-accent: 255 255 255;
     --sidebar-accent-foreground: 0 0 0;
-    --sidebar-border: 229 229 229;
+    --sidebar-border: 0 0 0;
     --sidebar-ring: 0 0 0;
   }
 }
@@ -135,60 +135,60 @@
 /* Custom classes for our sports streaming app */
 @layer components {
   .text-sports-light {
-    @apply text-white;
-  }
-  
-  .bg-sports-dark {
-    @apply bg-[#1A1F2C];
-  }
-  
-  .bg-sports-darker {
-    @apply bg-[#151922];
-  }
-  
-  .bg-sports-card {
-    @apply bg-[#242836];
-  }
-  
-  .border-sports {
-    @apply border-[#343a4d];
-  }
-  
-  .text-sports-muted {
-    @apply text-white/70;
-  }
-  
-  .text-sports-title {
-    @apply text-white font-bold;
-  }
-
-  /* Light mode overrides */
-  .light .text-sports-light {
     @apply text-black;
   }
   
-  .light .bg-sports-dark {
+  .bg-sports-dark {
     @apply bg-white;
   }
   
-  .light .bg-sports-darker {
-    @apply bg-gray-50;
+  .bg-sports-darker {
+    @apply bg-white;
   }
   
-  .light .bg-sports-card {
-    @apply bg-white border border-gray-200;
+  .bg-sports-card {
+    @apply bg-white border border-black;
   }
   
-  .light .border-sports {
-    @apply border-gray-200;
+  .border-sports {
+    @apply border-black;
   }
   
-  .light .text-sports-muted {
-    @apply text-black/70;
+  .text-sports-muted {
+    @apply text-black;
   }
   
-  .light .text-sports-title {
+  .text-sports-title {
     @apply text-black font-bold;
+  }
+
+  /* Dark mode overrides */
+  .dark .text-sports-light {
+    @apply text-white;
+  }
+  
+  .dark .bg-sports-dark {
+    @apply bg-black;
+  }
+  
+  .dark .bg-sports-darker {
+    @apply bg-black;
+  }
+  
+  .dark .bg-sports-card {
+    @apply bg-black border border-white;
+  }
+  
+  .dark .border-sports {
+    @apply border-white;
+  }
+  
+  .dark .text-sports-muted {
+    @apply text-white;
+  }
+  
+  .dark .text-sports-title {
+    @apply text-white font-bold;
   }
 
   /* Make mobile responsive classes */
