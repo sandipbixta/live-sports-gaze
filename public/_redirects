@@ -1,22 +1,29 @@
 
-# Permanent 301 redirects for old pages
-/home              /              301
-/sport/*           /live          301
-/tv                /channels      301
-/channel/*         /channels      301
-/tv-guide          /channels      301
-/watch/*           /live          301
-/soccer            /live          301
-/football          /live          301
-/stream            /live          301
+# Permanent 301 redirects for old pages - prevent duplicate content
+/home              /              301!
+/sport/*           /live          301!
+/tv                /channels      301!
+/channel/*         /channels      301!
+/tv-guide          /channels      301!
+/watch/*           /live          301!
+/soccer            /live          301!
+/football          /live          301!
+/stream            /live          301!
 
-# Fix broken links
-/about             /              301
-/contact           /              301
-/help              /              301
-/faq               /              301
-/privacy           /dmca          301
-/terms             /dmca          301
+# Fix broken links - prevent 404s
+/about             /              301!
+/contact           /              301!
+/help              /              301!
+/faq               /              301!
+/privacy           /dmca          301!
+/terms             /dmca          301!
 
-# Handle 404s properly - send to custom 404 page
+# Handle trailing slashes consistently
+/live/             /live          301!
+/channels/         /channels      301!
+/schedule/         /schedule      301!
+/news/             /news          301!
+/dmca/             /dmca          301!
+
+# Handle 404s properly - send to custom 404 page with SPA fallback
 /*                 /index.html    200

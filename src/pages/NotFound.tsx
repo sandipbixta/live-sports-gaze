@@ -19,9 +19,10 @@ const NotFound = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col justify-center items-center p-4">
       <Helmet>
-        <title>404 - Page Not Found | DamiTV</title>
+        <title>404 - Page Not Found | DamiTV - Free Live Football Streaming</title>
+        <link rel="canonical" href="https://damitv.pro/404" />
+        <meta name="description" content="The page you're looking for doesn't exist or has been moved. Return to DamiTV homepage for live sports streaming including Premier League, Champions League and more." />
         <meta name="robots" content="noindex, follow" />
-        <meta name="description" content="The page you're looking for doesn't exist or has been moved. Return to DamiTV homepage for live sports streaming." />
       </Helmet>
       
       <div className="text-center max-w-md">

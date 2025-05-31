@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -53,12 +54,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="DamiTV Sports" />
 
-    <!-- SEO Meta Tags -->
+    <!-- SEO Meta Tags - Fixed for better indexing -->
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <link rel="alternate" hreflang="x-default" href="https://damitv.pro/" />
     <link rel="alternate" hreflang="en" href="https://damitv.pro/" />
     
-    <!-- Structured Data (JSON-LD) -->
+    <!-- DNS Prefetch for better performance -->
+    <link rel="dns-prefetch" href="//www.google-analytics.com">
+    <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
+    
+    <!-- Structured Data (JSON-LD) - Enhanced for better indexing -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -70,7 +75,11 @@
         "https://twitter.com/damitv_official",
         "https://facebook.com/damitv.pro"
       ],
-      "description": "Watch free live football streaming including Premier League, Champions League, La Liga and all sports TV online on DamiTV. Access free sports streaming with hundreds of live matches daily."
+      "description": "Watch free live football streaming including Premier League, Champions League, La Liga and all sports TV online on DamiTV. Access free sports streaming with hundreds of live matches daily.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "ES"
+      }
     }
     </script>
 
@@ -79,10 +88,23 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "url": "https://damitv.pro/",
+      "name": "DamiTV - Free Live Football Streaming",
+      "description": "Watch free live football streaming with Premier League, Champions League, La Liga matches",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://damitv.pro/search?q={search_term_string}",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://damitv.pro/search?q={search_term_string}"
+        },
         "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "DamiTV",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://i.imgur.com/m4nV9S8.png"
+        }
       }
     }
     </script>

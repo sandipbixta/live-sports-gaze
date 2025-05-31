@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -12,6 +11,7 @@ import PageHeader from '../components/PageHeader';
 import DatePagination from '../components/DatePagination';
 import PopularGames from '../components/PopularGames';
 import { isPopularLeague } from '../utils/popularLeagues';
+import { Helmet } from 'react-helmet-async';
 
 const Schedule = () => {
   const { toast } = useToast();
@@ -119,50 +119,64 @@ const Schedule = () => {
   };
 
   return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
-      <PageHeader 
-        title="Schedule" 
-        subtitle="Find upcoming matches and events" 
-        currentDate={currentDate}
-        showCalendar={false}
-      />
+    <>
+      <Helmet>
+        <title>Football Schedule - Live Matches Today | DamiTV Free Sports Streaming</title>
+        <link rel="canonical" href="https://damitv.pro/schedule" />
+        <meta name="description" content="Check today's football schedule with Premier League, Champions League, La Liga and more live matches. Free sports streaming schedule on DamiTV." />
+        <meta name="keywords" content="football schedule, live matches today, premier league schedule, champions league schedule, free sports schedule" />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <meta property="og:title" content="Football Schedule - Live Matches Today | DamiTV" />
+        <meta property="og:description" content="Check today's football schedule with Premier League, Champions League and more live matches" />
+        <meta property="og:url" content="https://damitv.pro/schedule" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       
-      <div className="mb-6">
-        <DatePagination 
-          currentDate={currentDate} 
-          setCurrentDate={setCurrentDate} 
-          navigateDate={navigateDate} 
+      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+        <PageHeader 
+          title="Schedule" 
+          subtitle="Find upcoming matches and events" 
+          currentDate={currentDate}
+          showCalendar={false}
         />
-      </div>
-      
-      <div className="mb-8">
-        <SportsList 
-          sports={sports}
-          onSelectSport={handleSelectSport}
-          selectedSport={selectedSport}
-          isLoading={loadingSports}
-        />
-      </div>
-
-      <PopularGames 
-        popularMatches={popularMatches}
-        selectedSport={selectedSport}
-      />
-
-      {popularMatches.length > 0 && (
-        <Separator className="my-8 bg-black dark:bg-white" />
-      )}
-      
-      <div className="mb-8">
-        {(selectedSport || loadingMatches) && (
-          <MatchesList
-            matches={searchTerm ? filteredMatches : matches}
-            sportId={selectedSport || ""}
-            isLoading={loadingMatches}
+        
+        <div className="mb-6">
+          <DatePagination 
+            currentDate={currentDate} 
+            setCurrentDate={setCurrentDate} 
+            navigateDate={navigateDate} 
           />
+        </div>
+        
+        <div className="mb-8">
+          <SportsList 
+            sports={sports}
+            onSelectSport={handleSelectSport}
+            selectedSport={selectedSport}
+            isLoading={loadingSports}
+          />
+        </div>
+
+        <PopularGames 
+          popularMatches={popularMatches}
+          selectedSport={selectedSport}
+        />
+
+        {popularMatches.length > 0 && (
+          <Separator className="my-8 bg-black dark:bg-white" />
         )}
-      </div>
-    </PageLayout>
+        
+        <div className="mb-8">
+          {(selectedSport || loadingMatches) && (
+            <MatchesList
+              matches={searchTerm ? filteredMatches : matches}
+              sportId={selectedSport || ""}
+              isLoading={loadingMatches}
+            />
+          )}
+        </div>
+      </PageLayout>
+    </>
   );
 };
 

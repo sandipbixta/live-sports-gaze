@@ -3,10 +3,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-  <!-- Home Page -->
+  
+  <!-- Home Page - Highest Priority -->
   <url>
     <loc>https://damitv.pro/</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -14,7 +15,7 @@
   <!-- Live Sports Section - High Priority -->
   <url>
     <loc>https://damitv.pro/live</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
     <news:news>
@@ -22,7 +23,7 @@
         <news:name>DamiTV Sports</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>2025-05-23</news:publication_date>
+      <news:publication_date>2025-05-31</news:publication_date>
       <news:title>Live Football Streaming - Premier League, Champions League</news:title>
     </news:news>
   </url>
@@ -30,29 +31,32 @@
   <!-- Schedule - Updated Daily -->
   <url>
     <loc>https://damitv.pro/schedule</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   
   <!-- Channels Page - Focus on Trending -->
   <url>
     <loc>https://damitv.pro/channels</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
     <video:video>
-      <video:title>Live Football TV Channels</video:title>
-      <video:description>Watch live football TV channels including Premier League, Champions League and more</video:description>
+      <video:title>Live Football TV Channels - Premier League, Champions League</video:title>
+      <video:description>Watch live football TV channels including Premier League, Champions League, La Liga and more sports streams</video:description>
       <video:content_loc>https://damitv.pro/channels</video:content_loc>
       <video:player_loc>https://damitv.pro/channels</video:player_loc>
+      <video:thumbnail_loc>https://i.imgur.com/m4nV9S8.png</video:thumbnail_loc>
+      <video:duration>0</video:duration>
+      <video:live>yes</video:live>
     </video:video>
   </url>
   
   <!-- News Section - Frequently Updated -->
   <url>
     <loc>https://damitv.pro/news</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
     <news:news>
@@ -60,16 +64,46 @@
         <news:name>DamiTV Sports News</news:name>
         <news:language>en</news:language>
       </news:publication>
-      <news:publication_date>2025-05-23</news:publication_date>
-      <news:title>Latest Football News and Match Reports</news:title>
+      <news:publication_date>2025-05-31</news:publication_date>
+      <news:title>Latest Football News and Match Reports - Premier League Updates</news:title>
     </news:news>
   </url>
   
   <!-- Legal Page -->
   <url>
     <loc>https://damitv.pro/dmca</loc>
-    <lastmod>2025-05-23</lastmod>
+    <lastmod>2025-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
+
+  <!-- Dynamic Match Pages - High Priority for SEO -->
+  <url>
+    <loc>https://damitv.pro/match/1/premier-league</loc>
+    <lastmod>2025-05-31</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/match/1/champions-league</loc>
+    <lastmod>2025-05-31</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/match/1/la-liga</loc>
+    <lastmod>2025-05-31</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/match/1/serie-a</loc>
+    <lastmod>2025-05-31</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
 </urlset>

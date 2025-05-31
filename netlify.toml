@@ -2,12 +2,105 @@
 [build]
   publish = "dist"
 
+# Permanent 301 redirects for old pages - fix duplicate content
+[[redirects]]
+  from = "/home"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/sport/*"
+  to = "/live"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/tv"
+  to = "/channels"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/channel/*"
+  to = "/channels"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/tv-guide"
+  to = "/channels"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/watch/*"
+  to = "/live"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/soccer"
+  to = "/live"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/football"
+  to = "/live"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/stream"
+  to = "/live"
+  status = 301
+  force = true
+
+# Fix broken links - redirect to appropriate pages
+[[redirects]]
+  from = "/about"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/help"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/faq"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/privacy"
+  to = "/dmca"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/terms"
+  to = "/dmca"
+  status = 301
+  force = true
+
+# Handle 404s properly - send to custom 404 page
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Add proper caching headers
+# Add proper caching headers for better performance
 [[headers]]
   for = "/*"
   [headers.values]
@@ -38,28 +131,50 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Add proper canonical tags through headers
+[[headers]]
+  for = "/*.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Add proper canonical tags through headers - fix duplicate content issues
+[[headers]]
+  for = "/"
+  [headers.values]
+    Link = "<https://damitv.pro/>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-image-preview:large, max-snippet:-1"
+
 [[headers]]
   for = "/channels"
   [headers.values]
-    Link = "</channels>; rel=\"canonical\""
+    Link = "<https://damitv.pro/channels>; rel=\"canonical\""
     X-Robots-Tag = "index, follow, max-image-preview:large"
 
 [[headers]]
   for = "/live"
   [headers.values]
-    Link = "</live>; rel=\"canonical\""
+    Link = "<https://damitv.pro/live>; rel=\"canonical\""
     X-Robots-Tag = "index, follow, max-image-preview:large"
 
 [[headers]]
   for = "/news"
   [headers.values]
-    Link = "</news>; rel=\"canonical\""
+    Link = "<https://damitv.pro/news>; rel=\"canonical\""
     X-Robots-Tag = "index, follow, max-snippet:-1, max-image-preview:large"
 
-# Add SEO-optimized headers for trending content
 [[headers]]
   for = "/schedule"
   [headers.values]
-    Link = "</schedule>; rel=\"canonical\""
+    Link = "<https://damitv.pro/schedule>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow, max-image-preview:large"
+
+[[headers]]
+  for = "/dmca"
+  [headers.values]
+    Link = "<https://damitv.pro/dmca>; rel=\"canonical\""
+    X-Robots-Tag = "index, follow"
+
+# Handle match pages with canonical tags
+[[headers]]
+  for = "/match/*"
+  [headers.values]
     X-Robots-Tag = "index, follow, max-image-preview:large"
