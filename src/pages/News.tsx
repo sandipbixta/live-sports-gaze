@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import NewsSection from '../components/NewsSection';
@@ -83,11 +82,6 @@ const News = () => {
           >
             <RefreshCw className="h-4 w-4 mr-2" /> Refresh News
           </Button>
-        </div>
-        
-        {/* Prominent ad placement */}
-        <div className="mb-6">
-          <Advertisement type="banner" className="w-full" />
         </div>
         
         {/* Email signup for returning visitors */}

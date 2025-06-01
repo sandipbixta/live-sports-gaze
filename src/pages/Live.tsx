@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -13,7 +14,6 @@ import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
-import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import { Badge } from '../components/ui/badge';
 
