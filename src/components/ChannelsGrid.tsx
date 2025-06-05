@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
@@ -13,6 +14,7 @@ import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
 
 const ChannelsGrid = () => {
+  const navigate = useNavigate();
   const countries = getCountries();
   const channelsByCountry = getChannelsByCountry();
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
@@ -78,9 +80,9 @@ const ChannelsGrid = () => {
     loadEnhancedChannels();
   }, []);
 
-  const handleSelectChannel = (embedUrl: string, title: string) => {
-    setSelectedChannelUrl(embedUrl);
-    setSelectedChannelTitle(title);
+  const handleSelectChannel = (channel: any) => {
+    // Navigate to dedicated channel player page
+    navigate(`/channel/${selectedCountry}/${channel.id}`);
   };
 
   const currentChannels = useEnhancedView ? 
@@ -148,7 +150,7 @@ const ChannelsGrid = () => {
 
         <TabsContent value="channels" className="mt-0">
           {useModernView ? (
-            // Modern simplified layout without featured channels
+            // Modern simplified layout
             <div className="space-y-8">
               {/* All Channels Grid */}
               <div>
@@ -158,7 +160,7 @@ const ChannelsGrid = () => {
                     <div
                       key={channel.id}
                       className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group"
-                      onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                      onClick={() => handleSelectChannel(channel)}
                     >
                       <div className="flex flex-col items-center text-center">
                         <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform">
@@ -185,63 +187,21 @@ const ChannelsGrid = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Video Player */}
-              {selectedChannelUrl && (
-                <div className="bg-[#151922] rounded-xl overflow-hidden border border-[#343a4d]">
-                  <div className="relative w-full bg-[#151922]">
-                    <AspectRatio ratio={16/9}>
-                      <iframe 
-                        src={selectedChannelUrl}
-                        className="w-full h-full"
-                        title={selectedChannelTitle || "Live Channel"}
-                        frameBorder="0"
-                        allowFullScreen 
-                        allow="encrypted-media; picture-in-picture;"
-                      ></iframe>
-                    </AspectRatio>
-                  </div>
-                  <div className="p-4 border-t border-[#343a4d]">
-                    <h3 className="text-lg font-semibold text-white">{selectedChannelTitle}</h3>
-                    <p className="text-gray-400 text-sm">Now Playing</p>
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
-            // Original layout
+            // Original layout - also updated to navigate to player page
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-              {/* Video player */}
+              {/* Placeholder for original layout */}
               <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
-                {selectedChannelUrl ? (
-                  <>
-                    <div className="relative w-full bg-[#151922]">
-                      <AspectRatio ratio={16/9}>
-                        <iframe 
-                          src={selectedChannelUrl}
-                          className="w-full h-full"
-                          title={selectedChannelTitle || "Live Channel"}
-                          frameBorder="0"
-                          allowFullScreen 
-                          allow="encrypted-media; picture-in-picture;"
-                        ></iframe>
-                      </AspectRatio>
+                <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
+                  <div className="text-center p-4">
+                    <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
+                      <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
                     </div>
-                    <div className="p-2 sm:p-4 border-t border-[#343a4d]">
-                      <h3 className="text-sm sm:text-lg font-semibold text-white">{selectedChannelTitle}</h3>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
-                    <div className="text-center p-4">
-                      <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
-                        <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
-                      </div>
-                      <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
-                      <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel from the list</p>
-                    </div>
+                    <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
+                    <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
                   </div>
-                )}
+                </div>
               </div>
               
               {/* Channel list */}
@@ -269,8 +229,8 @@ const ChannelsGrid = () => {
                           website={channel.website}
                           network={channel.network}
                           categories={channel.categories}
-                          onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                          isActive={selectedChannelUrl === channel.embedUrl}
+                          onClick={() => handleSelectChannel(channel)}
+                          isActive={false}
                         />
                       ) : (
                         <ChannelCard
@@ -278,8 +238,8 @@ const ChannelsGrid = () => {
                           title={channel.title}
                           embedUrl={channel.embedUrl}
                           logo={channel.logo}
-                          onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                          isActive={selectedChannelUrl === channel.embedUrl}
+                          onClick={() => handleSelectChannel(channel)}
+                          isActive={false}
                         />
                       )
                     ))}

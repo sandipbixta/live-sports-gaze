@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
@@ -23,6 +22,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const isMobile = useIsMobile();
   
+  // Mobile-optimized player container with proper orientation
+  const PlayerContainer = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative w-full bg-[#151922] rounded-none sm:rounded-lg overflow-hidden shadow-xl group">
+      {children}
+    </div>
+  );
+
   const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -84,8 +90,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   if (isLoading) {
     return (
-      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
-        <div className="absolute top-2 left-2 z-30">
+      <PlayerContainer>
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -105,14 +111,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </div>
+      </PlayerContainer>
     );
   }
 
   if (!stream) {
     return (
-      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
-        <div className="absolute top-2 left-2 z-30">
+      <PlayerContainer>
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -132,7 +138,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </div>
+      </PlayerContainer>
     );
   }
 
@@ -141,8 +147,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   
   if (!validEmbedUrl) {
     return (
-      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
-        <div className="absolute top-2 left-2 z-30">
+      <PlayerContainer>
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -172,14 +178,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </div>
+      </PlayerContainer>
     );
   }
 
   if (loadError) {
     return (
-      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
-        <div className="absolute top-2 left-2 z-30">
+      <PlayerContainer>
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -207,24 +213,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </div>
+      </PlayerContainer>
     );
   }
 
   return (
-    <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
-      <div className="absolute top-2 left-2 z-30">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
-          onClick={handleGoBack}
-          onTouchEnd={handleGoBack}
-        >
-          <ArrowLeft className="h-5 w-5 text-white" />
-        </Button>
-      </div>
-      
+    <PlayerContainer>
       <AspectRatio ratio={16 / 9} className="w-full">
         {/* Loading overlay shown until iframe loads */}
         {!isContentLoaded && (
@@ -245,13 +239,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           title="Live Sports Stream"
           onLoad={handleIframeLoad}
           onError={() => setLoadError(true)}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         ></iframe>
       </AspectRatio>
       
-      {/* Controls overlay */}
+      {/* Controls overlay - hidden on dedicated player page */}
       <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity",
+        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity sm:block hidden",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
         <button 
@@ -266,7 +260,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           }
         </button>
       </div>
-    </div>
+    </PlayerContainer>
   );
 };
 
