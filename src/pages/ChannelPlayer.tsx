@@ -1,18 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import StreamPlayer from '@/components/StreamPlayer';
 import { getChannelsByCountry } from '@/data/tvChannels';
-import { ArrowLeft, Share, Star } from 'lucide-react';
+import { ArrowLeft, Share, Star, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
   const navigate = useNavigate();
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [otherChannels, setOtherChannels] = useState<any[]>([]);
 
   useEffect(() => {
     const loadChannel = () => {
@@ -37,6 +38,11 @@ const ChannelPlayer = () => {
       }
 
       setChannel(foundChannel);
+      
+      // Set other channels (excluding current one)
+      const otherChannelsList = countryChannels.filter(ch => ch.id !== channelId);
+      setOtherChannels(otherChannelsList);
+      
       setIsLoading(false);
     };
 
@@ -51,6 +57,10 @@ const ChannelPlayer = () => {
     // Force reload the channel
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 1000);
+  };
+
+  const handleChannelSwitch = (newChannelId: string) => {
+    navigate(`/channel/${country}/${newChannelId}`);
   };
 
   if (isLoading || !channel) {
@@ -115,53 +125,102 @@ const ChannelPlayer = () => {
         />
       </div>
 
-      {/* Channel Info */}
-      <div className="p-4">
-        <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
-          <div className="flex items-start gap-4">
-            {/* Channel Logo */}
-            <div className="w-16 h-16 rounded-xl bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
-              {channel.logo ? (
-                <img 
-                  src={channel.logo} 
-                  alt={channel.title}
-                  className="w-12 h-12 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <div className={`w-full h-full flex items-center justify-center text-lg font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
-                {channel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+      <div className="flex flex-col lg:flex-row gap-4 p-4">
+        {/* Channel Info */}
+        <div className="flex-1">
+          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+            <div className="flex items-start gap-4">
+              {/* Channel Logo */}
+              <div className="w-16 h-16 rounded-xl bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
+                {channel.logo ? (
+                  <img 
+                    src={channel.logo} 
+                    alt={channel.title}
+                    className="w-12 h-12 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full flex items-center justify-center text-lg font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
+                  {channel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                </div>
               </div>
+              
+              {/* Channel Details */}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-bold text-white mb-2">{channel.title}</h2>
+                <p className="text-gray-400 text-sm mb-3">Live Sports Channel</p>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]"
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Favorite
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]"
+                  >
+                    <Share className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Other Channels Sidebar */}
+        <div className="lg:w-80">
+          <div className="bg-[#151922] rounded-xl border border-[#343a4d] overflow-hidden">
+            <div className="p-4 border-b border-[#343a4d]">
+              <h3 className="font-semibold text-white text-sm">Other Channels</h3>
+              <p className="text-xs text-gray-400 mt-1">Switch to another channel</p>
             </div>
             
-            {/* Channel Details */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold text-white mb-2">{channel.title}</h2>
-              <p className="text-gray-400 text-sm mb-3">Live Sports Channel</p>
-              
-              {/* Action Buttons */}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]"
-                >
-                  <Star className="h-4 w-4 mr-2" />
-                  Favorite
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]"
-                >
-                  <Share className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
+            <ScrollArea className="h-[400px]">
+              <div className="p-2">
+                {otherChannels.map(otherChannel => (
+                  <div
+                    key={otherChannel.id}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#242836] cursor-pointer transition-colors group"
+                    onClick={() => handleChannelSwitch(otherChannel.id)}
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {otherChannel.logo ? (
+                        <img 
+                          src={otherChannel.logo} 
+                          alt={otherChannel.title}
+                          className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${otherChannel.logo ? 'hidden' : ''}`}>
+                        {otherChannel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-white truncate group-hover:text-[#ff5a36] transition-colors">
+                        {otherChannel.title}
+                      </h4>
+                    </div>
+                    
+                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-[#ff5a36] transition-colors" />
+                  </div>
+                ))}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         </div>
       </div>
