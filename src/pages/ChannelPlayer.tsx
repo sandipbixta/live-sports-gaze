@@ -66,8 +66,11 @@ const ChannelPlayer = () => {
 
   const stream = {
     id: channel.id,
+    streamNo: 1,
+    language: 'English',
+    hd: true,
     embedUrl: channel.embedUrl,
-    hd: true
+    source: 'TV Channel'
   };
 
   return (
