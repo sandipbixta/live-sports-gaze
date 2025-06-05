@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
@@ -149,43 +148,8 @@ const ChannelsGrid = () => {
 
         <TabsContent value="channels" className="mt-0">
           {useModernView ? (
-            // Modern SportsZone-style layout
+            // Modern simplified layout without featured channels
             <div className="space-y-8">
-              {/* Featured Channels Section */}
-              {featuredChannels.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-4 mb-6">
-                    <h2 className="text-2xl font-bold text-white">Featured Channels</h2>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-[#4285f4] hover:bg-[#4285f4]/80 text-white">All</Button>
-                      <Button size="sm" variant="outline" className="bg-transparent border-[#343a4d] text-white hover:bg-[#343a4d]">Sports</Button>
-                      <Button size="sm" variant="outline" className="bg-transparent border-[#343a4d] text-white hover:bg-[#343a4d]">News</Button>
-                      <Button size="sm" variant="outline" className="bg-transparent border-[#343a4d] text-white hover:bg-[#343a4d]">Premium</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-                    {featuredChannels.map((channel, index) => (
-                      <ModernChannelCard
-                        key={channel.id}
-                        title={channel.title}
-                        embedUrl={channel.embedUrl}
-                        logo={channel.logo}
-                        category={channel.category}
-                        network={channel.network}
-                        isLive={true}
-                        currentShow={`Live Sports - ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`}
-                        nextShow="Next: Match Highlights"
-                        timeSlot={`${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} - ${new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`}
-                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
-                        isActive={selectedChannelUrl === channel.embedUrl}
-                        colorScheme={['blue', 'red', 'green', 'purple'][index % 4] as 'blue' | 'red' | 'green' | 'purple'}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* All Channels Grid */}
               <div>
                 <h2 className="text-2xl font-bold text-white mb-6">All Channels</h2>
