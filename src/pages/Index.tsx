@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -8,7 +8,7 @@ import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import { Separator } from '../components/ui/separator';
-import { Calendar } from 'lucide-react';
+import { Calendar, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
@@ -28,6 +28,7 @@ const Index = () => {
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
+  const [retryCounter, setRetryCounter] = useState(0);
 
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
@@ -50,45 +51,63 @@ const Index = () => {
     });
   }, [matches, searchTerm]);
 
-  // Load sports immediately on mount with optimization
-  useEffect(() => {
-    const loadSports = async () => {
-      try {
-        let sportsData = await fetchSports();
-        
-        // Sort with football first for better UX
-        sportsData = sportsData.sort((a, b) => {
-          if (a.name.toLowerCase() === 'football') return -1;
-          if (b.name.toLowerCase() === 'football') return 1;
-          if (a.name.toLowerCase() === 'basketball') return -1;
-          if (b.name.toLowerCase() === 'basketball') return 1;
-          return a.name.localeCompare(b.name);
-        });
-        
-        setSports(sportsData);
-        
-        // Auto-select football for faster initial load
-        if (sportsData.length > 0) {
-          const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
-          if (footballSport) {
-            handleSelectSport(footballSport.id);
-          } else {
-            handleSelectSport(sportsData[0].id);
-          }
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load sports data.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingSports(false);
+  // Optimized fetch sports function
+  const loadSports = useCallback(async () => {
+    setLoadingSports(true);
+    
+    try {
+      let sportsData = await fetchSports();
+      
+      if (!sportsData || sportsData.length === 0) {
+        throw new Error('No sports data received');
       }
-    };
-
-    loadSports();
+      
+      // Sort with football first for better UX
+      sportsData = sportsData.sort((a, b) => {
+        if (a.name.toLowerCase() === 'football') return -1;
+        if (b.name.toLowerCase() === 'football') return 1;
+        if (a.name.toLowerCase() === 'basketball') return -1;
+        if (b.name.toLowerCase() === 'basketball') return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      setSports(sportsData);
+      
+      // Auto-select football for faster initial load
+      if (sportsData.length > 0) {
+        const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
+        if (footballSport) {
+          handleSelectSport(footballSport.id);
+        } else {
+          handleSelectSport(sportsData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading sports:', error);
+      toast({
+        title: "Data Loading Issue",
+        description: "We're having trouble loading sports data. Trying to recover...",
+        variant: "destructive",
+      });
+      
+      // Try to use fallback data
+      const fallbackSports = [
+        { id: '1', name: 'Football' },
+        { id: '2', name: 'Basketball' }
+      ];
+      
+      setSports(fallbackSports);
+      handleSelectSport('1'); // Default to football
+      
+    } finally {
+      setLoadingSports(false);
+    }
   }, [toast]);
+
+  // Load sports immediately on mount with optimization and retry mechanism
+  useEffect(() => {
+    loadSports();
+  }, [loadSports, retryCounter]);
 
   // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,23 +127,44 @@ const Index = () => {
         setMatches(allMatches[sportId]);
       } else {
         const matchesData = await fetchMatches(sportId);
-        setMatches(matchesData);
         
-        // Cache the data
-        setAllMatches(prev => ({
-          ...prev,
-          [sportId]: matchesData
-        }));
+        if (matchesData && matchesData.length > 0) {
+          setMatches(matchesData);
+          
+          // Cache the data
+          setAllMatches(prev => ({
+            ...prev,
+            [sportId]: matchesData
+          }));
+        } else {
+          // Handle empty matches case
+          setMatches([]);
+          toast({
+            title: "No Matches Found",
+            description: "No matches are currently available for this sport.",
+          });
+        }
       }
     } catch (error) {
+      console.error('Error loading matches:', error);
       toast({
         title: "Error",
-        description: "Failed to load matches data.",
+        description: "Failed to load matches data. Please try again.",
         variant: "destructive",
       });
+      setMatches([]);
     } finally {
       setLoadingMatches(false);
     }
+  };
+
+  // Handle retry
+  const handleRetry = () => {
+    setRetryCounter(prev => prev + 1);
+    toast({
+      title: "Retrying",
+      description: "Attempting to reload sports and matches data...",
+    });
   };
 
   return (
@@ -140,11 +180,21 @@ const Index = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
-            <Link to="/schedule">
-              <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
-                <Calendar className="mr-2 h-4 w-4" /> View Schedule
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRetry} 
+                className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" /> Refresh Data
               </Button>
-            </Link>
+              <Link to="/schedule">
+                <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
+                  <Calendar className="mr-2 h-4 w-4" /> View Schedule
+                </Button>
+              </Link>
+            </div>
           </div>
           <SportsList 
             sports={sports}
@@ -189,6 +239,15 @@ const Index = () => {
               sportId={selectedSport || ""}
               isLoading={loadingMatches}
             />
+          )}
+          
+          {!loadingMatches && filteredMatches.length === 0 && selectedSport && (
+            <div className="bg-[#242836] rounded-xl p-6 text-center">
+              <p className="text-gray-300 mb-4">No matches found for this sport right now.</p>
+              <Button onClick={handleRetry} className="bg-[#9b87f5] hover:bg-[#8a75e8]">
+                <RefreshCw className="mr-2 h-4 w-4" /> Refresh Data
+              </Button>
+            </div>
           )}
         </div>
         
