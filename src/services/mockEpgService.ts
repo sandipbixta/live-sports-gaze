@@ -1,5 +1,5 @@
 
-// Simplified mock EPG service with no artificial delays
+// Simplified mock EPG service with minimal data
 import { EPGChannel, EPGProgram } from './epgService';
 
 // Generate simple programs for a channel
@@ -7,8 +7,8 @@ const generatePrograms = (channelName: string): EPGProgram[] => {
   const programs: EPGProgram[] = [];
   const now = new Date();
   
-  // Generate only 2 programs to reduce processing time
-  for (let i = 0; i < 2; i++) {
+  // Generate only 3 programs instead of 12 to reduce load time
+  for (let i = 0; i < 3; i++) {
     const startTime = new Date(now.getTime() + (i * 2 * 60 * 60 * 1000)); // 2 hours each
     const endTime = new Date(startTime.getTime() + (2 * 60 * 60 * 1000));
     
@@ -30,8 +30,8 @@ export const createMockEPGData = (channelsByCountry: Record<string, any[]>): Rec
   const mockEPGData: Record<string, EPGChannel[]> = {};
   
   Object.entries(channelsByCountry).forEach(([country, channels]) => {
-    // Only process first 5 channels to reduce load time even further
-    const limitedChannels = channels.slice(0, 5);
+    // Only process first 10 channels to reduce load time
+    const limitedChannels = channels.slice(0, 10);
     
     mockEPGData[country] = limitedChannels.map(channel => ({
       channelId: channel.id,
@@ -43,23 +43,26 @@ export const createMockEPGData = (channelsByCountry: Record<string, any[]>): Rec
   return mockEPGData;
 };
 
-// No-delay mock EPG service
+// Simplified mock EPG service
 export class MockEPGService {
   private mockData: Record<string, EPGChannel[]> = {};
   
   async getAllEPGData(channelsByCountry: Record<string, any[]>): Promise<Record<string, EPGChannel[]>> {
-    // No artificial delay - instant response
-    console.log('Loading instant EPG data...');
+    // Reduced loading time from 1000ms to 200ms
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    console.log('Loading simplified EPG data...');
     
     this.mockData = createMockEPGData(channelsByCountry);
     
-    console.log('EPG data loaded instantly:', Object.keys(this.mockData).length, 'countries');
+    console.log('EPG data loaded:', Object.keys(this.mockData).length, 'countries');
     
     return this.mockData;
   }
   
   async getEPGForCountry(countryName: string, channels: any[]): Promise<EPGChannel[]> {
-    // No artificial delay - instant response
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const mockData = createMockEPGData({ [countryName]: channels });
     return mockData[countryName] || [];
   }
