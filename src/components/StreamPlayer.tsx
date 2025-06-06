@@ -21,6 +21,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
+  const [iframeTimeout, setIframeTimeout] = useState(false);
   const isMobile = useIsMobile();
   
   // Mobile-optimized player container with proper orientation
@@ -73,13 +74,30 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
+      setIframeTimeout(false);
     }
   }, [stream]);
+
+  // Set timeout for iframe loading on mobile
+  useEffect(() => {
+    if (stream && !isContentLoaded && !loadError) {
+      const timer = setTimeout(() => {
+        if (!isContentLoaded) {
+          console.log('Iframe loading timeout on mobile, setting content as loaded');
+          setIframeTimeout(true);
+          setIsContentLoaded(true);
+        }
+      }, isMobile ? 3000 : 5000); // Shorter timeout for mobile
+
+      return () => clearTimeout(timer);
+    }
+  }, [stream, isContentLoaded, loadError, isMobile]);
 
   // Handle retry action
   const handleRetry = () => {
     setLoadError(false);
     setIsContentLoaded(false);
+    setIframeTimeout(false);
     if (onRetry) onRetry();
   };
 
@@ -87,6 +105,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const handleIframeLoad = () => {
     console.log('Stream iframe loaded successfully');
     setIsContentLoaded(true);
+  };
+
+  // Handle iframe error
+  const handleIframeError = () => {
+    console.error('Stream iframe failed to load');
+    setLoadError(true);
   };
 
   if (isLoading) {
@@ -221,12 +245,15 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   return (
     <PlayerContainer>
       <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads */}
-        {!isContentLoaded && (
+        {/* Loading overlay shown until iframe loads or timeout */}
+        {!isContentLoaded && !iframeTimeout && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
               <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
               <p className="text-sm sm:text-lg">Loading stream...</p>
+              {isMobile && (
+                <p className="text-xs text-gray-400 mt-2">This may take longer on mobile</p>
+              )}
             </div>
           </div>
         )}
@@ -238,10 +265,32 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           allowFullScreen
           title="Live Sports Stream"
           onLoad={handleIframeLoad}
-          onError={() => setLoadError(true)}
+          onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        ></iframe>
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+          style={{ 
+            border: 'none',
+            // Mobile-specific optimizations
+            ...(isMobile && {
+              touchAction: 'manipulation',
+              WebkitOverflowScrolling: 'touch'
+            })
+          }}
+        />
       </AspectRatio>
+      
+      {/* Back button - always visible on mobile */}
+      <div className="absolute top-2 left-2 z-30">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
+          onClick={handleGoBack}
+          onTouchEnd={handleGoBack}
+        >
+          <ArrowLeft className="h-5 w-5 text-white" />
+        </Button>
+      </div>
       
       {/* Controls overlay - now always visible on mobile */}
       <div className={cn(
