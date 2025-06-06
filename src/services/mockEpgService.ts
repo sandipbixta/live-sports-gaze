@@ -1,124 +1,120 @@
 
-import { EPGChannel, EPGProgram } from './epgService';
+interface EPGProgram {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  description?: string;
+  category?: string;
+}
 
-// Mock program templates for different types of sports content
-const programTemplates = {
-  football: [
-    'Premier League Live', 'Champions League', 'La Liga Match', 'Serie A Football', 
-    'Bundesliga Live', 'Football Tonight', 'Match Highlights', 'Football Analysis',
-    'Live Football', 'European Football', 'International Football', 'Cup Final'
-  ],
-  sports: [
-    'Sports Center', 'Live Sports', 'Sports News', 'Sports Tonight', 'Game Time',
-    'Sports Highlights', 'Sports Talk', 'Sports Update', 'Live Action', 'Sports World'
-  ],
-  news: [
-    'Sports News', 'Breaking News', 'News Update', 'Evening News', 'Live News',
-    'News Tonight', 'Sports Report', 'News Analysis', 'Daily Update', 'News Brief'
-  ]
-};
+interface EPGChannel {
+  channelId: string;
+  channelName: string;
+  programs: EPGProgram[];
+}
 
-const categories = ['Football', 'Sports', 'News', 'Entertainment', 'Documentary'];
-
-// Generate realistic program descriptions
-const generateDescription = (title: string): string => {
-  const descriptions = [
-    `Live coverage of ${title} with expert commentary and analysis.`,
-    `Join us for ${title} featuring the latest updates and highlights.`,
-    `Comprehensive coverage of ${title} with in-depth reporting.`,
-    `Watch ${title} live with pre-match and post-match analysis.`,
-    `${title} brings you the best action from around the world.`,
-    `Experience ${title} with HD quality streaming and commentary.`
-  ];
-  return descriptions[Math.floor(Math.random() * descriptions.length)];
-};
-
-// Generate programs for a channel
-const generatePrograms = (channelName: string, channelType: 'football' | 'sports' | 'news' = 'sports'): EPGProgram[] => {
-  const programs: EPGProgram[] = [];
-  const now = new Date();
-  const templates = programTemplates[channelType];
-  
-  // Generate 12 programs (current + next 11)
-  for (let i = 0; i < 12; i++) {
-    const startTime = new Date(now.getTime() + (i * 2 * 60 * 60 * 1000)); // 2 hours each
-    const endTime = new Date(startTime.getTime() + (2 * 60 * 60 * 1000));
+class MockEPGService {
+  private generateMockPrograms(channelName: string, baseDate: Date): EPGProgram[] {
+    const programs: EPGProgram[] = [];
+    const currentTime = new Date(baseDate);
     
-    // Pick a template and sometimes add team names for football
-    let title = templates[Math.floor(Math.random() * templates.length)];
+    const programTemplates = this.getProgramTemplatesForChannel(channelName);
     
-    if (channelType === 'football' && Math.random() > 0.5) {
-      const teams = ['Arsenal vs Chelsea', 'Liverpool vs Man City', 'Barcelona vs Real Madrid', 
-                    'Bayern vs Dortmund', 'Juventus vs AC Milan', 'PSG vs Lyon'];
-      title = teams[Math.floor(Math.random() * teams.length)];
+    // Generate 12 programs (6 hours worth)
+    for (let i = 0; i < 12; i++) {
+      const startTime = new Date(currentTime.getTime() + (i * 30 * 60 * 1000)); // 30-minute slots
+      const endTime = new Date(startTime.getTime() + (30 * 60 * 1000));
+      
+      const template = programTemplates[i % programTemplates.length];
+      
+      programs.push({
+        id: `${channelName.toLowerCase().replace(/\s+/g, '-')}-${i}`,
+        title: template.title,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        description: template.description,
+        category: template.category
+      });
     }
     
-    programs.push({
-      id: `${channelName}-prog-${i}`,
-      title,
-      startTime: startTime.toISOString(),
-      endTime: endTime.toISOString(),
-      description: generateDescription(title),
-      category: categories[Math.floor(Math.random() * categories.length)]
-    });
+    return programs;
   }
-  
-  return programs;
-};
 
-// Map our channels to EPG data
-export const createMockEPGData = (channelsByCountry: Record<string, any[]>): Record<string, EPGChannel[]> => {
-  const mockEPGData: Record<string, EPGChannel[]> = {};
-  
-  Object.entries(channelsByCountry).forEach(([country, channels]) => {
-    mockEPGData[country] = channels.map(channel => {
-      // Determine channel type based on name
-      let channelType: 'football' | 'sports' | 'news' = 'sports';
-      const channelNameLower = channel.title.toLowerCase();
-      
-      if (channelNameLower.includes('football') || channelNameLower.includes('premier') || 
-          channelNameLower.includes('laliga') || channelNameLower.includes('champions')) {
-        channelType = 'football';
-      } else if (channelNameLower.includes('news')) {
-        channelType = 'news';
-      }
-      
-      return {
-        channelId: channel.id,
-        channelName: channel.title,
-        programs: generatePrograms(channel.title, channelType)
-      };
-    });
-  });
-  
-  return mockEPGData;
-};
+  private getProgramTemplatesForChannel(channelName: string) {
+    const sportsProgramTemplates = [
+      { title: 'Live Football Match', description: 'Live coverage of football match', category: 'Sports' },
+      { title: 'Sports News Update', description: 'Latest sports news and highlights', category: 'News' },
+      { title: 'Match Analysis', description: 'Expert analysis of recent matches', category: 'Sports' },
+      { title: 'Live Basketball', description: 'Live basketball coverage', category: 'Sports' },
+      { title: 'Sports Tonight', description: 'Daily sports roundup show', category: 'Sports' },
+      { title: 'Championship Highlights', description: 'Best moments from recent championships', category: 'Sports' }
+    ];
 
-// Mock EPG service that mimics the real one
-export class MockEPGService {
-  private mockData: Record<string, EPGChannel[]> = {};
-  
-  async getAllEPGData(channelsByCountry: Record<string, any[]>): Promise<Record<string, EPGChannel[]>> {
-    // Simulate loading time
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const newsProgramTemplates = [
+      { title: 'Breaking News', description: 'Latest breaking news updates', category: 'News' },
+      { title: 'Sports Headlines', description: 'Top sports stories of the day', category: 'News' },
+      { title: 'Weather Update', description: 'Current weather conditions and forecast', category: 'News' },
+      { title: 'Business News', description: 'Financial markets and business updates', category: 'News' },
+      { title: 'World Report', description: 'International news coverage', category: 'News' },
+      { title: 'Local News', description: 'Regional news and updates', category: 'News' }
+    ];
+
+    const lowerChannelName = channelName.toLowerCase();
     
-    console.log('Loading mock EPG data for demonstration...');
+    if (lowerChannelName.includes('sport') || lowerChannelName.includes('espn') || 
+        lowerChannelName.includes('fox sports') || lowerChannelName.includes('tsn') ||
+        lowerChannelName.includes('sportsnet')) {
+      return sportsProgramTemplates;
+    } else if (lowerChannelName.includes('news') || lowerChannelName.includes('cnn') || 
+               lowerChannelName.includes('bbc') || lowerChannelName.includes('sky news')) {
+      return newsProgramTemplates;
+    }
     
-    this.mockData = createMockEPGData(channelsByCountry);
-    
-    console.log('Mock EPG data loaded:', Object.keys(this.mockData).map(country => 
-      `${country}: ${this.mockData[country].length} channels`
-    ));
-    
-    return this.mockData;
+    // Default mix for general channels
+    return [...sportsProgramTemplates.slice(0, 3), ...newsProgramTemplates.slice(0, 3)];
   }
-  
+
   async getEPGForCountry(countryName: string, channels: any[]): Promise<EPGChannel[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    console.log(`Generating optimized mock EPG for ${countryName} with ${channels.length} channels`);
     
-    const mockData = createMockEPGData({ [countryName]: channels });
-    return mockData[countryName] || [];
+    // Immediate return without artificial delays
+    const epgChannels: EPGChannel[] = channels.slice(0, 20).map(channel => ({
+      channelId: channel.id,
+      channelName: channel.title,
+      programs: this.generateMockPrograms(channel.title, new Date())
+    }));
+    
+    console.log(`Generated mock EPG for ${epgChannels.length} channels in ${countryName}`);
+    return epgChannels;
+  }
+
+  async getAllEPGData(channelsByCountry: Record<string, any[]>): Promise<Record<string, EPGChannel[]>> {
+    console.log('Generating optimized mock EPG data for all countries');
+    
+    const allEPGData: Record<string, EPGChannel[]> = {};
+    
+    // Process all countries in parallel for better performance
+    const promises = Object.entries(channelsByCountry).map(async ([country, channels]) => {
+      try {
+        const epgData = await this.getEPGForCountry(country, channels);
+        return { country, epgData };
+      } catch (error) {
+        console.error(`Error generating mock EPG for ${country}:`, error);
+        return { country, epgData: [] };
+      }
+    });
+    
+    const results = await Promise.all(promises);
+    
+    results.forEach(({ country, epgData }) => {
+      allEPGData[country] = epgData;
+    });
+    
+    console.log('Mock EPG generation completed for all countries');
+    return allEPGData;
   }
 }
 
 export const mockEpgService = new MockEPGService();
+export type { EPGProgram, EPGChannel };
