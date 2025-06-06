@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
@@ -92,7 +91,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (isLoading) {
     return (
       <PlayerContainer>
-        <div className="absolute top-2 left-2 z-30">
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -119,7 +118,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (!stream) {
     return (
       <PlayerContainer>
-        <div className="absolute top-2 left-2 z-30">
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -149,7 +148,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (!validEmbedUrl) {
     return (
       <PlayerContainer>
-        <div className="absolute top-2 left-2 z-30">
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -186,7 +185,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   if (loadError) {
     return (
       <PlayerContainer>
-        <div className="absolute top-2 left-2 z-30">
+        <div className="absolute top-2 left-2 z-30 sm:block hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -225,8 +224,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         {!isContentLoaded && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
-              <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
-              <p className="text-sm sm:text-lg">Loading stream...</p>
+              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#ff5a36]" />
+              <p className="text-lg sm:text-xl">Loading stream...</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
             </div>
           </div>
         )}
@@ -243,9 +243,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         ></iframe>
       </AspectRatio>
       
-      {/* Controls overlay - now always visible on mobile */}
+      {/* Controls overlay - hidden on dedicated player page */}
       <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity",
+        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity sm:block hidden",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
         <button 
