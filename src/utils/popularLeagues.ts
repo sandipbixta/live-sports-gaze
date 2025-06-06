@@ -24,9 +24,6 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'uefa', weight: 7, seoTerms: ['uefa stream', 'european football', 'uefa matches'] },
     { name: 'euro', weight: 10, seoTerms: ['euro championship', 'european championship', 'euro qualifiers'] }, 
     { name: 'world cup', weight: 10, seoTerms: ['fifa world cup', 'world cup stream', 'wc qualifiers'] },
-    { name: 'nations league', weight: 9, seoTerms: ['uefa nations league', 'nations league stream', 'national teams'] }, // Increased weight
-    { name: 'uefa nations league', weight: 10, seoTerms: ['nations league', 'uefa nations', 'national teams'] }, // Added explicit match
-    { name: 'national league', weight: 8, seoTerms: ['nations league', 'uefa nations league', 'national teams'] }, // Alternative naming
     
     // Other major competitions with high global interest
     { name: 'copa libertadores', weight: 8, seoTerms: ['libertadores stream', 'south american football'] },
@@ -37,6 +34,7 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'club world cup', weight: 8, seoTerms: ['fifa cwc', 'club world cup stream'] },
     { name: 'supercup', weight: 7, seoTerms: ['super cup', 'uefa supercup', 'supercup stream'] },
     { name: 'super cup', weight: 7, seoTerms: ['supercup', 'uefa super cup', 'super cup stream'] },
+    { name: 'nations league', weight: 7, seoTerms: ['uefa nations league', 'nations league stream'] },
     { name: 'copa del rey', weight: 6, seoTerms: ['spanish cup', 'copa del rey stream'] },
     { name: 'dfb pokal', weight: 6, seoTerms: ['german cup', 'dfb pokal stream'] },
     { name: 'coppa italia', weight: 6, seoTerms: ['italian cup', 'coppa italia stream'] },
@@ -79,17 +77,6 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'paris saint-germain', weight: 9, seoTerms: ['psg', 'paris', 'psg stream'] },
     { name: 'marseille', weight: 6, seoTerms: ['om', 'olympique marseille', 'marseille stream'] },
     { name: 'lyon', weight: 6, seoTerms: ['ol', 'olympique lyonnais', 'lyon stream'] },
-    
-    // National Teams (for Nations League and international matches)
-    { name: 'spain', weight: 9, seoTerms: ['spain national team', 'la roja', 'spain stream'] },
-    { name: 'france', weight: 9, seoTerms: ['france national team', 'les bleus', 'france stream'] },
-    { name: 'england', weight: 9, seoTerms: ['england national team', 'three lions', 'england stream'] },
-    { name: 'germany', weight: 9, seoTerms: ['germany national team', 'die mannschaft', 'germany stream'] },
-    { name: 'italy', weight: 8, seoTerms: ['italy national team', 'azzurri', 'italy stream'] },
-    { name: 'portugal', weight: 8, seoTerms: ['portugal national team', 'portugal stream'] },
-    { name: 'netherlands', weight: 8, seoTerms: ['netherlands national team', 'oranje', 'netherlands stream'] },
-    { name: 'brazil', weight: 9, seoTerms: ['brazil national team', 'selecao', 'brazil stream'] },
-    { name: 'argentina', weight: 9, seoTerms: ['argentina national team', 'albiceleste', 'argentina stream'] },
     
     // Additional popular teams
     { name: 'real betis', weight: 5, seoTerms: ['betis', 'real betis stream'] },
@@ -153,13 +140,13 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     trendingScore += 3; // VS matches tend to get more attention
     allSeoTerms.push('live match', 'watch online', 'stream free');
     
-    // Common derby names and high-profile international matchups
-    const derbies = ['north london', 'manchester', 'merseyside', 'madrid', 'milan', 'london', 'el clasico', 'spain vs france', 'france vs spain', 'england vs germany', 'germany vs england'];
+    // Common derby names
+    const derbies = ['north london', 'manchester', 'merseyside', 'madrid', 'milan', 'london', 'el clasico'];
     for (const derby of derbies) {
       if (lowerTitle.includes(derby)) {
         trendingScore += 5;
-        trendingReason = `Features ${derby} match`;
-        allSeoTerms.push(`${derby} stream`, `${derby} live`, `watch ${derby}`);
+        trendingReason = `Features ${derby} derby`;
+        allSeoTerms.push(`${derby} derby stream`, `${derby} derby live`, `watch ${derby} derby`);
         break;
       }
     }

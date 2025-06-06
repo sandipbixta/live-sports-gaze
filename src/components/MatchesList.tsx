@@ -12,38 +12,35 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
-  // Helper function to remove duplicates more strictly
-  const removeDuplicates = (matches: Match[]): Match[] => {
-    const seen = new Set<string>();
-    const uniqueMatches: Match[] = [];
+  // Helper function to remove duplicates and prioritize matches with team logos
+  const removeDuplicatesAndPrioritizeLogos = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
     
     matches.forEach(match => {
-      // Create a unique key based on teams and date
-      const homeTeam = match.teams?.home?.name || '';
-      const awayTeam = match.teams?.away?.name || '';
-      const matchDate = new Date(match.date).toISOString().split('T')[0]; // Just the date part
+      const normalizedTitle = match.title.toLowerCase().trim();
+      const hasTeamLogos = match.teams?.home?.badge && match.teams?.away?.badge;
       
-      // Use teams and date for uniqueness, fallback to title if no teams
-      const uniqueKey = homeTeam && awayTeam 
-        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`.toLowerCase()
-        : `${match.title}-${matchDate}`.toLowerCase();
-      
-      if (!seen.has(uniqueKey)) {
-        seen.add(uniqueKey);
-        uniqueMatches.push(match);
+      if (!matchMap.has(normalizedTitle)) {
+        matchMap.set(normalizedTitle, match);
+      } else {
+        const existing = matchMap.get(normalizedTitle)!;
+        const existingHasLogos = existing.teams?.home?.badge && existing.teams?.away?.badge;
+        
+        // Replace with current match if it has logos and existing doesn't
+        if (hasTeamLogos && !existingHasLogos) {
+          matchMap.set(normalizedTitle, match);
+        }
       }
     });
     
-    return uniqueMatches;
+    return Array.from(matchMap.values());
   };
 
   // Filter out advertisement matches and remove duplicates
-  const filteredMatches = removeDuplicates(
+  const filteredMatches = removeDuplicatesAndPrioritizeLogos(
     matches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news') &&
-      !match.title.toLowerCase().includes('advertisement') &&
-      !match.title.toLowerCase().includes('ad break')
+      !match.id.includes('sky-sports-news')
     )
   );
 
@@ -51,17 +48,30 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
   
   // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {
+    // A match is considered live if it has sources AND the match time is within 2 hours of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    
+    return (
+      match.sources && 
+      match.sources.length > 0 && 
+      Math.abs(matchTime - now) < twoHoursInMs
+    );
+  };
+
+  // Separate matches into live and upcoming more strictly
+  const liveMatches = filteredMatches.filter(match => {
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    // Only consider it live if it's happening now (within last hour to next hour)
     const oneHourInMs = 60 * 60 * 1000;
     return match.sources && 
            match.sources.length > 0 && 
-           matchTime - now < oneHourInMs && 
-           now - matchTime < oneHourInMs;
-  };
-
-  // Separate matches into live and upcoming
-  const liveMatches = filteredMatches.filter(match => isMatchLive(match));
+           matchTime - now < oneHourInMs && // Match hasn't started more than an hour in the future
+           now - matchTime < oneHourInMs;   // Match hasn't ended more than an hour ago
+  });
+  
   const upcomingMatches = filteredMatches.filter(match => !liveMatches.includes(match));
 
   if (isLoading) {
@@ -101,9 +111,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
             </span>
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 live-matches-grid`}>
-            {liveMatches.map((match, index) => (
+            {liveMatches.map((match) => (
               <MatchCard 
-                key={`live-${match.id}-${index}`}
+                key={match.id}
                 match={match}
                 sportId={sportId}
               />
@@ -122,9 +132,9 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
             </span>
           </h2>
           <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 upcoming-matches-grid`}>
-            {upcomingMatches.map((match, index) => (
+            {upcomingMatches.map((match) => (
               <MatchCard 
-                key={`upcoming-${match.id}-${index}`}
+                key={match.id}
                 match={match}
                 sportId={sportId}
               />

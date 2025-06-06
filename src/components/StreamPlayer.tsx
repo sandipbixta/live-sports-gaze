@@ -21,16 +21,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
-  const [iframeTimeout, setIframeTimeout] = useState(false);
   const isMobile = useIsMobile();
   
-  // Mobile-optimized player container with proper orientation
-  const PlayerContainer = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative w-full bg-[#151922] rounded-none sm:rounded-lg overflow-hidden shadow-xl group">
-      {children}
-    </div>
-  );
-
   const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -74,30 +66,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
-      setIframeTimeout(false);
     }
   }, [stream]);
-
-  // Set timeout for iframe loading on mobile
-  useEffect(() => {
-    if (stream && !isContentLoaded && !loadError) {
-      const timer = setTimeout(() => {
-        if (!isContentLoaded) {
-          console.log('Iframe loading timeout on mobile, setting content as loaded');
-          setIframeTimeout(true);
-          setIsContentLoaded(true);
-        }
-      }, isMobile ? 3000 : 5000); // Shorter timeout for mobile
-
-      return () => clearTimeout(timer);
-    }
-  }, [stream, isContentLoaded, loadError, isMobile]);
 
   // Handle retry action
   const handleRetry = () => {
     setLoadError(false);
     setIsContentLoaded(false);
-    setIframeTimeout(false);
     if (onRetry) onRetry();
   };
 
@@ -107,15 +82,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     setIsContentLoaded(true);
   };
 
-  // Handle iframe error
-  const handleIframeError = () => {
-    console.error('Stream iframe failed to load');
-    setLoadError(true);
-  };
-
   if (isLoading) {
     return (
-      <PlayerContainer>
+      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <div className="absolute top-2 left-2 z-30">
           <Button
             variant="ghost"
@@ -136,13 +105,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </PlayerContainer>
+      </div>
     );
   }
 
   if (!stream) {
     return (
-      <PlayerContainer>
+      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <div className="absolute top-2 left-2 z-30">
           <Button
             variant="ghost"
@@ -163,7 +132,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </PlayerContainer>
+      </div>
     );
   }
 
@@ -172,7 +141,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   
   if (!validEmbedUrl) {
     return (
-      <PlayerContainer>
+      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <div className="absolute top-2 left-2 z-30">
           <Button
             variant="ghost"
@@ -203,13 +172,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </PlayerContainer>
+      </div>
     );
   }
 
   if (loadError) {
     return (
-      <PlayerContainer>
+      <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden">
         <div className="absolute top-2 left-2 z-30">
           <Button
             variant="ghost"
@@ -238,48 +207,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             </div>
           </div>
         </AspectRatio>
-      </PlayerContainer>
+      </div>
     );
   }
 
   return (
-    <PlayerContainer>
-      <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads or timeout */}
-        {!isContentLoaded && !iframeTimeout && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
-            <div className="text-white text-center">
-              <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
-              <p className="text-sm sm:text-lg">Loading stream...</p>
-              {isMobile && (
-                <p className="text-xs text-gray-400 mt-2">This may take longer on mobile</p>
-              )}
-            </div>
-          </div>
-        )}
-        
-        <iframe 
-          ref={videoRef}
-          src={stream.embedUrl}
-          className="w-full h-full absolute inset-0"
-          allowFullScreen
-          title="Live Sports Stream"
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
-          style={{ 
-            border: 'none',
-            // Mobile-specific optimizations
-            ...(isMobile && {
-              touchAction: 'manipulation',
-              WebkitOverflowScrolling: 'touch'
-            })
-          }}
-        />
-      </AspectRatio>
-      
-      {/* Back button - always visible on mobile */}
+    <div className="relative w-full bg-[#151922] rounded-lg overflow-hidden shadow-xl group">
       <div className="absolute top-2 left-2 z-30">
         <Button
           variant="ghost"
@@ -292,7 +225,31 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         </Button>
       </div>
       
-      {/* Controls overlay - now always visible on mobile */}
+      <AspectRatio ratio={16 / 9} className="w-full">
+        {/* Loading overlay shown until iframe loads */}
+        {!isContentLoaded && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
+            <div className="text-white text-center">
+              <Loader className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto mb-3 sm:mb-4 text-[#ff5a36]" />
+              <p className="text-lg sm:text-xl">Loading stream...</p>
+              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">This may take a moment</p>
+            </div>
+          </div>
+        )}
+        
+        <iframe 
+          ref={videoRef}
+          src={stream.embedUrl}
+          className="w-full h-full absolute inset-0"
+          allowFullScreen
+          title="Live Sports Stream"
+          onLoad={handleIframeLoad}
+          onError={() => setLoadError(true)}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        ></iframe>
+      </AspectRatio>
+      
+      {/* Controls overlay */}
       <div className={cn(
         "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -309,7 +266,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           }
         </button>
       </div>
-    </PlayerContainer>
+    </div>
   );
 };
 

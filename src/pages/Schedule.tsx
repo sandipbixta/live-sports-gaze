@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -20,37 +19,12 @@ const Schedule = () => {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [popularMatches, setPopularMatches] = useState<Match[]>([]);
-  const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
+  const [currentDate, setCurrentDate] = useState(startOfDay(new Date())); // Ensure we start at beginning of day
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
-
-  // Helper function to remove duplicates more strictly
-  const removeDuplicatesFromMatches = (matches: Match[]): Match[] => {
-    const seen = new Set<string>();
-    const uniqueMatches: Match[] = [];
-    
-    matches.forEach(match => {
-      // Create a unique key based on teams and date
-      const homeTeam = match.teams?.home?.name || '';
-      const awayTeam = match.teams?.away?.name || '';
-      const matchDate = new Date(match.date).toISOString().split('T')[0];
-      
-      // Use teams and date for uniqueness, fallback to title if no teams
-      const uniqueKey = homeTeam && awayTeam 
-        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`.toLowerCase()
-        : `${match.title}-${matchDate}`.toLowerCase();
-      
-      if (!seen.has(uniqueKey)) {
-        seen.add(uniqueKey);
-        uniqueMatches.push(match);
-      }
-    });
-    
-    return uniqueMatches;
-  };
 
   // Fetch sports on mount
   useEffect(() => {
@@ -93,12 +67,9 @@ const Schedule = () => {
     try {
       const matchesData = await fetchMatches(sportId);
       
-      // Remove duplicates from API data first
-      const uniqueMatches = removeDuplicatesFromMatches(matchesData);
-      
       // Filter matches by date
       const dateStr = format(currentDate, 'yyyy-MM-dd');
-      const filtered = uniqueMatches.filter(match => {
+      const filtered = matchesData.filter(match => {
         const matchDate = new Date(match.date);
         return format(matchDate, 'yyyy-MM-dd') === dateStr;
       });

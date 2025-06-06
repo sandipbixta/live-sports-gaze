@@ -7,6 +7,7 @@ import {
   PopoverTrigger 
 } from '@/components/ui/popover';
 import { useIsMobile } from '../hooks/use-mobile';
+import Advertisement from './Advertisement';
 
 const SocialBar = () => {
   const isMobile = useIsMobile();
@@ -40,6 +41,11 @@ const SocialBar = () => {
   
   return (
     <>
+      {/* Social bar ad integration with video ad */}
+      <div className="hidden md:block">
+        <Advertisement type="video" className="mt-2" />
+      </div>
+      
       {/* Share button with popover */}
       <div className={`fixed ${isMobile ? 'bottom-16' : 'bottom-4'} right-4 z-40`}>
         <Popover>
@@ -90,6 +96,11 @@ const SocialBar = () => {
             </div>
           </PopoverContent>
         </Popover>
+      </div>
+      
+      {/* Mobile social bar placement */}
+      <div className="md:hidden">
+        <Advertisement type="video" className="mt-4 mb-6" />
       </div>
     </>
   );

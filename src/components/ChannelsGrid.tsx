@@ -1,10 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
-import ModernChannelCard from './ModernChannelCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getChannelsByCountry, getCountries } from '@/data/tvChannels';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -15,7 +13,6 @@ import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
 
 const ChannelsGrid = () => {
-  const navigate = useNavigate();
   const countries = getCountries();
   const channelsByCountry = getChannelsByCountry();
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
@@ -25,7 +22,6 @@ const ChannelsGrid = () => {
   const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
   const [useEnhancedView, setUseEnhancedView] = useState(false);
-  const [useModernView, setUseModernView] = useState(true); // Default to modern view
 
   // Load enhanced channel data
   useEffect(() => {
@@ -81,65 +77,48 @@ const ChannelsGrid = () => {
     loadEnhancedChannels();
   }, []);
 
-  const handleSelectChannel = (channel: any) => {
-    // Navigate to dedicated channel player page
-    navigate(`/channel/${selectedCountry}/${channel.id}`);
+  const handleSelectChannel = (embedUrl: string, title: string) => {
+    setSelectedChannelUrl(embedUrl);
+    setSelectedChannelTitle(title);
   };
 
   const currentChannels = useEnhancedView ? 
     (enhancedChannels[selectedCountry] || []) : 
     (channelsByCountry[selectedCountry] || []).map(channel => ({ ...channel, enhanced: false }));
 
-  // Get featured channels (first 4 for the hero section)
-  const featuredChannels = currentChannels.slice(0, 4);
-  const allChannels = currentChannels;
-
   return (
-    <div className="flex flex-col gap-6">
-      {/* Country Selector and View Toggle */}
+    <div className="flex flex-col gap-4">
+      {/* Country Selector */}
       <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex-1">
-            <h3 className="font-semibold text-white text-sm mb-2">Select Country</h3>
-            <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-              <SelectTrigger className="w-full bg-[#242836] border-[#343a4d] text-white text-xs sm:text-sm">
-                <SelectValue placeholder="Select country" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#242836] border-[#343a4d] text-white">
-                {countries.map(country => (
-                  <SelectItem key={country} value={country}>
-                    {country} {useEnhancedView && enhancedChannels[country] && 
-                      `(${enhancedChannels[country].length} channels)`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {loadingEnhanced && <Loader className="h-4 w-4 animate-spin text-[#ff5a36]" />}
-            <div className="flex gap-2">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-semibold text-white text-sm">Select Country</h3>
+          {Object.keys(enhancedChannels).length > 0 && (
+            <div className="flex items-center gap-2">
+              {loadingEnhanced && <Loader className="h-4 w-4 animate-spin text-[#ff5a36]" />}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setUseModernView(!useModernView)}
+                onClick={() => setUseEnhancedView(!useEnhancedView)}
                 className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs"
               >
-                {useModernView ? 'Classic View' : 'Modern View'}
+                {useEnhancedView ? 'Basic View' : 'Enhanced View'}
               </Button>
-              {Object.keys(enhancedChannels).length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setUseEnhancedView(!useEnhancedView)}
-                  className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs"
-                >
-                  {useEnhancedView ? 'Basic View' : 'Enhanced View'}
-                </Button>
-              )}
             </div>
-          </div>
+          )}
         </div>
+        <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+          <SelectTrigger className="w-full bg-[#242836] border-[#343a4d] text-white text-xs sm:text-sm">
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#242836] border-[#343a4d] text-white">
+            {countries.map(country => (
+              <SelectItem key={country} value={country}>
+                {country} {useEnhancedView && enhancedChannels[country] && 
+                  `(${enhancedChannels[country].length} channels)`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Tabs for Channels and TV Guide */}
@@ -150,106 +129,83 @@ const ChannelsGrid = () => {
         </TabsList>
 
         <TabsContent value="channels" className="mt-0">
-          {useModernView ? (
-            // Modern simplified layout - Fixed mobile grid
-            <div className="space-y-8">
-              {/* All Channels Grid - Mobile optimized */}
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-6">All Channels</h2>
-                {/* Mobile: Single column, Tablet: 2 columns, Desktop: Multiple columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                  {allChannels.map(channel => (
-                    <div
-                      key={channel.id}
-                      className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group min-h-[120px] flex flex-col justify-center"
-                      onClick={() => handleSelectChannel(channel)}
-                    >
-                      <div className="flex flex-col items-center text-center space-y-3">
-                        <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform flex-shrink-0">
-                          {channel.logo ? (
-                            <img 
-                              src={channel.logo} 
-                              alt={channel.title}
-                              className="w-full h-full object-contain"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
-                            {channel.title.split(' ').map(word => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
-                          </div>
-                        </div>
-                        <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors text-center leading-tight">
-                          {channel.title}
-                        </h3>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Original layout - also updated to navigate to player page
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-              {/* Placeholder for original layout */}
-              <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
+            {/* Video player - moved to top on mobile */}
+            <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
+              {selectedChannelUrl ? (
+                <>
+                  <div className="relative w-full bg-[#151922]">
+                    <AspectRatio ratio={16/9}>
+                      <iframe 
+                        src={selectedChannelUrl}
+                        className="w-full h-full"
+                        title={selectedChannelTitle || "Live Channel"}
+                        frameBorder="0"
+                        allowFullScreen 
+                        allow="encrypted-media; picture-in-picture;"
+                      ></iframe>
+                    </AspectRatio>
+                  </div>
+                  <div className="p-2 sm:p-4 border-t border-[#343a4d]">
+                    <h3 className="text-sm sm:text-lg font-semibold text-white">{selectedChannelTitle}</h3>
+                  </div>
+                </>
+              ) : (
                 <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
                   <div className="text-center p-4">
                     <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
                       <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
                     </div>
                     <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
-                    <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
+                    <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel from the list</p>
                   </div>
                 </div>
+              )}
+            </div>
+            
+            {/* Channel list */}
+            <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden order-2 lg:order-2">
+              <div className="p-2 sm:p-4 border-b border-[#343a4d]">
+                <h3 className="font-semibold text-white mb-2 text-sm">
+                  Live Sports Channels 
+                  {useEnhancedView && (
+                    <span className="text-xs text-gray-400 ml-1">
+                      (Enhanced with IPTV-ORG)
+                    </span>
+                  )}
+                </h3>
               </div>
               
-              {/* Channel list */}
-              <div className="col-span-1 bg-[#151922] rounded-xl overflow-hidden order-2 lg:order-2">
-                <div className="p-2 sm:p-4 border-b border-[#343a4d]">
-                  <h3 className="font-semibold text-white mb-2 text-sm">
-                    Live Sports Channels 
-                    {useEnhancedView && (
-                      <span className="text-xs text-gray-400 ml-1">
-                        (Enhanced with IPTV-ORG)
-                      </span>
-                    )}
-                  </h3>
+              <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
+                <div className="grid grid-cols-1 gap-1 sm:gap-2">
+                  {currentChannels.map(channel => (
+                    useEnhancedView && channel.enhanced ? (
+                      <EnhancedChannelCard
+                        key={channel.id}
+                        title={channel.title}
+                        embedUrl={channel.embedUrl}
+                        logo={channel.logo}
+                        website={channel.website}
+                        network={channel.network}
+                        categories={channel.categories}
+                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                        isActive={selectedChannelUrl === channel.embedUrl}
+                      />
+                    ) : (
+                      <ChannelCard
+                        key={channel.id}
+                        title={channel.title}
+                        embedUrl={channel.embedUrl}
+                        logo={channel.logo}
+                        onClick={() => handleSelectChannel(channel.embedUrl, channel.title)}
+                        isActive={selectedChannelUrl === channel.embedUrl}
+                      />
+                    )
+                  ))}
                 </div>
-                
-                <ScrollArea className="h-[200px] sm:h-[600px] px-2 sm:px-4 py-2 sm:py-4">
-                  <div className="grid grid-cols-1 gap-1 sm:gap-2">
-                    {currentChannels.map(channel => (
-                      useEnhancedView && channel.enhanced ? (
-                        <EnhancedChannelCard
-                          key={channel.id}
-                          title={channel.title}
-                          embedUrl={channel.embedUrl}
-                          logo={channel.logo}
-                          website={channel.website}
-                          network={channel.network}
-                          categories={channel.categories}
-                          onClick={() => handleSelectChannel(channel)}
-                          isActive={false}
-                        />
-                      ) : (
-                        <ChannelCard
-                          key={channel.id}
-                          title={channel.title}
-                          embedUrl={channel.embedUrl}
-                          logo={channel.logo}
-                          onClick={() => handleSelectChannel(channel)}
-                          isActive={false}
-                        />
-                      )
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+              </ScrollArea>
             </div>
-          )}
+          </div>
         </TabsContent>
 
         <TabsContent value="guide" className="mt-0">
