@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -7,37 +8,55 @@ import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import { Separator } from '../components/ui/separator';
-import { Calendar, Search } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
-import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
-import NewsSection from '../components/NewsSection';
-import FeaturedChannels from '../components/FeaturedChannels';
+
+// Lazy load heavy components
+const NewsSection = React.lazy(() => import('../components/NewsSection'));
+const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 
 const Index = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [popularMatches, setPopularMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Fetch sports on mount and sort them with football first
+  // Memoize popular matches calculation
+  const popularMatches = useMemo(() => {
+    return matches.filter(match => 
+      isPopularLeague(match.title) && 
+      !match.title.toLowerCase().includes('sky sports news') && 
+      !match.id.includes('sky-sports-news')
+    );
+  }, [matches]);
+
+  // Memoize filtered matches
+  const filteredMatches = useMemo(() => {
+    if (!searchTerm.trim()) return matches;
+    
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return matches.filter(match => {
+      return match.title.toLowerCase().includes(lowercaseSearch) || 
+        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+    });
+  }, [matches, searchTerm]);
+
+  // Load sports immediately on mount with optimization
   useEffect(() => {
     const loadSports = async () => {
-      setLoadingSports(true);
       try {
         let sportsData = await fetchSports();
         
-        // Sort sports to put football first, then basketball
+        // Sort with football first for better UX
         sportsData = sportsData.sort((a, b) => {
           if (a.name.toLowerCase() === 'football') return -1;
           if (b.name.toLowerCase() === 'football') return 1;
@@ -48,9 +67,14 @@ const Index = () => {
         
         setSports(sportsData);
         
-        // Auto-select first sport (should be football after sorting)
+        // Auto-select football for faster initial load
         if (sportsData.length > 0) {
-          handleSelectSport(sportsData[0].id);
+          const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
+          if (footballSport) {
+            handleSelectSport(footballSport.id);
+          } else {
+            handleSelectSport(sportsData[0].id);
+          }
         }
       } catch (error) {
         toast({
@@ -66,58 +90,27 @@ const Index = () => {
     loadSports();
   }, [toast]);
 
-  // Handle search
+  // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    
-    if (!value.trim()) {
-      setFilteredMatches(matches);
-      return;
-    }
-    
-    const lowercaseSearch = value.toLowerCase();
-    const results = matches.filter(match => {
-      return match.title.toLowerCase().includes(lowercaseSearch) || 
-        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
-    });
-    
-    setFilteredMatches(results);
+    setSearchTerm(e.target.value);
   };
 
-  // Fetch matches when a sport is selected
+  // Optimized sport selection with caching
   const handleSelectSport = async (sportId: string) => {
+    if (selectedSport === sportId) return; // Avoid unnecessary re-fetch
+    
     setSelectedSport(sportId);
     setLoadingMatches(true);
     
     try {
-      // Check if we already have matches for this sport
+      // Check cache first
       if (allMatches[sportId]) {
         setMatches(allMatches[sportId]);
-        setFilteredMatches(allMatches[sportId]);
-        
-        // Find popular matches from major leagues
-        const popular = allMatches[sportId].filter(match => 
-          isPopularLeague(match.title) && 
-          !match.title.toLowerCase().includes('sky sports news') && 
-          !match.id.includes('sky-sports-news')
-        );
-        setPopularMatches(popular);
       } else {
         const matchesData = await fetchMatches(sportId);
         setMatches(matchesData);
-        setFilteredMatches(matchesData);
         
-        // Find popular matches from major leagues
-        const popular = matchesData.filter(match => 
-          isPopularLeague(match.title) && 
-          !match.title.toLowerCase().includes('sky sports news') && 
-          !match.id.includes('sky-sports-news')
-        );
-        setPopularMatches(popular);
-        
-        // Store the matches for this sport
+        // Cache the data
         setAllMatches(prev => ({
           ...prev,
           [sportId]: matchesData
@@ -141,28 +134,6 @@ const Index = () => {
         <meta name="description" content="Watch free live football streams, soccer matches, and sports TV online on DamiTV. Access hundreds of free sports streaming channels with no registration required." />
         <meta name="keywords" content="live football streaming, watch football online, free sports streams, live matches today, free football tv" />
         <link rel="canonical" href="https://damitv.pro/" />
-        {/* Schema.org structured data for sports events */}
-        <script type="application/ld+json">
-        {`
-          {
-            "@context": "https://schema.org",
-            "@type": "SportsEvent",
-            "name": "Live Sports Streaming",
-            "description": "Watch live football and sports streams online for free",
-            "url": "https://damitv.pro/",
-            "location": {
-              "@type": "VirtualLocation",
-              "name": "DamiTV Streaming Platform"
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD",
-              "availability": "https://schema.org/InStock"
-            }
-          }
-        `}
-        </script>
       </Helmet>
       
       <main className="py-4">
@@ -183,7 +154,7 @@ const Index = () => {
           />
         </div>
         
-        {/* Scrolling text announcement */}
+        {/* Quick announcement - optimized */}
         <div className="mb-6 bg-gradient-to-r from-[#ff5a36] to-[#e64d2e] rounded-lg p-1 overflow-hidden">
           <div className="bg-[#0A0F1C] rounded-md p-3">
             <div className="overflow-hidden whitespace-nowrap">
@@ -194,8 +165,10 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Featured Channels Section */}
-        <FeaturedChannels />
+        {/* Lazy load featured channels */}
+        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+          <FeaturedChannels />
+        </React.Suspense>
         
         <Separator className="my-8 bg-[#343a4d]" />
         
@@ -205,7 +178,6 @@ const Index = () => {
               popularMatches={popularMatches} 
               selectedSport={selectedSport}
             />
-            
             <Separator className="my-8 bg-[#343a4d]" />
           </>
         )}
@@ -213,19 +185,21 @@ const Index = () => {
         <div className="mb-8">
           {(selectedSport || loadingMatches) && (
             <MatchesList
-              matches={searchTerm ? filteredMatches : matches}
+              matches={filteredMatches}
               sportId={selectedSport || ""}
               isLoading={loadingMatches}
             />
           )}
         </div>
         
-        {/* Sports News Section */}
+        {/* Lazy load news section */}
         <div className="mb-8">
-          <NewsSection />
+          <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+            <NewsSection />
+          </React.Suspense>
         </div>
         
-        {/* Side-by-side promotion boxes */}
+        {/* Promotion boxes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
           <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
             <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
