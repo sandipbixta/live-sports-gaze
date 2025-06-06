@@ -13,7 +13,6 @@ import PageLayout from '../components/PageLayout';
 import MatchCard from '../components/MatchCard';
 import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
-import Advertisement from '../components/Advertisement';
 import { Helmet } from 'react-helmet-async';
 import { Badge } from '../components/ui/badge';
 
@@ -753,12 +752,7 @@ const Live = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Single ad placement - modified to be non-intrusive */}
-      {!loading && filteredMatches.length > 0 && (
-        <div className="mb-6">
-          <Advertisement type="banner" className="w-full" />
-        </div>
-      )}
+      
       
       <Link to="/channels" className="block w-full">
         <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">

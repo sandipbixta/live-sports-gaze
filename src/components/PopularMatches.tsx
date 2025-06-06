@@ -11,38 +11,40 @@ interface PopularMatchesProps {
 }
 
 const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selectedSport }) => {
-  // Check if we're on mobile
   const isMobile = useIsMobile();
   
-  // Helper function to remove duplicates and prioritize matches with team logos
-  const removeDuplicatesAndPrioritizeLogos = (matches: Match[]): Match[] => {
-    const matchMap = new Map<string, Match>();
+  // Helper function to remove duplicates more strictly
+  const removeDuplicates = (matches: Match[]): Match[] => {
+    const seen = new Set<string>();
+    const uniqueMatches: Match[] = [];
     
     matches.forEach(match => {
-      const normalizedTitle = match.title.toLowerCase().trim();
-      const hasTeamLogos = match.teams?.home?.badge && match.teams?.away?.badge;
+      // Create a unique key based on teams and date
+      const homeTeam = match.teams?.home?.name || '';
+      const awayTeam = match.teams?.away?.name || '';
+      const matchDate = new Date(match.date).toISOString().split('T')[0];
       
-      if (!matchMap.has(normalizedTitle)) {
-        matchMap.set(normalizedTitle, match);
-      } else {
-        const existing = matchMap.get(normalizedTitle)!;
-        const existingHasLogos = existing.teams?.home?.badge && existing.teams?.away?.badge;
-        
-        // Replace with current match if it has logos and existing doesn't
-        if (hasTeamLogos && !existingHasLogos) {
-          matchMap.set(normalizedTitle, match);
-        }
+      // Use teams and date for uniqueness, fallback to title if no teams
+      const uniqueKey = homeTeam && awayTeam 
+        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`.toLowerCase()
+        : `${match.title}-${matchDate}`.toLowerCase();
+      
+      if (!seen.has(uniqueKey)) {
+        seen.add(uniqueKey);
+        uniqueMatches.push(match);
       }
     });
     
-    return Array.from(matchMap.values());
+    return uniqueMatches;
   };
   
   // Filter out advertisement matches and remove duplicates
-  const filteredMatches = removeDuplicatesAndPrioritizeLogos(
+  const filteredMatches = removeDuplicates(
     popularMatches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news')
+      !match.id.includes('sky-sports-news') &&
+      !match.title.toLowerCase().includes('advertisement') &&
+      !match.title.toLowerCase().includes('ad break')
     )
   ).sort((a, b) => {
     // Sort by trending score (higher score first)
@@ -59,9 +61,9 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selecte
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-3 text-white">Trending Matches</h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3'} gap-2`}>
-        {filteredMatches.slice(0, 6).map((match) => (
+        {filteredMatches.slice(0, 6).map((match, index) => (
           <MatchCard 
-            key={`popular-${match.id}`}
+            key={`popular-${match.id}-${index}`}
             match={match}
             sportId={selectedSport || ''}
             isPriority={true}

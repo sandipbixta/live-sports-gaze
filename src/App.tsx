@@ -10,6 +10,7 @@ import Match from "./pages/Match";
 import Schedule from "./pages/Schedule";
 import Live from "./pages/Live";
 import Channels from "./pages/Channels";
+import ChannelPlayer from "./pages/ChannelPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/live" element={<Live />} />
             <Route path="/channels" element={<Channels />} />
+            <Route path="/channel/:country/:channelId" element={<ChannelPlayer />} />
             <Route path="/news" element={<News />} />
             <Route path="/dmca" element={<DMCANotice />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
