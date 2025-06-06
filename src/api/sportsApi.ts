@@ -5,16 +5,7 @@ const API_BASE = 'https://streamed.su/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes - increased from 5 to 10 minutes
-
-// Fallback data in case API fails
-const fallbackSports: Sport[] = [
-  { id: '1', name: 'Football' },
-  { id: '2', name: 'Basketball' },
-  { id: '3', name: 'Ice Hockey' },
-  { id: '4', name: 'Tennis' },
-  { id: '5', name: 'Baseball' }
-];
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Helper function to get cached data
 const getCachedData = (key: string) => {
@@ -37,27 +28,24 @@ export const fetchSports = async (): Promise<Sport[]> => {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // Increased timeout from 5s to 8s
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
     
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
-      },
-      cache: 'no-store' // Force fresh data
+      }
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error(`Failed to fetch sports: ${response.status}`);
+    if (!response.ok) throw new Error('Failed to fetch sports');
     const data = await response.json();
     setCachedData(cacheKey, data);
     return data;
   } catch (error) {
     console.error('Error fetching sports:', error);
-    // Return fallback data if API fails
-    console.log('Using fallback sports data');
-    return fallbackSports;
+    return [];
   }
 };
 
@@ -68,54 +56,24 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // Increased from 8s to 10s
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
     
     const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
-      },
-      cache: 'no-store' // Force fresh data
+      }
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error(`Failed to fetch matches: ${response.status}`);
+    if (!response.ok) throw new Error('Failed to fetch matches');
     const matches = await response.json();
     setCachedData(cacheKey, matches);
     return matches;
   } catch (error) {
-    console.error(`Error fetching matches for sport ${sportId}:`, error);
-    
-    // Generate fallback matches for this sport if API fails
-    const currentDate = new Date();
-    const fallbackMatches: Match[] = [
-      {
-        id: `fallback-${sportId}-1`,
-        title: 'Premier League Match',
-        date: new Date(currentDate.getTime() + 3600000).toISOString(),
-        teams: {
-          home: { name: 'Team A' },
-          away: { name: 'Team B' }
-        },
-        sources: [{ source: 'demo', id: 'demo1' }],
-        sportId
-      },
-      {
-        id: `fallback-${sportId}-2`,
-        title: 'Championship Match',
-        date: new Date(currentDate.getTime() + 7200000).toISOString(),
-        teams: {
-          home: { name: 'Team C' },
-          away: { name: 'Team D' }
-        },
-        sources: [{ source: 'demo', id: 'demo2' }],
-        sportId
-      }
-    ];
-    
-    console.log(`Using fallback matches for sport ${sportId}`);
-    return fallbackMatches;
+    console.error('Error fetching matches:', error);
+    return [];
   }
 };
 
@@ -156,7 +114,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // Increased from 10s to 12s
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
       signal: controller.signal,
@@ -206,19 +164,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     
   } catch (error) {
     console.error('Error in fetchStream:', error);
-    
-    // Return fallback stream data
-    const fallbackStream: Stream = {
-      id: 'fallback-stream',
-      streamNo: streamNo || 1,
-      language: 'English',
-      hd: true,
-      embedUrl: 'https://player.twitch.tv/?channel=twitchsports&parent=' + window.location.hostname,
-      source: source || 'fallback'
-    };
-    
-    console.log('Using fallback stream data');
-    return fallbackStream;
+    throw error;
   }
 };
 
