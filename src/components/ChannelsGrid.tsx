@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -151,21 +150,20 @@ const ChannelsGrid = () => {
 
         <TabsContent value="channels" className="mt-0">
           {useModernView ? (
-            // Modern simplified layout - Fixed mobile grid
+            // Modern simplified layout
             <div className="space-y-8">
-              {/* All Channels Grid - Mobile optimized */}
+              {/* All Channels Grid */}
               <div>
                 <h2 className="text-2xl font-bold text-white mb-6">All Channels</h2>
-                {/* Mobile: Single column, Tablet: 2 columns, Desktop: Multiple columns */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   {allChannels.map(channel => (
                     <div
                       key={channel.id}
-                      className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group min-h-[120px] flex flex-col justify-center"
+                      className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group"
                       onClick={() => handleSelectChannel(channel)}
                     >
-                      <div className="flex flex-col items-center text-center space-y-3">
-                        <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform flex-shrink-0">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform">
                           {channel.logo ? (
                             <img 
                               src={channel.logo} 
@@ -181,7 +179,7 @@ const ChannelsGrid = () => {
                             {channel.title.split(' ').map(word => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
                           </div>
                         </div>
-                        <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors text-center leading-tight">
+                        <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors">
                           {channel.title}
                         </h3>
                       </div>
