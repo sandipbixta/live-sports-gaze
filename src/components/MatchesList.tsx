@@ -49,15 +49,17 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
 
   const isMobile = useIsMobile();
   
-  // Helper function to determine if a match is likely live
+  // Helper function to determine if a match is likely live - Extended window
   const isMatchLive = (match: Match): boolean => {
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
+    const sixHoursInMs = 6 * 60 * 60 * 1000; // Extended to 6 hours
     const oneHourInMs = 60 * 60 * 1000;
+    
     return match.sources && 
            match.sources.length > 0 && 
-           matchTime - now < oneHourInMs && 
-           now - matchTime < oneHourInMs;
+           matchTime - now < oneHourInMs && // Match starts within 1 hour
+           now - matchTime < sixHoursInMs; // Match can be live up to 6 hours after start
   };
 
   // Separate matches into live and upcoming
