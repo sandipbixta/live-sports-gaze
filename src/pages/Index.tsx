@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -7,8 +6,9 @@ import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
+import LiveSportsWidget from '../components/LiveSportsWidget';
 import { Separator } from '../components/ui/separator';
-import { Calendar } from 'lucide-react';
+import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
@@ -25,6 +25,7 @@ const Index = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [showLiveSports, setShowLiveSports] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -140,83 +141,107 @@ const Index = () => {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
-            <Link to="/schedule">
-              <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
-                <Calendar className="mr-2 h-4 w-4" /> View Schedule
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+                onClick={() => setShowLiveSports(!showLiveSports)}
+              >
+                <Tv className="mr-2 h-4 w-4" /> 
+                {showLiveSports ? 'Hide Live Sports' : 'Live Sports'}
               </Button>
-            </Link>
-          </div>
-          <SportsList 
-            sports={sports}
-            onSelectSport={handleSelectSport}
-            selectedSport={selectedSport}
-            isLoading={loadingSports}
-          />
-        </div>
-        
-        {/* Quick announcement - optimized */}
-        <div className="mb-6 bg-gradient-to-r from-[#ff5a36] to-[#e64d2e] rounded-lg p-1 overflow-hidden">
-          <div className="bg-[#0A0F1C] rounded-md p-3">
-            <div className="overflow-hidden whitespace-nowrap">
-              <div className="animate-marquee inline-block text-white font-medium">
-                🔴 IF YOU CAN'T FIND YOUR MATCH PLEASE VISIT THE LIVE SPORTS CHANNELS SECTION 📺
-              </div>
+              <Link to="/schedule">
+                <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
+                  <Calendar className="mr-2 h-4 w-4" /> View Schedule
+                </Button>
+              </Link>
             </div>
           </div>
-        </div>
-        
-        {/* Lazy load featured channels */}
-        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
-          <FeaturedChannels />
-        </React.Suspense>
-        
-        <Separator className="my-8 bg-[#343a4d]" />
-        
-        {popularMatches.length > 0 && (
-          <>
-            <PopularMatches 
-              popularMatches={popularMatches} 
-              selectedSport={selectedSport}
-            />
-            <Separator className="my-8 bg-[#343a4d]" />
-          </>
-        )}
-        
-        <div className="mb-8">
-          {(selectedSport || loadingMatches) && (
-            <MatchesList
-              matches={filteredMatches}
-              sportId={selectedSport || ""}
-              isLoading={loadingMatches}
-            />
+          
+          {showLiveSports ? (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">Live Sports Streams</h2>
+              <LiveSportsWidget />
+            </div>
+          ) : (
+            <>
+              <SportsList 
+                sports={sports}
+                onSelectSport={handleSelectSport}
+                selectedSport={selectedSport}
+                isLoading={loadingSports}
+              />
+            </>
           )}
         </div>
         
-        {/* Lazy load news section */}
-        <div className="mb-8">
-          <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-            <NewsSection />
-          </React.Suspense>
-        </div>
-        
-        {/* Promotion boxes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-          <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
-            <p className="text-gray-300">Discover events happening right now across different sports.</p>
-            <Link to="/live" aria-label="View all live sports events">
-              <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
-            </Link>
-          </div>
-          
-          <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-            <h2 className="text-xl font-bold mb-4 text-white">Coming Up</h2>
-            <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
-            <Link to="/schedule" aria-label="View upcoming matches schedule">
-              <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
-            </Link>
-          </div>
-        </div>
+        {!showLiveSports && (
+          <>
+            {/* Quick announcement - optimized */}
+            <div className="mb-6 bg-gradient-to-r from-[#ff5a36] to-[#e64d2e] rounded-lg p-1 overflow-hidden">
+              <div className="bg-[#0A0F1C] rounded-md p-3">
+                <div className="overflow-hidden whitespace-nowrap">
+                  <div className="animate-marquee inline-block text-white font-medium">
+                    🔴 IF YOU CAN'T FIND YOUR MATCH PLEASE VISIT THE LIVE SPORTS CHANNELS SECTION 📺
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Lazy load featured channels */}
+            <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+              <FeaturedChannels />
+            </React.Suspense>
+            
+            <Separator className="my-8 bg-[#343a4d]" />
+            
+            {popularMatches.length > 0 && (
+              <>
+                <PopularMatches 
+                  popularMatches={popularMatches} 
+                  selectedSport={selectedSport}
+                />
+                <Separator className="my-8 bg-[#343a4d]" />
+              </>
+            )}
+            
+            <div className="mb-8">
+              {(selectedSport || loadingMatches) && (
+                <MatchesList
+                  matches={filteredMatches}
+                  sportId={selectedSport || ""}
+                  isLoading={loadingMatches}
+                />
+              )}
+            </div>
+            
+            {/* Lazy load news section */}
+            <div className="mb-8">
+              <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                <NewsSection />
+              </React.Suspense>
+            </div>
+            
+            {/* Promotion boxes */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+              <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
+                <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
+                <p className="text-gray-300">Discover events happening right now across different sports.</p>
+                <Link to="/live" aria-label="View all live sports events">
+                  <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
+                </Link>
+              </div>
+              
+              <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
+                <h2 className="text-xl font-bold mb-4 text-white">Coming Up</h2>
+                <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
+                <Link to="/schedule" aria-label="View upcoming matches schedule">
+                  <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
       </main>
     </PageLayout>
   );
