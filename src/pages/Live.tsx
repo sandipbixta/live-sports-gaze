@@ -36,17 +36,18 @@ const Live = () => {
   // Determine if we're on mobile
   const isMobile = useIsMobile();
   
-  // Check if a match is currently live - More strict criteria
+  // Check if a match is currently live - Extended window to match other components
   const isMatchLive = (match: Match): boolean => {
-    // A match is considered live only if it has sources AND the match time is within 1 hour of now
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
+    const sixHoursInMs = 6 * 60 * 60 * 1000; // Extended to 6 hours
     const oneHourInMs = 60 * 60 * 1000;
     
     return (
       match.sources && 
       match.sources.length > 0 && 
-      Math.abs(matchTime - now) < oneHourInMs
+      matchTime - now < oneHourInMs && // Match starts within 1 hour
+      now - matchTime < sixHoursInMs  // Match can be live up to 6 hours after start
     );
   };
 
@@ -182,16 +183,17 @@ const Live = () => {
         
         console.log('Matches after filtering ads:', allFetchedMatches.length);
         
-        // Separate matches into live and upcoming using strict criteria
+        // Separate matches into live and upcoming using the extended criteria
         const live = allFetchedMatches.filter(match => {
           const matchTime = new Date(match.date).getTime();
           const now = new Date().getTime();
+          const sixHoursInMs = 6 * 60 * 60 * 1000; // Extended to 6 hours
           const oneHourInMs = 60 * 60 * 1000;
           
           return match.sources && 
                  match.sources.length > 0 && 
-                 matchTime - now < oneHourInMs && // Match hasn't started more than an hour in the future
-                 now - matchTime < oneHourInMs;   // Match hasn't ended more than an hour ago
+                 matchTime - now < oneHourInMs && // Match starts within 1 hour
+                 now - matchTime < sixHoursInMs; // Match can be live up to 6 hours after start
         });
         
         const upcoming = allFetchedMatches.filter(match => 
