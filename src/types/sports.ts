@@ -36,3 +36,33 @@ export interface Stream {
   embedUrl: string;
   source: string;
 }
+
+// New interfaces for the streams API
+export interface StreamsApiResponse {
+  success: boolean;
+  timestamp: number;
+  READ_ME: string;
+  performance: number;
+  streams: StreamCategory[];
+}
+
+export interface StreamCategory {
+  category: string;
+  id: number;
+  always_live: number;
+  streams: StreamItem[];
+}
+
+export interface StreamItem {
+  id: number;
+  name: string;
+  tag: string;
+  poster: string;
+  uri_name: string;
+  starts_at: number;
+  ends_at: number;
+  always_live: number;
+  category_name: string;
+  iframe?: string;
+  allowpaststreams: number;
+}
