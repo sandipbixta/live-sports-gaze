@@ -97,11 +97,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasTeamLogos && hasTeams ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-16 h-16' : 'w-20 h-20'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={homeBadge} 
                     alt={home} 
-                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
+                    className={`${isMobile ? 'w-14 h-14' : 'w-18 h-18'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
@@ -111,14 +111,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
               {/* Only show VS when both teams exist */}
               {hasTeams && (
-                <div className="mx-2 text-white text-xs font-bold">VS</div>
+                <div className="mx-3 text-white text-sm font-bold">VS</div>
               )}
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-16 h-16' : 'w-20 h-20'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
                   <img 
                     src={awayBadge} 
                     alt={away}
-                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain`}
+                    className={`${isMobile ? 'w-14 h-14' : 'w-18 h-18'} object-contain`}
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">D</span></div>';
