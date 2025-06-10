@@ -1,6 +1,5 @@
 
 import { Sport, Match, Stream } from '../types/sports';
-import { customMatches } from '../data/manual/customMatches';
 
 const API_BASE = 'https://streamed.su/api';
 
@@ -55,11 +54,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Get manual matches for this sport first
-  const manualMatchesForSport = customMatches.filter(match => 
-    match.sportId === sportId
-  );
-
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
@@ -74,18 +68,12 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     clearTimeout(timeoutId);
     
     if (!response.ok) throw new Error('Failed to fetch matches');
-    const apiMatches = await response.json();
-    
-    // Combine manual matches first (they get priority), then API matches
-    const allMatches = [...manualMatchesForSport, ...apiMatches];
-    setCachedData(cacheKey, allMatches);
-    return allMatches;
+    const matches = await response.json();
+    setCachedData(cacheKey, matches);
+    return matches;
   } catch (error) {
     console.error('Error fetching matches:', error);
-    
-    // If API fails, still return manual matches
-    setCachedData(cacheKey, manualMatchesForSport);
-    return manualMatchesForSport;
+    return [];
   }
 };
 
@@ -93,13 +81,6 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   const cacheKey = `match-${sportId}-${matchId}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
-
-  // First check if it's a manual match
-  const manualMatch = customMatches.find(match => match.id === matchId);
-  if (manualMatch) {
-    setCachedData(cacheKey, manualMatch);
-    return manualMatch;
-  }
 
   try {
     // First try to get from cached matches
@@ -128,44 +109,6 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
-
-  // Handle manual channel streams
-  if (source === 'manual-channel') {
-    const channelStream: Stream = {
-      id: id,
-      streamNo: 1,
-      language: 'English',
-      hd: true,
-      embedUrl: `/channel/redirect/${id}`, // This will redirect to the channel player
-      source: 'manual-channel'
-    };
-    setCachedData(cacheKey, channelStream);
-    return channelStream;
-  }
-
-  // Handle manual streams with direct URLs
-  if (source === 'manual') {
-    // Find the custom match with this source
-    const customMatch = customMatches.find(match => 
-      match.sources.some(src => src.source === 'manual' && src.id === id)
-    );
-    
-    if (customMatch) {
-      const matchSource = customMatch.sources.find(src => src.id === id);
-      if (matchSource?.directUrl) {
-        const manualStream: Stream = {
-          id: id,
-          streamNo: 1,
-          language: 'English',
-          hd: true,
-          embedUrl: matchSource.directUrl,
-          source: 'manual'
-        };
-        setCachedData(cacheKey, manualStream);
-        return manualStream;
-      }
-    }
-  }
 
   try {
     console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
