@@ -1,58 +1,92 @@
-import React from 'react';
-import { Card, CardContent } from './ui/card';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import { Play, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { ManualMatch } from '../types/sports';  // Adjust path to your ManualMatch type
+import { X, Maximize } from 'lucide-react';
 
-interface ManualMatchCardProps {
-  match: ManualMatch;
-  onWatchNow: (match: ManualMatch) => void;
+interface ManualMatchPlayerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  streamUrl: string;
+  title: string;
 }
 
-const ManualMatchCard: React.FC<ManualMatchCardProps> = ({ match, onWatchNow }) => {
-  const formatDate = (dateString: string) => {
+const ManualMatchPlayer: React.FC<ManualMatchPlayerProps> = ({
+  isOpen,
+  onClose,
+  streamUrl,
+  title
+}) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = async () => {
+    if (!iframeRef.current) return;
+
     try {
-      return format(new Date(dateString), 'MMM dd, HH:mm');
-    } catch {
-      return 'TBD';
+      if (!document.fullscreenElement) {
+        await iframeRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
     }
   };
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   return (
-    <Card className="bg-[#242836] border-[#343a4d] hover:border-[#ff5a36] transition-all duration-300 group cursor-pointer">
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Match title */}
-          <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-[#ff5a36] transition-colors">
-            {match.title}
-          </h3>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl w-full h-[80vh] bg-[#0A0F1C] border-[#343a4d]">
+        <DialogHeader>
+          <DialogTitle className="text-white">{title}</DialogTitle>
+        </DialogHeader>
+        
+        <div className="relative flex-1 bg-black rounded-lg overflow-hidden">
+          <iframe
+            ref={iframeRef}
+            title={title}
+            src={streamUrl}
+            frameBorder="0"
+            className="w-full h-full rounded-lg"
+            allowFullScreen
+            allow="encrypted-media; picture-in-picture"
+            onError={(e) => console.error('Iframe error:', e)}
+          ></iframe>
           
-          {/* Teams */}
-          <div className="text-center space-y-1">
-            <div className="text-white font-medium text-xs">{match.teams.home}</div>
-            <div className="text-gray-400 text-xs">vs</div>
-            <div className="text-white font-medium text-xs">{match.teams.away}</div>
+          <div className="absolute top-2 right-2 flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleFullscreen}
+              className="bg-black/50 hover:bg-black/70 text-white"
+            >
+              <Maximize className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="bg-black/50 hover:bg-black/70 text-white"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          
-          {/* Date */}
-          <div className="flex items-center justify-center gap-1 text-gray-400 text-xs">
-            <Calendar className="h-3 w-3" />
-            <span>{formatDate(match.date)}</span>
-          </div>
-          
-          {/* Watch button */}
-          <Button 
-            onClick={() => onWatchNow(match)}
-            className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white text-xs py-2 h-8"
-          >
-            <Play className="h-3 w-3 mr-1" />
-            Watch Now
-          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default ManualMatchCard;
+export default ManualMatchPlayer;
