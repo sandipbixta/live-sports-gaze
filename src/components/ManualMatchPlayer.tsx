@@ -1,5 +1,4 @@
-
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { X, Maximize } from 'lucide-react';
@@ -7,7 +6,7 @@ import { X, Maximize } from 'lucide-react';
 interface ManualMatchPlayerProps {
   isOpen: boolean;
   onClose: () => void;
-  streamUrl: string;
+  streamUrl: string; // This will now be the embed URL
   title: string;
 }
 
@@ -17,30 +16,15 @@ const ManualMatchPlayer: React.FC<ManualMatchPlayerProps> = ({
   streamUrl,
   title
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && videoRef.current && streamUrl) {
-      const video = videoRef.current;
-      
-      // Check if the browser supports HLS natively
-      if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = streamUrl;
-      } else {
-        // For browsers that don't support HLS natively, you might want to use hls.js
-        console.log('HLS not supported natively, consider using hls.js library');
-        video.src = streamUrl;
-      }
-    }
-  }, [isOpen, streamUrl]);
-
   const toggleFullscreen = async () => {
-    if (!videoRef.current) return;
+    const iframe = document.getElementById('manual-iframe');
+    if (!iframe) return;
 
     try {
       if (!document.fullscreenElement) {
-        await videoRef.current.requestFullscreen();
+        await iframe.requestFullscreen();
         setIsFullscreen(true);
       } else {
         await document.exitFullscreen();
@@ -68,19 +52,19 @@ const ManualMatchPlayer: React.FC<ManualMatchPlayerProps> = ({
         <DialogHeader>
           <DialogTitle className="text-white">{title}</DialogTitle>
         </DialogHeader>
-        
-        <div className="relative flex-1 bg-black rounded-lg overflow-hidden">
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            className="w-full h-full object-contain"
-            onError={(e) => console.error('Video error:', e)}
-          >
-            Your browser does not support the video tag.
-          </video>
-          
-          <div className="absolute top-2 right-2 flex gap-2">
+
+        <div className="relative flex-1 rounded-lg overflow-hidden bg-black aspect-video">
+          <iframe
+            id="manual-iframe"
+            title={title}
+            src={streamUrl}
+            className="w-full h-full rounded"
+            allowFullScreen
+            allow="encrypted-media; picture-in-picture"
+            frameBorder="0"
+          />
+
+          <div className="absolute top-2 right-2 flex gap-2 z-10">
             <Button
               variant="ghost"
               size="sm"
