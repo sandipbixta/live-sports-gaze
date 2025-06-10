@@ -19,7 +19,7 @@ export const manualMatches: ManualMatch[] = [
       home: "Real Madrid",
       away: "Barcelona"
     },
-    streamUrl: "https://example.com/stream.m3u8"
+    streamUrl: "https://damitv.pro/channel/India/star-sports2-india"
   },
   {
     id: "manchester-united-vs-liverpool-2024",
