@@ -18,7 +18,6 @@ import { Helmet } from 'react-helmet-async';
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const SpecialLiveMatch = React.lazy(() => import('../components/SpecialLiveMatch'));
-import ManualStreamInput from '../components/ManualStreamInput';
 
 interface ManualStream {
   id: string;
@@ -155,23 +154,6 @@ const Index = () => {
     }
   };
 
-  // Handle adding manual stream
-  const handleAddStream = (stream: ManualStream) => {
-    setManualStreams(prev => [...prev, stream]);
-    // Store in localStorage for the API to access
-    const updatedStreams = [...manualStreams, stream];
-    localStorage.setItem('manualStreams', JSON.stringify(updatedStreams));
-  };
-
-  // Handle removing manual stream
-  const handleRemoveStream = (streamId: string) => {
-    setManualStreams(prev => {
-      const updated = prev.filter(stream => stream.id !== streamId);
-      localStorage.setItem('manualStreams', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
   // Load manual streams from localStorage on component mount
   useEffect(() => {
     try {
@@ -194,12 +176,6 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Manual Stream Input */}
-        <ManualStreamInput 
-          onAddStream={handleAddStream}
-          streams={manualStreams}
-          onRemoveStream={handleRemoveStream}
-        />
         {/* Special Live Match - Featured prominently */}
         <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse mb-8" />}>
           <SpecialLiveMatch />
