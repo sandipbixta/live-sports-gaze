@@ -81,12 +81,12 @@ const StreamTab: React.FC<StreamTabProps> = ({
     loadStreams();
   }, [match.sources, toast, isManualStream]);
 
-  const handleSourceChange = async (source: { source: string; id: string }) => {
+  const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     if (isManualStream) return;
 
     setIsLoadingStream(true);
     try {
-      const streamData = await fetchStream(source.source, source.id);
+      const streamData = await fetchStream(source, id);
       
       if (Array.isArray(streamData)) {
         setAvailableStreams(streamData);
@@ -115,7 +115,7 @@ const StreamTab: React.FC<StreamTabProps> = ({
 
   const handleRetry = () => {
     if (match.sources && match.sources.length > 0) {
-      handleSourceChange(match.sources[0]);
+      handleSourceChange(match.sources[0].source, match.sources[0].id);
     }
   };
 

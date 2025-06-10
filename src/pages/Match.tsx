@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -96,7 +95,10 @@ const Match = () => {
       </Helmet>
 
       <div className="min-h-screen bg-[#0A0F1C]">
-        <MatchHeader match={match} />
+        <MatchHeader 
+          match={match} 
+          streamAvailable={isManualStream(match) || (match.sources && match.sources.length > 0)}
+        />
         <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
         
         <div className="container mx-auto px-4 py-6">

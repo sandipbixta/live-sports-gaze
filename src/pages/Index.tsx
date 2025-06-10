@@ -14,6 +14,9 @@ import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
+import { manualMatches } from '../data/manualMatches';
+import ManualMatchCard from '../components/ManualMatchCard';
+import ManualMatchPlayer from '../components/ManualMatchPlayer';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -28,6 +31,8 @@ const Index = () => {
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
+  const [selectedManualMatch, setSelectedManualMatch] = useState<any>(null);
+  const [showManualPlayer, setShowManualPlayer] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -149,6 +154,16 @@ const Index = () => {
     }
   };
 
+  const handleWatchManualMatch = (match: any) => {
+    setSelectedManualMatch(match);
+    setShowManualPlayer(true);
+  };
+
+  const handleCloseManualPlayer = () => {
+    setShowManualPlayer(false);
+    setSelectedManualMatch(null);
+  };
+
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -159,6 +174,33 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
+        {/* Manual Matches Section */}
+        {manualMatches.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Featured Matches</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              {manualMatches.map((match) => (
+                <ManualMatchCard
+                  key={match.id}
+                  match={match}
+                  onWatchNow={handleWatchManualMatch}
+                />
+              ))}
+            </div>
+            <Separator className="my-8 bg-[#343a4d]" />
+          </div>
+        )}
+
+        {/* Manual Match Player */}
+        {selectedManualMatch && (
+          <ManualMatchPlayer
+            isOpen={showManualPlayer}
+            onClose={handleCloseManualPlayer}
+            streamUrl={selectedManualMatch.streamUrl}
+            title={selectedManualMatch.title}
+          />
+        )}
+
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
