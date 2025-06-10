@@ -18,6 +18,14 @@ import { Helmet } from 'react-helmet-async';
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const SpecialLiveMatch = React.lazy(() => import('../components/SpecialLiveMatch'));
+import ManualStreamInput from '../components/ManualStreamInput';
+
+interface ManualStream {
+  id: string;
+  title: string;
+  streamUrl: string;
+  date: string;
+}
 
 const Index = () => {
   const { toast } = useToast();
@@ -30,27 +38,52 @@ const Index = () => {
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
+  const [manualStreams, setManualStreams] = useState<ManualStream[]>([]);
 
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    return matches.filter(match => 
+    const allMatchesIncludingManual = [...matches, ...manualStreams.map((stream) => ({
+      id: stream.id,
+      title: stream.title,
+      date: stream.date,
+      sources: [
+        {
+          source: 'manual',
+          id: stream.id
+        }
+      ],
+      sportId: 'football'
+    }))];
+    return allMatchesIncludingManual.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [matches]);
+  }, [matches, manualStreams]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
-    if (!searchTerm.trim()) return matches;
+    const allMatchesIncludingManual = [...matches, ...manualStreams.map((stream) => ({
+      id: stream.id,
+      title: stream.title,
+      date: stream.date,
+      sources: [
+        {
+          source: 'manual',
+          id: stream.id
+        }
+      ],
+      sportId: 'football'
+    }))];
+    if (!searchTerm.trim()) return allMatchesIncludingManual;
     
     const lowercaseSearch = searchTerm.toLowerCase();
-    return matches.filter(match => {
+    return allMatchesIncludingManual.filter(match => {
       return match.title.toLowerCase().includes(lowercaseSearch) || 
         match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
         match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
-  }, [matches, searchTerm]);
+  }, [matches, manualStreams, searchTerm]);
 
   // Load sports immediately on mount with optimization
   useEffect(() => {
@@ -129,6 +162,35 @@ const Index = () => {
     }
   };
 
+  // Handle adding manual stream
+  const handleAddStream = (stream: ManualStream) => {
+    setManualStreams(prev => [...prev, stream]);
+    // Store in localStorage for the API to access
+    const updatedStreams = [...manualStreams, stream];
+    localStorage.setItem('manualStreams', JSON.stringify(updatedStreams));
+  };
+
+  // Handle removing manual stream
+  const handleRemoveStream = (streamId: string) => {
+    setManualStreams(prev => {
+      const updated = prev.filter(stream => stream.id !== streamId);
+      localStorage.setItem('manualStreams', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Load manual streams from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedStreams = localStorage.getItem('manualStreams');
+      if (savedStreams) {
+        setManualStreams(JSON.parse(savedStreams));
+      }
+    } catch (error) {
+      console.error('Error loading manual streams from localStorage:', error);
+    }
+  }, []);
+
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -139,6 +201,12 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
+        {/* Manual Stream Input */}
+        <ManualStreamInput 
+          onAddStream={handleAddStream}
+          streams={manualStreams}
+          onRemoveStream={handleRemoveStream}
+        />
         {/* Special Live Match - Featured prominently */}
         <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse mb-8" />}>
           <SpecialLiveMatch />
@@ -212,10 +280,10 @@ const Index = () => {
             )}
             
             <div className="mb-8">
-              {(selectedSport || loadingMatches) && (
+              {(selectedSport || loadingMatches || manualStreams.length > 0) && (
                 <MatchesList
                   matches={filteredMatches}
-                  sportId={selectedSport || ""}
+                  sportId={selectedSport || "football"}
                   isLoading={loadingMatches}
                 />
               )}
