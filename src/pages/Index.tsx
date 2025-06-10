@@ -19,13 +19,6 @@ const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const SpecialLiveMatch = React.lazy(() => import('../components/SpecialLiveMatch'));
 
-interface ManualStream {
-  id: string;
-  title: string;
-  streamUrl: string;
-  date: string;
-}
-
 const Index = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
@@ -37,45 +30,27 @@ const Index = () => {
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
-  const [manualStreams, setManualStreams] = useState<ManualStream[]>([]);
-
-  // Convert manual streams to match format with proper teams structure
-  const manualMatches: Match[] = manualStreams.map((stream) => ({
-    id: stream.id,
-    title: stream.title,
-    date: stream.date,
-    teams: undefined, // Explicitly set teams as undefined to match Match interface
-    sources: [
-      {
-        source: 'manual',
-        id: stream.id
-      }
-    ],
-    sportId: 'football'
-  }));
 
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    const allMatchesIncludingManual = [...matches, ...manualMatches];
-    return allMatchesIncludingManual.filter(match => 
+    return matches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [matches, manualMatches]);
+  }, [matches]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
-    const allMatchesIncludingManual = [...matches, ...manualMatches];
-    if (!searchTerm.trim()) return allMatchesIncludingManual;
+    if (!searchTerm.trim()) return matches;
     
     const lowercaseSearch = searchTerm.toLowerCase();
-    return allMatchesIncludingManual.filter(match => {
+    return matches.filter(match => {
       return match.title.toLowerCase().includes(lowercaseSearch) || 
         match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
         match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
-  }, [matches, manualMatches, searchTerm]);
+  }, [matches, searchTerm]);
 
   // Load sports immediately on mount with optimization
   useEffect(() => {
@@ -153,18 +128,6 @@ const Index = () => {
       setLoadingMatches(false);
     }
   };
-
-  // Load manual streams from localStorage on component mount
-  useEffect(() => {
-    try {
-      const savedStreams = localStorage.getItem('manualStreams');
-      if (savedStreams) {
-        setManualStreams(JSON.parse(savedStreams));
-      }
-    } catch (error) {
-      console.error('Error loading manual streams from localStorage:', error);
-    }
-  }, []);
 
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
@@ -249,10 +212,10 @@ const Index = () => {
             )}
             
             <div className="mb-8">
-              {(selectedSport || loadingMatches || manualStreams.length > 0) && (
+              {(selectedSport || loadingMatches) && (
                 <MatchesList
                   matches={filteredMatches}
-                  sportId={selectedSport || "football"}
+                  sportId={selectedSport || ""}
                   isLoading={loadingMatches}
                 />
               )}

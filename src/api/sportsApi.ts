@@ -110,29 +110,6 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Handle manual streams with user-provided URLs
-  if (source === 'manual') {
-    try {
-      const manualStreams = JSON.parse(localStorage.getItem('manualStreams') || '[]');
-      const manualStream = manualStreams.find((stream: any) => stream.id === id);
-      
-      if (manualStream) {
-        const stream: Stream = {
-          id: id,
-          streamNo: 1,
-          language: 'English',
-          hd: true,
-          embedUrl: manualStream.streamUrl,
-          source: 'manual'
-        };
-        setCachedData(cacheKey, stream);
-        return stream;
-      }
-    } catch (error) {
-      console.log('No manual streams in localStorage');
-    }
-  }
-
   try {
     console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
     
