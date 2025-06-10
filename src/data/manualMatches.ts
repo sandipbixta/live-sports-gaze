@@ -19,7 +19,7 @@ export const manualMatches: ManualMatch[] = [
       home: "A",
       away: "B"
     },
-    streamUrl: "https://damitv.pro/channel/New%20Zealand/sky-sport2-nz"
+    streamUrl: "https://azonew.newkso.ru/azo/skynz1/mono.m3u8"
   },
   {
     id: "manchester-united-vs-liverpool-2024",
