@@ -12,14 +12,14 @@ export interface ManualMatch {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "real-madrid-vs-barcelona-2024",
-    title: "El Clasico - Real Madrid vs Barcelona",
+    id: "A-vs-B-2024",
+    title: "El Clasico - A vs B",
     date: "2024-06-15T20:00:00Z",
     teams: {
-      home: "Real Madrid",
-      away: "Barcelona"
+      home: "A",
+      away: "B"
     },
-    streamUrl: "https://azonew.newkso.ru/azo/skynz2/mono.m3u8"
+    streamUrl: "https://damitv.pro/channel/New%20Zealand/sky-sport2-nz"
   },
   {
     id: "manchester-united-vs-liverpool-2024",
