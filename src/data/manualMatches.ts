@@ -1,33 +1,22 @@
-
-export interface ManualMatch {
-  id: string;
-  title: string;
-  date: string;
-  teams: {
-    home: string;
-    away: string;
-  };
-  embedUrl: string; // iframe source link
-}
 export const manualMatches: ManualMatch[] = [
   {
-    id: "el-clasico-2024",
-    title: "El Clasico - Barcelona vs Real Madrid",
+    id: "real-madrid-vs-barcelona-2024",
+    title: "El Clasico - Real Madrid vs Barcelona",
     date: "2024-06-15T20:00:00Z",
     teams: {
-      home: "Barcelona",
-      away: "Real Madrid"
+      home: "Real Madrid",
+      away: "Barcelona"
     },
-    embedUrl: "<iframe id="topembed-iframe" title="DAZNF1[Spain]" frameborder="0" class="w-full aspect-video rounded-lg" src="https://topembed.pw/channel/DAZNF1%5BSpain%5D" allowfullscreen allow="encrypted-media; picture-in-picture;"></iframe>"
+    streamUrl: "https://topembed.pw/channel/DAZNF1%5BSpain%5D" // Updated to embed link
   },
   {
-    id: "mancity-vs-arsenal",
-    title: "Manchester City vs Arsenal",
-    date: "2024-06-16T17:00:00Z",
+    id: "manchester-united-vs-liverpool-2024",
+    title: "Manchester United vs Liverpool",
+    date: "2024-06-16T15:30:00Z",
     teams: {
-      home: "Manchester City",
-      away: "Arsenal"
+      home: "Manchester United",
+      away: "Liverpool"
     },
-    embedUrl: "https://topembed.pw/channel/SkySportPremierLeague"
+    streamUrl: "https://example.com/stream2.m3u8" // Kept as is
   }
 ];
