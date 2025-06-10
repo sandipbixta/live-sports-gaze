@@ -18,7 +18,7 @@ export const manualMatches: ManualMatch[] = [
       home: "Barcelona",
       away: "Real Madrid"
     },
-    embedUrl: "https://topembed.pw/channel/DAZNF1%5BSpain%5D"
+    embedUrl: "<iframe id="topembed-iframe" title="DAZNF1[Spain]" frameborder="0" class="w-full aspect-video rounded-lg" src="https://topembed.pw/channel/DAZNF1%5BSpain%5D" allowfullscreen allow="encrypted-media; picture-in-picture;"></iframe>"
   },
   {
     id: "mancity-vs-arsenal",
