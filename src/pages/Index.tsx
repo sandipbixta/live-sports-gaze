@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
+import { fetchManualStreams, ManualStream } from '../services/manualStreamsService';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -23,6 +24,7 @@ const Index = () => {
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [manualStreams, setManualStreams] = useState<ManualStream[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
@@ -30,26 +32,45 @@ const Index = () => {
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
+  // Load manual streams on mount
+  useEffect(() => {
+    const loadManualStreams = async () => {
+      try {
+        const streams = await fetchManualStreams();
+        setManualStreams(streams);
+      } catch (error) {
+        console.error('Failed to load manual streams:', error);
+      }
+    };
+
+    loadManualStreams();
+  }, []);
+
+  // Combine regular matches with manual streams
+  const combinedMatches = useMemo(() => {
+    return [...matches, ...manualStreams];
+  }, [matches, manualStreams]);
+
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    return matches.filter(match => 
+    return combinedMatches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [matches]);
+  }, [combinedMatches]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
-    if (!searchTerm.trim()) return matches;
+    if (!searchTerm.trim()) return combinedMatches;
     
     const lowercaseSearch = searchTerm.toLowerCase();
-    return matches.filter(match => {
+    return combinedMatches.filter(match => {
       return match.title.toLowerCase().includes(lowercaseSearch) || 
         match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
         match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
-  }, [matches, searchTerm]);
+  }, [combinedMatches, searchTerm]);
 
   // Load sports immediately on mount with optimization
   useEffect(() => {

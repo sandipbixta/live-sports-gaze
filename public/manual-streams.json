@@ -1,0 +1,28 @@
+
+{
+  "streams": [
+    {
+      "id": "manual-stream-1",
+      "title": "Sample Manual Stream",
+      "date": "2024-06-10T20:00:00Z",
+      "sources": [
+        {
+          "source": "manual",
+          "id": "sample-1"
+        }
+      ],
+      "sportId": "football",
+      "embedUrl": "https://example.com/stream1",
+      "teams": {
+        "home": {
+          "name": "Team A",
+          "badge": "team-a-badge"
+        },
+        "away": {
+          "name": "Team B", 
+          "badge": "team-b-badge"
+        }
+      }
+    }
+  ]
+}
