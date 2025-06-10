@@ -33,6 +33,7 @@ const Index = () => {
   const [showLiveSports, setShowLiveSports] = useState(false);
   const [selectedManualMatch, setSelectedManualMatch] = useState<any>(null);
   const [showManualPlayer, setShowManualPlayer] = useState(false);
+  const [showMatchCards, setShowMatchCards] = useState(true); // New state for toggle
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -164,6 +165,11 @@ const Index = () => {
     setSelectedManualMatch(null);
   };
 
+  // Toggle match cards visibility
+  const toggleMatchCards = () => {
+    setShowMatchCards(prev =>W => !prev);
+  };
+
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -175,9 +181,18 @@ const Index = () => {
       
       <main className="py-4">
         {/* Manual Matches Section */}
-        {manualMatches.length > 0 && (
+        {manualMatches.length > 0 && showMatchCards && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Featured Matches</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white">Featured Matches</h2>
+              <Button
+                variant="outline"
+                className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+                onClick={toggleMatchCards}
+              >
+                {showMatchCards ? 'Hide Match Cards' : 'Show Match Cards'}
+              </Button>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {manualMatches.map((match) => (
                 <ManualMatchCard
@@ -188,6 +203,19 @@ const Index = () => {
               ))}
             </div>
             <Separator className="my-8 bg-[#343a4d]" />
+          </div>
+        )}
+
+        {/* Toggle button when match cards are hidden */}
+        {!showMatchCards && (
+          <div className="mb-8">
+            <Button
+              variant="outline"
+              className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+              onClick={toggleMatchCards}
+            >
+              Show Match Cards
+            </Button>
           </div>
         )}
 
