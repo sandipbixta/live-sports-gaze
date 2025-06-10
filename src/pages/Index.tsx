@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
-import { fetchManualStreams, ManualStream } from '../services/manualStreamsService';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -14,9 +13,6 @@ import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
-import { manualMatches } from '../data/manualMatches';
-import ManualMatchCard from '../components/ManualMatchCard';
-import ManualMatchPlayer from '../components/ManualMatchPlayer';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -27,55 +23,33 @@ const Index = () => {
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [manualStreams, setManualStreams] = useState<ManualStream[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
-  const [selectedManualMatch, setSelectedManualMatch] = useState<any>(null);
-  const [showManualPlayer, setShowManualPlayer] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Load manual streams on mount
-  useEffect(() => {
-    const loadManualStreams = async () => {
-      try {
-        const streams = await fetchManualStreams();
-        setManualStreams(streams);
-      } catch (error) {
-        console.error('Failed to load manual streams:', error);
-      }
-    };
-
-    loadManualStreams();
-  }, []);
-
-  // Combine regular matches with manual streams
-  const combinedMatches = useMemo(() => {
-    return [...matches, ...manualStreams];
-  }, [matches, manualStreams]);
-
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    return combinedMatches.filter(match => 
+    return matches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [combinedMatches]);
+  }, [matches]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
-    if (!searchTerm.trim()) return combinedMatches;
+    if (!searchTerm.trim()) return matches;
     
     const lowercaseSearch = searchTerm.toLowerCase();
-    return combinedMatches.filter(match => {
+    return matches.filter(match => {
       return match.title.toLowerCase().includes(lowercaseSearch) || 
         match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
         match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
-  }, [combinedMatches, searchTerm]);
+  }, [matches, searchTerm]);
 
   // Load sports immediately on mount with optimization
   useEffect(() => {
@@ -154,16 +128,6 @@ const Index = () => {
     }
   };
 
-  const handleWatchManualMatch = (match: any) => {
-    setSelectedManualMatch(match);
-    setShowManualPlayer(true);
-  };
-
-  const handleCloseManualPlayer = () => {
-    setShowManualPlayer(false);
-    setSelectedManualMatch(null);
-  };
-
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -174,33 +138,6 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Manual Matches Section */}
-        {manualMatches.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Featured Matches</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-              {manualMatches.map((match) => (
-                <ManualMatchCard
-                  key={match.id}
-                  match={match}
-                  onWatchNow={handleWatchManualMatch}
-                />
-              ))}
-            </div>
-            <Separator className="my-8 bg-[#343a4d]" />
-          </div>
-        )}
-
-        {/* Manual Match Player */}
-        {selectedManualMatch && (
-          <ManualMatchPlayer
-            isOpen={showManualPlayer}
-            onClose={handleCloseManualPlayer}
-            streamUrl={selectedManualMatch.streamUrl}
-            title={selectedManualMatch.title}
-          />
-        )}
-
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
