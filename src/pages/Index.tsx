@@ -17,7 +17,6 @@ import { Helmet } from 'react-helmet-async';
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
-const SpecialLiveMatch = React.lazy(() => import('../components/SpecialLiveMatch'));
 
 const Index = () => {
   const { toast } = useToast();
@@ -139,11 +138,6 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Special Live Match - Featured prominently */}
-        <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse mb-8" />}>
-          <SpecialLiveMatch />
-        </React.Suspense>
-
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>

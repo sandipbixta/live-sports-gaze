@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ChannelCard from './ChannelCard';
 import EnhancedChannelCard from './EnhancedChannelCard';
@@ -13,11 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ChannelGuide from './ChannelGuide';
 import { iptvOrgService } from '@/services/iptvOrgService';
 import { Button } from '@/components/ui/button';
-import StreamPlayer from './StreamPlayer';
 
 const ChannelsGrid = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const countries = getCountries();
   const channelsByCountry = getChannelsByCountry();
   const [selectedCountry, setSelectedCountry] = useState(countries[0]);
@@ -27,32 +24,7 @@ const ChannelsGrid = () => {
   const [enhancedChannels, setEnhancedChannels] = useState<Record<string, any[]>>({});
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
   const [useEnhancedView, setUseEnhancedView] = useState(false);
-  const [useModernView, setUseModernView] = useState(false); // Set to false to show video player
-
-  // Auto-select channel from URL parameter
-  useEffect(() => {
-    const channelParam = searchParams.get('channel');
-    if (channelParam) {
-      // Find the channel across all countries
-      let foundChannel = null;
-      let foundCountry = null;
-      
-      for (const [country, channels] of Object.entries(channelsByCountry)) {
-        const channel = channels.find(ch => ch.id === channelParam);
-        if (channel) {
-          foundChannel = channel;
-          foundCountry = country;
-          break;
-        }
-      }
-      
-      if (foundChannel && foundCountry) {
-        setSelectedCountry(foundCountry);
-        setSelectedChannelUrl(foundChannel.embedUrl);
-        setSelectedChannelTitle(foundChannel.title);
-      }
-    }
-  }, [searchParams, channelsByCountry]);
+  const [useModernView, setUseModernView] = useState(true); // Default to modern view
 
   // Load enhanced channel data
   useEffect(() => {
@@ -109,17 +81,8 @@ const ChannelsGrid = () => {
   }, []);
 
   const handleSelectChannel = (channel: any) => {
-    setSelectedChannelUrl(channel.embedUrl);
-    setSelectedChannelTitle(channel.title);
-  };
-
-  const handleRetry = () => {
-    // Force reload the current channel
-    if (selectedChannelUrl) {
-      const currentUrl = selectedChannelUrl;
-      setSelectedChannelUrl(null);
-      setTimeout(() => setSelectedChannelUrl(currentUrl), 100);
-    }
+    // Navigate to dedicated channel player page
+    navigate(`/channel/${selectedCountry}/${channel.id}`);
   };
 
   const currentChannels = useEnhancedView ? 
@@ -129,16 +92,6 @@ const ChannelsGrid = () => {
   // Get featured channels (first 4 for the hero section)
   const featuredChannels = currentChannels.slice(0, 4);
   const allChannels = currentChannels;
-
-  // Create stream object for the selected channel
-  const selectedStream = selectedChannelUrl ? {
-    id: selectedChannelTitle || 'channel',
-    streamNo: 1,
-    language: 'English',
-    hd: true,
-    embedUrl: selectedChannelUrl,
-    source: 'TV Channel'
-  } : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -171,7 +124,7 @@ const ChannelsGrid = () => {
                 onClick={() => setUseModernView(!useModernView)}
                 className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] text-xs"
               >
-                {useModernView ? 'Video View' : 'Grid View'}
+                {useModernView ? 'Classic View' : 'Modern View'}
               </Button>
               {Object.keys(enhancedChannels).length > 0 && (
                 <Button
@@ -236,35 +189,19 @@ const ChannelsGrid = () => {
               </div>
             </div>
           ) : (
-            // Original layout with video player
+            // Original layout - also updated to navigate to player page
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-              {/* Video Player */}
+              {/* Placeholder for original layout */}
               <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
-                {selectedChannelUrl ? (
-                  <div>
-                    <StreamPlayer
-                      stream={selectedStream}
-                      isLoading={false}
-                      onRetry={handleRetry}
-                    />
-                    {selectedChannelTitle && (
-                      <div className="p-4 border-t border-[#343a4d]">
-                        <h3 className="text-lg font-semibold text-white">{selectedChannelTitle}</h3>
-                        <p className="text-gray-400 text-sm">Live Sports Channel</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
-                    <div className="text-center p-4">
-                      <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
-                        <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
-                      </div>
-                      <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
-                      <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
+                <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
+                  <div className="text-center p-4">
+                    <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
+                      <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
                     </div>
+                    <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
+                    <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
                   </div>
-                )}
+                </div>
               </div>
               
               {/* Channel list */}
@@ -293,7 +230,7 @@ const ChannelsGrid = () => {
                           network={channel.network}
                           categories={channel.categories}
                           onClick={() => handleSelectChannel(channel)}
-                          isActive={selectedChannelUrl === channel.embedUrl}
+                          isActive={false}
                         />
                       ) : (
                         <ChannelCard
@@ -302,7 +239,7 @@ const ChannelsGrid = () => {
                           embedUrl={channel.embedUrl}
                           logo={channel.logo}
                           onClick={() => handleSelectChannel(channel)}
-                          isActive={selectedChannelUrl === channel.embedUrl}
+                          isActive={false}
                         />
                       )
                     ))}
