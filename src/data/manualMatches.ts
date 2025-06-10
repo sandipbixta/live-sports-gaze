@@ -7,28 +7,27 @@ export interface ManualMatch {
     home: string;
     away: string;
   };
-  streamUrl: string;
+  embedUrl: string; // iframe source link
 }
-
 export const manualMatches: ManualMatch[] = [
   {
-    id: "A-vs-B-2024",
-    title: "El Clasico - A vs B",
+    id: "el-clasico-2024",
+    title: "El Clasico - Barcelona vs Real Madrid",
     date: "2024-06-15T20:00:00Z",
     teams: {
-      home: "A",
-      away: "B"
+      home: "Barcelona",
+      away: "Real Madrid"
     },
-    streamUrl: "https://azonew.newkso.ru/azo/skynz1/mono.m3u8"
+    embedUrl: "https://topembed.pw/channel/DAZNF1%5BSpain%5D"
   },
   {
-    id: "manchester-united-vs-liverpool-2024",
-    title: "Manchester United vs Liverpool",
-    date: "2024-06-16T15:30:00Z",
+    id: "mancity-vs-arsenal",
+    title: "Manchester City vs Arsenal",
+    date: "2024-06-16T17:00:00Z",
     teams: {
-      home: "Manchester United",
-      away: "Liverpool"
+      home: "Manchester City",
+      away: "Arsenal"
     },
-    streamUrl: "https://example.com/stream2.m3u8"
+    embedUrl: "https://topembed.pw/channel/SkySportPremierLeague"
   }
 ];
