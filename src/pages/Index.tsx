@@ -57,39 +57,17 @@ const Index = () => {
 
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    const allMatchesIncludingManual = [...matches, ...manualStreams.map((stream) => ({
-      id: stream.id,
-      title: stream.title,
-      date: stream.date,
-      sources: [
-        {
-          source: 'manual',
-          id: stream.id
-        }
-      ],
-      sportId: 'football'
-    }))];
+    const allMatchesIncludingManual = [...matches, ...manualMatches];
     return allMatchesIncludingManual.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [matches, manualStreams]);
+  }, [matches, manualMatches]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
-    const allMatchesIncludingManual = [...matches, ...manualStreams.map((stream) => ({
-      id: stream.id,
-      title: stream.title,
-      date: stream.date,
-      sources: [
-        {
-          source: 'manual',
-          id: stream.id
-        }
-      ],
-      sportId: 'football'
-    }))];
+    const allMatchesIncludingManual = [...matches, ...manualMatches];
     if (!searchTerm.trim()) return allMatchesIncludingManual;
     
     const lowercaseSearch = searchTerm.toLowerCase();
@@ -98,7 +76,7 @@ const Index = () => {
         match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
         match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
-  }, [matches, manualStreams, searchTerm]);
+  }, [matches, manualMatches, searchTerm]);
 
   // Load sports immediately on mount with optimization
   useEffect(() => {
