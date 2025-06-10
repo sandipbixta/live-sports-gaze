@@ -40,6 +40,21 @@ const Index = () => {
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [manualStreams, setManualStreams] = useState<ManualStream[]>([]);
 
+  // Convert manual streams to match format with proper teams structure
+  const manualMatches: Match[] = manualStreams.map((stream) => ({
+    id: stream.id,
+    title: stream.title,
+    date: stream.date,
+    teams: undefined, // Explicitly set teams as undefined to match Match interface
+    sources: [
+      {
+        source: 'manual',
+        id: stream.id
+      }
+    ],
+    sportId: 'football'
+  }));
+
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
     const allMatchesIncludingManual = [...matches, ...manualStreams.map((stream) => ({
