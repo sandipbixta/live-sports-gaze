@@ -7,12 +7,15 @@ import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
+import ManualMatchCard from '../components/ManualMatchCard';
+import ManualMatchPlayer from '../components/ManualMatchPlayer';
 import { Separator } from '../components/ui/separator';
-import { Calendar, Tv } from 'lucide-react';
+import { Calendar, Tv, Play } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
+import { manualMatches, ManualMatch } from '../data/manualMatches';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -26,9 +29,16 @@ const Index = () => {
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
+  const [selectedManualMatch, setSelectedManualMatch] = useState<ManualMatch | null>(null);
+  const [showManualPlayer, setShowManualPlayer] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
+
+  // Filter visible manual matches
+  const visibleManualMatches = useMemo(() => {
+    return manualMatches.filter(match => match.visible);
+  }, []);
 
   // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
@@ -128,6 +138,16 @@ const Index = () => {
     }
   };
 
+  const handleWatchManualMatch = (match: ManualMatch) => {
+    setSelectedManualMatch(match);
+    setShowManualPlayer(true);
+  };
+
+  const handleCloseManualPlayer = () => {
+    setShowManualPlayer(false);
+    setSelectedManualMatch(null);
+  };
+
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -138,6 +158,31 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
+        {/* Manual Matches Section */}
+        {visibleManualMatches.length > 0 && (
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Play className="h-6 w-6 text-[#ff5a36]" />
+                Featured Matches
+              </h2>
+              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-3 py-1 text-white">
+                {visibleManualMatches.length} available
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {visibleManualMatches.map((match) => (
+                <ManualMatchCard
+                  key={match.id}
+                  match={match}
+                  onWatchNow={() => handleWatchManualMatch(match)}
+                />
+              ))}
+            </div>
+            <Separator className="my-8 bg-[#343a4d]" />
+          </div>
+        )}
+
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
@@ -243,6 +288,13 @@ const Index = () => {
           </>
         )}
       </main>
+
+      {/* Manual Match Player Modal */}
+      <ManualMatchPlayer
+        match={selectedManualMatch}
+        isOpen={showManualPlayer}
+        onClose={handleCloseManualPlayer}
+      />
     </PageLayout>
   );
 };
