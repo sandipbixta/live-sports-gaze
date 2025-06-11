@@ -21,7 +21,7 @@ export const manualMatches: ManualMatch[] = [
       away: "Real Madrid"
     },
     embedUrl: "https://topembed.pw/channel/DAZNF1%5BSpain%5D",
-    visible: true
+    visible: false
   },
   {
     id: "hidden-match",
