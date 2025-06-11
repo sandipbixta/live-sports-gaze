@@ -13,7 +13,7 @@ export interface ManualMatch {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "AUS-vs-SA",
+    id: "WillowTV",
     title: "Australia vs South Africa",
     date: "2025-06-12T20:00:00Z",
     teams: {
