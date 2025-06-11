@@ -14,6 +14,7 @@ const Schedule = React.lazy(() => import("./pages/Schedule"));
 const Live = React.lazy(() => import("./pages/Live"));
 const Channels = React.lazy(() => import("./pages/Channels"));
 const ChannelPlayer = React.lazy(() => import("./pages/ChannelPlayer"));
+const ManualMatchPlayer = React.lazy(() => import("./pages/ManualMatchPlayer"));
 const News = React.lazy(() => import("./pages/News"));
 const DMCANotice = React.lazy(() => import("./pages/DMCANotice"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
@@ -48,6 +49,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/match/:sportId/:matchId" element={<Match />} />
+              <Route path="/manual-match/:matchId" element={<ManualMatchPlayer />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/live" element={<Live />} />
               <Route path="/channels" element={<Channels />} />

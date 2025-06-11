@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -8,14 +9,13 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import ManualMatchCard from '../components/ManualMatchCard';
-import ManualMatchPlayer from '../components/ManualMatchPlayer';
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv, Play } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
-import { manualMatches, ManualMatch } from '../data/manualMatches';
+import { manualMatches } from '../data/manualMatches';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -29,8 +29,6 @@ const Index = () => {
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
-  const [selectedManualMatch, setSelectedManualMatch] = useState<ManualMatch | null>(null);
-  const [showManualPlayer, setShowManualPlayer] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -138,16 +136,6 @@ const Index = () => {
     }
   };
 
-  const handleWatchManualMatch = (match: ManualMatch) => {
-    setSelectedManualMatch(match);
-    setShowManualPlayer(true);
-  };
-
-  const handleCloseManualPlayer = () => {
-    setShowManualPlayer(false);
-    setSelectedManualMatch(null);
-  };
-
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
@@ -175,7 +163,6 @@ const Index = () => {
                 <ManualMatchCard
                   key={match.id}
                   match={match}
-                  onWatchNow={() => handleWatchManualMatch(match)}
                 />
               ))}
             </div>
@@ -288,13 +275,6 @@ const Index = () => {
           </>
         )}
       </main>
-
-      {/* Manual Match Player Modal */}
-      <ManualMatchPlayer
-        match={selectedManualMatch}
-        isOpen={showManualPlayer}
-        onClose={handleCloseManualPlayer}
-      />
     </PageLayout>
   );
 };

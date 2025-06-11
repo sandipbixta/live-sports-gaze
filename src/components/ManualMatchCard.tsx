@@ -4,13 +4,15 @@ import { Play, Calendar, Clock } from 'lucide-react';
 import { ManualMatch } from '@/data/manualMatches';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useNavigate } from 'react-router-dom';
 
 interface ManualMatchCardProps {
   match: ManualMatch;
-  onWatchNow: () => void;
 }
 
-const ManualMatchCard = ({ match, onWatchNow }: ManualMatchCardProps) => {
+const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
+  const navigate = useNavigate();
+
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { 
@@ -40,8 +42,12 @@ const ManualMatchCard = ({ match, onWatchNow }: ManualMatchCardProps) => {
     );
   };
 
+  const handleWatchNow = () => {
+    navigate(`/manual-match/${match.id}`);
+  };
+
   return (
-    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={onWatchNow}>
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={handleWatchNow}>
       <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
         
