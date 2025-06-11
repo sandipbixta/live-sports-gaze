@@ -29,8 +29,8 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
   if (!match) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl w-full h-[70vh] bg-[#0A0F1C] border-[#343a4d] p-0">
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogContent className="max-w-6xl w-full h-[85vh] bg-[#0A0F1C] border-[#343a4d] p-0">
         <DialogHeader className="p-4 pb-2 border-b border-[#343a4d]">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-white font-bold">
@@ -58,8 +58,8 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
           </div>
         </DialogHeader>
         
-        <div className="flex-1 p-4">
-          <div className="w-full h-full bg-black rounded-lg overflow-hidden max-w-3xl mx-auto">
+        <div className="flex-1 p-2">
+          <div className="w-full h-full bg-black rounded-lg overflow-hidden">
             <iframe
               id="manual-stream-iframe"
               src={match.embedUrl}
