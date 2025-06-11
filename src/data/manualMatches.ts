@@ -21,7 +21,7 @@ export const manualMatches: ManualMatch[] = [
       away: "South Africa"
     },
     embedUrl: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
-    visible: true
+    visible: false
   },
   {
     id: "hidden-match",
