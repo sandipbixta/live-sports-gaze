@@ -17,8 +17,8 @@ export const manualMatches: ManualMatch[] = [
     title: "Australia vs South Africa",
     date: "2025-06-12T20:00:00Z",
     teams: {
-      home: "Aus",
-      away: "SA"
+      home: "Australia",
+      away: "South Africa"
     },
     embedUrl: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
     visible: true
