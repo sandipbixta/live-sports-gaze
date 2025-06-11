@@ -3,7 +3,7 @@ import React from 'react';
 import { Play, Calendar, Clock } from 'lucide-react';
 import { ManualMatch } from '@/data/manualMatches';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface ManualMatchCardProps {
   match: ManualMatch;
@@ -41,10 +41,20 @@ const ManualMatchCard = ({ match, onWatchNow }: ManualMatchCardProps) => {
   };
 
   return (
-    <Card className="bg-[#242836] border-[#343a4d] hover:bg-[#2a2f3f] transition-all duration-200 overflow-hidden">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className="font-bold text-white text-sm line-clamp-2">{match.title}</h3>
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={onWatchNow}>
+      <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
+        
+        {/* Match Time */}
+        <div className="absolute top-1 left-1 z-20">
+          <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1">
+            <Clock className="w-2.5 h-2.5" />
+            {formatMatchTime(match.date)}
+          </div>
+        </div>
+        
+        {/* Live Badge */}
+        <div className="absolute top-1 right-1 z-30">
           {isMatchLive() && (
             <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
               <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
@@ -53,34 +63,35 @@ const ManualMatchCard = ({ match, onWatchNow }: ManualMatchCardProps) => {
           )}
         </div>
         
-        <div className="mb-3">
-          <div className="flex items-center justify-between text-white text-sm">
-            <span className="font-medium">{match.teams.home}</span>
-            <span className="text-gray-400 font-bold">VS</span>
-            <span className="font-medium">{match.teams.away}</span>
+        {/* Teams Display */}
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">
+          <div className="flex items-center justify-between text-white text-sm mb-2">
+            <span className="font-medium text-center">{match.teams.home}</span>
+            <span className="text-gray-400 font-bold mx-2">VS</span>
+            <span className="font-medium text-center">{match.teams.away}</span>
+          </div>
+          
+          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1">
+            {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
+          </h3>
+          
+          <p className="text-center text-[#1EAEDB] text-[8px] md:text-[10px] mt-1">
+            {formatMatchDate(match.date)}
+          </p>
+          
+          {/* Watch Now Button - appears on hover */}
+          <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button 
+              className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-medium py-1 text-xs flex items-center justify-center gap-1"
+              size="sm"
+            >
+              <Play size={12} />
+              Watch Now
+            </Button>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-gray-400 text-xs">
-            <Calendar size={12} />
-            <span>{formatMatchDate(match.date)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-400 text-xs">
-            <Clock size={12} />
-            <span>{formatMatchTime(match.date)}</span>
-          </div>
-        </div>
-        
-        <Button 
-          onClick={onWatchNow}
-          className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-medium py-2 flex items-center justify-center gap-2"
-        >
-          <Play size={16} />
-          Watch Now
-        </Button>
-      </CardContent>
-    </Card>
+      </AspectRatio>
+    </div>
   );
 };
 
