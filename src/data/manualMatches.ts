@@ -13,15 +13,15 @@ export interface ManualMatch {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "barca-vs-real",
-    title: "Barcelona vs Real Madrid",
-    date: "2025-06-12T19:00:00Z",
+    id: "AUS-vs-SA",
+    title: "Australia vs South Africa",
+    date: "2025-06-12T20:00:00Z",
     teams: {
-      home: "Barcelona",
-      away: "Real Madrid"
+      home: "Australia",
+      away: "South Africa"
     },
-    embedUrl: "https://topembed.pw/channel/DAZNF1%5BSpain%5D",
-    visible: false
+    embedUrl: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
+    visible: true
   },
   {
     id: "hidden-match",
