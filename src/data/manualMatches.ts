@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "Austraila-VS-South-africa,Day-2",
     title: "Aus vs SA",
-    date: "2025-06-12T07:00:00Z",
+    date: "2025-06-12T09:00:00Z",
     teams: {
       home: "Australia",
       away: "South Africa"
