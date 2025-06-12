@@ -109,6 +109,15 @@ const ManualMatchPlayer = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Channel Title */}
+              {selectedLink && (
+                <div className="bg-[#242836] px-4 py-2 border-b border-[#343a4d]">
+                  <h2 className="text-lg font-semibold text-white text-center">
+                    {selectedLink.name}
+                  </h2>
+                </div>
+              )}
               
               {/* Video Player */}
               <div className="relative aspect-video bg-black">

@@ -28,6 +28,9 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
 
   if (!match) return null;
 
+  // Use the first link as default
+  const defaultLink = match.links?.[0];
+
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="max-w-6xl w-full h-[85vh] bg-[#0A0F1C] border-[#343a4d] p-0">
@@ -60,14 +63,16 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
         
         <div className="flex-1 p-2">
           <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-            <iframe
-              id="manual-stream-iframe"
-              src={match.embedUrl}
-              className="w-full h-full border-0"
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              title={`${match.teams.home} vs ${match.teams.away} Stream`}
-            />
+            {defaultLink && (
+              <iframe
+                id="manual-stream-iframe"
+                src={defaultLink.url}
+                className="w-full h-full border-0"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title={`${match.teams.home} vs ${match.teams.away} Stream`}
+              />
+            )}
           </div>
         </div>
         
