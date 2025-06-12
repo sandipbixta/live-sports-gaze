@@ -3,9 +3,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Match } from '../types/sports';
 import { AspectRatio } from './ui/aspect-ratio';
-import { Eye, Clock } from 'lucide-react';
+import { Eye, Clock, Play } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { format } from 'date-fns';
+import { Button } from './ui/button';
 
 interface MatchCardProps {
   match: Match;
@@ -65,7 +66,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300">
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group">
       <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
         
@@ -147,6 +148,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
               {formatDate(match.date)}
             </p>
           )}
+          
+          {/* Watch Now Button - appears on hover */}
+          <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button 
+              className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-medium py-1 text-xs flex items-center justify-center gap-1"
+              size="sm"
+            >
+              <Play size={12} />
+              Watch Now
+            </Button>
+          </div>
         </div>
       </AspectRatio>
     </div>
