@@ -1,4 +1,11 @@
 
+export interface ManualMatchLink {
+  id: string;
+  name: string;
+  url: string;
+  quality?: string;
+}
+
 export interface ManualMatch {
   id: string;
   title: string;
@@ -7,7 +14,7 @@ export interface ManualMatch {
     home: string;
     away: string;
   };
-  embedUrl: string;
+  links: ManualMatchLink[];
   visible: boolean;
 }
 
@@ -20,7 +27,26 @@ export const manualMatches: ManualMatch[] = [
       home: "Australia",
       away: "South Africa"
     },
-    embedUrl: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
+    links: [
+      {
+        id: "willow-hd",
+        name: "Willow TV HD",
+        url: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
+        quality: "HD"
+      },
+      {
+        id: "willow-backup",
+        name: "Willow TV Backup",
+        url: "https://topembed.pw/channel/WillowTV-backup",
+        quality: "SD"
+      },
+      {
+        id: "sports-stream",
+        name: "Sports Stream",
+        url: "https://topembed.pw/channel/sports-live",
+        quality: "HD"
+      }
+    ],
     visible: false
   },
   {
@@ -31,7 +57,14 @@ export const manualMatches: ManualMatch[] = [
       home: "Hidden FC",
       away: "Invisible United"
     },
-    embedUrl: "https://topembed.pw/channel/hidden",
+    links: [
+      {
+        id: "hidden-link",
+        name: "Hidden Stream",
+        url: "https://topembed.pw/channel/hidden",
+        quality: "HD"
+      }
+    ],
     visible: false
   }
 ];
