@@ -35,9 +35,9 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "sky-sport-1[NewZealand]",
-        name: "sky sport 1 [NewZealand]",
-        url: "https://topembed.pw/channel/SkySport1[NewZealand]",
+        id: "Super-sport-Cricket[SouthAfrica]",
+        name: "Super Sport Cricket [SouthAfrica]",
+        url: "https://topembed.pw/channel/SuperSportCricket[SouthAfrica]",
         quality: "HD"
       },
       {
