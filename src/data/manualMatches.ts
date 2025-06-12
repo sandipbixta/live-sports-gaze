@@ -35,19 +35,19 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "willow-backup",
-        name: "Willow TV Backup",
-        url: "https://topembed.pw/channel/WillowTV-backup",
-        quality: "SD"
+        id: "sky-sport-1",
+        name: "sky sport 1",
+        url: "https://topembed.pw/channel/SkySport1[NewZealand]",
+        quality: "HD"
       },
       {
-        id: "sports-stream",
-        name: "Sports Stream",
-        url: "https://topembed.pw/channel/sports-live",
+        id: "sky-sport-UK",
+        name: "Sky sport UK",
+        url: "https://topembed.pw/channel/SkySportsCricket[UK]",
         quality: "HD"
       }
     ],
-    visible: false
+    visible: true
   },
   {
     id: "hidden-match",
