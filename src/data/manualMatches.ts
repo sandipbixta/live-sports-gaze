@@ -20,7 +20,7 @@ export interface ManualMatch {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "WillowTV",
+    id: "Austraila-VS-South-africa",
     title: "Aus vs SA",
     date: "2025-06-12T20:00:00Z",
     teams: {
@@ -35,8 +35,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "sky-sport-1",
-        name: "sky sport 1",
+        id: "sky-sport-1[NewZealand]",
+        name: "sky sport 1 [NewZealand]",
         url: "https://topembed.pw/channel/SkySport1[NewZealand]",
         quality: "HD"
       },
