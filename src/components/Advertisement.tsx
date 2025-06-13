@@ -16,6 +16,12 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     adRef.current.innerHTML = '';
     
     if (type === 'banner') {
+      // Create a container div for the banner ad
+      const adContainer = document.createElement('div');
+      adContainer.style.textAlign = 'center';
+      adContainer.style.width = '100%';
+      adContainer.style.overflow = 'hidden';
+      
       // Banner ad configuration - responsive for mobile
       const script1 = document.createElement('script');
       script1.type = 'text/javascript';
@@ -34,8 +40,19 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       script2.src = '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
       script2.async = true;
       
-      adRef.current.appendChild(script1);
-      adRef.current.appendChild(script2);
+      // Add error handling
+      script2.onerror = () => {
+        console.log('Banner ad script failed to load');
+      };
+      
+      script2.onload = () => {
+        console.log('Banner ad script loaded successfully');
+      };
+      
+      adContainer.appendChild(script1);
+      adContainer.appendChild(script2);
+      adRef.current.appendChild(adContainer);
+      
     } else if (type === 'direct-link') {
       // Direct link ad - mobile optimized
       const link = document.createElement('a');
@@ -46,6 +63,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       link.innerHTML = '🎯 Exclusive Offers - Click Here!';
       
       adRef.current.appendChild(link);
+      
     } else if (type === 'popunder') {
       // Popunder ad functionality
       const handlePopunder = () => {
@@ -100,7 +118,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     return (
       <div className={`bg-gray-200 dark:bg-gray-800 rounded-lg p-4 text-center ${className}`}>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Advertisement Placeholder ({type})
+          Advertisement Placeholder ({type}) - Banner: 728x90
         </p>
       </div>
     );
@@ -114,8 +132,9 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   return (
     <div 
       ref={adRef} 
-      className={`ad-container flex justify-center items-center overflow-hidden ${className}`} 
+      className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] ${className}`} 
       data-ad-type={type}
+      style={{ minHeight: type === 'banner' ? '90px' : 'auto' }}
     />
   );
 };
