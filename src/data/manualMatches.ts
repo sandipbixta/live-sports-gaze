@@ -47,7 +47,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true
+    visible: false
   },
   {
     id: "hidden-match",
