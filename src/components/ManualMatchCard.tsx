@@ -34,11 +34,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
     const oneHourInMs = 60 * 60 * 1000;
-    const sixHoursInMs = 6 * 60 * 60 * 1000;
+    const threeHoursInMs = 3 * 60 * 60 * 1000; // Changed to 3 hours
     
     return (
       matchTime - now < oneHourInMs && // Match starts within 1 hour
-      now - matchTime < sixHoursInMs  // Match can be live up to 6 hours after start
+      now - matchTime < threeHoursInMs  // Match can be live up to 3 hours after start
     );
   };
 
@@ -49,6 +49,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   return (
     <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={handleWatchNow}>
       <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
+        {/* Background Image if available */}
+        {match.image && (
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${match.image})` }}
+          />
+        )}
+        
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
         
         {/* Match Time */}
