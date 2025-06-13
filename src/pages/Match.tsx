@@ -189,13 +189,16 @@ const Match = () => {
         </script>
       </Helmet>
       
+      {/* Popunder Ad */}
+      <Advertisement type="popunder" />
+      
       <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
-      <div className="container mx-auto px-4 py-8">
-        {/* Banner Advertisement */}
-        <div className="mb-6">
-          <Advertisement type="banner" className="w-full" />
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        {/* Banner Advertisement - mobile responsive */}
+        <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
         {activeTab === 'stream' && (
@@ -212,14 +215,14 @@ const Match = () => {
         
         {activeTab === 'highlights' && <HighlightsTab />}
 
-        {/* Direct Link Advertisement */}
-        <div className="my-8">
+        {/* Direct Link Advertisement - mobile optimized */}
+        <div className="my-6 sm:my-8">
           <Advertisement type="direct-link" className="w-full" />
         </div>
 
         {/* Trending Matches Section */}
         {trendingMatches.length > 0 && (
-          <div className="mt-12">
+          <div className="mt-8 sm:mt-12">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
               🔥 Trending Matches
               <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">

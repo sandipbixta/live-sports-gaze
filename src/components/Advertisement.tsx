@@ -16,7 +16,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     adRef.current.innerHTML = '';
     
     if (type === 'banner') {
-      // Banner ad configuration
+      // Banner ad configuration - responsive for mobile
       const script1 = document.createElement('script');
       script1.type = 'text/javascript';
       script1.innerHTML = `
@@ -37,15 +37,54 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adRef.current.appendChild(script1);
       adRef.current.appendChild(script2);
     } else if (type === 'direct-link') {
-      // Direct link ad
+      // Direct link ad - mobile optimized
       const link = document.createElement('a');
       link.href = 'https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37';
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
-      link.className = 'block w-full h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold hover:from-blue-600 hover:to-purple-700 transition-all';
+      link.className = 'block w-full h-16 sm:h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold hover:from-blue-600 hover:to-purple-700 transition-all text-sm sm:text-base';
       link.innerHTML = '🎯 Exclusive Offers - Click Here!';
       
       adRef.current.appendChild(link);
+    } else if (type === 'popunder') {
+      // Popunder ad functionality
+      const handlePopunder = () => {
+        // Only trigger once per session
+        if (sessionStorage.getItem('popunder_shown')) return;
+        
+        try {
+          const popWindow = window.open(
+            'https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
+            '_blank',
+            'width=1,height=1,left=0,top=0'
+          );
+          
+          if (popWindow) {
+            // Move the popup behind the main window
+            setTimeout(() => {
+              window.focus();
+              popWindow.blur();
+            }, 100);
+            
+            sessionStorage.setItem('popunder_shown', 'true');
+          }
+        } catch (error) {
+          console.log('Popunder blocked or error:', error);
+        }
+      };
+      
+      // Trigger popunder on user interaction (click anywhere)
+      const triggerPopunder = () => {
+        handlePopunder();
+        document.removeEventListener('click', triggerPopunder);
+      };
+      
+      document.addEventListener('click', triggerPopunder);
+      
+      // Cleanup function
+      return () => {
+        document.removeEventListener('click', triggerPopunder);
+      };
     }
     
     return () => {
@@ -60,15 +99,22 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   if (process.env.NODE_ENV === 'development') {
     return (
       <div className={`bg-gray-200 dark:bg-gray-800 rounded-lg p-4 text-center ${className}`}>
-        <p className="text-sm text-gray-600 dark:text-gray-400">Advertisement Placeholder</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Advertisement Placeholder ({type})
+        </p>
       </div>
     );
+  }
+  
+  // Popunder type doesn't render visible content
+  if (type === 'popunder') {
+    return null;
   }
   
   return (
     <div 
       ref={adRef} 
-      className={`ad-container flex justify-center items-center ${className}`} 
+      className={`ad-container flex justify-center items-center overflow-hidden ${className}`} 
       data-ad-type={type}
     />
   );

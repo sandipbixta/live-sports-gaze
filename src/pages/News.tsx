@@ -67,6 +67,9 @@ const News = () => {
         </script>
       </Helmet>
       
+      {/* Popunder Ad */}
+      <Advertisement type="popunder" />
+      
       <div className="py-4">
         <div className="flex justify-between items-center mb-4">
           <div>
@@ -84,13 +87,13 @@ const News = () => {
           </Button>
         </div>
         
-        {/* Banner Advertisement */}
-        <div className="mb-6">
-          <Advertisement type="banner" className="w-full" />
+        {/* Banner Advertisement - mobile responsive */}
+        <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
         {/* Email signup for returning visitors */}
-        <div className="bg-white dark:bg-black rounded-xl p-5 border border-black dark:border-white mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="bg-white dark:bg-black rounded-xl p-4 sm:p-5 border border-black dark:border-white mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
             <h3 className="text-xl font-bold text-black dark:text-white">Get Daily Football Updates</h3>
             <p className="text-sm text-black dark:text-white">Delivered straight to your inbox</p>
@@ -108,12 +111,12 @@ const News = () => {
         </div>
         
         {/* Featured news section with enhanced SEO */}
-        <div className="mb-8 news-section-component">
+        <div className="mb-6 sm:mb-8 news-section-component">
           <NewsSection />
         </div>
         
-        {/* Direct Link Advertisement */}
-        <div className="mb-6">
+        {/* Direct Link Advertisement - mobile optimized */}
+        <div className="mb-4 sm:mb-6">
           <Advertisement type="direct-link" className="w-full" />
         </div>
         

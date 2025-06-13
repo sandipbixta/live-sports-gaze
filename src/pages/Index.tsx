@@ -145,15 +145,18 @@ const Index = () => {
         <link rel="canonical" href="https://damitv.pro/" />
       </Helmet>
       
+      {/* Popunder Ad - triggers on user interaction */}
+      <Advertisement type="popunder" />
+      
       <main className="py-4">
-        {/* Banner Advertisement */}
-        <div className="mb-6">
-          <Advertisement type="banner" className="w-full" />
+        {/* Banner Advertisement - mobile responsive */}
+        <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
 
         {/* Manual Matches Section */}
         {visibleManualMatches.length > 0 && (
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <Play className="h-6 w-6 text-[#ff5a36]" />
@@ -175,8 +178,8 @@ const Index = () => {
           </div>
         )}
 
-        {/* Direct Link Advertisement */}
-        <div className="mb-6">
+        {/* Direct Link Advertisement - mobile optimized */}
+        <div className="mb-4 sm:mb-6">
           <Advertisement type="direct-link" className="w-full" />
         </div>
 

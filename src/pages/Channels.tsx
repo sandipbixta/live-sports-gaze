@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
@@ -123,7 +122,10 @@ const Channels = () => {
         </script>
       </Helmet>
       
-      <div className="mb-8">
+      {/* Popunder Ad */}
+      <Advertisement type="popunder" />
+      
+      <div className="mb-6 sm:mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-white">Live TV Channels</h1>
           <Link to="/schedule" className="hidden sm:flex items-center gap-2">
@@ -137,15 +139,15 @@ const Channels = () => {
           Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
-        {/* Banner Advertisement */}
-        <div className={`mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
-          <Advertisement type="banner" className="w-full" />
+        {/* Banner Advertisement - mobile responsive */}
+        <div className={`mb-4 sm:mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
         <ChannelsGrid />
         
-        {/* Direct Link Advertisement */}
-        <div className="my-8">
+        {/* Direct Link Advertisement - mobile optimized */}
+        <div className="my-6 sm:my-8">
           <Advertisement type="direct-link" className="w-full" />
         </div>
         
