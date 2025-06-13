@@ -20,7 +20,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "Super-sport-Cricket[SouthAfrica]",
         name: "Super Sport Cricket [SouthAfrica]",
-        url: "https://topembed.pw/channel/SuperSportCricket[SouthAfrica]",
+        url: "https://topembed.pw/channel/SuperSportGrandstand[SouthAfrica]",
         quality: "HD"
       },
       {
