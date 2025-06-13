@@ -18,15 +18,21 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "Super-sport-G[SouthAfrica]",
-        name: "Super Sport G [SouthAfrica]",
-        url: "https://topembed.pw/channel/SuperSportGrandstand[SouthAfrica]",
+        id: "Sky-Sports-Main-Event [UK]",
+        name: "Sky Sports MainEvent[UK]",
+        url: "https://topembed.pw/channel/SkySportsMainEvent%5BUK%5D",
         quality: "HD"
       },
       {
-        id: "sky-sports",
-        name: "Sky sports ",
-        url: "https://topembed.pw/channel/SkySportsCricket[UK]",
+        id: "sky-sport-2",
+        name: "Sky sport 2 ",
+        url: "https://topembed.pw/channel/SkySport2%5BNewZealand%5D",
+        quality: "HD"
+      },
+       {
+        id: "Willow-Extra",
+        name: "Willow Extra ",
+        url: "https://topembed.pw/channel/WillowXtra2%5BUSA%5D",
         quality: "HD"
       }
     ],
