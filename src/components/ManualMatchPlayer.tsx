@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X, Maximize2 } from 'lucide-react';
-import { ManualMatch } from '@/data/manualMatches';
+import { ManualMatch } from '@/types/manualMatch';
 import {
   Dialog,
   DialogContent,
