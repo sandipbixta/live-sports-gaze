@@ -16,6 +16,7 @@ export interface ManualMatch {
   };
   links: ManualMatchLink[];
   visible: boolean;
+  image?: string;
 }
 
 export const manualMatches: ManualMatch[] = [
@@ -47,7 +48,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false
+    visible: true,
+    image: "https://i.ibb.co/0jjBfQG/aus-vs-sa.jpg"
   },
   {
     id: "hidden-match",
