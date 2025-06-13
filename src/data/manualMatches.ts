@@ -24,8 +24,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "sky-sport",
-        name: "Sky sport ",
+        id: "sky-sports",
+        name: "Sky sports ",
         url: "https://topembed.pw/channel/SkySportsCricket[UK]",
         quality: "HD"
       }
