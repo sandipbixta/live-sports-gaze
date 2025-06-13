@@ -49,7 +49,7 @@ export const manualMatches: ManualMatch[] = [
       }
     ],
     visible: true,
-    image: "https://i.ibb.co/0jjBfQG/aus-vs-sa.jpg"
+    image: "https://postimg.cc/Mn0cf22G"
   },
   {
     id: "hidden-match",
