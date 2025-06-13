@@ -37,7 +37,7 @@ export const manualMatches: ManualMatch[] = [
       }
     ],
     visible: true,
-    image: "https://i.imgur.com/MpB8olj.png"
+    image: "https://imgur.com/undefined"
   },
   {
     id: "hidden-match",
