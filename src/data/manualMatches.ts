@@ -21,7 +21,7 @@ export const manualMatches: ManualMatch[] = [
         id: "Sky-Sports-Main-Event [UK]",
         name: "Sky Sports MainEvent[UK]",
         url: "https://topembed.pw/channel/SkySportsMainEvent%5BUK%5D",
-        quality: "HD"
+        quality: "HD+"
       },
       {
         id: "sky-sport-2",
