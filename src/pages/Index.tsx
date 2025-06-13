@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -16,6 +15,7 @@ import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
+import Advertisement from '../components/Advertisement';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -146,6 +146,11 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
+        {/* Banner Advertisement */}
+        <div className="mb-6">
+          <Advertisement type="banner" className="w-full" />
+        </div>
+
         {/* Manual Matches Section */}
         {visibleManualMatches.length > 0 && (
           <div className="mb-8">
@@ -169,6 +174,11 @@ const Index = () => {
             <Separator className="my-8 bg-[#343a4d]" />
           </div>
         )}
+
+        {/* Direct Link Advertisement */}
+        <div className="mb-6">
+          <Advertisement type="direct-link" className="w-full" />
+        </div>
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">

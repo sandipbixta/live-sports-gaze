@@ -1,3 +1,4 @@
+import { ManualMatch } from '@/types/manualMatch';
 
 export interface ManualMatchLink {
   id: string;

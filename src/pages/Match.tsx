@@ -193,7 +193,7 @@ const Match = () => {
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="container mx-auto px-4 py-8">
-        {/* Non-intrusive ad placement */}
+        {/* Banner Advertisement */}
         <div className="mb-6">
           <Advertisement type="banner" className="w-full" />
         </div>
@@ -211,6 +211,11 @@ const Match = () => {
         )}
         
         {activeTab === 'highlights' && <HighlightsTab />}
+
+        {/* Direct Link Advertisement */}
+        <div className="my-8">
+          <Advertisement type="direct-link" className="w-full" />
+        </div>
 
         {/* Trending Matches Section */}
         {trendingMatches.length > 0 && (

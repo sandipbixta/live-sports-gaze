@@ -137,12 +137,17 @@ const Channels = () => {
           Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
-        {/* Single ad placement before channel grid - responsive */}
+        {/* Banner Advertisement */}
         <div className={`mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
           <Advertisement type="banner" className="w-full" />
         </div>
         
         <ChannelsGrid />
+        
+        {/* Direct Link Advertisement */}
+        <div className="my-8">
+          <Advertisement type="direct-link" className="w-full" />
+        </div>
         
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">

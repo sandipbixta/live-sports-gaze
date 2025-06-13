@@ -84,6 +84,11 @@ const News = () => {
           </Button>
         </div>
         
+        {/* Banner Advertisement */}
+        <div className="mb-6">
+          <Advertisement type="banner" className="w-full" />
+        </div>
+        
         {/* Email signup for returning visitors */}
         <div className="bg-white dark:bg-black rounded-xl p-5 border border-black dark:border-white mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
@@ -105,6 +110,11 @@ const News = () => {
         {/* Featured news section with enhanced SEO */}
         <div className="mb-8 news-section-component">
           <NewsSection />
+        </div>
+        
+        {/* Direct Link Advertisement */}
+        <div className="mb-6">
+          <Advertisement type="direct-link" className="w-full" />
         </div>
         
         {/* Categories section */}

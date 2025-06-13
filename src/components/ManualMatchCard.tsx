@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Play, Calendar, Clock } from 'lucide-react';
-import { ManualMatch } from '@/data/manualMatches';
+import { ManualMatch } from '@/types/manualMatch';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useNavigate } from 'react-router-dom';
