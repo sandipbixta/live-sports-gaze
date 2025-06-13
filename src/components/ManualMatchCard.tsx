@@ -49,15 +49,6 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   return (
     <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={handleWatchNow}>
       <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
-        {/* Background Image */}
-        {match.image && (
-          <img 
-            src={match.image} 
-            alt={`${match.teams.home} vs ${match.teams.away}`}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
         
         {/* Match Time */}

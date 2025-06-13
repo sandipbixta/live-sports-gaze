@@ -16,7 +16,6 @@ export interface ManualMatch {
   };
   links: ManualMatchLink[];
   visible: boolean;
-  image?: string;
 }
 
 export const manualMatches: ManualMatch[] = [
@@ -48,8 +47,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true,
-    image: "https://imgur.com/MpB8olj"
+    visible: false
   },
   {
     id: "hidden-match",
