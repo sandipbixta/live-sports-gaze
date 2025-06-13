@@ -1,23 +1,5 @@
+
 import { ManualMatch } from '@/types/manualMatch';
-
-export interface ManualMatchLink {
-  id: string;
-  name: string;
-  url: string;
-  quality?: string;
-}
-
-export interface ManualMatch {
-  id: string;
-  title: string;
-  date: string;
-  teams: {
-    home: string;
-    away: string;
-  };
-  links: ManualMatchLink[];
-  visible: boolean;
-}
 
 export const manualMatches: ManualMatch[] = [
   {
@@ -48,7 +30,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true
+    visible: true,
+    image: "https://i.imgur.com/MpB8olj.png"
   },
   {
     id: "hidden-match",

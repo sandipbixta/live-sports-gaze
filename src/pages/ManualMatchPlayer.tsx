@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { manualMatches, ManualMatchLink } from '@/data/manualMatches';
+import { manualMatches } from '@/data/manualMatches';
+import { ManualMatchLink } from '@/types/manualMatch';
 import { Helmet } from 'react-helmet-async';
 
 const ManualMatchPlayer = () => {
