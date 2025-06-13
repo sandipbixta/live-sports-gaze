@@ -13,7 +13,7 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "willow-hd",
+        id: "willow-h.d",
         name: "Willow TV HD",
         url: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
         quality: "HD"
