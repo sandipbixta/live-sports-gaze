@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Play, Calendar, Clock } from 'lucide-react';
 import { ManualMatch } from '@/types/manualMatch';
@@ -13,12 +12,14 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
+  // Always format using UTC, so time is fixed regardless of user's local browser timezone.
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
+      timeZone: 'UTC' // force UTC display
     });
   };
 
@@ -26,7 +27,8 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric' 
+      day: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
