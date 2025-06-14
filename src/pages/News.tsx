@@ -67,8 +67,7 @@ const News = () => {
         </script>
       </Helmet>
       
-      {/* Popunder Ad */}
-      <Advertisement type="popunder" />
+      {/* Popunder Ad removed */}
       
       <div className="py-4">
         <div className="flex justify-between items-center mb-4">

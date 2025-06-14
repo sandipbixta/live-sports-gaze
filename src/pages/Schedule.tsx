@@ -161,9 +161,6 @@ const Schedule = () => {
         <meta property="og:type" content="website" />
       </Helmet>
       
-      {/* Popunder Ad */}
-      <Advertisement type="popunder" />
-      
       <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
         <PageHeader 
           title="Schedule" 

@@ -189,9 +189,6 @@ const Match = () => {
         </script>
       </Helmet>
       
-      {/* Popunder Ad */}
-      <Advertisement type="popunder" />
-      
       <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
