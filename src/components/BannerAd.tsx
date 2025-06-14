@@ -9,34 +9,28 @@ const BannerAd: React.FC = () => {
   if (closed) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-2 pointer-events-none">
-      <div
-        className="bg-white dark:bg-black border border-black dark:border-white shadow-xl rounded-lg max-w-md w-full sm:max-w-lg mx-auto flex flex-col items-center py-4 px-4 relative pointer-events-auto"
-        style={{
-          top: "18vh",
-          position: "relative",
-        }}
-      >
-        <button
-          aria-label="Close Banner Ad"
-          className="absolute top-2 right-2 text-black dark:text-white text-lg font-bold px-2 hover:text-red-500 rounded"
-          onClick={() => setClosed(true)}
-        >
-          ×
-        </button>
+    <div className="w-full bg-white dark:bg-black border-b border-black dark:border-white shadow-md flex items-center justify-center px-2 py-2 z-30">
+      <div className="flex items-center justify-between w-full max-w-3xl mx-auto relative">
         <a
           href={BANNER_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex flex-col items-center"
+          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2"
         >
-          <span className="text-base font-semibold text-[#2C2E34] dark:text-white mb-1">
+          <span className="text-sm font-semibold text-[#2C2E34] dark:text-white whitespace-nowrap">
             🎯 Special Offer — Tap to Access!
           </span>
-          <div className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg py-3 px-2 text-center font-semibold text-sm hover:from-blue-600 hover:to-purple-700 transition-all">
+          <span className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md py-2 px-3 text-center font-semibold text-xs sm:text-sm hover:from-blue-600 hover:to-purple-700 transition-all">
             Exclusive Offers - Click Here!
-          </div>
+          </span>
         </a>
+        <button
+          aria-label="Close Banner Ad"
+          className="absolute top-1 right-1 text-black dark:text-white text-lg font-bold px-2 hover:text-red-500 rounded"
+          onClick={() => setClosed(true)}
+        >
+          ×
+        </button>
       </div>
     </div>
   );
