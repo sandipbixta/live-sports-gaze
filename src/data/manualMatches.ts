@@ -30,7 +30,7 @@ export const manualMatches: ManualMatch[] = [
         url: "https://topembed.pw/channel/SkySport2%5BNewZealand%5D",
         quality: "HD"
       },
-       {
+      {
         id: "Willow-Extra",
         name: "Willow Extra ",
         url: "https://topembed.pw/channel/WillowXtra2%5BUSA%5D",
@@ -38,7 +38,7 @@ export const manualMatches: ManualMatch[] = [
       }
     ],
     visible: true,
-    image: "https://imgur.com/SU5B2sQ"
+    image: "https://i.imgur.com/SU5B2sQ.jpg" // fixed: use direct image link
   },
   {
     id: "hidden-match",
