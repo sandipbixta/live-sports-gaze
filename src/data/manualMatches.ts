@@ -37,7 +37,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false,
+    visible: true,
     image: "https://i.imgur.com/SU5B2sQ.jpg" // fixed: use direct image link
   },
   {
