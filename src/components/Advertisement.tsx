@@ -68,16 +68,32 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adRef.current.appendChild(link);
       
     } else if (type === 'popunder') {
-      // Less aggressive popunder ad functionality
+      // Much less aggressive popunder ad functionality
       const handlePopunder = () => {
-        // Check if already shown in the last 30 minutes
+        // Check if already shown in the last 2 hours (increased from 30 minutes)
         const lastShown = localStorage.getItem('popunder_last_shown');
         const now = Date.now();
-        const thirtyMinutes = 30 * 60 * 1000;
+        const twoHours = 2 * 60 * 60 * 1000; // 2 hours instead of 30 minutes
         
-        if (lastShown && (now - parseInt(lastShown)) < thirtyMinutes) {
-          console.log('Popunder cooldown active');
+        if (lastShown && (now - parseInt(lastShown)) < twoHours) {
+          console.log('Popunder cooldown active - 2 hour limit');
           return;
+        }
+        
+        // Check if user is on video player pages - be extra careful there
+        const isVideoPlayerPage = window.location.pathname.includes('/match/') || 
+                                 window.location.pathname.includes('/channel/') ||
+                                 window.location.pathname.includes('/manual-match/');
+        
+        if (isVideoPlayerPage) {
+          // On video pages, only trigger if user has been idle for a while
+          const lastActivity = localStorage.getItem('last_user_activity');
+          const fiveMinutes = 5 * 60 * 1000;
+          
+          if (!lastActivity || (now - parseInt(lastActivity)) < fiveMinutes) {
+            console.log('User recently active on video page, skipping popunder');
+            return;
+          }
         }
         
         try {
@@ -94,39 +110,64 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
               popWindow.blur();
             }, 100);
             
-            // Set cooldown
+            // Set longer cooldown
             localStorage.setItem('popunder_last_shown', now.toString());
-            console.log('Popunder triggered, cooldown set');
+            console.log('Popunder triggered, 2-hour cooldown set');
           }
         } catch (error) {
           console.log('Popunder blocked or error:', error);
         }
       };
       
-      // More controlled popunder triggering - only after user has been on site for 10 seconds
-      let clickCount = 0;
-      const maxClicks = 1; // Only trigger once per session
+      // Track user activity to avoid interrupting active users
+      const trackActivity = () => {
+        localStorage.setItem('last_user_activity', Date.now().toString());
+      };
+      
+      // Add activity listeners
+      document.addEventListener('click', trackActivity);
+      document.addEventListener('scroll', trackActivity);
+      document.addEventListener('keydown', trackActivity);
+      
+      // Much more controlled popunder triggering
+      let hasTriggered = false;
       
       const triggerPopunder = () => {
-        clickCount++;
-        if (clickCount === maxClicks) {
-          // Add a small delay to make it less aggressive
+        if (hasTriggered) return;
+        
+        // Only trigger on specific user interactions, not every click
+        const target = event?.target as HTMLElement;
+        const isNavigationClick = target?.closest('a') || 
+                                 target?.closest('button') ||
+                                 target?.closest('[role="button"]');
+        
+        if (isNavigationClick) {
+          hasTriggered = true;
+          // Add longer delay to make it less intrusive
           setTimeout(() => {
             handlePopunder();
-          }, 2000);
+          }, 3000); // 3 seconds delay
+          
+          // Remove listeners after first trigger
           document.removeEventListener('click', triggerPopunder);
         }
       };
       
-      // Wait 10 seconds before enabling popunder
+      // Wait much longer before enabling popunder (30 seconds instead of 10)
       setTimeout(() => {
-        document.addEventListener('click', triggerPopunder);
-        console.log('Popunder listener enabled after 10 seconds');
-      }, 10000);
+        // Only enable if user is still on the page
+        if (document.visibilityState === 'visible') {
+          document.addEventListener('click', triggerPopunder);
+          console.log('Popunder listener enabled after 30 seconds');
+        }
+      }, 30000);
       
       // Cleanup function
       return () => {
         document.removeEventListener('click', triggerPopunder);
+        document.removeEventListener('click', trackActivity);
+        document.removeEventListener('scroll', trackActivity);
+        document.removeEventListener('keydown', trackActivity);
       };
     }
     
