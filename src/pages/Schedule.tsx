@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
@@ -12,7 +13,7 @@ import DatePagination from '../components/DatePagination';
 import PopularGames from '../components/PopularGames';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
-import Advertisement from '../components/Advertisement';
+// import Advertisement from '../components/Advertisement';
 
 const Schedule = () => {
   const { toast } = useToast();
@@ -169,10 +170,10 @@ const Schedule = () => {
           showCalendar={false}
         />
         
-        {/* Banner Advertisement - mobile responsive */}
-        <div className="mb-4 sm:mb-6">
+        {/* Banner Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div>
+        </div> */}
         
         <div className="mb-6">
           <DatePagination 
@@ -196,10 +197,10 @@ const Schedule = () => {
           selectedSport={selectedSport}
         />
 
-        {/* Direct Link Advertisement - mobile optimized */}
-        <div className="my-6 sm:my-8">
+        {/* Direct Link Advertisement removed */}
+        {/* <div className="my-6 sm:my-8">
           <Advertisement type="direct-link" className="w-full" />
-        </div>
+        </div> */}
 
         {popularMatches.length > 0 && (
           <Separator className="my-8 bg-black dark:bg-white" />
@@ -220,3 +221,4 @@ const Schedule = () => {
 };
 
 export default Schedule;
+

@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import NewsSection from '../components/NewsSection';
 import { useToast } from '../hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
-import Advertisement from '../components/Advertisement';
+// import Advertisement from '../components/Advertisement';
 import SocialBar from '../components/SocialBar';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Share } from 'lucide-react';
@@ -86,10 +87,10 @@ const News = () => {
           </Button>
         </div>
         
-        {/* Banner Advertisement - mobile responsive */}
-        <div className="mb-4 sm:mb-6">
+        {/* Banner Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div>
+        </div> */}
         
         {/* Email signup for returning visitors */}
         <div className="bg-white dark:bg-black rounded-xl p-4 sm:p-5 border border-black dark:border-white mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -114,10 +115,10 @@ const News = () => {
           <NewsSection />
         </div>
         
-        {/* Direct Link Advertisement - mobile optimized */}
-        <div className="mb-4 sm:mb-6">
+        {/* Direct Link Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
           <Advertisement type="direct-link" className="w-full" />
-        </div>
+        </div> */}
         
         {/* Categories section */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -147,3 +148,4 @@ const News = () => {
 };
 
 export default News;
+

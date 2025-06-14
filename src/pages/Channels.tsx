@@ -1,7 +1,8 @@
+
 import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
-import Advertisement from '../components/Advertisement';
+// import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -138,17 +139,17 @@ const Channels = () => {
           Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
-        {/* Banner Advertisement - mobile responsive */}
-        <div className={`mb-4 sm:mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
+        {/* Banner Advertisement removed */}
+        {/* <div className={`mb-4 sm:mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div>
+        </div> */}
         
         <ChannelsGrid />
         
-        {/* Direct Link Advertisement - mobile optimized */}
-        <div className="my-6 sm:my-8">
+        {/* Direct Link Advertisement removed */}
+        {/* <div className="my-6 sm:my-8">
           <Advertisement type="direct-link" className="w-full" />
-        </div>
+        </div> */}
         
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
@@ -173,3 +174,4 @@ const Channels = () => {
 };
 
 export default Channels;
+
