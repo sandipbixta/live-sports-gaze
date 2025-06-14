@@ -37,7 +37,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false,
+    visible: true,
     image: "https://imgur.com/undefined"
   },
   {
@@ -56,6 +56,6 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true
+    visible: false
   }
 ];
