@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -7,9 +8,11 @@ import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
-import ManualMatchCard from '../components/ManualMatchCard';
+import FeaturedMatches from '../components/FeaturedMatches';
+import AnnouncementBanner from '../components/AnnouncementBanner';
+import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
-import { Calendar, Tv, Play } from 'lucide-react';
+import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
@@ -106,20 +109,18 @@ const Index = () => {
 
   // Optimized sport selection with caching
   const handleSelectSport = async (sportId: string) => {
-    if (selectedSport === sportId) return; // Avoid unnecessary re-fetch
+    if (selectedSport === sportId) return;
     
     setSelectedSport(sportId);
     setLoadingMatches(true);
     
     try {
-      // Check cache first
       if (allMatches[sportId]) {
         setMatches(allMatches[sportId]);
       } else {
         const matchesData = await fetchMatches(sportId);
         setMatches(matchesData);
         
-        // Cache the data
         setAllMatches(prev => ({
           ...prev,
           [sportId]: matchesData
@@ -145,40 +146,15 @@ const Index = () => {
         <link rel="canonical" href="https://damitv.pro/" />
       </Helmet>
       
-      {/* Popunder Ad - triggers on user interaction */}
       <Advertisement type="popunder" />
       
       <main className="py-4">
-        {/* Banner Advertisement - mobile responsive */}
         <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
 
-        {/* Manual Matches Section */}
-        {visibleManualMatches.length > 0 && (
-          <div className="mb-6 sm:mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Play className="h-6 w-6 text-[#ff5a36]" />
-                Featured Matches
-              </h2>
-              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-3 py-1 text-white">
-                {visibleManualMatches.length} available
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {visibleManualMatches.map((match) => (
-                <ManualMatchCard
-                  key={match.id}
-                  match={match}
-                />
-              ))}
-            </div>
-            <Separator className="my-8 bg-[#343a4d]" />
-          </div>
-        )}
+        <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Direct Link Advertisement - mobile optimized */}
         <div className="mb-4 sm:mb-6">
           <Advertisement type="direct-link" className="w-full" />
         </div>
@@ -209,31 +185,19 @@ const Index = () => {
               <LiveSportsWidget />
             </div>
           ) : (
-            <>
-              <SportsList 
-                sports={sports}
-                onSelectSport={handleSelectSport}
-                selectedSport={selectedSport}
-                isLoading={loadingSports}
-              />
-            </>
+            <SportsList 
+              sports={sports}
+              onSelectSport={handleSelectSport}
+              selectedSport={selectedSport}
+              isLoading={loadingSports}
+            />
           )}
         </div>
         
         {!showLiveSports && (
           <>
-            {/* Quick announcement - optimized */}
-            <div className="mb-6 bg-gradient-to-r from-[#ff5a36] to-[#e64d2e] rounded-lg p-1 overflow-hidden">
-              <div className="bg-[#0A0F1C] rounded-md p-3">
-                <div className="overflow-hidden whitespace-nowrap">
-                  <div className="animate-marquee inline-block text-white font-medium">
-                    🔴 IF YOU CAN'T FIND YOUR MATCH PLEASE VISIT THE LIVE SPORTS CHANNELS SECTION 📺
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AnnouncementBanner />
             
-            {/* Lazy load featured channels */}
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
             </React.Suspense>
@@ -260,31 +224,13 @@ const Index = () => {
               )}
             </div>
             
-            {/* Lazy load news section */}
             <div className="mb-8">
               <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
                 <NewsSection />
               </React.Suspense>
             </div>
             
-            {/* Promotion boxes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-              <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-                <h2 className="text-xl font-bold mb-4 text-white">Live Now</h2>
-                <p className="text-gray-300">Discover events happening right now across different sports.</p>
-                <Link to="/live" aria-label="View all live sports events">
-                  <Button variant="link" className="mt-4 text-[#9b87f5]">See all live events →</Button>
-                </Link>
-              </div>
-              
-              <div className="bg-[#242836] rounded-xl p-6 border border-[#343a4d]">
-                <h2 className="text-xl font-bold mb-4 text-white">Coming Up</h2>
-                <p className="text-gray-300">Get ready for upcoming matches and tournaments.</p>
-                <Link to="/schedule" aria-label="View upcoming matches schedule">
-                  <Button variant="link" className="mt-4 text-[#9b87f5]">See schedule →</Button>
-                </Link>
-              </div>
-            </div>
+            <PromotionBoxes />
           </>
         )}
       </main>
