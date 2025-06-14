@@ -13,7 +13,7 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "willow-h.d",
+        id: "willow-hd",
         name: "Willow TV HD",
         url: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
         quality: "HD"
@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
         id: "Sky-Sports-Main-Event [UK]",
         name: "Sky Sports MainEvent[UK]",
         url: "https://topembed.pw/channel/SkySportsMainEvent%5BUK%5D",
-        quality: "HD+"
+        quality: "HD"
       },
       {
         id: "sky-sport-2",
