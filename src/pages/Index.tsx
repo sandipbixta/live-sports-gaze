@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
@@ -145,8 +144,6 @@ const Index = () => {
         <meta name="keywords" content="live football streaming, watch football online, free sports streams, live matches today, free football tv" />
         <link rel="canonical" href="https://damitv.pro/" />
       </Helmet>
-      
-      <Advertisement type="popunder" />
       
       <main className="py-4">
         <div className="mb-4 sm:mb-6">

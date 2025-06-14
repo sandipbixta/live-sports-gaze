@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video' | 'popunder' | 'direct-link';
+  type: 'banner' | 'sidebar' | 'video' | 'direct-link';
   className?: string;
 }
 
@@ -66,109 +66,6 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       link.innerHTML = '🎯 Exclusive Offers - Click Here!';
       
       adRef.current.appendChild(link);
-      
-    } else if (type === 'popunder') {
-      // Much less aggressive popunder ad functionality
-      const handlePopunder = () => {
-        // Check if already shown in the last 2 hours (increased from 30 minutes)
-        const lastShown = localStorage.getItem('popunder_last_shown');
-        const now = Date.now();
-        const twoHours = 2 * 60 * 60 * 1000; // 2 hours instead of 30 minutes
-        
-        if (lastShown && (now - parseInt(lastShown)) < twoHours) {
-          console.log('Popunder cooldown active - 2 hour limit');
-          return;
-        }
-        
-        // Check if user is on video player pages - be extra careful there
-        const isVideoPlayerPage = window.location.pathname.includes('/match/') || 
-                                 window.location.pathname.includes('/channel/') ||
-                                 window.location.pathname.includes('/manual-match/');
-        
-        if (isVideoPlayerPage) {
-          // On video pages, only trigger if user has been idle for a while
-          const lastActivity = localStorage.getItem('last_user_activity');
-          const fiveMinutes = 5 * 60 * 1000;
-          
-          if (!lastActivity || (now - parseInt(lastActivity)) < fiveMinutes) {
-            console.log('User recently active on video page, skipping popunder');
-            return;
-          }
-        }
-        
-        try {
-          const popWindow = window.open(
-            'https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-            '_blank',
-            'width=1,height=1,left=0,top=0'
-          );
-          
-          if (popWindow) {
-            // Move the popup behind the main window
-            setTimeout(() => {
-              window.focus();
-              popWindow.blur();
-            }, 100);
-            
-            // Set longer cooldown
-            localStorage.setItem('popunder_last_shown', now.toString());
-            console.log('Popunder triggered, 2-hour cooldown set');
-          }
-        } catch (error) {
-          console.log('Popunder blocked or error:', error);
-        }
-      };
-      
-      // Track user activity to avoid interrupting active users
-      const trackActivity = () => {
-        localStorage.setItem('last_user_activity', Date.now().toString());
-      };
-      
-      // Add activity listeners
-      document.addEventListener('click', trackActivity);
-      document.addEventListener('scroll', trackActivity);
-      document.addEventListener('keydown', trackActivity);
-      
-      // Much more controlled popunder triggering
-      let hasTriggered = false;
-      
-      const triggerPopunder = () => {
-        if (hasTriggered) return;
-        
-        // Only trigger on specific user interactions, not every click
-        const target = event?.target as HTMLElement;
-        const isNavigationClick = target?.closest('a') || 
-                                 target?.closest('button') ||
-                                 target?.closest('[role="button"]');
-        
-        if (isNavigationClick) {
-          hasTriggered = true;
-          // Add longer delay to make it less intrusive
-          setTimeout(() => {
-            handlePopunder();
-          }, 3000); // 3 seconds delay
-          
-          // Remove listeners after first trigger
-          document.removeEventListener('click', triggerPopunder);
-        }
-      };
-      
-      // Wait much longer before enabling popunder (30 seconds instead of 10)
-      setTimeout(() => {
-        // Only enable if user is still on the page
-        if (document.visibilityState === 'visible') {
-          document.addEventListener('click', triggerPopunder);
-          console.log('Popunder listener enabled after 30 seconds');
-        }
-      }, 30000);
-      
-      // Cleanup function
-      return () => {
-        document.removeEventListener('click', triggerPopunder);
-        document.removeEventListener('click', trackActivity);
-        document.removeEventListener('scroll', trackActivity);
-        document.removeEventListener('keydown', trackActivity);
-      };
     }
     
     return () => {
@@ -188,11 +85,6 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
         </p>
       </div>
     );
-  }
-  
-  // Popunder type doesn't render visible content
-  if (type === 'popunder') {
-    return null;
   }
   
   return (
