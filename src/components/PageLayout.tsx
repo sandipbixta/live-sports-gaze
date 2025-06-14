@@ -24,7 +24,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-      <BannerAd />
       <header className="bg-[#ff5a36] shadow-md">
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-row justify-between items-center gap-2">
@@ -68,6 +67,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </div>
         </div>
       </header>
+
+      {/* Moved BannerAd here so it shows under the menu/header bar */}
+      <BannerAd />
       
       <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
