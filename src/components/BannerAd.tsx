@@ -1,39 +1,88 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-const BANNER_LINK = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
+const BANNER_AD_KEY = "6f9d1f3d2ad1eb4e3efaf82e5571ea37";
+const BANNER_SCRIPT_SRC = "//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js";
 
 const BannerAd: React.FC = () => {
   const [closed, setClosed] = useState(false);
+  const adRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (closed) return;
+    const adContainer = adRef.current;
+    if (!adContainer) return;
+
+    // Clean previous ad content if any
+    adContainer.innerHTML = "";
+
+    // 1. Set the inline ad options script
+    const optionsScript = document.createElement("script");
+    optionsScript.type = "text/javascript";
+    optionsScript.innerHTML = `
+      atOptions = {
+        'key' : '${BANNER_AD_KEY}',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+    `;
+
+    // 2. Set the main ad script
+    const invokeScript = document.createElement("script");
+    invokeScript.type = "text/javascript";
+    invokeScript.src = BANNER_SCRIPT_SRC;
+    invokeScript.async = true;
+
+    adContainer.appendChild(optionsScript);
+    adContainer.appendChild(invokeScript);
+
+    return () => {
+      // Clean up any injected ads when component unmounts or closes
+      adContainer.innerHTML = "";
+    };
+  }, [closed]);
 
   if (closed) return null;
 
   return (
-    <div className="w-full bg-white dark:bg-black border-b border-black dark:border-white shadow-md flex items-center justify-center px-2 py-2 z-30">
-      <div className="flex items-center justify-between w-full max-w-3xl mx-auto relative">
-        <a
-          href={BANNER_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2"
-        >
-          <span className="text-sm font-semibold text-[#2C2E34] dark:text-white whitespace-nowrap">
-            🎯 Special Offer — Tap to Access!
-          </span>
-          <span className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md py-2 px-3 text-center font-semibold text-xs sm:text-sm hover:from-blue-600 hover:to-purple-700 transition-all">
-            Exclusive Offers - Click Here!
-          </span>
-        </a>
+    <div className="w-full bg-white dark:bg-black border-b border-black dark:border-white shadow-md flex items-center justify-center px-2 py-2 z-30 relative">
+      <div className="flex items-center justify-center w-full max-w-full mx-auto relative min-h-[90px]">
+        {/* The ad will inject the iframe here */}
+        <div
+          ref={adRef}
+          id="banner-ad"
+          className="flex justify-center items-center w-full max-w-3xl min-h-[90px]"
+          style={{
+            minHeight: 60,
+            width: "100%",
+            overflow: "hidden",
+          }}
+        />
         <button
           aria-label="Close Banner Ad"
-          className="absolute top-1 right-1 text-black dark:text-white text-lg font-bold px-2 hover:text-red-500 rounded"
+          className="absolute top-1 right-1 text-black dark:text-white text-lg font-bold p-1 hover:text-red-500 bg-white/60 dark:bg-black/50 rounded transition"
           onClick={() => setClosed(true)}
         >
           ×
         </button>
       </div>
+      {/* Responsive CSS for smaller screens */}
+      <style>{`
+        @media (max-width: 768px) {
+          #banner-ad iframe {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100vw !important;
+            height: 60px !important;
+            min-height: 60px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
 export default BannerAd;
+
