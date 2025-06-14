@@ -3,42 +3,36 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "Austraila-VS-South-africa,Day-3",
-    title: "Aus vs SA",
-    date: "2025-06-12T09:00:00Z",
-    Day: "3",
+    id: "AL-AHLY-VS-INTER-MIAMI",
+    title: "al ahly vs Inter Miami",
+    date: "2025-06-15T012:00:00Z",
     teams: {
-      home: "Australia",
-      away: "South Africa"
+      home: "Al Ahly",
+      away: "Inter Miami"
     },
     links: [
       {
-        id: "willow-hd",
-        name: "Willow TV HD",
-        url: "https://topembed.pw/channel/WillowTV%5BUSA%5D",
+        id: "TBS-USA",
+        name: "TBS [USA]",
+        url: "https://topembed.pw/channel/TBS[USA]",
         quality: "HD"
       },
       {
-        id: "Sky-Sports-Main-Event [UK]",
-        name: "Sky Sports MainEvent[UK]",
-        url: "https://topembed.pw/channel/SkySportsMainEvent[UK]",
+        id: "Channel-5 [UK]",
+        name: "Channel 5 [UK]",
+        url: "https://topembed.pw/channel/Channel5[UK]",
         quality: "HD"
       },
       {
-        id: "sky-sport-2",
-        name: "Sky sport 2 ",
-        url: "https://topembed.pw/channel/SkySport2[NewZealand]",
+        id: "TUDN-[USA]",
+        name: "TUDN [USA]",
+        url: "https://topembed.pw/channel/TUDN[USA]",
         quality: "HD"
       },
-      {
-        id: "Willow-Extra",
-        name: "Willow Extra ",
-        url: "https://topembed.pw/channel/WillowXtra2%5BUSA%5D",
-        quality: "HD"
-      }
+     
     ],
-    visible: false,
-    image: "https://i.imgur.com/SU5B2sQ.jpg" // fixed: use direct image link
+    visible: true,
+    image: "https://imgur.com/C9iom5u" // fixed: use direct image link
   },
   {
     id: "hidden-match",
