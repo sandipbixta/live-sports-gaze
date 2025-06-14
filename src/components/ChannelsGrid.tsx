@@ -189,18 +189,16 @@ const ChannelsGrid = () => {
               </div>
             </div>
           ) : (
-            // Original layout - also updated to navigate to player page
+            // Classic/original layout (remove background/padding box from channel select section)
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
-              {/* Placeholder for original layout */}
-              <div className="col-span-1 lg:col-span-3 bg-[#151922] rounded-xl overflow-hidden order-1 lg:order-1">
-                <div className="flex items-center justify-center h-full min-h-[200px] sm:min-h-[400px]">
-                  <div className="text-center p-4">
-                    <div className="mx-auto w-10 h-10 sm:w-16 sm:h-16 rounded-full bg-[#242836] flex items-center justify-center mb-2 sm:mb-4">
-                      <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
-                    </div>
-                    <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
-                    <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
+              {/* Just the icon and text, no background, box, padding, or border */}
+              <div className="col-span-1 lg:col-span-3 flex items-center justify-center order-1 lg:order-1 min-h-[200px] sm:min-h-[400px]">
+                <div className="text-center">
+                  <div className="mx-auto w-10 h-10 sm:w-16 sm:w-16 rounded-full flex items-center justify-center mb-2 sm:mb-4">
+                    <Tv className="h-5 w-5 sm:h-8 sm:w-8 text-[#fa2d04]" />
                   </div>
+                  <h3 className="text-base sm:text-xl font-semibold text-white">Select a Channel</h3>
+                  <p className="text-gray-400 mt-1 text-xs sm:text-base">Choose a sports channel to watch</p>
                 </div>
               </div>
               
