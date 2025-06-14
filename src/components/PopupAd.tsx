@@ -6,7 +6,7 @@ const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e4
 const PopupAd: React.FC = () => {
   const [open, setOpen] = useState(true);
 
-  // Prevent scrolling when popup is open
+  // Prevent background scrolling when the popup is open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -22,25 +22,36 @@ const PopupAd: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center">
-      <div className="relative rounded-lg shadow-2xl bg-white dark:bg-black border border-gray-300 dark:border-gray-700 w-full max-w-lg mx-2 sm:mx-0">
+      <div className="relative rounded-xl shadow-2xl bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 max-w-xs w-full mx-2 animate-scale-in">
         <button
-          aria-label="Close Popup Ad"
+          aria-label="Close Special Offer"
           onClick={() => setOpen(false)}
-          className="absolute -right-3 -top-3 bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-full text-xl w-8 h-8 flex items-center justify-center shadow hover:bg-red-100 hover:text-red-500 transition"
+          className="absolute -right-3 -top-3 bg-white dark:bg-neutral-900 border border-gray-200 dark:border-gray-700 rounded-full text-xl w-8 h-8 flex items-center justify-center shadow hover:bg-red-100 hover:text-red-500 transition z-10"
         >
           ×
         </button>
-        <iframe
-          src={AD_URL}
-          title="Popup Advertisement"
-          className="w-full h-[360px] sm:h-[420px] rounded-b-lg"
-          style={{
-            minHeight: 260,
-            border: "none",
-            display: "block"
-          }}
-          sandbox="allow-scripts allow-same-origin allow-popups"
-        ></iframe>
+        {/* Special Offer Header */}
+        <div className="w-full flex items-center justify-center py-2 border-b border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900 rounded-t-xl">
+          <span className="text-base font-semibold text-orange-600 dark:text-orange-200">
+            🎁 Special Offer
+          </span>
+        </div>
+        {/* Ad iframe */}
+        <div className="p-3 flex justify-center items-center">
+          <iframe
+            src={AD_URL}
+            title="Special Offer Advertisement"
+            className="w-[300px] h-[250px] rounded-lg border-none"
+            style={{
+              minWidth: "200px",
+              minHeight: "100px",
+              display: "block",
+              backgroundColor: "#fff",
+              border: "none",
+            }}
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          ></iframe>
+        </div>
       </div>
     </div>
   );
