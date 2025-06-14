@@ -1,5 +1,7 @@
+
 import React, { useEffect, useRef, useState } from "react";
 
+const LOCAL_SPECIAL_OFFER_URL = "/special-offer";
 const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
 
 const PopupAd: React.FC = () => {
@@ -18,17 +20,14 @@ const PopupAd: React.FC = () => {
     };
   }, [open]);
 
-  // Handler to open the link (and not when clicking close btn)
+  // Handler to open the link (not when clicking close btn)
   const handleBoxClick = (e: React.MouseEvent) => {
-    // Prevent click if it originated from the close btn
     const target = e.target as HTMLElement;
     if (target.closest('[data-close-btn="true"]')) {
       return;
     }
-    // Also don't trigger if clicking inside the iframe
-    // (Let iframe handle its own clicks)
-    // Otherwise, open the direct link in new tab
-    window.open(AD_URL, "_blank", "noopener noreferrer");
+    // Open our new minimal local route instead of the external ad directly
+    window.open(LOCAL_SPECIAL_OFFER_URL, "_blank", "noopener noreferrer");
   };
 
   if (!open) return null;
