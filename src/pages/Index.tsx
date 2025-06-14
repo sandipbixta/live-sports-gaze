@@ -1,321 +1,241 @@
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { manualMatches } from "@/data/manualMatches";
-import FeaturedMatches from "@/components/FeaturedMatches";
-import PageLayout from "@/components/PageLayout";
-import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
-import { fetchMatches } from "@/lib/api";
-import { Match } from "@/types/match";
-import MatchCard from "@/components/MatchCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
 
-const IndexPage = () => {
-  // Filter for only visible manual matches
-  const visibleManualMatches = manualMatches.filter((m) => m.visible);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("all");
+import React, { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { useToast } from '../hooks/use-toast';
+import { Sport, Match } from '../types/sports';
+import { fetchSports, fetchMatches } from '../api/sportsApi';
+import SportsList from '../components/SportsList';
+import MatchesList from '../components/MatchesList';
+import PopularMatches from '../components/PopularMatches';
+import LiveSportsWidget from '../components/LiveSportsWidget';
+import FeaturedMatches from '../components/FeaturedMatches';
+import AnnouncementBanner from '../components/AnnouncementBanner';
+import PromotionBoxes from '../components/PromotionBoxes';
+import { Separator } from '../components/ui/separator';
+import { Calendar, Tv } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import PageLayout from '../components/PageLayout';
+import { isPopularLeague } from '../utils/popularLeagues';
+import { Helmet } from 'react-helmet-async';
+import { manualMatches } from '../data/manualMatches';
+
+// Lazy load heavy components
+const NewsSection = React.lazy(() => import('../components/NewsSection'));
+const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
+
+const Index = () => {
   const { toast } = useToast();
+  const [sports, setSports] = useState<Sport[]>([]);
+  const [selectedSport, setSelectedSport] = useState<string | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showLiveSports, setShowLiveSports] = useState(false);
+  
+  const [loadingSports, setLoadingSports] = useState(true);
+  const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Create JSON-LD entries for each
-  const sportsEventsJSONLD = visibleManualMatches.map((match) => {
-    return {
-      "@context": "https://schema.org",
-      "@type": "SportsEvent",
-      "name": match.title,
-      "startDate": match.date,
-      "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
-      "eventStatus": "https://schema.org/EventScheduled",
-      "location": {
-        "@type": "VirtualLocation",
-        "url": `${window.location.origin}/manual-match/${match.id}`,
-      },
-      "image": match.image,
-      "description": `Watch ${match.teams.home} vs ${match.teams.away} live stream online for free on DamiTV.`,
-      "performer": [
-        {
-          "@type": "SportsTeam",
-          "name": match.teams.home,
-        },
-        {
-          "@type": "SportsTeam",
-          "name": match.teams.away,
-        },
-      ],
-      "offers": {
-        "@type": "Offer",
-        "url": `${window.location.origin}/manual-match/${match.id}`,
-        "price": "0",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock",
-        "validFrom": match.date,
-      },
-      "organizer": {
-        "@type": "Organization",
-        "name": "DamiTV",
-        "url": "https://damitv.pro"
-      }
-    };
-  });
+  // Filter visible manual matches
+  const visibleManualMatches = useMemo(() => {
+    return manualMatches.filter(match => match.visible);
+  }, []);
 
+  // Memoize popular matches calculation
+  const popularMatches = useMemo(() => {
+    return matches.filter(match => 
+      isPopularLeague(match.title) && 
+      !match.title.toLowerCase().includes('sky sports news') && 
+      !match.id.includes('sky-sports-news')
+    );
+  }, [matches]);
+
+  // Memoize filtered matches
+  const filteredMatches = useMemo(() => {
+    if (!searchTerm.trim()) return matches;
+    
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return matches.filter(match => {
+      return match.title.toLowerCase().includes(lowercaseSearch) || 
+        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+    });
+  }, [matches, searchTerm]);
+
+  // Load sports immediately on mount with optimization
   useEffect(() => {
-    const loadMatches = async () => {
+    const loadSports = async () => {
       try {
-        setLoading(true);
-        const data = await fetchMatches();
-        setMatches(data);
+        let sportsData = await fetchSports();
+        
+        // Sort with football first for better UX
+        sportsData = sportsData.sort((a, b) => {
+          if (a.name.toLowerCase() === 'football') return -1;
+          if (b.name.toLowerCase() === 'football') return 1;
+          if (a.name.toLowerCase() === 'basketball') return -1;
+          if (b.name.toLowerCase() === 'basketball') return 1;
+          return a.name.localeCompare(b.name);
+        });
+        
+        setSports(sportsData);
+        
+        // Auto-select football for faster initial load
+        if (sportsData.length > 0) {
+          const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
+          if (footballSport) {
+            handleSelectSport(footballSport.id);
+          } else {
+            handleSelectSport(sportsData[0].id);
+          }
+        }
       } catch (error) {
-        console.error("Failed to fetch matches:", error);
         toast({
           title: "Error",
-          description: "Failed to load matches. Please try again later.",
+          description: "Failed to load sports data.",
           variant: "destructive",
         });
       } finally {
-        setLoading(false);
+        setLoadingSports(false);
       }
     };
 
-    loadMatches();
+    loadSports();
   }, [toast]);
 
+  // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredMatches = matches.filter((match) => {
-    const searchMatch =
-      match.teams.home.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      match.teams.away.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      match.competition.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    if (activeTab === "all") return searchMatch;
-    return (
-      searchMatch && match.competition.name.toLowerCase().includes(activeTab.toLowerCase())
-    );
-  });
-
-  const competitions = Array.from(
-    new Set(matches.map((match) => match.competition.name))
-  );
+  // Optimized sport selection with caching
+  const handleSelectSport = async (sportId: string) => {
+    if (selectedSport === sportId) return;
+    
+    setSelectedSport(sportId);
+    setLoadingMatches(true);
+    
+    try {
+      if (allMatches[sportId]) {
+        setMatches(allMatches[sportId]);
+      } else {
+        const matchesData = await fetchMatches(sportId);
+        setMatches(matchesData);
+        
+        setAllMatches(prev => ({
+          ...prev,
+          [sportId]: matchesData
+        }));
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load matches data.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
 
   return (
-    <>
+    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>DamiTV - Free Live Football Streaming & Sports TV Online</title>
-        <meta
-          name="description"
-          content="Watch free live football streaming with Premier League, Champions League, La Liga matches and all sports TV online at DamiTV. Access hundreds of free sports channels with no registration required."
-        />
-        {/* Inject all match meta tags for SEO */}
-        {sportsEventsJSONLD.map((event, idx) => (
-          <script
-            key={idx}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(event) }}
-          />
-        ))}
+        <title>DamiTV - Watch Live Football & Sports Streams | Free Football Streaming</title>
+        <meta name="description" content="Watch free live football streams, soccer matches, and sports TV online on DamiTV. Access hundreds of free sports streaming channels with no registration required." />
+        <meta name="keywords" content="live football streaming, watch football online, free sports streams, live matches today, free football tv" />
+        <link rel="canonical" href="https://damitv.pro/" />
       </Helmet>
-      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white mb-6 sm:mb-8">
-          <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
-          <div className="relative p-6 sm:p-8 md:p-10">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">
-              Watch Live Football Streams
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl">
-              Stream Premier League, Champions League, La Liga, Serie A and more for free.
-              No registration required, just click and watch in HD quality.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                asChild
-                className="bg-white text-blue-600 hover:bg-gray-100"
-              >
-                <Link to="/live">
-                  <Play className="mr-2 h-4 w-4" />
-                  Watch Live Now
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="bg-transparent border-white text-white hover:bg-white/10"
-              >
-                <Link to="/schedule">View Schedule</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+      
+      <main className="py-4">
+        {/* Banner Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
+        </div> */}
 
-        {/* Featured Matches Section */}
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Live & Upcoming Matches */}
-        <div className="mb-6 sm:mb-8">
+        {/* Direct Link Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
+          <Advertisement type="direct-link" className="w-full" />
+        </div> */}
+
+        <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-black dark:text-white flex items-center gap-2">
-              <Play className="h-6 w-6 text-[#ff5a36]" />
-              Live & Upcoming Matches
-            </h2>
-            <Link
-              to="/live"
-              className="text-sm text-[#ff5a36] hover:underline font-medium"
-            >
-              View All
-            </Link>
-          </div>
-
-          {/* Tabs for filtering */}
-          <Tabs
-            defaultValue="all"
-            className="mb-4"
-            onValueChange={(value) => setActiveTab(value)}
-          >
-            <TabsList className="mb-4 flex flex-wrap gap-2">
-              <TabsTrigger value="all">All</TabsTrigger>
-              {competitions.map((competition) => (
-                <TabsTrigger key={competition} value={competition.toLowerCase()}>
-                  {competition}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value="all" className="mt-0">
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="border border-gray-200 dark:border-gray-800 rounded-lg p-4"
-                    >
-                      <Skeleton className="h-4 w-3/4 mb-2" />
-                      <Skeleton className="h-10 w-full mb-2" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ))}
-                </div>
-              ) : filteredMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredMatches.slice(0, 8).map((match) => (
-                    <MatchCard key={match.id} match={match} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-10">
-                  <p className="text-gray-500 dark:text-gray-400">
-                    No matches found. Please try a different search.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-
-            {competitions.map((competition) => (
-              <TabsContent
-                key={competition}
-                value={competition.toLowerCase()}
-                className="mt-0"
+            <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+                onClick={() => setShowLiveSports(!showLiveSports)}
               >
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="border border-gray-200 dark:border-gray-800 rounded-lg p-4"
-                      >
-                        <Skeleton className="h-4 w-3/4 mb-2" />
-                        <Skeleton className="h-10 w-full mb-2" />
-                        <Skeleton className="h-4 w-1/2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : filteredMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filteredMatches.slice(0, 8).map((match) => (
-                      <MatchCard key={match.id} match={match} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-10">
-                    <p className="text-gray-500 dark:text-gray-400">
-                      No matches found for this competition.
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-            ))}
-          </Tabs>
-
-          <div className="flex justify-center mt-6">
-            <Button asChild variant="outline">
-              <Link to="/live">View All Matches</Link>
-            </Button>
-          </div>
-        </div>
-
-        <Separator className="my-8 bg-gray-200 dark:bg-gray-800" />
-
-        {/* How to Watch Section */}
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
-            How to Watch
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
-                <span className="text-blue-600 dark:text-blue-300 text-xl font-bold">
-                  1
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
-                Find Your Match
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Browse our extensive collection of live and upcoming matches from
-                various competitions around the world.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
-                <span className="text-green-600 dark:text-green-300 text-xl font-bold">
-                  2
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
-                Select a Stream
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Choose from multiple streaming options available for each match.
-                We provide various quality options to suit your internet speed.
-              </p>
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mb-4">
-                <span className="text-purple-600 dark:text-purple-300 text-xl font-bold">
-                  3
-                </span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
-                Enjoy the Game
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Watch the match in HD quality for free. No registration required,
-                no credit card needed - just pure football action.
-              </p>
+                <Tv className="mr-2 h-4 w-4" /> 
+                {showLiveSports ? 'Hide Live Sports' : 'Live Sports'}
+              </Button>
+              <Link to="/schedule">
+                <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
+                  <Calendar className="mr-2 h-4 w-4" /> View Schedule
+                </Button>
+              </Link>
             </div>
           </div>
+          
+          {showLiveSports ? (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">Live Sports Streams</h2>
+              <LiveSportsWidget />
+            </div>
+          ) : (
+            <SportsList 
+              sports={sports}
+              onSelectSport={handleSelectSport}
+              selectedSport={selectedSport}
+              isLoading={loadingSports}
+            />
+          )}
         </div>
-      </PageLayout>
-    </>
+        
+        {!showLiveSports && (
+          <>
+            <AnnouncementBanner />
+            
+            <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+              <FeaturedChannels />
+            </React.Suspense>
+            
+            <Separator className="my-8 bg-[#343a4d]" />
+            
+            {popularMatches.length > 0 && (
+              <>
+                <PopularMatches 
+                  popularMatches={popularMatches} 
+                  selectedSport={selectedSport}
+                />
+                <Separator className="my-8 bg-[#343a4d]" />
+              </>
+            )}
+            
+            <div className="mb-8">
+              {(selectedSport || loadingMatches) && (
+                <MatchesList
+                  matches={filteredMatches}
+                  sportId={selectedSport || ""}
+                  isLoading={loadingMatches}
+                />
+              )}
+            </div>
+            
+            <div className="mb-8">
+              <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                <NewsSection />
+              </React.Suspense>
+            </div>
+            
+            <PromotionBoxes />
+          </>
+        )}
+      </main>
+    </PageLayout>
   );
 };
 
-export default IndexPage;
+export default Index;
+
