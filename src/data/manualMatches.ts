@@ -4,7 +4,7 @@ import { ManualMatch } from '@/types/manualMatch';
 export const manualMatches: ManualMatch[] = [
   {
     id: "AL-AHLY-VS-INTER-MIAMI",
-    title: "Al ahly vs Inter Miami",
+    title: "Al vs Inter",
     // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
     date: "2025-06-15T10:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
     teams: {
