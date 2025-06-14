@@ -5,7 +5,8 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "AL-AHLY-VS-INTER-MIAMI",
     title: "al ahly vs Inter Miami",
-    date: "2025-06-15T012:00:00Z",
+    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
+    date: "2025-06-15T01:00:00Z",
     teams: {
       home: "Al Ahly",
       away: "Inter Miami"
@@ -28,11 +29,10 @@ export const manualMatches: ManualMatch[] = [
         name: "TUDN [USA]",
         url: "https://topembed.pw/channel/TUDN[USA]",
         quality: "HD"
-      },
-     
+      },     
     ],
     visible: true,
-    image: "https://imgur.com/C9iom5u" // fixed: use direct image link
+    image: "https://i.imgur.com/C9iom5u.jpg" // FIXED: proper direct Imgur image link
   },
   {
     id: "hidden-match",
