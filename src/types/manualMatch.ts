@@ -14,6 +14,7 @@ export interface ManualMatch {
     away: string;
   };
   date: string;
+  Day?: string;
   visible: boolean;
   image?: string;
   links: ManualMatchLink[];
