@@ -12,23 +12,24 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
-  // Always format using UTC, so time is fixed regardless of user's local browser timezone.
+  // Format time in the user's *local* browser time zone
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
-      hour12: true,
-      timeZone: 'UTC' // force UTC display
+      hour12: true
+      // Do NOT specify timeZone: uses browser's local time zone by default
     });
   };
 
+  // Format date in the user's *local* browser time zone
   const formatMatchDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
-      day: 'numeric',
-      timeZone: 'UTC'
+      day: 'numeric'
+      // Do NOT specify timeZone: uses browser's local time zone by default
     });
   };
 
