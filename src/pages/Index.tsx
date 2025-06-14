@@ -8,8 +8,8 @@ import { Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
-import { fetchMatches } from "../api/sportsApi"; // Corrected import
-import { Match } from "../types/sports"; // Corrected import
+import { fetchMatches } from "@/lib/api";
+import { Match } from "@/types/match";
 import MatchCard from "@/components/MatchCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -206,11 +206,7 @@ const IndexPage = () => {
               ) : filteredMatches.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {filteredMatches.slice(0, 8).map((match) => (
-                    <MatchCard
-                      key={match.id}
-                      match={match}
-                      sportId={match.sportId || "football"} // Make sure to always provide sportId
-                    />
+                    <MatchCard key={match.id} match={match} />
                   ))}
                 </div>
               ) : (
@@ -244,11 +240,7 @@ const IndexPage = () => {
                 ) : filteredMatches.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredMatches.slice(0, 8).map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                        sportId={match.sportId || "football"} // Always provide sportId
-                      />
+                      <MatchCard key={match.id} match={match} />
                     ))}
                   </div>
                 ) : (
