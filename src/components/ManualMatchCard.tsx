@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Play, Calendar, Clock } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { ManualMatch } from '@/types/manualMatch';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -12,24 +13,22 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
-  // Format time in the user's *local* browser time zone
+  // Format time in user's local time zone
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true
-      // Do NOT specify timeZone: uses browser's local time zone by default
     });
   };
 
-  // Format date in the user's *local* browser time zone
+  // Format date in user's local time zone
   const formatMatchDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric'
-      // Do NOT specify timeZone: uses browser's local time zone by default
     });
   };
 
@@ -37,81 +36,81 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
     const oneHourInMs = 60 * 60 * 1000;
-    const threeHoursInMs = 3 * 60 * 60 * 1000; // Changed to 3 hours
-    
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
     return (
-      matchTime - now < oneHourInMs && // Match starts within 1 hour
-      now - matchTime < threeHoursInMs  // Match can be live up to 3 hours after start
+      matchTime - now < oneHourInMs &&
+      now - matchTime < threeHoursInMs
     );
   };
 
-  const handleWatchNow = () => {
+  const handleWatchNow = (e?: React.MouseEvent) => {
+    // Prevent accidental navigation while button loading/active
+    if (e) e.stopPropagation();
     navigate(`/manual-match/${match.id}`);
   };
 
   return (
-    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group cursor-pointer" onClick={handleWatchNow}>
-      <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
-        {/* Background Image if available */}
-        {match.image && match.image !== "https://imgur.com/undefined" && (
+    <div
+      className="relative overflow-hidden transition-transform duration-300 cursor-pointer group rounded-xl shadow-2xl hover:scale-105 bg-[#16181D]"
+      onClick={handleWatchNow}
+    >
+      <AspectRatio ratio={16 / 9} className="relative">
+        {/* Background Image */}
+        {match.image && match.image !== "https://imgur.com/undefined" ? (
           <img
             src={match.image}
             alt={`${match.teams.home} vs ${match.teams.away}`}
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={(e) => {
-              console.log('Image failed to load:', match.image);
-              e.currentTarget.style.display = 'none';
-            }}
+            className="absolute inset-0 object-cover w-full h-full z-0 scale-105 group-hover:scale-110 transition-transform duration-500"
+            onError={e => { e.currentTarget.style.display='none'; }}
           />
+        ) : (
+          <div className="absolute inset-0 bg-gray-800" />
         )}
-        
-        {/* Stronger overlay for better text visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/70 z-10"></div>
-        
-        {/* Match Time */}
-        <div className="absolute top-2 left-2 z-20">
-          <div className="bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 border border-white/20">
-            <Clock className="w-3 h-3" />
+
+        {/* Dark overlay for text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/95 via-black/65 to-gray-900/90 z-10" />
+
+        {/* Left Bar: Date/Time */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 flex flex-col items-center justify-center bg-black/40 z-20 backdrop-blur-md border-r border-white/10">
+          <div className="text-center text-white font-bold text-xs md:text-sm uppercase tracking-wide">
+            {formatMatchDate(match.date)}
+          </div>
+          <div className="text-center text-[#ff5a36] font-extrabold text-base md:text-lg mt-2 tracking-wide">
             {formatMatchTime(match.date)}
           </div>
         </div>
-        
-        {/* Live Badge */}
-        <div className="absolute top-2 right-2 z-30">
-          {isMatchLive() && (
-            <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 border border-white/20">
-              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-              LIVE
+
+        {/* LIVE badge */}
+        {isMatchLive() && (
+          <span className="absolute top-3 right-3 z-30 bg-[#ff5a36] text-white text-xs px-2 py-1 rounded-lg font-semibold flex items-center gap-1 shadow-md">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+            LIVE
+          </span>
+        )}
+
+        {/* Main content center */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-center items-center px-3">
+          <div className="flex items-center justify-center gap-3 w-full">
+            <span className="font-bold text-white text-lg md:text-2xl truncate max-w-[42%] text-shadow-md text-center drop-shadow-lg">
+              {match.teams.home}
             </span>
-          )}
-        </div>
-        
-        {/* Teams Display with enhanced visibility */}
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-3">
-          <div className="flex items-center justify-between text-white text-sm mb-3">
-            <span className="font-bold text-center text-white drop-shadow-lg">{match.teams.home}</span>
-            <span className="text-white font-bold mx-3 drop-shadow-lg">VS</span>
-            <span className="font-bold text-center text-white drop-shadow-lg">{match.teams.away}</span>
+            <span className="font-bold text-[#ff5a36] text-lg md:text-2xl tracking-wider drop-shadow-lg">VS</span>
+            <span className="font-bold text-white text-lg md:text-2xl truncate max-w-[42%] text-shadow-md text-center drop-shadow-lg">
+              {match.teams.away}
+            </span>
           </div>
-          
-          <h3 className="font-bold text-center text-white text-sm md:text-base truncate px-2 drop-shadow-lg bg-black/30 backdrop-blur-sm rounded-lg py-1">
-            {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
+          <h3 className="my-2 font-medium text-center text-white text-base md:text-lg px-4 truncate shadow-md bg-black/30 backdrop-blur-lg rounded-md py-1">
+            {match.title.length > 30 ? `${match.title.slice(0, 28)}...` : match.title}
           </h3>
-          
-          <p className="text-center text-cyan-300 text-xs md:text-sm mt-2 font-semibold drop-shadow-lg">
-            {formatMatchDate(match.date)}
-          </p>
-          
-          {/* Watch Now Button - appears on hover */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button 
-              className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-bold py-2 text-sm flex items-center justify-center gap-2 shadow-lg border border-white/20"
-              size="sm"
-            >
-              <Play size={14} />
-              Watch Now
-            </Button>
-          </div>
+          {/* Central Watch Button */}
+          <Button
+            className="bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-bold mt-2 py-2 px-6 text-base rounded-lg shadow-lg flex items-center gap-2 opacity-90 hover:opacity-100 transition duration-200"
+            size="lg"
+            onClick={handleWatchNow}
+          >
+            <Play size={18} />
+            Watch Now
+          </Button>
         </div>
       </AspectRatio>
     </div>
