@@ -6,7 +6,7 @@ export const manualMatches: ManualMatch[] = [
     id: "AL-AHLY-VS-INTER-MIAMI",
     title: "Al ahly vs Inter Miami",
     // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-15T12:00:00Z",
+    date: "2025-06-15T10:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
     teams: {
       home: "Al Ahly",
       away: "Inter Miami"
@@ -32,7 +32,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://imgur.com/C9iom5u" // FIXED: proper direct Imgur image link
+    image: "https://i.imgur.com/C9iom5u.png" // Now direct Imgur PNG link
   },
   {
     id: "hidden-match",
