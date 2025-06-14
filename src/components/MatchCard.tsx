@@ -65,8 +65,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group">
-      <AspectRatio ratio={16/10} className="bg-gradient-to-b from-gray-800 to-gray-900">
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group bg-transparent">
+      <AspectRatio 
+        ratio={16/10} 
+        className="bg-gradient-to-b from-gray-800 to-gray-900 border-0 shadow-none"
+        style={{ border: 'none', boxShadow: 'none' }}>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
         
         {/* Match Time */}
@@ -97,7 +100,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasTeamLogos && hasTeams ? (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden border-0`}>
                   <img 
                     src={homeBadge} 
                     alt={home} 
@@ -114,7 +117,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <div className="mx-2 text-white text-xs font-bold">VS</div>
               )}
               <div className="flex items-center">
-                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden`}>
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden border-0`}>
                   <img 
                     src={awayBadge} 
                     alt={away}

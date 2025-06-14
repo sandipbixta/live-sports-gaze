@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from "react";
 
 const BANNER_AD_KEY = "6f9d1f3d2ad1eb4e3efaf82e5571ea37";
@@ -44,7 +45,7 @@ const BannerAd: React.FC = () => {
   }, [closed]);
 
   return (
-    <div className="w-full bg-white dark:bg-black border-b border-black dark:border-white shadow-md flex items-center justify-center px-2 py-2 z-30 relative">
+    <div className="w-full bg-white dark:bg-black shadow-md flex items-center justify-center px-2 py-2 z-30 relative">
       <div className="flex items-center justify-center w-full max-w-full mx-auto relative min-h-[90px]">
         {/* The ad will inject the iframe here */}
         <div
