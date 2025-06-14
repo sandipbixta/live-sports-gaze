@@ -21,13 +21,13 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "Sky-Sports-Main-Event [UK]",
         name: "Sky Sports MainEvent[UK]",
-        url: "https://topembed.pw/channel/SkySportsMainEvent%5BUK%5D",
+        url: "https://topembed.pw/channel/SkySportsMainEvent[UK]",
         quality: "HD"
       },
       {
         id: "sky-sport-2",
         name: "Sky sport 2 ",
-        url: "https://topembed.pw/channel/SkySport2%5BNewZealand%5D",
+        url: "https://topembed.pw/channel/SkySport2[NewZealand]",
         quality: "HD"
       },
       {
