@@ -16,11 +16,14 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     adRef.current.innerHTML = '';
     
     if (type === 'banner') {
-      // Create a container div for the banner ad
+      // Create a centered container for the banner ad
       const adContainer = document.createElement('div');
-      adContainer.style.textAlign = 'center';
+      adContainer.style.display = 'flex';
+      adContainer.style.justifyContent = 'center';
+      adContainer.style.alignItems = 'center';
       adContainer.style.width = '100%';
       adContainer.style.overflow = 'hidden';
+      adContainer.style.minHeight = '90px';
       
       // Banner ad configuration - responsive for mobile
       const script1 = document.createElement('script');
@@ -65,10 +68,17 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adRef.current.appendChild(link);
       
     } else if (type === 'popunder') {
-      // Popunder ad functionality
+      // Less aggressive popunder ad functionality
       const handlePopunder = () => {
-        // Only trigger once per session
-        if (sessionStorage.getItem('popunder_shown')) return;
+        // Check if already shown in the last 30 minutes
+        const lastShown = localStorage.getItem('popunder_last_shown');
+        const now = Date.now();
+        const thirtyMinutes = 30 * 60 * 1000;
+        
+        if (lastShown && (now - parseInt(lastShown)) < thirtyMinutes) {
+          console.log('Popunder cooldown active');
+          return;
+        }
         
         try {
           const popWindow = window.open(
@@ -84,20 +94,35 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
               popWindow.blur();
             }, 100);
             
-            sessionStorage.setItem('popunder_shown', 'true');
+            // Set cooldown
+            localStorage.setItem('popunder_last_shown', now.toString());
+            console.log('Popunder triggered, cooldown set');
           }
         } catch (error) {
           console.log('Popunder blocked or error:', error);
         }
       };
       
-      // Trigger popunder on user interaction (click anywhere)
+      // More controlled popunder triggering - only after user has been on site for 10 seconds
+      let clickCount = 0;
+      const maxClicks = 1; // Only trigger once per session
+      
       const triggerPopunder = () => {
-        handlePopunder();
-        document.removeEventListener('click', triggerPopunder);
+        clickCount++;
+        if (clickCount === maxClicks) {
+          // Add a small delay to make it less aggressive
+          setTimeout(() => {
+            handlePopunder();
+          }, 2000);
+          document.removeEventListener('click', triggerPopunder);
+        }
       };
       
-      document.addEventListener('click', triggerPopunder);
+      // Wait 10 seconds before enabling popunder
+      setTimeout(() => {
+        document.addEventListener('click', triggerPopunder);
+        console.log('Popunder listener enabled after 10 seconds');
+      }, 10000);
       
       // Cleanup function
       return () => {
@@ -132,9 +157,14 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
   return (
     <div 
       ref={adRef} 
-      className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] ${className}`} 
+      className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
-      style={{ minHeight: type === 'banner' ? '90px' : 'auto' }}
+      style={{ 
+        minHeight: type === 'banner' ? '90px' : 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
     />
   );
 };
