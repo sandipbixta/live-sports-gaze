@@ -128,86 +128,86 @@ export const tvChannels: Channel[] = [
 const extraChannels: Channel[] = [
   // UK
   { id: "bbc-scotland-uk", title: "BBCScotland", country: "UK", embedUrl: "https://topembed.pw/channel/BBCScotland[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/bbc-scotland-uk.png?raw=true" },
-  { id: "itv-1-uk", title: "ITV1", country: "UK", embedUrl: "https://topembed.pw/channel/ITV1[UK]", category: "sports" },
-  { id: "itv-2-uk", title: "ITV2", country: "UK", embedUrl: "https://topembed.pw/channel/ITV2[UK]", category: "sports" },
-  { id: "itv-3-uk", title: "ITV3", country: "UK", embedUrl: "https://topembed.pw/channel/ITV3[UK]", category: "sports" },
-  { id: "itv-4-uk", title: "ITV4", country: "UK", embedUrl: "https://topembed.pw/channel/ITV4[UK]", category: "sports" },
-  { id: "bbc-one-uk", title: "BBCOne", country: "UK", embedUrl: "https://topembed.pw/channel/BBCOne[UK]", category: "sports" },
-  { id: "bbc-two-uk", title: "BBCTwo", country: "UK", embedUrl: "https://topembed.pw/channel/BBCTwo[UK]", category: "sports" },
-  { id: "bbc-three-uk", title: "BBCThree", country: "UK", embedUrl: "https://topembed.pw/channel/BBCThree[UK]", category: "sports" },
+  { id: "itv-1-uk", title: "ITV1", country: "UK", embedUrl: "https://topembed.pw/channel/ITV1[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/itv-1-uk.png?raw=true" },
+  { id: "itv-2-uk", title: "ITV2", country: "UK", embedUrl: "https://topembed.pw/channel/ITV2[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/itv-2-uk.png?raw=true" },
+  { id: "itv-3-uk", title: "ITV3", country: "UK", embedUrl: "https://topembed.pw/channel/ITV3[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/itv-3-uk.png?raw=true" },
+  { id: "itv-4-uk", title: "ITV4", country: "UK", embedUrl: "https://topembed.pw/channel/ITV4[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/itv-4-uk.png?raw=true" },
+  { id: "bbc-one-uk", title: "BBCOne", country: "UK", embedUrl: "https://topembed.pw/channel/BBCOne[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/bbc-one-uk.png?raw=true" },
+  { id: "bbc-two-uk", title: "BBCTwo", country: "UK", embedUrl: "https://topembed.pw/channel/BBCTwo[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/bbc-two-uk.png?raw=true" },
+  { id: "bbc-three-uk", title: "BBCThree", country: "UK", embedUrl: "https://topembed.pw/channel/BBCThree[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/bbc-three-uk.png?raw=true" },
   { id: "bbc-four-uk", title: "BBCFour", country: "UK", embedUrl: "https://topembed.pw/channel/BBCFour[UK]", category: "sports" },
   { id: "sky-discovery-hd-uk", title: "SkyDiscoveryHD", country: "UK", embedUrl: "https://topembed.pw/channel/SkyDiscoveryHD[UK]", category: "sports" },
-  { id: "film4-uk", title: "Film4", country: "UK", embedUrl: "https://topembed.pw/channel/Film4[UK]", category: "sports" },
-  { id: "mutv-uk", title: "MUTV", country: "UK", embedUrl: "https://topembed.pw/channel/MUTV[UK]", category: "sports" },
-  { id: "viaplaysports1-uk", title: "ViaplaySports1", country: "UK", embedUrl: "https://topembed.pw/channel/ViaplaySports1[UK]", category: "sports" },
+  { id: "film4-uk", title: "Film4", country: "UK", embedUrl: "https://topembed.pw/channel/Film4[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/film-4-uk.png?raw=true" },
+  { id: "mutv-uk", title: "MUTV", country: "UK", embedUrl: "https://topembed.pw/channel/MUTV[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/mutv-uk.png?raw=true" },
+  { id: "viaplaysports1-uk", title: "ViaplaySports1", country: "UK", embedUrl: "https://topembed.pw/channel/ViaplaySports1[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/viaplay-sports-1-uk.png?raw=true" },
 
   // USA
-  { id: "btn-usa", title: "BTN", country: "USA", embedUrl: "https://topembed.pw/channel/BTN[USA]", category: "sports" },
-  { id: "espn-deportes-usa", title: "ESPNDeportes", country: "USA", embedUrl: "https://topembed.pw/channel/ESPNDeportes[USA]", category: "sports" },
-  { id: "espnu-usa", title: "ESPNU", country: "USA", embedUrl: "https://topembed.pw/channel/ESPNU[USA]", category: "sports" },
-  { id: "golf-channel-usa", title: "GOLFChannel", country: "USA", embedUrl: "https://topembed.pw/channel/GOLFChannel[USA]", category: "sports" },
-  { id: "nba-tv-usa", title: "NBATV", country: "USA", embedUrl: "https://topembed.pw/channel/NBATV[USA]", category: "sports" },
-  { id: "nfl-network-usa", title: "NFLNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/NFLNetwork[USA]", category: "sports" },
-  { id: "nfl-redzone-usa", title: "NFLRedzone", country: "USA", embedUrl: "https://topembed.pw/channel/NFLRedzone[USA]", category: "sports" },
-  { id: "nhl-network-usa", title: "NHLNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/NHLNetwork[USA]", category: "sports" },
-  { id: "sec-network-usa", title: "SECNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/SECNetwork[USA]", category: "sports" },
-  { id: "tennis-channel-usa", title: "TennisChannel", country: "USA", embedUrl: "https://topembed.pw/channel/TennisChannel[USA]", category: "sports" },
+  { id: "btn-usa", title: "BTN", country: "USA", embedUrl: "https://topembed.pw/channel/BTN[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/btn-us.png?raw=true" },
+  { id: "espn-deportes-usa", title: "ESPNDeportes", country: "USA", embedUrl: "https://topembed.pw/channel/ESPNDeportes[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/espn-deportes-us.png?raw=true" },
+  { id: "espnu-usa", title: "ESPNU", country: "USA", embedUrl: "https://topembed.pw/channel/ESPNU[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/espn-u-us.png?raw=true" },
+  { id: "golf-channel-usa", title: "GOLFChannel", country: "USA", embedUrl: "https://topembed.pw/channel/GOLFChannel[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/nbc-golf-channel-us.png?raw=true" },
+  { id: "nba-tv-usa", title: "NBATV", country: "USA", embedUrl: "https://topembed.pw/channel/NBATV[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/nba-tv-us.png?raw=true" },
+  { id: "nfl-network-usa", title: "NFLNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/NFLNetwork[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/nfl-network-us.png?raw=true" },
+  { id: "nfl-redzone-usa", title: "NFLRedzone", country: "USA", embedUrl: "https://topembed.pw/channel/NFLRedzone[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/nfl-red-zone-us.png?raw=true" },
+  { id: "nhl-network-usa", title: "NHLNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/NHLNetwork[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/nhl-network-us.png?raw=true" },
+  { id: "sec-network-usa", title: "SECNetwork", country: "USA", embedUrl: "https://topembed.pw/channel/SECNetwork[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/sec-network-us.png?raw=true" },
+  { id: "tennis-channel-usa", title: "TennisChannel", country: "USA", embedUrl: "https://topembed.pw/channel/TennisChannel[USA]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/tennis-channel-us.png?raw=true" },
 
   // Australia
-  { id: "fox-sports-506-au", title: "FoxSports506", country: "Australia", embedUrl: "https://topembed.pw/channel/FoxSports506[Australia]", category: "sports" },
-  { id: "optus-sport-1-au", title: "OptusSport1", country: "Australia", embedUrl: "https://topembed.pw/channel/OptusSport1[Australia]", category: "sports" },
+  { id: "fox-sports-506-au", title: "FoxSports506", country: "Australia", embedUrl: "https://topembed.pw/channel/FoxSports506[Australia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/australia/fox-sports-506-au.png?raw=true" },
+  { id: "optus-sport-1-au", title: "OptusSport1", country: "Australia", embedUrl: "https://topembed.pw/channel/OptusSport1[Australia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/australia/optus-sport-1-au.png?raw=true" },
 
   // Portugal
-  { id: "canal-11-portugal", title: "Canal11", country: "Portugal", embedUrl: "https://topembed.pw/channel/Canal11[Portugal]", category: "sports" },
-  { id: "eleven-sports-1-portugal", title: "ElevenSports1", country: "Portugal", embedUrl: "https://topembed.pw/channel/ElevenSports1[Portugal]", category: "sports" },
+  { id: "canal-11-portugal", title: "Canal11", country: "Portugal", embedUrl: "https://topembed.pw/channel/Canal11[Portugal]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/portugal/canal11-pt.png?raw=true" },
+  { id: "eleven-sports-1-portugal", title: "ElevenSports1", country: "Portugal", embedUrl: "https://topembed.pw/channel/ElevenSports1[Portugal]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/portugal/eleven-sports-1-pt.png?raw=true" },
 
   // Romania
-  { id: "digi-sport-1-ro", title: "DigiSport1", country: "Romania", embedUrl: "https://topembed.pw/channel/DigiSport1[Romania]", category: "sports" },
-  { id: "orange-sport-1-ro", title: "OrangeSport1", country: "Romania", embedUrl: "https://topembed.pw/channel/OrangeSport1[Romania]", category: "sports" },
-  { id: "pro-arena-ro", title: "ProArena", country: "Romania", embedUrl: "https://topembed.pw/channel/ProArena[Romania]", category: "sports" },
+  { id: "digi-sport-1-ro", title: "DigiSport1", country: "Romania", embedUrl: "https://topembed.pw/channel/DigiSport1[Romania]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/romania/digi-sport-1-ro.png?raw=true" },
+  { id: "orange-sport-1-ro", title: "OrangeSport1", country: "Romania", embedUrl: "https://topembed.pw/channel/OrangeSport1[Romania]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/romania/orange-sport-1-ro.png?raw=true" },
+  { id: "pro-arena-ro", title: "ProArena", country: "Romania", embedUrl: "https://topembed.pw/channel/ProArena[Romania]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/romania/pro-arena-ro.png?raw=true" },
 
   // Greece
-  { id: "novasports1-gr", title: "NovaSports1", country: "Greece", embedUrl: "https://topembed.pw/channel/NovaSports1[Greece]", category: "sports" },
+  { id: "novasports1-gr", title: "NovaSports1", country: "Greece", embedUrl: "https://topembed.pw/channel/NovaSports1[Greece]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/greece/nova-sports-1-gr.png?raw=true" },
 
   // Germany
-  { id: "sky-bundesliga1-de", title: "SkyBundesliga1", country: "Germany", embedUrl: "https://topembed.pw/channel/SkyBundesliga1[Germany]", category: "sports" },
+  { id: "sky-bundesliga1-de", title: "SkyBundesliga1", country: "Germany", embedUrl: "https://topembed.pw/channel/SkyBundesliga1[Germany]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/germany/sky-sport/sky-sport-bundesliga-de.png?raw=true" },
   
   // Serbia
-  { id: "sportklub-1-serbia", title: "Sportklub1", country: "Serbia", embedUrl: "https://topembed.pw/channel/Sportklub1[Serbia]", category: "sports" },
+  { id: "sportklub-1-serbia", title: "Sportklub1", country: "Serbia", embedUrl: "https://topembed.pw/channel/Sportklub1[Serbia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/croatia/sportklub-1-hr.png?raw=true" },
 
   // SouthAfrica
   { id: "super-sport-action-zaf", title: "SuperSportAction", country: "SouthAfrica", embedUrl: "https://topembed.pw/channel/SuperSportAction[SouthAfrica]", category: "sports" },
 
   // Canada
-  { id: "sportsnet-ontario-canada", title: "SportsnetOntario", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOntario[Canada]", category: "sports" },
+  { id: "sportsnet-ontario-canada", title: "SportsnetOntario", country: "Canada", embedUrl: "https://topembed.pw/channel/SportsnetOntario[Canada]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/canada/sportsnet-ontario-ca.png?raw=true" },
 
   // Netherlands
-  { id: "ziggo-sport-2-nl", title: "ZiggoSport2", country: "Netherlands", embedUrl: "https://topembed.pw/channel/ZiggoSport2[Netherlands]", category: "sports" },
+  { id: "ziggo-sport-2-nl", title: "ZiggoSport2", country: "Netherlands", embedUrl: "https://topembed.pw/channel/ZiggoSport2[Netherlands]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/netherlands/ziggo-sport-2-nl.png?raw=true" },
 
   // Ireland
-  { id: "rte-one-ie", title: "RTEOne", country: "Ireland", embedUrl: "https://topembed.pw/channel/RTEOne[Ireland]", category: "sports" },
+  { id: "rte-one-ie", title: "RTEOne", country: "Ireland", embedUrl: "https://topembed.pw/channel/RTEOne[Ireland]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/rte-one-uk.png?raw=true" },
   { id: "rte-two-ie", title: "RTETwo", country: "Ireland", embedUrl: "https://topembed.pw/channel/RTETwo[Ireland]", category: "sports" },
 
   // Spain
-  { id: "movistar-deportes-es", title: "MovistarDeportes", country: "Spain", embedUrl: "https://topembed.pw/channel/MovistarDeportes[Spain]", category: "sports" },
+  { id: "movistar-deportes-es", title: "MovistarDeportes", country: "Spain", embedUrl: "https://topembed.pw/channel/MovistarDeportes[Spain]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/spain/deportes-por-movistar-plus-es.png?raw=true" },
 
   // France
-  { id: "canal-sport-fr", title: "CanalSport", country: "France", embedUrl: "https://topembed.pw/channel/CanalSport[France]", category: "sports" },
+  { id: "canal-sport-fr", title: "CanalSport", country: "France", embedUrl: "https://topembed.pw/channel/CanalSport[France]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/france/canal-plus-sport-fr.png?raw=true" },
 
   // Italy
-  { id: "cartoon-network-it", title: "CartoonNetworkItaly", country: "Italy", embedUrl: "https://topembed.pw/channel/CartoonNetworkItaly[Italy]", category: "sports" },
+  { id: "cartoon-network-it", title: "CartoonNetworkItaly", country: "Italy", embedUrl: "https://topembed.pw/channel/CartoonNetworkItaly[Italy]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/italy/cartoon-network-it.png?raw=true" },
 
   // Poland
-  { id: "canal-sport-pl", title: "CanalSport", country: "Poland", embedUrl: "https://topembed.pw/channel/CanalSport[Poland]", category: "sports" },
+  { id: "canal-sport-pl", title: "CanalSport", country: "Poland", embedUrl: "https://topembed.pw/channel/CanalSport[Poland]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/poland/canal-plus-sport-pl.png?raw=true" },
 
   // Brazil
   { id: "combate-br", title: "Combate", country: "Brazil", embedUrl: "https://topembed.pw/channel/Combate[Brazil]", category: "sports" },
 
   // Albania
-  { id: "rtsh-sport-al", title: "RTSHSport", country: "Albania", embedUrl: "https://topembed.pw/channel/RTSHSport[Albania]", category: "sports" },
+  { id: "rtsh-sport-al", title: "RTSHSport", country: "Albania", embedUrl: "https://topembed.pw/channel/RTSHSport[Albania]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/albania/rtsh-sport-al.png?raw=true" },
 
   // Ecuador
-  { id: "gol-tv-ec", title: "GolTV", country: "Ecuador", embedUrl: "https://topembed.pw/channel/GolTV[Ecuador]", category: "sports" },
+  { id: "gol-tv-ec", title: "GolTV", country: "Ecuador", embedUrl: "https://topembed.pw/channel/GolTV[Ecuador]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-states/gol-tv-us.png?raw=true" },
 
   // Colombia
   { id: "win-sports-co", title: "WINSports", country: "Colombia", embedUrl: "https://topembed.pw/channel/WINSports[Colombia]", category: "sports" },
@@ -216,29 +216,31 @@ const extraChannels: Channel[] = [
   { id: "yessport1-il", title: "YesSport1", country: "Israel", embedUrl: "https://topembed.pw/channel/YesSport1[Israel]", category: "sports" },
 
   // Bulgaria
-  { id: "diema-sport-bg", title: "DiemaSport", country: "Bulgaria", embedUrl: "https://topembed.pw/channel/DiemaSport[Bulgaria]", category: "sports" },
+  { id: "diema-sport-bg", title: "DiemaSport", country: "Bulgaria", embedUrl: "https://topembed.pw/channel/DiemaSport[Bulgaria]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/bulgaria/diema-sport-hd-bg.png?raw=true" },
 
   // Arab (as "Other")
   { id: "bein-sports-1-arab", title: "BeinSports1", country: "Other", embedUrl: "https://topembed.pw/channel/BeinSports1[Arab]", category: "sports" },
 
   // Malaysia
-  { id: "astro-cricket-my", title: "AstroCricket", country: "Malaysia", embedUrl: "https://topembed.pw/channel/AstroCricket[Malaysia]", category: "sports" },
+  { id: "astro-cricket-my", title: "AstroCricket", country: "Malaysia", embedUrl: "https://topembed.pw/channel/AstroCricket[Malaysia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/malaysia/astro-cricket-my.png?raw=true" },
 
   // Denmark
   { id: "tv3-dk", title: "TV3", country: "Denmark", embedUrl: "https://topembed.pw/channel/TV3[Denmark]", category: "sports" },
 
   // Russia
-  { id: "khl-tv-ru", title: "KHLTV", country: "Russia", embedUrl: "https://topembed.pw/channel/KHLTV[Russia]", category: "sports" },
+  { id: "khl-tv-ru", title: "KHLTV", country: "Russia", embedUrl: "https://topembed.pw/channel/KHLTV[Russia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/russia/khl-ru.png?raw=true" },
 
   // Pakistan
   { id: "ptv-sports-pk", title: "PTVSports", country: "Pakistan", embedUrl: "https://topembed.pw/channel/PTVSports[Pakistan]", category: "sports" },
 
   // Belgium
-  { id: "vtm2-be", title: "VTM2", country: "Belgium", embedUrl: "https://topembed.pw/channel/VTM2[Belgium]", category: "sports" },
+  { id: "vtm2-be", title: "VTM2", country: "Belgium", embedUrl: "https://topembed.pw/channel/VTM2[Belgium]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/belgium/vtm2-be.png?raw=true" },
 
   // S7 (Other)
   { id: "nevena1-s7", title: "Nevena1", country: "Other", embedUrl: "https://topembed.pw/channel/Nevena1[S7]", category: "sports" },
 
+  // Malaysia TV3
+  { id: "tv3-my", title: "TV3", country: "Malaysia", embedUrl: "https://topembed.pw/channel/TV3[Malaysia]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/malaysia/tv3-my.png?raw=true" }
   // ... more can be appended as needed ...
 ];
 
