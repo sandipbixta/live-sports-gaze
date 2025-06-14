@@ -127,7 +127,7 @@ export const tvChannels: Channel[] = [
 // Add extra channels only if not already present in tvChannels (avoid duplicates)
 const extraChannels: Channel[] = [
   // UK
-  { id: "bbc-scotland-uk", title: "BBCScotland", country: "UK", embedUrl: "https://topembed.pw/channel/BBCScotland[UK]", category: "sports" },
+  { id: "bbc-scotland-uk", title: "BBCScotland", country: "UK", embedUrl: "https://topembed.pw/channel/BBCScotland[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/bbc-scotland-uk.png?raw=true" },
   { id: "itv-1-uk", title: "ITV1", country: "UK", embedUrl: "https://topembed.pw/channel/ITV1[UK]", category: "sports" },
   { id: "itv-2-uk", title: "ITV2", country: "UK", embedUrl: "https://topembed.pw/channel/ITV2[UK]", category: "sports" },
   { id: "itv-3-uk", title: "ITV3", country: "UK", embedUrl: "https://topembed.pw/channel/ITV3[UK]", category: "sports" },
