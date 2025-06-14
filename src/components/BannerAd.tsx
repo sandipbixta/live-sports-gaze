@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 
 const BANNER_AD_KEY = "6f9d1f3d2ad1eb4e3efaf82e5571ea37";
@@ -44,8 +43,6 @@ const BannerAd: React.FC = () => {
     };
   }, [closed]);
 
-  if (closed) return null;
-
   return (
     <div className="w-full bg-white dark:bg-black border-b border-black dark:border-white shadow-md flex items-center justify-center px-2 py-2 z-30 relative">
       <div className="flex items-center justify-center w-full max-w-full mx-auto relative min-h-[90px]">
@@ -60,13 +57,6 @@ const BannerAd: React.FC = () => {
             overflow: "hidden",
           }}
         />
-        <button
-          aria-label="Close Banner Ad"
-          className="absolute top-1 right-1 text-black dark:text-white text-lg font-bold p-1 hover:text-red-500 bg-white/60 dark:bg-black/50 rounded transition"
-          onClick={() => setClosed(true)}
-        >
-          ×
-        </button>
       </div>
       {/* Responsive CSS for smaller screens */}
       <style>{`
@@ -85,4 +75,3 @@ const BannerAd: React.FC = () => {
 };
 
 export default BannerAd;
-
