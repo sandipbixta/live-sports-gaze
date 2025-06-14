@@ -56,6 +56,6 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false
+    visible: true
   }
 ];
