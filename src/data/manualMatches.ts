@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
     title: "Bota vs Sea",
     // Already correct: zero-padded hour and T
-    date: "2025-06-16T00:00:00Z",
+    date: "2025-06-16T22:00:00Z",
     teams: {
       home: "Botafogo RJ",
       away: "Seattle Sounders"
@@ -138,7 +138,7 @@ export const manualMatches: ManualMatch[] = [
     id: "PALMEIRAS-VS-FC-PORTO",
     title: "Palmeiras vs FC Porto",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T00:00:00Z",
+    date: "2025-06-16T02:00:00Z",
     teams: {
       home: "Palmeiras",
       away: "FC Porto"
