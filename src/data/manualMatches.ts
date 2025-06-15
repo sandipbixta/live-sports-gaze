@@ -43,7 +43,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/zUQD0ek.jpeg"
   },
   {
@@ -87,7 +87,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/nywK4YX.jpeg"
   },
   {
@@ -103,7 +103,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "Nevena-3",
         name: "Nevena3",
-        url: "https://topembed.pw/channel/Nevena3[S7]",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
         quality: "HD"
       },     
       {
@@ -145,9 +145,9 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "Nevena-3",
-        name: "Nevena3",
-        url: "https://topembed.pw/channel/Nevena3[S7]",
+        id: "Nevena-2",
+        name: "Nevena 2",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
         quality: "HD"
       },     
       {
