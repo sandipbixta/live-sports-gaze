@@ -5,8 +5,8 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "BAYERN-MUNICH-VS-AUCKLAND-CITY",
     title: "Bayern vs Auckland",
-    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-16T2:00:00Z", 
+    // FIX: Corrected date with zero-padded hour (ISO 8601)
+    date: "2025-06-16T02:00:00Z", 
     teams: {
       home: "Bayern Munich",
       away: "Auckland City"
@@ -44,13 +44,13 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/zUQD0ek.jpeg" // Now direct Imgur PNG link
+    image: "https://i.imgur.com/zUQD0ek.jpeg"
   },
   {
     id: "PSG-VS-ATL-MADRID",
     title: "PSG vs Atl. Madrid",
-    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-16T5:00:00Z", 
+    // FIX: Corrected date with zero-padded hour
+    date: "2025-06-16T05:00:00Z", 
     teams: {
       home: "PSG",
       away: "Atl. Madrid"
@@ -88,13 +88,13 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/nywK4YX.jpeg" // Now direct Imgur PNG link
+    image: "https://i.imgur.com/nywK4YX.jpeg"
   },
   {
     id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
     title: "Bota vs Sea",
-    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-16T12:00:00Z", // <-- Fixed: Inserted "T" between date and time
+    // Already correct: zero-padded hour and T
+    date: "2025-06-16T12:00:00Z",
     teams: {
       home: "Botafogo RJ",
       away: "Seattle Sounders"
@@ -132,13 +132,13 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/f6ByUT2.jpeg" // Now direct Imgur PNG link
+    image: "https://i.imgur.com/f6ByUT2.jpeg"
   },
   {
     id: "PALMEIRAS-VS-FC-PORTO",
     title: "Palmeiras vs FC Porto",
-    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-16T8:00:00Z",
+    // FIX: Corrected date with zero-padded hour
+    date: "2025-06-16T08:00:00Z",
     teams: {
       home: "Palmeiras",
       away: "FC Porto"
@@ -176,7 +176,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/PojQSYn.jpeg" // Now direct Imgur PNG link
+    image: "https://i.imgur.com/PojQSYn.jpeg"
   },
   {
     id: "hidden-match",
