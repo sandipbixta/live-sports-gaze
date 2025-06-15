@@ -29,6 +29,12 @@ export const manualMatches: ManualMatch[] = [
         name: "TUDN [USA]",
         url: "https://topembed.pw/channel/TUDN[USA]",
         quality: "HD"
+      },
+      {
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
+        quality: "HD"
       },     
     ],
     visible: true,
