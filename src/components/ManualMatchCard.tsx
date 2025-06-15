@@ -76,21 +76,25 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       >
         {/* Time + Timezone label */}
         <div
-          className="bg-black/60 backdrop-blur-sm rounded px-1.5 xs:px-2 py-[2px] flex flex-col
-          items-start"
+          className="bg-black/60 backdrop-blur-sm rounded px-1.5 xs:px-2 py-[2px] flex flex-col items-start"
         >
           <div
-            className="text-white text-[13px] xs:text-sm sm:text-sm font-bold leading-tight flex items-baseline gap-1"
+            className="
+              text-white 
+              text-[11px] xs:text-[13px] sm:text-sm font-bold leading-tight 
+              flex items-baseline gap-1
+            "
           >
             {timeString}
-            <span className="text-[11px] xs:text-xs text-gray-400 ml-0.5 font-semibold tracking-wide">AEST</span>
+            <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-400 ml-0.5 font-semibold tracking-wide">AEST</span>
           </div>
         </div>
         {/* LIVE Badge */}
         <Badge
           variant="live"
           className="
-            text-[12px] xs:text-xs font-bold px-2 py-0.5 xs:py-[2px] bg-[#ff5a36] shadow 
+            text-[11px] xs:text-[12px] sm:text-xs font-bold 
+            px-1.5 xs:px-2 py-[1px] xs:py-[2px] bg-[#ff5a36] shadow 
             rounded-full flex items-center
             "
           style={{ minHeight: 0, height: 'auto' }}
@@ -117,19 +121,20 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
           className="
             flex flex-col items-start justify-center
             text-white
-            text-[13px] xs:text-sm sm:text-base md:text-lg 
+            text-[13px] xs:text-[14px] sm:text-base md:text-lg 
             font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
             "
         >
           {/* First line: Home Team + 'vs', Second line: Away Team */}
-          <span className="truncate max-w-full text-left">
-            {match.teams.home} <span className="text-xs text-gray-300 font-normal">vs</span>
+          <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
+            {match.teams.home}{" "}
+            <span className="text-[10px] xs:text-xs sm:text-xs text-gray-300 font-normal">vs</span>
           </span>
-          <span className="truncate max-w-full text-left">
+          <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
             {match.teams.away}
           </span>
         </div>
-        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm text-left mt-1">
+        <p className="text-gray-300 text-[11px] xs:text-xs sm:text-sm text-left mt-1">
           {/* Mobile: "16 June", desktop: "Jun 16" */}
           <span className="sm:hidden">{dateStringMobile}</span>
           <span className="hidden sm:inline">{dateStringDesktop}</span>
