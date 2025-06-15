@@ -31,14 +31,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 
   return (
     <div
-      className="flex flex-col rounded-2xl bg-black border border-[#ff5a36] shadow-lg w-full max-w-sm mx-auto overflow-hidden"
+      className="flex flex-col md:flex-row rounded-2xl bg-black border border-[#ff5a36] shadow-lg w-full max-w-3xl mx-auto overflow-hidden"
       style={{
         background: 'radial-gradient(ellipse 170% 80% at 80% 50%, #232323 80%, #181818 100%)',
-        minHeight: 480,
+        minHeight: 340,
       }}
     >
-      {/* Image on Top */}
-      <div className="relative w-full bg-zinc-900 aspect-video flex items-center justify-center overflow-hidden">
+      {/* Image (Left side on desktop, Top on mobile) */}
+      <div className="relative w-full md:w-[320px] lg:w-[380px] aspect-video md:aspect-auto md:h-auto bg-zinc-900 flex items-center justify-center overflow-hidden">
         {match.image && match.image !== 'https://imgur.com/undefined' ? (
           <img
             src={match.image}
@@ -47,7 +47,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
             draggable={false}
           />
         ) : (
-          <div className="flex items-center justify-center w-full h-full bg-[#20242d] aspect-video">
+          <div className="flex items-center justify-center w-full h-full bg-[#20242d]">
             <span className="text-white/70 text-lg font-semibold">No Image</span>
           </div>
         )}
@@ -62,11 +62,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
 
-      {/* Match Details below image */}
+      {/* Match Details (Right side on desktop, Bottom on mobile) */}
       <div className="flex flex-col justify-between flex-1 px-5 py-6 bg-black">
         {/* Match Info */}
         <div>
-          {/* TIME */}
+          {/* TIME LABEL */}
           <div className="text-white text-sm font-bold tracking-wide mb-2" style={{ letterSpacing: "0.04em" }}>
             TIME
           </div>
@@ -80,6 +80,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
               {match.teams.away}
             </div>
           </div>
+
+          {/* Title (optional, shown if exists) */}
+          {match.title && (
+            <div className="text-base font-medium text-zinc-200 mb-1 line-clamp-2">{match.title}</div>
+          )}
 
           {/* Date/Time */}
           <div className="uppercase text-xs font-medium text-zinc-300 tracking-wider mb-1">DATE</div>
