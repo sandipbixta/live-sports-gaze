@@ -38,7 +38,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     <div
       className="
         relative w-full 
-        h-[110px] xs:h-[120px] sm:h-[140px] 
+        h-[120px] xs:h-[130px] sm:h-[140px] 
         md:h-64
         rounded-lg bg-black overflow-hidden 
         cursor-pointer hover:scale-105 transition-transform duration-200 group shadow-lg
@@ -118,23 +118,15 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
           className="
             text-white
             text-[13px] xs:text-sm sm:text-base md:text-lg 
-            font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
+            font-bold leading-tight mb-0.5 xs:mb-1 line-clamp-1 drop-shadow-sm
           "
         >
-          {/* 
-            Mobile (xs/sm): stacked
-            Desktop (sm+): inline (single line)
-          */}
-          <span className="block sm:hidden text-center leading-snug">
-            <span className="block truncate">{match.teams.home}</span>
-            <span className="block text-xs text-gray-200 tracking-wide">vs</span>
-            <span className="block truncate">{match.teams.away}</span>
-          </span>
-          <span className="hidden sm:block truncate">
+          {/* Truncate names a bit more on mobile */}
+          <span className="truncate block">
             {match.teams.home} vs {match.teams.away}
           </span>
         </h3>
-        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm text-center sm:text-left">
+        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm">
           {/* Mobile: "16 June", desktop: "Jun 16" */}
           <span className="sm:hidden">{dateStringMobile}</span>
           <span className="hidden sm:inline">{dateStringDesktop}</span>
@@ -145,4 +137,3 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 };
 
 export default ManualMatchCard;
-
