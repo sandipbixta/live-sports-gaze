@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
     title: "Bota vs Sea",
     // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-1612:00:00Z", 
+    date: "2025-06-16T12:00:00Z", // <-- Fixed: Inserted "T" between date and time
     teams: {
       home: "Botafogo RJ",
       away: "Seattle Sounders"
