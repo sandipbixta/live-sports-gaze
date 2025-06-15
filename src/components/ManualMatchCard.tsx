@@ -121,11 +121,10 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
             font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
             "
         >
-          {/* Left-aligned vertical layout */}
+          {/* First line: Home Team + 'vs', Second line: Away Team */}
           <span className="truncate max-w-full text-left">
-            {match.teams.home}
+            {match.teams.home} <span className="text-xs text-gray-300 font-normal">vs</span>
           </span>
-          <span className="text-xs text-gray-300 font-normal leading-tight text-left">vs</span>
           <span className="truncate max-w-full text-left">
             {match.teams.away}
           </span>
