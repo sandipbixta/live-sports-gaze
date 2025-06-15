@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
     title: "Bota vs Sea",
     // Already correct: zero-padded hour and T
-    date: "2025-06-16T20:00:00Z",
+    date: "2025-06-16T10:00:00Z",
     teams: {
       home: "Botafogo RJ",
       away: "Seattle Sounders"
