@@ -138,7 +138,7 @@ export const manualMatches: ManualMatch[] = [
     id: "PALMEIRAS-VS-FC-PORTO",
     title: "Palmeiras vs FC Porto",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T20:00:00Z",
+    date: "2025-06-16T24:00:00Z",
     teams: {
       home: "Palmeiras",
       away: "FC Porto"
