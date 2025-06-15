@@ -31,14 +31,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 
   return (
     <div
-      className="flex flex-col md:flex-row rounded-2xl bg-black border border-[#ff5a36] shadow-lg w-full max-w-3xl mx-auto overflow-hidden"
+      className="flex flex-col md:flex-row md:items-stretch rounded-2xl border border-[#ff5a36] bg-[#181818] w-full max-w-3xl mx-auto overflow-hidden shadow-lg"
       style={{
         background: 'radial-gradient(ellipse 170% 80% at 80% 50%, #232323 80%, #181818 100%)',
-        minHeight: 340,
+        minHeight: 260,
       }}
     >
-      {/* Image (Left side on desktop, Top on mobile) */}
-      <div className="relative w-full md:w-[320px] lg:w-[380px] aspect-video md:aspect-auto md:h-auto bg-zinc-900 flex items-center justify-center overflow-hidden">
+      {/* Image on the left (or top on mobile) */}
+      <div className="relative flex-shrink-0 w-full md:w-[350px] xl:w-[400px] aspect-video md:aspect-[16/9] md:min-h-[220px] md:max-h-none bg-zinc-900 flex items-center justify-center overflow-hidden">
         {match.image && match.image !== 'https://imgur.com/undefined' ? (
           <img
             src={match.image}
@@ -53,54 +53,45 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         )}
 
         {/* DAMITV label (top left) */}
-        <div className="absolute left-4 top-3 text-zinc-200 text-xs font-light tracking-wide bg-black bg-opacity-40 px-2 py-1 rounded">
+        <div className="absolute left-3 top-3 z-10 bg-black/60 px-2 py-1 rounded text-xs text-gray-100 font-bold tracking-wide shadow">
           DAMITV
         </div>
         {/* LIVE label (top right) */}
-        <div className="absolute right-4 top-3 text-lg font-bold text-[#ff2020] uppercase tracking-widest z-20 bg-black bg-opacity-40 px-2 py-1 rounded shadow-sm">
+        <div className="absolute right-3 top-3 z-10 bg-[#ff2020] px-2 py-1 rounded text-xs text-white font-bold tracking-widest shadow animate-pulse-subtle">
           LIVE
         </div>
       </div>
 
-      {/* Match Details (Right side on desktop, Bottom on mobile) */}
-      <div className="flex flex-col justify-between flex-1 px-5 py-6 bg-black">
-        {/* Match Info */}
+      {/* Details on the right */}
+      <div className="flex flex-col flex-1 justify-between px-4 py-6 bg-black">
         <div>
-          {/* TIME LABEL */}
-          <div className="text-white text-sm font-bold tracking-wide mb-2" style={{ letterSpacing: "0.04em" }}>
-            TIME
-          </div>
-          {/* Teams */}
-          <div className="mb-2">
-            <div className="text-2xl font-extrabold text-white leading-tight uppercase mb-1" style={{ letterSpacing: 1 }}>
-              {match.teams.home}
-            </div>
-            <div className="text-[#ff5a36] text-base font-black uppercase leading-none">vs</div>
-            <div className="text-2xl font-extrabold text-white leading-tight mt-1 uppercase" style={{ letterSpacing: 1 }}>
-              {match.teams.away}
+          <div className="mb-3">
+            <span className="block text-[13px] font-semibold text-[#ff5a36] tracking-widest mb-1">TIME</span>
+            <div className="flex flex-col gap-2">
+              <div className="text-3xl font-black text-white uppercase tracking-wider leading-tight">
+                {match.teams.home}
+              </div>
+              <div className="text-xl font-extrabold text-[#ff5a36] uppercase leading-none text-center">VS</div>
+              <div className="text-3xl font-black text-white uppercase tracking-wider leading-tight">
+                {match.teams.away}
+              </div>
             </div>
           </div>
-
-          {/* Title (optional, shown if exists) */}
           {match.title && (
-            <div className="text-base font-medium text-zinc-200 mb-1 line-clamp-2">{match.title}</div>
+            <div className="text-base font-medium text-zinc-200 mb-2 line-clamp-2">{match.title}</div>
           )}
-
-          {/* Date/Time */}
-          <div className="uppercase text-xs font-medium text-zinc-300 tracking-wider mb-1">DATE</div>
-          <div className="text-white text-base font-semibold mb-1">
-            {formatDate(match.date)}
-            <br />
-            {formatTime(match.date)}
+          <div className="flex flex-col gap-0.5 mt-4">
+            <span className="uppercase text-xs font-medium text-zinc-400 tracking-widest">Date</span>
+            <span className="text-white text-base font-semibold">
+              {formatDate(match.date)} &bull; {formatTime(match.date)}
+            </span>
           </div>
         </div>
-
-        {/* Button */}
-        <div className="mt-6">
+        <div className="mt-6 max-w-xs mx-auto w-full">
           <button
             onClick={() => navigate(`/manual-match/${match.id}`)}
-            className="w-full text-lg px-0 py-3 bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-bold rounded-md transition-colors duration-200 shadow uppercase tracking-wide"
-            style={{ letterSpacing: 1 }}
+            className="w-full text-lg py-3 bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-bold rounded-md transition-colors duration-200 shadow uppercase tracking-widest"
+            style={{ letterSpacing: 2.5 }}
           >
             WATCH HERE
           </button>
@@ -111,3 +102,4 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 };
 
 export default ManualMatchCard;
+
