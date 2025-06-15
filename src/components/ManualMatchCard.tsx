@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ManualMatch } from "@/types/manualMatch";
 import { useNavigate } from "react-router-dom";
@@ -114,19 +113,24 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 
       {/* Title and Date at the bottom */}
       <div className="absolute bottom-1 left-0 right-0 px-1 xs:px-2 sm:px-4 pb-1 z-30">
-        <h3
+        <div
           className="
+            flex flex-col items-center justify-center
             text-white
             text-[13px] xs:text-sm sm:text-base md:text-lg 
-            font-bold leading-tight mb-0.5 xs:mb-1 line-clamp-1 drop-shadow-sm
-          "
+            font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
+            "
         >
-          {/* Truncate names a bit more on mobile */}
-          <span className="truncate block">
-            {match.teams.home} vs {match.teams.away}
+          {/* Always vertical layout */}
+          <span className="truncate max-w-full text-center">
+            {match.teams.home}
           </span>
-        </h3>
-        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm">
+          <span className="text-xs text-gray-300 font-normal leading-tight">vs</span>
+          <span className="truncate max-w-full text-center">
+            {match.teams.away}
+          </span>
+        </div>
+        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm text-center mt-1">
           {/* Mobile: "16 June", desktop: "Jun 16" */}
           <span className="sm:hidden">{dateStringMobile}</span>
           <span className="hidden sm:inline">{dateStringDesktop}</span>
