@@ -43,7 +43,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/C9iom5u.png" // Now direct Imgur PNG link
   },
   {
