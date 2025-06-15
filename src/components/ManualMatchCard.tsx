@@ -115,22 +115,22 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       <div className="absolute bottom-1 left-0 right-0 px-1 xs:px-2 sm:px-4 pb-1 z-30">
         <div
           className="
-            flex flex-col items-center justify-center
+            flex flex-col items-start justify-center
             text-white
             text-[13px] xs:text-sm sm:text-base md:text-lg 
             font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
             "
         >
-          {/* Always vertical layout */}
-          <span className="truncate max-w-full text-center">
+          {/* Left-aligned vertical layout */}
+          <span className="truncate max-w-full text-left">
             {match.teams.home}
           </span>
-          <span className="text-xs text-gray-300 font-normal leading-tight">vs</span>
-          <span className="truncate max-w-full text-center">
+          <span className="text-xs text-gray-300 font-normal leading-tight text-left">vs</span>
+          <span className="truncate max-w-full text-left">
             {match.teams.away}
           </span>
         </div>
-        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm text-center mt-1">
+        <p className="text-gray-300 text-[12px] xs:text-xs sm:text-sm text-left mt-1">
           {/* Mobile: "16 June", desktop: "Jun 16" */}
           <span className="sm:hidden">{dateStringMobile}</span>
           <span className="hidden sm:inline">{dateStringDesktop}</span>
