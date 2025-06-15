@@ -28,13 +28,19 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'uefa nations league', weight: 10, seoTerms: ['nations league', 'uefa nations', 'national teams'] }, // Added explicit match
     { name: 'national league', weight: 8, seoTerms: ['nations league', 'uefa nations league', 'national teams'] }, // Alternative naming
     
+    // FIFA Club World Cup - Enhanced detection with high priority
+    { name: 'fifa club world cup', weight: 10, seoTerms: ['club world cup stream', 'fifa cwc', 'cwc 2025', 'fifa club world cup 2025'] },
+    { name: 'club world cup', weight: 10, seoTerms: ['fifa club world cup', 'fifa cwc', 'cwc stream', 'club world cup 2025'] },
+    { name: 'fifa cwc', weight: 10, seoTerms: ['club world cup', 'fifa club world cup', 'cwc 2025'] },
+    { name: 'cwc', weight: 9, seoTerms: ['club world cup', 'fifa club world cup', 'fifa cwc'] },
+    { name: 'fifa 2025', weight: 9, seoTerms: ['fifa club world cup 2025', 'cwc 2025', 'club world cup'] },
+    { name: 'club world cup 2025', weight: 10, seoTerms: ['fifa club world cup', 'fifa cwc', 'cwc 2025'] },
+    
     // Other major competitions with high global interest
     { name: 'copa libertadores', weight: 8, seoTerms: ['libertadores stream', 'south american football'] },
     { name: 'copa america', weight: 9, seoTerms: ['copa america stream', 'conmebol', 'south american championship'] },
     { name: 'fa cup', weight: 7, seoTerms: ['fa cup stream', 'english cup', 'football association cup'] },
     { name: 'super copa', weight: 7, seoTerms: ['super cup stream', 'supercopa'] },
-    { name: 'fifa world cup', weight: 10, seoTerms: ['world cup stream', 'fifa wc', 'world cup qualifiers'] },
-    { name: 'club world cup', weight: 8, seoTerms: ['fifa cwc', 'club world cup stream'] },
     { name: 'supercup', weight: 7, seoTerms: ['super cup', 'uefa supercup', 'supercup stream'] },
     { name: 'super cup', weight: 7, seoTerms: ['supercup', 'uefa super cup', 'super cup stream'] },
     { name: 'copa del rey', weight: 6, seoTerms: ['spanish cup', 'copa del rey stream'] },
@@ -46,7 +52,7 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'derby', weight: 8, seoTerms: ['football derby', 'derby stream', 'rivalry match'] }, // Derby matches trend highly
   ];
   
-  // Top clubs that typically trend on Google searches
+  // Top clubs that typically trend on Google searches - Enhanced with CWC participants
   const topClubs = [
     // Premier League
     { name: 'manchester united', weight: 10, seoTerms: ['man utd', 'man united', 'manchester united stream'] },
@@ -79,6 +85,28 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'paris saint-germain', weight: 9, seoTerms: ['psg', 'paris', 'psg stream'] },
     { name: 'marseille', weight: 6, seoTerms: ['om', 'olympique marseille', 'marseille stream'] },
     { name: 'lyon', weight: 6, seoTerms: ['ol', 'olympique lyonnais', 'lyon stream'] },
+    
+    // MLS and other CWC participants
+    { name: 'inter miami', weight: 9, seoTerms: ['inter miami cf', 'miami', 'inter miami stream', 'messi team'] },
+    { name: 'miami', weight: 8, seoTerms: ['inter miami', 'inter miami cf', 'miami stream'] },
+    { name: 'seattle sounders', weight: 7, seoTerms: ['sounders', 'seattle', 'mls champions'] },
+    { name: 'sounders', weight: 7, seoTerms: ['seattle sounders', 'seattle', 'mls'] },
+    
+    // South American clubs (CWC participants)
+    { name: 'flamengo', weight: 8, seoTerms: ['cr flamengo', 'mengao', 'flamengo stream'] },
+    { name: 'palmeiras', weight: 8, seoTerms: ['se palmeiras', 'verdao', 'palmeiras stream'] },
+    { name: 'boca juniors', weight: 8, seoTerms: ['boca', 'xeneize', 'boca stream'] },
+    { name: 'river plate', weight: 8, seoTerms: ['river', 'millonarios', 'river stream'] },
+    
+    // African clubs (CWC participants)
+    { name: 'al ahly', weight: 8, seoTerms: ['ahly', 'al ahly sc', 'al ahly stream', 'egyptian club'] },
+    { name: 'ahly', weight: 8, seoTerms: ['al ahly', 'al ahly sc', 'ahly stream'] },
+    { name: 'wydad', weight: 7, seoTerms: ['wydad casablanca', 'wydad ac', 'moroccan club'] },
+    
+    // Asian clubs (CWC participants)
+    { name: 'urawa reds', weight: 7, seoTerms: ['urawa red diamonds', 'reds', 'japanese club'] },
+    { name: 'al hilal', weight: 8, seoTerms: ['hilal', 'saudi club', 'al hilal stream'] },
+    { name: 'ulsan hyundai', weight: 7, seoTerms: ['ulsan', 'korean club', 'hyundai'] },
     
     // National Teams (for Nations League and international matches)
     { name: 'spain', weight: 9, seoTerms: ['spain national team', 'la roja', 'spain stream'] },
