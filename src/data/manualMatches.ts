@@ -50,7 +50,7 @@ export const manualMatches: ManualMatch[] = [
     id: "PSG-VS-ATL-MADRID",
     title: "PSG vs Atl. Madrid",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T17:00:00Z", 
+    date: "2025-06-16T19:00:00Z", 
     teams: {
       home: "PSG",
       away: "Atl. Madrid"
