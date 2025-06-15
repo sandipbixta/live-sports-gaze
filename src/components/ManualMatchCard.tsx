@@ -30,13 +30,13 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 
   return (
     <div
-      className="flex flex-col sm:flex-row rounded-2xl bg-black border border-[#ff5a36] shadow-lg min-h-[360px] w-full max-w-3xl mx-auto overflow-hidden"
+      className="flex flex-col sm:flex-row rounded-2xl bg-black border border-[#ff5a36] shadow-lg min-h-[480px] w-full max-w-2xl mx-auto overflow-hidden"
       style={{
         background: 'radial-gradient(ellipse 170% 80% at 80% 50%, #232323 80%, #181818 100%)',
       }}
     >
       {/* Left Section */}
-      <div className="flex flex-col justify-between p-7 sm:w-1/2 w-full bg-black">
+      <div className="flex flex-col justify-between p-8 sm:w-1/2 w-full bg-black">
         {/* TIME & Match info */}
         <div>
           <div className="text-white text-lg font-bold tracking-wide mb-3" style={{ letterSpacing: "0.04em" }}>
@@ -72,13 +72,13 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       </div>
 
       {/* Right Section (Match Image, always visible and contained) */}
-      <div className="relative flex-1 sm:w-1/2 w-full flex items-stretch justify-center bg-zinc-900 rounded-br-2xl rounded-tr-2xl sm:rounded-bl-none overflow-hidden min-h-[360px]">
+      <div className="relative flex-1 sm:w-1/2 w-full flex items-center justify-center bg-zinc-900 rounded-br-2xl rounded-tr-2xl sm:rounded-bl-none overflow-hidden min-h-[480px]">
         {match.image && match.image !== 'https://imgur.com/undefined' ? (
           <img
             src={match.image}
             alt={match.title}
             className="w-full h-full object-contain object-center bg-black"
-            style={{ minHeight: '100%', maxHeight: '100%' }}
+            style={{ minHeight: '100%', maxHeight: '100%', maxWidth: '100%' }}
             draggable={false}
           />
         ) : (
