@@ -69,17 +69,17 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
       {/* Right Section (Match Image) */}
-      <div className="relative flex-1 min-h-[200px] bg-zinc-900">
+      <div className="relative flex-1 min-h-[270px] bg-zinc-900 flex items-center justify-center rounded-br-2xl rounded-tr-2xl sm:rounded-bl-none sm:rounded-br-2xl overflow-hidden">
         {match.image && match.image !== 'https://imgur.com/undefined' ? (
           <img
             src={match.image}
             alt={match.title}
-            className="w-full h-full object-cover object-center"
-            style={{ minHeight: '100%', maxHeight: 340 }}
+            className="w-full h-full object-cover object-center transition-all duration-200"
+            style={{ minHeight: 270, maxHeight: 380, borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem' }}
             draggable={false}
           />
         ) : (
-          <div className="flex items-center justify-center w-full h-full min-h-[200px] bg-[#20242d]">
+          <div className="flex items-center justify-center w-full h-full min-h-[270px] bg-[#20242d]">
             <span className="text-white/70 text-lg font-semibold">No Image</span>
           </div>
         )}
