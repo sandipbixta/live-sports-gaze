@@ -28,7 +28,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 
   return (
     <div 
-      className="relative w-full max-w-xs sm:max-w-sm h-52 sm:h-64 rounded-lg bg-black overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 group shadow-lg"
+      className="relative w-full h-[170px] sm:h-52 md:h-64 rounded-lg bg-black overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 group shadow-lg"
       style={{ minWidth: 0 }}
       onClick={() => navigate(`/manual-match/${match.id}`)}
     >
@@ -78,7 +78,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       </div>
 
       {/* Title and Date at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-30">
+      <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-4 z-30">
         <h3 className="text-white text-base sm:text-lg font-bold leading-tight mb-1 line-clamp-1">
           {match.teams.home} vs {match.teams.away}
         </h3>
@@ -91,3 +91,4 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
 };
 
 export default ManualMatchCard;
+
