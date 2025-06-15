@@ -12,16 +12,18 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
-  // Format the date and time
+  // Format the date and time for Australia (AEST/AEDT)
   const matchDate = new Date(match.date);
-  const timeString = matchDate.toLocaleTimeString('en-US', { 
+  const timeString = matchDate.toLocaleTimeString('en-AU', { 
     hour: '2-digit', 
     minute: '2-digit',
-    hour12: false 
+    hour12: false,
+    timeZone: 'Australia/Sydney'
   });
-  const dateString = matchDate.toLocaleDateString('en-US', { 
+  const dateString = matchDate.toLocaleDateString('en-AU', { 
     month: 'short', 
-    day: 'numeric' 
+    day: 'numeric',
+    timeZone: 'Australia/Sydney'
   });
 
   return (
@@ -48,12 +50,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       {/* Overlay gradient for better text readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
 
-      {/* Top Section - Time/Date and LIVE badge */}
+      {/* Top Section - Time and LIVE badge */}
       <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start">
-        {/* Time and Date */}
+        {/* Time */}
         <div className="bg-black/60 backdrop-blur-sm rounded-md px-2 py-1">
           <div className="text-white text-sm font-bold">{timeString}</div>
-          <div className="text-gray-300 text-xs">{dateString}</div>
         </div>
         
         {/* LIVE Badge */}
@@ -70,11 +71,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
 
-      {/* Title at the bottom */}
+      {/* Title and Date at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <h3 className="text-white text-lg font-bold leading-tight">
-          {match.title || `${match.teams.home} vs ${match.teams.away}`}
+        <h3 className="text-white text-lg font-bold leading-tight mb-1">
+          {match.teams.home} vs {match.teams.away}
         </h3>
+        <p className="text-gray-300 text-sm">
+          {dateString}
+        </p>
       </div>
     </div>
   );
