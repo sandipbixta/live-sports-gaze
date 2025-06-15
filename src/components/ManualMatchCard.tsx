@@ -1,9 +1,6 @@
 
 import React from 'react';
-import { Play } from 'lucide-react';
 import { ManualMatch } from '@/types/manualMatch';
-import { Button } from '@/components/ui/button';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useNavigate } from 'react-router-dom';
 
 interface ManualMatchCardProps {
@@ -13,110 +10,113 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
-  // Formatting helpers
-  const formatMatchTime = (dateString: string) => {
+  // Helper to format time and date
+  const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
   };
-  const formatMatchDate = (dateString: string) => {
+  const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric'
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
     });
   };
-  const isMatchLive = () => {
-    const matchTime = new Date(match.date).getTime();
-    const now = new Date().getTime();
-    const oneHourInMs = 60 * 60 * 1000;
-    const threeHoursInMs = 3 * 60 * 60 * 1000;
-    return (
-      matchTime - now < oneHourInMs &&
-      now - matchTime < threeHoursInMs
-    );
-  };
 
-  const handleWatchNow = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    navigate(`/manual-match/${match.id}`);
-  };
+  // Team logo helpers (fallback to simple colored circles if missing)
+  const homeLogo = match.image && match.image !== 'https://imgur.com/undefined'
+    ? match.image
+    : null;
+  const awayLogo = match.image && match.image !== 'https://imgur.com/undefined'
+    ? match.image
+    : null;
 
   return (
     <div
-      className="relative flex min-h-[140px] sm:min-h-[160px] bg-[#181c23] border border-[#252525] rounded-xl shadow-lg overflow-hidden hover:scale-[1.015] transition-transform duration-200 cursor-pointer group"
-      onClick={handleWatchNow}
+      className="flex flex-col sm:flex-row rounded-2xl bg-black overflow-hidden border border-[#ff5a36] shadow-lg min-h-[250px] w-full max-w-3xl mx-auto"
+      style={{ background: 'radial-gradient(ellipse 170% 80% at 80% 50%, #232323 80%, #181818 100%)' }}
     >
-      {/* Left side: all info + small play button */}
-      <div className="relative flex flex-col justify-between px-4 py-3 min-w-[190px] max-w-[240px] w-full z-10">
-        <div className="flex flex-col gap-2">
-          {/* Date & Time row */}
-          <div className="flex items-center gap-2">
-            <span className="bg-black/70 text-xs text-white rounded px-2 py-0.5 font-semibold">
-              {formatMatchDate(match.date)} • {formatMatchTime(match.date)}
-            </span>
-            {isMatchLive() && (
-              <span className="flex items-center gap-1 bg-[#ff5a36] text-white text-[11px] px-2 py-0.5 font-bold rounded shadow animate-fade-in">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse" /> LIVE
-              </span>
-            )}
+      {/* Left Section (Details & Button) */}
+      <div className="flex flex-col justify-between p-6 sm:w-[37%] w-full bg-black">
+        {/* TIME, Match info */}
+        <div>
+          <div className="text-white text-lg font-bold tracking-wide mb-2" style={{letterSpacing: "0.04em"}}>
+            TIME
           </div>
-          {/* Match Title */}
-          <div className="truncate text-xs text-white/90 font-semibold">{match.title}</div>
-          {/* Teams home vs away */}
-          <div className="flex items-center gap-3 mt-1 mb-1">
-            {/* Home */}
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center overflow-hidden">
-                <span className="font-bold text-black text-base">
-                  {match.teams.home.charAt(0)}
-                </span>
-              </div>
-              <span className="text-xs text-white/90 font-medium leading-tight text-center max-w-[60px] truncate">{match.teams.home}</span>
+          <div className="mt-7 mb-2">
+            <div className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-3" style={{ letterSpacing: 1 }}>
+              {match.teams.home.toUpperCase()}<br />
+              VS<br />
+              {match.teams.away.toUpperCase()}
             </div>
-            <span className="text-[#ff5a36] font-extrabold text-sm">VS</span>
-            {/* Away */}
-            <div className="flex flex-col items-center gap-0.5">
-              <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center overflow-hidden">
-                <span className="font-bold text-black text-base">
-                  {match.teams.away.charAt(0)}
-                </span>
-              </div>
-              <span className="text-xs text-white/90 font-medium leading-tight text-center max-w-[60px] truncate">{match.teams.away}</span>
-            </div>
+          </div>
+          <div className="uppercase text-xs font-medium text-zinc-300 tracking-wider mt-3">
+            DATE
+          </div>
+          <div className="text-white text-base font-semibold">
+            {formatDate(match.date)} &nbsp; {formatTime(match.date)}
           </div>
         </div>
-        {/* Play icon, smaller and round, bottom-left */}
-        <Button
-          className="mt-2 w-7 h-7 p-0 rounded-full flex items-center justify-center shadow-lg bg-[#ff5a36] hover:bg-[#e64d2e] group/button"
-          size="icon"
-          onClick={e => { e.stopPropagation(); handleWatchNow(e); }}
-          aria-label="Watch Match"
-        >
-          <Play size={14} />
-        </Button>
+        {/* WATCH HERE Button */}
+        <div className="mt-8 mb-2">
+          <button
+            onClick={() => navigate(`/manual-match/${match.id}`)}
+            className="w-full text-lg sm:text-base px-0 py-2 bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-bold rounded-md transition-colors duration-200 shadow uppercase tracking-wide"
+          >
+            WATCH HERE
+          </button>
+        </div>
       </div>
-      {/* Right: Match image as background (super dimmed) */}
-      <div className="relative flex-1 overflow-hidden hidden sm:block">
-        <AspectRatio ratio={16/9} className="w-full h-full">
-          {match.image && match.image !== "https://imgur.com/undefined" ? (
-            <>
+      {/* Right Section (Logos, title, live) */}
+      <div className="relative flex-1 flex items-center justify-center bg-black bg-opacity-80">
+        {/* DAMITV */}
+        <div className="absolute left-5 top-5 text-zinc-200 text-xs font-light tracking-wide hidden sm:block">
+          DAMITV
+        </div>
+        {/* LIVE on top right */}
+        <div className="absolute right-6 top-6 text-lg font-bold text-[#ff2020] uppercase tracking-widest z-20">
+          LIVE
+        </div>
+        {/* Centered logos and VS line */}
+        <div className="flex flex-row items-center justify-center w-full gap-10 sm:gap-16">
+          {/* Home logo */}
+          <div className="flex flex-col items-center">
+            {homeLogo ? (
               <img
-                src={match.image}
-                alt={`${match.teams.home} vs ${match.teams.away}`}
-                className="absolute inset-0 w-full h-full object-cover opacity-40"
+                src={homeLogo}
+                alt={`${match.teams.home} Logo`}
+                className="rounded-full border-4 border-white bg-white shadow-xl shadow-black/40 w-24 h-24 sm:w-32 sm:h-32 object-contain"
                 draggable={false}
               />
-              {/* Extra dark overlay for better text contrast */}
-              <div className="absolute inset-0 bg-black/70" />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gray-800" />
-          )}
-        </AspectRatio>
+            ) : (
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-black text-2xl font-bold">{match.teams.home.charAt(0)}</span>
+              </div>
+            )}
+          </div>
+          {/* VS Divider (optional, can add golden vertical line or fade) */}
+          <div className="h-24 sm:h-32 border-l-2 border-[#ff5a36] mx-2 opacity-70" />
+          {/* Away logo */}
+          <div className="flex flex-col items-center">
+            {awayLogo ? (
+              <img
+                src={awayLogo}
+                alt={`${match.teams.away} Logo`}
+                className="rounded-full border-4 border-white bg-white shadow-xl shadow-black/40 w-24 h-24 sm:w-32 sm:h-32 object-contain"
+                draggable={false}
+              />
+            ) : (
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-black text-2xl font-bold">{match.teams.away.charAt(0)}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
