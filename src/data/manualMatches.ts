@@ -13,6 +13,12 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
+        quality: "HD"
+      },     
+      {
         id: "TBS-USA",
         name: "TBS [USA]",
         url: "https://topembed.pw/channel/TBS[USA]",
@@ -31,9 +37,9 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "Nevena-3",
-        name: "Nevena3",
-        url: "https://topembed.pw/channel/Nevena3[S7]",
+        id: "Nevena-2",
+        name: "Nevena 2",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
         quality: "HD"
       },     
     ],
