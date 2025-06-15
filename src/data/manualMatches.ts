@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "AL-AHLY-VS-INTER-MIAMI",
-    title: "Al vs Inter",
+    id: "BAYERN-MUNICH-VS-AUCKLAND-CITY",
+    title: "Bayern vs Auckland",
     // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
-    date: "2025-06-15T12:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
+    date: "2025-06-16T12:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
     teams: {
-      home: "Al Ahly",
-      away: "Inter Miami"
+      home: "Bayern Munich",
+      away: "Auckland City"
     },
     links: [
       {
@@ -43,8 +43,140 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/C9iom5u.png" // Now direct Imgur PNG link
+    visible: true,
+    image: "https://i.imgur.com/zUQD0ek.jpeg" // Now direct Imgur PNG link
+  },
+  {
+    id: "PSG-VS-ATL-MADRID",
+    title: "PSG vs Atl. Madrid",
+    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
+    date: "2025-06-16T12:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
+    teams: {
+      home: "PSG",
+      away: "Atl. Madrid"
+    },
+    links: [
+      {
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
+        quality: "HD"
+      },     
+      {
+        id: "TBS-USA",
+        name: "TBS [USA]",
+        url: "https://topembed.pw/channel/TBS[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Channel-5 [UK]",
+        name: "Channel 5 [UK]",
+        url: "https://topembed.pw/channel/Channel5[UK]",
+        quality: "HD"
+      },
+      {
+        id: "TUDN-[USA]",
+        name: "TUDN [USA]",
+        url: "https://topembed.pw/channel/TUDN[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Nevena-2",
+        name: "Nevena 2",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
+        quality: "HD"
+      },     
+    ],
+    visible: true,
+    image: "https://i.imgur.com/nywK4YX.jpeg" // Now direct Imgur PNG link
+  },
+  {
+    id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
+    title: "Bota vs Sea",
+    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
+    date: "2025-06-16T12:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
+    teams: {
+      home: "Botafogo RJ",
+      away: "Seattle Sounders"
+    },
+    links: [
+      {
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
+        quality: "HD"
+      },     
+      {
+        id: "TBS-USA",
+        name: "TBS [USA]",
+        url: "https://topembed.pw/channel/TBS[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Channel-5 [UK]",
+        name: "Channel 5 [UK]",
+        url: "https://topembed.pw/channel/Channel5[UK]",
+        quality: "HD"
+      },
+      {
+        id: "TUDN-[USA]",
+        name: "TUDN [USA]",
+        url: "https://topembed.pw/channel/TUDN[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Nevena-2",
+        name: "Nevena 2",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
+        quality: "HD"
+      },     
+    ],
+    visible: true,
+    image: "https://i.imgur.com/f6ByUT2.jpeg" // Now direct Imgur PNG link
+  },
+  {
+    id: "PALMEIRAS-VS-FC-PORTO",
+    title: "Palmeiras vs FC Porto",
+    // FIX: Corrected date (ISO 8601) and image string to direct Imgur link
+    date: "2025-06-16T12:00:00Z", // Set to 10:00 AM UTC (adjust if you want 10am in another timezone)
+    teams: {
+      home: "Palmeiras",
+      away: "FC Porto"
+    },
+    links: [
+      {
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
+        quality: "HD"
+      },     
+      {
+        id: "TBS-USA",
+        name: "TBS [USA]",
+        url: "https://topembed.pw/channel/TBS[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Channel-5 [UK]",
+        name: "Channel 5 [UK]",
+        url: "https://topembed.pw/channel/Channel5[UK]",
+        quality: "HD"
+      },
+      {
+        id: "TUDN-[USA]",
+        name: "TUDN [USA]",
+        url: "https://topembed.pw/channel/TUDN[USA]",
+        quality: "HD"
+      },
+      {
+        id: "Nevena-2",
+        name: "Nevena 2",
+        url: "https://topembed.pw/channel/Nevena2[S7]",
+        quality: "HD"
+      },     
+    ],
+    visible: true,
+    image: "https://i.imgur.com/PojQSYn.jpeg" // Now direct Imgur PNG link
   },
   {
     id: "hidden-match",
