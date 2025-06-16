@@ -50,7 +50,7 @@ export const manualMatches: ManualMatch[] = [
     id: "BOCA-JUNIORS-VS-BENIFICA",
     title: "Boca Juniors vs Benifica",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T19:00:00Z", 
+    date: "2025-06-16T22:00:00Z", 
     teams: {
       home: "Boca Juniors",
       away: "Benifica"
@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "FLAMENGO-RJ-VS-ESPERANCE-TUNIS",
     title: "Flamengo vs Esperance Tunis",
     // Already correct: zero-padded hour and T
-    date: "2025-06-16T22:00:00Z",
+    date: "2025-06-16T01:00:00Z",
     teams: {
       home: "Flamengo RJ",
       away: "Esperance Tunis"
