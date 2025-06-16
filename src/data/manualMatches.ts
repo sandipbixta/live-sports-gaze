@@ -6,7 +6,7 @@ export const manualMatches: ManualMatch[] = [
     id: "CHELSEA-VS-LOS-ANGELES-FC",
     title: "Chelsea vs Los Angeles fc",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-16T19:00:00Z", 
+    date: "2025-06-17T19:00:00Z", 
     teams: {
       home: "Chelsea",
       away: "Los Angeles FC"
@@ -50,7 +50,7 @@ export const manualMatches: ManualMatch[] = [
     id: "BOCA-JUNIORS-VS-BENIFICA",
     title: "Boca Juniors vs Benifica",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T22:00:00Z", 
+    date: "2025-06-17T22:00:00Z", 
     teams: {
       home: "Boca Juniors",
       away: "Benifica"
@@ -83,7 +83,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "Nevena-2",
         name: "Nevena 2",
-        url: "https://topembed.pw/channel/Nevena2[S7]",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
         quality: "HD"
       },     
     ],
@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "FLAMENGO-RJ-VS-ESPERANCE-TUNIS",
     title: "Flamengo vs Esperance Tunis",
     // Already correct: zero-padded hour and T
-    date: "2025-06-16T01:00:00Z",
+    date: "2025-06-17T01:00:00Z",
     teams: {
       home: "Flamengo RJ",
       away: "Esperance Tunis"
