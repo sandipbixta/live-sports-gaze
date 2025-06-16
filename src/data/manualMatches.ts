@@ -131,7 +131,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/f6ByUT2.jpeg"
   },
   {
@@ -175,7 +175,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/PojQSYn.jpeg"
   },
   {
