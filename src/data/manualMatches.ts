@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "BAYERN-MUNICH-VS-AUCKLAND-CITY",
-    title: "Bayern vs Auckland",
+    id: "CHELSEA-VS-LOS-ANGELES-FC",
+    title: "Chelsea vs Los Angeles fc",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
     date: "2025-06-16T16:00:00Z", 
     teams: {
-      home: "Bayern Munich",
-      away: "Auckland City"
+      home: "Chelsea",
+      away: "Los Angeles FC"
     },
     links: [
       {
@@ -43,17 +43,17 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/zUQD0ek.jpeg"
+    visible: true,
+    image: "https://i.imgur.com/zzH3VTt.jpeg"
   },
   {
-    id: "PSG-VS-ATL-MADRID",
-    title: "PSG vs Atl. Madrid",
+    id: "BOCA-JUNIORS-VS-BENIFICA",
+    title: "Boca Juniors vs Benifica",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-16T19:00:00Z", 
     teams: {
-      home: "PSG",
-      away: "Atl. Madrid"
+      home: "Boca Juniors",
+      away: "Benifica"
     },
     links: [
       {
@@ -87,17 +87,17 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/nywK4YX.jpeg"
+    visible: true,
+    image: "https://i.imgur.com/cl8Odjy.jpeg"
   },
   {
-    id: "BOTAFOGO-AJ-VS-SEATTLE-SOUNDERS",
-    title: "Bota vs Sea",
+    id: "FLAMENGO-RJ-VS-ESPERANCE-TUNIS",
+    title: "Flamengo vs Esperance Tunis",
     // Already correct: zero-padded hour and T
     date: "2025-06-16T22:00:00Z",
     teams: {
-      home: "Botafogo RJ",
-      away: "Seattle Sounders"
+      home: "Flamengo RJ",
+      away: "Esperance Tunis"
     },
     links: [
       {
@@ -131,8 +131,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/f6ByUT2.jpeg"
+    visible: true,
+    image: "https://i.imgur.com/scFpRUP.jpeg"
   },
   {
     id: "PALMEIRAS-VS-FC-PORTO",
