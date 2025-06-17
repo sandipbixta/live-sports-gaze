@@ -8,9 +8,14 @@ import { isTrendingMatch } from '../utils/popularLeagues';
 interface PopularMatchesProps {
   popularMatches: Match[];
   selectedSport: string | null;
+  excludeMatchIds?: string[]; // Add prop to exclude specific match IDs
 }
 
-const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selectedSport }) => {
+const PopularMatches: React.FC<PopularMatchesProps> = ({ 
+  popularMatches, 
+  selectedSport,
+  excludeMatchIds = []
+}) => {
   const isMobile = useIsMobile();
   
   // Helper function to remove duplicates more strictly
@@ -19,6 +24,11 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selecte
     const uniqueMatches: Match[] = [];
     
     matches.forEach(match => {
+      // Skip if this match ID should be excluded
+      if (excludeMatchIds.includes(match.id)) {
+        return;
+      }
+      
       // Create a unique key based on teams and date
       const homeTeam = match.teams?.home?.name || '';
       const awayTeam = match.teams?.away?.name || '';
@@ -38,13 +48,14 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({ popularMatches, selecte
     return uniqueMatches;
   };
   
-  // Filter out advertisement matches and remove duplicates
+  // Filter out advertisement matches, exclude specified IDs, and remove duplicates
   const filteredMatches = removeDuplicates(
     popularMatches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news') &&
       !match.title.toLowerCase().includes('advertisement') &&
-      !match.title.toLowerCase().includes('ad break')
+      !match.title.toLowerCase().includes('ad break') &&
+      !excludeMatchIds.includes(match.id) // Additional filter for excluded IDs
     )
   ).sort((a, b) => {
     // Sort by trending score (higher score first)

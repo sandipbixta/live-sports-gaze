@@ -7,9 +7,15 @@ interface MatchesListProps {
   matches: Match[];
   sportId: string;
   isLoading: boolean;
+  onMatchesDisplayed?: (matchIds: string[]) => void; // Add callback to report displayed match IDs
 }
 
-const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
+const MatchesList: React.FC<MatchesListProps> = ({ 
+  matches, 
+  sportId, 
+  isLoading,
+  onMatchesDisplayed
+}) => {
   // Enhanced duplicate removal function
   const removeDuplicates = (matches: Match[]): Match[] => {
     const seen = new Map<string, Match>();
@@ -64,6 +70,14 @@ const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }
 
   const filteredMatches = removeDuplicates(cleanMatches);
   const isMobile = useIsMobile();
+  
+  // Report displayed match IDs to parent component
+  React.useEffect(() => {
+    if (onMatchesDisplayed && filteredMatches.length > 0) {
+      const displayedIds = filteredMatches.map(match => match.id);
+      onMatchesDisplayed(displayedIds);
+    }
+  }, [filteredMatches, onMatchesDisplayed]);
   
   // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {

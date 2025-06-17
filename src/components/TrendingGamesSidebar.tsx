@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Sidebar,
@@ -18,15 +17,25 @@ import { Badge } from '@/components/ui/badge';
 interface TrendingGamesSidebarProps {
   matches: Match[];
   sportId: string;
+  excludeMatchIds?: string[]; // Add prop to exclude specific match IDs
 }
 
-const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ matches, sportId }) => {
+const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ 
+  matches, 
+  sportId,
+  excludeMatchIds = []
+}) => {
   // Helper function to remove duplicates more strictly
   const removeDuplicates = (matches: Match[]): Match[] => {
     const seen = new Set<string>();
     const uniqueMatches: Match[] = [];
     
     matches.forEach(match => {
+      // Skip if this match ID should be excluded
+      if (excludeMatchIds.includes(match.id)) {
+        return;
+      }
+      
       // Create a unique key based on teams and date
       const homeTeam = match.teams?.home?.name || '';
       const awayTeam = match.teams?.away?.name || '';
@@ -46,13 +55,14 @@ const TrendingGamesSidebar: React.FC<TrendingGamesSidebarProps> = ({ matches, sp
     return uniqueMatches;
   };
 
-  // Filter and sort matches by trending score
+  // Filter and sort matches by trending score, excluding specified IDs
   const trendingMatches = removeDuplicates(
     matches.filter(match => 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news') &&
       !match.title.toLowerCase().includes('advertisement') &&
-      !match.title.toLowerCase().includes('ad break')
+      !match.title.toLowerCase().includes('ad break') &&
+      !excludeMatchIds.includes(match.id) // Additional filter for excluded IDs
     )
   ).map(match => ({
     ...match,
