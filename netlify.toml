@@ -2,9 +2,15 @@
 [build]
   publish = "dist"
 
-# Permanent 301 redirects for old pages - fix duplicate content
+# Fix duplicate content with proper 301 redirects
 [[redirects]]
   from = "/home"
+  to = "/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/index.html"
   to = "/"
   status = 301
   force = true
@@ -57,7 +63,7 @@
   status = 301
   force = true
 
-# Fix broken links - redirect to appropriate pages
+# Fix broken links
 [[redirects]]
   from = "/about"
   to = "/"
@@ -94,13 +100,44 @@
   status = 301
   force = true
 
-# Handle 404s properly - send to custom 404 page
+# Handle trailing slashes to prevent duplicates
+[[redirects]]
+  from = "/live/"
+  to = "/live"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/channels/"
+  to = "/channels"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/schedule/"
+  to = "/schedule"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/news/"
+  to = "/news"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/dmca/"
+  to = "/dmca"
+  status = 301
+  force = true
+
+# SPA fallback - must be last
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Add proper caching headers for better performance
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
@@ -110,7 +147,7 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Content-Security-Policy = "upgrade-insecure-requests"
     
-# Add proper cache control for static assets
+# Cache control for static assets
 [[headers]]
   for = "/*.js"
   [headers.values]
@@ -136,7 +173,7 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Add proper canonical tags through headers - fix duplicate content issues
+# SEO headers with proper canonical tags
 [[headers]]
   for = "/"
   [headers.values]
@@ -173,8 +210,8 @@
     Link = "<https://damitv.pro/dmca>; rel=\"canonical\""
     X-Robots-Tag = "index, follow"
 
-# Handle match pages with canonical tags
+# Manual match pages with proper indexing
 [[headers]]
-  for = "/match/*"
+  for = "/manual-match/*"
   [headers.values]
     X-Robots-Tag = "index, follow, max-image-preview:large"

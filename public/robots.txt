@@ -1,16 +1,17 @@
 
-# DamiTV Robots.txt - Optimized for better indexing
+# DamiTV Robots.txt - Fixed for better indexing
 User-agent: *
 Allow: /
 
-# High priority content for better crawling
+# High priority content - ensure these are crawled
 Allow: /live
 Allow: /channels  
 Allow: /schedule
 Allow: /news
 Allow: /match/*
+Allow: /manual-match/*
 
-# Crawl rate optimization for major search engines
+# Crawl rate optimization
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 1
@@ -19,14 +20,7 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 2
 
-User-agent: Slurp
-Allow: /
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Allow: /
-
-# Social media crawlers for better sharing
+# Social media crawlers
 User-agent: Twitterbot
 Allow: /
 
@@ -39,7 +33,7 @@ Allow: /
 User-agent: WhatsApp
 Allow: /
 
-# Block only problematic paths
+# Block problematic paths that cause duplicate content
 Disallow: /api/
 Disallow: /admin/
 Disallow: /_next/
@@ -47,6 +41,8 @@ Disallow: /static/
 Disallow: /*.json$
 Disallow: /*?preview=
 Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?source=*
 
 # Important: Sitemap location
 Sitemap: https://damitv.pro/sitemap.xml
