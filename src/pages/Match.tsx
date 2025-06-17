@@ -29,37 +29,40 @@ const Match = () => {
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
   const [retryCounter, setRetryCounter] = useState(0);
   
-  // Memoized stream fetching function to prevent recreation on every render
+  // Memoized stream fetching function
   const fetchStreamData = useCallback(async (source: string, id: string, streamNo?: number) => {
     setLoadingStream(true);
     try {
-      console.log(`Fetching stream data: source=${source}, id=${id}, streamNo=${streamNo}, retry=${retryCounter}`);
+      console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
       const streamData = await fetchStream(source, id, streamNo);
-      console.log('Stream data received:', streamData);
       
-      // Handle both single stream and array of streams
       if (Array.isArray(streamData)) {
-        // If array, pick the requested streamNo or the first HD stream
-        const selectedStream = streamNo 
-          ? streamData.find(s => s.streamNo === streamNo)
+        // If array, pick the requested streamNo or the first available stream
+        const selectedStream = streamNo !== undefined
+          ? streamData.find(s => s.streamNo === streamNo) || streamData[0]
           : streamData.find(s => s.hd) || streamData[0];
         
+        console.log('Selected stream from array:', selectedStream);
         setStream(selectedStream || null);
-      } else {
+      } else if (streamData && streamData.embedUrl) {
+        console.log('Single stream received:', streamData);
         setStream(streamData);
+      } else {
+        console.log('No valid stream data received');
+        setStream(null);
       }
     } catch (error) {
-      console.error('Error in fetchStreamData:', error);
+      console.error('Error fetching stream:', error);
       toast({
-        title: "Error",
-        description: "Failed to load stream data.",
+        title: "Stream Error",
+        description: "Failed to load this stream. Try another source.",
         variant: "destructive",
       });
       setStream(null);
     } finally {
       setLoadingStream(false);
     }
-  }, [toast, retryCounter]);
+  }, [toast]);
   
   useEffect(() => {
     const loadMatch = async () => {
@@ -121,10 +124,11 @@ const Match = () => {
   }, [sportId, matchId, toast, fetchStreamData]);
 
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
-    console.log(`Source change: source=${source}, id=${id}, streamNo=${streamNo}`);
-    const sourceKey = streamNo 
+    console.log(`Source change requested: ${source}/${id}/${streamNo || 'default'}`);
+    const sourceKey = streamNo !== undefined 
       ? `${source}/${id}/${streamNo}` 
       : `${source}/${id}`;
+    
     setActiveSource(sourceKey);
     setRetryCounter(prev => prev + 1);
     await fetchStreamData(source, id, streamNo);

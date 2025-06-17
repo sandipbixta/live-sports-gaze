@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader } from 'lucide-react';
+import { Loader, Play } from 'lucide-react';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -18,60 +18,70 @@ const StreamSources = ({
   onSourceChange, 
   streamId 
 }: StreamSourcesProps) => {
-  const [subStreams, setSubStreams] = useState<Record<string, Stream[]>>({});
-  const [loadingSubStreams, setLoadingSubStreams] = useState<Record<string, boolean>>({});
+  const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
+  const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
 
-  // Fetch sub-streams for each source
+  // Fetch all available streams for each source
   useEffect(() => {
-    const fetchSubStreams = async () => {
+    const fetchAllStreams = async () => {
+      if (!sources || sources.length === 0) return;
+
       for (const source of sources) {
         const sourceKey = `${source.source}/${source.id}`;
         
-        if (subStreams[sourceKey]) continue; // Already fetched
+        if (allStreams[sourceKey]) continue; // Already fetched
         
-        setLoadingSubStreams(prev => ({ ...prev, [sourceKey]: true }));
+        setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
         
         try {
-          console.log(`Fetching sub-streams for: ${source.source}/${source.id}`);
+          console.log(`Fetching all streams for: ${source.source}/${source.id}`);
           const streamData = await fetchStream(source.source, source.id);
           
-          // If we get an array of streams, use them directly
-          // If we get a single stream, check if there are multiple streamNo variants
           let streams: Stream[] = [];
           
           if (Array.isArray(streamData)) {
-            streams = streamData;
-          } else {
-            // For single stream response, we'll display it as is
-            streams = [streamData];
+            // API returned multiple streams
+            streams = streamData.filter(stream => 
+              stream.embedUrl && 
+              stream.embedUrl.startsWith('http') &&
+              !stream.embedUrl.includes('youtube.com') &&
+              !stream.embedUrl.includes('demo')
+            );
+          } else if (streamData && typeof streamData === 'object' && streamData.embedUrl) {
+            // API returned single stream
+            if (streamData.embedUrl.startsWith('http') && 
+                !streamData.embedUrl.includes('youtube.com') &&
+                !streamData.embedUrl.includes('demo')) {
+              streams = [streamData];
+            }
           }
           
-          setSubStreams(prev => ({
+          console.log(`Found ${streams.length} valid streams for ${sourceKey}:`, streams);
+          
+          setAllStreams(prev => ({
             ...prev,
             [sourceKey]: streams
           }));
         } catch (error) {
-          console.error(`Failed to fetch sub-streams for ${sourceKey}:`, error);
-          setSubStreams(prev => ({
+          console.error(`Failed to fetch streams for ${sourceKey}:`, error);
+          setAllStreams(prev => ({
             ...prev,
             [sourceKey]: []
           }));
         } finally {
-          setLoadingSubStreams(prev => ({ ...prev, [sourceKey]: false }));
+          setLoadingStreams(prev => ({ ...prev, [sourceKey]: false }));
         }
       }
     };
 
-    if (sources && sources.length > 0) {
-      fetchSubStreams();
-    }
+    fetchAllStreams();
   }, [sources]);
 
   if (!sources || sources.length === 0) {
     return null;
   }
 
-  // Group sources by source name to organize different languages/qualities
+  // Group sources by source name
   const groupedSources = sources.reduce((groups: Record<string, Source[]>, source) => {
     const groupName = source.source;
     if (!groups[groupName]) {
@@ -85,66 +95,85 @@ const StreamSources = ({
     <div className="mt-6">
       <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
       
-      {/* Display all grouped sources with their sub-streams */}
       {Object.entries(groupedSources).map(([groupName, groupSources]) => (
         <div key={groupName} className="mb-6">
-          <h4 className="text-md font-semibold mb-3 text-gray-300 first-letter:uppercase">{groupName}</h4>
+          <h4 className="text-md font-semibold mb-3 text-gray-300 capitalize">{groupName}</h4>
           
           {groupSources.map((source) => {
             const sourceKey = `${source.source}/${source.id}`;
-            const streams = subStreams[sourceKey] || [];
-            const isLoading = loadingSubStreams[sourceKey];
+            const streams = allStreams[sourceKey] || [];
+            const isLoading = loadingStreams[sourceKey];
             
             return (
               <div key={sourceKey} className="mb-4 bg-[#1a1f2e] rounded-lg p-4 border border-[#343a4d]">
-                <div className="flex flex-wrap gap-2">
-                  {isLoading ? (
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Loader className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">Loading streams...</span>
+                {isLoading ? (
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Loader className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Loading streams...</span>
+                  </div>
+                ) : streams.length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-400 mb-2">
+                      {streams.length} stream{streams.length > 1 ? 's' : ''} available
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {streams.map((stream, index) => {
+                        const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
+                        const isActive = activeSource === streamKey;
+                        
+                        return (
+                          <Badge
+                            key={streamKey}
+                            variant="source"
+                            className={`cursor-pointer p-3 text-left transition-all hover:scale-105 ${
+                              isActive 
+                                ? 'bg-[#ff5a36] border-[#ff5a36] text-white' 
+                                : 'bg-[#242836] border-[#343a4d] text-gray-300 hover:bg-[#343a4d]'
+                            }`}
+                            onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-2">
+                                  <Play size={12} />
+                                  <span className="font-medium">
+                                    Stream {stream.streamNo || (index + 1)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className="capitalize">{stream.language || 'English'}</span>
+                                  {stream.hd && (
+                                    <span className="bg-[#ff5a36] text-white px-1 rounded text-xs font-bold">
+                                      HD
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {isActive && (
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                              )}
+                            </div>
+                          </Badge>
+                        );
+                      })}
                     </div>
-                  ) : streams.length > 0 ? (
-                    streams.map((stream) => (
-                      <Badge
-                        key={`${stream.source}-${stream.id}-${stream.streamNo}`}
-                        variant="source"
-                        className={`cursor-pointer text-sm py-2 px-4 ${
-                          activeSource === `${stream.source}/${stream.id}/${stream.streamNo}` 
-                            ? 'bg-[#343a4d] border-[#9b87f5]' 
-                            : ''
-                        }`}
-                        onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo)}
-                      >
-                        <div className="flex flex-col items-center gap-1">
-                          <span>Stream {stream.streamNo}</span>
-                          <div className="flex items-center gap-1 text-xs">
-                            <span>{stream.language}</span>
-                            {stream.hd && (
-                              <span className="bg-[#ff5a36] text-white px-1 rounded text-xs">HD</span>
-                            )}
-                          </div>
-                        </div>
-                      </Badge>
-                    ))
-                  ) : (
-                    <Badge
-                      variant="source"
-                      className={`cursor-pointer text-sm py-2 px-4 ${
-                        activeSource === `${source.source}/${source.id}` 
-                          ? 'bg-[#343a4d] border-[#9b87f5]' 
-                          : ''
-                      }`}
-                      onClick={() => onSourceChange(source.source, source.id)}
-                    >
-                      {source.id}
-                    </Badge>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-gray-400 text-sm">No streams available for this source</p>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       ))}
+      
+      {Object.keys(allStreams).length === 0 && !Object.values(loadingStreams).some(Boolean) && (
+        <div className="text-center py-8">
+          <p className="text-gray-400">No stream sources available for this match.</p>
+        </div>
+      )}
     </div>
   );
 };
