@@ -2,7 +2,6 @@ import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
-import { format } from 'date-fns';
 
 interface MatchesListProps {
   matches: Match[];
@@ -11,59 +10,77 @@ interface MatchesListProps {
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ matches, sportId, isLoading }) => {
-  // Helper function to remove duplicates more strictly
+  // Enhanced duplicate removal function
   const removeDuplicates = (matches: Match[]): Match[] => {
-    const seen = new Set<string>();
-    const uniqueMatches: Match[] = [];
+    const seen = new Map<string, Match>();
     
     matches.forEach(match => {
-      // Create a unique key based on teams and date
-      const homeTeam = match.teams?.home?.name || '';
-      const awayTeam = match.teams?.away?.name || '';
-      const matchDate = new Date(match.date).toISOString().split('T')[0]; // Just the date part
+      // Create multiple unique keys to catch different types of duplicates
+      const homeTeam = match.teams?.home?.name?.toLowerCase().trim() || '';
+      const awayTeam = match.teams?.away?.name?.toLowerCase().trim() || '';
+      const matchTitle = match.title?.toLowerCase().trim() || '';
+      const matchDate = new Date(match.date).toISOString().split('T')[0];
       
-      // Use teams and date for uniqueness, fallback to title if no teams
-      const uniqueKey = homeTeam && awayTeam 
-        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`.toLowerCase()
-        : `${match.title}-${matchDate}`.toLowerCase();
+      // Primary key: teams and date
+      const teamKey = homeTeam && awayTeam 
+        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`
+        : null;
       
+      // Secondary key: title and date
+      const titleKey = matchTitle 
+        ? `${matchTitle}-${matchDate}`
+        : null;
+      
+      // Use the most specific key available
+      const uniqueKey = teamKey || titleKey || match.id;
+      
+      // Keep the match with more sources or the first one encountered
       if (!seen.has(uniqueKey)) {
-        seen.add(uniqueKey);
-        uniqueMatches.push(match);
+        seen.set(uniqueKey, match);
+      } else {
+        const existingMatch = seen.get(uniqueKey)!;
+        if ((match.sources?.length || 0) > (existingMatch.sources?.length || 0)) {
+          seen.set(uniqueKey, match);
+        }
       }
     });
     
-    return uniqueMatches;
+    return Array.from(seen.values());
   };
 
-  // Filter out advertisement matches and remove duplicates
-  const filteredMatches = removeDuplicates(
-    matches.filter(match => 
-      !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news') &&
-      !match.title.toLowerCase().includes('advertisement') &&
-      !match.title.toLowerCase().includes('ad break')
-    )
-  );
+  // Filter out advertisement and invalid matches, then remove duplicates
+  const cleanMatches = matches.filter(match => {
+    const title = match.title?.toLowerCase() || '';
+    const id = match.id?.toLowerCase() || '';
+    
+    return !title.includes('sky sports news') && 
+           !id.includes('sky-sports-news') &&
+           !title.includes('advertisement') &&
+           !title.includes('ad break') &&
+           !title.includes('promo') &&
+           match.title && // Must have a title
+           match.date; // Must have a date
+  });
 
+  const filteredMatches = removeDuplicates(cleanMatches);
   const isMobile = useIsMobile();
   
-  // Helper function to determine if a match is likely live - Reduced to 3 hours
+  // Helper function to determine if a match is likely live
   const isMatchLive = (match: Match): boolean => {
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
-    const threeHoursInMs = 3 * 60 * 60 * 1000; // Changed to 3 hours
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
     const oneHourInMs = 60 * 60 * 1000;
     
     return match.sources && 
            match.sources.length > 0 && 
-           matchTime - now < oneHourInMs && // Match starts within 1 hour
-           now - matchTime < threeHoursInMs; // Match can be live up to 3 hours after start
+           matchTime - now < oneHourInMs && 
+           now - matchTime < threeHoursInMs;
   };
 
   // Separate matches into live and upcoming
   const liveMatches = filteredMatches.filter(match => isMatchLive(match));
-  const upcomingMatches = filteredMatches.filter(match => !liveMatches.includes(match));
+  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
 
   if (isLoading) {
     return (

@@ -7,12 +7,22 @@ import { ManualMatch } from '../types/manualMatch';
 
 interface FeaturedMatchesProps {
   visibleManualMatches: ManualMatch[];
+  hasApiMatches?: boolean; // Add prop to check if API matches are available
 }
 
-const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ visibleManualMatches }) => {
-  if (visibleManualMatches.length === 0) {
+const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ 
+  visibleManualMatches, 
+  hasApiMatches = false 
+}) => {
+  // Don't show manual matches if API matches are available
+  if (hasApiMatches || visibleManualMatches.length === 0) {
     return null;
   }
+
+  // Remove duplicates based on match ID
+  const uniqueMatches = visibleManualMatches.filter((match, index, self) => 
+    index === self.findIndex(m => m.id === match.id)
+  );
 
   return (
     <div className="mb-6 sm:mb-8">
@@ -22,7 +32,7 @@ const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ visibleManualMatches 
           Featured Matches
         </h2>
         <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-3 py-1 text-white">
-          {visibleManualMatches.length} available
+          {uniqueMatches.length} available
         </span>
       </div>
       <div
@@ -33,7 +43,7 @@ const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ visibleManualMatches 
           gap-2 xs:gap-3 sm:gap-4
         "
       >
-        {visibleManualMatches.map((match) => (
+        {uniqueMatches.map((match) => (
           <ManualMatchCard
             key={match.id}
             match={match}
