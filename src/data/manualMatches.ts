@@ -50,7 +50,7 @@ export const manualMatches: ManualMatch[] = [
     id: "RIVER-PLATE-VS-URAWA-REDS",
     title: "River Plate vs Urawa Reds",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-17T22:00:00Z", 
+    date: "2025-06-17T19:00:00Z", 
     teams: {
       home: "River Plate",
       away: "Urawa Reds"
@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
     id: "ULSAN-HD-VS-MAMELODI-SUNDOWNS",
     title: "Ulsan HD vs Mamelodi Sundowns",
     // Already correct: zero-padded hour and T
-    date: "2025-06-18T01:00:00Z",
+    date: "2025-06-18T22:00:00Z",
     teams: {
       home: "Ulsan",
       away: "Mamelodi"
