@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "CHELSEA-VS-LOS-ANGELES-FC",
-    title: "Chelsea vs Los Angeles fc",
+    id: "FLUMINENSE-VS-DORTMUND",
+    title: "Fluminense vs Dortmund",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-17T19:00:00Z", 
+    date: "2025-06-18T16:00:00Z", 
     teams: {
-      home: "Chelsea",
-      away: "Los Angeles FC"
+      home: "Fluminense",
+      away: "Dortmund"
     },
     links: [
       {
@@ -44,16 +44,16 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/zzH3VTt.jpeg"
+    image: "https://i.imgur.com/Gvjm0BZ.jpeg"
   },
   {
-    id: "BOCA-JUNIORS-VS-BENIFICA",
-    title: "Boca Juniors vs Benifica",
+    id: "RIVER-PLATE-VS-URAWA-REDS",
+    title: "River Plate vs Urawa Reds",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-17T22:00:00Z", 
     teams: {
-      home: "Boca Juniors",
-      away: "Benifica"
+      home: "River Plate",
+      away: "Urawa Reds"
     },
     links: [
       {
@@ -88,16 +88,16 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/cl8Odjy.jpeg"
+    image: "https://i.imgur.com/ersHuzP.jpeg"
   },
   {
-    id: "FLAMENGO-RJ-VS-ESPERANCE-TUNIS",
-    title: "Flamengo vs Esperance Tunis",
+    id: "ULSAN-HD-VS-MAMELODI-SUNDOWNS",
+    title: "Ulsan HD vs Mamelodi Sundowns",
     // Already correct: zero-padded hour and T
-    date: "2025-06-17T01:00:00Z",
+    date: "2025-06-18T01:00:00Z",
     teams: {
-      home: "Flamengo RJ",
-      away: "Esperance Tunis"
+      home: "Ulsan",
+      away: "Mamelodi"
     },
     links: [
       {
@@ -132,22 +132,22 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/scFpRUP.jpeg"
+    image: "https://i.imgur.com/5ANBndF.jpeg"
   },
   {
-    id: "PALMEIRAS-VS-FC-PORTO",
-    title: "Palmeiras vs FC Porto",
+    id: "MONTERREY-VS-INTER-MILAN",
+    title: "Monterrey vs Inter Milan",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-16T02:00:00Z",
+    date: "2025-06-18T22:00:00Z",
     teams: {
-      home: "Palmeiras",
-      away: "FC Porto"
+      home: "Monterrey",
+      away: "Inter"
     },
     links: [
       {
-        id: "Nevena-2",
-        name: "Nevena 2",
-        url: "https://topembed.pw/channel/Nevena2[S7]",
+        id: "Nevena-3",
+        name: "Nevena 3",
+        url: "https://topembed.pw/channel/Nevena3[S7]",
         quality: "HD"
       },     
       {
@@ -175,8 +175,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/PojQSYn.jpeg"
+    visible: true,
+    image: "https://i.imgur.com/5ANBndF.jpeg"
   },
   {
     id: "hidden-match",
