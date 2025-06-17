@@ -138,7 +138,7 @@ export const manualMatches: ManualMatch[] = [
     id: "MONTERREY-VS-INTER-MILAN",
     title: "Monterrey vs Inter Milan",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-18T22:00:00Z",
+    date: "2025-06-18T01:00:00Z",
     teams: {
       home: "Monterrey",
       away: "Inter"
@@ -176,7 +176,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/5ANBndF.jpeg"
+    image: "https://i.imgur.com/r7vNepH.jpeg"
   },
   {
     id: "hidden-match",
