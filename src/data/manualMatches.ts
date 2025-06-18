@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "FLUMINENSE-VS-DORTMUND",
-    title: "Fluminense vs Dortmund",
+    id: "MANCHESTER-CIRT-VS-WYDAD",
+    title: "Manchester City vs Wydad",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
     date: "2025-06-17T16:00:00Z", 
     teams: {
-      home: "Fluminense",
-      away: "Dortmund"
+      home: "Manchester City",
+      away: "Wydad"
     },
     links: [
       {
@@ -44,16 +44,16 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/Gvjm0BZ.jpeg"
+    image: "https://i.imgur.com/Hu4TGZt.jpeg"
   },
   {
-    id: "RIVER-PLATE-VS-URAWA-REDS",
-    title: "River Plate vs Urawa Reds",
+    id: "REAL-MADRID-VS-AL-HILAL",
+    title: "Real Madrid vs Al Hilal",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-17T19:00:00Z", 
     teams: {
-      home: "River Plate",
-      away: "Urawa Reds"
+      home: "Real Madrid",
+      away: "Al Hilal"
     },
     links: [
       {
@@ -88,16 +88,16 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/ersHuzP.jpeg"
+    image: "https://i.imgur.com/7ykKYUk.jpeg"
   },
   {
-    id: "ULSAN-HD-VS-MAMELODI-SUNDOWNS",
-    title: "Ulsan HD vs Mamelodi Sundowns",
+    id: "PACHUCA-VS-SALZBURG",
+    title: "Pachuca vs Salzburg",
     // Already correct: zero-padded hour and T
     date: "2025-06-17T22:00:00Z",
     teams: {
-      home: "Ulsan",
-      away: "Mamelodi"
+      home: "Pachuca",
+      away: "Salzburg"
     },
     links: [
       {
@@ -132,16 +132,16 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/5ANBndF.jpeg"
+    image: "https://i.imgur.com/lSpovBr.jpeg"
   },
   {
-    id: "MONTERREY-VS-INTER-MILAN",
-    title: "Monterrey vs Inter Milan",
+    id: "AL-AIN-VS-JUVENTUS",
+    title: "Al Ain vs Juventus",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-18T01:00:00Z",
     teams: {
-      home: "Monterrey",
-      away: "Inter"
+      home: "Al Ain",
+      away: "Juventus"
     },
     links: [
       {
@@ -176,7 +176,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/r7vNepH.jpeg"
+    image: "https://i.imgur.com/fHT7ssS.jpeg"
   },
   {
     id: "hidden-match",
