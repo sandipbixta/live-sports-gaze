@@ -7,7 +7,7 @@ const AnnouncementBanner: React.FC = () => {
       <div className="bg-[#0A0F1C] rounded-md p-3">
         <div className="overflow-hidden whitespace-nowrap">
           <div className="animate-marquee inline-block text-white font-medium">
-            🔴 IF YOU CAN'T FIND YOUR MATCH PLEASE VISIT THE LIVE SPORTS CHANNELS SECTION 📺
+            🔴 IF YOU CAN'T FIND YOUR MATCH PLEASE VISIT THE LIVE SPORTS CHANNELS SECTION 📺 • 🚫 DON'T USE SAFARI TO WATCH THE MATCH - USE CHROME OR FIREFOX INSTEAD 🌐
           </div>
         </div>
       </div>
