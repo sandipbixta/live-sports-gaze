@@ -74,9 +74,9 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "Channel-5 [UK]",
-        name: "Channel 5 [UK]",
-        url: "https://topembed.pw/channel/Channel5[UK]",
+        id: "TNT [USA]",
+        name: "TNT [USA]",
+        url: "https://topembed.pw/channel/TNT[USA]",
         quality: "HD"
       },
       {
