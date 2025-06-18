@@ -62,6 +62,12 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
+        id: "TNT [USA]",
+        name: "TNT [USA]",
+        url: "https://topembed.pw/channel/TNT[USA]",
+        quality: "HD"
+      },
+      {
         id: "Nevena-3",
         name: "Nevena3",
         url: "https://topembed.pw/channel/Nevena3[S7]",
@@ -73,12 +79,7 @@ export const manualMatches: ManualMatch[] = [
         url: "https://topembed.pw/channel/TBS[USA]",
         quality: "HD"
       },
-      {
-        id: "TNT [USA]",
-        name: "TNT [USA]",
-        url: "https://topembed.pw/channel/TNT[USA]",
-        quality: "HD"
-      },
+      
       {
         id: "TUDN-[USA]",
         name: "TUDN [USA]",
