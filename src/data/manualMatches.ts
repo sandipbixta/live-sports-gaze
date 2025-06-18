@@ -123,9 +123,9 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },
       {
-        id: "Channel-5 [UK]",
-        name: "Channel 5 [UK]",
-        url: "https://topembed.pw/channel/Channel5[UK]",
+        id: "Nevena 1",
+        name: "Nevena 1",
+        url: "https://topembed.pw/channel/Nevena1[S7]",
         quality: "HD"
       },
       {
