@@ -44,7 +44,12 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/Hu4TGZt.jpeg"
+    image: "https://i.imgur.com/Hu4TGZt.jpeg",
+    seo: {
+      keywords: "Manchester City vs Wydad live stream, Manchester City Wydad watch online, City vs Wydad free stream",
+      description: "Watch Manchester City vs Wydad live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      category: "Football"
+    }
   },
   {
     id: "REAL-MADRID-VS-AL-HILAL",
@@ -88,7 +93,12 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/7ykKYUk.jpeg"
+    image: "https://i.imgur.com/7ykKYUk.jpeg",
+    seo: {
+      keywords: "Real Madrid vs Al Hilal live stream, Real Madrid Al Hilal watch online, Madrid vs Al Hilal free stream",
+      description: "Watch Real Madrid vs Al Hilal live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      category: "Football"
+    }
   },
   {
     id: "PACHUCA-VS-SALZBURG",
@@ -132,7 +142,12 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/lSpovBr.jpeg"
+    image: "https://i.imgur.com/lSpovBr.jpeg",
+    seo: {
+      keywords: "Pachuca vs Salzburg live stream, Pachuca Salzburg watch online, Pachuca vs Salzburg free stream",
+      description: "Watch Pachuca vs Salzburg live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      category: "Football"
+    }
   },
   {
     id: "AL-AIN-VS-JUVENTUS",
@@ -176,7 +191,12 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/fHT7ssS.jpeg"
+    image: "https://i.imgur.com/fHT7ssS.jpeg",
+    seo: {
+      keywords: "Al Ain vs Juventus live stream, Al Ain Juventus watch online, Al Ain vs Juventus free stream",
+      description: "Watch Al Ain vs Juventus live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      category: "Football"
+    }
   },
   {
     id: "hidden-match",
@@ -194,6 +214,11 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false
+    visible: false,
+    seo: {
+      keywords: "hidden match live stream",
+      description: "Hidden match for testing purposes",
+      category: "Other"
+    }
   }
 ];

@@ -6,6 +6,12 @@ export interface ManualMatchLink {
   quality?: string;
 }
 
+export interface ManualMatchSEO {
+  keywords: string;
+  description: string;
+  category: string;
+}
+
 export interface ManualMatch {
   id: string;
   title: string;
@@ -18,4 +24,5 @@ export interface ManualMatch {
   visible: boolean;
   image?: string;
   links: ManualMatchLink[];
+  seo?: ManualMatchSEO;
 }

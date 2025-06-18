@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
@@ -27,6 +28,10 @@ const ManualMatchPlayer = () => {
   if (!match) {
     return (
       <div className="min-h-screen bg-[#0A0F1C] flex items-center justify-center">
+        <Helmet>
+          <title>Match Not Found | DamiTV</title>
+          <meta name="description" content="The requested match could not be found on DamiTV." />
+        </Helmet>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Match Not Found</h1>
           <p className="text-gray-400 mb-6">The requested match could not be found.</p>
@@ -38,11 +43,111 @@ const ManualMatchPlayer = () => {
     );
   }
 
+  // Generate dynamic SEO data
+  const homeTeam = match.teams.home;
+  const awayTeam = match.teams.away;
+  const matchDate = new Date(match.date);
+  const formattedDate = matchDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  const formattedTime = matchDate.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+  
+  // SEO Title - Dynamic and keyword-rich
+  const seoTitle = `${homeTeam} vs ${awayTeam} Live Stream Free | ${formattedDate} | DamiTV`;
+  
+  // SEO Description - Dynamic based on match data
+  const seoDescription = match.seo?.description || 
+    `Watch ${homeTeam} vs ${awayTeam} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available.`;
+  
+  // SEO Keywords - Dynamic and comprehensive
+  const seoKeywords = match.seo?.keywords || 
+    `${homeTeam} vs ${awayTeam} live stream, ${homeTeam} ${awayTeam} watch online, ${homeTeam} vs ${awayTeam} free stream, live ${match.seo?.category || 'sports'} streaming, ${homeTeam} ${awayTeam} ${formattedDate}`;
+
+  // Generate JSON-LD structured data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": `${homeTeam} vs ${awayTeam}`,
+    "description": seoDescription,
+    "startDate": match.date,
+    "url": `https://damitv.pro/manual-match/${match.id}`,
+    "location": {
+      "@type": "VirtualLocation",
+      "name": "DamiTV Streaming Platform",
+      "url": "https://damitv.pro"
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": "DamiTV",
+      "url": "https://damitv.pro"
+    },
+    "competitor": [
+      {
+        "@type": "SportsTeam",
+        "name": homeTeam
+      },
+      {
+        "@type": "SportsTeam", 
+        "name": awayTeam
+      }
+    ],
+    "video": {
+      "@type": "VideoObject",
+      "name": `${homeTeam} vs ${awayTeam} Live Stream`,
+      "description": `Live streaming video for ${homeTeam} vs ${awayTeam}`,
+      "uploadDate": match.date,
+      "thumbnailUrl": match.image || "https://damitv.pro/logo.png",
+      "embedUrl": selectedLink?.url,
+      "duration": "PT180M"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0F1C]">
       <Helmet>
-        <title>{match.teams.home} vs {match.teams.away} - Live Stream | DamiTV</title>
-        <meta name="description" content={`Watch ${match.teams.home} vs ${match.teams.away} live stream online for free on DamiTV`} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={seoKeywords} />
+        <link rel="canonical" href={`https://damitv.pro/manual-match/${match.id}`} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`https://damitv.pro/manual-match/${match.id}`} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={match.image || "https://damitv.pro/logo.png"} />
+        <meta property="og:site_name" content="DamiTV" />
+        
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={`https://damitv.pro/manual-match/${match.id}`} />
+        <meta property="twitter:title" content={seoTitle} />
+        <meta property="twitter:description" content={seoDescription} />
+        <meta property="twitter:image" content={match.image || "https://damitv.pro/logo.png"} />
+        
+        {/* Additional SEO meta tags */}
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="DamiTV" />
+        <meta name="category" content={match.seo?.category || "Sports"} />
+        <meta name="coverage" content="Worldwide" />
+        <meta name="distribution" content="Global" />
+        <meta name="rating" content="General" />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </Helmet>
       
       {/* Header */}
@@ -59,7 +164,7 @@ const ManualMatchPlayer = () => {
             </Button>
             <div>
               <h1 className="text-xl font-bold text-white">
-                {match.teams.home} vs {match.teams.away}
+                {homeTeam} vs {awayTeam}
               </h1>
               <p className="text-sm text-gray-400">{match.title}</p>
               {selectedLink && (
@@ -94,9 +199,9 @@ const ManualMatchPlayer = () => {
               <div className="bg-[#1a1f2e] p-3 border-b border-[#343a4d]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold">{match.teams.home}</span>
+                    <span className="text-white font-semibold">{homeTeam}</span>
                     <span className="text-gray-400">vs</span>
-                    <span className="text-white font-semibold">{match.teams.away}</span>
+                    <span className="text-white font-semibold">{awayTeam}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
@@ -104,7 +209,7 @@ const ManualMatchPlayer = () => {
                       LIVE
                     </span>
                     <div className="text-sm text-gray-400">
-                      {new Date(match.date).toLocaleString()}
+                      {formattedDate} at {formattedTime}
                     </div>
                   </div>
                 </div>
@@ -128,7 +233,7 @@ const ManualMatchPlayer = () => {
                     className="w-full h-full border-0"
                     allowFullScreen
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    title={`${match.teams.home} vs ${match.teams.away} Stream`}
+                    title={`${homeTeam} vs ${awayTeam} Stream`}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
@@ -171,8 +276,11 @@ const ManualMatchPlayer = () => {
                 <h4 className="text-md font-semibold text-white mb-2">Match Details</h4>
                 <div className="space-y-2 text-sm text-gray-400">
                   <p><span className="text-white">Title:</span> {match.title}</p>
-                  <p><span className="text-white">Date:</span> {new Date(match.date).toLocaleDateString()}</p>
-                  <p><span className="text-white">Time:</span> {new Date(match.date).toLocaleTimeString()}</p>
+                  <p><span className="text-white">Date:</span> {formattedDate}</p>
+                  <p><span className="text-white">Time:</span> {formattedTime}</p>
+                  {match.seo?.category && (
+                    <p><span className="text-white">Category:</span> {match.seo.category}</p>
+                  )}
                 </div>
               </div>
             </div>
