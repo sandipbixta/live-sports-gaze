@@ -15,6 +15,7 @@ import SearchBar from '../components/SearchBar';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from 'react-helmet-async';
 import { Badge } from '../components/ui/badge';
+import AnnouncementBanner from '../components/AnnouncementBanner';
 
 const Live = () => {
   const { toast } = useToast();
@@ -401,6 +402,8 @@ const Live = () => {
         </script>
       </Helmet>
       
+      <AnnouncementBanner />
+      
       <div className="mb-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
           <h1 className="text-3xl font-bold text-white">Live &amp; Upcoming</h1>
@@ -753,8 +756,6 @@ const Live = () => {
           )}
         </TabsContent>
       </Tabs>
-      
-      
       
       <Link to="/channels" className="block w-full">
         <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">

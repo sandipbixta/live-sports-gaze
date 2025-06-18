@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -6,6 +7,7 @@ import { fetchMatch, fetchStream, fetchMatches } from '@/api/sportsApi';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -193,6 +195,7 @@ const Match = () => {
         </script>
       </Helmet>
       
+      <AnnouncementBanner />
       <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
       <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
