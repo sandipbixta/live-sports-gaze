@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Stream } from '../types/sports';
-import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, ArrowLeft } from 'lucide-react';
+import { Loader, Maximize, Minimize, Video, AlertTriangle, RefreshCcw, ArrowLeft, ExternalLink } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { AspectRatio } from './ui/aspect-ratio';
 import { cn } from '../lib/utils';
@@ -22,6 +22,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
+  const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
   const isMobile = useIsMobile();
   
   // Mobile-optimized player container with proper orientation
@@ -42,6 +43,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     } else {
       // Fallback to channels page if no history
       navigate('/channels');
+    }
+  };
+
+  // Function to open stream in new tab as fallback
+  const openStreamInNewTab = () => {
+    if (stream?.embedUrl) {
+      window.open(stream.embedUrl, '_blank');
     }
   };
   
@@ -69,25 +77,44 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  // Reset load error when stream changes
+  // Enhanced debugging and error detection
   useEffect(() => {
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
+      
+      // Debug stream information
+      const debugInfo = `Stream Debug Info:
+        - Source: ${stream.source}
+        - ID: ${stream.id}
+        - Stream No: ${stream.streamNo}
+        - Language: ${stream.language}
+        - HD: ${stream.hd}
+        - URL: ${stream.embedUrl}
+        - URL Protocol: ${stream.embedUrl?.startsWith('https') ? 'HTTPS' : 'HTTP'}
+        - Current Site Protocol: ${window.location.protocol}`;
+      
+      console.log(debugInfo);
+      setStreamDebugInfo(debugInfo);
+      
+      // Check for common issues
+      if (window.location.protocol === 'https:' && stream.embedUrl?.startsWith('http:')) {
+        console.warn('⚠️ Mixed content issue: HTTPS site trying to load HTTP stream');
+      }
     }
   }, [stream]);
 
-  // Set timeout for iframe loading on mobile
+  // Set timeout for iframe loading on mobile with enhanced debugging
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('Iframe loading timeout on mobile, setting content as loaded');
+          console.log('⏰ Iframe loading timeout - this could indicate CORS/X-Frame-Options blocking');
           setIframeTimeout(true);
           setIsContentLoaded(true);
         }
-      }, isMobile ? 3000 : 5000); // Shorter timeout for mobile
+      }, isMobile ? 3000 : 5000);
 
       return () => clearTimeout(timer);
     }
@@ -95,6 +122,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   // Handle retry action
   const handleRetry = () => {
+    console.log('🔄 Retrying stream load...');
     setLoadError(false);
     setIsContentLoaded(false);
     setIframeTimeout(false);
@@ -103,13 +131,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   // Handle iframe load event
   const handleIframeLoad = () => {
-    console.log('Stream iframe loaded successfully');
+    console.log('✅ Stream iframe loaded successfully');
     setIsContentLoaded(true);
   };
 
   // Handle iframe error
   const handleIframeError = () => {
-    console.error('Stream iframe failed to load');
+    console.error('❌ Stream iframe failed to load - likely CORS or X-Frame-Options blocking');
     setLoadError(true);
   };
 
@@ -207,7 +235,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
-  if (loadError) {
+  if (loadError || iframeTimeout) {
     return (
       <PlayerContainer>
         <div className="absolute top-2 left-2 z-30">
@@ -223,18 +251,44 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         </div>
         <AspectRatio ratio={16 / 9}>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-white text-center">
+            <div className="text-white text-center max-w-md mx-auto p-4">
               <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 mx-auto mb-3" />
-              <p className="text-lg sm:text-xl">Stream failed to load</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Please refresh or try another source</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleRetry}
-                className="mt-4 border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
-              </Button>
+              <p className="text-lg sm:text-xl mb-2">Stream blocked or unavailable</p>
+              <p className="text-xs sm:text-sm text-gray-400 mb-4">
+                {iframeTimeout 
+                  ? "The stream may be blocked by CORS policy or X-Frame-Options headers"
+                  : "Stream failed to load - likely blocked by the source website"
+                }
+              </p>
+              
+              <div className="flex flex-col gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRetry}
+                  className="border-[#343a4d] bg-transparent hover:bg-[#343a4d]"
+                >
+                  <RefreshCcw className="h-4 w-4 mr-2" /> Try Again
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={openStreamInNewTab}
+                  className="border-[#ff5a36] bg-transparent hover:bg-[#ff5a36] text-[#ff5a36] hover:text-white"
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" /> Open in New Tab
+                </Button>
+              </div>
+              
+              {process.env.NODE_ENV === 'development' && (
+                <details className="mt-4 text-left">
+                  <summary className="cursor-pointer text-xs text-gray-500">Debug Info</summary>
+                  <pre className="text-xs text-gray-400 mt-2 whitespace-pre-wrap">
+                    {streamDebugInfo}
+                  </pre>
+                </details>
+              )}
             </div>
           </div>
         </AspectRatio>
@@ -294,7 +348,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       
       {/* Controls overlay - now always visible on mobile */}
       <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity",
+        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity flex gap-2",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
         <button 
@@ -307,6 +361,15 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
             <Minimize className="h-4 w-4 sm:h-5 sm:w-5" /> : 
             <Maximize className="h-4 w-4 sm:h-5 sm:w-5" />
           }
+        </button>
+        
+        <button 
+          onClick={openStreamInNewTab}
+          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors touch-manipulation"
+          title="Open stream in new tab"
+          aria-label="Open stream in new tab"
+        >
+          <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
       </div>
     </PlayerContainer>
