@@ -4,12 +4,12 @@ import { ManualMatch } from '@/types/manualMatch';
 export const manualMatches: ManualMatch[] = [
   {
     id: "MANCHESTER-CIRT-VS-WYDAD",
-    title: "Manchester City vs Wydad",
+    title: "Palmeiras vs Al Ahly",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-17T16:00:00Z", 
+    date: "2025-06-19T16:00:00Z", 
     teams: {
-      home: "Manchester City",
-      away: "Wydad"
+      home: "Palmeiras",
+      away: "Al Ahly"
     },
     links: [
       {
@@ -44,7 +44,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/Hu4TGZt.jpeg",
+    image: "https://i.imgur.com/lkLr7jb.jpeg",
     seo: {
       keywords: "Manchester City vs Wydad live stream, Manchester City Wydad watch online, City vs Wydad free stream",
       description: "Watch Manchester City vs Wydad live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
@@ -53,12 +53,12 @@ export const manualMatches: ManualMatch[] = [
   },
   {
     id: "REAL-MADRID-VS-AL-HILAL",
-    title: "Real Madrid vs Al Hilal",
+    title: "Inter Miami vs FC Porto",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-17T19:00:00Z", 
+    date: "2025-06-18T19:00:00Z", 
     teams: {
-      home: "Real Madrid",
-      away: "Al Hilal"
+      home: "Inter Miami",
+      away: "FC Porto"
     },
     links: [
       {
@@ -94,7 +94,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/7ykKYUk.jpeg",
+    image: "https://i.imgur.com/Y4Wal0a.jpeg",
     seo: {
       keywords: "Real Madrid vs Al Hilal live stream, Real Madrid Al Hilal watch online, Madrid vs Al Hilal free stream",
       description: "Watch Real Madrid vs Al Hilal live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
@@ -103,12 +103,12 @@ export const manualMatches: ManualMatch[] = [
   },
   {
     id: "PACHUCA-VS-SALZBURG",
-    title: "Pachuca vs Salzburg",
+    title: "Seattle Sounders vs Atl. Madrid",
     // Already correct: zero-padded hour and T
     date: "2025-06-17T22:00:00Z",
     teams: {
-      home: "Pachuca",
-      away: "Salzburg"
+      home: "Seattle Sounders",
+      away: "Atl. Madrid"
     },
     links: [
       {
@@ -143,7 +143,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/lSpovBr.jpeg",
+    image: "https://i.imgur.com/DfKpYH4.jpeg",
     seo: {
       keywords: "Pachuca vs Salzburg live stream, Pachuca Salzburg watch online, Pachuca vs Salzburg free stream",
       description: "Watch Pachuca vs Salzburg live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
@@ -152,12 +152,12 @@ export const manualMatches: ManualMatch[] = [
   },
   {
     id: "AL-AIN-VS-JUVENTUS",
-    title: "Al Ain vs Juventus",
+    title: "PSG vs Botafogo RJ",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-18T01:00:00Z",
+    date: "2025-06-19T01:00:00Z",
     teams: {
-      home: "Al Ain",
-      away: "Juventus"
+      home: "PSG",
+      away: "Botafogo RJ"
     },
     links: [
       {
@@ -192,7 +192,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/fHT7ssS.jpeg",
+    image: "https://i.imgur.com/zGBAWAk.jpeg",
     seo: {
       keywords: "Al Ain vs Juventus live stream, Al Ain Juventus watch online, Al Ain vs Juventus free stream",
       description: "Watch Al Ain vs Juventus live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
