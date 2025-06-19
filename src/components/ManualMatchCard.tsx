@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ManualMatch } from "@/types/manualMatch";
 import { useNavigate } from "react-router-dom";
@@ -116,32 +115,30 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
 
-      {/* Title and Date at the bottom with blur background */}
+      {/* Title and Date at the bottom with subtle text background */}
       <div className="absolute bottom-1 left-0 right-0 px-1 xs:px-2 sm:px-4 pb-1 z-30">
-        <div className="bg-black/50 backdrop-blur-sm rounded-lg px-2 xs:px-3 py-1.5 xs:py-2">
-          <div
-            className="
-              flex flex-col items-start justify-center
-              text-white
-              text-[13px] xs:text-[14px] sm:text-base md:text-lg 
-              font-bold leading-tight mb-0.5 xs:mb-1 drop-shadow-sm
-              "
-          >
-            {/* First line: Home Team + 'vs', Second line: Away Team */}
-            <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
-              {match.teams.home}{" "}
-              <span className="text-[10px] xs:text-xs sm:text-xs text-gray-300 font-normal">vs</span>
-            </span>
-            <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
-              {match.teams.away}
-            </span>
-          </div>
-          <p className="text-gray-300 text-[11px] xs:text-xs sm:text-sm text-left mt-1">
-            {/* Mobile: "16 June", desktop: "Jun 16" */}
-            <span className="sm:hidden">{dateStringMobile}</span>
-            <span className="hidden sm:inline">{dateStringDesktop}</span>
-          </p>
+        <div
+          className="
+            flex flex-col items-start justify-center
+            text-white
+            text-[13px] xs:text-[14px] sm:text-base md:text-lg 
+            font-bold leading-tight mb-0.5 xs:mb-1
+            "
+        >
+          {/* First line: Home Team + 'vs', Second line: Away Team */}
+          <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded">
+            {match.teams.home}{" "}
+            <span className="text-[10px] xs:text-xs sm:text-xs text-gray-300 font-normal">vs</span>
+          </span>
+          <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded mt-0.5">
+            {match.teams.away}
+          </span>
         </div>
+        <p className="text-gray-300 text-[11px] xs:text-xs sm:text-sm text-left mt-1 bg-black/40 backdrop-blur-sm px-1.5 py-0.5 rounded inline-block">
+          {/* Mobile: "16 June", desktop: "Jun 16" */}
+          <span className="sm:hidden">{dateStringMobile}</span>
+          <span className="hidden sm:inline">{dateStringDesktop}</span>
+        </p>
       </div>
     </div>
   );
