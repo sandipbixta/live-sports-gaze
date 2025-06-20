@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "Palmeiras-vs-Al-Ahly",
-    title: "Palmeiras vs Al Ahly",
+    id: "Benifica-vs-Auckland-City",
+    title: "Benfica vs Auckland City",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
     date: "2025-06-18T16:00:00Z", 
     teams: {
-      home: "Palmeiras",
-      away: "Al Ahly"
+      home: "Benfica",
+      away: "Auckland City"
     },
     links: [
       {
@@ -44,21 +44,21 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/lkLr7jb.jpeg",
+    image: "https://i.imgur.com/y7NcxLb.jpeg",
     seo: {
-      keywords: "Palmeiras vs Al Ahly live stream, Palmeiras Al Ahly watch online, Palmeiras vs Al Ahly free stream",
-      description: "Watch Palmeiras vs Al Ahly live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "Benfica vs Auckland City live stream, Benfica Auckland City watch online, Benfica vs Auckland City free stream",
+      description: "Watch Benfica vs Auckland City live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
   {
-    id: "Inter-Miami-vs-FC-Porto",
-    title: "Inter Miami vs FC Porto",
+    id: "Flamengo-RJ-vs-Chelsea",
+    title: "Flamengo RJ vs Chelsea",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-19T19:00:00Z", 
     teams: {
-      home: "Inter Miami",
-      away: "FC Porto"
+      home: "Flamengo RJ",
+      away: "Chelsea"
     },
     links: [
       {
@@ -94,21 +94,21 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/Y4Wal0a.jpeg",
+    image: "https://i.imgur.com/WS1lX9c.jpeg",
     seo: {
-      keywords: "Inter Miami vs FC Porto live stream, Inter Miami FC Porto watch online,Miami vs Porto free stream",
-      description: "Watch Inter Miami vs FC Porto live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "Flamengo RJ vs Chelsea live stream, Flamengo RJ Chelsea watch online,Flamengo RJ vs Chelsea free stream",
+      description: "Watch Chelsea vs Flamengo RJ live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
   {
-    id: "Seattle-Sounders-vs-Atl.-Madrid",
-    title: "Seattle Sounders vs Atl. Madrid",
+    id: "Los-Angeles-FC-vs-Esperance-Tunis",
+    title: "Los Angeles FC vs Esperance Tunis",
     // Already correct: zero-padded hour and T
     date: "2025-06-19T22:00:00Z",
     teams: {
-      home: "Seattle Sounders",
-      away: "Atl. Madrid"
+      home: "Los Angeles FC",
+      away: "Esperance Tunis"
     },
     links: [
       {
@@ -143,21 +143,21 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/DfKpYH4.jpeg",
+    image: "https://i.imgur.com/2ttt7yh.jpeg",
     seo: {
-      keywords: "Seattle Sounders vs Atl. Madrid live stream, Seattle Sounders Atl. Madrid watch online, Seattle Sounders vs Atl. Madrid free stream",
-      description: "Watch Seattle Sounders vs Atl. Madrid live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "Los Angeles FC vs Esperance Tunis live stream, Los Angeles FC Esperance Tunis watch online, Los Angeles FC vs Esperance Tunis free stream",
+      description: "Watch Los Angeles FC vs Esperance Tunis live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
   {
-    id: "PSG-vs-Botafogo-RJ",
-    title: "PSG vs Botafogo RJ",
+    id: "Bayern-Munich-vs-Boca-Juniors",
+    title: "Bayern Munich vs Boca Juniors",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-20T01:00:00Z",
     teams: {
-      home: "PSG",
-      away: "Botafogo RJ"
+      home: "Bayern Munich",
+      away: "Boca Juniors"
     },
     links: [
       {
@@ -192,10 +192,10 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "https://i.imgur.com/zGBAWAk.jpeg",
+    image: "https://i.imgur.com/zZ4nHho.jpeg",
     seo: {
-      keywords: "PSG vs Botafogo RJ live stream, PSG Botafogo RJ watch online, PSG vs Botafogo RJ free stream",
-      description: "Watch PSG vs Botafogo RJ live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "Bayern Munich vs Boca Juniors live stream, Bayern Munich Boca Juniors watch online, Bayern Munich vs Boca Juniors free stream",
+      description: "Watch Bayern Munich vs Boca Juniors live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
