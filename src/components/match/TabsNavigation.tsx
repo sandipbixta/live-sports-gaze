@@ -9,7 +9,7 @@ interface TabsNavigationProps {
 
 const TabsNavigation = ({ activeTab, setActiveTab }: TabsNavigationProps) => {
   return (
-    <div className="bg-sports-card sticky top-0 z-10 border-b border-sports">
+    <div className="bg-sports-card border-b border-sports">
       <div className="container mx-auto">
         <div className="flex overflow-x-auto scrollbar-none">
           <Button 
