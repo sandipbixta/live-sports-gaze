@@ -6,7 +6,7 @@ export const manualMatches: ManualMatch[] = [
     id: "Benifica-vs-Auckland-City",
     title: "Benfica vs Auckland City",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-18T16:00:00Z", 
+    date: "2025-06-19T16:00:00Z", 
     teams: {
       home: "Benfica",
       away: "Auckland City"
@@ -55,7 +55,7 @@ export const manualMatches: ManualMatch[] = [
     id: "Flamengo-RJ-vs-Chelsea",
     title: "Flamengo RJ vs Chelsea",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-19T19:00:00Z", 
+    date: "2025-06-20T19:00:00Z", 
     teams: {
       home: "Flamengo RJ",
       away: "Chelsea"
@@ -105,7 +105,7 @@ export const manualMatches: ManualMatch[] = [
     id: "Los-Angeles-FC-vs-Esperance-Tunis",
     title: "Los Angeles FC vs Esperance Tunis",
     // Already correct: zero-padded hour and T
-    date: "2025-06-19T22:00:00Z",
+    date: "2025-06-20T22:00:00Z",
     teams: {
       home: "Los Angeles FC",
       away: "Esperance Tunis"
@@ -154,7 +154,7 @@ export const manualMatches: ManualMatch[] = [
     id: "Bayern-Munich-vs-Boca-Juniors",
     title: "Bayern Munich vs Boca Juniors",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-20T01:00:00Z",
+    date: "2025-06-21T01:00:00Z",
     teams: {
       home: "Bayern Munich",
       away: "Boca Juniors"
