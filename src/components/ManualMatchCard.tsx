@@ -36,8 +36,8 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         h-32 sm:h-36 md:h-40
         rounded-lg overflow-hidden 
         cursor-pointer hover:scale-105 transition-transform duration-200 group shadow-lg
-        bg-gradient-to-r from-amber-600/20 via-yellow-500/20 to-amber-600/20
-        border border-amber-500/30
+        bg-gradient-to-r from-blue-600/20 via-purple-500/20 to-blue-600/20
+        border border-blue-500/30
         "
       style={{ minWidth: 0 }}
       onClick={() => navigate(`/manual-match/${match.id}`)}
@@ -57,23 +57,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         <div className="w-full h-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900" />
       )}
 
-      {/* Golden Lines Pattern Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent" 
-           style={{
-             backgroundImage: `repeating-linear-gradient(
-               90deg,
-               transparent,
-               transparent 2px,
-               rgba(245, 158, 11, 0.1) 2px,
-               rgba(245, 158, 11, 0.1) 4px
-             )`
-           }} />
-
-      {/* Top Section - Time and Lock */}
+      {/* Top Section - Time and Live Badge */}
       <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-30">
         {/* Time Badge */}
         <div className="bg-black/70 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1">
-          <Lock className="w-3 h-3 text-amber-400" />
+          <Lock className="w-3 h-3 text-blue-400" />
           <span className="text-white text-xs font-bold">
             {dayString} {timeString}
           </span>
@@ -97,17 +85,17 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
       <div className="absolute inset-0 flex items-center justify-center z-30">
         <div className="flex items-center gap-4 sm:gap-6">
           {/* Home Team Logo Placeholder */}
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full border-2 border-amber-400/50 flex items-center justify-center backdrop-blur-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full border-2 border-blue-400/50 flex items-center justify-center backdrop-blur-sm">
             <span className="text-white text-xs sm:text-sm font-bold text-center leading-tight">
               {match.teams.home.substring(0, 3).toUpperCase()}
             </span>
           </div>
           
           {/* VS Text */}
-          <div className="text-amber-400 font-bold text-sm sm:text-lg">VS</div>
+          <div className="text-blue-400 font-bold text-sm sm:text-lg">VS</div>
           
           {/* Away Team Logo Placeholder */}
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full border-2 border-amber-400/50 flex items-center justify-center backdrop-blur-sm">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/10 rounded-full border-2 border-blue-400/50 flex items-center justify-center backdrop-blur-sm">
             <span className="text-white text-xs sm:text-sm font-bold text-center leading-tight">
               {match.teams.away.substring(0, 3).toUpperCase()}
             </span>
@@ -122,36 +110,19 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
 
-      {/* Premium Experience Badge */}
-      <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 z-20">
-        <div className="bg-gradient-to-r from-amber-600 to-yellow-500 py-1">
-          <div className="flex items-center justify-center gap-2">
-            <div className="flex gap-1">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="w-1 h-1 bg-white rotate-45" />
-              ))}
-            </div>
-            <span className="text-black text-xs font-bold tracking-wider">
-              PREMIUM EXPERIENCE
-            </span>
-            <div className="flex gap-1">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="w-1 h-1 bg-white rotate-45" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Bottom Section - Match Details */}
       <div className="absolute bottom-2 left-2 right-2 z-30">
         <div className="text-center">
-          <h3 className="text-white text-sm sm:text-base font-bold mb-1">
-            {match.teams.home} vs. {match.teams.away}
-          </h3>
-          <p className="text-amber-400 text-xs font-semibold">
-            FIFA Club World Cup™
-          </p>
+          <div className="bg-black/50 backdrop-blur-sm rounded px-2 py-1 mb-1">
+            <h3 className="text-white text-sm sm:text-base font-bold">
+              {match.teams.home} vs. {match.teams.away}
+            </h3>
+          </div>
+          <div className="bg-black/50 backdrop-blur-sm rounded px-2 py-1">
+            <p className="text-blue-400 text-xs font-semibold">
+              FIFA Club World Cup™
+            </p>
+          </div>
         </div>
       </div>
     </div>
