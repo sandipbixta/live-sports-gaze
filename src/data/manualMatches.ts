@@ -167,9 +167,9 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
       {
-        id: "TBS-USA",
-        name: "TBS [USA]",
-        url: "https://topembed.pw/channel/TBS[USA]",
+        id: "Nevena1[S7]",
+        name: "Nevena1[S7]",
+        url: "https://topembed.pw/channel/Nevena1[S7]",
         quality: "HD"
       },
       {
