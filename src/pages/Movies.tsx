@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -50,7 +48,7 @@ const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 const Movies = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState<string>('');
+  const [selectedGenre, setSelectedGenre] = useState<string>('all');
   const navigate = useNavigate();
 
   // Fetch movie genres
@@ -79,7 +77,7 @@ const Movies = () => {
       
       if (searchTerm) {
         endpoint = `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(searchTerm)}&page=${currentPage}`;
-      } else if (selectedGenre) {
+      } else if (selectedGenre && selectedGenre !== 'all') {
         endpoint = `${TMDB_BASE_URL}/discover/movie?with_genres=${selectedGenre}&page=${currentPage}&sort_by=popularity.desc`;
       } else {
         endpoint = `${TMDB_BASE_URL}/movie/popular?page=${currentPage}`;
@@ -101,7 +99,7 @@ const Movies = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setSelectedGenre(''); // Clear genre filter when searching
+    setSelectedGenre('all'); // Clear genre filter when searching
     setCurrentPage(1);
   };
 
@@ -116,24 +114,24 @@ const Movies = () => {
   };
 
   const getSelectedGenreName = () => {
-    if (!selectedGenre || !genresData) return '';
+    if (!selectedGenre || selectedGenre === 'all' || !genresData) return '';
     const genre = genresData.genres.find(g => g.id.toString() === selectedGenre);
     return genre ? genre.name : '';
   };
 
   const pageTitle = searchTerm 
     ? `Search Results for "${searchTerm}" - Movies | DAMITV`
-    : selectedGenre
+    : selectedGenre && selectedGenre !== 'all'
     ? `${getSelectedGenreName()} Movies | DAMITV`
     : `Movies - Stream Latest Movies Online Free | DAMITV`;
   
   const pageDescription = searchTerm
     ? `Search results for "${searchTerm}" movies. Watch free movies online in HD quality on DAMITV.`
-    : selectedGenre
+    : selectedGenre && selectedGenre !== 'all'
     ? `Watch ${getSelectedGenreName()} movies online for free in HD quality on DAMITV.`
     : 'Watch the latest movies online for free in HD quality. Stream popular movies, new releases, and classics on DAMITV - your premium destination for movie streaming.';
   
-  const currentUrl = `https://damitv.pro/movies${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : selectedGenre ? `?genre=${selectedGenre}` : ''}${currentPage > 1 ? `${searchTerm || selectedGenre ? '&' : '?'}page=${currentPage}` : ''}`;
+  const currentUrl = `https://damitv.pro/movies${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : selectedGenre && selectedGenre !== 'all' ? `?genre=${selectedGenre}` : ''}${currentPage > 1 ? `${searchTerm || (selectedGenre && selectedGenre !== 'all') ? '&' : '?'}page=${currentPage}` : ''}`;
 
   if (error) {
     return (
@@ -224,7 +222,7 @@ const Movies = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {genresData?.genres.map((genre) => (
                     <SelectItem key={genre.id} value={genre.id.toString()}>
                       {genre.name}
@@ -314,4 +312,3 @@ const Movies = () => {
 };
 
 export default Movies;
-
