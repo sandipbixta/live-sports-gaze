@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -22,16 +23,6 @@ interface Movie {
   popularity: number;
   adult: boolean;
   runtime?: number;
-}
-
-interface MovieDetails extends Movie {
-  genres: { id: number; name: string; }[];
-  production_countries: { iso_3166_1: string; name: string; }[];
-  spoken_languages: { iso_639_1: string; name: string; }[];
-  status: string;
-  tagline: string;
-  budget: number;
-  revenue: number;
 }
 
 interface TMDBResponse {
@@ -72,27 +63,6 @@ const Movies = () => {
     },
   });
 
-  // Fetch detailed movie information when a movie is selected
-  const { data: movieDetails } = useQuery({
-    queryKey: ['movie-details', selectedMovie?.id],
-    queryFn: async (): Promise<MovieDetails> => {
-      if (!selectedMovie) throw new Error('No movie selected');
-      
-      const response = await fetch(`${TMDB_BASE_URL}/movie/${selectedMovie.id}`, {
-        headers: {
-          'Authorization': `Bearer ${TMDB_READ_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json;charset=utf-8'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch movie details');
-      }
-      return response.json();
-    },
-    enabled: !!selectedMovie,
-  });
-
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
@@ -100,10 +70,6 @@ const Movies = () => {
 
   const handleMovieClick = (movie: Movie) => {
     navigate(`/movie/${movie.id}`);
-  };
-
-  const handleClosePlayer = () => {
-    setSelectedMovie(null);
   };
 
   const pageTitle = searchTerm 
@@ -186,26 +152,6 @@ const Movies = () => {
             }
           })}
         </script>
-        
-        {selectedMovie && (
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Movie",
-              "name": selectedMovie.title,
-              "description": selectedMovie.overview,
-              "datePublished": selectedMovie.release_date,
-              "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": selectedMovie.vote_average,
-                "ratingCount": selectedMovie.vote_count?.toString() || "1000",
-                "bestRating": "10",
-                "worstRating": "1"
-              },
-              "image": selectedMovie.poster_path ? `${TMDB_IMAGE_BASE_URL}${selectedMovie.poster_path}` : null
-            })}
-          </script>
-        )}
       </Helmet>
 
       <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
