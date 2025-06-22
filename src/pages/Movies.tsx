@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PageLayout from '../components/PageLayout';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Loader, Play, Calendar, Star, Clock, Globe, Users, Award } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { AspectRatio } from '../components/ui/aspect-ratio';
+import { Loader, Play, Calendar, Star } from 'lucide-react';
 
 interface Movie {
   id: number;
@@ -47,9 +46,9 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const Movies = () => {
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   // Fetch popular movies from TMDB
   const { data: moviesData, isLoading, error } = useQuery({
@@ -100,7 +99,7 @@ const Movies = () => {
   };
 
   const handleMovieClick = (movie: Movie) => {
-    setSelectedMovie(movie);
+    navigate(`/movie/${movie.id}`);
   };
 
   const handleClosePlayer = () => {
@@ -114,7 +113,7 @@ const Movies = () => {
   const pageDescription = searchTerm
     ? `Search results for "${searchTerm}" movies. Watch free movies online in HD quality on DAMITV.`
     : 'Watch the latest movies online for free in HD quality. Stream popular movies, new releases, and classics on DAMITV - your premium destination for movie streaming.';
-
+  
   const currentUrl = `https://damitv.pro/movies${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}${currentPage > 1 ? `${searchTerm ? '&' : '?'}page=${currentPage}` : ''}`;
 
   if (error) {
@@ -290,176 +289,6 @@ const Movies = () => {
               )}
             </>
           )}
-
-          {/* Enhanced Movie Player Dialog with Detailed Information */}
-          <Dialog open={!!selectedMovie} onOpenChange={handleClosePlayer}>
-            <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-              <DialogHeader className="p-6 pb-0">
-                <DialogTitle className="text-xl font-bold">
-                  {selectedMovie?.title}
-                </DialogTitle>
-                {movieDetails?.tagline && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">
-                    "{movieDetails.tagline}"
-                  </p>
-                )}
-              </DialogHeader>
-              <div className="p-6">
-                {selectedMovie && (
-                  <div className="space-y-6">
-                    <AspectRatio ratio={16 / 9}>
-                      <iframe
-                        src={`https://rivestream.org/embed?type=movie&id=${selectedMovie.id}`}
-                        className="w-full h-full rounded-lg"
-                        allowFullScreen
-                        title={selectedMovie.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                      />
-                    </AspectRatio>
-                    
-                    <div className="grid md:grid-cols-3 gap-6">
-                      <div className="md:col-span-2 space-y-4">
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2">Overview</h3>
-                          <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                            {selectedMovie.overview || 'No overview available.'}
-                          </p>
-                        </div>
-
-                        {movieDetails?.genres && movieDetails.genres.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold mb-2">Genres</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {movieDetails.genres.map((genre) => (
-                                <span 
-                                  key={genre.id}
-                                  className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-xs"
-                                >
-                                  {genre.name}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {movieDetails?.spoken_languages && movieDetails.spoken_languages.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold mb-2">Languages</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {movieDetails.spoken_languages.map((lang) => (
-                                <span 
-                                  key={lang.iso_639_1}
-                                  className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded-full text-xs"
-                                >
-                                  {lang.name}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="space-y-4 text-sm">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Calendar className="h-4 w-4" />
-                              <span className="font-semibold">Release Date</span>
-                            </div>
-                            <span>{selectedMovie.release_date || 'N/A'}</span>
-                          </div>
-                          
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-semibold">Rating</span>
-                            </div>
-                            <span>{selectedMovie.vote_average?.toFixed(1) || 'N/A'}/10</span>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Users className="h-4 w-4" />
-                              <span className="font-semibold">Votes</span>
-                            </div>
-                            <span>{selectedMovie.vote_count?.toLocaleString() || 'N/A'}</span>
-                          </div>
-                          
-                          {movieDetails?.runtime && (
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <Clock className="h-4 w-4" />
-                                <span className="font-semibold">Runtime</span>
-                              </div>
-                              <span>{movieDetails.runtime} min</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Globe className="h-4 w-4" />
-                              <span className="font-semibold">Language</span>
-                            </div>
-                            <span>{selectedMovie.original_language?.toUpperCase() || 'N/A'}</span>
-                          </div>
-                          
-                          {movieDetails?.status && (
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <Award className="h-4 w-4" />
-                                <span className="font-semibold">Status</span>
-                              </div>
-                              <span>{movieDetails.status}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {selectedMovie.original_title !== selectedMovie.title && (
-                          <div>
-                            <span className="font-semibold">Original Title:</span>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {selectedMovie.original_title}
-                            </p>
-                          </div>
-                        )}
-
-                        {movieDetails?.production_countries && movieDetails.production_countries.length > 0 && (
-                          <div>
-                            <span className="font-semibold">Countries:</span>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              {movieDetails.production_countries.map(country => country.name).join(', ')}
-                            </p>
-                          </div>
-                        )}
-
-                        {movieDetails?.budget && movieDetails.budget > 0 && (
-                          <div>
-                            <span className="font-semibold">Budget:</span>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              ${movieDetails.budget.toLocaleString()}
-                            </p>
-                          </div>
-                        )}
-
-                        {movieDetails?.revenue && movieDetails.revenue > 0 && (
-                          <div>
-                            <span className="font-semibold">Revenue:</span>
-                            <p className="text-gray-600 dark:text-gray-400">
-                              ${movieDetails.revenue.toLocaleString()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </PageLayout>
     </>
