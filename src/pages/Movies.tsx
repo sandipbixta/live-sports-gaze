@@ -6,7 +6,8 @@ import PageLayout from '../components/PageLayout';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Loader, Play, Calendar, Star } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Loader, Play, Calendar, Star, Search } from 'lucide-react';
 
 interface Movie {
   id: number;
@@ -141,7 +142,7 @@ const Movies = () => {
           <meta name="description" content="Error loading movies. Please try again later." />
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-        <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+        <PageLayout>
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-4">Error Loading Movies</h2>
@@ -205,7 +206,7 @@ const Movies = () => {
         </script>
       </Helmet>
 
-      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+      <PageLayout>
         <div className="space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Movies</h1>
@@ -214,11 +215,12 @@ const Movies = () => {
             </p>
           </div>
 
-          {/* Genre Filter */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-xs">
+          {/* Genre Filter (Left) and Search (Right) */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+            {/* Genre Filter - Left */}
+            <div className="w-full sm:w-auto">
               <Select value={selectedGenre} onValueChange={handleGenreChange}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -230,6 +232,18 @@ const Movies = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Search - Right */}
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search movies..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full sm:w-64 pl-10 pr-4"
+              />
             </div>
           </div>
 
