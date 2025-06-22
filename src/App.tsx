@@ -16,6 +16,7 @@ import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
+import Movies from "./pages/Movies";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/channels" element={<Channels />} />
             <Route path="/channel/:country/:channelId" element={<ChannelPlayer />} />
             <Route path="/news" element={<News />} />
+            <Route path="/movies" element={<Movies />} />
             <Route path="/dmca" element={<DMCANotice />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

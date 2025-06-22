@@ -1,0 +1,233 @@
+
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import PageLayout from '../components/PageLayout';
+import { Card, CardContent } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Loader, Play, Calendar, Star } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { AspectRatio } from '../components/ui/aspect-ratio';
+
+interface Movie {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string;
+  backdrop_path: string;
+  release_date: string;
+  vote_average: number;
+  genre_ids: number[];
+}
+
+interface TMDBResponse {
+  results: Movie[];
+  total_pages: number;
+  page: number;
+}
+
+const TMDB_API_KEY = ''; // You'll need to get this from TMDB
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+
+const Movies = () => {
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch popular movies from TMDB
+  const { data: moviesData, isLoading, error } = useQuery({
+    queryKey: ['movies', currentPage, searchTerm],
+    queryFn: async (): Promise<TMDBResponse> => {
+      const endpoint = searchTerm 
+        ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(searchTerm)}&page=${currentPage}`
+        : `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+      
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error('Failed to fetch movies');
+      }
+      return response.json();
+    },
+    enabled: !!TMDB_API_KEY, // Only run query if API key is provided
+  });
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleMovieClick = (movie: Movie) => {
+    setSelectedMovie(movie);
+  };
+
+  const handleClosePlayer = () => {
+    setSelectedMovie(null);
+  };
+
+  if (!TMDB_API_KEY) {
+    return (
+      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Movies Coming Soon</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Movie streaming feature is currently being set up.
+            </p>
+            <p className="text-sm text-gray-500">
+              TMDB API integration required for movie data.
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Error Loading Movies</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Failed to fetch movies. Please try again later.
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">Movies</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Watch the latest and greatest movies
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[40vh]">
+            <div className="text-center">
+              <Loader className="h-12 w-12 animate-spin mx-auto mb-4 text-[#ff5a36]" />
+              <p className="text-lg">Loading movies...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {moviesData?.results.map((movie) => (
+                <Card 
+                  key={movie.id} 
+                  className="cursor-pointer hover:scale-105 transition-transform duration-200 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                  onClick={() => handleMovieClick(movie)}
+                >
+                  <CardContent className="p-0">
+                    <div className="relative">
+                      <img
+                        src={movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : '/placeholder.svg'}
+                        alt={movie.title}
+                        className="w-full h-60 sm:h-72 object-cover rounded-t-lg"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 rounded-t-lg flex items-center justify-center">
+                        <Play className="h-12 w-12 text-white" />
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-sm line-clamp-2 mb-2">
+                        {movie.title}
+                      </h3>
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>{movie.release_date?.split('-')[0] || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span>{movie.vote_average?.toFixed(1) || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {moviesData && moviesData.total_pages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm">
+                  Page {currentPage} of {moviesData.total_pages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage(prev => Math.min(moviesData.total_pages, prev + 1))}
+                  disabled={currentPage === moviesData.total_pages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Movie Player Dialog */}
+        <Dialog open={!!selectedMovie} onOpenChange={handleClosePlayer}>
+          <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-xl font-bold">
+                {selectedMovie?.title}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-6">
+              {selectedMovie && (
+                <div className="space-y-4">
+                  <AspectRatio ratio={16 / 9}>
+                    <iframe
+                      src={`https://rivestream.org/embed?type=movie&id=${selectedMovie.id}`}
+                      className="w-full h-full rounded-lg"
+                      allowFullScreen
+                      title={selectedMovie.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                    />
+                  </AspectRatio>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <h3 className="text-lg font-semibold mb-2">Overview</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm">
+                        {selectedMovie.overview || 'No overview available.'}
+                      </p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-semibold">Release Date:</span>
+                        <span className="ml-2">{selectedMovie.release_date || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="font-semibold">Rating:</span>
+                        <span className="ml-2 flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          {selectedMovie.vote_average?.toFixed(1) || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </PageLayout>
+  );
+};
+
+export default Movies;
