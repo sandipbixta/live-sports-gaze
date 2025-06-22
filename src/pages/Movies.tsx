@@ -25,7 +25,8 @@ interface TMDBResponse {
   page: number;
 }
 
-const TMDB_API_KEY = ''; // You'll need to get this from TMDB
+const TMDB_API_KEY = '80d3df1c267378db32e702c5c3132e49';
+const TMDB_READ_ACCESS_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4MGQzZGYxYzI2NzM3OGRiMzJlNzAyYzVjMzEzMmU0OSIsIm5iZiI6MTc1MDU5MDkzNS42OTYsInN1YiI6IjY4NTdlNWQ3OTE4YzY5YzNkNGNiNGRjNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.zYkLeTXUcByVeMAcfzHFFTi3Q8fH4YblR-X2u7PItDI';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
@@ -39,16 +40,21 @@ const Movies = () => {
     queryKey: ['movies', currentPage, searchTerm],
     queryFn: async (): Promise<TMDBResponse> => {
       const endpoint = searchTerm 
-        ? `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(searchTerm)}&page=${currentPage}`
-        : `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+        ? `${TMDB_BASE_URL}/search/movie?query=${encodeURIComponent(searchTerm)}&page=${currentPage}`
+        : `${TMDB_BASE_URL}/movie/popular?page=${currentPage}`;
       
-      const response = await fetch(endpoint);
+      const response = await fetch(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${TMDB_READ_ACCESS_TOKEN}`,
+          'Content-Type': 'application/json;charset=utf-8'
+        }
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to fetch movies');
       }
       return response.json();
     },
-    enabled: !!TMDB_API_KEY, // Only run query if API key is provided
   });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,24 +69,6 @@ const Movies = () => {
   const handleClosePlayer = () => {
     setSelectedMovie(null);
   };
-
-  if (!TMDB_API_KEY) {
-    return (
-      <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Movies Coming Soon</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              Movie streaming feature is currently being set up.
-            </p>
-            <p className="text-sm text-gray-500">
-              TMDB API integration required for movie data.
-            </p>
-          </div>
-        </div>
-      </PageLayout>
-    );
-  }
 
   if (error) {
     return (
