@@ -135,7 +135,7 @@ const MoviePlayer = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-2 sm:px-4 py-6">
           {/* Back Button */}
           <Button 
             variant="outline" 
@@ -150,24 +150,42 @@ const MoviePlayer = () => {
             <div className="space-y-8">
               {/* Movie Title and Tagline */}
               <div className="text-center">
-                <h1 className="text-3xl md:text-4xl font-bold mb-2">{movieDetails.title}</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">{movieDetails.title}</h1>
                 {movieDetails.tagline && (
-                  <p className="text-lg text-gray-600 dark:text-gray-400 italic">
+                  <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 italic">
                     "{movieDetails.tagline}"
                   </p>
                 )}
               </div>
 
-              {/* Video Player */}
-              <div className="max-w-6xl mx-auto">
+              {/* Video Player - Made larger for mobile */}
+              <div className="w-full">
                 <AspectRatio ratio={16 / 9}>
-                  <iframe
-                    src={`https://rivestream.org/embed?type=movie&id=${movieDetails.id}`}
-                    className="w-full h-full rounded-lg shadow-lg"
-                    allowFullScreen
-                    title={movieDetails.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                  />
+                  <div className="relative w-full h-full">
+                    <iframe
+                      src={`https://rivestream.org/embed?type=movie&id=${movieDetails.id}`}
+                      className="w-full h-full rounded-lg shadow-lg border-0"
+                      allowFullScreen
+                      title={movieDetails.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                      style={{ minHeight: '250px' }}
+                    />
+                    {/* Custom fullscreen button overlay */}
+                    <button
+                      onClick={() => {
+                        const iframe = document.querySelector('iframe');
+                        if (iframe?.requestFullscreen) {
+                          iframe.requestFullscreen();
+                        }
+                      }}
+                      className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-md transition-colors z-10"
+                      title="Fullscreen"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    </button>
+                  </div>
                 </AspectRatio>
               </div>
 

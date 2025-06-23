@@ -134,6 +134,40 @@ const Movies = () => {
   
   const currentUrl = `https://damitv.pro/movies${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : selectedGenre && selectedGenre !== 'all' ? `?genre=${selectedGenre}` : ''}${currentPage > 1 ? `${searchTerm || (selectedGenre && selectedGenre !== 'all') ? '&' : '?'}page=${currentPage}` : ''}`;
 
+  // Helper function to generate page numbers for pagination
+  const getPageNumbers = () => {
+    if (!moviesData) return [];
+    
+    const totalPages = moviesData.total_pages;
+    const current = currentPage;
+    const delta = 2; // Number of pages to show on each side of current page
+    
+    let pages: (number | string)[] = [];
+    
+    // Always show first page
+    if (current > delta + 2) {
+      pages.push(1);
+      if (current > delta + 3) {
+        pages.push('...');
+      }
+    }
+    
+    // Show pages around current page
+    for (let i = Math.max(1, current - delta); i <= Math.min(totalPages, current + delta); i++) {
+      pages.push(i);
+    }
+    
+    // Always show last page
+    if (current < totalPages - delta - 1) {
+      if (current < totalPages - delta - 2) {
+        pages.push('...');
+      }
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+
   if (error) {
     return (
       <>
@@ -295,23 +329,45 @@ const Movies = () => {
                 ))}
               </div>
 
-              {/* Pagination */}
+              {/* Enhanced Pagination with Numbers */}
               {moviesData && moviesData.total_pages > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-8">
+                <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+                  {/* Previous Button */}
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
+                    className="px-3 py-1"
                   >
                     Previous
                   </Button>
-                  <span className="text-sm">
-                    Page {currentPage} of {moviesData.total_pages}
-                  </span>
+
+                  {/* Page Numbers */}
+                  {getPageNumbers().map((page, index) => (
+                    <div key={index}>
+                      {page === '...' ? (
+                        <span className="px-2 py-1 text-gray-500">...</span>
+                      ) : (
+                        <Button
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page as number)}
+                          className="px-3 py-1 min-w-[40px]"
+                        >
+                          {page}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Next Button */}
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(moviesData.total_pages, prev + 1))}
                     disabled={currentPage === moviesData.total_pages}
+                    className="px-3 py-1"
                   >
                     Next
                   </Button>
