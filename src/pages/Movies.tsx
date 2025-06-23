@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PageLayout from '../components/PageLayout';
 import { Card, CardContent } from '../components/ui/card';
@@ -47,10 +47,13 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const Movies = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState<string>('all');
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Initialize state from URL params
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1'));
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedGenre, setSelectedGenre] = useState<string>(searchParams.get('genre') || 'all');
 
   // Fetch movie genres
   const { data: genresData } = useQuery({
@@ -99,19 +102,50 @@ const Movies = () => {
   });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setSelectedGenre('all'); // Clear genre filter when searching
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setSelectedGenre('all');
     setCurrentPage(1);
+    
+    // Update URL params
+    const newParams = new URLSearchParams();
+    if (newSearchTerm) newParams.set('search', newSearchTerm);
+    setSearchParams(newParams);
   };
 
   const handleGenreChange = (genreId: string) => {
     setSelectedGenre(genreId);
-    setSearchTerm(''); // Clear search when filtering by genre
+    setSearchTerm('');
     setCurrentPage(1);
+    
+    // Update URL params
+    const newParams = new URLSearchParams();
+    if (genreId !== 'all') newParams.set('genre', genreId);
+    setSearchParams(newParams);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    
+    // Update URL params
+    const newParams = new URLSearchParams(searchParams);
+    if (page > 1) {
+      newParams.set('page', page.toString());
+    } else {
+      newParams.delete('page');
+    }
+    setSearchParams(newParams);
   };
 
   const handleMovieClick = (movie: Movie) => {
-    navigate(`/movie/${movie.id}`);
+    // Create return URL with current state
+    const returnParams = new URLSearchParams();
+    if (currentPage > 1) returnParams.set('page', currentPage.toString());
+    if (searchTerm) returnParams.set('search', searchTerm);
+    if (selectedGenre !== 'all') returnParams.set('genre', selectedGenre);
+    
+    const returnUrl = returnParams.toString() ? `/movies?${returnParams.toString()}` : '/movies';
+    navigate(`/movie/${movie.id}?returnUrl=${encodeURIComponent(returnUrl)}`);
   };
 
   const getSelectedGenreName = () => {
@@ -336,7 +370,7 @@ const Movies = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className="px-3 py-1"
                   >
@@ -352,7 +386,7 @@ const Movies = () => {
                         <Button
                           variant={currentPage === page ? "default" : "outline"}
                           size="sm"
-                          onClick={() => setCurrentPage(page as number)}
+                          onClick={() => handlePageChange(page as number)}
                           className="px-3 py-1 min-w-[40px]"
                         >
                           {page}
@@ -365,7 +399,7 @@ const Movies = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(moviesData.total_pages, prev + 1))}
+                    onClick={() => handlePageChange(Math.min(moviesData.total_pages, currentPage + 1))}
                     disabled={currentPage === moviesData.total_pages}
                     className="px-3 py-1"
                   >
