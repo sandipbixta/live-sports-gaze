@@ -7,7 +7,7 @@ interface MatchesListProps {
   matches: Match[];
   sportId: string;
   isLoading: boolean;
-  onMatchesDisplayed?: (matchIds: string[]) => void; // Add callback to report displayed match IDs
+  onMatchesDisplayed?: (matchIds: string[]) => void;
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ 
@@ -16,12 +16,12 @@ const MatchesList: React.FC<MatchesListProps> = ({
   isLoading,
   onMatchesDisplayed
 }) => {
-  // Enhanced duplicate removal function
-  const removeDuplicates = (matches: Match[]): Match[] => {
-    const seen = new Map<string, Match>();
+  // Enhanced consolidation function to merge matches with same identity but different sources
+  const consolidateMatches = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
     
     matches.forEach(match => {
-      // Create multiple unique keys to catch different types of duplicates
+      // Create unique key based on match identity (title, date, teams)
       const homeTeam = match.teams?.home?.name?.toLowerCase().trim() || '';
       const awayTeam = match.teams?.away?.name?.toLowerCase().trim() || '';
       const matchTitle = match.title?.toLowerCase().trim() || '';
@@ -40,21 +40,41 @@ const MatchesList: React.FC<MatchesListProps> = ({
       // Use the most specific key available
       const uniqueKey = teamKey || titleKey || match.id;
       
-      // Keep the match with more sources or the first one encountered
-      if (!seen.has(uniqueKey)) {
-        seen.set(uniqueKey, match);
-      } else {
-        const existingMatch = seen.get(uniqueKey)!;
-        if ((match.sources?.length || 0) > (existingMatch.sources?.length || 0)) {
-          seen.set(uniqueKey, match);
+      if (matchMap.has(uniqueKey)) {
+        // Merge sources from duplicate match
+        const existingMatch = matchMap.get(uniqueKey)!;
+        const combinedSources = [...(existingMatch.sources || [])];
+        
+        // Add new sources if they don't already exist
+        if (match.sources) {
+          match.sources.forEach(newSource => {
+            const exists = combinedSources.some(existing => 
+              existing.source === newSource.source && existing.id === newSource.id
+            );
+            if (!exists) {
+              combinedSources.push(newSource);
+            }
+          });
         }
+        
+        // Update the existing match with combined sources
+        matchMap.set(uniqueKey, {
+          ...existingMatch,
+          sources: combinedSources,
+          // Keep the match with more complete data
+          ...(match.teams && !existingMatch.teams ? { teams: match.teams } : {}),
+          ...(match.title && match.title.length > existingMatch.title.length ? { title: match.title } : {})
+        });
+      } else {
+        // Add new match
+        matchMap.set(uniqueKey, { ...match });
       }
     });
     
-    return Array.from(seen.values());
+    return Array.from(matchMap.values());
   };
 
-  // Filter out advertisement and invalid matches, then remove duplicates
+  // Filter out advertisement and invalid matches, then consolidate duplicates
   const cleanMatches = matches.filter(match => {
     const title = match.title?.toLowerCase() || '';
     const id = match.id?.toLowerCase() || '';
@@ -68,7 +88,7 @@ const MatchesList: React.FC<MatchesListProps> = ({
            match.date; // Must have a date
   });
 
-  const filteredMatches = removeDuplicates(cleanMatches);
+  const filteredMatches = consolidateMatches(cleanMatches);
   const isMobile = useIsMobile();
   
   // Report displayed match IDs to parent component

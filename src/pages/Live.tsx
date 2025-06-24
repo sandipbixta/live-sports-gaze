@@ -37,6 +37,64 @@ const Live = () => {
   // Determine if we're on mobile
   const isMobile = useIsMobile();
   
+  // Enhanced consolidation function to merge matches with same identity but different sources
+  const consolidateMatches = (matches: Match[]): Match[] => {
+    const matchMap = new Map<string, Match>();
+    
+    matches.forEach(match => {
+      // Create unique key based on match identity (title, date, teams)
+      const homeTeam = match.teams?.home?.name?.toLowerCase().trim() || '';
+      const awayTeam = match.teams?.away?.name?.toLowerCase().trim() || '';
+      const matchTitle = match.title?.toLowerCase().trim() || '';
+      const matchDate = new Date(match.date).toISOString().split('T')[0];
+      
+      // Primary key: teams and date
+      const teamKey = homeTeam && awayTeam 
+        ? `${homeTeam}-vs-${awayTeam}-${matchDate}`
+        : null;
+      
+      // Secondary key: title and date
+      const titleKey = matchTitle 
+        ? `${matchTitle}-${matchDate}`
+        : null;
+      
+      // Use the most specific key available
+      const uniqueKey = teamKey || titleKey || match.id;
+      
+      if (matchMap.has(uniqueKey)) {
+        // Merge sources from duplicate match
+        const existingMatch = matchMap.get(uniqueKey)!;
+        const combinedSources = [...(existingMatch.sources || [])];
+        
+        // Add new sources if they don't already exist
+        if (match.sources) {
+          match.sources.forEach(newSource => {
+            const exists = combinedSources.some(existing => 
+              existing.source === newSource.source && existing.id === newSource.id
+            );
+            if (!exists) {
+              combinedSources.push(newSource);
+            }
+          });
+        }
+        
+        // Update the existing match with combined sources
+        matchMap.set(uniqueKey, {
+          ...existingMatch,
+          sources: combinedSources,
+          // Keep the match with more complete data
+          ...(match.teams && !existingMatch.teams ? { teams: match.teams } : {}),
+          ...(match.title && match.title.length > existingMatch.title.length ? { title: match.title } : {})
+        });
+      } else {
+        // Add new match
+        matchMap.set(uniqueKey, { ...match });
+      }
+    });
+    
+    return Array.from(matchMap.values());
+  };
+  
   // Check if a match is currently live - Extended window to match other components
   const isMatchLive = (match: Match): boolean => {
     const matchTime = new Date(match.date).getTime();
@@ -154,7 +212,7 @@ const Live = () => {
         console.log('Sports data:', sportsData);
         
         // Fetch from multiple sports to find live matches including wrestling/combat sports
-        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey', 'tennis', 'baseball', 'cricket', 'rugby', 'golf', 'fight', 'wrestling', 'ufc', 'boxing']; // Extended sport IDs with combat sports
+        const sportIds = ['1', '2', '3', '4', 'football', 'basketball', 'hockey', 'tennis', 'baseball', 'cricket', 'rugby', 'golf', 'fight', 'wrestling', 'ufc', 'boxing'];
         let allFetchedMatches: Match[] = [];
         
         for (const sportId of sportIds) {
@@ -176,43 +234,46 @@ const Live = () => {
         
         console.log('All matches before filtering:', allFetchedMatches.length);
         
-        // Filter out advertisement matches (like Sky Sports News) but include wrestling/combat sports
-        allFetchedMatches = allFetchedMatches.filter(match => 
+        // Filter out advertisement matches and consolidate duplicates
+        const cleanMatches = allFetchedMatches.filter(match => 
           !match.title.toLowerCase().includes('sky sports news') && 
           !match.id.includes('sky-sports-news')
         );
         
-        console.log('Matches after filtering ads:', allFetchedMatches.length);
+        // Consolidate matches with same identity but different sources
+        const consolidatedMatches = consolidateMatches(cleanMatches);
+        
+        console.log('Matches after consolidation:', consolidatedMatches.length);
         
         // Separate matches into live and upcoming using the extended criteria
-        const live = allFetchedMatches.filter(match => {
+        const live = consolidatedMatches.filter(match => {
           const matchTime = new Date(match.date).getTime();
           const now = new Date().getTime();
-          const sixHoursInMs = 6 * 60 * 60 * 1000; // Extended to 6 hours
+          const sixHoursInMs = 6 * 60 * 60 * 1000;
           const oneHourInMs = 60 * 60 * 1000;
           
           return match.sources && 
                  match.sources.length > 0 && 
-                 matchTime - now < oneHourInMs && // Match starts within 1 hour
-                 now - matchTime < sixHoursInMs; // Match can be live up to 6 hours after start
+                 matchTime - now < oneHourInMs && 
+                 now - matchTime < sixHoursInMs;
         });
         
-        const upcoming = allFetchedMatches.filter(match => 
+        const upcoming = consolidatedMatches.filter(match => 
           !live.some(liveMatch => liveMatch.id === match.id)
         );
         
         console.log('Live matches:', live.length);
         console.log('Upcoming matches:', upcoming.length);
         
-        setAllMatches(allFetchedMatches);
+        setAllMatches(consolidatedMatches);
         setLiveMatches(live);
         setUpcomingMatches(upcoming);
-        setFilteredMatches(allFetchedMatches);
+        setFilteredMatches(consolidatedMatches);
         
         // Set featured match (first live one with sources if available, otherwise first match)
         const liveWithSources = live.filter(match => match.sources && match.sources.length > 0);
         const firstLiveMatch = liveWithSources.length > 0 ? liveWithSources[0] : null;
-        const firstMatch = allFetchedMatches.length > 0 ? allFetchedMatches[0] : null;
+        const firstMatch = consolidatedMatches.length > 0 ? consolidatedMatches[0] : null;
         const matchToFeature = firstLiveMatch || firstMatch;
         
         if (matchToFeature) {
