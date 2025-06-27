@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { ArrowLeft, Maximize, Minimize, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/utils';
@@ -19,6 +19,40 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   isPictureInPicture
 }) => {
   const isMobile = useIsMobile();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Track fullscreen state more reliably
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreenState = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+      setIsFullscreen(fullscreenState);
+    };
+
+    const fullscreenEvents = [
+      'fullscreenchange',
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'msfullscreenchange'
+    ];
+    
+    fullscreenEvents.forEach(event => {
+      document.addEventListener(event, handleFullscreenChange);
+    });
+
+    // Set initial state
+    handleFullscreenChange();
+
+    return () => {
+      fullscreenEvents.forEach(event => {
+        document.removeEventListener(event, handleFullscreenChange);
+      });
+    };
+  }, []);
 
   const handleFullscreen = async () => {
     try {
@@ -29,11 +63,21 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         return;
       }
 
-      if (document.fullscreenElement) {
+      if (isFullscreen) {
         // Exit fullscreen
-        await document.exitFullscreen();
+        console.log('Exiting fullscreen...');
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
       } else {
         // Enter fullscreen
+        console.log('Entering fullscreen...');
         if (playerContainer.requestFullscreen) {
           await playerContainer.requestFullscreen();
         } else if ((playerContainer as any).webkitRequestFullscreen) {
@@ -48,13 +92,6 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
       console.error('Fullscreen error:', error);
     }
   };
-
-  const isFullscreen = !!(
-    document.fullscreenElement ||
-    (document as any).webkitFullscreenElement ||
-    (document as any).mozFullScreenElement ||
-    (document as any).msFullscreenElement
-  );
 
   return (
     <>

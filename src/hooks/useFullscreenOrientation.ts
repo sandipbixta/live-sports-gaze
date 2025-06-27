@@ -6,6 +6,7 @@ import { Stream } from '../types/sports';
 export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.RefObject<HTMLIFrameElement>) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [lastOrientation, setLastOrientation] = useState<number | null>(null);
+  const [refreshTimeout, setRefreshTimeout] = useState<NodeJS.Timeout | null>(null);
   const isMobile = useIsMobile();
 
   // Enhanced mobile fullscreen handling
@@ -20,10 +21,16 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
     setIsFullscreen(isCurrentlyFullscreen);
     console.log('Fullscreen state changed:', isCurrentlyFullscreen);
     
-    // On mobile, when exiting fullscreen, refresh the iframe to prevent playback issues
-    if (!isCurrentlyFullscreen && isMobile && videoRef.current) {
-      setTimeout(() => {
-        if (videoRef.current && stream?.embedUrl) {
+    // Clear any pending refresh timeout when entering fullscreen
+    if (isCurrentlyFullscreen && refreshTimeout) {
+      clearTimeout(refreshTimeout);
+      setRefreshTimeout(null);
+    }
+    
+    // Only refresh iframe on mobile when exiting fullscreen, with a delay to prevent conflicts
+    if (!isCurrentlyFullscreen && isMobile && videoRef.current && stream?.embedUrl) {
+      const timeout = setTimeout(() => {
+        if (videoRef.current && stream?.embedUrl && !document.fullscreenElement) {
           console.log('Refreshing iframe after fullscreen exit on mobile');
           const currentSrc = videoRef.current.src;
           videoRef.current.src = '';
@@ -33,22 +40,30 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
             }
           }, 100);
         }
-      }, 200);
+      }, 500); // Increased delay to prevent conflicts
+      
+      setRefreshTimeout(timeout);
     }
   };
 
-  // Handle device orientation changes on mobile
+  // Handle device orientation changes on mobile - only refresh if not in fullscreen
   const handleOrientationChange = () => {
     if (!isMobile || !stream) return;
     
     const currentOrientation = window.orientation || screen.orientation?.angle || 0;
     console.log('Orientation changed from', lastOrientation, 'to', currentOrientation);
     
-    // If we're in fullscreen and orientation changed, refresh the iframe
-    if (isFullscreen && lastOrientation !== null && lastOrientation !== currentOrientation) {
-      console.log('Refreshing iframe due to orientation change in fullscreen');
-      setTimeout(() => {
-        if (videoRef.current && stream?.embedUrl) {
+    // Only refresh if we're NOT in fullscreen and orientation actually changed
+    if (!isFullscreen && lastOrientation !== null && lastOrientation !== currentOrientation) {
+      console.log('Refreshing iframe due to orientation change (not in fullscreen)');
+      
+      // Clear any existing timeout
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
+      
+      const timeout = setTimeout(() => {
+        if (videoRef.current && stream?.embedUrl && !document.fullscreenElement) {
           const currentSrc = videoRef.current.src;
           videoRef.current.src = '';
           setTimeout(() => {
@@ -57,7 +72,9 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
             }
           }, 300);
         }
-      }, 500);
+      }, 800); // Longer delay to prevent interference
+      
+      setRefreshTimeout(timeout);
     }
     
     setLastOrientation(currentOrientation);
@@ -80,8 +97,13 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
     // Orientation change listener for mobile
     if (isMobile) {
       window.addEventListener('orientationchange', handleOrientationChange);
-      // Also listen to resize as a fallback
-      window.addEventListener('resize', handleOrientationChange);
+      // Also listen to resize as a fallback, but with throttling
+      let resizeTimeout: NodeJS.Timeout;
+      const throttledResize = () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(handleOrientationChange, 300);
+      };
+      window.addEventListener('resize', throttledResize);
       
       // Set initial orientation
       setLastOrientation(window.orientation || screen.orientation?.angle || 0);
@@ -96,8 +118,22 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
         window.removeEventListener('orientationchange', handleOrientationChange);
         window.removeEventListener('resize', handleOrientationChange);
       }
+      
+      // Clear any pending timeouts
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
     };
-  }, [isMobile, isFullscreen, lastOrientation, stream]);
+  }, [isMobile, isFullscreen, lastOrientation, stream, refreshTimeout]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
+    };
+  }, [refreshTimeout]);
 
   return { isFullscreen, lastOrientation };
 };
