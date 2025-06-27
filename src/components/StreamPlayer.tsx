@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Stream } from '../types/sports';
 import { Loader } from 'lucide-react';
@@ -20,7 +19,6 @@ interface StreamPlayerProps {
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLIFrameElement>(null);
-  const [isPictureInPicture, setIsPictureInPicture] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
@@ -51,28 +49,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  const togglePictureInPicture = async () => {
-    try {
-      // For modern browsers with PiP API
-      if (document.pictureInPictureElement) {
-        await document.exitPictureInPicture();
-        setIsPictureInPicture(false);
-      } else if (videoRef.current) {
-        // Try to enter PiP mode - this is tricky with iframes but we'll try
-        // We need to access the video element inside the iframe
-        const iframeDocument = videoRef.current.contentDocument || videoRef.current.contentWindow?.document;
-        const videoElement = iframeDocument?.querySelector('video');
-        
-        if (videoElement && videoElement.requestPictureInPicture) {
-          await videoElement.requestPictureInPicture();
-          setIsPictureInPicture(true);
-        } else {
-          console.error('Picture-in-picture not supported or video element not found in iframe');
-        }
-      }
-    } catch (error) {
-      console.error('Failed to toggle picture-in-picture mode:', error);
-    }
+  // Placeholder function for compatibility
+  const togglePictureInPicture = () => {
+    console.log('Picture-in-picture functionality moved to fullscreen');
   };
   
   // Enhanced debugging and error detection
@@ -216,7 +195,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onGoBack={handleGoBack}
         onTogglePictureInPicture={togglePictureInPicture}
         onOpenInNewTab={openStreamInNewTab}
-        isPictureInPicture={isPictureInPicture}
+        isPictureInPicture={false}
       />
     </PlayerContainer>
   );

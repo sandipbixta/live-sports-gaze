@@ -20,6 +20,42 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
+  const handleFullscreen = async () => {
+    try {
+      const playerContainer = document.querySelector('[data-player-container]') as HTMLElement;
+      
+      if (!playerContainer) {
+        console.log('Player container not found');
+        return;
+      }
+
+      if (document.fullscreenElement) {
+        // Exit fullscreen
+        await document.exitFullscreen();
+      } else {
+        // Enter fullscreen
+        if (playerContainer.requestFullscreen) {
+          await playerContainer.requestFullscreen();
+        } else if ((playerContainer as any).webkitRequestFullscreen) {
+          await (playerContainer as any).webkitRequestFullscreen();
+        } else if ((playerContainer as any).mozRequestFullScreen) {
+          await (playerContainer as any).mozRequestFullScreen();
+        } else if ((playerContainer as any).msRequestFullscreen) {
+          await (playerContainer as any).msRequestFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error('Fullscreen error:', error);
+    }
+  };
+
+  const isFullscreen = !!(
+    document.fullscreenElement ||
+    (document as any).webkitFullscreenElement ||
+    (document as any).mozFullScreenElement ||
+    (document as any).msFullscreenElement
+  );
+
   return (
     <>
       {/* Back button */}
@@ -41,12 +77,12 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
         <button 
-          onClick={onTogglePictureInPicture}
+          onClick={handleFullscreen}
           className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors touch-manipulation"
-          title={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
-          aria-label={isPictureInPicture ? "Exit picture-in-picture" : "Enter picture-in-picture"}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
-          {isPictureInPicture ? 
+          {isFullscreen ? 
             <Minimize className="h-4 w-4 sm:h-5 sm:w-5" /> : 
             <Maximize className="h-4 w-4 sm:h-5 sm:w-5" />
           }
