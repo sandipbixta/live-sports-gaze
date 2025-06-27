@@ -23,6 +23,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
   const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lastOrientation, setLastOrientation] = useState<number | null>(null);
   const isMobile = useIsMobile();
   
   // Mobile-optimized player container with proper orientation
@@ -46,6 +48,97 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
 
+  // Enhanced mobile fullscreen handling
+  const handleFullscreenChange = () => {
+    const isCurrentlyFullscreen = !!(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    );
+    
+    setIsFullscreen(isCurrentlyFullscreen);
+    console.log('Fullscreen state changed:', isCurrentlyFullscreen);
+    
+    // On mobile, when exiting fullscreen, refresh the iframe to prevent playback issues
+    if (!isCurrentlyFullscreen && isMobile && videoRef.current) {
+      setTimeout(() => {
+        if (videoRef.current && stream?.embedUrl) {
+          console.log('Refreshing iframe after fullscreen exit on mobile');
+          const currentSrc = videoRef.current.src;
+          videoRef.current.src = '';
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.src = currentSrc;
+            }
+          }, 100);
+        }
+      }, 200);
+    }
+  };
+
+  // Handle device orientation changes on mobile
+  const handleOrientationChange = () => {
+    if (!isMobile || !stream) return;
+    
+    const currentOrientation = window.orientation || screen.orientation?.angle || 0;
+    console.log('Orientation changed from', lastOrientation, 'to', currentOrientation);
+    
+    // If we're in fullscreen and orientation changed, refresh the iframe
+    if (isFullscreen && lastOrientation !== null && lastOrientation !== currentOrientation) {
+      console.log('Refreshing iframe due to orientation change in fullscreen');
+      setTimeout(() => {
+        if (videoRef.current && stream?.embedUrl) {
+          const currentSrc = videoRef.current.src;
+          videoRef.current.src = '';
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.src = currentSrc;
+            }
+          }, 300);
+        }
+      }, 500);
+    }
+    
+    setLastOrientation(currentOrientation);
+  };
+
+  // Add event listeners for fullscreen and orientation changes
+  useEffect(() => {
+    // Fullscreen change listeners
+    const fullscreenEvents = [
+      'fullscreenchange',
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'msfullscreenchange'
+    ];
+    
+    fullscreenEvents.forEach(event => {
+      document.addEventListener(event, handleFullscreenChange);
+    });
+
+    // Orientation change listener for mobile
+    if (isMobile) {
+      window.addEventListener('orientationchange', handleOrientationChange);
+      // Also listen to resize as a fallback
+      window.addEventListener('resize', handleOrientationChange);
+      
+      // Set initial orientation
+      setLastOrientation(window.orientation || screen.orientation?.angle || 0);
+    }
+
+    return () => {
+      fullscreenEvents.forEach(event => {
+        document.removeEventListener(event, handleFullscreenChange);
+      });
+      
+      if (isMobile) {
+        window.removeEventListener('orientationchange', handleOrientationChange);
+        window.removeEventListener('resize', handleOrientationChange);
+      }
+    };
+  }, [isMobile, isFullscreen, lastOrientation, stream]);
+  
   // Function to open stream in new tab as fallback
   const openStreamInNewTab = () => {
     if (stream?.embedUrl) {
@@ -93,7 +186,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         - HD: ${stream.hd}
         - URL: ${stream.embedUrl}
         - URL Protocol: ${stream.embedUrl?.startsWith('https') ? 'HTTPS' : 'HTTP'}
-        - Current Site Protocol: ${window.location.protocol}`;
+        - Current Site Protocol: ${window.location.protocol}
+        - Mobile Device: ${isMobile}
+        - User Agent: ${navigator.userAgent}`;
       
       console.log(debugInfo);
       setStreamDebugInfo(debugInfo);
@@ -103,7 +198,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         console.warn('⚠️ Mixed content issue: HTTPS site trying to load HTTP stream');
       }
     }
-  }, [stream]);
+  }, [stream, isMobile]);
 
   // Set timeout for iframe loading on mobile with enhanced debugging
   useEffect(() => {
