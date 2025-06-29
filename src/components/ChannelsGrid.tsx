@@ -10,9 +10,10 @@ const getInitials = (title: string) =>
 
 interface ChannelsGridProps {
   selectedCountryFromState?: string;
+  searchTerm?: string;
 }
 
-const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState }) => {
+const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, searchTerm = '' }) => {
   const navigate = useNavigate();
   const channelsByCountry = getChannelsByCountry();
   const allCountryNames = Object.keys(channelsByCountry);
@@ -39,28 +40,60 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState })
     setSelectedCountry(country);
   };
 
-  const displayChannels = selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
+  // Filter channels based on search term
+  const getFilteredChannels = () => {
+    if (!searchTerm.trim()) {
+      return selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
+    }
+
+    // If searching, search across all countries
+    const allChannels: any[] = [];
+    Object.entries(channelsByCountry).forEach(([country, channels]) => {
+      channels.forEach((channel: any) => {
+        if (channel.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+          allChannels.push({ ...channel, country });
+        }
+      });
+    });
+    return allChannels;
+  };
+
+  const displayChannels = getFilteredChannels();
+  const isSearching = searchTerm.trim().length > 0;
 
   return (
     <div className="flex flex-col gap-8">
       <h2 className="text-2xl font-bold text-white mb-4">All Channels by Country</h2>
-      {/* Country Selector */}
-      <CountrySelector
-        countries={allCountryNames}
-        selected={selectedCountry}
-        onSelect={handleSelectCountry}
-      />
+      
+      {/* Only show country selector when not searching */}
+      {!isSearching && (
+        <CountrySelector
+          countries={allCountryNames}
+          selected={selectedCountry}
+          onSelect={handleSelectCountry}
+        />
+      )}
 
-      {/* Show for selected country only */}
-      {selectedCountry && (
-        <div className="bg-[#151922] rounded-xl border border-[#343a4d] p-4">
-          <h3 className="font-semibold text-white text-lg mb-2">{selectedCountry}</h3>
+      {/* Show search results or selected country */}
+      <div className="bg-[#151922] rounded-xl border border-[#343a4d] p-4">
+        <h3 className="font-semibold text-white text-lg mb-2">
+          {isSearching 
+            ? `Search Results for "${searchTerm}" (${displayChannels.length} channels)` 
+            : selectedCountry
+          }
+        </h3>
+        
+        {displayChannels.length === 0 ? (
+          <div className="text-gray-400 text-center py-8">
+            {isSearching ? 'No channels found matching your search.' : 'No channels available.'}
+          </div>
+        ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {displayChannels.map(channel => (
+            {displayChannels.map((channel, index) => (
               <div
-                key={channel.id}
+                key={`${channel.country || selectedCountry}-${channel.id}-${index}`}
                 className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group"
-                onClick={() => handleSelectChannel(channel, selectedCountry)}
+                onClick={() => handleSelectChannel(channel, channel.country || selectedCountry)}
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform">
@@ -82,12 +115,15 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState })
                   <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors">
                     {channel.title}
                   </h3>
+                  {isSearching && channel.country && (
+                    <span className="text-xs text-gray-400 mt-1">{channel.country}</span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
