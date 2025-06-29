@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -51,8 +50,7 @@ const ChannelPlayer = () => {
   }, [country, channelId, navigate]);
 
   const handleGoBack = () => {
-    // Navigate back to channels page and preserve the selected country in state
-    navigate('/channels', { state: { selectedCountry: country } });
+    navigate('/channels');
   };
 
   const handleRetry = () => {

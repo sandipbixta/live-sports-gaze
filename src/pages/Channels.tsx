@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+
+import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
+// import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -11,8 +12,6 @@ import { Calendar } from 'lucide-react';
 
 const Channels = () => {
   const isMobile = useIsMobile();
-  const location = useLocation();
-  const [searchTerm, setSearchTerm] = useState('');
   
   // Log when the Channels page loads
   useEffect(() => {
@@ -20,12 +19,8 @@ const Channels = () => {
     console.log('EPG data will be loaded for all available countries');
   }, []);
   
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-  
   return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+    <PageLayout>
       <Helmet>
         <title>Live TV Channels | Watch Football Streams | DamiTV - Stream International Sports</title>
         <meta name="description" content="Watch free live football TV channels, Premier League, Champions League, La Liga streams and more. Stream international sports TV channels in HD quality - updated daily with trending games." />
@@ -128,6 +123,8 @@ const Channels = () => {
         </script>
       </Helmet>
       
+      {/* Popunder Ad removed */}
+      
       <div className="mb-6 sm:mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-white">Live TV Channels</h1>
@@ -142,8 +139,19 @@ const Channels = () => {
           Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
-        <ChannelsGrid selectedCountryFromState={location.state?.selectedCountry} searchTerm={searchTerm} />
+        {/* Banner Advertisement removed */}
+        {/* <div className={`mb-4 sm:mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
+        </div> */}
         
+        <ChannelsGrid />
+        
+        {/* Direct Link Advertisement removed */}
+        {/* <div className="my-6 sm:my-8">
+          <Advertisement type="direct-link" className="w-full" />
+        </div> */}
+        
+        {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h3 className="text-xl font-bold text-white">Latest Sports Updates</h3>
@@ -156,6 +164,7 @@ const Channels = () => {
           </Link>
         </div>
         
+        {/* Sports News section */}
         <div className="mt-8">
           <NewsSection />
         </div>
@@ -165,3 +174,4 @@ const Channels = () => {
 };
 
 export default Channels;
+
