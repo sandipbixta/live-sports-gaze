@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import { getChannelsByCountry } from '@/data/tvChannels';
@@ -8,12 +8,28 @@ import { getChannelsByCountry } from '@/data/tvChannels';
 const getInitials = (title: string) =>
   title.split(' ').map(word => word.charAt(0).toUpperCase()).slice(0, 2).join('');
 
-const ChannelsGrid = () => {
+interface ChannelsGridProps {
+  selectedCountryFromState?: string;
+}
+
+const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState }) => {
   const navigate = useNavigate();
   const channelsByCountry = getChannelsByCountry();
   const allCountryNames = Object.keys(channelsByCountry);
-  // Default to first country alphabetical if exists
-  const [selectedCountry, setSelectedCountry] = useState(allCountryNames[0] || "");
+  
+  // Use the country from navigation state if available, otherwise default to first country
+  const defaultCountry = selectedCountryFromState && allCountryNames.includes(selectedCountryFromState) 
+    ? selectedCountryFromState 
+    : allCountryNames[0] || "";
+    
+  const [selectedCountry, setSelectedCountry] = useState(defaultCountry);
+
+  // Update selected country when selectedCountryFromState changes
+  useEffect(() => {
+    if (selectedCountryFromState && allCountryNames.includes(selectedCountryFromState)) {
+      setSelectedCountry(selectedCountryFromState);
+    }
+  }, [selectedCountryFromState, allCountryNames]);
 
   const handleSelectChannel = (channel: any, country: string) => {
     navigate(`/channel/${country}/${channel.id}`);

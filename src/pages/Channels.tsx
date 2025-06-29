@@ -1,8 +1,7 @@
-
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
-// import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -12,6 +11,7 @@ import { Calendar } from 'lucide-react';
 
 const Channels = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
   
   // Log when the Channels page loads
   useEffect(() => {
@@ -144,7 +144,7 @@ const Channels = () => {
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div> */}
         
-        <ChannelsGrid />
+        <ChannelsGrid selectedCountryFromState={location.state?.selectedCountry} />
         
         {/* Direct Link Advertisement removed */}
         {/* <div className="my-6 sm:my-8">
@@ -174,4 +174,3 @@ const Channels = () => {
 };
 
 export default Channels;
-
