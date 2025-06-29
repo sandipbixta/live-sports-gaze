@@ -272,7 +272,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
           referrerPolicy="no-referrer"
           loading="eager"
-          importance="high"
           style={{ 
             border: 'none',
             ...(isMobile && {
