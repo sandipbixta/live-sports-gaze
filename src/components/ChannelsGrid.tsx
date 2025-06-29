@@ -41,8 +41,12 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, s
   const handleSelectCountry = (country: string) => {
     console.log('ChannelsGrid: handleSelectCountry called with:', country);
     console.log('ChannelsGrid: Current selectedCountry:', selectedCountry);
-    setSelectedCountry(country);
-    console.log('ChannelsGrid: Selected country updated to:', country);
+    
+    // Force state update and ensure re-render
+    setSelectedCountry(prevCountry => {
+      console.log('ChannelsGrid: Updating from', prevCountry, 'to', country);
+      return country;
+    });
   };
 
   // Filter channels based on search term

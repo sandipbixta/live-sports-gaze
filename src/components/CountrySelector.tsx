@@ -12,10 +12,18 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
   selected,
   onSelect,
 }) => {
-  const handleCountryClick = (country: string) => {
+  const handleCountryClick = (event: React.MouseEvent | React.TouchEvent, country: string) => {
+    // Prevent multiple event handlers from firing
+    event.preventDefault();
+    event.stopPropagation();
+    
     console.log('Country clicked:', country);
     console.log('Previously selected:', selected);
-    onSelect(country);
+    
+    // Only update if different country is selected
+    if (selected !== country) {
+      onSelect(country);
+    }
   };
 
   return (
@@ -25,14 +33,14 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
         {countries.map(country => (
           <button
             key={country}
-            onClick={() => handleCountryClick(country)}
-            onTouchEnd={() => handleCountryClick(country)}
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors touch-manipulation ${
+            onClick={(e) => handleCountryClick(e, country)}
+            className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors touch-manipulation select-none ${
               selected === country
                 ? "bg-[#ff5a36] border-[#ff5a36] text-white"
                 : "bg-[#232738] border-[#343a4d] text-gray-200 hover:bg-[#242836] hover:border-[#ff5a36] active:bg-[#242836]"
             }`}
             type="button"
+            style={{ touchAction: 'manipulation' }}
           >
             {country}
           </button>
