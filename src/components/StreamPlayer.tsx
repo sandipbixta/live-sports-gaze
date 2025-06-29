@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Stream } from '../types/sports';
 import { Loader } from 'lucide-react';
@@ -10,6 +9,7 @@ import PlayerContainer from './StreamPlayer/PlayerContainer';
 import PlayerControls from './StreamPlayer/PlayerControls';
 import LoadingState from './StreamPlayer/LoadingState';
 import ErrorState from './StreamPlayer/ErrorState';
+import StreamOptimizer from './StreamPlayer/StreamOptimizer';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -224,6 +224,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
   return (
     <PlayerContainer>
+      <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
         {/* Loading overlay shown until iframe loads or timeout */}
         {!isContentLoaded && !iframeTimeout && (
@@ -233,7 +234,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
               <p className="text-sm sm:text-lg">Loading stream...</p>
               {isMobile && (
                 <p className="text-xs text-gray-400 mt-2">
-                  Mobile devices may have longer loading times
+                  Optimizing connection for mobile...
                 </p>
               )}
             </div>
@@ -249,8 +250,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           onLoad={handleIframeLoad}
           onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
           referrerPolicy="no-referrer"
+          loading="eager"
+          importance="high"
           style={{ 
             border: 'none',
             // Mobile-specific optimizations
