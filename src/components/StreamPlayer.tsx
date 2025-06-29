@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Stream } from '../types/sports';
 import { Loader } from 'lucide-react';
@@ -143,7 +144,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           setIframeTimeout(true);
           setIsContentLoaded(true);
           
-          // Set mobile-specific blocking flag
+          // Set mobile-specific blocking flag but don't show error message
           if (isMobile) {
             setMobileStreamBlocked(true);
           }
@@ -203,13 +204,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
-  if (loadError || iframeTimeout || mobileStreamBlocked) {
-    const errorMessage = mobileStreamBlocked 
-      ? "This stream is blocked on mobile devices. Try opening in a new tab or switch to desktop."
-      : iframeTimeout 
-      ? "Stream loading timed out - likely blocked by the source website"
-      : "Stream failed to load";
-      
+  // Don't show error state for mobile blocking - just show the iframe and let it try to load
+  if (loadError && !mobileStreamBlocked) {
     return (
       <ErrorState
         hasError={true}
@@ -217,7 +213,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onRetry={handleRetry}
         onOpenInNewTab={openStreamInNewTab}
         onGoBack={handleGoBack}
-        debugInfo={`${errorMessage}\n\n${streamDebugInfo}`}
+        debugInfo={`Stream failed to load\n\n${streamDebugInfo}`}
       />
     );
   }
@@ -226,8 +222,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads or timeout */}
-        {!isContentLoaded && !iframeTimeout && (
+        {/* Loading overlay shown until iframe loads or timeout - but hide on mobile if blocked */}
+        {!isContentLoaded && !iframeTimeout && !(mobileStreamBlocked && isMobile) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
               <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
