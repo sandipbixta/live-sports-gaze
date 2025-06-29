@@ -27,6 +27,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
   const [mobileStreamBlocked, setMobileStreamBlocked] = useState(false);
   const [loadStartTime, setLoadStartTime] = useState<number>(0);
+  const [retryCount, setRetryCount] = useState(0);
   const isMobile = useIsMobile();
   
   // Use the fullscreen orientation hook
@@ -88,9 +89,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       
       console.log(`🎬 Stream Loading Started at: ${new Date().toISOString()}`);
       console.log(`⏱️ Performance timestamp: ${startTime}`);
+      console.log(`🔄 Retry attempt: ${retryCount}`);
       
       const debugInfo = `Stream Performance Debug:
         - Start Time: ${new Date().toISOString()}
+        - Retry Count: ${retryCount}
         - Source: ${stream.source}
         - ID: ${stream.id}
         - Stream No: ${stream.streamNo}
@@ -148,30 +151,37 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         }
       }
     }
-  }, [stream, isMobile]);
+  }, [stream, isMobile, retryCount]);
 
-  // Optimized timeout with faster mobile detection
+  // Faster timeout with retry logic
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
       // Reduced timeout for faster feedback
-      const timeoutDuration = isMobile ? 3000 : 8000;
+      const timeoutDuration = isMobile ? 2000 : 4000; // Even faster timeouts
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
           const loadTime = performance.now() - loadStartTime;
           console.log(`⏰ Stream timeout after ${loadTime}ms - likely blocked or slow connection`);
           setIframeTimeout(true);
-          setIsContentLoaded(true);
           
           if (isMobile) {
             setMobileStreamBlocked(true);
+          }
+          
+          // Auto-retry once after timeout
+          if (retryCount < 1) {
+            console.log('🔄 Auto-retrying after timeout...');
+            setTimeout(() => {
+              handleRetry();
+            }, 1000);
           }
         }
       }, timeoutDuration);
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, isMobile, loadStartTime]);
+  }, [stream, isContentLoaded, loadError, isMobile, loadStartTime, retryCount]);
 
   const handleRetry = () => {
     const retryTime = performance.now();
@@ -183,6 +193,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     setIframeTimeout(false);
     setMobileStreamBlocked(false);
     setLoadStartTime(retryTime);
+    setRetryCount(prev => prev + 1);
     
     if (onRetry) onRetry();
   };
@@ -193,6 +204,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     console.log(`✅ Load completed at: ${new Date().toISOString()}`);
     setIsContentLoaded(true);
     setMobileStreamBlocked(false);
+    setRetryCount(0); // Reset retry count on success
   };
 
   const handleIframeError = () => {
@@ -203,6 +215,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     
     if (isMobile) {
       setMobileStreamBlocked(true);
+    }
+    
+    // Auto-retry on error if haven't retried too many times
+    if (retryCount < 2) {
+      console.log('🔄 Auto-retrying after error...');
+      setTimeout(() => {
+        handleRetry();
+      }, 2000);
     }
   };
 
@@ -234,7 +254,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onRetry={handleRetry}
         onOpenInNewTab={openStreamInNewTab}
         onGoBack={handleGoBack}
-        debugInfo={`Stream failed to load\n\n${streamDebugInfo}`}
+        debugInfo={`Stream failed to load (Retry: ${retryCount})\n\n${streamDebugInfo}`}
       />
     );
   }
@@ -254,6 +274,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
               {isMobile && (
                 <p className="text-xs text-gray-400 mt-1">
                   Optimizing for mobile...
+                </p>
+              )}
+              {retryCount > 0 && (
+                <p className="text-xs text-yellow-400 mt-1">
+                  Retry attempt {retryCount}
                 </p>
               )}
             </div>

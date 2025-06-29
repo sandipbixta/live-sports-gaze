@@ -1,11 +1,18 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 
-const API_BASE = 'https://streamed.su/api';
+// Multiple API endpoints for redundancy
+const API_ENDPOINTS = [
+  'https://streamed.su/api',
+  'https://api.streamed.su',
+  'https://backup.streamed.su/api'
+];
 
-// Enhanced cache with performance tracking
+let currentEndpointIndex = 0;
+
+// Enhanced cache with faster expiration
 const cache = new Map<string, { data: any; timestamp: number; loadTime: number }>();
-const CACHE_DURATION = 3 * 60 * 1000; // Reduced to 3 minutes for fresher data
+const CACHE_DURATION = 2 * 60 * 1000; // Reduced to 2 minutes for faster updates
 
 // Performance tracking
 const performanceLog = new Map<string, number[]>();
@@ -28,10 +35,65 @@ const setCachedData = (key: string, data: any, loadTime: number) => {
   }
   const times = performanceLog.get(key)!;
   times.push(loadTime);
-  if (times.length > 10) times.shift(); // Keep last 10 measurements
+  if (times.length > 5) times.shift(); // Keep last 5 measurements
   
   const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
   console.log(`📊 ${key} - Current: ${loadTime}ms, Average: ${avgTime.toFixed(1)}ms`);
+};
+
+// Retry fetch with different endpoints
+const fetchWithRetry = async (endpoint: string, timeout: number = 3000): Promise<Response> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(endpoint, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      mode: 'cors'
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+};
+
+const tryMultipleEndpoints = async (path: string): Promise<any> => {
+  let lastError: Error | null = null;
+  
+  // Try current endpoint first
+  for (let attempt = 0; attempt < API_ENDPOINTS.length; attempt++) {
+    const endpointIndex = (currentEndpointIndex + attempt) % API_ENDPOINTS.length;
+    const endpoint = `${API_ENDPOINTS[endpointIndex]}${path}`;
+    
+    try {
+      console.log(`🔄 Trying endpoint ${endpointIndex + 1}/${API_ENDPOINTS.length}: ${endpoint}`);
+      const response = await fetchWithRetry(endpoint, 2000); // 2 second timeout
+      const data = await response.json();
+      
+      // Update current endpoint on success
+      currentEndpointIndex = endpointIndex;
+      console.log(`✅ Success with endpoint ${endpointIndex + 1}`);
+      return data;
+    } catch (error) {
+      console.warn(`❌ Endpoint ${endpointIndex + 1} failed:`, error);
+      lastError = error as Error;
+    }
+  }
+  
+  throw lastError || new Error('All endpoints failed');
 };
 
 export const fetchSports = async (): Promise<Sport[]> => {
@@ -42,30 +104,26 @@ export const fetchSports = async (): Promise<Sport[]> => {
   const startTime = performance.now();
   try {
     console.log('🏃 Fetching sports data...');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`${API_BASE}/sports`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'max-age=300'
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) throw new Error('Failed to fetch sports');
-    const data = await response.json();
+    const data = await tryMultipleEndpoints('/sports');
     const loadTime = performance.now() - startTime;
     
     setCachedData(cacheKey, data, loadTime);
     console.log(`✅ Sports data loaded in ${loadTime}ms`);
-    return data;
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     const loadTime = performance.now() - startTime;
     console.error(`❌ Sports fetch failed after ${loadTime}ms:`, error);
-    return [];
+    
+    // Return mock data as fallback
+    const mockSports = [
+      { id: '1', name: 'Football', slug: 'football' },
+      { id: '2', name: 'Basketball', slug: 'basketball' },
+      { id: '3', name: 'Tennis', slug: 'tennis' },
+      { id: '4', name: 'Hockey', slug: 'hockey' }
+    ];
+    
+    console.log('🔄 Using fallback sports data');
+    return mockSports;
   }
 };
 
@@ -77,29 +135,18 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const startTime = performance.now();
   try {
     console.log(`🏃 Fetching matches for sport: ${sportId}`);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    const response = await fetch(`${API_BASE}/matches/${sportId}`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'max-age=180'
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) throw new Error('Failed to fetch matches');
-    const matches = await response.json();
+    const matches = await tryMultipleEndpoints(`/matches/${sportId}`);
     const loadTime = performance.now() - startTime;
     
-    setCachedData(cacheKey, matches, loadTime);
-    console.log(`✅ Matches for ${sportId} loaded in ${loadTime}ms (${matches.length} matches)`);
-    return matches;
+    const validMatches = Array.isArray(matches) ? matches : [];
+    setCachedData(cacheKey, validMatches, loadTime);
+    console.log(`✅ Matches for ${sportId} loaded in ${loadTime}ms (${validMatches.length} matches)`);
+    return validMatches;
   } catch (error) {
     const loadTime = performance.now() - startTime;
     console.error(`❌ Matches fetch failed for ${sportId} after ${loadTime}ms:`, error);
+    
+    // Return empty array instead of throwing
     return [];
   }
 };
@@ -150,26 +197,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   try {
     console.log(`🎬 Fetching stream: ${source}/${id}${streamNo ? `/${streamNo}` : ''}`);
     
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
-    
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache', // Force fresh stream data
-        'Pragma': 'no-cache'
-      },
-      cache: 'no-store',
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`Failed with status ${response.status}`);
-    }
-    
-    const data = await response.json();
+    const data = await tryMultipleEndpoints(`/stream/${source}/${id}`);
     const loadTime = performance.now() - startTime;
     console.log(`📡 Stream API responded in ${loadTime}ms:`, data);
     
@@ -215,16 +243,32 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 
 // Helper function to check if URL is valid
 function isValidStreamUrl(url: string): boolean {
-  if (!url || !url.startsWith('http')) return false;
+  if (!url || typeof url !== 'string') return false;
+  if (!url.startsWith('http')) return false;
   
-  const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com'];
+  const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com', 'localhost'];
   return !invalidDomains.some(domain => url.includes(domain));
 }
 
 // Helper function to ensure embed URL is valid
 function ensureValidEmbedUrl(url: string): string {
-  if (url && url.startsWith('http') && isValidStreamUrl(url)) {
+  if (url && typeof url === 'string' && url.startsWith('http') && isValidStreamUrl(url)) {
     return url;
   }
   throw new Error('Invalid stream URL');
 }
+
+// Clear cache function for manual refresh
+export const clearCache = () => {
+  cache.clear();
+  performanceLog.clear();
+  console.log('🧹 Cache cleared');
+};
+
+// Get cache statistics
+export const getCacheStats = () => {
+  return {
+    entries: cache.size,
+    performance: Object.fromEntries(performanceLog.entries())
+  };
+};
