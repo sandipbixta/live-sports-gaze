@@ -27,7 +27,9 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, s
 
   // Update selected country when selectedCountryFromState changes
   useEffect(() => {
+    console.log('ChannelsGrid: selectedCountryFromState changed to:', selectedCountryFromState);
     if (selectedCountryFromState && allCountryNames.includes(selectedCountryFromState)) {
+      console.log('ChannelsGrid: Setting selected country to:', selectedCountryFromState);
       setSelectedCountry(selectedCountryFromState);
     }
   }, [selectedCountryFromState, allCountryNames]);
@@ -37,13 +39,18 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, s
   };
 
   const handleSelectCountry = (country: string) => {
+    console.log('ChannelsGrid: handleSelectCountry called with:', country);
+    console.log('ChannelsGrid: Current selectedCountry:', selectedCountry);
     setSelectedCountry(country);
+    console.log('ChannelsGrid: Selected country updated to:', country);
   };
 
   // Filter channels based on search term
   const getFilteredChannels = () => {
     if (!searchTerm.trim()) {
-      return selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
+      const channels = selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
+      console.log('ChannelsGrid: Showing channels for country:', selectedCountry, 'Count:', channels.length);
+      return channels;
     }
 
     // If searching, search across all countries
@@ -79,7 +86,7 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, s
         <h3 className="font-semibold text-white text-lg mb-2">
           {isSearching 
             ? `Search Results for "${searchTerm}" (${displayChannels.length} channels)` 
-            : selectedCountry
+            : `${selectedCountry} (${displayChannels.length} channels)`
           }
         </h3>
         
@@ -92,7 +99,7 @@ const ChannelsGrid: React.FC<ChannelsGridProps> = ({ selectedCountryFromState, s
             {displayChannels.map((channel, index) => (
               <div
                 key={`${channel.country || selectedCountry}-${channel.id}-${index}`}
-                className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group"
+                className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group active:scale-95"
                 onClick={() => handleSelectChannel(channel, channel.country || selectedCountry)}
               >
                 <div className="flex flex-col items-center text-center">
