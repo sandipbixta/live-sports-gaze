@@ -26,6 +26,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [iframeTimeout, setIframeTimeout] = useState(false);
   const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
   const [mobileStreamBlocked, setMobileStreamBlocked] = useState(false);
+  const [loadStartTime, setLoadStartTime] = useState<number>(0);
   const isMobile = useIsMobile();
   
   // Use the fullscreen orientation hook
@@ -36,28 +37,22 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     e.stopPropagation();
     console.log('Back button clicked on mobile:', isMobile);
     
-    // For mobile, try different navigation methods
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      // Fallback to channels page if no history
       navigate('/channels');
     }
   };
   
-  // Function to open stream in new tab as fallback
   const openStreamInNewTab = () => {
     if (stream?.embedUrl) {
-      // For mobile, try to open with different referrer policies
       if (isMobile) {
-        // Create a form to submit with no-referrer policy
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = stream.embedUrl;
         form.target = '_blank';
         form.style.display = 'none';
         
-        // Add referrer policy
         const referrerInput = document.createElement('input');
         referrerInput.type = 'hidden';
         referrerInput.name = 'referrer';
@@ -73,45 +68,50 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  // Placeholder function for compatibility
   const togglePictureInPicture = () => {
     console.log('Picture-in-picture functionality moved to fullscreen');
   };
   
-  // Enhanced debugging and error detection with mobile-specific checks
+  // Enhanced debugging with performance timing
   useEffect(() => {
     if (stream) {
+      const startTime = performance.now();
+      setLoadStartTime(startTime);
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setMobileStreamBlocked(false);
       
-      // Debug stream information with mobile-specific checks
       const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isAndroid = /Android/.test(navigator.userAgent);
       
-      const debugInfo = `Stream Debug Info:
+      console.log(`🎬 Stream Loading Started at: ${new Date().toISOString()}`);
+      console.log(`⏱️ Performance timestamp: ${startTime}`);
+      
+      const debugInfo = `Stream Performance Debug:
+        - Start Time: ${new Date().toISOString()}
         - Source: ${stream.source}
         - ID: ${stream.id}
         - Stream No: ${stream.streamNo}
         - Language: ${stream.language}
         - HD: ${stream.hd}
         - URL: ${stream.embedUrl}
+        - URL Length: ${stream.embedUrl?.length}
         - URL Protocol: ${stream.embedUrl?.startsWith('https') ? 'HTTPS' : 'HTTP'}
         - Current Site Protocol: ${window.location.protocol}
         - Mobile Device: ${isMobile}
         - Mobile User Agent: ${isMobileUserAgent}
         - iOS Device: ${isIOS}
         - Android Device: ${isAndroid}
+        - Connection: ${(navigator as any).connection?.effectiveType || 'unknown'}
         - User Agent: ${navigator.userAgent}
-        - Viewport: ${window.innerWidth}x${window.innerHeight}
-        - Screen: ${screen.width}x${screen.height}`;
+        - Viewport: ${window.innerWidth}x${window.innerHeight}`;
       
       console.log(debugInfo);
       setStreamDebugInfo(debugInfo);
       
-      // Check for common mobile blocking issues
+      // Check for mixed content issues
       if (window.location.protocol === 'https:' && stream.embedUrl?.startsWith('http:')) {
         console.warn('⚠️ Mixed content issue: HTTPS site trying to load HTTP stream');
         if (isMobile) {
@@ -119,32 +119,50 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         }
       }
       
-      // Check for potential mobile-specific blocking
-      if (isMobile && stream.embedUrl) {
-        // Some streams block mobile user agents
-        const commonMobileBlockingDomains = ['youtube.com', 'vimeo.com', 'dailymotion.com'];
-        const streamDomain = new URL(stream.embedUrl).hostname.toLowerCase();
-        
-        if (commonMobileBlockingDomains.some(domain => streamDomain.includes(domain))) {
-          console.warn('⚠️ Stream from domain known to block mobile devices:', streamDomain);
+      // Preload DNS and connection for the stream domain
+      if (stream.embedUrl) {
+        try {
+          const url = new URL(stream.embedUrl);
+          const domain = url.hostname;
+          
+          // Check if DNS prefetch already exists
+          if (!document.querySelector(`link[rel="dns-prefetch"][href="//${domain}"]`)) {
+            const prefetch = document.createElement('link');
+            prefetch.rel = 'dns-prefetch';
+            prefetch.href = `//${domain}`;
+            document.head.appendChild(prefetch);
+            console.log(`🌐 DNS prefetch added for: ${domain}`);
+          }
+          
+          // Check if preconnect already exists
+          if (!document.querySelector(`link[rel="preconnect"][href="${url.origin}"]`)) {
+            const preconnect = document.createElement('link');
+            preconnect.rel = 'preconnect';
+            preconnect.href = url.origin;
+            preconnect.crossOrigin = 'anonymous';
+            document.head.appendChild(preconnect);
+            console.log(`🔗 Preconnect added for: ${url.origin}`);
+          }
+        } catch (error) {
+          console.warn('Failed to preload stream domain:', error);
         }
       }
     }
   }, [stream, isMobile]);
 
-  // Set timeout for iframe loading on mobile with enhanced mobile detection
+  // Optimized timeout with faster mobile detection
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
-      // Shorter timeout for mobile due to stricter blocking
-      const timeoutDuration = isMobile ? 2000 : 5000;
+      // Reduced timeout for faster feedback
+      const timeoutDuration = isMobile ? 3000 : 8000;
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('⏰ Iframe loading timeout - likely blocked on mobile device');
+          const loadTime = performance.now() - loadStartTime;
+          console.log(`⏰ Stream timeout after ${loadTime}ms - likely blocked or slow connection`);
           setIframeTimeout(true);
           setIsContentLoaded(true);
           
-          // Set mobile-specific blocking flag but don't show error message
           if (isMobile) {
             setMobileStreamBlocked(true);
           }
@@ -153,29 +171,34 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, isMobile]);
+  }, [stream, isContentLoaded, loadError, isMobile, loadStartTime]);
 
-  // Handle retry action with mobile-specific logic
   const handleRetry = () => {
-    console.log('🔄 Retrying stream load...', isMobile ? '(Mobile)' : '(Desktop)');
+    const retryTime = performance.now();
+    console.log(`🔄 Retrying stream at ${new Date().toISOString()}`);
+    console.log(`🔄 Retry performance timestamp: ${retryTime}`);
+    
     setLoadError(false);
     setIsContentLoaded(false);
     setIframeTimeout(false);
     setMobileStreamBlocked(false);
+    setLoadStartTime(retryTime);
     
     if (onRetry) onRetry();
   };
 
-  // Handle iframe load event
   const handleIframeLoad = () => {
-    console.log('✅ Stream iframe loaded successfully on', isMobile ? 'mobile' : 'desktop');
+    const loadTime = performance.now() - loadStartTime;
+    console.log(`✅ Stream loaded successfully in ${loadTime}ms on ${isMobile ? 'mobile' : 'desktop'}`);
+    console.log(`✅ Load completed at: ${new Date().toISOString()}`);
     setIsContentLoaded(true);
     setMobileStreamBlocked(false);
   };
 
-  // Handle iframe error with mobile-specific messaging
   const handleIframeError = () => {
-    console.error('❌ Stream iframe failed to load on', isMobile ? 'mobile' : 'desktop');
+    const errorTime = performance.now() - loadStartTime;
+    console.error(`❌ Stream failed to load after ${errorTime}ms on ${isMobile ? 'mobile' : 'desktop'}`);
+    console.error(`❌ Error occurred at: ${new Date().toISOString()}`);
     setLoadError(true);
     
     if (isMobile) {
@@ -188,7 +211,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     return <LoadingState isLoading={isLoading} hasStream={!!stream} onGoBack={handleGoBack} />;
   }
 
-  // Check if we have a valid stream URL
   const validEmbedUrl = stream.embedUrl && stream.embedUrl.startsWith('http');
   
   if (!validEmbedUrl) {
@@ -204,7 +226,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
-  // Don't show error state for mobile blocking - just show the iframe and let it try to load
   if (loadError && !mobileStreamBlocked) {
     return (
       <ErrorState
@@ -222,15 +243,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads or timeout - but hide on mobile if blocked */}
         {!isContentLoaded && !iframeTimeout && !(mobileStreamBlocked && isMobile) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
               <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
               <p className="text-sm sm:text-lg">Loading stream...</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Connecting to {stream.source}...
+              </p>
               {isMobile && (
-                <p className="text-xs text-gray-400 mt-2">
-                  Optimizing connection for mobile...
+                <p className="text-xs text-gray-400 mt-1">
+                  Optimizing for mobile...
                 </p>
               )}
             </div>
@@ -249,9 +272,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
           referrerPolicy="no-referrer"
           loading="eager"
+          importance="high"
           style={{ 
             border: 'none',
-            // Mobile-specific optimizations
             ...(isMobile && {
               touchAction: 'manipulation',
               WebkitOverflowScrolling: 'touch'
