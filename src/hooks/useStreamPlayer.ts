@@ -11,7 +11,7 @@ export const useStreamPlayer = () => {
   const [streamLoading, setStreamLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string | null>(null);
 
-  // Memoized stream fetching function
+  // Optimized stream fetching with faster timeout
   const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
     setStreamLoading(true);
     const sourceKey = streamNo 
@@ -20,13 +20,20 @@ export const useStreamPlayer = () => {
     setActiveSource(sourceKey);
     
     try {
-      console.log(`Fetching stream data: source=${source.source}, id=${source.id}, streamNo=${streamNo}`);
-      const streamData = await fetchStream(source.source, source.id, streamNo);
-      console.log('Stream data received:', streamData);
+      console.log(`Fetching stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
-      // Handle both single stream and array of streams
+      // Use a shorter timeout for faster feedback
+      const streamData = await Promise.race([
+        fetchStream(source.source, source.id, streamNo),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Stream timeout')), 3000)
+        )
+      ]) as Stream | Stream[];
+      
+      console.log('Stream data received');
+      
+      // Handle response
       if (Array.isArray(streamData)) {
-        // If array, pick the requested streamNo or the first HD stream
         const selectedStream = streamNo 
           ? streamData.find(s => s.streamNo === streamNo)
           : streamData.find(s => s.hd) || streamData[0];
@@ -36,47 +43,43 @@ export const useStreamPlayer = () => {
         setCurrentStream(streamData);
       }
       
-      // Scroll to player if not in view
+      // Quick scroll to player
       const playerElement = document.getElementById('stream-player');
       if (playerElement) {
         playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     } catch (error) {
-      console.error('Error loading stream:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load stream.",
-        variant: "destructive",
-      });
+      console.error('Stream load error:', error);
       setCurrentStream(null);
+      
+      // Show less intrusive error message
+      if (error instanceof Error && error.message !== 'Stream timeout') {
+        toast({
+          title: "Stream Error",
+          description: "Failed to load stream. Try another source.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setStreamLoading(false);
     }
   }, [toast]);
 
-  // Function to handle match selection
   const handleMatchSelect = (match: Match) => {
     setFeaturedMatch(match);
     if (match.sources && match.sources.length > 0) {
       fetchStreamData(match.sources[0]);
     } else {
       setCurrentStream(null);
-      toast({
-        title: "No Stream",
-        description: "This match has no available streams.",
-        variant: "destructive",
-      });
     }
   };
 
-  // Function to handle source change for the current match
   const handleSourceChange = (source: string, id: string, streamNo?: number) => {
     if (featuredMatch) {
       fetchStreamData({ source, id }, streamNo);
     }
   };
 
-  // Handle stream retry
   const handleStreamRetry = () => {
     if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
       fetchStreamData(featuredMatch.sources[0]);
