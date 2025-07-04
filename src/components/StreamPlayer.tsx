@@ -26,6 +26,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
   const [iframeTimeout, setIframeTimeout] = useState(false);
   const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
   const [mobileStreamBlocked, setMobileStreamBlocked] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const isMobile = useIsMobile();
   
   // Use the fullscreen orientation hook
@@ -36,28 +37,50 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     e.stopPropagation();
     console.log('Back button clicked on mobile:', isMobile);
     
-    // For mobile, try different navigation methods
     if (window.history.length > 1) {
       navigate(-1);
     } else {
-      // Fallback to channels page if no history
       navigate('/channels');
     }
   };
   
+  // Function to refresh stream URL and reload iframe
+  const refreshStream = () => {
+    if (videoRef.current && stream?.embedUrl) {
+      console.log('Refreshing stream URL...');
+      
+      // Force reload the iframe by changing its src
+      const currentSrc = videoRef.current.src;
+      const url = new URL(currentSrc);
+      
+      // Add timestamp to force refresh
+      url.searchParams.set('_t', Date.now().toString());
+      url.searchParams.set('_retry', retryCount.toString());
+      
+      videoRef.current.src = url.toString();
+      
+      // Reset states
+      setLoadError(false);
+      setIsContentLoaded(false);
+      setIframeTimeout(false);
+      setRetryCount(prev => prev + 1);
+    }
+  };
+
   // Function to open stream in new tab as fallback
   const openStreamInNewTab = () => {
     if (stream?.embedUrl) {
-      // For mobile, try to open with different referrer policies
+      // Add retry parameter to URL for fresh connection
+      const url = new URL(stream.embedUrl);
+      url.searchParams.set('_t', Date.now().toString());
+      
       if (isMobile) {
-        // Create a form to submit with no-referrer policy
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = stream.embedUrl;
+        form.action = url.toString();
         form.target = '_blank';
         form.style.display = 'none';
         
-        // Add referrer policy
         const referrerInput = document.createElement('input');
         referrerInput.type = 'hidden';
         referrerInput.name = 'referrer';
@@ -68,25 +91,25 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         form.submit();
         document.body.removeChild(form);
       } else {
-        window.open(stream.embedUrl, '_blank', 'noopener,noreferrer');
+        window.open(url.toString(), '_blank', 'noopener,noreferrer');
       }
     }
   };
   
-  // Placeholder function for compatibility
   const togglePictureInPicture = () => {
     console.log('Picture-in-picture functionality moved to fullscreen');
   };
   
-  // Enhanced debugging and error detection with mobile-specific checks
+  // Reset states when stream changes
   useEffect(() => {
     if (stream) {
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setMobileStreamBlocked(false);
+      setRetryCount(0);
       
-      // Debug stream information with mobile-specific checks
+      // Debug stream information
       const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isAndroid = /Android/.test(navigator.userAgent);
@@ -104,66 +127,59 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         - Mobile User Agent: ${isMobileUserAgent}
         - iOS Device: ${isIOS}
         - Android Device: ${isAndroid}
-        - User Agent: ${navigator.userAgent}
-        - Viewport: ${window.innerWidth}x${window.innerHeight}
-        - Screen: ${screen.width}x${screen.height}`;
+        - Retry Count: ${retryCount}`;
       
       console.log(debugInfo);
       setStreamDebugInfo(debugInfo);
       
-      // Check for common mobile blocking issues
+      // Check for mixed content issues
       if (window.location.protocol === 'https:' && stream.embedUrl?.startsWith('http:')) {
         console.warn('⚠️ Mixed content issue: HTTPS site trying to load HTTP stream');
         if (isMobile) {
           setMobileStreamBlocked(true);
         }
       }
-      
-      // Check for potential mobile-specific blocking
-      if (isMobile && stream.embedUrl) {
-        // Some streams block mobile user agents
-        const commonMobileBlockingDomains = ['youtube.com', 'vimeo.com', 'dailymotion.com'];
-        const streamDomain = new URL(stream.embedUrl).hostname.toLowerCase();
-        
-        if (commonMobileBlockingDomains.some(domain => streamDomain.includes(domain))) {
-          console.warn('⚠️ Stream from domain known to block mobile devices:', streamDomain);
-        }
-      }
     }
   }, [stream, isMobile]);
 
-  // Set timeout for iframe loading on mobile with enhanced mobile detection
+  // Set timeout for iframe loading with shorter timeout for faster retry
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
-      // Shorter timeout for mobile due to stricter blocking
-      const timeoutDuration = isMobile ? 2000 : 5000;
+      const timeoutDuration = isMobile ? 3000 : 5000; // Reduced timeout
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('⏰ Iframe loading timeout - likely blocked on mobile device');
+          console.log('⏰ Iframe loading timeout - attempting refresh');
           setIframeTimeout(true);
-          setIsContentLoaded(true);
           
-          // Set mobile-specific blocking flag but don't show error message
-          if (isMobile) {
-            setMobileStreamBlocked(true);
+          // Auto-retry once on timeout
+          if (retryCount === 0) {
+            console.log('Auto-retrying stream...');
+            refreshStream();
+          } else {
+            setIsContentLoaded(true);
+            if (isMobile) {
+              setMobileStreamBlocked(true);
+            }
           }
         }
       }, timeoutDuration);
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, isMobile]);
+  }, [stream, isContentLoaded, loadError, isMobile, retryCount]);
 
-  // Handle retry action with mobile-specific logic
+  // Enhanced retry handler
   const handleRetry = () => {
-    console.log('🔄 Retrying stream load...', isMobile ? '(Mobile)' : '(Desktop)');
-    setLoadError(false);
-    setIsContentLoaded(false);
-    setIframeTimeout(false);
-    setMobileStreamBlocked(false);
+    console.log('🔄 Manual retry requested...', isMobile ? '(Mobile)' : '(Desktop)');
     
-    if (onRetry) onRetry();
+    if (onRetry && retryCount < 2) {
+      // First try the original onRetry (fetch new stream)
+      onRetry();
+    } else {
+      // Then try refreshing the current stream
+      refreshStream();
+    }
   };
 
   // Handle iframe load event
@@ -171,9 +187,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     console.log('✅ Stream iframe loaded successfully on', isMobile ? 'mobile' : 'desktop');
     setIsContentLoaded(true);
     setMobileStreamBlocked(false);
+    setIframeTimeout(false);
   };
 
-  // Handle iframe error with mobile-specific messaging
+  // Handle iframe error
   const handleIframeError = () => {
     console.error('❌ Stream iframe failed to load on', isMobile ? 'mobile' : 'desktop');
     setLoadError(true);
@@ -204,8 +221,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
-  // Don't show error state for mobile blocking - just show the iframe and let it try to load
-  if (loadError && !mobileStreamBlocked) {
+  // Show error state for persistent failures (not mobile blocking)
+  if (loadError && !mobileStreamBlocked && retryCount > 1) {
     return (
       <ErrorState
         hasError={true}
@@ -213,21 +230,39 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onRetry={handleRetry}
         onOpenInNewTab={openStreamInNewTab}
         onGoBack={handleGoBack}
-        debugInfo={`Stream failed to load\n\n${streamDebugInfo}`}
+        debugInfo={`Stream failed after ${retryCount} retries\n\n${streamDebugInfo}`}
       />
     );
   }
+
+  // Create iframe URL with cache-busting parameters
+  const iframeUrl = (() => {
+    try {
+      const url = new URL(stream.embedUrl);
+      url.searchParams.set('_t', Date.now().toString());
+      url.searchParams.set('autoplay', '1');
+      url.searchParams.set('muted', '0');
+      return url.toString();
+    } catch {
+      return stream.embedUrl;
+    }
+  })();
 
   return (
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Loading overlay shown until iframe loads or timeout - but hide on mobile if blocked */}
+        {/* Loading overlay */}
         {!isContentLoaded && !iframeTimeout && !(mobileStreamBlocked && isMobile) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
               <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
               <p className="text-sm sm:text-lg">Loading stream...</p>
+              {retryCount > 0 && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Retry attempt {retryCount}
+                </p>
+              )}
               {isMobile && (
                 <p className="text-xs text-gray-400 mt-2">
                   Optimizing connection for mobile...
@@ -239,7 +274,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         
         <iframe 
           ref={videoRef}
-          src={stream.embedUrl}
+          src={iframeUrl}
           className="w-full h-full absolute inset-0"
           allowFullScreen
           title="Live Sports Stream"
@@ -251,7 +286,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           loading="eager"
           style={{ 
             border: 'none',
-            // Mobile-specific optimizations
             ...(isMobile && {
               touchAction: 'manipulation',
               WebkitOverflowScrolling: 'touch'
