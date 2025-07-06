@@ -34,6 +34,11 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     timeZone: "Australia/Sydney"
   });
 
+  // Check if we have a valid image URL
+  const hasValidImage = match.image && 
+    match.image !== "https://imgur.com/undefined" && 
+    match.image.trim() !== "";
+
   return (
     <div
       className="
@@ -53,20 +58,32 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         flex flex-col
       ">
         {/* Background Image or Fallback */}
-        {match.image && match.image !== "https://imgur.com/undefined" ? (
+        {hasValidImage ? (
           <img
             src={match.image}
             alt={match.title || `${match.teams.home} vs ${match.teams.away}`}
             className="w-full h-full object-cover"
             draggable={false}
+            onError={(e) => {
+              // If image fails to load, hide it and show fallback
+              (e.target as HTMLImageElement).style.display = 'none';
+              const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+              if (fallback) {
+                fallback.style.display = 'flex';
+              }
+            }}
           />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-            <span className="text-white text-sm sm:text-lg font-bold">
-              {match.teams.home} vs {match.teams.away}
-            </span>
-          </div>
-        )}
+        ) : null}
+        
+        {/* Fallback background for when no image or image fails */}
+        <div 
+          className={`w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center ${hasValidImage ? 'hidden' : ''}`}
+          style={{ display: hasValidImage ? 'none' : 'flex' }}
+        >
+          <span className="text-white text-sm sm:text-lg font-bold text-center px-2">
+            {match.teams.home} vs {match.teams.away}
+          </span>
+        </div>
 
         {/* Top shadow overlays */}
         <div className="pointer-events-none absolute top-0 left-0 w-full h-8 sm:h-10 bg-gradient-to-b from-black/60 via-black/20 to-transparent z-20" />
