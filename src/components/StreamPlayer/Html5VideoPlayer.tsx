@@ -36,7 +36,7 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
       if (isPlaying) {
         setShowControls(false);
       }
-    }, 3000);
+    }, 4000); // Increased to 4 seconds
   };
 
   // Handle play/pause
@@ -146,6 +146,19 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
           }
         }}
       />
+
+      {/* Always Visible DAMITV Home Button - Fixed Position */}
+      <div className="absolute top-2 left-2 z-50">
+        <Button
+          variant="ghost"
+          onClick={handleHomeClick}
+          className="bg-black/80 hover:bg-black/90 text-white px-2 py-1 h-7 flex items-center gap-1 border border-white/20 shadow-lg"
+          title="Go to DAMITV Home"
+        >
+          <Home className="h-3 w-3" />
+          <span className="font-bold text-xs">DAMITV</span>
+        </Button>
+      </div>
       
       {/* Custom Video Controls */}
       <div 
@@ -153,19 +166,11 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        {/* Top Controls Bar with DAMITV Home Button */}
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-4">
-          <div className="flex items-center justify-between">
-            {/* DAMITV Home Button */}
-            <Button
-              variant="ghost"
-              onClick={handleHomeClick}
-              className="bg-black/50 hover:bg-black/70 text-white px-3 py-1 h-8 flex items-center gap-2"
-              title="Go to DAMITV Home"
-            >
-              <Home className="h-4 w-4" />
-              <span className="font-bold text-sm">DAMITV</span>
-            </Button>
+        {/* Top Controls Bar - moved down to avoid overlap */}
+        <div className="absolute top-10 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-4">
+          <div className="flex items-center justify-end">
+            {/* Spacer to avoid overlap with always-visible button */}
+            <div className="flex-1"></div>
           </div>
         </div>
 

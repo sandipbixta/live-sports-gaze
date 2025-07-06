@@ -55,7 +55,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     
     const timer = setTimeout(() => {
       setShowControls(false);
-    }, 3000);
+    }, 4000); // Increased to 4 seconds
 
     const handleMouseMove = () => {
       setShowControls(true);
@@ -112,6 +112,19 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         }}
       />
 
+      {/* Always Visible DAMITV Home Button - Fixed Position */}
+      <div className="absolute top-2 left-2 z-50">
+        <Button
+          variant="ghost"
+          onClick={handleHomeClick}
+          className="bg-black/80 hover:bg-black/90 text-white px-2 py-1 h-7 flex items-center gap-1 border border-white/20 shadow-lg"
+          title="Go to DAMITV Home"
+        >
+          <Home className="h-3 w-3" />
+          <span className="font-bold text-xs">DAMITV</span>
+        </Button>
+      </div>
+
       {/* Control Overlay */}
       <div 
         className={`absolute top-4 left-4 right-4 transition-opacity duration-300 ${
@@ -120,16 +133,8 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         onMouseEnter={() => setShowControls(true)}
       >
         <div className="flex items-center justify-between">
-          {/* DAMITV Home Button */}
-          <Button
-            variant="ghost"
-            onClick={handleHomeClick}
-            className="bg-black/50 hover:bg-black/70 text-white px-3 py-1 h-8 flex items-center gap-2"
-            title="Go to DAMITV Home"
-          >
-            <Home className="h-4 w-4" />
-            <span className="font-bold text-sm">DAMITV</span>
-          </Button>
+          {/* Spacer to avoid overlap with always-visible button */}
+          <div className="w-20"></div>
 
           {/* Fullscreen Button */}
           <Button
