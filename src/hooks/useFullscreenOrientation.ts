@@ -46,14 +46,14 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
     }
   };
 
-  // Handle device orientation changes on mobile - only refresh if not in fullscreen
+  // Handle device orientation changes on mobile - NEVER refresh if in fullscreen
   const handleOrientationChange = () => {
     if (!isMobile || !stream) return;
     
     const currentOrientation = window.orientation || screen.orientation?.angle || 0;
-    console.log('Orientation changed from', lastOrientation, 'to', currentOrientation);
+    console.log('Orientation changed from', lastOrientation, 'to', currentOrientation, 'Fullscreen:', isFullscreen);
     
-    // Only refresh if we're NOT in fullscreen and orientation actually changed
+    // CRITICAL FIX: Never refresh iframe when in fullscreen mode during orientation change
     if (!isFullscreen && lastOrientation !== null && lastOrientation !== currentOrientation) {
       console.log('Refreshing iframe due to orientation change (not in fullscreen)');
       
@@ -63,7 +63,15 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
       }
       
       const timeout = setTimeout(() => {
-        if (videoRef.current && stream?.embedUrl && !document.fullscreenElement) {
+        // Double check we're still not in fullscreen before refreshing
+        const stillInFullscreen = !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).mozFullScreenElement ||
+          (document as any).msFullscreenElement
+        );
+        
+        if (videoRef.current && stream?.embedUrl && !stillInFullscreen) {
           const currentSrc = videoRef.current.src;
           videoRef.current.src = '';
           setTimeout(() => {
@@ -75,6 +83,8 @@ export const useFullscreenOrientation = (stream: Stream | null, videoRef: React.
       }, 800); // Longer delay to prevent interference
       
       setRefreshTimeout(timeout);
+    } else if (isFullscreen) {
+      console.log('Skipping iframe refresh - currently in fullscreen mode');
     }
     
     setLastOrientation(currentOrientation);
