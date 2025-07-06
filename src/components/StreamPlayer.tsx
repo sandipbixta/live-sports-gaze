@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Stream } from '../types/sports';
 import { useNavigate } from 'react-router-dom';
@@ -50,15 +49,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     e.preventDefault();
     e.stopPropagation();
     
+    console.log('StreamPlayer back button clicked');
+    
     try {
-      if (window.history.length > 2) {
-        window.history.back();
-      } else {
-        navigate('/channels', { replace: true });
-      }
+      navigate(-1);
     } catch (error) {
-      console.error('Navigation error:', error);
-      window.location.href = '/channels';
+      console.error('StreamPlayer navigation failed:', error);
+      navigate('/channels', { replace: true });
     }
   };
 

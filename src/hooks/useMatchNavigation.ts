@@ -9,26 +9,15 @@ export const useMatchNavigation = () => {
   const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Header back button clicked on mobile:', isMobile);
     
-    // Enhanced navigation with multiple fallbacks
+    console.log('Back button clicked, navigating...');
+    
     try {
-      // First attempt: use React Router navigation
-      if (window.history.length > 2) {
-        navigate(-1);
-      } else {
-        navigate('/channels', { replace: true });
-      }
+      // Simple and reliable navigation
+      navigate(-1);
     } catch (error) {
-      console.error('React Router navigation failed:', error);
-      // Fallback: use browser history
-      try {
-        window.history.back();
-      } catch (historyError) {
-        console.error('Browser history navigation failed:', historyError);
-        // Final fallback: direct page navigation
-        window.location.href = '/channels';
-      }
+      console.error('Navigation failed, falling back to channels:', error);
+      navigate('/channels', { replace: true });
     }
   };
 
