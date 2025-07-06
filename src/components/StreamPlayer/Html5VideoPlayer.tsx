@@ -1,8 +1,8 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Home } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface Html5VideoPlayerProps {
   src: string;
@@ -13,11 +13,18 @@ interface Html5VideoPlayerProps {
 
 const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onError, videoRef }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [volume, setVolume] = useState(1);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Handle home navigation
+  const handleHomeClick = () => {
+    console.log('DAMITV home button clicked from HTML5 player');
+    navigate('/');
+  };
 
   // Auto-hide controls after 3 seconds of inactivity
   const resetControlsTimeout = () => {
@@ -117,8 +124,8 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
   return (
     <div 
       className="relative w-full h-full bg-black overflow-hidden"
-      onMouseMove={handleMouseMove}
-      onTouchStart={handleTouchStart}
+      onMouseMove={() => resetControlsTimeout()}
+      onTouchStart={() => resetControlsTimeout()}
     >
       <video
         ref={videoRef}
@@ -146,10 +153,34 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
+        {/* Top Controls Bar with DAMITV Home Button */}
+        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 to-transparent p-4">
+          <div className="flex items-center justify-between">
+            {/* DAMITV Home Button */}
+            <Button
+              variant="ghost"
+              onClick={handleHomeClick}
+              className="bg-black/50 hover:bg-black/70 text-white px-3 py-1 h-8 flex items-center gap-2"
+              title="Go to DAMITV Home"
+            >
+              <Home className="h-4 w-4" />
+              <span className="font-bold text-sm">DAMITV</span>
+            </Button>
+          </div>
+        </div>
+
         {/* Play/Pause Overlay */}
         <div 
           className="absolute inset-0 flex items-center justify-center cursor-pointer"
-          onClick={togglePlay}
+          onClick={() => {
+            if (videoRef.current) {
+              if (isPlaying) {
+                videoRef.current.pause();
+              } else {
+                videoRef.current.play();
+              }
+            }
+          }}
         >
           {!isPlaying && (
             <div className="bg-black/50 rounded-full p-4">
@@ -165,7 +196,15 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
             <Button
               variant="ghost"
               size="icon"
-              onClick={togglePlay}
+              onClick={() => {
+                if (videoRef.current) {
+                  if (isPlaying) {
+                    videoRef.current.pause();
+                  } else {
+                    videoRef.current.play();
+                  }
+                }
+              }}
               className="text-white hover:bg-white/20 h-8 w-8"
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -176,7 +215,12 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleMute}
+                onClick={() => {
+                  if (videoRef.current) {
+                    videoRef.current.muted = !isMuted;
+                    setIsMuted(!isMuted);
+                  }
+                }}
                 className="text-white hover:bg-white/20 h-8 w-8"
               >
                 {isMuted || volume === 0 ? 
@@ -192,7 +236,14 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
                   max="1"
                   step="0.1"
                   value={volume}
-                  onChange={handleVolumeChange}
+                  onChange={(e) => {
+                    const newVolume = parseFloat(e.target.value);
+                    setVolume(newVolume);
+                    if (videoRef.current) {
+                      videoRef.current.volume = newVolume;
+                      setIsMuted(newVolume === 0);
+                    }
+                  }}
                   className="w-16 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer"
                 />
               )}
@@ -205,7 +256,15 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleFullscreen}
+              onClick={() => {
+                if (videoRef.current) {
+                  if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                  } else {
+                    videoRef.current.requestFullscreen();
+                  }
+                }
+              }}
               className="text-white hover:bg-white/20 h-8 w-8"
             >
               <Maximize className="h-4 w-4" />
