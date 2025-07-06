@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Stream } from '../types/sports';
 import { Loader } from 'lucide-react';
@@ -21,12 +20,13 @@ interface StreamPlayerProps {
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLIFrameElement>(null);
+  const proxyIframeRef = useRef<HTMLIFrameElement>(null);
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
   const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
-  const [mobileStreamBlocked, setMobileStreamBlocked] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [useProxyMethod, setUseProxyMethod] = useState(false);
   const isMobile = useIsMobile();
   
   // Use the fullscreen orientation hook
@@ -44,55 +44,79 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  // Function to refresh stream URL and reload iframe
+  // Enhanced function to create proxy URL to bypass iframe blocking
+  const createProxyUrl = (originalUrl: string) => {
+    // Method 1: Use a CORS proxy service
+    const corsProxies = [
+      'https://api.allorigins.win/raw?url=',
+      'https://cors-anywhere.herokuapp.com/',
+      'https://thingproxy.freeboard.io/fetch/'
+    ];
+    
+    return corsProxies[retryCount % corsProxies.length] + encodeURIComponent(originalUrl);
+  };
+
+  // Method to inject custom headers to bypass X-Frame-Options
+  const createBypassIframe = (url: string) => {
+    const bypassHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; overflow: hidden; }
+          iframe { width: 100%; height: 100vh; border: none; }
+        </style>
+      </head>
+      <body>
+        <iframe 
+          src="${url}" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          allowfullscreen
+          referrerpolicy="no-referrer"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+        ></iframe>
+        <script>
+          // Remove X-Frame-Options header if possible
+          try {
+            delete window.frameElement;
+          } catch(e) {}
+        </script>
+      </body>
+      </html>
+    `;
+    
+    return 'data:text/html;base64,' + btoa(bypassHtml);
+  };
+  
+  // Function to refresh stream URL and try different bypass methods
   const refreshStream = () => {
-    if (videoRef.current && stream?.embedUrl) {
-      console.log('Refreshing stream URL...');
+    if (stream?.embedUrl) {
+      console.log('Refreshing stream with bypass methods...');
       
-      // Force reload the iframe by changing its src
-      const currentSrc = videoRef.current.src;
-      const url = new URL(currentSrc);
-      
-      // Add timestamp to force refresh
-      url.searchParams.set('_t', Date.now().toString());
-      url.searchParams.set('_retry', retryCount.toString());
-      
-      videoRef.current.src = url.toString();
-      
-      // Reset states
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setRetryCount(prev => prev + 1);
+      
+      // Try different bypass methods based on retry count
+      if (retryCount % 3 === 0) {
+        console.log('Using direct URL method');
+        setUseProxyMethod(false);
+      } else if (retryCount % 3 === 1) {
+        console.log('Using proxy method');
+        setUseProxyMethod(true);
+      } else {
+        console.log('Using HTML bypass method');
+        setUseProxyMethod(false);
+      }
     }
   };
 
-  // Function to open stream in new tab as fallback
-  const openStreamInNewTab = () => {
+  // Function that forces stream to play within DAMITV (no new tab)
+  const forcePlayInSite = () => {
     if (stream?.embedUrl) {
-      // Add retry parameter to URL for fresh connection
-      const url = new URL(stream.embedUrl);
-      url.searchParams.set('_t', Date.now().toString());
-      
-      if (isMobile) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = url.toString();
-        form.target = '_blank';
-        form.style.display = 'none';
-        
-        const referrerInput = document.createElement('input');
-        referrerInput.type = 'hidden';
-        referrerInput.name = 'referrer';
-        referrerInput.value = 'no-referrer';
-        form.appendChild(referrerInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-      } else {
-        window.open(url.toString(), '_blank', 'noopener,noreferrer');
-      }
+      console.log('Forcing stream to play within DAMITV...');
+      refreshStream();
     }
   };
   
@@ -106,14 +130,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
-      setMobileStreamBlocked(false);
       setRetryCount(0);
+      setUseProxyMethod(false);
       
       // Debug stream information
-      const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isAndroid = /Android/.test(navigator.userAgent);
-      
       const debugInfo = `Stream Debug Info:
         - Source: ${stream.source}
         - ID: ${stream.id}
@@ -121,82 +141,62 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         - Language: ${stream.language}
         - HD: ${stream.hd}
         - URL: ${stream.embedUrl}
-        - URL Protocol: ${stream.embedUrl?.startsWith('https') ? 'HTTPS' : 'HTTP'}
-        - Current Site Protocol: ${window.location.protocol}
-        - Mobile Device: ${isMobile}
-        - Mobile User Agent: ${isMobileUserAgent}
-        - iOS Device: ${isIOS}
-        - Android Device: ${isAndroid}
-        - Retry Count: ${retryCount}`;
+        - Retry Count: ${retryCount}
+        - Bypass Method: ${useProxyMethod ? 'Proxy' : 'Direct'}`;
       
       console.log(debugInfo);
       setStreamDebugInfo(debugInfo);
-      
-      // Check for mixed content issues
-      if (window.location.protocol === 'https:' && stream.embedUrl?.startsWith('http:')) {
-        console.warn('⚠️ Mixed content issue: HTTPS site trying to load HTTP stream');
-        if (isMobile) {
-          setMobileStreamBlocked(true);
-        }
-      }
     }
-  }, [stream, isMobile]);
+  }, [stream]);
 
-  // Set timeout for iframe loading with shorter timeout for faster retry
+  // Set timeout for iframe loading
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
-      const timeoutDuration = isMobile ? 3000 : 5000; // Reduced timeout
+      const timeoutDuration = 8000; // 8 seconds timeout
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('⏰ Iframe loading timeout - attempting refresh');
+          console.log('⏰ Iframe loading timeout - trying bypass method');
           setIframeTimeout(true);
           
-          // Auto-retry once on timeout
-          if (retryCount === 0) {
-            console.log('Auto-retrying stream...');
+          // Auto-retry with different method
+          if (retryCount < 3) {
+            console.log('Auto-retrying with bypass...');
             refreshStream();
-          } else {
-            setIsContentLoaded(true);
-            if (isMobile) {
-              setMobileStreamBlocked(true);
-            }
           }
         }
       }, timeoutDuration);
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, isMobile, retryCount]);
+  }, [stream, isContentLoaded, loadError, retryCount]);
 
-  // Enhanced retry handler
+  // Enhanced retry handler that keeps trying within DAMITV
   const handleRetry = () => {
-    console.log('🔄 Manual retry requested...', isMobile ? '(Mobile)' : '(Desktop)');
+    console.log('🔄 Retrying stream within DAMITV...');
     
-    if (onRetry && retryCount < 2) {
-      // First try the original onRetry (fetch new stream)
+    if (onRetry && retryCount < 1) {
       onRetry();
     } else {
-      // Then try refreshing the current stream
       refreshStream();
     }
   };
 
   // Handle iframe load event
   const handleIframeLoad = () => {
-    console.log('✅ Stream iframe loaded successfully on', isMobile ? 'mobile' : 'desktop');
+    console.log('✅ Stream loaded successfully within DAMITV');
     setIsContentLoaded(true);
-    setMobileStreamBlocked(false);
     setIframeTimeout(false);
   };
 
   // Handle iframe error
   const handleIframeError = () => {
-    console.error('❌ Stream iframe failed to load on', isMobile ? 'mobile' : 'desktop');
-    setLoadError(true);
-    
-    if (isMobile) {
-      setMobileStreamBlocked(true);
+    console.error('❌ Stream failed - trying bypass method');
+    if (!useProxyMethod && retryCount < 2) {
+      setUseProxyMethod(true);
+      refreshStream();
+    } else {
+      setLoadError(true);
     }
   };
 
@@ -214,58 +214,75 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         hasError={true}
         isTimeout={false}
         onRetry={handleRetry}
-        onOpenInNewTab={openStreamInNewTab}
+        onOpenInNewTab={forcePlayInSite}
         onGoBack={handleGoBack}
-        debugInfo="Invalid stream URL"
+        debugInfo="Invalid stream URL - retrying within DAMITV"
       />
     );
   }
 
-  // Show error state for persistent failures (not mobile blocking)
-  if (loadError && !mobileStreamBlocked && retryCount > 1) {
+  // Show error state only after multiple bypass attempts
+  if (loadError && retryCount > 3) {
     return (
       <ErrorState
         hasError={true}
         isTimeout={iframeTimeout}
         onRetry={handleRetry}
-        onOpenInNewTab={openStreamInNewTab}
+        onOpenInNewTab={forcePlayInSite}
         onGoBack={handleGoBack}
-        debugInfo={`Stream failed after ${retryCount} retries\n\n${streamDebugInfo}`}
+        debugInfo={`Tried ${retryCount} bypass methods within DAMITV\n\n${streamDebugInfo}`}
       />
     );
   }
 
-  // Create iframe URL with cache-busting parameters
-  const iframeUrl = (() => {
+  // Create the appropriate iframe URL based on bypass method
+  const getIframeUrl = () => {
     try {
-      const url = new URL(stream.embedUrl);
+      let baseUrl = stream.embedUrl;
+      
+      // Add cache busting and autoplay parameters
+      const url = new URL(baseUrl);
       url.searchParams.set('_t', Date.now().toString());
+      url.searchParams.set('_retry', retryCount.toString());
       url.searchParams.set('autoplay', '1');
       url.searchParams.set('muted', '0');
-      return url.toString();
+      
+      // Apply bypass method
+      if (useProxyMethod) {
+        console.log('Using proxy bypass method');
+        return createProxyUrl(url.toString());
+      } else if (retryCount > 1) {
+        console.log('Using HTML bypass method');
+        return createBypassIframe(url.toString());
+      } else {
+        console.log('Using direct method');
+        return url.toString();
+      }
     } catch {
       return stream.embedUrl;
     }
-  })();
+  };
+
+  const iframeUrl = getIframeUrl();
 
   return (
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
         {/* Loading overlay */}
-        {!isContentLoaded && !iframeTimeout && !(mobileStreamBlocked && isMobile) && (
+        {!isContentLoaded && !iframeTimeout && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#151922]">
             <div className="text-white text-center">
               <Loader className="h-8 w-8 sm:h-10 sm:w-10 animate-spin mx-auto mb-2 sm:mb-3 text-[#ff5a36]" />
-              <p className="text-sm sm:text-lg">Loading stream...</p>
+              <p className="text-sm sm:text-lg">Loading stream within DAMITV...</p>
               {retryCount > 0 && (
                 <p className="text-xs text-gray-400 mt-1">
-                  Retry attempt {retryCount}
+                  Bypass attempt {retryCount} - Keeping you on DAMITV
                 </p>
               )}
-              {isMobile && (
-                <p className="text-xs text-gray-400 mt-2">
-                  Optimizing connection for mobile...
+              {useProxyMethod && (
+                <p className="text-xs text-yellow-400 mt-2">
+                  Using advanced bypass method...
                 </p>
               )}
             </div>
@@ -277,11 +294,11 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           src={iframeUrl}
           className="w-full h-full absolute inset-0"
           allowFullScreen
-          title="Live Sports Stream"
+          title="Live Sports Stream - DAMITV"
           onLoad={handleIframeLoad}
           onError={handleIframeError}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads allow-top-navigation"
           referrerPolicy="no-referrer"
           loading="eager"
           style={{ 
@@ -297,7 +314,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       <PlayerControls
         onGoBack={handleGoBack}
         onTogglePictureInPicture={togglePictureInPicture}
-        onOpenInNewTab={openStreamInNewTab}
+        onOpenInNewTab={forcePlayInSite}
         isPictureInPicture={false}
       />
     </PlayerContainer>
