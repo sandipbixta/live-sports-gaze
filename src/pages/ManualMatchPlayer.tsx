@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
@@ -57,22 +56,22 @@ const ManualMatchPlayer = () => {
     minute: '2-digit' 
   });
   
-  // SEO Title - Dynamic and keyword-rich
-  const seoTitle = `${homeTeam} vs ${awayTeam} Live Stream Free | ${formattedDate} | DamiTV`;
+  // SEO Title - Use match title instead of team names
+  const seoTitle = `${match.title} Live Stream Free | ${formattedDate} | DamiTV`;
   
-  // SEO Description - Dynamic based on match data
+  // SEO Description - Use match title
   const seoDescription = match.seo?.description || 
-    `Watch ${homeTeam} vs ${awayTeam} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available.`;
+    `Watch ${match.title} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available.`;
   
-  // SEO Keywords - Dynamic and comprehensive
+  // SEO Keywords - Use match title
   const seoKeywords = match.seo?.keywords || 
-    `${homeTeam} vs ${awayTeam} live stream, ${homeTeam} ${awayTeam} watch online, ${homeTeam} vs ${awayTeam} free stream, live ${match.seo?.category || 'sports'} streaming, ${homeTeam} ${awayTeam} ${formattedDate}`;
+    `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}`;
 
   // Generate JSON-LD structured data
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
-    "name": `${homeTeam} vs ${awayTeam}`,
+    "name": match.title,
     "description": seoDescription,
     "startDate": match.date,
     "url": `https://damitv.pro/manual-match/${match.id}`,
@@ -98,8 +97,8 @@ const ManualMatchPlayer = () => {
     ],
     "video": {
       "@type": "VideoObject",
-      "name": `${homeTeam} vs ${awayTeam} Live Stream`,
-      "description": `Live streaming video for ${homeTeam} vs ${awayTeam}`,
+      "name": `${match.title} Live Stream`,
+      "description": `Live streaming video for ${match.title}`,
       "uploadDate": match.date,
       "thumbnailUrl": match.image || "https://damitv.pro/logo.png",
       "embedUrl": selectedLink?.url,
@@ -164,7 +163,7 @@ const ManualMatchPlayer = () => {
             </Button>
             <div>
               <h1 className="text-xl font-bold text-white">
-                {homeTeam} vs {awayTeam}
+                {match.title}
               </h1>
               <p className="text-sm text-gray-400">{match.title}</p>
               {selectedLink && (
@@ -199,9 +198,7 @@ const ManualMatchPlayer = () => {
               <div className="bg-[#1a1f2e] p-3 border-b border-[#343a4d]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold">{homeTeam}</span>
-                    <span className="text-gray-400">vs</span>
-                    <span className="text-white font-semibold">{awayTeam}</span>
+                    <span className="text-white font-semibold">{match.title}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
@@ -233,7 +230,7 @@ const ManualMatchPlayer = () => {
                     className="w-full h-full border-0"
                     allowFullScreen
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    title={`${homeTeam} vs ${awayTeam} Stream`}
+                    title={`${match.title} Stream`}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
