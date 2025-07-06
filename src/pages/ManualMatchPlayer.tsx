@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
 import { Helmet } from 'react-helmet-async';
+import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
@@ -16,15 +16,27 @@ const ManualMatchPlayer = () => {
     match?.links?.[0] || null
   );
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   const handleFullscreen = () => {
-    if (videoRef.current) {
+    const playerContainer = document.querySelector('[data-player-container]') as HTMLElement;
+    if (playerContainer) {
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
-        videoRef.current.requestFullscreen();
+        playerContainer.requestFullscreen();
       }
     }
+  };
+
+  const handleVideoLoad = () => {
+    console.log('Manual match video loaded');
+    setIsVideoLoaded(true);
+  };
+
+  const handleVideoError = () => {
+    console.error('Manual match video failed to load');
+    setIsVideoLoaded(false);
   };
 
   if (!match) {
@@ -45,7 +57,6 @@ const ManualMatchPlayer = () => {
     );
   }
 
-  // Generate dynamic SEO data
   const homeTeam = match.teams.home;
   const awayTeam = match.teams.away;
   const matchDate = new Date(match.date);
@@ -59,18 +70,12 @@ const ManualMatchPlayer = () => {
     minute: '2-digit' 
   });
   
-  // SEO Title - Use match title instead of team names
   const seoTitle = `${match.title} Live Stream Free | ${formattedDate} | DamiTV`;
-  
-  // SEO Description - Use match title
   const seoDescription = match.seo?.description || 
     `Watch ${match.title} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available.`;
-  
-  // SEO Keywords - Use match title
   const seoKeywords = match.seo?.keywords || 
     `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}`;
 
-  // Generate JSON-LD structured data
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
@@ -123,7 +128,6 @@ const ManualMatchPlayer = () => {
         <meta name="keywords" content={seoKeywords} />
         <link rel="canonical" href={`https://damitv.pro/manual-match/${match.id}`} />
         
-        {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`https://damitv.pro/manual-match/${match.id}`} />
         <meta property="og:title" content={seoTitle} />
@@ -131,14 +135,12 @@ const ManualMatchPlayer = () => {
         <meta property="og:image" content={match.image || "https://damitv.pro/logo.png"} />
         <meta property="og:site_name" content="DamiTV" />
         
-        {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={`https://damitv.pro/manual-match/${match.id}`} />
         <meta property="twitter:title" content={seoTitle} />
         <meta property="twitter:description" content={seoDescription} />
         <meta property="twitter:image" content={match.image || "https://damitv.pro/logo.png"} />
         
-        {/* Additional SEO meta tags */}
         <meta name="robots" content="index, follow" />
         <meta name="author" content="DamiTV" />
         <meta name="category" content={match.seo?.category || "Sports"} />
@@ -146,13 +148,11 @@ const ManualMatchPlayer = () => {
         <meta name="distribution" content="Global" />
         <meta name="rating" content="General" />
         
-        {/* Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
       </Helmet>
       
-      {/* Header */}
       <div className="bg-[#242836] border-b border-[#343a4d] p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -191,13 +191,10 @@ const ManualMatchPlayer = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Video Player */}
           <div className="lg:col-span-3">
             <div className="bg-[#242836] rounded-lg overflow-hidden border border-[#343a4d]">
-              {/* Match Info Bar */}
               <div className="bg-[#1a1f2e] p-3 border-b border-[#343a4d]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -215,7 +212,6 @@ const ManualMatchPlayer = () => {
                 </div>
               </div>
 
-              {/* Channel Title */}
               {selectedLink && (
                 <div className="bg-[#242836] px-4 py-2 border-b border-[#343a4d]">
                   <h2 className="text-lg font-semibold text-white text-center">
@@ -224,18 +220,15 @@ const ManualMatchPlayer = () => {
                 </div>
               )}
               
-              {/* Video Player */}
-              <div className="relative aspect-video bg-black">
+              <div className="relative aspect-video bg-black" data-player-container>
                 {selectedLink ? (
-                  <video
-                    ref={videoRef}
+                  <VideoPlayerSelector
                     src={selectedLink.url}
-                    className="w-full h-full object-contain"
-                    controls
-                    autoPlay
-                    playsInline
-                    preload="auto"
+                    onLoad={handleVideoLoad}
+                    onError={handleVideoError}
+                    videoRef={videoRef}
                     title={`${match.title} Stream`}
+                    isManualChannel={true}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
@@ -246,7 +239,6 @@ const ManualMatchPlayer = () => {
             </div>
           </div>
 
-          {/* Stream Sources Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-4">
               <h3 className="text-lg font-semibold text-white mb-4">Stream Sources</h3>
@@ -273,7 +265,6 @@ const ManualMatchPlayer = () => {
                 ))}
               </div>
               
-              {/* Match Details */}
               <div className="mt-6 pt-4 border-t border-[#343a4d]">
                 <h4 className="text-md font-semibold text-white mb-2">Match Details</h4>
                 <div className="space-y-2 text-sm text-gray-400">

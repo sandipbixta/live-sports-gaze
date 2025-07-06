@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -34,25 +33,21 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   
-  // Function to generate stream ID from match ID if needed
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
   };
   
   const streamId = getStreamId();
   
-  // Logging for debugging
   useEffect(() => {
     console.log('Match sources:', match.sources);
     console.log('Active source:', activeSource);
     console.log('Current stream:', stream);
   }, [match.sources, activeSource, stream]);
 
-  // Handle retry function
   const handleRetry = async () => {
     if (!activeSource) return;
     
-    // Parse source, id, and streamNo from activeSource string
     const parts = activeSource.split('/');
     const [source, id, streamNo] = parts;
     
@@ -66,7 +61,6 @@ const StreamTab = ({
       
       handleSourceChange(source, id, streamNo ? parseInt(streamNo) : undefined);
     } else {
-      // If we can't get source/id from activeSource, try the first available source
       if (match.sources && match.sources.length > 0) {
         const { source, id } = match.sources[0];
         setRetryCount(prev => prev + 1);
@@ -81,28 +75,25 @@ const StreamTab = ({
     }
   };
 
-  // Format match time to display time
   const formatMatchTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
   
-  // Helper function to determine if a match is likely live - Reduced to 3 hours
   const isMatchLive = (): boolean => {
     const matchTime = new Date(match.date).getTime();
     const now = new Date().getTime();
-    const threeHoursInMs = 3 * 60 * 60 * 1000; // Changed to 3 hours
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
     const oneHourInMs = 60 * 60 * 1000;
     
     return (
       match.sources && 
       match.sources.length > 0 && 
-      matchTime - now < oneHourInMs && // Match starts within 1 hour
-      now - matchTime < threeHoursInMs  // Match can be live up to 3 hours after start
+      matchTime - now < oneHourInMs &&
+      now - matchTime < threeHoursInMs
     );
   };
 
-  // Sort related matches by trending score
   const sortedPopularMatches = [...popularMatches].sort((a, b) => {
     const aTrending = isTrendingMatch(a.title);
     const bTrending = isTrendingMatch(b.title);
@@ -115,9 +106,11 @@ const StreamTab = ({
         stream={stream}
         isLoading={loadingStream}
         onRetry={handleRetry}
+        title={match.title}
+        isManualChannel={false}
+        isTvChannel={false}
       />
       
-      {/* Stream Sources */}
       <StreamSources
         sources={match.sources}
         activeSource={activeSource}
@@ -125,7 +118,6 @@ const StreamTab = ({
         streamId={streamId}
       />
       
-      {/* Match status - Live or Upcoming */}
       {!loadingStream && (
         <div className="flex justify-center mt-4">
           {isMatchLive() ? (
@@ -142,7 +134,6 @@ const StreamTab = ({
         </div>
       )}
       
-      {/* No Stream Available Message */}
       {!stream && !loadingStream && (
         <Card className="bg-sports-card border-sports mt-6">
           <CardContent className="p-6 text-center">
@@ -151,7 +142,6 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Popular Matches Section - Now using trending data */}
       {sortedPopularMatches.length > 0 && (
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
@@ -177,7 +167,6 @@ const StreamTab = ({
         </div>
       )}
       
-      {/* No matches message */}
       {sortedPopularMatches.length === 0 && (
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>

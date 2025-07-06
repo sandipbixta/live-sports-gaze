@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Stream } from '../types/sports';
 import { useNavigate } from 'react-router-dom';
@@ -9,16 +8,26 @@ import PlayerControls from './StreamPlayer/PlayerControls';
 import LoadingState from './StreamPlayer/LoadingState';
 import ErrorState from './StreamPlayer/ErrorState';
 import StreamOptimizer from './StreamPlayer/StreamOptimizer';
-import Html5VideoPlayer from './StreamPlayer/Html5VideoPlayer';
+import VideoPlayerSelector from './StreamPlayer/VideoPlayerSelector';
 import StreamLoadingOverlay from './StreamPlayer/StreamLoadingOverlay';
 
 interface StreamPlayerProps {
   stream: Stream | null;
   isLoading: boolean;
   onRetry?: () => void;
+  isManualChannel?: boolean;
+  isTvChannel?: boolean;
+  title?: string;
 }
 
-const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
+const StreamPlayer: React.FC<StreamPlayerProps> = ({ 
+  stream, 
+  isLoading, 
+  onRetry,
+  isManualChannel = false,
+  isTvChannel = false,
+  title
+}) => {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   
@@ -155,11 +164,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           useProxyMethod={useProxyMethod}
         />
         
-        <Html5VideoPlayer
+        <VideoPlayerSelector
           src={videoUrl}
           onLoad={handleVideoLoad}
           onError={handleVideoError}
           videoRef={videoRef}
+          title={title}
+          isManualChannel={isManualChannel}
+          isTvChannel={isTvChannel}
         />
       </AspectRatio>
       
