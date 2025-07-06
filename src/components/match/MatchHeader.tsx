@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +28,24 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
     e.stopPropagation();
     console.log('Header back button clicked on mobile:', isMobile);
     
-    // For mobile, try different navigation methods
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      // Fallback to channels page if no history
-      navigate('/channels');
+    // Enhanced navigation with multiple fallbacks
+    try {
+      // First attempt: use React Router navigation
+      if (window.history.length > 2) {
+        navigate(-1);
+      } else {
+        navigate('/channels', { replace: true });
+      }
+    } catch (error) {
+      console.error('React Router navigation failed:', error);
+      // Fallback: use browser history
+      try {
+        window.history.back();
+      } catch (historyError) {
+        console.error('Browser history navigation failed:', historyError);
+        // Final fallback: direct page navigation
+        window.location.href = '/channels';
+      }
     }
   };
     

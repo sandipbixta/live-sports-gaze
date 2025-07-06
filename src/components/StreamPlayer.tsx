@@ -37,13 +37,22 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     e.stopPropagation();
     console.log('Back button clicked on mobile:', isMobile);
     
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/channels');
+    // Force navigation with multiple fallback strategies
+    try {
+      // First try: go back in history if available
+      if (window.history.length > 2) {
+        window.history.back();
+      } else {
+        // Fallback: navigate to channels page
+        navigate('/channels', { replace: true });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Emergency fallback: force page navigation
+      window.location.href = '/channels';
     }
   };
-  
+
   // Enhanced function to create proxy URL to bypass iframe blocking
   const createProxyUrl = (originalUrl: string) => {
     // Method 1: Use a CORS proxy service
