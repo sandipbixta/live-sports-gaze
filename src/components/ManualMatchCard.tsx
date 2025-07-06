@@ -146,11 +146,9 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
           text-[13px] xs:text-[14px] sm:text-base md:text-lg 
           font-bold leading-tight mb-1
         ">
-          {/* Team names */}
+          {/* Show title instead of team names with vs */}
           <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
-            {match.teams.home}{" "}
-            <span className="text-[10px] xs:text-xs sm:text-xs text-gray-300 font-normal">vs</span>{" "}
-            {match.teams.away}
+            {match.title}
           </span>
         </div>
         <p className="text-gray-400 text-[11px] xs:text-xs sm:text-sm text-left">
