@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,14 @@ const ManualMatchPlayer = () => {
   const [selectedLink, setSelectedLink] = useState<ManualMatchLink | null>(
     match?.links?.[0] || null
   );
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleFullscreen = () => {
-    const iframe = document.querySelector('#manual-stream-iframe') as HTMLIFrameElement;
-    if (iframe) {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
+    if (videoRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoRef.current.requestFullscreen();
       }
     }
   };
@@ -224,13 +226,19 @@ const ManualMatchPlayer = () => {
               {/* Video Player */}
               <div className="relative aspect-video bg-black">
                 {selectedLink ? (
-                  <iframe
-                    id="manual-stream-iframe"
+                  <video
+                    ref={videoRef}
                     src={selectedLink.url}
-                    className="w-full h-full border-0"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    className="w-full h-full object-contain"
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="auto"
                     title={`${match.title} Stream`}
+                    style={{
+                      WebkitPlaysinline: true,
+                      WebkitPresentationMode: 'inline'
+                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">

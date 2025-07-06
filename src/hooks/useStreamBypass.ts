@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Stream } from '../types/sports';
 
@@ -9,7 +8,7 @@ export const useStreamBypass = (stream: Stream | null) => {
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
 
-  // Enhanced function to create proxy URL to bypass iframe blocking
+  // Enhanced function to create proxy URL for video streams
   const createProxyUrl = useCallback((originalUrl: string) => {
     const corsProxies = [
       'https://api.allorigins.win/raw?url=',
@@ -20,88 +19,78 @@ export const useStreamBypass = (stream: Stream | null) => {
     return corsProxies[retryCount % corsProxies.length] + encodeURIComponent(originalUrl);
   }, [retryCount]);
 
-  // Method to inject custom headers to bypass X-Frame-Options
-  const createBypassIframe = useCallback((url: string) => {
-    const bypassHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { margin: 0; padding: 0; overflow: hidden; }
-          iframe { width: 100%; height: 100vh; border: none; }
-        </style>
-      </head>
-      <body>
-        <iframe 
-          src="${url}" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          allowfullscreen
-          referrerpolicy="no-referrer"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
-        ></iframe>
-        <script>
-          // Remove X-Frame-Options header if possible
-          try {
-            delete window.frameElement;
-          } catch(e) {}
-        </script>
-      </body>
-      </html>
-    `;
-    
-    return 'data:text/html;base64,' + btoa(bypassHtml);
+  // Method to extract direct video URL from embed URL
+  const extractVideoUrl = useCallback((embedUrl: string) => {
+    try {
+      // Handle different embed URL patterns
+      if (embedUrl.includes('/embed/')) {
+        // Try to extract direct stream URL from embed URL
+        const urlParts = embedUrl.split('/embed/');
+        if (urlParts.length > 1) {
+          const streamId = urlParts[1].split('?')[0];
+          // Try common direct stream URL patterns
+          const baseUrl = urlParts[0];
+          return `${baseUrl}/stream/${streamId}.m3u8`;
+        }
+      }
+      
+      // If embed URL contains direct video file extensions
+      if (embedUrl.match(/\.(m3u8|mp4|webm|ogg)(\?|$)/i)) {
+        return embedUrl;
+      }
+      
+      // Otherwise return the embed URL as fallback
+      return embedUrl;
+    } catch {
+      return embedUrl;
+    }
   }, []);
 
-  // Create the appropriate iframe URL based on bypass method
-  const getIframeUrl = useCallback(() => {
+  // Create the appropriate video URL based on bypass method
+  const getVideoUrl = useCallback(() => {
     if (!stream?.embedUrl) return '';
     
     try {
       let baseUrl = stream.embedUrl;
       
-      // Add cache busting and autoplay parameters
+      // First try to extract direct video URL
+      baseUrl = extractVideoUrl(baseUrl);
+      
+      // Add cache busting and streaming parameters
       const url = new URL(baseUrl);
       url.searchParams.set('_t', Date.now().toString());
       url.searchParams.set('_retry', retryCount.toString());
-      url.searchParams.set('autoplay', '1');
-      url.searchParams.set('muted', '0');
       
       // Apply bypass method
-      if (useProxyMethod) {
-        console.log('Using proxy bypass method');
+      if (useProxyMethod && retryCount > 0) {
+        console.log('Using proxy bypass method for video');
         return createProxyUrl(url.toString());
-      } else if (retryCount > 1) {
-        console.log('Using HTML bypass method');
-        return createBypassIframe(url.toString());
       } else {
-        console.log('Using direct method');
+        console.log('Using direct video URL');
         return url.toString();
       }
     } catch {
       return stream.embedUrl;
     }
-  }, [stream, retryCount, useProxyMethod, createProxyUrl, createBypassIframe]);
+  }, [stream, retryCount, useProxyMethod, createProxyUrl, extractVideoUrl]);
 
   // Function to refresh stream URL and try different bypass methods
   const refreshStream = useCallback(() => {
     if (stream?.embedUrl) {
-      console.log('Refreshing stream with bypass methods...');
+      console.log('Refreshing video stream...');
       
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setRetryCount(prev => prev + 1);
       
-      // Try different bypass methods based on retry count
-      if (retryCount % 3 === 0) {
-        console.log('Using direct URL method');
+      // Try different methods based on retry count
+      if (retryCount % 2 === 0) {
+        console.log('Using direct video URL method');
         setUseProxyMethod(false);
-      } else if (retryCount % 3 === 1) {
-        console.log('Using proxy method');
-        setUseProxyMethod(true);
       } else {
-        console.log('Using HTML bypass method');
-        setUseProxyMethod(false);
+        console.log('Using proxy method for video');
+        setUseProxyMethod(true);
       }
     }
   }, [stream, retryCount]);
@@ -117,18 +106,18 @@ export const useStreamBypass = (stream: Stream | null) => {
     }
   }, [stream]);
 
-  // Set timeout for iframe loading
+  // Set timeout for video loading
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
-      const timeoutDuration = 8000;
+      const timeoutDuration = 10000; // 10 seconds for video
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('⏰ Iframe loading timeout - trying bypass method');
+          console.log('⏰ Video loading timeout - trying alternative method');
           setIframeTimeout(true);
           
-          if (retryCount < 3) {
-            console.log('Auto-retrying with bypass...');
+          if (retryCount < 2) {
+            console.log('Auto-retrying video with different method...');
             refreshStream();
           }
         }
@@ -148,6 +137,6 @@ export const useStreamBypass = (stream: Stream | null) => {
     setIsContentLoaded,
     setIframeTimeout,
     refreshStream,
-    getIframeUrl
+    getVideoUrl
   };
 };

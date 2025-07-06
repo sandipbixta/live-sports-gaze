@@ -3,14 +3,13 @@ import React, { useRef, useState } from 'react';
 import { Stream } from '../types/sports';
 import { useNavigate } from 'react-router-dom';
 import { AspectRatio } from './ui/aspect-ratio';
-import { useFullscreenOrientation } from '../hooks/useFullscreenOrientation';
 import { useStreamBypass } from '../hooks/useStreamBypass';
 import PlayerContainer from './StreamPlayer/PlayerContainer';
 import PlayerControls from './StreamPlayer/PlayerControls';
 import LoadingState from './StreamPlayer/LoadingState';
 import ErrorState from './StreamPlayer/ErrorState';
 import StreamOptimizer from './StreamPlayer/StreamOptimizer';
-import StreamIframe from './StreamPlayer/StreamIframe';
+import Html5VideoPlayer from './StreamPlayer/Html5VideoPlayer';
 import StreamLoadingOverlay from './StreamPlayer/StreamLoadingOverlay';
 
 interface StreamPlayerProps {
@@ -21,11 +20,9 @@ interface StreamPlayerProps {
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry }) => {
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLIFrameElement>(null);
-  const [streamDebugInfo, setStreamDebugInfo] = useState<string>('');
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   // Use custom hooks
-  useFullscreenOrientation(stream, videoRef);
   const {
     retryCount,
     useProxyMethod,
@@ -36,7 +33,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     setIsContentLoaded,
     setIframeTimeout,
     refreshStream,
-    getIframeUrl
+    getVideoUrl
   } = useStreamBypass(stream);
 
   const handleGoBack = (e: React.MouseEvent | React.TouchEvent) => {
@@ -62,8 +59,18 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
   
-  const togglePictureInPicture = () => {
-    console.log('Picture-in-picture functionality moved to fullscreen');
+  const togglePictureInPicture = async () => {
+    if (videoRef.current) {
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await videoRef.current.requestPictureInPicture();
+        }
+      } catch (error) {
+        console.log('Picture-in-Picture not supported or failed:', error);
+      }
+    }
   };
 
   const handleRetry = () => {
@@ -76,15 +83,15 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     }
   };
 
-  const handleIframeLoad = () => {
-    console.log('✅ Stream loaded successfully within DAMITV');
+  const handleVideoLoad = () => {
+    console.log('✅ Video loaded successfully within DAMITV');
     setIsContentLoaded(true);
     setIframeTimeout(false);
   };
 
-  const handleIframeError = () => {
-    console.error('❌ Stream failed - trying bypass method');
-    if (!useProxyMethod && retryCount < 2) {
+  const handleVideoError = () => {
+    console.error('❌ Video failed - trying alternative method');
+    if (retryCount < 2) {
       refreshStream();
     } else {
       setLoadError(true);
@@ -112,7 +119,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
     );
   }
 
-  // Show error state only after multiple bypass attempts
+  // Show error state only after multiple attempts
   if (loadError && retryCount > 3) {
     const debugInfo = `Stream Debug Info:
       - Source: ${stream.source}
@@ -122,7 +129,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
       - HD: ${stream.hd}
       - URL: ${stream.embedUrl}
       - Retry Count: ${retryCount}
-      - Bypass Method: ${useProxyMethod ? 'Proxy' : 'Direct'}`;
+      - Method: ${useProxyMethod ? 'Proxy' : 'Direct'}`;
 
     return (
       <ErrorState
@@ -131,12 +138,12 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onRetry={handleRetry}
         onOpenInNewTab={forcePlayInSite}
         onGoBack={handleGoBack}
-        debugInfo={`Tried ${retryCount} bypass methods within DAMITV\n\n${debugInfo}`}
+        debugInfo={`Tried ${retryCount} methods within DAMITV\n\n${debugInfo}`}
       />
     );
   }
 
-  const iframeUrl = getIframeUrl();
+  const videoUrl = getVideoUrl();
 
   return (
     <PlayerContainer>
@@ -148,10 +155,10 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
           useProxyMethod={useProxyMethod}
         />
         
-        <StreamIframe
-          src={iframeUrl}
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
+        <Html5VideoPlayer
+          src={videoUrl}
+          onLoad={handleVideoLoad}
+          onError={handleVideoError}
           videoRef={videoRef}
         />
       </AspectRatio>
@@ -160,7 +167,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({ stream, isLoading, onRetry 
         onGoBack={handleGoBack}
         onTogglePictureInPicture={togglePictureInPicture}
         onOpenInNewTab={forcePlayInSite}
-        isPictureInPicture={false}
+        isPictureInPicture={!!document.pictureInPictureElement}
       />
     </PlayerContainer>
   );
