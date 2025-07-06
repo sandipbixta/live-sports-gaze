@@ -1,12 +1,19 @@
 
 import { ManualMatch } from '@/types/manualMatch';
 
+// Helper function to get tomorrow's date
+const getTomorrowDate = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0); // Set to midnight
+  return tomorrow.toISOString();
+};
+
 export const manualMatches: ManualMatch[] = [
   {
     id: "FIFA-CLUB-WORLD-CUP",
     title: "FIFA Club WorldCup",
-    // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-07-07T00:00:00Z", 
+    date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
       away: ""
@@ -54,8 +61,7 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "UEFA-WOMEN-EURO-2025",
     title: "UEFA WOMEN EURO 2025",
-    // FIX: Corrected date with zero-padded hour
-    date: "2025-07-07T00:00:00Z", 
+    date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
       away: ""
@@ -104,8 +110,7 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "Los-Angeles-FC-vs-Esperance-Tunis",
     title: "Los Angeles FC vs Esperance Tunis",
-    // Already correct: zero-padded hour and T
-    date: "2025-06-20T22:00:00Z",
+    date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "Los Angeles FC",
       away: "Esperance Tunis"
@@ -153,8 +158,7 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "Bayern-Munich-vs-Boca-Juniors",
     title: "Bayern Munich vs Boca Juniors",
-    // FIX: Corrected date with zero-padded hour
-    date: "2025-06-21T01:00:00Z",
+    date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "Bayern Munich",
       away: "Boca Juniors"
@@ -202,7 +206,7 @@ export const manualMatches: ManualMatch[] = [
   {
     id: "hidden-match",
     title: "Hidden Match",
-    date: "2025-06-10T17:00:00Z",
+    date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "Hidden FC",
       away: "Invisible United"
