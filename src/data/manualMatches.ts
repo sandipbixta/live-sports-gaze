@@ -6,7 +6,7 @@ export const manualMatches: ManualMatch[] = [
     id: "FIFA-CLUB-WORLD-CUP",
     title: "FIFA Club WorldCup",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-19T00:00:00Z", 
+    date: "2025-07-07T00:00:00Z", 
     teams: {
       home: "",
       away: ""
@@ -55,7 +55,7 @@ export const manualMatches: ManualMatch[] = [
     id: "UEFA-WOMEN-EURO-2025",
     title: "UEFA WOMEN EURO 2025",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-20T00:00:00Z", 
+    date: "2025-07-07T00:00:00Z", 
     teams: {
       home: "",
       away: ""
