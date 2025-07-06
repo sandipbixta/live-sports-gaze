@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Stream } from '../types/sports';
 import { useNavigate } from 'react-router-dom';
@@ -96,14 +97,21 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     console.log('✅ Video loaded successfully within DAMITV');
     setIsContentLoaded(true);
     setIframeTimeout(false);
+    setLoadError(false);
   };
 
   const handleVideoError = () => {
     console.error('❌ Video failed - trying alternative method');
+    
+    // Don't retry endlessly - limit to 2 attempts
     if (retryCount < 2) {
-      refreshStream();
+      setTimeout(() => {
+        refreshStream();
+      }, 1000);
     } else {
+      console.log('Max retries reached, showing error state');
       setLoadError(true);
+      setIframeTimeout(true);
     }
   };
 
@@ -123,20 +131,20 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         onRetry={handleRetry}
         onOpenInNewTab={forcePlayInSite}
         onGoBack={handleGoBack}
-        debugInfo="Invalid stream URL - retrying within DAMITV"
+        debugInfo="Invalid stream URL"
       />
     );
   }
 
-  // Show error state only after multiple attempts
-  if (loadError && retryCount > 3) {
+  // Show error state after reasonable attempts or timeout
+  if ((loadError && retryCount >= 2) || iframeTimeout) {
     const debugInfo = `Stream Debug Info:
       - Source: ${stream.source}
       - ID: ${stream.id}
       - Stream No: ${stream.streamNo}
       - Language: ${stream.language}
       - HD: ${stream.hd}
-      - URL: ${stream.embedUrl}
+      - URL: ${stream.embedUrl?.substring(0, 100)}...
       - Retry Count: ${retryCount}
       - Method: ${useProxyMethod ? 'Proxy' : 'Direct'}`;
 
@@ -147,7 +155,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         onRetry={handleRetry}
         onOpenInNewTab={forcePlayInSite}
         onGoBack={handleGoBack}
-        debugInfo={`Tried ${retryCount} methods within DAMITV\n\n${debugInfo}`}
+        debugInfo={debugInfo}
       />
     );
   }
@@ -158,11 +166,14 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
-        <StreamLoadingOverlay 
-          isVisible={!isContentLoaded && !iframeTimeout}
-          retryCount={retryCount}
-          useProxyMethod={useProxyMethod}
-        />
+        {/* Only show loading overlay during initial load, not during retries */}
+        {!isContentLoaded && retryCount === 0 && (
+          <StreamLoadingOverlay 
+            isVisible={true}
+            retryCount={retryCount}
+            useProxyMethod={useProxyMethod}
+          />
+        )}
         
         <VideoPlayerSelector
           src={videoUrl}

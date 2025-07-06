@@ -15,6 +15,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const isMobile = useIsMobile();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showControls, setShowControls] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   // Handle fullscreen
   const toggleFullscreen = () => {
@@ -27,23 +28,29 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     }
   };
 
-  // Handle iframe clicks on mobile to prevent automatic opening
-  const handleIframeClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      e.preventDefault();
-      console.log('Mobile iframe click prevented');
-    }
+  // Handle iframe load success
+  const handleIframeLoad = () => {
+    console.log('✅ Iframe loaded successfully');
+    setHasLoaded(true);
+    onLoad();
+  };
+
+  // Handle iframe load error
+  const handleIframeError = () => {
+    console.error('❌ Iframe failed to load');
+    onError();
   };
 
   // Auto-hide controls
   useEffect(() => {
+    if (!showControls) return;
+    
     const timer = setTimeout(() => {
       setShowControls(false);
     }, 3000);
 
     const handleMouseMove = () => {
       setShowControls(true);
-      clearTimeout(timer);
     };
 
     const container = iframeRef.current?.parentElement;
@@ -56,7 +63,19 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     }
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [showControls]);
+
+  // Set a reasonable timeout for iframe loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!hasLoaded) {
+        console.log('Iframe taking too long to load, calling onLoad anyway');
+        onLoad();
+      }
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [hasLoaded, onLoad]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
@@ -66,23 +85,15 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         className="w-full h-full absolute inset-0"
         allowFullScreen
         title={title || "Live Stream"}
-        onLoad={onLoad}
-        onError={onError}
-        onClick={handleIframeClick}
+        onLoad={handleIframeLoad}
+        onError={handleIframeError}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads allow-top-navigation"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads allow-top-navigation allow-top-navigation-by-user-activation"
         referrerPolicy="no-referrer"
         loading="eager"
         style={{ 
           border: 'none',
-          pointerEvents: isMobile ? 'auto' : 'auto',
-          ...(isMobile && {
-            touchAction: 'manipulation',
-            WebkitOverflowScrolling: 'touch',
-            WebkitTouchCallout: 'none',
-            WebkitUserSelect: 'none',
-            userSelect: 'none'
-          })
+          pointerEvents: 'auto'
         }}
       />
 
@@ -91,6 +102,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         className={`absolute top-4 right-4 transition-opacity duration-300 ${
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
+        onMouseEnter={() => setShowControls(true)}
       >
         <Button
           variant="ghost"
