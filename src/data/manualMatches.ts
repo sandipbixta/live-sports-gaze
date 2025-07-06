@@ -3,13 +3,13 @@ import { ManualMatch } from '@/types/manualMatch';
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "Benifica-vs-Auckland-City",
-    title: "Benfica vs Auckland City",
+    id: "FIFA-CLUB-WORLD-CUP",
+    title: "FIFA Club WorldCup",
     // FIX: Corrected date with zero-padded hour (ISO 8601)
-    date: "2025-06-19T16:00:00Z", 
+    date: "2025-06-19T00:00:00Z", 
     teams: {
-      home: "Benfica",
-      away: "Auckland City"
+      home: "",
+      away: ""
     },
     links: [
       {
@@ -43,61 +43,61 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/y7NcxLb.jpeg",
+    visible: true,
+    image: "https://i.imgur.com/rXT699O.jpeg",
     seo: {
-      keywords: "Benfica vs Auckland City live stream, Benfica Auckland City watch online, Benfica vs Auckland City free stream",
-      description: "Watch Benfica vs Auckland City live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
+      description: "Watch Fifa club world cup live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
   {
-    id: "Flamengo-RJ-vs-Chelsea",
-    title: "Flamengo RJ vs Chelsea",
+    id: "UEFA-WOMEN-EURO-2025",
+    title: "UEFA EURO WOMEN 2025",
     // FIX: Corrected date with zero-padded hour
-    date: "2025-06-20T19:00:00Z", 
+    date: "2025-06-20T00:00:00Z", 
     teams: {
-      home: "Flamengo RJ",
-      away: "Chelsea"
+      home: "",
+      away: ""
     },
     links: [
       {
-        id: "TNT [USA]",
-        name: "TNT [USA]",
-        url: "https://topembed.pw/channel/TNT[USA]",
+        id: "FOXSports1[USA]",
+        name: "FOXSports1[USA]",
+        url: "https://topembed.pw/channel/FOXSports1[USA]",
         quality: "HD"
       },
       {
-        id: "Nevena-3",
-        name: "Nevena3",
-        url: "https://topembed.pw/channel/Nevena3[S7]",
+        id: "TSN4[Canada]",
+        name: "TSN4[Canada]",
+        url: "https://topembed.pw/channel/TSN4[Canada]",
         quality: "HD"
       },     
       {
-        id: "TBS-USA",
-        name: "TBS [USA]",
-        url: "https://topembed.pw/channel/TBS[USA]",
+        id: "TUDN[USA]",
+        name: "TUDN[USA]",
+        url: "https://topembed.pw/channel/TUDN[USA]",
         quality: "HD"
       },
       
       {
-        id: "TUDN-[USA]",
-        name: "TUDN [USA]",
-        url: "https://topembed.pw/channel/TUDN[USA]",
+        id: "ESPN3[Argentina]",
+        name: "ESPN3[Argentina]",
+        url: "https://topembed.pw/channel/ESPN3[Argentina]",
         quality: "HD"
       },
       {
-        id: "Nevena-2",
-        name: "Nevena 2",
-        url: "https://topembed.pw/channel/Nevena3[S7]",
+        id: "SportTV1[Portugal]",
+        name: "SportTV1[Portugal]",
+        url: "https://topembed.pw/channel/SportTV1[Portugal]",
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "https://i.imgur.com/WS1lX9c.jpeg",
+    visible: true,
+    image: "https://i.imgur.com/ZDK0tgZ.jpeg",
     seo: {
-      keywords: "Flamengo RJ vs Chelsea live stream, Flamengo RJ Chelsea watch online,Flamengo RJ vs Chelsea free stream",
-      description: "Watch Chelsea vs Flamengo RJ live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
+      keywords: "UEFA women euro 2025 live stream, UEFA watch online,euro women 2025 free stream",
+      description: "Watch UEFA euro women 2025 live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
       category: "Football"
     }
   },
