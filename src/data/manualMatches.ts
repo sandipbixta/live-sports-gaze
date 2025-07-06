@@ -53,7 +53,7 @@ export const manualMatches: ManualMatch[] = [
   },
   {
     id: "UEFA-WOMEN-EURO-2025",
-    title: "UEFA EURO WOMEN 2025",
+    title: "UEFA WOMEN EURO 2025",
     // FIX: Corrected date with zero-padded hour
     date: "2025-06-20T00:00:00Z", 
     teams: {
