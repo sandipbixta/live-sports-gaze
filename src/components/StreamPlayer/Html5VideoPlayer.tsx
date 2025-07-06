@@ -138,12 +138,6 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
             setIsMuted(videoRef.current.muted);
           }
         }}
-        style={{
-          ...(isMobile && {
-            WebkitPlaysinline: true,
-            WebkitPresentationMode: 'inline'
-          })
-        }}
       />
       
       {/* Custom Video Controls */}

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Maximize2, Play } from 'lucide-react';
@@ -235,10 +236,6 @@ const ManualMatchPlayer = () => {
                     playsInline
                     preload="auto"
                     title={`${match.title} Stream`}
-                    style={{
-                      WebkitPlaysinline: true,
-                      WebkitPresentationMode: 'inline'
-                    }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
