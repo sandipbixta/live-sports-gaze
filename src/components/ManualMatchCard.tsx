@@ -2,7 +2,7 @@
 import React from "react";
 import { ManualMatch } from "@/types/manualMatch";
 import { useNavigate } from "react-router-dom";
-import { Play } from "lucide-react";
+import { Play, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ManualMatchCardProps {
@@ -89,16 +89,16 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         <div className="pointer-events-none absolute top-0 left-0 w-full h-8 sm:h-10 bg-gradient-to-b from-black/60 via-black/20 to-transparent z-20" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-        {/* Top Section - Time and LIVE badge */}
+        {/* Top Section - Time, Date and LIVE badge */}
         <div
           className="
             absolute top-1 left-0 right-0 px-1 xs:px-2 sm:px-3
             flex justify-between items-start z-30
           "
         >
-          {/* Time + Timezone label */}
+          {/* Time + Date + Timezone label */}
           <div
-            className="bg-black/60 backdrop-blur-sm rounded px-1.5 xs:px-2 py-[2px] flex flex-col items-start"
+            className="bg-black/70 backdrop-blur-sm rounded px-1.5 xs:px-2 py-[2px] flex flex-col items-start"
           >
             <div
               className="
@@ -107,8 +107,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
                 flex items-baseline gap-1
               "
             >
+              <Clock className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
               {timeString}
-              <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-400 ml-0.5 font-semibold tracking-wide">AEST</span>
+              <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-300 ml-0.5 font-semibold tracking-wide">AEST</span>
+            </div>
+            <div className="text-[10px] xs:text-[11px] sm:text-xs text-gray-300 font-medium mt-[1px]">
+              {/* Mobile: "16 June", desktop: "Jun 16" */}
+              <span className="sm:hidden">{dateStringMobile}</span>
+              <span className="hidden sm:inline">{dateStringDesktop}</span>
             </div>
           </div>
           {/* LIVE Badge */}
@@ -138,7 +144,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         </div>
       </div>
 
-      {/* Team Names and Date Below the Card */}
+      {/* Team Names and Additional Date Below the Card */}
       <div className="mt-2 px-1 xs:px-2">
         <div className="
           flex flex-col items-start justify-center
@@ -151,11 +157,14 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
             {match.title}
           </span>
         </div>
-        <p className="text-gray-400 text-[11px] xs:text-xs sm:text-sm text-left">
-          {/* Mobile: "16 June", desktop: "Jun 16" */}
-          <span className="sm:hidden">{dateStringMobile}</span>
-          <span className="hidden sm:inline">{dateStringDesktop}</span>
-        </p>
+        {/* Enhanced date and time display below the card */}
+        <div className="flex items-center gap-2 text-gray-400 text-[11px] xs:text-xs sm:text-sm text-left">
+          <Clock className="w-3 h-3" />
+          <span>
+            {timeString} • <span className="sm:hidden">{dateStringMobile}</span>
+            <span className="hidden sm:inline">{dateStringDesktop}</span>
+          </span>
+        </div>
       </div>
     </div>
   );
