@@ -16,21 +16,27 @@ export const useStreamBypass = (stream: Stream | null) => {
     try {
       let baseUrl = stream.embedUrl;
       
-      // Add cache busting parameters to force reload
+      // Add stronger cache busting parameters to force reload
       const url = new URL(baseUrl);
       url.searchParams.set('_t', Date.now().toString());
-      url.searchParams.set('_refresh', '1'); // Force refresh parameter
+      url.searchParams.set('_refresh', Math.random().toString(36).substring(7));
+      url.searchParams.set('_nocache', '1');
+      
+      // Add session ID to ensure uniqueness across page loads
+      url.searchParams.set('_session', `${Date.now()}_${Math.random()}`);
       
       // Only add retry parameter if we're actually retrying
       if (retryCount > 0) {
         url.searchParams.set('_retry', retryCount.toString());
       }
       
+      console.log('Generated video URL:', url.toString());
       return url.toString();
     } catch {
       // If URL parsing fails, add simple cache busting
       const separator = stream.embedUrl.includes('?') ? '&' : '?';
-      return `${stream.embedUrl}${separator}_t=${Date.now()}&_refresh=1`;
+      const cacheBuster = `_t=${Date.now()}&_refresh=${Math.random().toString(36).substring(7)}&_nocache=1&_session=${Date.now()}_${Math.random()}`;
+      return `${stream.embedUrl}${separator}${cacheBuster}`;
     }
   }, [stream, retryCount]);
 
@@ -53,38 +59,41 @@ export const useStreamBypass = (stream: Stream | null) => {
   useEffect(() => {
     if (stream?.embedUrl) {
       console.log('🎬 Stream detected, initializing player...');
+      
+      // Always reset everything on stream change (including page reload)
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setRetryCount(0);
       setUseProxyMethod(false);
       
-      // Force a small delay to ensure DOM is ready
+      // Force immediate refresh to ensure stream loads
       setTimeout(() => {
         console.log('✅ Stream player ready for:', stream.embedUrl?.substring(0, 50) + '...');
+        // Trigger a refresh to ensure the stream loads properly
+        setRetryCount(1);
+        setRetryCount(0);
       }, 100);
     }
   }, [stream?.embedUrl]);
 
-  // Set timeout for loading with reasonable duration
+  // Set timeout for loading with auto-retry
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError) {
-      const timeoutDuration = 12000; // Reduced to 12 seconds for faster feedback
+      const timeoutDuration = 10000; // 10 seconds timeout
       
       const timer = setTimeout(() => {
         if (!isContentLoaded) {
-          console.log('⏰ Stream loading timeout, trying to refresh...');
+          console.log('⏰ Stream loading timeout, forcing refresh...');
           setIframeTimeout(true);
-          // Auto-retry once on timeout
-          if (retryCount === 0) {
-            refreshStream();
-          }
+          // Force refresh on timeout
+          refreshStream();
         }
       }, timeoutDuration);
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, retryCount, refreshStream]);
+  }, [stream, isContentLoaded, loadError, refreshStream]);
 
   return {
     retryCount,

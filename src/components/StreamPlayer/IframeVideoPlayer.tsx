@@ -19,6 +19,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const [showControls, setShowControls] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSrc, setCurrentSrc] = useState('');
 
   // Handle home navigation
   const handleHomeClick = () => {
@@ -52,17 +53,26 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     onError();
   };
 
-  // Force reload iframe when src changes (important for page refreshes)
+  // Force reload iframe when src changes (critical for page refreshes)
   useEffect(() => {
-    if (src && iframeRef.current) {
-      console.log('🔄 Reloading iframe with new src:', src.substring(0, 50) + '...');
+    if (src && src !== currentSrc) {
+      console.log('🔄 New src detected, forcing iframe reload:', src.substring(0, 50) + '...');
+      
+      setCurrentSrc(src);
       setHasLoaded(false);
       setIsLoading(true);
       
-      // Force iframe reload by setting src
-      iframeRef.current.src = src;
+      if (iframeRef.current) {
+        // Force complete iframe reload by clearing and setting src
+        iframeRef.current.src = '';
+        setTimeout(() => {
+          if (iframeRef.current) {
+            iframeRef.current.src = src;
+          }
+        }, 100);
+      }
     }
-  }, [src]);
+  }, [src, currentSrc]);
 
   // Auto-hide controls
   useEffect(() => {
@@ -88,20 +98,29 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     return () => clearTimeout(timer);
   }, [showControls]);
 
-  // Set a reasonable timeout for iframe loading
+  // Set a reasonable timeout for iframe loading with retry
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading && src) {
       const timeout = setTimeout(() => {
         if (!hasLoaded && isLoading) {
-          console.log('📺 Iframe taking too long, assuming loaded...');
-          setIsLoading(false);
-          onLoad();
+          console.log('📺 Iframe taking too long, trying to reload...');
+          // Try to reload the iframe
+          if (iframeRef.current) {
+            const currentSrcValue = iframeRef.current.src;
+            iframeRef.current.src = '';
+            setTimeout(() => {
+              if (iframeRef.current) {
+                iframeRef.current.src = currentSrcValue;
+              }
+            }, 500);
+          }
+          onLoad(); // Assume loaded to prevent infinite loading
         }
       }, 8000); // 8 second timeout
 
       return () => clearTimeout(timeout);
     }
-  }, [isLoading, hasLoaded, onLoad]);
+  }, [isLoading, hasLoaded, onLoad, src]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
@@ -111,13 +130,14 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <p className="text-sm">Loading stream...</p>
+            <p className="text-xs text-gray-400 mt-1">Please wait...</p>
           </div>
         </div>
       )}
 
       <iframe 
         ref={iframeRef}
-        src={src}
+        src={currentSrc || src}
         className="w-full h-full absolute inset-0"
         allowFullScreen
         title={title || "Live Stream"}

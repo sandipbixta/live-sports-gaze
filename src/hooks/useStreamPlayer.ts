@@ -11,7 +11,7 @@ export const useStreamPlayer = () => {
   const [streamLoading, setStreamLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string | null>(null);
 
-  // Optimized stream fetching with better reload handling
+  // Enhanced stream fetching with better reload handling
   const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
     setStreamLoading(true);
     const sourceKey = streamNo 
@@ -20,17 +20,17 @@ export const useStreamPlayer = () => {
     setActiveSource(sourceKey);
     
     try {
-      console.log(`🎯 Fetching stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
+      console.log(`🎯 Fetching fresh stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
-      // Use a timeout but longer for better reliability
+      // Always fetch fresh data, no cache for streams
       const streamData = await Promise.race([
         fetchStream(source.source, source.id, streamNo),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Stream timeout')), 5000) // Increased to 5 seconds
+          setTimeout(() => reject(new Error('Stream timeout')), 8000) // 8 seconds timeout
         )
       ]) as Stream | Stream[];
       
-      console.log('✅ Stream data received successfully');
+      console.log('✅ Fresh stream data received successfully');
       
       // Handle response
       if (Array.isArray(streamData)) {
@@ -38,9 +38,24 @@ export const useStreamPlayer = () => {
           ? streamData.find(s => s.streamNo === streamNo)
           : streamData.find(s => s.hd) || streamData[0];
         
-        setCurrentStream(selectedStream || null);
-      } else {
-        setCurrentStream(streamData);
+        if (selectedStream) {
+          // Add timestamp to ensure freshness
+          const freshStream = {
+            ...selectedStream,
+            embedUrl: selectedStream.embedUrl,
+            timestamp: Date.now()
+          };
+          setCurrentStream(freshStream);
+        } else {
+          setCurrentStream(null);
+        }
+      } else if (streamData) {
+        // Add timestamp to ensure freshness
+        const freshStream = {
+          ...streamData,
+          timestamp: Date.now()
+        };
+        setCurrentStream(freshStream);
       }
       
       // Smooth scroll to player
@@ -49,25 +64,23 @@ export const useStreamPlayer = () => {
         if (playerElement) {
           playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error('❌ Stream load error:', error);
       setCurrentStream(null);
       
       // Show more helpful error message
-      if (error instanceof Error && error.message === 'Stream timeout') {
-        toast({
-          title: "Stream Loading",
-          description: "Stream is taking longer to load. Please wait or try another source.",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Stream Error",
-          description: "Failed to load stream. Try another source or refresh the page.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Stream Loading Issue",
+        description: "Stream failed to load. Trying to refresh automatically...",
+        variant: "default",
+      });
+      
+      // Auto-retry once after a short delay
+      setTimeout(() => {
+        console.log('🔄 Auto-retrying stream load...');
+        fetchStreamData(source, streamNo);
+      }, 2000);
     } finally {
       setStreamLoading(false);
     }
@@ -76,24 +89,37 @@ export const useStreamPlayer = () => {
   const handleMatchSelect = (match: Match) => {
     console.log('🎬 Match selected:', match.title);
     setFeaturedMatch(match);
+    setCurrentStream(null); // Clear current stream first
+    
     if (match.sources && match.sources.length > 0) {
-      fetchStreamData(match.sources[0]);
-    } else {
-      setCurrentStream(null);
+      // Force fresh load
+      setTimeout(() => {
+        fetchStreamData(match.sources[0]);
+      }, 100);
     }
   };
 
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
+    setCurrentStream(null); // Clear current stream first
+    
     if (featuredMatch) {
-      fetchStreamData({ source, id }, streamNo);
+      // Force fresh load with delay
+      setTimeout(() => {
+        fetchStreamData({ source, id }, streamNo);
+      }, 100);
     }
   };
 
   const handleStreamRetry = () => {
     console.log('🔄 Retrying stream...');
+    setCurrentStream(null); // Clear current stream first
+    
     if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
-      fetchStreamData(featuredMatch.sources[0]);
+      // Force fresh load with delay
+      setTimeout(() => {
+        fetchStreamData(featuredMatch.sources[0]);
+      }, 100);
     }
   };
 
