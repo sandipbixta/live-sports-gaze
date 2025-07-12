@@ -1,7 +1,8 @@
+
 import React, { useEffect, useRef } from 'react';
 
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video' | 'direct-link';
+  type: 'banner' | 'sidebar' | 'video' | 'direct-link' | 'native-bar';
   className?: string;
 }
 
@@ -91,6 +92,28 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       
       adRef.current.appendChild(script);
       
+    } else if (type === 'native-bar') {
+      // Native bar ad - script and container
+      const script = document.createElement('script');
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+      script.src = '//monkeyhundredsarmed.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      
+      const container = document.createElement('div');
+      container.id = 'container-a873bc1d3d203f2f13c32a99592441b8';
+      
+      // Add error handling
+      script.onerror = () => {
+        console.log('Native bar ad script failed to load');
+      };
+      
+      script.onload = () => {
+        console.log('Native bar ad script loaded successfully');
+      };
+      
+      adRef.current.appendChild(script);
+      adRef.current.appendChild(container);
+      
     } else if (type === 'direct-link') {
       // Direct link ad - mobile optimized
       const link = document.createElement('a');
@@ -116,7 +139,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     return (
       <div className={`bg-gray-200 dark:bg-gray-800 rounded-lg p-4 text-center ${className}`}>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Advertisement Placeholder ({type}) - {type === 'banner' ? 'Banner: 728x90' : type === 'video' ? 'Video Ad' : type === 'sidebar' ? 'Sidebar Ad' : 'Ad'}
+          Advertisement Placeholder ({type}) - {type === 'banner' ? 'Banner: 728x90' : type === 'video' ? 'Video Ad' : type === 'sidebar' ? 'Sidebar Ad' : type === 'native-bar' ? 'Native Bar Ad' : 'Ad'}
         </p>
       </div>
     );
@@ -128,7 +151,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
       style={{ 
-        minHeight: type === 'banner' ? '90px' : type === 'video' ? '250px' : type === 'sidebar' ? '200px' : 'auto',
+        minHeight: type === 'banner' ? '90px' : type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'native-bar' ? '120px' : 'auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
