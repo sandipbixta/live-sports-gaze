@@ -147,8 +147,8 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
         }}
       />
 
-      {/* Always Visible DAMITV Home Button - Fixed Position */}
-      <div className="absolute top-2 left-2 z-50">
+      {/* Always Visible DAMITV Home Button - Top Center */}
+      <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50">
         <Button
           variant="ghost"
           onClick={handleHomeClick}
