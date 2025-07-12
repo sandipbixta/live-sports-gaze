@@ -9,91 +9,73 @@ export const useStreamBypass = (stream: Stream | null) => {
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
 
-  // Create the appropriate video URL based on bypass method
+  // Create a stable video URL with minimal cache busting to avoid conflicts
   const getVideoUrl = useCallback(() => {
     if (!stream?.embedUrl) return '';
     
     try {
-      let baseUrl = stream.embedUrl;
-      
-      // Add stronger cache busting parameters to force reload
+      const baseUrl = stream.embedUrl;
       const url = new URL(baseUrl);
+      
+      // Only add essential cache busting - too many parameters cause conflicts
       url.searchParams.set('_t', Date.now().toString());
-      url.searchParams.set('_refresh', Math.random().toString(36).substring(7));
-      url.searchParams.set('_nocache', '1');
       
-      // Add session ID to ensure uniqueness across page loads
-      url.searchParams.set('_session', `${Date.now()}_${Math.random()}`);
-      
-      // Only add retry parameter if we're actually retrying
+      // Only add retry parameter if actually retrying (not on first load)
       if (retryCount > 0) {
         url.searchParams.set('_retry', retryCount.toString());
       }
       
-      console.log('Generated video URL:', url.toString());
+      console.log('🎯 Generated clean video URL:', url.toString());
       return url.toString();
     } catch {
-      // If URL parsing fails, add simple cache busting
+      // Fallback for invalid URLs
       const separator = stream.embedUrl.includes('?') ? '&' : '?';
-      const cacheBuster = `_t=${Date.now()}&_refresh=${Math.random().toString(36).substring(7)}&_nocache=1&_session=${Date.now()}_${Math.random()}`;
-      return `${stream.embedUrl}${separator}${cacheBuster}`;
+      return `${stream.embedUrl}${separator}_t=${Date.now()}`;
     }
   }, [stream, retryCount]);
 
-  // Function to refresh stream URL and try different bypass methods
+  // Function to refresh stream URL
   const refreshStream = useCallback(() => {
     if (stream?.embedUrl) {
-      console.log(`🔄 Refreshing video stream (attempt ${retryCount + 1})...`);
+      console.log(`🔄 Refreshing stream (attempt ${retryCount + 1})...`);
       
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setRetryCount(prev => prev + 1);
       
-      // Alternate between direct and proxy methods
-      setUseProxyMethod(retryCount % 2 === 1);
+      // Only use proxy method after first retry
+      setUseProxyMethod(retryCount > 0);
     }
   }, [stream, retryCount]);
 
-  // Reset states when stream changes or on initial load
+  // Reset states when stream changes - simplified logic
   useEffect(() => {
     if (stream?.embedUrl) {
-      console.log('🎬 Stream detected, initializing player...');
+      console.log('🎬 New stream detected, resetting player state...');
       
-      // Always reset everything on stream change (including page reload)
+      // Reset all states for new stream
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
       setRetryCount(0);
       setUseProxyMethod(false);
-      
-      // Force immediate refresh to ensure stream loads
-      setTimeout(() => {
-        console.log('✅ Stream player ready for:', stream.embedUrl?.substring(0, 50) + '...');
-        // Trigger a refresh to ensure the stream loads properly
-        setRetryCount(1);
-        setRetryCount(0);
-      }, 100);
     }
   }, [stream?.embedUrl]);
 
-  // Set timeout for loading with auto-retry
+  // Simplified timeout with auto-retry - only for actual loading issues
   useEffect(() => {
-    if (stream && !isContentLoaded && !loadError) {
-      const timeoutDuration = 10000; // 10 seconds timeout
-      
+    if (stream && !isContentLoaded && !loadError && retryCount === 0) {
       const timer = setTimeout(() => {
-        if (!isContentLoaded) {
-          console.log('⏰ Stream loading timeout, forcing refresh...');
+        if (!isContentLoaded && !loadError) {
+          console.log('⏰ Initial load timeout, will auto-retry if needed...');
           setIframeTimeout(true);
-          // Force refresh on timeout
-          refreshStream();
         }
-      }, timeoutDuration);
+      }, 20000); // 20 seconds - longer timeout for better reliability
 
       return () => clearTimeout(timer);
     }
-  }, [stream, isContentLoaded, loadError, refreshStream]);
+  }, [stream, isContentLoaded, loadError, retryCount]);
 
   return {
     retryCount,

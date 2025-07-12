@@ -17,9 +17,9 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showControls, setShowControls] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentSrc, setCurrentSrc] = useState('');
+  const [lastSrc, setLastSrc] = useState('');
+  const [reloadCount, setReloadCount] = useState(0);
 
   // Handle home navigation
   const handleHomeClick = () => {
@@ -40,10 +40,14 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
 
   // Handle iframe load success
   const handleIframeLoad = () => {
-    console.log('✅ Iframe loaded successfully');
-    setHasLoaded(true);
+    console.log('✅ Iframe content loaded');
     setIsLoading(false);
     onLoad();
+    
+    // Give the iframe content time to fully initialize
+    setTimeout(() => {
+      console.log('🎬 Stream should now be ready for playback');
+    }, 1000);
   };
 
   // Handle iframe load error
@@ -53,26 +57,43 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     onError();
   };
 
-  // Force reload iframe when src changes (critical for page refreshes)
+  // Smart iframe reloading - only when src actually changes and with proper delay
   useEffect(() => {
-    if (src && src !== currentSrc) {
-      console.log('🔄 New src detected, forcing iframe reload:', src.substring(0, 50) + '...');
+    if (!src || src === lastSrc) return;
+    
+    console.log('🔄 Stream URL changed, reloading iframe...');
+    setLastSrc(src);
+    setIsLoading(true);
+    setReloadCount(prev => prev + 1);
+    
+    if (iframeRef.current) {
+      // Clear existing src first
+      iframeRef.current.src = 'about:blank';
       
-      setCurrentSrc(src);
-      setHasLoaded(false);
-      setIsLoading(true);
-      
-      if (iframeRef.current) {
-        // Force complete iframe reload by clearing and setting src
-        iframeRef.current.src = '';
-        setTimeout(() => {
-          if (iframeRef.current) {
-            iframeRef.current.src = src;
-          }
-        }, 100);
-      }
+      // Wait longer before setting new src to ensure clean reload
+      setTimeout(() => {
+        if (iframeRef.current && src) {
+          console.log('🎯 Setting new iframe src:', src.substring(0, 80) + '...');
+          iframeRef.current.src = src;
+        }
+      }, 300); // Increased delay for better reliability
     }
-  }, [src, currentSrc]);
+  }, [src, lastSrc]);
+
+  // Timeout handling with longer duration for streaming content
+  useEffect(() => {
+    if (!isLoading) return;
+    
+    const timeout = setTimeout(() => {
+      if (isLoading) {
+        console.log('⏰ Iframe load timeout - assuming successful');
+        setIsLoading(false);
+        onLoad(); // Assume success after reasonable wait time
+      }
+    }, 15000); // Increased to 15 seconds for streaming content
+
+    return () => clearTimeout(timeout);
+  }, [isLoading, onLoad, reloadCount]);
 
   // Auto-hide controls
   useEffect(() => {
@@ -80,7 +101,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     
     const timer = setTimeout(() => {
       setShowControls(false);
-    }, 4000);
+    }, 5000); // Increased to 5 seconds
 
     const handleMouseMove = () => {
       setShowControls(true);
@@ -98,46 +119,21 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     return () => clearTimeout(timer);
   }, [showControls]);
 
-  // Set a reasonable timeout for iframe loading with retry
-  useEffect(() => {
-    if (isLoading && src) {
-      const timeout = setTimeout(() => {
-        if (!hasLoaded && isLoading) {
-          console.log('📺 Iframe taking too long, trying to reload...');
-          // Try to reload the iframe
-          if (iframeRef.current) {
-            const currentSrcValue = iframeRef.current.src;
-            iframeRef.current.src = '';
-            setTimeout(() => {
-              if (iframeRef.current) {
-                iframeRef.current.src = currentSrcValue;
-              }
-            }, 500);
-          }
-          onLoad(); // Assume loaded to prevent infinite loading
-        }
-      }, 8000); // 8 second timeout
-
-      return () => clearTimeout(timeout);
-    }
-  }, [isLoading, hasLoaded, onLoad, src]);
-
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
-      {/* Loading indicator */}
-      {isLoading && (
+      {/* Loading indicator - only show for first 3 seconds */}
+      {isLoading && reloadCount <= 1 && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#151922]">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <p className="text-sm">Loading stream...</p>
-            <p className="text-xs text-gray-400 mt-1">Please wait...</p>
+            <p className="text-xs text-gray-400 mt-1">Preparing video player...</p>
           </div>
         </div>
       )}
 
       <iframe 
         ref={iframeRef}
-        src={currentSrc || src}
         className="w-full h-full absolute inset-0"
         allowFullScreen
         title={title || "Live Stream"}
