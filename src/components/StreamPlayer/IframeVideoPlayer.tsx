@@ -18,6 +18,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showControls, setShowControls] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Handle home navigation
   const handleHomeClick = () => {
@@ -40,14 +41,28 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const handleIframeLoad = () => {
     console.log('✅ Iframe loaded successfully');
     setHasLoaded(true);
+    setIsLoading(false);
     onLoad();
   };
 
   // Handle iframe load error
   const handleIframeError = () => {
     console.error('❌ Iframe failed to load');
+    setIsLoading(false);
     onError();
   };
+
+  // Force reload iframe when src changes (important for page refreshes)
+  useEffect(() => {
+    if (src && iframeRef.current) {
+      console.log('🔄 Reloading iframe with new src:', src.substring(0, 50) + '...');
+      setHasLoaded(false);
+      setIsLoading(true);
+      
+      // Force iframe reload by setting src
+      iframeRef.current.src = src;
+    }
+  }, [src]);
 
   // Auto-hide controls
   useEffect(() => {
@@ -55,7 +70,7 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     
     const timer = setTimeout(() => {
       setShowControls(false);
-    }, 4000); // Increased to 4 seconds
+    }, 4000);
 
     const handleMouseMove = () => {
       setShowControls(true);
@@ -75,33 +90,39 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
 
   // Set a reasonable timeout for iframe loading
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (!hasLoaded) {
-        console.log('Iframe taking too long to load, calling onLoad anyway');
-        onLoad();
-      }
-    }, 5000); // 5 second timeout
+    if (isLoading) {
+      const timeout = setTimeout(() => {
+        if (!hasLoaded && isLoading) {
+          console.log('📺 Iframe taking too long, assuming loaded...');
+          setIsLoading(false);
+          onLoad();
+        }
+      }, 8000); // 8 second timeout
 
-    return () => clearTimeout(timeout);
-  }, [hasLoaded, onLoad]);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, hasLoaded, onLoad]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#151922]">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+            <p className="text-sm">Loading stream...</p>
+          </div>
+        </div>
+      )}
+
       <iframe 
         ref={iframeRef}
         src={src}
         className="w-full h-full absolute inset-0"
         allowFullScreen
         title={title || "Live Stream"}
-        onLoad={() => {
-          console.log('✅ Iframe loaded successfully');
-          setHasLoaded(true);
-          onLoad();
-        }}
-        onError={() => {
-          console.error('❌ Iframe failed to load');
-          onError();
-        }}
+        onLoad={handleIframeLoad}
+        onError={handleIframeError}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads allow-top-navigation allow-top-navigation-by-user-activation"
         referrerPolicy="no-referrer"
