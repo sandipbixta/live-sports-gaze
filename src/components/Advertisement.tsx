@@ -56,6 +56,24 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adContainer.appendChild(script2);
       adRef.current.appendChild(adContainer);
       
+    } else if (type === 'video') {
+      // Video ad - new ad script
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+      script.async = true;
+      
+      // Add error handling
+      script.onerror = () => {
+        console.log('Video ad script failed to load');
+      };
+      
+      script.onload = () => {
+        console.log('Video ad script loaded successfully');
+      };
+      
+      adRef.current.appendChild(script);
+      
     } else if (type === 'direct-link') {
       // Direct link ad - mobile optimized
       const link = document.createElement('a');
@@ -81,7 +99,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     return (
       <div className={`bg-gray-200 dark:bg-gray-800 rounded-lg p-4 text-center ${className}`}>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Advertisement Placeholder ({type}) - Banner: 728x90
+          Advertisement Placeholder ({type}) - {type === 'banner' ? 'Banner: 728x90' : type === 'video' ? 'Video Ad' : 'Ad'}
         </p>
       </div>
     );
@@ -93,7 +111,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
       style={{ 
-        minHeight: type === 'banner' ? '90px' : 'auto',
+        minHeight: type === 'banner' ? '90px' : type === 'video' ? '250px' : 'auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
