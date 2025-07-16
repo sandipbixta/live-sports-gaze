@@ -278,17 +278,17 @@ const Movies = () => {
       <PageLayout>
         <div className="space-y-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold mb-2 text-white">Movies</h1>
-            <p className="text-gray-400 text-lg">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-2 text-white">Movies</h1>
+            <p className="text-gray-400 text-sm sm:text-lg">
               Discover thousands of movies to stream
             </p>
           </div>
 
           {/* Search and Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-            <div className="w-full sm:w-auto">
+          <div className="flex flex-col gap-4 justify-between items-center">
+            <div className="w-full">
               <Select value={selectedGenre} onValueChange={handleGenreChange}>
-                <SelectTrigger className="w-full sm:w-48 bg-gray-800 border-gray-700 text-white">
+                <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -302,14 +302,14 @@ const Movies = () => {
               </Select>
             </div>
 
-            <div className="relative w-full sm:w-auto">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
                 placeholder="Search movies..."
                 value={searchTerm}
                 onChange={handleSearch}
-                className="w-full sm:w-64 pl-10 pr-4 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                className="w-full pl-10 pr-4 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
               />
             </div>
           </div>
@@ -323,29 +323,29 @@ const Movies = () => {
             </div>
           ) : (
             <>
-              {/* Netflix-style Movie Grid with fixed z-index issues */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 pb-8">
+              {/* Mobile-optimized Movie Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6 pb-8">
                 {moviesData?.results.map((movie, index) => (
                   <div
                     key={movie.id}
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-110 relative"
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-105 sm:hover:scale-110 relative"
                     style={{ zIndex: moviesData.results.length - index }}
                     onClick={() => handleMovieClick(movie)}
                   >
-                    {/* Main Card */}
+                    {/* Main Card - Optimized for mobile */}
                     <div className="relative overflow-hidden rounded-lg shadow-lg">
                       <img
                         src={movie.poster_path ? `${TMDB_IMAGE_BASE_URL}${movie.poster_path}` : '/placeholder.svg'}
                         alt={movie.title}
-                        className="w-full h-60 sm:h-72 md:h-80 object-cover transition-transform duration-300"
+                        className="w-full h-48 xs:h-56 sm:h-72 md:h-80 object-cover transition-transform duration-300"
                       />
                       
-                      {/* Hover Overlay */}
+                      {/* Mobile-friendly Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
-                            className="bg-white text-black hover:bg-gray-200 rounded-full p-2"
+                            className="bg-white text-black hover:bg-gray-200 rounded-full p-2 min-h-[44px] min-w-[44px]"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleMovieClick(movie);
@@ -356,7 +356,7 @@ const Movies = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-gray-400 text-white hover:bg-gray-800 rounded-full p-2"
+                            className="border-gray-400 text-white hover:bg-gray-800 rounded-full p-2 min-h-[44px] min-w-[44px] hidden sm:flex"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Plus className="h-4 w-4" />
@@ -364,7 +364,7 @@ const Movies = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-gray-400 text-white hover:bg-gray-800 rounded-full p-2"
+                            className="border-gray-400 text-white hover:bg-gray-800 rounded-full p-2 min-h-[44px] min-w-[44px] hidden sm:flex"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Info className="h-4 w-4" />
@@ -373,18 +373,29 @@ const Movies = () => {
                       </div>
 
                       {/* Quality Badge */}
-                      <div className="absolute top-2 left-2 bg-[#ff5a36] text-white text-xs px-2 py-1 rounded font-semibold">
+                      <div className="absolute top-1 left-1 sm:top-2 sm:left-2 bg-[#ff5a36] text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded font-semibold">
                         HD
                       </div>
 
                       {/* Rating Badge */}
-                      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span>{movie.vote_average?.toFixed(1) || 'N/A'}</span>
+                      <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-black/70 text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded flex items-center gap-1">
+                        <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs">{movie.vote_average?.toFixed(1) || 'N/A'}</span>
                       </div>
                     </div>
 
-                    {/* Expanded Info Panel (only shows on larger screens and with proper z-index) */}
+                    {/* Movie Title for Mobile */}
+                    <div className="mt-2 sm:hidden">
+                      <h3 className="font-medium text-white text-xs line-clamp-2 text-center px-1">
+                        {movie.title}
+                      </h3>
+                      <div className="flex items-center justify-center text-xs text-gray-400 mt-1">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        <span>{movie.release_date?.split('-')[0] || 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {/* Expanded Info Panel (desktop only) */}
                     <div className="hidden lg:block absolute top-full left-0 right-0 bg-gray-900 rounded-b-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 p-4 max-w-sm">
                       <h3 className="font-bold text-white text-sm mb-2 line-clamp-2">
                         {movie.title}
@@ -429,29 +440,29 @@ const Movies = () => {
                 ))}
               </div>
 
-              {/* Enhanced Pagination with higher z-index */}
+              {/* Mobile-friendly Pagination */}
               {moviesData && moviesData.total_pages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12 flex-wrap relative z-50">
+                <div className="flex justify-center items-center gap-1 sm:gap-2 mt-12 flex-wrap relative z-50">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                    className="px-2 sm:px-4 py-2 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 text-xs sm:text-sm"
                   >
-                    Previous
+                    Prev
                   </Button>
 
                   {getPageNumbers().map((page, index) => (
                     <div key={index}>
                       {page === '...' ? (
-                        <span className="px-2 py-1 text-gray-500">...</span>
+                        <span className="px-1 py-1 text-gray-500 text-xs">...</span>
                       ) : (
                         <Button
                           variant={currentPage === page ? "default" : "outline"}
                           size="sm"
                           onClick={() => handlePageChange(page as number)}
-                          className={`px-3 py-2 min-w-[40px] ${
+                          className={`px-2 sm:px-3 py-2 min-w-[32px] sm:min-w-[40px] text-xs sm:text-sm ${
                             currentPage === page
                               ? 'bg-[#ff5a36] text-white hover:bg-[#ff5a36]/90'
                               : 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700'
@@ -468,7 +479,7 @@ const Movies = () => {
                     size="sm"
                     onClick={() => handlePageChange(Math.min(moviesData.total_pages, currentPage + 1))}
                     disabled={currentPage === moviesData.total_pages}
-                    className="px-4 py-2 bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                    className="px-2 sm:px-4 py-2 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 text-xs sm:text-sm"
                   >
                     Next
                   </Button>
