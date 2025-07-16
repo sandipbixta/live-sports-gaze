@@ -1,63 +1,54 @@
-
 import React from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient } from 'react-query';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from "@/components/ui/toaster"
 
-// Import pages directly instead of lazy loading to avoid module import errors
-import Index from "./pages/Index";
-import Match from "./pages/Match";
-import Schedule from "./pages/Schedule";
-import Live from "./pages/Live";
-import Channels from "./pages/Channels";
-import ChannelPlayer from "./pages/ChannelPlayer";
-import ManualMatchPlayer from "./pages/ManualMatchPlayer";
-import News from "./pages/News";
-import Movies from "./pages/Movies";
-import MoviePlayer from "./pages/MoviePlayer";
-import DMCANotice from "./pages/DMCANotice";
-import NotFound from "./pages/NotFound";
+import Index from './pages/Index';
+import Live from './pages/Live';
+import Schedule from './pages/Schedule';
+import Channels from './pages/Channels';
+import Movies from './pages/Movies';
+import News from './pages/News';
+import DMCANotice from './pages/DMCANotice';
+import SpecialOffer from './pages/SpecialOffer';
+import Match from './pages/Match';
+import ManualMatchPlayer from './pages/ManualMatchPlayer';
+import ChannelPlayer from './pages/ChannelPlayer';
+import MoviePlayer from './pages/MoviePlayer';
+import NotFound from './pages/NotFound';
+import Football from './pages/Football';
+import Basketball from './pages/Basketball';
 
-// Optimized query client configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
-    }
-  }
-});
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+function App() {
+  return (
     <HelmetProvider>
-      <BrowserRouter>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/match/:sportId/:matchId" element={<Match />} />
-            <Route path="/manual-match/:matchId" element={<ManualMatchPlayer />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/live" element={<Live />} />
-            <Route path="/channels" element={<Channels />} />
-            <Route path="/channel/:country/:channelId" element={<ChannelPlayer />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/movies" element={<Movies />} />
-            <Route path="/movie/:movieId" element={<MoviePlayer />} />
-            <Route path="/dmca" element={<DMCANotice />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </TooltipProvider>
-      </BrowserRouter>
+      <QueryClient>
+        <BrowserRouter>
+          <div className="min-h-screen bg-black text-white">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/live" element={<Live />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/channels" element={<Channels />} />
+              <Route path="/football" element={<Football />} />
+              <Route path="/basketball" element={<Basketball />} />
+              <Route path="/movies" element={<Movies />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/dmca" element={<DMCANotice />} />
+              <Route path="/special-offer" element={<SpecialOffer />} />
+              <Route path="/match/:matchId" element={<Match />} />
+              <Route path="/manual-match/:matchId" element={<ManualMatchPlayer />} />
+              <Route path="/channel/:channelId" element={<ChannelPlayer />} />
+              <Route path="/movie/:movieId" element={<MoviePlayer />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </div>
+        </BrowserRouter>
+      </QueryClient>
     </HelmetProvider>
-  </QueryClientProvider>
-);
+  );
+}
 
 export default App;
