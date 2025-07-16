@@ -7,7 +7,7 @@
   <!-- Home Page - Highest Priority -->
   <url>
     <loc>https://damitv.pro/</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,23 +15,7 @@
   <!-- Live Sports Section - High Priority -->
   <url>
     <loc>https://damitv.pro/live</loc>
-    <lastmod>2025-07-16</lastmod>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- Football Landing Page - High Priority for SEO -->
-  <url>
-    <loc>https://damitv.pro/football</loc>
-    <lastmod>2025-07-16</lastmod>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- Basketball Landing Page - High Priority for SEO -->
-  <url>
-    <loc>https://damitv.pro/basketball</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -39,7 +23,7 @@
   <!-- Schedule - Updated Daily -->
   <url>
     <loc>https://damitv.pro/schedule</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -47,23 +31,15 @@
   <!-- Channels Page -->
   <url>
     <loc>https://damitv.pro/channels</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-  </url>
-  
-  <!-- Movies Page -->
-  <url>
-    <loc>https://damitv.pro/movies</loc>
-    <lastmod>2025-07-16</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
   </url>
   
   <!-- News Section -->
   <url>
     <loc>https://damitv.pro/news</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -71,7 +47,7 @@
   <!-- Legal Page -->
   <url>
     <loc>https://damitv.pro/dmca</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -79,28 +55,28 @@
   <!-- Manual Match Pages - High Priority for SEO -->
   <url>
     <loc>https://damitv.pro/manual-match/MANCHESTER-CIRT-VS-WYDAD</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://damitv.pro/manual-match/REAL-MADRID-VS-AL-HILAL</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://damitv.pro/manual-match/PACHUCA-VS-SALZBURG</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
     <loc>https://damitv.pro/manual-match/AL-AIN-VS-JUVENTUS</loc>
-    <lastmod>2025-07-16</lastmod>
+    <lastmod>2025-06-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
