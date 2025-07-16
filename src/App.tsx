@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { QueryClient } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from "@/components/ui/toaster"
 
@@ -20,10 +21,12 @@ import NotFound from './pages/NotFound';
 import Football from './pages/Football';
 import Basketball from './pages/Basketball';
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
     <HelmetProvider>
-      <QueryClient>
+      <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <div className="min-h-screen bg-black text-white">
             <Routes>
@@ -46,7 +49,7 @@ function App() {
             <Toaster />
           </div>
         </BrowserRouter>
-      </QueryClient>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
