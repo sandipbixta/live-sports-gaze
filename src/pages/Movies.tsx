@@ -323,12 +323,13 @@ const Movies = () => {
             </div>
           ) : (
             <>
-              {/* Netflix-style Movie Grid with proper spacing */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                {moviesData?.results.map((movie) => (
+              {/* Netflix-style Movie Grid with fixed z-index issues */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 pb-8">
+                {moviesData?.results.map((movie, index) => (
                   <div
                     key={movie.id}
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-110 hover:z-10 relative"
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-110 relative"
+                    style={{ zIndex: moviesData.results.length - index }}
                     onClick={() => handleMovieClick(movie)}
                   >
                     {/* Main Card */}
@@ -383,8 +384,8 @@ const Movies = () => {
                       </div>
                     </div>
 
-                    {/* Expanded Info Panel (appears on hover) */}
-                    <div className="absolute top-full left-0 right-0 bg-gray-900 rounded-b-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-20 p-4">
+                    {/* Expanded Info Panel (only shows on larger screens and with proper z-index) */}
+                    <div className="hidden lg:block absolute top-full left-0 right-0 bg-gray-900 rounded-b-lg shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 p-4 max-w-sm">
                       <h3 className="font-bold text-white text-sm mb-2 line-clamp-2">
                         {movie.title}
                       </h3>
@@ -428,9 +429,9 @@ const Movies = () => {
                 ))}
               </div>
 
-              {/* Enhanced Pagination */}
+              {/* Enhanced Pagination with higher z-index */}
               {moviesData && moviesData.total_pages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-12 flex-wrap">
+                <div className="flex justify-center items-center gap-2 mt-12 flex-wrap relative z-50">
                   <Button
                     variant="outline"
                     size="sm"
