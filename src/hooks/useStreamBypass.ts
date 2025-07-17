@@ -8,8 +8,9 @@ export const useStreamBypass = (stream: Stream | null) => {
   const [loadError, setLoadError] = useState(false);
   const [isContentLoaded, setIsContentLoaded] = useState(false);
   const [iframeTimeout, setIframeTimeout] = useState(false);
+  const maxRetries = 2; // Limit retries to prevent infinite loops
 
-  // Create a stable video URL with minimal cache busting to avoid conflicts
+  // Create a stable video URL with minimal cache busting
   const getVideoUrl = useCallback(() => {
     if (!stream?.embedUrl) return '';
     
@@ -17,15 +18,15 @@ export const useStreamBypass = (stream: Stream | null) => {
       const baseUrl = stream.embedUrl;
       const url = new URL(baseUrl);
       
-      // Only add essential cache busting - too many parameters cause conflicts
+      // Add timestamp for cache busting
       url.searchParams.set('_t', Date.now().toString());
       
-      // Only add retry parameter if actually retrying (not on first load)
+      // Add retry parameter only if actually retrying
       if (retryCount > 0) {
         url.searchParams.set('_retry', retryCount.toString());
       }
       
-      console.log('🎯 Generated clean video URL:', url.toString());
+      console.log('🎯 Generated video URL:', url.toString());
       return url.toString();
     } catch {
       // Fallback for invalid URLs
@@ -34,27 +35,30 @@ export const useStreamBypass = (stream: Stream | null) => {
     }
   }, [stream, retryCount]);
 
-  // Function to refresh stream URL
+  // Function to refresh stream URL with retry limits
   const refreshStream = useCallback(() => {
-    if (stream?.embedUrl) {
-      console.log(`🔄 Refreshing stream (attempt ${retryCount + 1})...`);
-      
-      setLoadError(false);
-      setIsContentLoaded(false);
-      setIframeTimeout(false);
-      setRetryCount(prev => prev + 1);
-      
-      // Only use proxy method after first retry
-      setUseProxyMethod(retryCount > 0);
+    if (!stream?.embedUrl || retryCount >= maxRetries) {
+      console.log('🛑 Max retries reached or no stream URL, stopping refresh');
+      setLoadError(true);
+      return;
     }
-  }, [stream, retryCount]);
+    
+    console.log(`🔄 Refreshing stream (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+    
+    setLoadError(false);
+    setIsContentLoaded(false);
+    setIframeTimeout(false);
+    setRetryCount(prev => prev + 1);
+    
+    // Use proxy method after first retry
+    setUseProxyMethod(retryCount > 0);
+  }, [stream, retryCount, maxRetries]);
 
-  // Reset states when stream changes - simplified logic
+  // Reset states when stream changes
   useEffect(() => {
     if (stream?.embedUrl) {
       console.log('🎬 New stream detected, resetting player state...');
       
-      // Reset all states for new stream
       setLoadError(false);
       setIsContentLoaded(false);
       setIframeTimeout(false);
@@ -63,15 +67,15 @@ export const useStreamBypass = (stream: Stream | null) => {
     }
   }, [stream?.embedUrl]);
 
-  // Simplified timeout with auto-retry - only for actual loading issues
+  // Timeout handling - only for initial load
   useEffect(() => {
     if (stream && !isContentLoaded && !loadError && retryCount === 0) {
       const timer = setTimeout(() => {
         if (!isContentLoaded && !loadError) {
-          console.log('⏰ Initial load timeout, will auto-retry if needed...');
+          console.log('⏰ Initial load timeout detected');
           setIframeTimeout(true);
         }
-      }, 20000); // 20 seconds - longer timeout for better reliability
+      }, 15000); // 15 seconds - reasonable timeout for PC
 
       return () => clearTimeout(timer);
     }
@@ -83,6 +87,7 @@ export const useStreamBypass = (stream: Stream | null) => {
     loadError,
     isContentLoaded,
     iframeTimeout,
+    maxRetries,
     setLoadError,
     setIsContentLoaded,
     setIframeTimeout,
