@@ -8,7 +8,6 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
-import AnnouncementBanner from '../components/AnnouncementBanner';
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
@@ -145,33 +144,7 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Banner Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
-
-        {/* Hero/Intro: Remove "Watch Live Football Streams" headline and football-specific text */}
-        {/* You may wish to add a more generic intro or simply skip it */}
-        {/* Example generic intro below (feel free to adapt): */}
-        {/* <section className="mb-6 sm:mb-8">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 sm:p-8 md:p-10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
-            <div className="relative">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Sports & TV Channels Live Online</h1>
-              <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl">
-                Stream a wide variety of sports and TV events for free. No registration required.
-              </p>
-            </div>
-          </div>
-        </section> */}
-        {/* This section now omitted, per your request */}
-
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
-
-        {/* Direct Link Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="direct-link" className="w-full" />
-        </div> */}
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -210,8 +183,6 @@ const Index = () => {
         
         {!showLiveSports && (
           <>
-            <AnnouncementBanner />
-            
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
             </React.Suspense>
