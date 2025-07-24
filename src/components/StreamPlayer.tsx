@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Stream } from '../types/sports';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +38,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     loadError,
     isContentLoaded,
     iframeTimeout,
-    maxRetries,
     setLoadError,
     setIsContentLoaded,
     setIframeTimeout,
@@ -62,11 +60,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   };
 
   const forcePlayInSite = () => {
-    if (stream?.embedUrl && retryCount < maxRetries) {
+    if (stream?.embedUrl) {
       console.log('Forcing stream to play within DAMITV...');
       refreshStream();
-    } else {
-      console.log('Max retries reached, cannot force play');
     }
   };
   
@@ -85,32 +81,30 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   };
 
   const handleRetry = () => {
-    console.log('🔄 Manual retry requested...');
+    console.log('🔄 Retrying stream within DAMITV...');
     
     if (onRetry && retryCount < 1) {
       onRetry();
-    } else if (retryCount < maxRetries) {
-      refreshStream();
     } else {
-      console.log('Max retries reached, cannot retry');
+      refreshStream();
     }
   };
 
   const handleVideoLoad = () => {
-    console.log('✅ Video loaded successfully');
+    console.log('✅ Video loaded successfully within DAMITV');
     setIsContentLoaded(true);
     setIframeTimeout(false);
     setLoadError(false);
   };
 
   const handleVideoError = () => {
-    console.error('❌ Video failed to load');
+    console.error('❌ Video failed - trying alternative method');
     
-    // Only retry if we haven't exceeded max retries
-    if (retryCount < maxRetries) {
+    // Don't retry endlessly - limit to 2 attempts
+    if (retryCount < 2) {
       setTimeout(() => {
         refreshStream();
-      }, 1500);
+      }, 1000);
     } else {
       console.log('Max retries reached, showing error state');
       setLoadError(true);
@@ -139,8 +133,8 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     );
   }
 
-  // Show error state if we've exceeded retry limits or have persistent errors
-  if ((loadError && retryCount >= maxRetries) || (iframeTimeout && retryCount >= maxRetries)) {
+  // Show error state after reasonable attempts or timeout
+  if ((loadError && retryCount >= 2) || iframeTimeout) {
     const debugInfo = `Stream Debug Info:
       - Source: ${stream.source}
       - ID: ${stream.id}
@@ -148,7 +142,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
       - Language: ${stream.language}
       - HD: ${stream.hd}
       - URL: ${stream.embedUrl?.substring(0, 100)}...
-      - Retry Count: ${retryCount}/${maxRetries}
+      - Retry Count: ${retryCount}
       - Method: ${useProxyMethod ? 'Proxy' : 'Direct'}`;
 
     return (
@@ -169,7 +163,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
     <PlayerContainer>
       <StreamOptimizer stream={stream} />
       <AspectRatio ratio={16 / 9} className="w-full">
-        {/* Show loading overlay only during initial load */}
+        {/* Only show loading overlay during initial load, not during retries */}
         {!isContentLoaded && retryCount === 0 && (
           <StreamLoadingOverlay 
             isVisible={true}

@@ -18,8 +18,8 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadAttempts, setLoadAttempts] = useState(0);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [lastSrc, setLastSrc] = useState('');
+  const [reloadCount, setReloadCount] = useState(0);
 
   // Handle home navigation
   const handleHomeClick = () => {
@@ -33,94 +33,101 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
       if (document.fullscreenElement) {
         document.exitFullscreen();
       } else {
-        iframeRef.current.requestFullscreen().catch(console.error);
+        iframeRef.current.requestFullscreen();
       }
     }
   };
 
   // Handle iframe load success
   const handleIframeLoad = () => {
-    console.log('✅ Iframe content loaded successfully');
+    console.log('✅ Iframe content loaded');
     setIsLoading(false);
-    setHasErrored(false);
     onLoad();
+    
+    // Give the iframe content time to fully initialize
+    setTimeout(() => {
+      console.log('🎬 Stream should now be ready for playback');
+    }, 1000);
   };
 
   // Handle iframe load error
   const handleIframeError = () => {
     console.error('❌ Iframe failed to load');
     setIsLoading(false);
-    setHasErrored(true);
     onError();
   };
 
-  // Smart iframe loading with better PC compatibility
+  // Smart iframe reloading - only when src actually changes and with proper delay
   useEffect(() => {
-    if (!src) return;
+    if (!src || src === lastSrc) return;
     
-    console.log('🔄 Loading iframe with src:', src.substring(0, 80) + '...');
+    console.log('🔄 Stream URL changed, reloading iframe...');
+    setLastSrc(src);
     setIsLoading(true);
-    setHasErrored(false);
-    setLoadAttempts(prev => prev + 1);
+    setReloadCount(prev => prev + 1);
     
     if (iframeRef.current) {
-      // For PC, we need to handle the iframe loading more carefully
-      iframeRef.current.src = src;
+      // Clear existing src first
+      iframeRef.current.src = 'about:blank';
+      
+      // Wait longer before setting new src to ensure clean reload
+      setTimeout(() => {
+        if (iframeRef.current && src) {
+          console.log('🎯 Setting new iframe src:', src.substring(0, 80) + '...');
+          iframeRef.current.src = src;
+        }
+      }, 300); // Increased delay for better reliability
     }
-  }, [src]);
+  }, [src, lastSrc]);
 
-  // PC-specific timeout handling
+  // Timeout handling with longer duration for streaming content
   useEffect(() => {
     if (!isLoading) return;
     
     const timeout = setTimeout(() => {
-      if (isLoading && !hasErrored) {
-        console.log('⏰ Iframe load timeout - assuming success for PC compatibility');
+      if (isLoading) {
+        console.log('⏰ Iframe load timeout - assuming successful');
         setIsLoading(false);
-        onLoad(); // Assume success on PC after timeout
+        onLoad(); // Assume success after reasonable wait time
       }
-    }, isMobile ? 10000 : 8000); // Shorter timeout for PC
+    }, 15000); // Increased to 15 seconds for streaming content
 
     return () => clearTimeout(timeout);
-  }, [isLoading, hasErrored, onLoad, isMobile]);
+  }, [isLoading, onLoad, reloadCount]);
 
-  // Auto-hide controls with better PC interaction
+  // Auto-hide controls
   useEffect(() => {
     if (!showControls) return;
     
     const timer = setTimeout(() => {
       setShowControls(false);
-    }, isMobile ? 3000 : 5000); // Longer for PC
+    }, 5000); // Increased to 5 seconds
 
-    const handleInteraction = () => {
+    const handleMouseMove = () => {
       setShowControls(true);
     };
 
     const container = iframeRef.current?.parentElement;
     if (container) {
-      container.addEventListener('mousemove', handleInteraction);
-      container.addEventListener('click', handleInteraction);
+      container.addEventListener('mousemove', handleMouseMove);
       return () => {
-        container.removeEventListener('mousemove', handleInteraction);
-        container.removeEventListener('click', handleInteraction);
+        container.removeEventListener('mousemove', handleMouseMove);
         clearTimeout(timer);
       };
     }
 
     return () => clearTimeout(timer);
-  }, [showControls, isMobile]);
+  }, [showControls]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
-      {/* Loading indicator - show only initially */}
-      {isLoading && loadAttempts <= 1 && (
+      {/* Loading indicator - only show for first 3 seconds */}
+      {isLoading && reloadCount <= 1 && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#151922]">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
             <p className="text-sm">Loading stream...</p>
-            <p className="text-xs text-gray-400 mt-1">
-              {isMobile ? 'Optimizing for mobile...' : 'Preparing video player...'}
-            </p>
+            <p className="text-xs text-gray-400 mt-1">Preparing video player...</p>
           </div>
         </div>
       )}
@@ -163,7 +170,10 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         onMouseEnter={() => setShowControls(true)}
       >
         <div className="flex items-center justify-between">
+          {/* Left spacer for back buttons */}
           <div className="w-20"></div>
+
+          {/* Right side - Fullscreen Button */}
           <Button
             variant="ghost"
             size="icon"

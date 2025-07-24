@@ -99,7 +99,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
+    visible: true,
     image: "https://i.imgur.com/ZDK0tgZ.jpeg",
     seo: {
       keywords: "UEFA women euro 2025 live stream, UEFA watch online,euro women 2025 free stream",

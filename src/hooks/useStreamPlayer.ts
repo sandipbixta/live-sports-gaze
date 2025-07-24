@@ -10,17 +10,9 @@ export const useStreamPlayer = () => {
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [streamLoading, setStreamLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string | null>(null);
-  const [retryAttempts, setRetryAttempts] = useState(0);
-  const [maxRetries] = useState(2); // Limit retries to prevent infinite loops
 
-  // Enhanced stream fetching with better error handling and retry limits
+  // Enhanced stream fetching with better reload handling
   const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
-    if (retryAttempts >= maxRetries) {
-      console.log('🛑 Max retries reached, stopping automatic retries');
-      setStreamLoading(false);
-      return;
-    }
-
     setStreamLoading(true);
     const sourceKey = streamNo 
       ? `${source.source}/${source.id}/${streamNo}` 
@@ -28,17 +20,17 @@ export const useStreamPlayer = () => {
     setActiveSource(sourceKey);
     
     try {
-      console.log(`🎯 Fetching stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''} (attempt ${retryAttempts + 1}/${maxRetries + 1})`);
+      console.log(`🎯 Fetching fresh stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
       // Always fetch fresh data, no cache for streams
       const streamData = await Promise.race([
         fetchStream(source.source, source.id, streamNo),
         new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Stream timeout')), 10000) // 10 seconds timeout
+          setTimeout(() => reject(new Error('Stream timeout')), 8000) // 8 seconds timeout
         )
       ]) as Stream | Stream[];
       
-      console.log('✅ Stream data received successfully');
+      console.log('✅ Fresh stream data received successfully');
       
       // Handle response
       if (Array.isArray(streamData)) {
@@ -47,25 +39,23 @@ export const useStreamPlayer = () => {
           : streamData.find(s => s.hd) || streamData[0];
         
         if (selectedStream) {
+          // Add timestamp to ensure freshness
           const freshStream = {
             ...selectedStream,
             embedUrl: selectedStream.embedUrl,
             timestamp: Date.now()
           };
           setCurrentStream(freshStream);
-          setRetryAttempts(0); // Reset retry count on success
         } else {
-          throw new Error('No valid stream found in response');
+          setCurrentStream(null);
         }
       } else if (streamData) {
+        // Add timestamp to ensure freshness
         const freshStream = {
           ...streamData,
           timestamp: Date.now()
         };
         setCurrentStream(freshStream);
-        setRetryAttempts(0); // Reset retry count on success
-      } else {
-        throw new Error('Invalid stream data received');
       }
       
       // Smooth scroll to player
@@ -77,31 +67,32 @@ export const useStreamPlayer = () => {
       }, 200);
     } catch (error) {
       console.error('❌ Stream load error:', error);
-      setRetryAttempts(prev => prev + 1);
-      
-      // Only show toast on first error, not on retries
-      if (retryAttempts === 0) {
-        toast({
-          title: "Stream Loading Issue",
-          description: "Trying alternative methods to load the stream...",
-          variant: "default",
-        });
-      }
-      
-      // Don't auto-retry - let user manually retry
       setCurrentStream(null);
+      
+      // Show more helpful error message
+      toast({
+        title: "Stream Loading Issue",
+        description: "Stream failed to load. Trying to refresh automatically...",
+        variant: "default",
+      });
+      
+      // Auto-retry once after a short delay
+      setTimeout(() => {
+        console.log('🔄 Auto-retrying stream load...');
+        fetchStreamData(source, streamNo);
+      }, 2000);
     } finally {
       setStreamLoading(false);
     }
-  }, [toast, retryAttempts, maxRetries]);
+  }, [toast]);
 
   const handleMatchSelect = (match: Match) => {
     console.log('🎬 Match selected:', match.title);
     setFeaturedMatch(match);
-    setCurrentStream(null);
-    setRetryAttempts(0); // Reset retry attempts for new match
+    setCurrentStream(null); // Clear current stream first
     
     if (match.sources && match.sources.length > 0) {
+      // Force fresh load
       setTimeout(() => {
         fetchStreamData(match.sources[0]);
       }, 100);
@@ -110,10 +101,10 @@ export const useStreamPlayer = () => {
 
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
-    setCurrentStream(null);
-    setRetryAttempts(0); // Reset retry attempts for new source
+    setCurrentStream(null); // Clear current stream first
     
     if (featuredMatch) {
+      // Force fresh load with delay
       setTimeout(() => {
         fetchStreamData({ source, id }, streamNo);
       }, 100);
@@ -121,11 +112,11 @@ export const useStreamPlayer = () => {
   };
 
   const handleStreamRetry = () => {
-    console.log('🔄 Manual retry requested...');
-    setCurrentStream(null);
-    setRetryAttempts(0); // Reset retry attempts on manual retry
+    console.log('🔄 Retrying stream...');
+    setCurrentStream(null); // Clear current stream first
     
     if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
+      // Force fresh load with delay
       setTimeout(() => {
         fetchStreamData(featuredMatch.sources[0]);
       }, 100);
