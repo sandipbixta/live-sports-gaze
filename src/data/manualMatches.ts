@@ -50,7 +50,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: trye,
+    visible: false,
     image: "",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
