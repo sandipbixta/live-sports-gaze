@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Radio, Clock } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import { Helmet } from 'react-helmet-async';
-import AnnouncementBanner from '../components/AnnouncementBanner';
+
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useStreamPlayer } from '../hooks/useStreamPlayer';
 import LiveHeader from '../components/live/LiveHeader';
@@ -134,7 +134,7 @@ const Live = () => {
         </script>
       </Helmet>
       
-      <AnnouncementBanner />
+      
       
       <div className="mb-8">
         <LiveHeader

@@ -8,7 +8,7 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
-import AnnouncementBanner from '../components/AnnouncementBanner';
+
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
@@ -210,7 +210,7 @@ const Index = () => {
         
         {!showLiveSports && (
           <>
-            <AnnouncementBanner />
+            
             
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
