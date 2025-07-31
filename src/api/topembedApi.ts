@@ -107,42 +107,14 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
       const homeTeam = teamsParts[0]?.trim() || event.match;
       const awayTeam = teamsParts[1]?.trim() || '';
 
-      // Simple text-based team initials as logos for now
-      const getTeamInitials = (teamName: string) => {
-        return teamName.split(' ')
-          .map(word => word.charAt(0).toUpperCase())
-          .slice(0, 2)
-          .join('');
-      };
-
       const match: Match = {
         id: matchId,
         title: event.match,
         date: startTime.toISOString(),
         sportId: eventSportId,
         teams: {
-          home: { 
-            name: homeTeam, 
-            logo: `data:image/svg+xml;base64,${btoa(`
-              <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
-                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
-                  ${getTeamInitials(homeTeam)}
-                </text>
-              </svg>
-            `)}`
-          },
-          away: { 
-            name: awayTeam, 
-            logo: awayTeam ? `data:image/svg+xml;base64,${btoa(`
-              <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="18" fill="#EF4444" stroke="#DC2626" stroke-width="2"/>
-                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
-                  ${getTeamInitials(awayTeam)}
-                </text>
-              </svg>
-            `)}` : ''
-          }
+          home: { name: homeTeam, logo: '' },
+          away: { name: awayTeam, logo: '' }
         },
         sources: event.channels.map((channel, idx) => ({
           source: 'topembed',
