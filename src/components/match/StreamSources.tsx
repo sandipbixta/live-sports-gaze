@@ -116,7 +116,7 @@ const StreamSources = ({
                     <p className="text-sm text-gray-400 mb-2">
                       {streams.length} stream{streams.length > 1 ? 's' : ''} available
                     </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                       {streams.map((stream, index) => {
                         const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                         const isActive = activeSource === streamKey;
@@ -161,33 +161,31 @@ const StreamSources = ({
                           <Badge
                             key={streamKey}
                             variant="source"
-                            className={`cursor-pointer p-3 text-left transition-all hover:scale-105 ${
+                            className={`cursor-pointer p-2 text-left transition-all hover:scale-105 w-full min-h-[60px] ${
                               isActive 
                                 ? 'bg-[#ff5a36] border-[#ff5a36] text-white' 
                                 : 'bg-[#242836] border-[#343a4d] text-gray-300 hover:bg-[#343a4d]'
                             }`}
                             onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
                           >
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                  <Play size={12} />
-                                  <span className="font-medium text-sm">
-                                    {channelName}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs">
-                                  <span className="capitalize">{stream.language || 'English'}</span>
-                                  {stream.hd && (
-                                    <span className="bg-[#ff5a36] text-white px-1 rounded text-xs font-bold">
-                                      HD
-                                    </span>
-                                  )}
-                                </div>
+                            <div className="flex flex-col gap-1 w-full">
+                              <div className="flex items-center gap-1">
+                                <Play size={10} />
+                                <span className="font-medium text-xs leading-tight line-clamp-2">
+                                  {channelName}
+                                </span>
                               </div>
-                              {isActive && (
-                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                              )}
+                              <div className="flex items-center gap-1 text-xs">
+                                <span className="capitalize text-xs">{stream.language || 'EN'}</span>
+                                {stream.hd && (
+                                  <span className="bg-[#ff5a36] text-white px-1 rounded text-xs font-bold">
+                                    HD
+                                  </span>
+                                )}
+                                {isActive && (
+                                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse ml-auto"></div>
+                                )}
+                              </div>
                             </div>
                           </Badge>
                         );
