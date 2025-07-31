@@ -1,5 +1,6 @@
 
 import { Sport, Match, Stream } from '../types/sports';
+import { convertTopEmbedToSports, convertTopEmbedToMatches, getTopEmbedStream } from './topembedApi';
 
 const API_BASE = 'https://streamed.su/api';
 
@@ -44,8 +45,15 @@ export const fetchSports = async (): Promise<Sport[]> => {
     setCachedData(cacheKey, data);
     return data;
   } catch (error) {
-    console.error('Error fetching sports:', error);
-    return [];
+    console.error('Error fetching sports from streamed.su, trying TopEmbed API:', error);
+    // Fallback to TopEmbed API
+    try {
+      const topembedSports = await convertTopEmbedToSports();
+      return topembedSports;
+    } catch (fallbackError) {
+      console.error('Error fetching sports from TopEmbed:', fallbackError);
+      return [];
+    }
   }
 };
 
@@ -72,8 +80,15 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     setCachedData(cacheKey, matches);
     return matches;
   } catch (error) {
-    console.error('Error fetching matches:', error);
-    return [];
+    console.error('Error fetching matches from streamed.su, trying TopEmbed API:', error);
+    // Fallback to TopEmbed API
+    try {
+      const topembedMatches = await convertTopEmbedToMatches(sportId);
+      return topembedMatches;
+    } catch (fallbackError) {
+      console.error('Error fetching matches from TopEmbed:', fallbackError);
+      return [];
+    }
   }
 };
 
@@ -93,9 +108,9 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
       }
     }
 
-    // Fallback to fetching all matches
-    const matches = await fetchMatches(sportId);
-    const match = matches.find(m => m.id === matchId);
+    // Fallback to TopEmbed matches
+    const topembedMatches = await convertTopEmbedToMatches(sportId);
+    const match = topembedMatches.find(m => m.id === matchId);
     if (!match) throw new Error('Match not found');
     setCachedData(cacheKey, match);
     return match;
@@ -163,7 +178,16 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     throw new Error('No valid streams found');
     
   } catch (error) {
-    console.error('Error in fetchStream:', error);
+    console.error('Error in fetchStream from streamed.su, trying TopEmbed:', error);
+    // Fallback to TopEmbed API if this looks like a TopEmbed match
+    if (id.startsWith('topembed-')) {
+      try {
+        return await getTopEmbedStream(id, streamNo);
+      } catch (fallbackError) {
+        console.error('Error fetching TopEmbed stream:', fallbackError);
+        throw fallbackError;
+      }
+    }
     throw error;
   }
 };
