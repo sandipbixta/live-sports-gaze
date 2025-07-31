@@ -1,5 +1,4 @@
 import { Sport, Match, Stream } from '../types/sports';
-import { getTeamLogo } from './logoApi';
 
 const API_BASE = 'https://topembed.pw/api.php?format=json';
 
@@ -108,9 +107,22 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
       const homeTeam = teamsParts[0]?.trim() || event.match;
       const awayTeam = teamsParts[1]?.trim() || '';
 
-      // Get team logos (async, but don't wait to avoid slowing down the API)
-      const homeLogoPromise = getTeamLogo(homeTeam);
-      const awayLogoPromise = awayTeam ? getTeamLogo(awayTeam) : Promise.resolve('/placeholder.svg');
+      // Generate team logos based on sport type (using Unsplash placeholders)
+      const getTeamPlaceholder = (sport: string) => {
+        switch (sport.toLowerCase()) {
+          case 'football':
+          case 'soccer':
+            return 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=100&h=100&fit=crop&crop=center';
+          case 'basketball':
+            return 'https://images.unsplash.com/photo-1466721591366-2d5fba72006d?w=100&h=100&fit=crop&crop=center';
+          case 'baseball':
+            return 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop&crop=center';
+          case 'tennis':
+            return 'https://images.unsplash.com/photo-1452960962994-acf4fd70b632?w=100&h=100&fit=crop&crop=center';
+          default:
+            return 'https://images.unsplash.com/photo-1439886183900-e79ec0057170?w=100&h=100&fit=crop&crop=center';
+        }
+      };
 
       const match: Match = {
         id: matchId,
@@ -118,19 +130,13 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
         date: startTime.toISOString(),
         sportId: eventSportId,
         teams: {
-          home: { name: homeTeam, logo: '/placeholder.svg' }, // Will be updated by component
-          away: { name: awayTeam, logo: '/placeholder.svg' }  // Will be updated by component
+          home: { name: homeTeam, logo: getTeamPlaceholder(event.sport) },
+          away: { name: awayTeam, logo: getTeamPlaceholder(event.sport) }
         },
         sources: event.channels.map((channel, idx) => ({
           source: 'topembed',
           id: `${matchId}-${idx}`
         }))
-      };
-
-      // Store logo promises for later use
-      (match as any).logoPromises = {
-        home: homeLogoPromise,
-        away: awayLogoPromise
       };
 
       matches.push(match);
