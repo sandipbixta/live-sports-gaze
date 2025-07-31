@@ -4,6 +4,7 @@ import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
 import { Loader, Play } from 'lucide-react';
+import { getLanguageName } from '@/utils/languageDetection';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -80,6 +81,7 @@ const StreamSources = ({
   if (!sources || sources.length === 0) {
     return null;
   }
+
 
   // Group sources by source name
   const groupedSources = sources.reduce((groups: Record<string, Source[]>, source) => {
@@ -205,7 +207,7 @@ const StreamSources = ({
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-xs">
-                        <span className="capitalize text-xs">{stream.language || 'EN'}</span>
+                        <span className="capitalize text-xs">{getLanguageName(stream.language)}</span>
                         {stream.hd && (
                           <span className="bg-[#ff5a36] text-white px-1 rounded text-xs font-bold">
                             HD

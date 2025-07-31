@@ -1,4 +1,5 @@
 import { Sport, Match, Stream } from '../types/sports';
+import { detectLanguageFromUrl } from '../utils/languageDetection';
 
 const API_BASE = 'https://topembed.pw/api.php?format=json';
 
@@ -161,10 +162,13 @@ export const getTopEmbedStream = async (matchId: string, streamIndex: number = 0
 
   if (!channelUrl) return null;
   
+  // Detect language from the channel URL
+  const detectedLanguage = detectLanguageFromUrl(channelUrl);
+  
   return {
     id: `${matchId}-${channelIndex}`,
     streamNo: channelIndex + 1,
-    language: 'en',
+    language: detectedLanguage,
     hd: true,
     embedUrl: channelUrl,
     source: 'topembed'

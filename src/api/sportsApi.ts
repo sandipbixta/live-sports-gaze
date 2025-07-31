@@ -1,6 +1,7 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 import { convertTopEmbedToSports, convertTopEmbedToMatches, getTopEmbedStream } from './topembedApi';
+import { detectLanguageFromUrl } from '../utils/languageDetection';
 
 const API_BASE = 'https://streamed.su/api';
 
@@ -155,7 +156,11 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
       if (streamNo !== undefined) {
         const specificStream = validStreams.find(stream => stream.streamNo === streamNo);
         if (specificStream) {
-          const result = { ...specificStream, embedUrl: ensureValidEmbedUrl(specificStream.embedUrl) };
+          const result = { 
+            ...specificStream, 
+            language: detectLanguageFromUrl(specificStream.embedUrl),
+            embedUrl: ensureValidEmbedUrl(specificStream.embedUrl) 
+          };
           setCachedData(cacheKey, result);
           return result;
         }
@@ -163,13 +168,18 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
       
       const result = validStreams.map(stream => ({
         ...stream,
+        language: detectLanguageFromUrl(stream.embedUrl),
         embedUrl: ensureValidEmbedUrl(stream.embedUrl)
       }));
       setCachedData(cacheKey, result);
       return result;
     } else if (data && typeof data === 'object' && data.embedUrl) {
       if (isValidStreamUrl(data.embedUrl)) {
-        const result = { ...data, embedUrl: ensureValidEmbedUrl(data.embedUrl) };
+        const result = { 
+          ...data, 
+          language: detectLanguageFromUrl(data.embedUrl),
+          embedUrl: ensureValidEmbedUrl(data.embedUrl) 
+        };
         setCachedData(cacheKey, result);
         return result;
       }
