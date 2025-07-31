@@ -107,21 +107,12 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
       const homeTeam = teamsParts[0]?.trim() || event.match;
       const awayTeam = teamsParts[1]?.trim() || '';
 
-      // Generate team logos based on sport type (using Unsplash placeholders)
-      const getTeamPlaceholder = (sport: string) => {
-        switch (sport.toLowerCase()) {
-          case 'football':
-          case 'soccer':
-            return 'https://images.unsplash.com/photo-1472396961693-142e6e269027?w=100&h=100&fit=crop&crop=center';
-          case 'basketball':
-            return 'https://images.unsplash.com/photo-1466721591366-2d5fba72006d?w=100&h=100&fit=crop&crop=center';
-          case 'baseball':
-            return 'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop&crop=center';
-          case 'tennis':
-            return 'https://images.unsplash.com/photo-1452960962994-acf4fd70b632?w=100&h=100&fit=crop&crop=center';
-          default:
-            return 'https://images.unsplash.com/photo-1439886183900-e79ec0057170?w=100&h=100&fit=crop&crop=center';
-        }
+      // Simple text-based team initials as logos for now
+      const getTeamInitials = (teamName: string) => {
+        return teamName.split(' ')
+          .map(word => word.charAt(0).toUpperCase())
+          .slice(0, 2)
+          .join('');
       };
 
       const match: Match = {
@@ -130,8 +121,28 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
         date: startTime.toISOString(),
         sportId: eventSportId,
         teams: {
-          home: { name: homeTeam, logo: getTeamPlaceholder(event.sport) },
-          away: { name: awayTeam, logo: getTeamPlaceholder(event.sport) }
+          home: { 
+            name: homeTeam, 
+            logo: `data:image/svg+xml;base64,${btoa(`
+              <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="18" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
+                  ${getTeamInitials(homeTeam)}
+                </text>
+              </svg>
+            `)}`
+          },
+          away: { 
+            name: awayTeam, 
+            logo: awayTeam ? `data:image/svg+xml;base64,${btoa(`
+              <svg width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="18" fill="#EF4444" stroke="#DC2626" stroke-width="2"/>
+                <text x="20" y="26" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">
+                  ${getTeamInitials(awayTeam)}
+                </text>
+              </svg>
+            `)}` : ''
+          }
         },
         sources: event.channels.map((channel, idx) => ({
           source: 'topembed',
