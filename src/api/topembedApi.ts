@@ -137,20 +137,33 @@ export const getTopEmbedStream = async (matchId: string, streamIndex: number = 0
 
   // Find the match and get the channel URL
   let channelUrl: string | null = null;
-  const matchIdParts = matchId.replace('topembed-', '').split('-');
-  const date = `${matchIdParts[0]}-${matchIdParts[1]}-${matchIdParts[2]}`;
-  const index = parseInt(matchIdParts[3]);
+  let channelIndex = streamIndex;
+  
+  // Parse match ID to extract date, event index, and channel index
+  if (matchId.includes('topembed-')) {
+    const matchIdParts = matchId.replace('topembed-', '').split('-');
+    const date = `${matchIdParts[0]}-${matchIdParts[1]}-${matchIdParts[2]}`;
+    const eventIndex = parseInt(matchIdParts[3]);
+    
+    // If the match ID has a channel index (like topembed-2025-07-31-176-2), use it
+    if (matchIdParts.length > 4) {
+      channelIndex = parseInt(matchIdParts[4]);
+    }
 
-  if (data.events[date] && data.events[date][index]) {
-    const event = data.events[date][index];
-    channelUrl = event.channels[streamIndex] || event.channels[0];
+    if (data.events[date] && data.events[date][eventIndex]) {
+      const event = data.events[date][eventIndex];
+      // Use the channel index from the match ID, fallback to streamIndex, then first channel
+      channelUrl = event.channels[channelIndex] || event.channels[streamIndex] || event.channels[0];
+      
+      console.log(`TopEmbed stream for ${matchId}: channel ${channelIndex}, URL: ${channelUrl}`);
+    }
   }
 
   if (!channelUrl) return null;
   
   return {
-    id: `${matchId}-${streamIndex}`,
-    streamNo: streamIndex + 1,
+    id: `${matchId}-${channelIndex}`,
+    streamNo: channelIndex + 1,
     language: 'en',
     hd: true,
     embedUrl: channelUrl,
