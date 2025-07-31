@@ -1,4 +1,5 @@
 import { Sport, Match, Stream } from '../types/sports';
+import { getTeamLogo } from './logoApi';
 
 const API_BASE = 'https://topembed.pw/api.php?format=json';
 
@@ -107,19 +108,29 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
       const homeTeam = teamsParts[0]?.trim() || event.match;
       const awayTeam = teamsParts[1]?.trim() || '';
 
+      // Get team logos (async, but don't wait to avoid slowing down the API)
+      const homeLogoPromise = getTeamLogo(homeTeam);
+      const awayLogoPromise = awayTeam ? getTeamLogo(awayTeam) : Promise.resolve('/placeholder.svg');
+
       const match: Match = {
         id: matchId,
         title: event.match,
         date: startTime.toISOString(),
         sportId: eventSportId,
         teams: {
-          home: { name: homeTeam, logo: '' },
-          away: { name: awayTeam, logo: '' }
+          home: { name: homeTeam, logo: '/placeholder.svg' }, // Will be updated by component
+          away: { name: awayTeam, logo: '/placeholder.svg' }  // Will be updated by component
         },
         sources: event.channels.map((channel, idx) => ({
           source: 'topembed',
           id: `${matchId}-${idx}`
         }))
+      };
+
+      // Store logo promises for later use
+      (match as any).logoPromises = {
+        home: homeLogoPromise,
+        away: awayLogoPromise
       };
 
       matches.push(match);
