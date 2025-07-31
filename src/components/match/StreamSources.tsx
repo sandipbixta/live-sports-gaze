@@ -121,6 +121,42 @@ const StreamSources = ({
                         const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                         const isActive = activeSource === streamKey;
                         
+                        // Extract channel name from URL
+                        const getChannelName = (embedUrl: string): string => {
+                          if (!embedUrl) return `Stream ${stream.streamNo || (index + 1)}`;
+                          
+                          try {
+                            // For TopEmbed URLs like: https://topembed.pw/channel/SkySportsMainEvent[UK]
+                            if (embedUrl.includes('/channel/')) {
+                              const channelPart = embedUrl.split('/channel/')[1];
+                              if (channelPart) {
+                                // Remove query parameters and decode
+                                const cleanChannelName = channelPart.split('?')[0];
+                                // Replace brackets and clean up the name
+                                return cleanChannelName
+                                  .replace(/\[|\]/g, ' ')
+                                  .replace(/([A-Z])/g, ' $1')
+                                  .trim()
+                                  .replace(/\s+/g, ' ');
+                              }
+                            }
+                            
+                            // For other URLs, try to extract domain or meaningful part
+                            const url = new URL(embedUrl);
+                            const pathParts = url.pathname.split('/').filter(part => part.length > 0);
+                            if (pathParts.length > 0) {
+                              const lastPart = pathParts[pathParts.length - 1];
+                              return lastPart.replace(/[-_]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+                            }
+                            
+                            return url.hostname.replace('www.', '');
+                          } catch {
+                            return `Stream ${stream.streamNo || (index + 1)}`;
+                          }
+                        };
+                        
+                        const channelName = getChannelName(stream.embedUrl);
+                        
                         return (
                           <Badge
                             key={streamKey}
@@ -136,8 +172,8 @@ const StreamSources = ({
                               <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
                                   <Play size={12} />
-                                  <span className="font-medium">
-                                    Stream {stream.streamNo || (index + 1)}
+                                  <span className="font-medium text-sm">
+                                    {channelName}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-xs">
