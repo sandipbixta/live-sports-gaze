@@ -224,7 +224,7 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {popularMatches.length > 0 && (
+            {popularMatches.length > 0 && !searchTerm.trim() && (
               <>
                 <PopularMatches 
                   popularMatches={popularMatches} 
