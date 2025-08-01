@@ -75,57 +75,57 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Teams Section */}
           {hasTeams ? (
-            <div className="flex items-center justify-between flex-1 px-2">
+            <div className="flex items-center justify-between flex-1 px-1">
               {/* Home Team */}
-              <div className="flex flex-col items-center space-y-2 flex-1">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
-                  {hasTeamLogos ? (
+              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border border-white/20">
+                  {homeBadge ? (
                     <img 
                       src={homeBadge} 
                       alt={home}
-                      className="w-8 h-8 object-contain"
+                      className="w-6 h-6 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                         (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                       }}
                     />
                   ) : null}
-                  <div className={`w-full h-full flex items-center justify-center text-white text-sm font-bold ${hasTeamLogos ? 'hidden' : ''}`}>
+                  <div className={`w-full h-full flex items-center justify-center text-white text-xs font-bold ${homeBadge ? 'hidden' : ''}`}>
                     {home.substring(0, 2).toUpperCase()}
                   </div>
                 </div>
-                <span className="text-white text-xs font-medium text-center leading-tight max-w-[80px] truncate">
+                <span className="text-white text-[10px] font-medium text-center leading-tight w-full truncate px-1">
                   {home}
                 </span>
               </div>
 
               {/* VS Section */}
-              <div className="flex flex-col items-center space-y-1 px-4">
-                <div className="text-white text-sm font-bold">VS</div>
-                <div className="text-white/60 text-xs font-medium text-center">
+              <div className="flex flex-col items-center space-y-1 px-2 min-w-0">
+                <div className="text-white text-xs font-bold">VS</div>
+                <div className="text-white/60 text-[9px] font-medium text-center whitespace-nowrap">
                   {formatDate(match.date)}
                 </div>
               </div>
 
               {/* Away Team */}
-              <div className="flex flex-col items-center space-y-2 flex-1">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
-                  {hasTeamLogos ? (
+              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border border-white/20">
+                  {awayBadge ? (
                     <img 
                       src={awayBadge} 
                       alt={away}
-                      className="w-8 h-8 object-contain"
+                      className="w-6 h-6 object-contain"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                         (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                       }}
                     />
                   ) : null}
-                  <div className={`w-full h-full flex items-center justify-center text-white text-sm font-bold ${hasTeamLogos ? 'hidden' : ''}`}>
+                  <div className={`w-full h-full flex items-center justify-center text-white text-xs font-bold ${awayBadge ? 'hidden' : ''}`}>
                     {away.substring(0, 2).toUpperCase()}
                   </div>
                 </div>
-                <span className="text-white text-xs font-medium text-center leading-tight max-w-[80px] truncate">
+                <span className="text-white text-[10px] font-medium text-center leading-tight w-full truncate px-1">
                   {away}
                 </span>
               </div>
