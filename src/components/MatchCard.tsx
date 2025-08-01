@@ -75,34 +75,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Teams Section */}
           {hasTeams ? (
-            <div className="flex items-stretch justify-between flex-1 min-h-0">
-              {/* Home Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto">
-                    {home}
-                  </span>
-                </div>
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-2">
+              <div className="text-white text-xs md:text-sm font-semibold mb-2 leading-tight">
+                <span className="break-words">
+                  {home} vs {away}
+                </span>
               </div>
-
-              {/* VS Section */}
-              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                <div className="text-white text-[9px] md:text-xs font-bold">VS</div>
-                <div className="text-white/80 text-[7px] md:text-[10px] font-medium text-center whitespace-nowrap">
-                  {formatTime(match.date)}
-                </div>
-                <div className="text-white/60 text-[6px] md:text-[9px] font-medium text-center whitespace-nowrap">
-                  {formatDate(match.date)}
-                </div>
-              </div>
-
-              {/* Away Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto">
-                    {away}
-                  </span>
-                </div>
+              <div className="text-white/80 text-xs font-medium">
+                {formatDate(match.date)}, {formatTime(match.date)}
               </div>
             </div>
           ) : (
