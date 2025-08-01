@@ -86,6 +86,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
               {/* VS Section */}
               <div className="flex flex-col items-center space-y-1 px-2 min-w-0">
                 <div className="text-white text-xs font-bold">VS</div>
+                <div className="text-white/80 text-[10px] font-medium text-center whitespace-nowrap">
+                  {formatTime(match.date)}
+                </div>
                 <div className="text-white/60 text-[9px] font-medium text-center whitespace-nowrap">
                   {formatDate(match.date)}
                 </div>
