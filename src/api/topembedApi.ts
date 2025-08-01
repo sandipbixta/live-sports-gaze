@@ -1,5 +1,6 @@
 import { Sport, Match, Stream } from '../types/sports';
 import { detectLanguageFromUrl } from '../utils/languageDetection';
+import { teamLogoService } from '../services/teamLogoService';
 
 const API_BASE = 'https://topembed.pw/api.php?format=json';
 
@@ -114,8 +115,14 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
         date: startTime.toISOString(),
         sportId: eventSportId,
         teams: {
-          home: { name: homeTeam, logo: '' },
-          away: { name: awayTeam, logo: '' }
+          home: { 
+            name: homeTeam, 
+            logo: teamLogoService.getTeamLogo(homeTeam) || ''
+          },
+          away: { 
+            name: awayTeam, 
+            logo: teamLogoService.getTeamLogo(awayTeam) || ''
+          }
         },
         sources: event.channels.map((channel, idx) => ({
           source: 'topembed',
