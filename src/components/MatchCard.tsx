@@ -88,9 +88,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
               {/* VS Section */}
               <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
                 <div className="text-white text-[9px] md:text-xs font-bold">VS</div>
-                <div className="text-white/60 text-[6px] md:text-[9px] font-medium text-center whitespace-nowrap">
-                  {formatDate(match.date)}
-                </div>
               </div>
 
               {/* Away Team */}
