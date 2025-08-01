@@ -114,8 +114,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Footer */}
           <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
             <div className="flex items-center space-x-1">
-              <Play className="w-3 h-3 text-white/60" />
-              <span className="text-white/60 text-xs font-medium">
+              <Play className="w-3 h-3 text-white/80" />
+              <span className="text-white/80 text-[11px] md:text-xs font-medium">
                 {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
               </span>
             </div>
