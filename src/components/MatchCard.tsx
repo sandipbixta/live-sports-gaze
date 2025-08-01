@@ -52,12 +52,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
       <AspectRatio 
-        ratio={16/11} 
+        ratio={16/12} 
         className="w-full"
       >
-        <div className="absolute inset-0 p-3 md:p-4 flex flex-col h-full">
+        <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
           {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-3 md:mb-4">
+          <div className="flex justify-between items-center mb-2 md:mb-4">
             {isLive ? (
               <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] px-1.5 py-0.5 animate-pulse font-medium">
                 • LIVE
@@ -75,30 +75,34 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Teams Section */}
           {hasTeams ? (
-            <div className="flex items-center justify-between flex-1 px-0 md:px-1">
+            <div className="flex items-stretch justify-between flex-1 min-h-0">
               {/* Home Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-[10px] md:text-xs font-semibold text-center leading-relaxed w-full px-0.5 md:px-1 line-clamp-2">
-                  {home}
-                </span>
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-1">
+                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words">
+                    {home}
+                  </span>
+                </div>
               </div>
 
               {/* VS Section */}
-              <div className="flex flex-col items-center space-y-1 md:space-y-1 px-2 min-w-fit">
+              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-2 min-w-fit">
                 <div className="text-white text-[10px] md:text-xs font-bold">VS</div>
-                <div className="text-white/80 text-[9px] md:text-[10px] font-medium text-center whitespace-nowrap">
+                <div className="text-white/80 text-[8px] md:text-[10px] font-medium text-center whitespace-nowrap">
                   {formatTime(match.date)}
                 </div>
-                <div className="text-white/60 text-[8px] md:text-[9px] font-medium text-center whitespace-nowrap">
+                <div className="text-white/60 text-[7px] md:text-[9px] font-medium text-center whitespace-nowrap">
                   {formatDate(match.date)}
                 </div>
               </div>
 
               {/* Away Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-[10px] md:text-xs font-semibold text-center leading-relaxed w-full px-0.5 md:px-1 line-clamp-2">
-                  {away}
-                </span>
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-1">
+                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words">
+                    {away}
+                  </span>
+                </div>
               </div>
             </div>
           ) : (
