@@ -32,7 +32,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return format(date, 'MMM d');
+    return format(date, 'EEEE, MMM d');
   };
 
   // Prioritize logo over badge for team images
@@ -50,136 +50,127 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-2xl border-0 bg-gradient-to-br from-[#1a1f36] via-[#242850] to-[#2d3464] rounded-xl">
+    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
       <AspectRatio 
-        ratio={16/9} 
-        className="w-full h-full"
+        ratio={16/10} 
+        className="w-full"
       >
-        <div className="absolute inset-0 p-6 flex flex-col justify-between">
-          {/* Header with Live/Time and Sport badges */}
+        <div className="absolute inset-0 p-4 flex flex-col justify-between">
+          {/* Header with Live/Time badge */}
           <div className="flex justify-between items-start">
-            {isLive ? (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-3 py-1.5 animate-pulse font-semibold rounded-full border-2 border-red-400">
-                <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-                LIVE
-              </Badge>
-            ) : (
-              <Badge className="bg-white/10 backdrop-blur-sm text-white text-xs px-3 py-1.5 font-medium border border-white/20 rounded-full">
-                <Clock className="w-3 h-3 mr-1.5" />
-                {formatTime(match.date)}
-              </Badge>
-            )}
+            <div className="flex items-center space-x-2">
+              {/* Live/Upcoming Badge - Adjusted for mobile */}
+              {isLive ? (
+                <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-2 py-1 animate-pulse">
+                  • LIVE
+                </Badge>
+              ) : (
+                <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-xs px-2 py-1">
+                  {formatTime(match.date)}
+                </Badge>
+              )}
+            </div>
             
-            <Badge className="bg-[#ff5a36] text-white text-xs px-3 py-1.5 font-semibold rounded-full shadow-lg">
+            <Badge className="bg-[#343a4d] text-white text-xs px-2 py-1">
               {match.sportId?.replace('-', ' ').toUpperCase() || 'SPORTS'}
             </Badge>
           </div>
           
-          {/* Main Content - Teams or Title */}
-          <div className="flex-1 flex items-center justify-center my-4">
-            {hasTeams ? (
-              <div className="flex items-center justify-center space-x-8 w-full">
-                {/* Home Team */}
-                <div className="flex flex-col items-center space-y-3 flex-1">
-                  {hasTeamLogos ? (
-                    <div className="w-20 h-20 rounded-full overflow-hidden bg-white/5 backdrop-blur-sm flex items-center justify-center border-2 border-white/10 shadow-xl group-hover:border-white/30 transition-all duration-300">
-                      <img 
-                        src={homeBadge} 
-                        alt={home}
-                        className="w-14 h-14 object-contain filter group-hover:brightness-110 transition-all duration-300"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden w-full h-full flex items-center justify-center text-white text-xl font-bold">
-                        {home.substring(0, 2).toUpperCase()}
-                      </div>
+          {/* Teams Section */}
+          {hasTeams && (
+            <div className="flex items-center justify-center space-x-3 sm:space-x-4 flex-1">
+              {/* Home Team */}
+              <div className="flex flex-col items-center space-y-1 sm:space-y-2 flex-1">
+                {hasTeamLogos ? (
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+                    <img 
+                      src={homeBadge} 
+                      alt={home}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                      {home.substring(0, 2).toUpperCase()}
                     </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm flex items-center justify-center border-2 border-white/10 group-hover:border-white/30 transition-all duration-300">
-                      <span className="text-white text-xl font-bold">
-                        {home.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-white text-sm font-semibold text-center leading-tight max-w-20 truncate">
-                    {home}
-                  </span>
-                </div>
-
-                {/* VS Divider */}
-                <div className="flex flex-col items-center space-y-2">
-                  <div className="text-white/90 text-2xl font-bold tracking-wider">VS</div>
-                  <div className="text-white/60 text-xs font-medium bg-white/5 px-2 py-1 rounded-full">
-                    {formatDate(match.date)}
                   </div>
-                </div>
-
-                {/* Away Team */}
-                <div className="flex flex-col items-center space-y-3 flex-1">
-                  {hasTeamLogos ? (
-                    <div className="w-20 h-20 rounded-full overflow-hidden bg-white/5 backdrop-blur-sm flex items-center justify-center border-2 border-white/10 shadow-xl group-hover:border-white/30 transition-all duration-300">
-                      <img 
-                        src={awayBadge} 
-                        alt={away}
-                        className="w-14 h-14 object-contain filter group-hover:brightness-110 transition-all duration-300"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden w-full h-full flex items-center justify-center text-white text-xl font-bold">
-                        {away.substring(0, 2).toUpperCase()}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-white/5 backdrop-blur-sm flex items-center justify-center border-2 border-white/10 group-hover:border-white/30 transition-all duration-300">
-                      <span className="text-white text-xl font-bold">
-                        {away.substring(0, 2).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-white text-sm font-semibold text-center leading-tight max-w-20 truncate">
-                    {away}
-                  </span>
-                </div>
+                ) : (
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-bold">
+                      {home.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <span className="text-white text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2">
+                  {home}
+                </span>
               </div>
-            ) : (
-              <div className="text-center">
-                <h3 className="text-white font-bold text-xl mb-2 leading-tight">{match.title}</h3>
-                <p className="text-white/70 text-sm font-medium">{formatDate(match.date)}</p>
-              </div>
-            )}
-          </div>
 
-          {/* Footer with Stream Info */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1.5 bg-white/5 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
-                <Play className="w-4 h-4 text-white/80" />
-                <span className="text-white/80 text-sm font-medium">
-                  {hasStream ? `${match.sources.length} Stream${match.sources.length > 1 ? 's' : ''}` : 'No Streams'}
+              {/* VS Divider */}
+              <div className="flex flex-col items-center space-y-1">
+                <div className="text-white/60 text-xs sm:text-sm font-bold">VS</div>
+                <div className="text-white/40 text-xs">{formatDate(match.date)}</div>
+              </div>
+
+              {/* Away Team */}
+              <div className="flex flex-col items-center space-y-1 sm:space-y-2 flex-1">
+                {hasTeamLogos ? (
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+                    <img 
+                      src={awayBadge} 
+                      alt={away}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                    <div className="hidden w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                      {away.substring(0, 2).toUpperCase()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center">
+                    <span className="text-white text-xs sm:text-sm font-bold">
+                      {away.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <span className="text-white text-xs sm:text-sm font-medium text-center leading-tight line-clamp-2">
+                  {away}
                 </span>
               </div>
             </div>
+          )}
+
+          {/* No Teams Available */}
+          {!hasTeams && (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center">
+                <h3 className="text-white font-bold text-sm sm:text-base mb-1">{match.title}</h3>
+                <p className="text-white/60 text-xs">{formatDate(match.date)}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex justify-between items-end">
+            <div className="flex items-center space-x-1">
+              <Play className="w-3 h-3 text-white/60" />
+              <span className="text-white/60 text-xs">
+                {hasStream ? `${match.sources.length} source${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+              </span>
+            </div>
             
             {hasStream && (
-              <div className="flex items-center space-x-1 text-white/70 group-hover:text-[#ff5a36] transition-colors duration-300">
-                <span className="text-sm font-semibold">Watch Now</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </div>
+              <ChevronRight className="w-4 h-4 text-white/40 group-hover:text-white/80 transition-colors" />
             )}
           </div>
 
-          {/* Hover overlay with gradient accent */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#ff5a36]/0 via-[#ff5a36]/5 to-[#ff5a36]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
-          
-          {/* Subtle border glow on hover */}
-          <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-[#ff5a36]/30 transition-all duration-300 pointer-events-none" />
-          
-          {/* Subtle shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#ff5a36]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </div>
       </AspectRatio>
     </Card>
