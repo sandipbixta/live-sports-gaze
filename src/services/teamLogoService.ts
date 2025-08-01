@@ -91,24 +91,29 @@ class TeamLogoService {
     return null;
   }
 
-  public getTeamLogo(teamName: string): string | null {
+  public getTeamLogo(teamName: string, teamBadge?: string): string | null {
     if (!teamName) return null;
+    
+    // First priority: Use official Streamed API badge if available
+    if (teamBadge) {
+      return `https://streamed.su/api/images/badge/${teamBadge}.webp`;
+    }
     
     const normalized = this.normalizeTeamName(teamName);
     
-    // First try direct team mapping
+    // Second priority: Direct team mapping
     if (TEAM_LOGO_MAPPINGS[normalized]) {
       return TEAM_LOGO_MAPPINGS[normalized];
     }
     
-    // Try partial matches for team names
+    // Third priority: Partial matches for team names
     for (const [mappedName, logo] of Object.entries(TEAM_LOGO_MAPPINGS)) {
       if (normalized.includes(mappedName) || mappedName.includes(normalized)) {
         return logo;
       }
     }
     
-    // Fallback to country flag if we can determine the country
+    // Fallback: Country flag if we can determine the country
     const country = this.extractCountryFromTeamName(teamName);
     if (country && COUNTRY_LOGO_MAPPINGS[country]) {
       return COUNTRY_LOGO_MAPPINGS[country];
@@ -131,14 +136,14 @@ class TeamLogoService {
     const enhancedMatch = { ...match };
     
     if (match.teams.home?.name && !match.teams.home.logo) {
-      const logo = this.getTeamLogo(match.teams.home.name);
+      const logo = this.getTeamLogo(match.teams.home.name, match.teams.home.badge);
       if (logo) {
         enhancedMatch.teams.home.logo = logo;
       }
     }
     
     if (match.teams.away?.name && !match.teams.away.logo) {
-      const logo = this.getTeamLogo(match.teams.away.name);
+      const logo = this.getTeamLogo(match.teams.away.name, match.teams.away.badge);
       if (logo) {
         enhancedMatch.teams.away.logo = logo;
       }
