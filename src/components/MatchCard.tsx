@@ -75,28 +75,28 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Teams Section */}
           {hasTeams ? (
-            <div className="flex items-center justify-between flex-1 px-1">
+            <div className="flex items-center justify-between flex-1 px-0 md:px-1">
               {/* Home Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-[11px] md:text-xs font-semibold text-center leading-relaxed w-full px-1">
+                <span className="text-white text-[10px] md:text-xs font-semibold text-center leading-relaxed w-full px-0.5 md:px-1 line-clamp-2">
                   {home}
                 </span>
               </div>
 
               {/* VS Section */}
-              <div className="flex flex-col items-center space-y-1.5 md:space-y-1 px-3 md:px-2 min-w-0">
-                <div className="text-white text-xs font-bold">VS</div>
-                <div className="text-white/80 text-[10px] font-medium text-center whitespace-nowrap">
+              <div className="flex flex-col items-center space-y-1 md:space-y-1 px-2 min-w-fit">
+                <div className="text-white text-[10px] md:text-xs font-bold">VS</div>
+                <div className="text-white/80 text-[9px] md:text-[10px] font-medium text-center whitespace-nowrap">
                   {formatTime(match.date)}
                 </div>
-                <div className="text-white/60 text-[9px] font-medium text-center whitespace-nowrap">
+                <div className="text-white/60 text-[8px] md:text-[9px] font-medium text-center whitespace-nowrap">
                   {formatDate(match.date)}
                 </div>
               </div>
 
               {/* Away Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-[11px] md:text-xs font-semibold text-center leading-relaxed w-full px-1">
+                <span className="text-white text-[10px] md:text-xs font-semibold text-center leading-relaxed w-full px-0.5 md:px-1 line-clamp-2">
                   {away}
                 </span>
               </div>
