@@ -69,7 +69,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             )}
             
             <Badge className="bg-white/10 text-white text-[10px] px-1.5 py-0.5 font-medium">
-              {match.sportId?.replace('-', ' ').toUpperCase() || 'SPORTS'}
+              {formatDate(match.date)}
             </Badge>
           </div>
           
