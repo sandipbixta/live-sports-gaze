@@ -138,6 +138,7 @@ class TeamLogoService {
     if (match.teams.home?.name && !match.teams.home.logo) {
       const logo = this.getTeamLogo(match.teams.home.name, match.teams.home.badge);
       if (logo) {
+        console.log(`Enhanced home team "${match.teams.home.name}" with logo:`, logo);
         enhancedMatch.teams.home.logo = logo;
       }
     }
@@ -145,6 +146,7 @@ class TeamLogoService {
     if (match.teams.away?.name && !match.teams.away.logo) {
       const logo = this.getTeamLogo(match.teams.away.name, match.teams.away.badge);
       if (logo) {
+        console.log(`Enhanced away team "${match.teams.away.name}" with logo:`, logo);
         enhancedMatch.teams.away.logo = logo;
       }
     }

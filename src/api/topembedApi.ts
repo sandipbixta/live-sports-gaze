@@ -117,11 +117,11 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
         teams: {
           home: { 
             name: homeTeam, 
-            logo: teamLogoService.getTeamLogo(homeTeam) || ''
+            logo: ''
           },
           away: { 
             name: awayTeam, 
-            logo: teamLogoService.getTeamLogo(awayTeam) || ''
+            logo: ''
           }
         },
         sources: event.channels.map((channel, idx) => ({
@@ -130,7 +130,8 @@ export const convertTopEmbedToMatches = async (sportId?: string): Promise<Match[
         }))
       };
 
-      matches.push(match);
+      const enhancedMatch = teamLogoService.enhanceMatchWithLogos(match);
+      matches.push(enhancedMatch);
     });
   });
 
