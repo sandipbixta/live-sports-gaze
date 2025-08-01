@@ -52,7 +52,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
       <AspectRatio 
-        ratio={16/12} 
+        ratio={16/10} 
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
