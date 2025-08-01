@@ -59,16 +59,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Header with Live/Time badge */}
           <div className="flex justify-between items-center mb-3">
             {isLive ? (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white text-xs px-2 py-1 animate-pulse font-medium">
+              <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] px-1.5 py-0.5 animate-pulse font-medium">
                 • LIVE
               </Badge>
             ) : (
-              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-xs px-2 py-1 font-medium">
+              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-[10px] px-1.5 py-0.5 font-medium">
                 {formatTime(match.date)}
               </Badge>
             )}
             
-            <Badge className="bg-white/10 text-white text-xs px-2 py-1 font-medium">
+            <Badge className="bg-white/10 text-white text-[10px] px-1.5 py-0.5 font-medium">
               {match.sportId?.replace('-', ' ').toUpperCase() || 'SPORTS'}
             </Badge>
           </div>
@@ -94,7 +94,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     {home.substring(0, 2).toUpperCase()}
                   </div>
                 </div>
-                <span className="text-white text-[10px] font-medium text-center leading-tight w-full truncate px-1">
+                <span className="text-white text-[10px] font-medium text-center leading-tight w-full px-1">
                   {home}
                 </span>
               </div>
@@ -125,7 +125,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     {away.substring(0, 2).toUpperCase()}
                   </div>
                 </div>
-                <span className="text-white text-[10px] font-medium text-center leading-tight w-full truncate px-1">
+                <span className="text-white text-[10px] font-medium text-center leading-tight w-full px-1">
                   {away}
                 </span>
               </div>
