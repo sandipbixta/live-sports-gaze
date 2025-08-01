@@ -78,7 +78,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex items-stretch justify-between flex-1 min-h-0">
               {/* Home Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[8px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {home}
                   </span>
@@ -98,7 +98,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
               {/* Away Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[8px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-white text-[9px] md:text-xs font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {away}
                   </span>
