@@ -59,16 +59,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Header with Live/Time badge */}
           <div className="flex justify-between items-center mb-2 md:mb-4">
             {isLive ? (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] px-1.5 py-0.5 animate-pulse font-medium">
+              <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] md:text-xs px-1.5 py-0.5 animate-pulse font-medium">
                 • LIVE
               </Badge>
             ) : (
-              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-[10px] px-1.5 py-0.5 font-medium">
+              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
                 {formatTime(match.date)}
               </Badge>
             )}
             
-            <Badge className="bg-white/10 text-white text-[10px] px-1.5 py-0.5 font-medium">
+            <Badge className="bg-white/10 text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
               {formatDate(match.date)}
             </Badge>
           </div>
@@ -78,7 +78,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex items-stretch justify-between flex-1 min-h-0">
               {/* Home Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[10px] font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {home}
                   </span>
@@ -87,12 +87,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
               {/* VS Section */}
               <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                <div className="text-white text-[10px] font-bold">VS</div>
+                <div className="text-white text-[10px] md:text-sm font-bold">VS</div>
               </div>
 
               {/* Away Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[10px] font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {away}
                   </span>
@@ -103,8 +103,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
             /* No Teams Available */
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <h3 className="text-white font-bold text-[10px] mb-1 leading-tight">{match.title}</h3>
-                <p className="text-white/60 text-[10px]">{formatDate(match.date)}</p>
+                <h3 className="text-white font-bold text-[10px] md:text-sm mb-1 leading-tight">{match.title}</h3>
+                <p className="text-white/60 text-[10px] md:text-xs">{formatDate(match.date)}</p>
               </div>
             </div>
           )}
@@ -113,7 +113,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
             <div className="flex items-center space-x-1">
               <Play className="w-3 h-3 text-white/80" />
-              <span className="text-white/80 text-[10px] font-medium">
+              <span className="text-white/80 text-[10px] md:text-xs font-medium">
                 {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
               </span>
             </div>
