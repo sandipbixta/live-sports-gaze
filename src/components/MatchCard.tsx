@@ -77,24 +77,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasTeams ? (
             <div className="flex items-center justify-between flex-1 px-1">
               {/* Home Team */}
-              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border border-white/20">
-                  {homeBadge ? (
-                    <img 
-                      src={homeBadge} 
-                      alt={home}
-                      className="w-6 h-6 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`w-full h-full flex items-center justify-center text-white text-xs font-bold ${homeBadge ? 'hidden' : ''}`}>
-                    {home.substring(0, 2).toUpperCase()}
-                  </div>
-                </div>
-                <span className="text-white text-[10px] font-medium text-center leading-tight w-full px-1">
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0">
+                <span className="text-white text-xs font-semibold text-center leading-tight w-full px-1">
                   {home}
                 </span>
               </div>
@@ -108,24 +92,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
 
               {/* Away Team */}
-              <div className="flex flex-col items-center space-y-1 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/10 flex items-center justify-center border border-white/20">
-                  {awayBadge ? (
-                    <img 
-                      src={awayBadge} 
-                      alt={away}
-                      className="w-6 h-6 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`w-full h-full flex items-center justify-center text-white text-xs font-bold ${awayBadge ? 'hidden' : ''}`}>
-                    {away.substring(0, 2).toUpperCase()}
-                  </div>
-                </div>
-                <span className="text-white text-[10px] font-medium text-center leading-tight w-full px-1">
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0">
+                <span className="text-white text-xs font-semibold text-center leading-tight w-full px-1">
                   {away}
                 </span>
               </div>
