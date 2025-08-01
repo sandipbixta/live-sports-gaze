@@ -52,12 +52,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
       <AspectRatio 
-        ratio={16/10} 
+        ratio={16/11} 
         className="w-full"
       >
-        <div className="absolute inset-0 p-4 flex flex-col h-full">
+        <div className="absolute inset-0 p-3 md:p-4 flex flex-col h-full">
           {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-3 md:mb-4">
             {isLive ? (
               <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] px-1.5 py-0.5 animate-pulse font-medium">
                 • LIVE
@@ -78,13 +78,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex items-center justify-between flex-1 px-1">
               {/* Home Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-xs font-semibold text-center leading-tight w-full px-1">
+                <span className="text-white text-[11px] md:text-xs font-semibold text-center leading-relaxed w-full px-1">
                   {home}
                 </span>
               </div>
 
               {/* VS Section */}
-              <div className="flex flex-col items-center space-y-1 px-2 min-w-0">
+              <div className="flex flex-col items-center space-y-1.5 md:space-y-1 px-3 md:px-2 min-w-0">
                 <div className="text-white text-xs font-bold">VS</div>
                 <div className="text-white/80 text-[10px] font-medium text-center whitespace-nowrap">
                   {formatTime(match.date)}
@@ -96,7 +96,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
               {/* Away Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0">
-                <span className="text-white text-xs font-semibold text-center leading-tight w-full px-1">
+                <span className="text-white text-[11px] md:text-xs font-semibold text-center leading-relaxed w-full px-1">
                   {away}
                 </span>
               </div>
