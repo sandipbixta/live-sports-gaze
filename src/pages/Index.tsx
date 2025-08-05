@@ -224,15 +224,6 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {popularMatches.length > 0 && !searchTerm.trim() && (
-              <>
-                <PopularMatches 
-                  popularMatches={popularMatches} 
-                  selectedSport={selectedSport}
-                />
-                <Separator className="my-8 bg-[#343a4d]" />
-              </>
-            )}
             
             <div className="mb-8">
               {(selectedSport || loadingMatches) && (
@@ -243,6 +234,16 @@ const Index = () => {
                 />
               )}
             </div>
+            
+            {popularMatches.length > 0 && !searchTerm.trim() && (
+              <>
+                <PopularMatches 
+                  popularMatches={popularMatches} 
+                  selectedSport={selectedSport}
+                />
+                <Separator className="my-8 bg-[#343a4d]" />
+              </>
+            )}
             
             <div className="mb-8">
               <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
