@@ -1,8 +1,9 @@
 
 import { Sport, Match, Stream } from '../types/sports';
+import { convertTopEmbedToSports, convertTopEmbedToMatches, getTopEmbedStream } from './topembedApi';
 import { detectLanguageFromUrl } from '../utils/languageDetection';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = 'https://streamed.su/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -25,144 +26,76 @@ const setCachedData = (key: string, data: any) => {
 export const fetchSports = async (): Promise<Sport[]> => {
   const cacheKey = 'sports';
   const cached = getCachedData(cacheKey);
-  if (cached) {
-    console.log('✅ Using cached sports data:', cached.length);
-    return cached;
-  }
-
-  console.log('🔄 Fetching sports from streamed.pk API...');
+  if (cached) return cached;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    
-    console.log('🌐 Making request to:', `${API_BASE}/sports`);
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
-      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-      mode: 'cors'
+      }
     });
     
     clearTimeout(timeoutId);
     
-    console.log('📡 Response status:', response.status, response.statusText);
-    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ API Error Response:', errorText);
-      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-    }
-    
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
-    console.log('📊 Raw API response:', data);
     
+    // Ensure data is an array of sports
     if (!Array.isArray(data)) {
-      console.error('❌ Invalid data format:', typeof data, data);
-      throw new Error('Invalid sports data format - expected array');
+      throw new Error('Invalid sports data format');
     }
     
     setCachedData(cacheKey, data);
-    console.log(`✅ Fetched ${data.length} sports from streamed.pk API`);
+    console.log(`✅ Fetched ${data.length} sports from streamed.su API`);
     return data;
   } catch (error) {
-    console.error('❌ Error fetching sports from streamed.pk:', error);
-    console.error('❌ Error details:', error.name, error.message);
-    
-    // Return a fallback list of sports if API fails
-    const fallbackSports: Sport[] = [
-      { id: 'football', name: 'Football' },
-      { id: 'basketball', name: 'Basketball' },
-      { id: 'tennis', name: 'Tennis' },
-      { id: 'hockey', name: 'Hockey' },
-      { id: 'baseball', name: 'Baseball' },
-      { id: 'mma', name: 'MMA' },
-      { id: 'boxing', name: 'Boxing' }
-    ];
-    
-    console.log('🔄 Using fallback sports data:', fallbackSports);
-    setCachedData(cacheKey, fallbackSports);
-    return fallbackSports;
+    console.error('❌ Error fetching sports from streamed.su:', error);
+    // Fallback to TopEmbed API only if streamed.su fails
+    try {
+      console.log('🔄 Falling back to TopEmbed API for sports...');
+      const topembedSports = await convertTopEmbedToSports();
+      setCachedData(cacheKey, topembedSports);
+      return topembedSports;
+    } catch (fallbackError) {
+      console.error('❌ TopEmbed fallback also failed:', fallbackError);
+      return [];
+    }
   }
-};
-
-// New API endpoints for different match types
-export const fetchAllMatches = async (): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint('all');
-};
-
-export const fetchLiveMatches = async (): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint('live');
-};
-
-export const fetchTodayMatches = async (): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint('all-today');
-};
-
-export const fetchPopularMatches = async (): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint('all/popular');
 };
 
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint(`${sportId}`);
-};
-
-export const fetchPopularMatchesBySport = async (sportId: string): Promise<Match[]> => {
-  return fetchMatchesFromEndpoint(`${sportId}/popular`);
-};
-
-// Helper function to fetch matches from different endpoints
-const fetchMatchesFromEndpoint = async (endpoint: string): Promise<Match[]> => {
-  const cacheKey = `matches-${endpoint}`;
+  const cacheKey = `matches-${sportId}`;
   const cached = getCachedData(cacheKey);
-  if (cached) {
-    console.log(`✅ Using cached matches for ${endpoint}:`, cached.length);
-    return cached;
-  }
-
-  console.log(`🔄 Fetching matches from endpoint: ${endpoint}`);
+  if (cached) return cached;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
-    console.log('🌐 Making request to:', `${API_BASE}/matches/${endpoint}`);
-    
-    const response = await fetch(`${API_BASE}/matches/${endpoint}`, {
+    const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
-      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-      mode: 'cors'
+      }
     });
     
     clearTimeout(timeoutId);
     
-    console.log('📡 Matches response status:', response.status, response.statusText);
-    console.log('📡 Matches response headers:', Object.fromEntries(response.headers.entries()));
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Matches API Error Response:', errorText);
-      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-    }
-    
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const matches = await response.json();
-    console.log('📊 Raw matches API response:', matches);
     
+    // Ensure data is an array of matches
     if (!Array.isArray(matches)) {
-      console.error('❌ Invalid matches data format:', typeof matches, matches);
-      throw new Error('Invalid matches data format - expected array');
+      throw new Error('Invalid matches data format');
     }
     
-    // Transform API data to our format and add logo URLs
+    // Validate and enhance matches
     const validMatches = matches.filter(match => 
       match && 
       match.id && 
@@ -170,62 +103,25 @@ const fetchMatchesFromEndpoint = async (endpoint: string): Promise<Match[]> => {
       match.date &&
       Array.isArray(match.sources)
     ).map(match => ({
-      id: match.id,
-      title: match.title,
-      date: new Date(match.date).toISOString(),
-      sportId: match.category || endpoint.split('/')[0],
-      teams: match.teams ? {
-        home: match.teams.home ? {
-          name: match.teams.home.name,
-          badge: match.teams.home.badge,
-          logo: match.teams.home.badge ? `${API_BASE}/images/badge/${match.teams.home.badge}.webp` : undefined
-        } : undefined,
-        away: match.teams.away ? {
-          name: match.teams.away.name,
-          badge: match.teams.away.badge,
-          logo: match.teams.away.badge ? `${API_BASE}/images/badge/${match.teams.away.badge}.webp` : undefined
-        } : undefined
-      } : undefined,
-      sources: match.sources || [],
-      poster: match.poster ? `${API_BASE}/images/proxy/${match.poster}.webp` : undefined
+      ...match,
+      sportId: match.sportId || sportId // Ensure sportId is set
     }));
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from endpoint ${endpoint} from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from streamed.su API`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches from endpoint ${endpoint} from streamed.pk:`, error);
-    console.error('❌ Error details:', error.name, error.message);
-    
-    // Return fallback matches for testing
-    const fallbackMatches: Match[] = [
-      {
-        id: 'fallback-1',
-        title: 'Manchester United vs Liverpool',
-        date: new Date().toISOString(),
-        sportId: 'football',
-        teams: {
-          home: { name: 'Manchester United' },
-          away: { name: 'Liverpool' }
-        },
-        sources: [{ source: 'alpha', id: 'test-1' }]
-      },
-      {
-        id: 'fallback-2', 
-        title: 'Lakers vs Warriors',
-        date: new Date().toISOString(),
-        sportId: 'basketball',
-        teams: {
-          home: { name: 'Lakers' },
-          away: { name: 'Warriors' }
-        },
-        sources: [{ source: 'bravo', id: 'test-2' }]
-      }
-    ];
-    
-    console.log('🔄 Using fallback matches data for endpoint:', endpoint);
-    setCachedData(cacheKey, fallbackMatches);
-    return fallbackMatches;
+    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.su:`, error);
+    // Fallback to TopEmbed API only if streamed.su fails
+    try {
+      console.log(`🔄 Falling back to TopEmbed API for matches (sport: ${sportId})...`);
+      const topembedMatches = await convertTopEmbedToMatches(sportId);
+      setCachedData(cacheKey, topembedMatches);
+      return topembedMatches;
+    } catch (fallbackError) {
+      console.error('❌ TopEmbed fallback also failed:', fallbackError);
+      return [];
+    }
   }
 };
 
@@ -251,6 +147,16 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
     const match = matches.find(m => m.id === matchId);
     
     if (!match) {
+      // Try TopEmbed fallback for specific match IDs
+      if (matchId.startsWith('topembed-')) {
+        console.log(`🔄 Trying TopEmbed for match ${matchId}...`);
+        const topembedMatches = await convertTopEmbedToMatches(sportId);
+        const topembedMatch = topembedMatches.find(m => m.id === matchId);
+        if (topembedMatch) {
+          setCachedData(cacheKey, topembedMatch);
+          return topembedMatch;
+        }
+      }
       throw new Error(`Match ${matchId} not found`);
     }
     
@@ -268,8 +174,23 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  // Handle TopEmbed streams directly
+  if (id.startsWith('topembed-') || source === 'topembed') {
+    try {
+      console.log(`🔄 Fetching TopEmbed stream: ${id}, streamNo: ${streamNo}`);
+      const stream = await getTopEmbedStream(id, streamNo || 0);
+      if (stream) {
+        setCachedData(cacheKey, stream);
+        return stream;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching TopEmbed stream:', error);
+      throw error;
+    }
+  }
+
   try {
-    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
+    console.log(`📡 Fetching stream from streamed.su: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout

@@ -7,7 +7,7 @@ export interface Sport {
 export interface Team {
   name: string;
   badge?: string;
-  logo?: string;
+  logo?: string;  // Adding logo property that's referenced in Match.tsx
 }
 
 export interface Source {
