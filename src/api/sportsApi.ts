@@ -30,29 +30,39 @@ export const fetchSports = async (): Promise<Sport[]> => {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       }
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error('Failed to fetch sports');
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
+    
+    // Ensure data is an array of sports
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid sports data format');
+    }
+    
     setCachedData(cacheKey, data);
+    console.log(`✅ Fetched ${data.length} sports from streamed.su API`);
     return data;
   } catch (error) {
-    console.error('Error fetching sports from streamed.su, trying TopEmbed API:', error);
-    // Fallback to TopEmbed API
+    console.error('❌ Error fetching sports from streamed.su:', error);
+    // Fallback to TopEmbed API only if streamed.su fails
     try {
+      console.log('🔄 Falling back to TopEmbed API for sports...');
       const topembedSports = await convertTopEmbedToSports();
+      setCachedData(cacheKey, topembedSports);
       return topembedSports;
     } catch (fallbackError) {
-      console.error('Error fetching sports from TopEmbed:', fallbackError);
+      console.error('❌ TopEmbed fallback also failed:', fallbackError);
       return [];
     }
   }
@@ -65,29 +75,51 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       }
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error('Failed to fetch matches');
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const matches = await response.json();
-    setCachedData(cacheKey, matches);
-    return matches;
+    
+    // Ensure data is an array of matches
+    if (!Array.isArray(matches)) {
+      throw new Error('Invalid matches data format');
+    }
+    
+    // Validate and enhance matches
+    const validMatches = matches.filter(match => 
+      match && 
+      match.id && 
+      match.title && 
+      match.date &&
+      Array.isArray(match.sources)
+    ).map(match => ({
+      ...match,
+      sportId: match.sportId || sportId // Ensure sportId is set
+    }));
+    
+    setCachedData(cacheKey, validMatches);
+    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from streamed.su API`);
+    return validMatches;
   } catch (error) {
-    console.error('Error fetching matches from streamed.su, trying TopEmbed API:', error);
-    // Fallback to TopEmbed API
+    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.su:`, error);
+    // Fallback to TopEmbed API only if streamed.su fails
     try {
+      console.log(`🔄 Falling back to TopEmbed API for matches (sport: ${sportId})...`);
       const topembedMatches = await convertTopEmbedToMatches(sportId);
+      setCachedData(cacheKey, topembedMatches);
       return topembedMatches;
     } catch (fallbackError) {
-      console.error('Error fetching matches from TopEmbed:', fallbackError);
+      console.error('❌ TopEmbed fallback also failed:', fallbackError);
       return [];
     }
   }
@@ -105,18 +137,34 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
       const match = cachedMatches.find((m: Match) => m.id === matchId);
       if (match) {
         setCachedData(cacheKey, match);
+        console.log(`✅ Found match ${matchId} in cache`);
         return match;
       }
     }
 
-    // Fallback to TopEmbed matches
-    const topembedMatches = await convertTopEmbedToMatches(sportId);
-    const match = topembedMatches.find(m => m.id === matchId);
-    if (!match) throw new Error('Match not found');
+    // If not in cache, fetch all matches for this sport and find the specific match
+    const matches = await fetchMatches(sportId);
+    const match = matches.find(m => m.id === matchId);
+    
+    if (!match) {
+      // Try TopEmbed fallback for specific match IDs
+      if (matchId.startsWith('topembed-')) {
+        console.log(`🔄 Trying TopEmbed for match ${matchId}...`);
+        const topembedMatches = await convertTopEmbedToMatches(sportId);
+        const topembedMatch = topembedMatches.find(m => m.id === matchId);
+        if (topembedMatch) {
+          setCachedData(cacheKey, topembedMatch);
+          return topembedMatch;
+        }
+      }
+      throw new Error(`Match ${matchId} not found`);
+    }
+    
     setCachedData(cacheKey, match);
+    console.log(`✅ Found match ${matchId} for sport ${sportId}`);
     return match;
   } catch (error) {
-    console.error('Error fetching match:', error);
+    console.error(`❌ Error fetching match ${matchId}:`, error);
     throw error;
   }
 };
@@ -126,16 +174,32 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  // Handle TopEmbed streams directly
+  if (id.startsWith('topembed-') || source === 'topembed') {
+    try {
+      console.log(`🔄 Fetching TopEmbed stream: ${id}, streamNo: ${streamNo}`);
+      const stream = await getTopEmbedStream(id, streamNo || 0);
+      if (stream) {
+        setCachedData(cacheKey, stream);
+        return stream;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching TopEmbed stream:', error);
+      throw error;
+    }
+  }
+
   try {
-    console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
+    console.log(`📡 Fetching stream from streamed.su: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
     const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
       cache: 'no-store',
     });
@@ -143,77 +207,76 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`Failed with status ${response.status}`);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('Stream API response:', data);
+    console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
     
     // Handle response format
     if (Array.isArray(data) && data.length > 0) {
-      const validStreams = data.filter(stream => isValidStreamUrl(stream.embedUrl));
+      const validStreams = data
+        .filter(stream => stream && isValidStreamUrl(stream.embedUrl))
+        .map(stream => ({
+          ...stream,
+          language: detectLanguageFromUrl(stream.embedUrl),
+          embedUrl: ensureValidEmbedUrl(stream.embedUrl)
+        }));
+      
+      if (validStreams.length === 0) {
+        throw new Error('No valid streams found in response');
+      }
       
       if (streamNo !== undefined) {
         const specificStream = validStreams.find(stream => stream.streamNo === streamNo);
         if (specificStream) {
-          const result = { 
-            ...specificStream, 
-            language: detectLanguageFromUrl(specificStream.embedUrl),
-            embedUrl: ensureValidEmbedUrl(specificStream.embedUrl) 
-          };
-          setCachedData(cacheKey, result);
-          return result;
+          setCachedData(cacheKey, specificStream);
+          console.log(`✅ Found specific stream ${streamNo} for ${source}/${id}`);
+          return specificStream;
         }
+        // If specific stream not found, return the first valid stream
+        const firstStream = validStreams[0];
+        setCachedData(cacheKey, firstStream);
+        console.log(`⚠️ Stream ${streamNo} not found, returning first available stream`);
+        return firstStream;
       }
       
-      const result = validStreams.map(stream => ({
-        ...stream,
-        language: detectLanguageFromUrl(stream.embedUrl),
-        embedUrl: ensureValidEmbedUrl(stream.embedUrl)
-      }));
-      setCachedData(cacheKey, result);
-      return result;
+      setCachedData(cacheKey, validStreams);
+      console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id}`);
+      return validStreams;
     } else if (data && typeof data === 'object' && data.embedUrl) {
       if (isValidStreamUrl(data.embedUrl)) {
-        const result = { 
+        const stream = { 
           ...data, 
           language: detectLanguageFromUrl(data.embedUrl),
           embedUrl: ensureValidEmbedUrl(data.embedUrl) 
         };
-        setCachedData(cacheKey, result);
-        return result;
+        setCachedData(cacheKey, stream);
+        console.log(`✅ Fetched single stream for ${source}/${id}`);
+        return stream;
       }
     }
     
-    throw new Error('No valid streams found');
+    throw new Error('No valid streams found in API response');
     
   } catch (error) {
-    console.error('Error in fetchStream from streamed.su, trying TopEmbed:', error);
-    // Fallback to TopEmbed API if this looks like a TopEmbed match
-    if (id.startsWith('topembed-')) {
-      try {
-        return await getTopEmbedStream(id, streamNo);
-      } catch (fallbackError) {
-        console.error('Error fetching TopEmbed stream:', fallbackError);
-        throw fallbackError;
-      }
-    }
+    console.error(`❌ Error fetching stream ${source}/${id}:`, error);
     throw error;
   }
 };
 
 // Helper function to check if URL is valid
 function isValidStreamUrl(url: string): boolean {
-  if (!url || !url.startsWith('http')) return false;
+  if (!url || typeof url !== 'string' || !url.startsWith('http')) return false;
   
-  const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com'];
-  return !invalidDomains.some(domain => url.includes(domain));
+  const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com', 'localhost'];
+  return !invalidDomains.some(domain => url.toLowerCase().includes(domain));
 }
 
 // Helper function to ensure embed URL is valid
 function ensureValidEmbedUrl(url: string): string {
-  if (url && url.startsWith('http') && isValidStreamUrl(url)) {
+  if (url && typeof url === 'string' && url.startsWith('http') && isValidStreamUrl(url)) {
     return url;
   }
-  throw new Error('Invalid stream URL');
+  throw new Error(`Invalid stream URL: ${url}`);
 }
