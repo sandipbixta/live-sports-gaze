@@ -25,27 +25,46 @@ const setCachedData = (key: string, data: any) => {
 export const fetchSports = async (): Promise<Sport[]> => {
   const cacheKey = 'sports';
   const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    console.log('✅ Using cached sports data:', cached.length);
+    return cached;
+  }
+
+  console.log('🔄 Fetching sports from streamed.pk API...');
 
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     
+    console.log('🌐 Making request to:', `${API_BASE}/sports`);
+    
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      }
+      },
+      mode: 'cors'
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    console.log('📡 Response status:', response.status, response.statusText);
+    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+    }
+    
     const data = await response.json();
+    console.log('📊 Raw API response:', data);
     
     if (!Array.isArray(data)) {
-      throw new Error('Invalid sports data format');
+      console.error('❌ Invalid data format:', typeof data, data);
+      throw new Error('Invalid sports data format - expected array');
     }
     
     setCachedData(cacheKey, data);
@@ -86,27 +105,46 @@ export const fetchPopularMatchesBySport = async (sportId: string): Promise<Match
 const fetchMatchesFromEndpoint = async (endpoint: string): Promise<Match[]> => {
   const cacheKey = `matches-${endpoint}`;
   const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    console.log(`✅ Using cached matches for ${endpoint}:`, cached.length);
+    return cached;
+  }
+
+  console.log(`🔄 Fetching matches from endpoint: ${endpoint}`);
 
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     
+    console.log('🌐 Making request to:', `${API_BASE}/matches/${endpoint}`);
+    
     const response = await fetch(`${API_BASE}/matches/${endpoint}`, {
       signal: controller.signal,
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      }
+      },
+      mode: 'cors'
     });
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    console.log('📡 Matches response status:', response.status, response.statusText);
+    console.log('📡 Matches response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Matches API Error Response:', errorText);
+      throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+    }
+    
     const matches = await response.json();
+    console.log('📊 Raw matches API response:', matches);
     
     if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
+      console.error('❌ Invalid matches data format:', typeof matches, matches);
+      throw new Error('Invalid matches data format - expected array');
     }
     
     // Transform API data to our format and add logo URLs
