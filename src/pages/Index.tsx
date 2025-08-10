@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
+import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -116,12 +117,17 @@ const Index = () => {
       if (allMatches[sportId]) {
         setMatches(allMatches[sportId]);
       } else {
-        const matchesData = await fetchMatches(sportId);
-        setMatches(matchesData);
+        const rawMatchesData = await fetchMatches(sportId);
+        
+        // Filter and consolidate matches to remove duplicates and combine stream sources
+        const cleanMatches = filterCleanMatches(rawMatchesData);
+        const consolidatedMatches = consolidateMatches(cleanMatches);
+        
+        setMatches(consolidatedMatches);
         
         setAllMatches(prev => ({
           ...prev,
-          [sportId]: matchesData
+          [sportId]: consolidatedMatches
         }));
       }
     } catch (error) {
@@ -218,15 +224,6 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {popularMatches.length > 0 && (
-              <>
-                <PopularMatches 
-                  popularMatches={popularMatches} 
-                  selectedSport={selectedSport}
-                />
-                <Separator className="my-8 bg-[#343a4d]" />
-              </>
-            )}
             
             <div className="mb-8">
               {(selectedSport || loadingMatches) && (
@@ -234,6 +231,17 @@ const Index = () => {
                   matches={filteredMatches}
                   sportId={selectedSport || ""}
                   isLoading={loadingMatches}
+                  trendingSection={
+                    popularMatches.length > 0 && !searchTerm.trim() ? (
+                      <>
+                        <PopularMatches 
+                          popularMatches={popularMatches} 
+                          selectedSport={selectedSport}
+                        />
+                        <Separator className="my-8 bg-[#343a4d]" />
+                      </>
+                    ) : null
+                  }
                 />
               )}
             </div>

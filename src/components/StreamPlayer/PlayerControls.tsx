@@ -102,7 +102,6 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
           size="sm"
           className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
           onClick={onGoBack}
-          onTouchEnd={onGoBack}
         >
           <ArrowLeft className="h-5 w-5 text-white" />
         </Button>
