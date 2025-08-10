@@ -1,17 +1,8 @@
 
 import React, { useEffect, useRef } from 'react';
 
-// TypeScript declaration for aclib global
-declare global {
-  interface Window {
-    aclib?: {
-      runAutoTag: (options: { zoneId: string }) => void;
-    };
-  }
-}
-
 interface AdvertisementProps {
-  type: 'banner' | 'sidebar' | 'video' | 'direct-link' | 'native-bar' | 'autotag';
+  type: 'banner' | 'sidebar' | 'video' | 'direct-link' | 'native-bar';
   className?: string;
 }
 
@@ -133,36 +124,6 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       link.innerHTML = '🎯 Exclusive Offers - Click Here!';
       
       adRef.current.appendChild(link);
-      
-    } else if (type === 'autotag') {
-      // AutoTag ad - aclib integration
-      // First load the aclib library if not already loaded
-      if (!window.aclib) {
-        const aclibScript = document.createElement('script');
-        aclibScript.type = 'text/javascript';
-        aclibScript.src = '//acscdn.com/script/aclib.js';
-        aclibScript.async = true;
-        
-        aclibScript.onload = () => {
-          // Run AutoTag after aclib is loaded
-          if (window.aclib && window.aclib.runAutoTag) {
-            window.aclib.runAutoTag({
-              zoneId: 'bz3drbnei2',
-            });
-          }
-        };
-        
-        aclibScript.onerror = () => {
-          console.log('AutoTag aclib script failed to load');
-        };
-        
-        document.head.appendChild(aclibScript);
-      } else {
-        // aclib already loaded, run AutoTag directly
-        window.aclib.runAutoTag({
-          zoneId: 'bz3drbnei2',
-        });
-      }
     }
     
     return () => {
@@ -178,7 +139,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
     return (
       <div className={`bg-gray-200 dark:bg-gray-800 rounded-lg p-4 text-center ${className}`}>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Advertisement Placeholder ({type}) - {type === 'banner' ? 'Banner: 728x90' : type === 'video' ? 'Video Ad' : type === 'sidebar' ? 'Sidebar Ad' : type === 'native-bar' ? 'Native Bar Ad' : type === 'autotag' ? 'AutoTag Ad' : 'Ad'}
+          Advertisement Placeholder ({type}) - {type === 'banner' ? 'Banner: 728x90' : type === 'video' ? 'Video Ad' : type === 'sidebar' ? 'Sidebar Ad' : type === 'native-bar' ? 'Native Bar Ad' : 'Ad'}
         </p>
       </div>
     );
@@ -190,7 +151,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
       style={{ 
-        minHeight: type === 'banner' ? '90px' : type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'native-bar' ? '120px' : type === 'autotag' ? '100px' : 'auto',
+        minHeight: type === 'banner' ? '90px' : type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'native-bar' ? '120px' : 'auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'

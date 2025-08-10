@@ -58,27 +58,22 @@ const ModernChannelCard: React.FC<ModernChannelCardProps> = ({
       )}
       
       <CardContent className="p-4 h-full flex flex-col">
-        {/* Channel Thumbnail */}
-        <div className="relative w-full h-32 mb-3 bg-[#343a4d] rounded-lg overflow-hidden">
-          {logo ? (
-            <img 
-              src={logo} 
-              alt={title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-              }}
-            />
-          ) : null}
-          <div className={`absolute inset-0 flex items-center justify-center text-2xl font-bold text-white ${logo ? 'hidden' : ''}`}>
-            {generateInitials()}
-          </div>
-          
-          {/* Play overlay */}
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-            <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-              <div className="w-0 h-0 border-l-[8px] border-l-black border-y-[6px] border-y-transparent ml-1"></div>
+        {/* Channel Logo/Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[#343a4d] flex items-center justify-center overflow-hidden">
+            {logo ? (
+              <img 
+                src={logo} 
+                alt={title}
+                className="w-12 h-12 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-full h-full flex items-center justify-center text-lg font-bold text-white ${logo ? 'hidden' : ''}`}>
+              {generateInitials()}
             </div>
           </div>
         </div>

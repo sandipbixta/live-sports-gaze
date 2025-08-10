@@ -207,73 +207,25 @@ const Live = () => {
         </div>
         
         <TabsContent value="all" className="mt-0">
-          {/* Live Matches Categorized by Sport */}
-          {(() => {
-            const liveMatchesFiltered = liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
-            
-            if (liveMatchesFiltered.length > 0) {
-              // Group live matches by sport
-              const liveMatchesBySport = sports.reduce((acc, sport) => {
-                const sportMatches = liveMatchesFiltered.filter(match => match.sportId === sport.id);
-                if (sportMatches.length > 0) {
-                  acc[sport.id] = {
-                    sport: sport,
-                    matches: sportMatches
-                  };
-                }
-                return acc;
-              }, {} as Record<string, { sport: any; matches: Match[] }>);
-              
-              return (
-                <div className="space-y-8 mb-8">
-                  {Object.values(liveMatchesBySport).map(({ sport, matches }) => (
-                    <MatchSection
-                      key={`live-${sport.id}`}
-                      matches={matches}
-                      sportId={sport.id}
-                      title={`${sport.name} - Live`}
-                      isLive={true}
-                    />
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })()}
+          {/* Live Matches Section */}
+          {liveMatches.length > 0 && (
+            <MatchSection
+              matches={liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id))}
+              sportId="all"
+              title="Live Matches"
+              isLive={true}
+            />
+          )}
           
-          {/* Upcoming Matches Categorized by Sport */}
-          {(() => {
-            const upcomingMatchesFiltered = upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id)).slice(0, 24);
-            
-            if (upcomingMatchesFiltered.length > 0) {
-              // Group upcoming matches by sport
-              const upcomingMatchesBySport = sports.reduce((acc, sport) => {
-                const sportMatches = upcomingMatchesFiltered.filter(match => match.sportId === sport.id);
-                if (sportMatches.length > 0) {
-                  acc[sport.id] = {
-                    sport: sport,
-                    matches: sportMatches
-                  };
-                }
-                return acc;
-              }, {} as Record<string, { sport: any; matches: Match[] }>);
-              
-              return (
-                <div className="space-y-8">
-                  {Object.values(upcomingMatchesBySport).map(({ sport, matches }) => (
-                    <MatchSection
-                      key={`upcoming-${sport.id}`}
-                      matches={matches}
-                      sportId={sport.id}
-                      title={`${sport.name} - Upcoming`}
-                      isLive={false}
-                    />
-                  ))}
-                </div>
-              );
-            }
-            return null;
-          })()}
+          {/* Upcoming Matches Section */}
+          {upcomingMatches.length > 0 && (
+            <MatchSection
+              matches={upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id)).slice(0, 24)}
+              sportId="all"
+              title="Upcoming Matches"
+              isLive={false}
+            />
+          )}
           
           {/* No matches message */}
           {filteredMatches.length === 0 && (

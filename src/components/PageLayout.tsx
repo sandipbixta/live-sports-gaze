@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import Clock from './Clock';
 import ThemeToggle from './ThemeToggle';
 import BannerAd from './BannerAd';
-import { useDirectLinkAd } from '@/hooks/useDirectLinkAd';
+import PopupAd from './PopupAd';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -23,11 +23,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Initialize direct link ad functionality
-  useDirectLinkAd();
-  
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
+      {/* Show the popup ad globally */}
+      <PopupAd />
       <header className="bg-[#ff5a36] shadow-md">
         <div className="container mx-auto py-2 px-2">
           <div className="flex flex-row justify-between items-center gap-2">

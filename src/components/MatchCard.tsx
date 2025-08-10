@@ -1,17 +1,16 @@
+
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Clock, Play, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { Link, useLocation } from 'react-router-dom';
 import { Match } from '../types/sports';
-import { isMatchLive } from '../utils/matchUtils';
+import { AspectRatio } from './ui/aspect-ratio';
+import { Eye, Clock, Play } from 'lucide-react';
+import { useIsMobile } from '../hooks/use-mobile';
+import { format } from 'date-fns';
+import { Button } from './ui/button';
 
 interface MatchCardProps {
   match: Match;
-  className?: string;
-  sportId?: string;
+  sportId: string;
   isPriority?: boolean;
   onClick?: () => void;
   preventNavigation?: boolean;
@@ -19,12 +18,29 @@ interface MatchCardProps {
 
 const MatchCard: React.FC<MatchCardProps> = ({ 
   match, 
-  className = '', 
   sportId, 
-  isPriority, 
-  onClick, 
-  preventNavigation 
+  isPriority = false,
+  onClick,
+  preventNavigation = false
 }) => {
+  // Check if we're on mobile
+  const isMobile = useIsMobile();
+  
+  // Helper function to determine if a match is likely live - Reduced to 3 hours
+  const isMatchLive = (match: Match): boolean => {
+    const matchTime = new Date(match.date).getTime();
+    const now = new Date().getTime();
+    const threeHoursInMs = 3 * 60 * 60 * 1000; // Changed to 3 hours
+    const oneHourInMs = 60 * 60 * 1000;
+    
+    return (
+      match.sources && 
+      match.sources.length > 0 && 
+      matchTime - now < oneHourInMs && // Match starts within 1 hour
+      now - matchTime < threeHoursInMs  // Match can be live up to 3 hours after start
+    );
+  };
+  
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -50,120 +66,130 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
+    <div className="relative rounded-md overflow-hidden h-full transition-all duration-300 group bg-transparent">
       <AspectRatio 
         ratio={16/10} 
-        className="w-full"
-      >
-        <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
-          {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-2 md:mb-4">
-            {isLive ? (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] md:text-xs px-1.5 py-0.5 animate-pulse font-medium">
-                • LIVE
-              </Badge>
-            ) : (
-              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
-                {formatTime(match.date)}
-              </Badge>
-            )}
-            
-            <Badge className="bg-white/10 text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
-              {formatDate(match.date)}
-            </Badge>
+        className="bg-gradient-to-b from-gray-800 to-gray-900 border-0 shadow-none"
+        style={{ border: 'none', boxShadow: 'none' }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 z-10"></div>
+        
+        {/* Match Time */}
+        <div className="absolute top-1 left-1 z-20">
+          <div className="bg-black/70 text-white px-1 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1">
+            {!isLive && <Clock className="w-2.5 h-2.5" />}
+            {formatTime(match.date)}
           </div>
-          
-          {/* Teams Section */}
-          {hasTeams ? (
-            <div className="flex items-stretch justify-between flex-1 min-h-0">
-              {/* Home Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto">
-                    {home}
-                  </span>
+        </div>
+        
+        {/* Live/Upcoming Badge - Adjusted for mobile */}
+        <div className="absolute top-1 right-1 z-30">
+          {isLive ? (
+            <div className="flex items-center gap-1 bg-[#fa2d04] text-white px-1 py-0.5 rounded-md">
+              <Eye className="w-2 h-2" />
+              <span className="text-[8px] font-medium">LIVE</span>
+            </div>
+          ) : hasStream ? (
+            <div className="flex items-center gap-1 bg-[#1EAEDB] text-white px-1 py-0.5 rounded-md">
+              <Clock className="w-2 h-2" />
+              <span className="text-[8px] font-medium">UPCOMING</span>
+            </div>
+          ) : null}
+        </div>
+        
+        {/* Teams or DAMITV - Centered in the card */}
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2">
+          {hasTeamLogos && hasTeams ? (
+            <div className="flex items-center justify-center">
+              <div className="flex items-center">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden border-0 p-0.5`}>
+                  <img 
+                    src={homeBadge} 
+                    alt={home} 
+                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain rounded-full`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">' + home.charAt(0) + '</span></div>';
+                    }}
+                  />
                 </div>
               </div>
-
-              {/* VS Section */}
-              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                <div className="text-white text-[10px] md:text-sm font-bold">VS</div>
-              </div>
-
-              {/* Away Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto">
-                    {away}
-                  </span>
+              {/* Only show VS when both teams exist */}
+              {hasTeams && (
+                <div className="mx-2 text-white text-xs font-bold">VS</div>
+              )}
+              <div className="flex items-center">
+                <div className={`${isMobile ? 'w-8 h-8' : 'w-14 h-14'} bg-white rounded-full flex items-center justify-center overflow-hidden border-0 p-0.5`}>
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className={`${isMobile ? 'w-7 h-7' : 'w-12 h-12'} object-contain rounded-full`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement!.innerHTML = '<div class="w-full h-full bg-[#343a4d] rounded-full flex items-center justify-center"><span class="font-bold text-white text-xs">' + away.charAt(0) + '</span></div>';
+                    }}
+                  />
                 </div>
               </div>
             </div>
           ) : (
-            /* No Teams Available */
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <h3 className="text-white font-bold text-[10px] md:text-sm mb-1 leading-tight">{match.title}</h3>
-                <p className="text-white/60 text-[10px] md:text-xs">{formatDate(match.date)}</p>
+            <div className="flex items-center justify-center">
+              <div className="bg-[#343a4d] px-2 py-0.5 rounded-md">
+                <span className="font-bold text-white text-[10px]">DAMITV</span>
               </div>
             </div>
           )}
-
-          {/* Footer */}
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
-            <div className="flex items-center space-x-1">
-              <Play className="w-3 h-3 text-white/80" />
-              <span className="text-white/80 text-[10px] md:text-xs font-medium">
-                {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-              </span>
-            </div>
-            
-            {hasStream && (
-              <div className="text-white/60 group-hover:text-[#ff5a36] transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            )}
+          <h3 className="font-semibold text-center text-white text-[10px] md:text-xs truncate px-1 mt-2">
+            {match.title.length > 20 ? `${match.title.substring(0, 20)}...` : match.title}
+          </h3>
+          <p className="text-center text-gray-300 text-[8px] md:text-[10px] truncate px-1">
+            {match.title.split('-').pop()?.trim() || 'Football'}
+          </p>
+          
+          {/* Add date for upcoming matches */}
+          {!isLive && (
+            <p className="text-center text-[#1EAEDB] text-[8px] md:text-[10px] mt-1">
+              {formatDate(match.date)}
+            </p>
+          )}
+          
+          {/* Watch Now Button - appears on hover */}
+          <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button 
+              className="w-full bg-[#ff5a36] hover:bg-[#e64d2e] text-white font-medium py-1 text-xs flex items-center justify-center gap-1"
+              size="sm"
+            >
+              <Play size={12} />
+              Watch Now
+            </Button>
           </div>
-
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#ff5a36]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl" />
         </div>
       </AspectRatio>
-    </Card>
+    </div>
   );
 
-  // Handle click and navigation logic
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    }
-  };
-
-  // If preventNavigation is true or onClick is provided, make it a clickable div
-  if (preventNavigation || onClick) {
+  // Return either a Link or a div based on the preventNavigation prop
+  if (preventNavigation) {
     return (
       <div 
-        className={`cursor-pointer ${className}`}
-        onClick={handleClick}
+        className="group block cursor-pointer" 
+        onClick={onClick}
+        key={`${isPriority ? 'popular-' : ''}${match.id}`}
       >
         {cardContent}
       </div>
     );
   }
-
-  // If there are streams, make it a Link; otherwise just show the card
-  if (hasStream) {
-    return (
-      <Link 
-        to={`/match/${sportId || match.sportId}/${match.id}`} 
-        className={`block ${className}`}
-      >
-        {cardContent}
-      </Link>
-    );
-  }
-
-  return <div className={className}>{cardContent}</div>;
+  
+  // Default behavior with Link navigation - use state to preserve navigation history
+  return (
+    <Link 
+      to={`/match/${sportId}/${match.id}`}
+      key={`${isPriority ? 'popular-' : ''}${match.id}`} 
+      className="group block"
+    >
+      {cardContent}
+    </Link>
+  );
 };
 
 export default MatchCard;

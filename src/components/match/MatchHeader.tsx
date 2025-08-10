@@ -23,6 +23,7 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
               variant="ghost" 
               size="sm" 
               onClick={handleGoBack}
+              onTouchEnd={handleGoBack}
               className="text-gray-300 hover:text-white mr-2 sm:mr-4 touch-manipulation min-h-[44px] min-w-[44px]"
             >
               <ChevronLeft className="mr-1" />

@@ -11,15 +11,13 @@ interface MatchesListProps {
   sportId: string;
   isLoading: boolean;
   onMatchesDisplayed?: (matchIds: string[]) => void;
-  trendingSection?: React.ReactNode; // Optional trending section to render between live and upcoming
 }
 
 const MatchesList: React.FC<MatchesListProps> = ({ 
   matches, 
   sportId, 
   isLoading,
-  onMatchesDisplayed,
-  trendingSection
+  onMatchesDisplayed
 }) => {
   // Filter out advertisement and invalid matches, then consolidate duplicates
   const cleanMatches = filterCleanMatches(matches);
@@ -56,9 +54,6 @@ const MatchesList: React.FC<MatchesListProps> = ({
         showEmptyMessage={liveMatches.length === 0 && upcomingMatches.length > 0}
         emptyMessage="No live matches available right now."
       />
-      
-      {/* Trending Section (if provided) */}
-      {trendingSection}
       
       {/* Upcoming Matches Section */}
       <MatchSection
