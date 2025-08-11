@@ -21,6 +21,8 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const [showExternal, setShowExternal] = useState(false);
   useEffect(() => {
     setError(false);
   }, [stream]);
@@ -150,7 +152,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           height="100%"
           allowFullScreen
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-          referrerPolicy="no-referrer"
+        referrerPolicy="origin-when-cross-origin"
           loading="eager"
           title="Live Stream"
           style={{ 
@@ -161,7 +163,17 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           onError={() => setError(true)}
         />
       )}
-
+      {/* External open fallback on Android for non-m3u8 embeds */}
+      {!isM3U8 && isAndroid && (
+        <div className="absolute top-4 left-4">
+          <Button asChild className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
+            <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Open
+            </a>
+          </Button>
+        </div>
+      )}
 
       <Button
         onClick={toggleFullscreen}
