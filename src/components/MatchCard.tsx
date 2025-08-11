@@ -88,7 +88,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 )}
                 <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto px-1">
-                    {home.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/(\w)([A-Z])/g, '$1 $2')}
+                    {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
                   </span>
                 </div>
               </div>
@@ -112,7 +112,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 )}
                 <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto px-1">
-                    {away.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/(\w)([A-Z])/g, '$1 $2')}
+                    {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
                   </span>
                 </div>
               </div>
@@ -122,7 +122,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <h3 className="text-white font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
-                  {match.title.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/(\w)([A-Z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
+                  {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
                 </h3>
                 <p className="text-white/60 text-[10px] md:text-xs">{formatDate(match.date)}</p>
               </div>
