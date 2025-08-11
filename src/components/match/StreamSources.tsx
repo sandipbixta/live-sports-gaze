@@ -152,41 +152,63 @@ const StreamSources = ({
                 const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                 const isActive = activeSource === streamKey;
                 
-                // Extract channel name from URL
-                const getChannelName = (embedUrl: string): string => {
+                // Get source name from API or extract from URL
+                const getSourceName = (stream: any, sourceInfo: Source): string => {
+                  // First, try to use the source name directly from API
+                  if (stream.source && stream.source !== sourceInfo.source) {
+                    return stream.source;
+                  }
+                  
+                  // Use the source identifier from the match data
+                  if (sourceInfo.source) {
+                    // Convert source names to more readable format
+                    const sourceNameMap: Record<string, string> = {
+                      'alpha': 'Alpha',
+                      'bravo': 'Bravo', 
+                      'charlie': 'Charlie',
+                      'delta': 'Delta',
+                      'echo': 'Echo',
+                      'foxtrot': 'Foxtrot',
+                      'golf': 'Golf'
+                    };
+                    
+                    const readableName = sourceNameMap[sourceInfo.source.toLowerCase()] || sourceInfo.source;
+                    
+                    // If multiple streams from same source, add stream number
+                    if (allStreams[sourceKey] && allStreams[sourceKey].length > 1) {
+                      return `${readableName} ${stream.streamNo || (index + 1)}`;
+                    }
+                    
+                    return readableName;
+                  }
+                  
+                  // Fallback to extracting from embedUrl for legacy support
+                  const embedUrl = stream.embedUrl;
                   if (!embedUrl) return `Stream ${stream.streamNo || (index + 1)}`;
                   
                   try {
-                    // For TopEmbed URLs like: https://topembed.pw/channel/SkySportsMainEvent[UK]
+                    // For channel URLs like: https://domain.com/channel/ChannelName[Country]
                     if (embedUrl.includes('/channel/')) {
                       const channelPart = embedUrl.split('/channel/')[1];
                       if (channelPart) {
-                        // Remove query parameters and decode
                         const cleanChannelName = channelPart.split('?')[0];
-                        // Replace brackets and clean up the name
                         return cleanChannelName
-                          .replace(/\[|\]/g, ' ')
+                          .replace(/\[.*?\]/g, '') // Remove [Country] parts
                           .replace(/([A-Z])/g, ' $1')
                           .trim()
-                          .replace(/\s+/g, ' ');
+                          .replace(/\s+/g, ' ')
+                          .substring(0, 20); // Limit length
                       }
                     }
                     
-                    // For other URLs, try to extract domain or meaningful part
                     const url = new URL(embedUrl);
-                    const pathParts = url.pathname.split('/').filter(part => part.length > 0);
-                    if (pathParts.length > 0) {
-                      const lastPart = pathParts[pathParts.length - 1];
-                      return lastPart.replace(/[-_]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
-                    }
-                    
-                    return url.hostname.replace('www.', '');
+                    return url.hostname.replace('www.', '').split('.')[0];
                   } catch {
                     return `Stream ${stream.streamNo || (index + 1)}`;
                   }
                 };
                 
-                const channelName = getChannelName(stream.embedUrl);
+                const sourceName = getSourceName(stream, sources.find(s => `${s.source}/${s.id}` === sourceKey) || sources[0]);
                 
                 return (
                   <Badge
@@ -203,7 +225,7 @@ const StreamSources = ({
                       <div className="flex items-center gap-1">
                         <Play size={10} />
                         <span className="font-medium text-xs leading-tight line-clamp-2">
-                          {channelName}
+                          {sourceName}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-xs">
