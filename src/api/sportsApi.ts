@@ -289,15 +289,40 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
-    
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      },
-      cache: 'no-store',
-    });
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
+    const pkUrl = `${API_BASE}/stream/${source}/${id}`;
+
+    let response: Response | null = null;
+
+    if (isMobile) {
+      try {
+        console.log('📡 Trying streamed.su for stream (mobile first)...');
+        response = await fetch(suUrl, {
+          signal: controller.signal,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          },
+          cache: 'no-store',
+        });
+      } catch (e) {
+        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
+      }
+    }
+
+    if (!response || !response.ok) {
+      console.log('↩️ Falling back to streamed.pk for stream...');
+      response = await fetch(pkUrl, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+        cache: 'no-store',
+      });
+    }
     
     clearTimeout(timeoutId);
     

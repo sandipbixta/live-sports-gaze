@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
+import { useIsMobile } from '../../hooks/use-mobile';
 
 interface SimpleVideoPlayerProps {
   stream: Stream | null;
@@ -17,6 +18,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setError(false);
@@ -79,12 +81,22 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
               : 'Failed to load the stream. Please try again.'
             }
           </p>
-          {onRetry && (
-            <Button onClick={handleRetry} variant="outline" className="bg-blue-600 hover:bg-blue-700">
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Retry
-            </Button>
-          )}
+          <div className="flex items-center justify-center gap-3">
+            {onRetry && (
+              <Button onClick={handleRetry} variant="outline" className="bg-blue-600 hover:bg-blue-700">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            )}
+            {stream?.embedUrl && (
+              <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Open Stream
+                </Button>
+              </a>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -95,12 +107,15 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       ref={containerRef}
       className={`relative bg-black rounded-lg overflow-hidden ${isFullscreen ? 'w-screen h-screen' : 'w-full aspect-video'}`}
     >
-      {/* Completely unrestricted iframe */}
+      {/* Mobile-optimized iframe */}
       <iframe
-        src={stream.embedUrl}
+        src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
         width="100%"
         height="100%"
         allowFullScreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+        referrerPolicy="no-referrer"
+        loading="eager"
         title="Live Stream"
         style={{ 
           border: 'none',
@@ -109,8 +124,16 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         }}
         onError={() => setError(true)}
       />
-      
-      {/* Fullscreen toggle button */}
+
+      {/* Open directly (helpful for mobile) */}
+      {isMobile && (
+        <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer" className="absolute top-4 left-4">
+          <Button className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Open
+          </Button>
+        </a>
+      )}
       <Button
         onClick={toggleFullscreen}
         className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white border-0"
