@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
@@ -18,8 +19,8 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
-  
-
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   useEffect(() => {
     setError(false);
   }, [stream]);
@@ -55,6 +56,32 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  // Set up HLS for Android/Chrome when URL is .m3u8
+  useEffect(() => {
+    if (!isM3U8 || !stream?.embedUrl) return;
+    const src = stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl;
+
+    if (videoRef.current && (videoRef.current as any).canPlayType && videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+      // Native HLS support (Safari)
+      videoRef.current.src = src;
+      return;
+    }
+
+    let hls: Hls | null = null;
+    if (Hls.isSupported() && videoRef.current) {
+      hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      hls.loadSource(src);
+      hls.attachMedia(videoRef.current);
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        console.error('HLS error', data);
+        setError(true);
+      });
+    }
+    return () => {
+      if (hls) hls.destroy();
+    };
+  }, [isM3U8, stream?.embedUrl]);
 
   if (isLoading) {
     return (
@@ -107,23 +134,34 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       ref={containerRef}
       className={`relative bg-black rounded-lg overflow-hidden ${isFullscreen ? 'w-screen h-screen' : 'w-full aspect-video'}`}
     >
-      {/* Mobile-optimized iframe */}
-      <iframe
-        src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-        width="100%"
-        height="100%"
-        allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        referrerPolicy="no-referrer"
-        loading="eager"
-        title="Live Stream"
-        style={{ 
-          border: 'none',
-          background: 'black',
-          display: 'block'
-        }}
-        onError={() => setError(true)}
-      />
+      {isM3U8 ? (
+        <video
+          ref={videoRef}
+          className="w-full h-full object-contain"
+          controls
+          autoPlay
+          playsInline
+          onError={() => setError(true)}
+        />
+      ) : (
+        <iframe
+          src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
+          width="100%"
+          height="100%"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          referrerPolicy="no-referrer"
+          loading="eager"
+          title="Live Stream"
+          style={{ 
+            border: 'none',
+            background: 'black',
+            display: 'block'
+          }}
+          onError={() => setError(true)}
+        />
+      )}
+
 
       <Button
         onClick={toggleFullscreen}
