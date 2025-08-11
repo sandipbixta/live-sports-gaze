@@ -48,27 +48,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
-    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg border-0 bg-gradient-to-br from-[#242836] to-[#1a1f2e] rounded-xl">
+    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-card text-card-foreground rounded-xl">
       <AspectRatio 
         ratio={16/10} 
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
           {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-2 md:mb-4">
-            {isLive ? (
-              <Badge className="bg-red-500 hover:bg-red-500 text-white text-[10px] md:text-xs px-1.5 py-0.5 animate-pulse font-medium">
-                • LIVE
-              </Badge>
-            ) : (
-              <Badge className="bg-[#ff5a36] hover:bg-[#ff5a36] text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
-                {formatTime(match.date)}
-              </Badge>
-            )}
-            
-            <Badge className="bg-white/10 text-white text-[10px] md:text-xs px-1.5 py-0.5 font-medium">
-              {formatDate(match.date)}
-            </Badge>
+          <div className="flex justify-between items-center mb-2 md:mb-3">
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
+                  • LIVE
+                </Badge>
+              ) : (
+                <Badge className="bg-secondary text-secondary-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatTime(match.date)}
+                </Badge>
+              )}
+            </div>
           </div>
           
           {/* Teams Section */}
@@ -86,7 +85,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     }}
                   />
                 )}
-                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto px-1">
                     {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
                   </span>
@@ -95,7 +94,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
               {/* VS Section */}
               <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                <div className="text-white text-[10px] md:text-sm font-bold">VS</div>
+                <div className="text-muted-foreground text-[10px] md:text-sm font-bold">VS</div>
               </div>
 
               {/* Away Team */}
@@ -110,7 +109,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                     }}
                   />
                 )}
-                <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto px-1">
                     {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
                   </span>
@@ -121,32 +120,32 @@ const MatchCard: React.FC<MatchCardProps> = ({
             /* No Teams Available */
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <h3 className="text-white font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
+                <h3 className="text-foreground font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
                   {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
                 </h3>
-                <p className="text-white/60 text-[10px] md:text-xs">{formatDate(match.date)}</p>
+                <p className="text-muted-foreground text-[10px] md:text-xs">{formatDate(match.date)}</p>
               </div>
             </div>
           )}
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-white/10">
-            <div className="flex items-center space-x-1">
-              <Play className="w-3 h-3 text-white/80" />
-              <span className="text-white/80 text-[10px] md:text-xs font-medium">
-                {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-              </span>
+          <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
+            <div className="text-muted-foreground text-[10px] md:text-xs">
+              {format(match.date, 'EEE, MMM d')}
             </div>
-            
-            {hasStream && (
-              <div className="text-white/60 group-hover:text-[#ff5a36] transition-colors">
-                <ChevronRight className="w-4 h-4" />
+            <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-1 text-muted-foreground">
+                <Play className="w-3 h-3" />
+                <span className="text-[10px] md:text-xs font-medium">
+                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+                </span>
               </div>
-            )}
+              {hasStream && (
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              )}
+            </div>
           </div>
 
-          {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#ff5a36]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl" />
         </div>
       </AspectRatio>
     </Card>
