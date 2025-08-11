@@ -37,12 +37,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
       onError={onError}
       onClick={handleIframeClick}
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-      // Remove sandbox entirely for Android WebView to avoid referrer conflicts
-      {...(!isAndroidWebView && {
-        sandbox: "allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-downloads allow-top-navigation"
-      })}
-      // Use no-referrer for Android WebView, unsafe-url for others
-      referrerPolicy={isAndroidWebView ? "no-referrer" : "unsafe-url"}
+      referrerPolicy="no-referrer"
       loading="eager"
       style={{ 
         border: 'none',
