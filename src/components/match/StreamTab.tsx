@@ -75,13 +75,13 @@ const StreamTab = ({
     }
   };
 
-  const formatMatchTime = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatMatchTime = (timestamp: number) => {
+    const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
   
   const isMatchLive = (): boolean => {
-    const matchTime = new Date(match.date).getTime();
+    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
     const now = new Date().getTime();
     const threeHoursInMs = 3 * 60 * 60 * 1000;
     const oneHourInMs = 60 * 60 * 1000;

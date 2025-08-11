@@ -25,21 +25,19 @@ const MatchCard: React.FC<MatchCardProps> = ({
   onClick, 
   preventNavigation 
 }) => {
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
     return format(date, 'EEEE, MMM d');
   };
 
-  // Prioritize logo over badge for team images
-  const homeBadge = match.teams?.home?.logo || 
-    (match.teams?.home?.badge ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` : '');
-  const awayBadge = match.teams?.away?.logo || 
-    (match.teams?.away?.badge ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` : '');
+  // Use badge for team images with streamed.su API
+  const homeBadge = match.teams?.home?.badge ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` : '';
+  const awayBadge = match.teams?.away?.badge ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` : '';
   
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
@@ -78,6 +76,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="flex items-stretch justify-between flex-1 min-h-0">
               {/* Home Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {homeBadge && (
+                  <img 
+                    src={homeBadge} 
+                    alt={home}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
                 <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {home}
@@ -92,6 +100,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
               {/* Away Team */}
               <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {awayBadge && (
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
                 <div className="text-white text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
                   <span className="line-clamp-2 break-words hyphens-auto">
                     {away}

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
-import { fetchMatches, fetchStream, fetchSports } from '../api/sportsApi';
+import { fetchMatches, fetchStream, fetchSports, fetchLiveMatches, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
 
 export const useLiveMatches = () => {
@@ -54,7 +54,7 @@ export const useLiveMatches = () => {
         const consolidatedMatches = consolidateMatches(cleanMatches);
         
         const live = consolidatedMatches.filter(match => {
-          const matchTime = new Date(match.date).getTime();
+          const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
           const now = new Date().getTime();
           const sixHoursInMs = 6 * 60 * 60 * 1000;
           const oneHourInMs = 60 * 60 * 1000;
@@ -106,7 +106,7 @@ export const useLiveMatches = () => {
       console.log('Matches after consolidation:', consolidatedMatches.length);
       
       const live = consolidatedMatches.filter(match => {
-        const matchTime = new Date(match.date).getTime();
+        const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
         const now = new Date().getTime();
         const sixHoursInMs = 6 * 60 * 60 * 1000;
         const oneHourInMs = 60 * 60 * 1000;

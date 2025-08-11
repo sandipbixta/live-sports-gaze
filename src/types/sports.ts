@@ -18,14 +18,17 @@ export interface Source {
 export interface Match {
   id: string;
   title: string;
-  date: string;
+  category: string;         // Sport category (e.g. "football", "basketball")
+  date: number;            // Unix timestamp in milliseconds
+  poster?: string;         // URL path to match poster image
+  popular: boolean;        // Whether the match is marked as popular
   teams?: {
     home?: Team;
     away?: Team;
   };
   sources: Source[];
-  related?: Match[]; // Related matches
-  sportId?: string;  // Added sportId to identify which sport the match belongs to
+  related?: Match[];       // Related matches
+  sportId?: string;        // Added for compatibility - maps to category
 }
 
 export interface Stream {

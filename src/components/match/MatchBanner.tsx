@@ -15,12 +15,16 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
   const away = match.teams?.away?.name || '';
   const hasTeams = !!home && !!away;
 
-  const formatTime = (date: string) => {
-    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString();
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
   if (isMobile) {
