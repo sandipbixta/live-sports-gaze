@@ -332,10 +332,21 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     
     const data = await response.json();
     console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
+
+    // Normalize helper for embed URLs
+    const normalize = (url: string) => {
+      if (!url) return url as any;
+      if (url.startsWith('//')) return 'https:' + url;
+      if (url.startsWith('http://')) return url.replace(/^http:\/\//i, 'https://');
+      return url;
+    };
     
-    // Handle response format
+    // Handle response format with normalization
     if (Array.isArray(data) && data.length > 0) {
-      const validStreams = data.filter(stream => stream && isValidStreamUrl(stream.embedUrl));
+      const sanitized = data.map((stream: any) =>
+        stream && stream.embedUrl ? { ...stream, embedUrl: normalize(stream.embedUrl) } : stream
+      );
+      const validStreams = sanitized.filter(stream => stream && isValidStreamUrl(stream.embedUrl));
       
       if (validStreams.length === 0) {
         throw new Error('No valid streams found in response');
@@ -359,10 +370,11 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
       console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id}`);
       return validStreams;
     } else if (data && typeof data === 'object' && data.embedUrl) {
-      if (isValidStreamUrl(data.embedUrl)) {
-        setCachedData(cacheKey, data);
+      const single = { ...data, embedUrl: normalize(data.embedUrl) };
+      if (isValidStreamUrl(single.embedUrl)) {
+        setCachedData(cacheKey, single);
         console.log(`✅ Fetched single stream for ${source}/${id}`);
-        return data;
+        return single;
       }
     }
     
@@ -376,8 +388,9 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 
 // Helper function to check if URL is valid
 function isValidStreamUrl(url: string): boolean {
-  if (!url || typeof url !== 'string' || !url.startsWith('http')) return false;
-  
+  if (!url || typeof url !== 'string') return false;
+  const startsOk = url.startsWith('http') || url.startsWith('//');
+  if (!startsOk) return false;
   const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com', 'localhost'];
   return !invalidDomains.some(domain => url.toLowerCase().includes(domain));
 }
