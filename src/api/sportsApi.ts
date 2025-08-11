@@ -88,9 +88,13 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  // Detect mobile and adjust timeout
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const timeout = isMobile ? 20000 : 15000; // Even longer timeout for mobile matches
+
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     
     const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
@@ -127,6 +131,43 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     return validMatches;
   } catch (error) {
     console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
+    
+    // On mobile, try one more time with a simpler request
+    if (isMobile && !error.message.includes('retry')) {
+      console.log(`🔄 Mobile retry for matches ${sportId}...`);
+      try {
+        const retryResponse = await fetch(`${API_BASE}/matches/${sportId}`, {
+          method: 'GET',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          if (Array.isArray(retryData)) {
+            const validMatches = retryData.filter(match => 
+              match && 
+              match.id && 
+              match.title && 
+              match.date &&
+              Array.isArray(match.sources)
+            ).map(match => ({
+              ...match,
+              sportId: match.category || sportId,
+              category: match.category || sportId
+            }));
+            setCachedData(cacheKey, validMatches);
+            console.log(`✅ Mobile retry successful: ${validMatches.length} matches for ${sportId}`);
+            return validMatches;
+          }
+        }
+      } catch (retryError) {
+        console.error(`❌ Mobile retry failed for ${sportId}:`, retryError);
+      }
+    }
+    
     throw error;
   }
 };
