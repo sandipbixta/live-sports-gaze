@@ -1,97 +1,39 @@
-
 import React from 'react';
-import Html5VideoPlayer from './Html5VideoPlayer';
-import IframeVideoPlayer from './IframeVideoPlayer';
 
 interface VideoPlayerSelectorProps {
   src: string;
-  onLoad: () => void;
-  onError: () => void;
-  videoRef?: React.RefObject<HTMLVideoElement>;
+  onLoad?: () => void;
+  onError?: () => void;
   title?: string;
   isManualChannel?: boolean;
   isTvChannel?: boolean;
+  videoRef?: React.RefObject<HTMLVideoElement>;
 }
 
-const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({ 
-  src, 
-  onLoad, 
-  onError, 
-  videoRef, 
-  title,
-  isManualChannel = false,
-  isTvChannel = false
+const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
+  src,
+  onLoad,
+  onError,
+  title = "Live Stream"
 }) => {
-  // Determine if we should use iframe or HTML5 video player
-  const shouldUseIframe = () => {
-    // Always use iframe for manual channels and TV channels
-    if (isManualChannel || isTvChannel) {
-      return true;
-    }
-    
-    // Check for direct video file extensions - use HTML5 for these
-    const videoExtensions = ['.m3u8', '.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.flv'];
-    const hasVideoExtension = videoExtensions.some(ext => 
-      src.toLowerCase().includes(ext.toLowerCase())
-    );
-    
-    if (hasVideoExtension) {
-      console.log('Direct video file detected, using HTML5 player');
-      return false;
-    }
-    
-    // Check for embed/streaming URLs - use iframe for these
-    const embedPatterns = [
-      '/embed/',
-      'embed.',
-      'player.',
-      'iframe',
-      'stream.php',
-      'watch.php',
-      'streamingfast',
-      'cricfree',
-      'buffstreams',
-      'reddit',
-      'twitch.tv'
-    ];
-    
-    const isEmbedUrl = embedPatterns.some(pattern => 
-      src.toLowerCase().includes(pattern.toLowerCase())
-    );
-    
-    // Default to iframe for most streaming sites
-    return isEmbedUrl || true;
-  };
-
-  const useIframe = shouldUseIframe();
-  
-  console.log(`Video player selection:`, {
-    src: src.substring(0, 100) + '...',
-    isManualChannel,
-    isTvChannel,
-    useIframe,
-    playerType: useIframe ? 'iframe' : 'html5'
-  });
-
-  if (useIframe) {
-    return (
-      <IframeVideoPlayer
+  // Always use the simplest possible iframe approach
+  return (
+    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+      <iframe
         src={src}
-        onLoad={onLoad}
-        onError={onError}
+        width="100%"
+        height="100%"
+        allowFullScreen
         title={title}
-      />
-    );
-  } else {
-    return (
-      <Html5VideoPlayer
-        src={src}
+        style={{ 
+          border: 'none',
+          background: 'black'
+        }}
         onLoad={onLoad}
         onError={onError}
-        videoRef={videoRef || React.createRef()}
       />
-    );
-  }
+    </div>
+  );
 };
 
 export default VideoPlayerSelector;

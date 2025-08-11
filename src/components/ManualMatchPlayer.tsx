@@ -67,10 +67,14 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
               <iframe
                 id="manual-stream-iframe"
                 src={defaultLink.url}
-                className="w-full h-full border-0"
+                width="100%"
+                height="100%"
                 allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 title={`${match.teams.home} vs ${match.teams.away} Stream`}
+                style={{ 
+                  border: 'none',
+                  background: 'black'
+                }}
               />
             )}
           </div>

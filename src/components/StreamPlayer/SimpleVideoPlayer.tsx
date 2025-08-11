@@ -95,18 +95,19 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       ref={containerRef}
       className={`relative bg-black rounded-lg overflow-hidden ${isFullscreen ? 'w-screen h-screen' : 'w-full aspect-video'}`}
     >
-      {/* Simple, clean iframe */}
+      {/* Completely unrestricted iframe */}
       <iframe
         src={stream.embedUrl}
-        className="w-full h-full"
+        width="100%"
+        height="100%"
         allowFullScreen
-        allow="autoplay; fullscreen; encrypted-media"
+        title="Live Stream"
         style={{ 
           border: 'none',
-          background: 'black'
+          background: 'black',
+          display: 'block'
         }}
         onError={() => setError(true)}
-        title="Live Stream"
       />
       
       {/* Fullscreen toggle button */}
