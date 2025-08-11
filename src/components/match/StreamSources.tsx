@@ -265,6 +265,8 @@ const StreamSources = ({
                 };
                 
                 const displayName = getDisplayName(stream, sources.find(s => `${s.source}/${s.id}` === sourceKey) || sources[0], index);
+                // Heuristic platform label based on URL type
+                const isM3U8 = /\.m3u8(\?|$)/i.test(stream?.embedUrl || '');
                 
                 return (
                   <Badge
@@ -285,6 +287,8 @@ const StreamSources = ({
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-xs">
+                        {/* Platform badge derived from stream URL */}
+                        <span className="text-xs uppercase opacity-80">{isM3U8 ? 'iOS' : 'Android'}</span>
                         <span className="capitalize text-xs">{getLanguageName(stream.language)}</span>
                         {stream.hd && (
                           <span className="bg-[#ff5a36] text-white px-1 rounded text-xs font-bold">
