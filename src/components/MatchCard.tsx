@@ -35,9 +35,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return format(date, 'EEEE, MMM d');
   };
 
-  // Use badge for team images with streamed.su API
-  const homeBadge = match.teams?.home?.badge ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` : '';
-  const awayBadge = match.teams?.away?.badge ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` : '';
+  // Use badge for team images with streamed.pk API
+  const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : '';
+  const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : '';
   
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
