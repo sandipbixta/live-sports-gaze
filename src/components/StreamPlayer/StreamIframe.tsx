@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
 
 interface StreamIframeProps {
@@ -11,6 +11,10 @@ interface StreamIframeProps {
 
 const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, videoRef }) => {
   const isMobile = useIsMobile();
+  const [loaded, setLoaded] = useState(false);
+  const [hadError, setHadError] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
   // Handle iframe clicks on mobile to prevent automatic opening
   const handleIframeClick = (e: React.MouseEvent) => {
@@ -21,36 +25,69 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     }
   };
 
-  // Android WebView specific handling
-  const isAndroidWebView = typeof navigator !== 'undefined' && 
-    navigator.userAgent.includes('Android') && 
-    navigator.userAgent.includes('wv');
+  useEffect(() => {
+    setLoaded(false);
+    setHadError(false);
+    setTimedOut(false);
+    const t = window.setTimeout(() => {
+      setTimedOut(true);
+    }, 8000);
+    return () => window.clearTimeout(t);
+  }, [src]);
+
+  const handleLoad = () => {
+    setLoaded(true);
+    onLoad?.();
+  };
+
+  const handleError = () => {
+    setHadError(true);
+    onError?.();
+  };
+
+  const showOpenOverlay = isAndroid && (hadError || (timedOut && !loaded));
 
   return (
-    <iframe 
-      ref={videoRef}
-      src={src}
-      className="w-full h-full absolute inset-0"
-      allowFullScreen
-      title="Live Sports Stream - DAMITV"
-      onLoad={onLoad}
-      onError={onError}
-      onClick={handleIframeClick}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-      referrerPolicy="no-referrer"
-      loading="eager"
-      style={{ 
-        border: 'none',
-        pointerEvents: isMobile ? 'auto' : 'auto',
-        ...(isMobile && {
-          touchAction: 'manipulation',
-          WebkitOverflowScrolling: 'touch',
-          WebkitTouchCallout: 'none',
-          WebkitUserSelect: 'none',
-          userSelect: 'none'
-        })
-      }}
-    />
+    <div className="absolute inset-0 w-full h-full">
+      <iframe 
+        ref={videoRef}
+        src={src}
+        className="w-full h-full"
+        allowFullScreen
+        title="Live Sports Stream - DAMITV"
+        onLoad={handleLoad}
+        onError={handleError}
+        onClick={handleIframeClick}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+        referrerPolicy="origin-when-cross-origin"
+        loading="eager"
+        style={{ 
+          border: 'none',
+          pointerEvents: isMobile ? 'auto' : 'auto',
+          ...(isMobile && {
+            touchAction: 'manipulation',
+            WebkitOverflowScrolling: 'touch',
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'none',
+            userSelect: 'none'
+          })
+        }}
+      />
+
+      {showOpenOverlay && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4">
+          <a
+            href={src}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center rounded-md px-4 py-2 text-white bg-white/10 hover:bg-white/20"
+            aria-label="Open stream in a new tab"
+          >
+            Open stream in new tab
+          </a>
+        </div>
+      )}
+    </div>
   );
 };
 
