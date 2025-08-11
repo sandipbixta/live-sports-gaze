@@ -3,6 +3,7 @@ import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
+import StreamIframe from './StreamIframe';
 
 
 interface SimpleVideoPlayerProps {
@@ -20,6 +21,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const [showExternal, setShowExternal] = useState(false);
@@ -146,20 +148,10 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           onError={() => setError(true)}
         />
       ) : (
-        <iframe
+        <StreamIframe
+          videoRef={iframeRef}
           src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-          width="100%"
-          height="100%"
-          allowFullScreen
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        referrerPolicy="origin-when-cross-origin"
-          loading="eager"
-          title="Live Stream"
-          style={{ 
-            border: 'none',
-            background: 'black',
-            display: 'block'
-          }}
+          onLoad={() => setError(false)}
           onError={() => setError(true)}
         />
       )}
