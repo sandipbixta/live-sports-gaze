@@ -21,6 +21,9 @@ const StreamSources = ({
 }: StreamSourcesProps) => {
   const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const isIOS = typeof navigator !== 'undefined' && ((/iPhone|iPad|iPod/i.test(navigator.userAgent)) || ((navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
+  const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>(() => (isAndroid ? 'android' : isIOS ? 'ios' : 'all'));
 
   // Fetch all available streams for each source
   useEffect(() => {
@@ -102,7 +105,14 @@ const StreamSources = ({
 
   return (
     <div className="mt-6">
-      <h3 className="text-xl font-bold mb-4 text-white">Stream Sources</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <h3 className="text-xl font-bold text-white">Stream Sources</h3>
+        <div className="flex items-center gap-2">
+          <Badge variant={filterMode === 'all' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setFilterMode('all')}>All</Badge>
+          <Badge variant={filterMode === 'ios' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setFilterMode('ios')}>iOS links</Badge>
+          <Badge variant={filterMode === 'android' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setFilterMode('android')}>Android links</Badge>
+        </div>
+      </div>
       
       {/* Collect all streams from all sources */}
       {(() => {
@@ -131,7 +141,15 @@ const StreamSources = ({
         
         const isAnyLoading = Object.values(loadingStreams).some(Boolean);
         
-        if (isAnyLoading && allAvailableStreams.length === 0) {
+        const filteredAvailableStreams = allAvailableStreams.filter(({ stream }) => {
+          const url = stream?.embedUrl || '';
+          const isM3U8 = /\.m3u8(\?|$)/i.test(url);
+          if (filterMode === 'ios') return isM3U8;
+          if (filterMode === 'android') return !isM3U8;
+          return true;
+        });
+        
+        if (isAnyLoading && filteredAvailableStreams.length === 0) {
           return (
             <div className="flex items-center gap-2 text-gray-400 justify-center py-8">
               <Loader className="h-4 w-4 animate-spin" />
@@ -140,10 +158,10 @@ const StreamSources = ({
           );
         }
         
-        if (allAvailableStreams.length === 0) {
+        if (filteredAvailableStreams.length === 0) {
           return (
             <div className="text-center py-8">
-              <p className="text-gray-400">No stream sources available for this match.</p>
+              <p className="text-gray-400">No matching streams for this filter. Try another filter.</p>
             </div>
           );
         }
@@ -151,11 +169,11 @@ const StreamSources = ({
         return (
           <div className="space-y-4">
             <p className="text-sm text-gray-400">
-              {allAvailableStreams.length} stream{allAvailableStreams.length > 1 ? 's' : ''} available
+              {filteredAvailableStreams.length} stream{filteredAvailableStreams.length > 1 ? 's' : ''} available
             </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-              {allAvailableStreams.map(({ stream, sourceKey, index, groupName }) => {
+              {filteredAvailableStreams.map(({ stream, sourceKey, index, groupName }) => {
                 const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                 const isActive = activeSource === streamKey;
                 
