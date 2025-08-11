@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
-import { useIsMobile } from '../../hooks/use-mobile';
+
 
 interface SimpleVideoPlayerProps {
   stream: Stream | null;
@@ -18,7 +18,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
-  const isMobile = useIsMobile();
+  
 
   useEffect(() => {
     setError(false);
@@ -125,15 +125,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         onError={() => setError(true)}
       />
 
-      {/* Open directly (helpful for mobile) */}
-      {isMobile && (
-        <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer" className="absolute top-4 left-4">
-          <Button className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Open
-          </Button>
-        </a>
-      )}
       <Button
         onClick={toggleFullscreen}
         className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white border-0"
