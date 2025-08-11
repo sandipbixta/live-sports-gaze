@@ -26,9 +26,13 @@ export const fetchSports = async (): Promise<Sport[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  // Detect mobile and adjust timeout
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const timeout = isMobile ? 15000 : 10000; // Longer timeout for mobile
+
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
@@ -52,6 +56,29 @@ export const fetchSports = async (): Promise<Sport[]> => {
     return data;
   } catch (error) {
     console.error('❌ Error fetching sports from streamed.pk:', error);
+    
+    // On mobile, try one more time with a simpler request
+    if (isMobile && !error.message.includes('retry')) {
+      console.log('🔄 Retrying with mobile-optimized request...');
+      try {
+        const retryResponse = await fetch(`${API_BASE}/sports`, {
+          method: 'GET',
+          cache: 'no-cache'
+        });
+        
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          if (Array.isArray(retryData)) {
+            setCachedData(cacheKey, retryData);
+            console.log(`✅ Mobile retry successful: ${retryData.length} sports`);
+            return retryData;
+          }
+        }
+      } catch (retryError) {
+        console.error('❌ Mobile retry failed:', retryError);
+      }
+    }
+    
     throw error;
   }
 };

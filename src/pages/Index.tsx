@@ -88,11 +88,23 @@ const Index = () => {
           }
         }
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load sports data.",
-          variant: "destructive",
-        });
+        console.error('Sports loading error:', error);
+        
+        // Only show error if we don't have any sports data at all
+        if (sports.length === 0) {
+          toast({
+            title: "Connection Issue",
+            description: "Slow connection detected. Retrying...",
+            variant: "destructive",
+          });
+          
+          // Retry after a short delay on mobile
+          setTimeout(() => {
+            if (sports.length === 0) {
+              loadSports();
+            }
+          }, 2000);
+        }
       } finally {
         setLoadingSports(false);
       }
