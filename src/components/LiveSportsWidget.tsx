@@ -89,7 +89,7 @@ const LiveSportsWidget = () => {
         return (
           <Link
             key={match.id}
-            to={`/match/${match.id}`}
+            to={`/match/${match.sportId || match.category || 'football'}/${match.id}`}
             className="bg-[#242836] border border-[#343a4d] rounded-lg p-4 hover:bg-[#2a2f3e] transition-colors"
           >
             <div className="flex items-center justify-between mb-3">
