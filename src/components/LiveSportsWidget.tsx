@@ -26,7 +26,13 @@ const LiveSportsWidget = () => {
           try {
             const matches = await fetchMatches(sport.id);
             const liveMatches = matches.filter(match => isMatchLive(match));
-            allMatches.push(...liveMatches);
+            // Ensure each match has the correct sportId
+            const matchesWithSportId = liveMatches.map(match => ({
+              ...match,
+              sportId: sport.id,
+              category: sport.id
+            }));
+            allMatches.push(...matchesWithSportId);
           } catch (error) {
             console.error(`Error fetching matches for ${sport.name}:`, error);
           }
@@ -89,7 +95,7 @@ const LiveSportsWidget = () => {
         return (
           <Link
             key={match.id}
-            to={`/match/${match.sportId || match.category || 'football'}/${match.id}`}
+            to={`/match/${match.sportId || match.category}/${match.id}`}
             className="bg-[#242836] border border-[#343a4d] rounded-lg p-4 hover:bg-[#2a2f3e] transition-colors"
           >
             <div className="flex items-center justify-between mb-3">
