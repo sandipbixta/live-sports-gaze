@@ -37,8 +37,7 @@ export const fetchSports = async (): Promise<Sport[]> => {
     const response = await fetch(`${API_BASE}/sports`, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
       }
     });
     
@@ -99,8 +98,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
       }
     });
     
@@ -181,8 +179,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/live`, {
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
       }
     });
     
@@ -217,8 +214,7 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/all`, {
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
       }
     });
     
@@ -302,8 +298,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
         response = await fetch(suUrl, {
           signal: controller.signal,
           headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
           },
           cache: 'no-store',
         });
@@ -317,8 +312,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
       response = await fetch(pkUrl, {
         signal: controller.signal,
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+'Accept': 'application/json'
         },
         cache: 'no-store',
       });
