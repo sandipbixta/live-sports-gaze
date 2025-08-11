@@ -80,17 +80,6 @@ const Index = () => {
         setSports(sportsData);
         console.log('✅ Sports state updated');
         
-        // Auto-select football for faster initial load
-        if (sportsData.length > 0) {
-          const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
-          const selectedSportId = footballSport ? footballSport.id : sportsData[0].id;
-          console.log('🏈 Auto-selecting sport:', selectedSportId);
-          
-          // Ensure we call handleSelectSport after sports are set
-          setTimeout(() => {
-            handleSelectSport(selectedSportId);
-          }, 100);
-        }
       } catch (error) {
         console.error('Sports loading error:', error);
         
@@ -115,7 +104,17 @@ const Index = () => {
     };
 
     loadSports();
-  }, [toast]);
+  }, []);
+
+  // Separate useEffect for handling sport auto-selection to avoid dependency issues
+  useEffect(() => {
+    if (sports.length > 0 && !selectedSport && !loadingSports) {
+      const footballSport = sports.find(s => s.name.toLowerCase() === 'football');
+      const selectedSportId = footballSport ? footballSport.id : sports[0].id;
+      console.log('🏈 Auto-selecting sport (separate effect):', selectedSportId);
+      handleSelectSport(selectedSportId);
+    }
+  }, [sports, selectedSport, loadingSports]);
 
   // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,23 +249,33 @@ const Index = () => {
             
             
             <div className="mb-8">
-              {(selectedSport || loadingMatches) && (
-                <MatchesList
-                  matches={filteredMatches}
-                  sportId={selectedSport || ""}
-                  isLoading={loadingMatches}
-                  trendingSection={
-                    popularMatches.length > 0 && !searchTerm.trim() ? (
-                      <>
-                        <PopularMatches 
-                          popularMatches={popularMatches} 
-                          selectedSport={selectedSport}
-                        />
-                        <Separator className="my-8 bg-[#343a4d]" />
-                      </>
-                    ) : null
-                  }
-                />
+              {selectedSport && (
+                <>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold text-white">
+                      {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      {filteredMatches.length} matches available
+                    </p>
+                  </div>
+                  <MatchesList
+                    matches={filteredMatches}
+                    sportId={selectedSport}
+                    isLoading={loadingMatches}
+                    trendingSection={
+                      popularMatches.length > 0 && !searchTerm.trim() ? (
+                        <>
+                          <PopularMatches 
+                            popularMatches={popularMatches} 
+                            selectedSport={selectedSport}
+                          />
+                          <Separator className="my-8 bg-[#343a4d]" />
+                        </>
+                      ) : null
+                    }
+                  />
+                </>
               )}
             </div>
             
