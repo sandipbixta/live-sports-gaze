@@ -152,63 +152,94 @@ const StreamSources = ({
                 const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                 const isActive = activeSource === streamKey;
                 
-                // Get source name from API or extract from URL
-                const getSourceName = (stream: any, sourceInfo: Source): string => {
-                  // First, try to use the source name directly from API
-                  if (stream.source && stream.source !== sourceInfo.source) {
-                    return stream.source;
-                  }
+                // Get the actual source name from the API data
+                const getDisplayName = (stream: any, sourceInfo: Source, index: number): string => {
+                  console.log('Stream data:', stream);
+                  console.log('Source info:', sourceInfo);
                   
-                  // Use the source identifier from the match data
+                  // 1. First priority: Use the source name from the match sources array
                   if (sourceInfo.source) {
-                    // Convert source names to more readable format
-                    const sourceNameMap: Record<string, string> = {
-                      'alpha': 'Alpha',
-                      'bravo': 'Bravo', 
-                      'charlie': 'Charlie',
-                      'delta': 'Delta',
-                      'echo': 'Echo',
-                      'foxtrot': 'Foxtrot',
-                      'golf': 'Golf'
+                    // Convert known source identifiers to readable names
+                    const sourceDisplayNames: Record<string, string> = {
+                      'alpha': 'Server Alpha',
+                      'bravo': 'Server Bravo', 
+                      'charlie': 'Server Charlie',
+                      'delta': 'Server Delta',
+                      'echo': 'Server Echo',
+                      'foxtrot': 'Server Foxtrot',
+                      'golf': 'Server Golf',
+                      'stream1': 'Stream 1',
+                      'stream2': 'Stream 2',
+                      'stream3': 'Stream 3'
                     };
                     
-                    const readableName = sourceNameMap[sourceInfo.source.toLowerCase()] || sourceInfo.source;
+                    const baseName = sourceDisplayNames[sourceInfo.source.toLowerCase()] || 
+                                   sourceInfo.source.charAt(0).toUpperCase() + sourceInfo.source.slice(1);
                     
-                    // If multiple streams from same source, add stream number
-                    if (allStreams[sourceKey] && allStreams[sourceKey].length > 1) {
-                      return `${readableName} ${stream.streamNo || (index + 1)}`;
+                    // If multiple streams from same source, add number
+                    const streamsFromSameSource = allStreams[sourceKey] || [];
+                    if (streamsFromSameSource.length > 1) {
+                      return `${baseName} ${stream.streamNo || (index + 1)}`;
                     }
                     
-                    return readableName;
+                    return baseName;
                   }
                   
-                  // Fallback to extracting from embedUrl for legacy support
-                  const embedUrl = stream.embedUrl;
-                  if (!embedUrl) return `Stream ${stream.streamNo || (index + 1)}`;
+                  // 2. Second priority: Use stream source if different from sourceInfo
+                  if (stream.source && stream.source !== sourceInfo.source) {
+                    return stream.source.charAt(0).toUpperCase() + stream.source.slice(1);
+                  }
                   
-                  try {
-                    // For channel URLs like: https://domain.com/channel/ChannelName[Country]
-                    if (embedUrl.includes('/channel/')) {
-                      const channelPart = embedUrl.split('/channel/')[1];
-                      if (channelPart) {
-                        const cleanChannelName = channelPart.split('?')[0];
-                        return cleanChannelName
-                          .replace(/\[.*?\]/g, '') // Remove [Country] parts
-                          .replace(/([A-Z])/g, ' $1')
-                          .trim()
-                          .replace(/\s+/g, ' ')
-                          .substring(0, 20); // Limit length
+                  // 3. Third priority: Extract meaningful name from embedUrl
+                  if (stream.embedUrl) {
+                    try {
+                      const url = new URL(stream.embedUrl);
+                      
+                      // For common streaming domains, extract meaningful names
+                      const domainNameMap: Record<string, string> = {
+                        'streameast': 'Stream East',
+                        'buffstreams': 'Buff Streams',
+                        'cricfree': 'CricFree',
+                        'sportsbay': 'Sports Bay',
+                        'streamhub': 'Stream Hub'
+                      };
+                      
+                      const hostname = url.hostname.replace('www.', '').toLowerCase();
+                      const domainName = Object.keys(domainNameMap).find(key => hostname.includes(key));
+                      
+                      if (domainName) {
+                        return domainNameMap[domainName];
                       }
+                      
+                      // Extract from channel path if available
+                      if (stream.embedUrl.includes('/channel/')) {
+                        const channelPart = stream.embedUrl.split('/channel/')[1];
+                        if (channelPart) {
+                          const cleanName = channelPart.split('?')[0]
+                            .replace(/\[.*?\]/g, '') // Remove [Country] parts
+                            .replace(/([A-Z])/g, ' $1')
+                            .trim()
+                            .replace(/\s+/g, ' ');
+                          if (cleanName.length > 0 && cleanName !== '/') {
+                            return cleanName.substring(0, 15);
+                          }
+                        }
+                      }
+                      
+                      // Use domain name as fallback
+                      const domain = hostname.split('.')[0];
+                      return domain.charAt(0).toUpperCase() + domain.slice(1);
+                      
+                    } catch (error) {
+                      console.log('Error parsing embed URL:', error);
                     }
-                    
-                    const url = new URL(embedUrl);
-                    return url.hostname.replace('www.', '').split('.')[0];
-                  } catch {
-                    return `Stream ${stream.streamNo || (index + 1)}`;
                   }
+                  
+                  // 4. Final fallback: Use server + number format
+                  return `Server ${index + 1}`;
                 };
                 
-                const sourceName = getSourceName(stream, sources.find(s => `${s.source}/${s.id}` === sourceKey) || sources[0]);
+                const displayName = getDisplayName(stream, sources.find(s => `${s.source}/${s.id}` === sourceKey) || sources[0], index);
                 
                 return (
                   <Badge
@@ -225,7 +256,7 @@ const StreamSources = ({
                       <div className="flex items-center gap-1">
                         <Play size={10} />
                         <span className="font-medium text-xs leading-tight line-clamp-2">
-                          {sourceName}
+                          {displayName}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-xs">
