@@ -144,35 +144,95 @@ const StreamTab = ({
       
       {sortedPopularMatches.length > 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedPopularMatches.map((match) => (
-              <Link 
-                key={match.id} 
-                to={`/match/${sportId}/${match.id}`}
-                className="bg-[#242836] border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:bg-[#2a2f3f] transition-all"
-              >
-                <div className="p-4">
-                  <h3 className="font-bold mb-2 text-white text-xs truncate">{match.title}</h3>
-                  <p className="text-xs text-gray-300">
-                    {isTrendingMatch(match.title).score >= 8 ? 
-                      '🔥 Highly Trending' : 
-                      isTrendingMatch(match.title).score >= 5 ? 
-                      '📈 Trending' : 'Related Match'}
-                  </p>
-                </div>
-              </Link>
-            ))}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🔥</span>
+            <h3 className="text-xl font-bold text-white">Trending Matches</h3>
+            <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
+              {sortedPopularMatches.length} match{sortedPopularMatches.length > 1 ? 'es' : ''}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sortedPopularMatches.slice(0, 4).map((trendingMatch) => {
+              const matchTime = typeof trendingMatch.date === 'number' ? trendingMatch.date : new Date(trendingMatch.date).getTime();
+              const isLive = Date.now() - matchTime < 3 * 60 * 60 * 1000 && matchTime - Date.now() < 60 * 60 * 1000;
+              
+              return (
+                <Link 
+                  key={trendingMatch.id} 
+                  to={`/match/${sportId}/${trendingMatch.id}`}
+                  className="bg-gradient-to-br from-[#242836] to-[#1a1f2e] border border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-all duration-300 hover:border-[#ff5a36]/30"
+                >
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2">
+                        {isLive ? (
+                          <div className="flex items-center gap-1 text-red-500 text-xs font-medium">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            LIVE
+                          </div>
+                        ) : (
+                          <div className="text-xs text-[#ff5a36] font-medium">
+                            {formatMatchTime(matchTime)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {new Date(matchTime).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      {trendingMatch.teams?.home && trendingMatch.teams?.away ? (
+                        <>
+                          <div className="text-white text-sm font-medium text-center flex-1">
+                            {trendingMatch.teams.home.name.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                          </div>
+                          <div className="text-white text-xs font-bold mx-3">VS</div>
+                          <div className="text-white text-sm font-medium text-center flex-1">
+                            {trendingMatch.teams.away.name.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-white text-sm font-medium">
+                          {trendingMatch.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-gray-400">
+                        <span className="text-xs">▶</span>
+                        <span className="text-xs">
+                          {trendingMatch.sources?.length || 0} stream{(trendingMatch.sources?.length || 0) !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="text-xs text-[#ff5a36] font-medium">
+                        {isTrendingMatch(trendingMatch.title).score >= 8 ? 
+                          '🔥 Hot' : 
+                          '📈 Trending'}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
       
       {sortedPopularMatches.length === 0 && (
         <div className="mt-8">
-          <h3 className="text-xl font-bold mb-4 text-white">Trending {match.title.split('-')[0].trim()} Matches</h3>
-          <Card className="bg-sports-card border-sports">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🔥</span>
+            <h3 className="text-xl font-bold text-white">Trending Matches</h3>
+          </div>
+          <Card className="bg-[#242836] border-[#343a4d]">
             <CardContent className="p-6 text-center">
-              <p className="text-gray-400">No related matches available at this time.</p>
+              <p className="text-gray-400">No trending matches available at this time.</p>
             </CardContent>
           </Card>
         </div>
