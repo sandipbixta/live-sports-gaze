@@ -1,12 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
-import PopularMatches from '@/components/PopularMatches';
+import MatchCard from '@/components/MatchCard';
 import { Match as MatchType, Stream } from '@/types/sports';
-import { Link } from 'react-router-dom';
+
 import { useEffect, useState } from 'react';
-import { AlertCircle, Clock } from 'lucide-react';
-import { fetchStream } from '@/api/sportsApi';
+import { Clock } from 'lucide-react';
+
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
@@ -146,80 +146,20 @@ const StreamTab = ({
         <div className="mt-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🔥</span>
-            <h3 className="text-xl font-bold text-white">Trending Matches</h3>
-            <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">
-              {sortedPopularMatches.length} match{sortedPopularMatches.length > 1 ? 'es' : ''}
+            <h3 className="text-xl font-bold text-foreground">Trending Matches</h3>
+            <span className="text-xs px-2 py-1 rounded-lg bg-card text-muted-foreground border border-border">
+              {Math.min(sortedPopularMatches.length, 6)} matches
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sortedPopularMatches.slice(0, 4).map((trendingMatch) => {
-              const matchTime = typeof trendingMatch.date === 'number' ? trendingMatch.date : new Date(trendingMatch.date).getTime();
-              const isLive = Date.now() - matchTime < 3 * 60 * 60 * 1000 && matchTime - Date.now() < 60 * 60 * 1000;
-              
-              return (
-                <Link 
-                  key={trendingMatch.id} 
-                  to={`/match/${sportId}/${trendingMatch.id}`}
-                  className="bg-gradient-to-br from-[#242836] to-[#1a1f2e] border border-[#343a4d] rounded-xl overflow-hidden cursor-pointer hover:scale-[1.02] transition-all duration-300 hover:border-[#ff5a36]/30"
-                >
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-2">
-                        {isLive ? (
-                          <div className="flex items-center gap-1 text-red-500 text-xs font-medium">
-                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            LIVE
-                          </div>
-                        ) : (
-                          <div className="text-xs text-[#ff5a36] font-medium">
-                            {formatMatchTime(matchTime)}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {new Date(matchTime).toLocaleDateString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between mb-3">
-                      {trendingMatch.teams?.home && trendingMatch.teams?.away ? (
-                        <>
-                          <div className="text-white text-sm font-medium text-center flex-1">
-                            {trendingMatch.teams.home.name.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                          </div>
-                          <div className="text-white text-xs font-bold mx-3">VS</div>
-                          <div className="text-white text-sm font-medium text-center flex-1">
-                            {trendingMatch.teams.away.name.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-white text-sm font-medium">
-                          {trendingMatch.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-gray-400">
-                        <span className="text-xs">▶</span>
-                        <span className="text-xs">
-                          {trendingMatch.sources?.length || 0} stream{(trendingMatch.sources?.length || 0) !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      <div className="text-xs text-[#ff5a36] font-medium">
-                        {isTrendingMatch(trendingMatch.title).score >= 8 ? 
-                          '🔥 Hot' : 
-                          '📈 Trending'}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            {sortedPopularMatches.slice(0, 6).map((m, index) => (
+              <MatchCard
+                key={`streamtab-trending-${m.id}-${index}`}
+                match={m}
+                sportId={sportId}
+                isPriority
+              />
+            ))}
           </div>
         </div>
       )}
@@ -230,9 +170,9 @@ const StreamTab = ({
             <span className="text-xl">🔥</span>
             <h3 className="text-xl font-bold text-white">Trending Matches</h3>
           </div>
-          <Card className="bg-[#242836] border-[#343a4d]">
+          <Card className="bg-sports-card border-sports">
             <CardContent className="p-6 text-center">
-              <p className="text-gray-400">No trending matches available at this time.</p>
+              <p className="text-muted-foreground">No trending matches available at this time.</p>
             </CardContent>
           </Card>
         </div>
