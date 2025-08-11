@@ -66,6 +66,7 @@ const Index = () => {
     const loadSports = async () => {
       try {
         let sportsData = await fetchSports();
+        console.log('📊 Sports data loaded:', sportsData);
         
         // Sort with football first for better UX
         sportsData = sportsData.sort((a, b) => {
@@ -77,15 +78,18 @@ const Index = () => {
         });
         
         setSports(sportsData);
+        console.log('✅ Sports state updated');
         
         // Auto-select football for faster initial load
         if (sportsData.length > 0) {
           const footballSport = sportsData.find(s => s.name.toLowerCase() === 'football');
-          if (footballSport) {
-            handleSelectSport(footballSport.id);
-          } else {
-            handleSelectSport(sportsData[0].id);
-          }
+          const selectedSportId = footballSport ? footballSport.id : sportsData[0].id;
+          console.log('🏈 Auto-selecting sport:', selectedSportId);
+          
+          // Ensure we call handleSelectSport after sports are set
+          setTimeout(() => {
+            handleSelectSport(selectedSportId);
+          }, 100);
         }
       } catch (error) {
         console.error('Sports loading error:', error);
@@ -120,20 +124,26 @@ const Index = () => {
 
   // Optimized sport selection with caching
   const handleSelectSport = async (sportId: string) => {
+    console.log(`🎯 Selecting sport: ${sportId}, current: ${selectedSport}`);
     if (selectedSport === sportId) return;
     
     setSelectedSport(sportId);
     setLoadingMatches(true);
+    console.log('🔄 Loading matches for sport:', sportId);
     
     try {
       if (allMatches[sportId]) {
+        console.log('📁 Using cached matches:', allMatches[sportId].length);
         setMatches(allMatches[sportId]);
       } else {
         const rawMatchesData = await fetchMatches(sportId);
+        console.log('📥 Raw matches data:', rawMatchesData.length);
         
         // Filter and consolidate matches to remove duplicates and combine stream sources
         const cleanMatches = filterCleanMatches(rawMatchesData);
+        console.log('🧹 Clean matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
+        console.log('🔗 Consolidated matches:', consolidatedMatches.length);
         
         setMatches(consolidatedMatches);
         
@@ -143,6 +153,7 @@ const Index = () => {
         }));
       }
     } catch (error) {
+      console.error('Error loading matches:', error);
       toast({
         title: "Error",
         description: "Failed to load matches data.",
@@ -150,6 +161,7 @@ const Index = () => {
       });
     } finally {
       setLoadingMatches(false);
+      console.log('✅ Finished loading matches');
     }
   };
 
