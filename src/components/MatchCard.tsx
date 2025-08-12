@@ -135,9 +135,36 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
           {/* Bottom Content with enhanced text backgrounds */}
           <div className="relative z-10 space-y-2">
-            {/* Match Title with text background */}
+            {/* Team Logos */}
+            {hasTeams && (homeBadge || awayBadge) && (
+              <div className="flex justify-center items-center gap-3 mb-2">
+                {homeBadge && (
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-background/80 backdrop-blur-sm rounded-full p-1">
+                    <img 
+                      src={homeBadge} 
+                      alt={home} 
+                      className="w-full h-full object-contain"
+                      onError={(e) => e.currentTarget.style.display = 'none'}
+                    />
+                  </div>
+                )}
+                <span className="text-white font-medium text-xs bg-background/60 backdrop-blur-sm px-2 py-1 rounded">VS</span>
+                {awayBadge && (
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-background/80 backdrop-blur-sm rounded-full p-1">
+                    <img 
+                      src={awayBadge} 
+                      alt={away} 
+                      className="w-full h-full object-contain"
+                      onError={(e) => e.currentTarget.style.display = 'none'}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Match Title with smaller text */}
             <div className="space-y-1">
-              <h3 className="text-foreground font-bold text-sm md:text-lg leading-tight">
+              <h3 className="text-foreground font-semibold text-xs md:text-sm leading-tight">
                 <span className="bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md">
                   {cleanTitle}
                 </span>
@@ -145,20 +172,20 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
 
             {/* Date, Time and Stream Info with background */}
-            <div className="flex justify-between items-center pt-2 border-t border-border/60 bg-background/60 backdrop-blur-sm px-2 py-1 rounded-md">
-              <div className="flex items-center gap-2 text-muted-foreground text-[10px] md:text-xs">
-                <Clock className="w-3 h-3" />
+            <div className="flex justify-between items-center pt-1 border-t border-border/60 bg-background/60 backdrop-blur-sm px-2 py-1 rounded-md">
+              <div className="flex items-center gap-1 text-muted-foreground text-[9px] md:text-[10px]">
+                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />
                 <span>{formatDate(match.date)} • {formatTime(match.date)}</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <div className="flex items-center space-x-1 text-muted-foreground">
-                  <Play className="w-3 h-3" />
-                  <span className="text-[10px] md:text-xs font-medium">
+                  <Play className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                  <span className="text-[9px] md:text-[10px] font-medium">
                     {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
                   </span>
                 </div>
                 {hasStream && (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 )}
               </div>
             </div>
