@@ -42,53 +42,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
+  const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
-  const backgroundImage = match.poster;
-  
-  // Create sport-specific poster URL as fallback
-  const getSportPosterUrl = (sportId: string, category: string) => {
-    const sport = category || sportId || 'football';
-    return `https://streamed.pk/api/images/sport/${sport}.webp`;
-  };
-  
-  // Debug logging for poster data
-  console.log('MatchCard Debug:', {
-    matchId: match.id,
-    title: match.title,
-    poster: match.poster,
-    category: match.category,
-    sportId: match.sportId
-  });
-  
-  // Clean up the title by removing "poster" word
-  const cleanTitle = match.title.replace(/\s*poster\s*/gi, '').replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim();
-  
-  // Check if poster exists and construct proper URL
-  const hasApiPoster = backgroundImage && typeof backgroundImage === 'string';
-  
-  // Construct full URL for API posters
-  let fullPosterUrl = '';
-  if (hasApiPoster) {
-    if (backgroundImage.startsWith('http')) {
-      // Already a full URL
-      fullPosterUrl = backgroundImage;
-    } else if (backgroundImage.startsWith('/')) {
-      // Relative path, add base URL
-      fullPosterUrl = `https://streamed.pk${backgroundImage}`;
-    } else {
-      // Use sport fallback
-      fullPosterUrl = getSportPosterUrl(match.sportId, match.category);
-    }
-  } else {
-    // No API poster, use sport fallback
-    fullPosterUrl = getSportPosterUrl(match.sportId, match.category);
-  }
-  
-  const finalPosterUrl = fullPosterUrl;
-  
-  const [posterLoaded, setPosterLoaded] = React.useState(false);
-  const [posterError, setPosterError] = React.useState(false);
+  // Use poster image as background when no teams (e.g., WWE, F1)
+  const showPosterBackground = !hasTeams && !!match.poster;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -97,72 +55,116 @@ const MatchCard: React.FC<MatchCardProps> = ({
         ratio={16/10} 
         className="w-full"
       >
-        <div className="absolute inset-0 p-1.5 md:p-2 flex flex-col h-full">
-          {/* Background Image - Always show poster (API or sport fallback) */}
-          <img
-            src={finalPosterUrl}
-            alt={cleanTitle}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading={isPriority ? 'eager' : 'lazy'}
-            onLoad={() => {
-              setPosterLoaded(true);
-              console.log('Poster loaded successfully:', finalPosterUrl);
-            }}
-            onError={(e) => {
-              setPosterError(true);
-              console.error('Poster failed to load:', finalPosterUrl, e);
-              // If sport poster fails, try a generic poster
-              const fallbackUrl = 'https://streamed.pk/api/images/sport/football.webp';
-              if (e.currentTarget.src !== fallbackUrl) {
-                e.currentTarget.src = fallbackUrl;
-              }
-            }}
-          />
-          {/* Enhanced overlay - darker gradient for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/60 to-background/20" />
-
-          {/* Live Badge - Top Left */}
-          <div className="relative z-10 flex justify-start items-start mb-2">
-            {isLive && (
-              <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse backdrop-blur-sm">
-                • LIVE
-              </Badge>
-            )}
-          </div>
-
-          {/* Spacer to push content to bottom */}
-          <div className="flex-1"></div>
-
-          {/* Bottom Content with enhanced text backgrounds */}
-          <div className="relative z-10 space-y-2">
-            {/* Match Title with smaller text */}
-            <div className="space-y-1">
-              <h3 className="text-foreground font-medium text-[10px] md:text-xs leading-tight line-clamp-2">
-                <span className="bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
-                  {cleanTitle}
-                </span>
-              </h3>
+        <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
+          {showPosterBackground && (
+            <>
+              <img
+                src={match.poster!}
+                alt={`${match.title} poster`}
+                className="absolute inset-0 w-full h-full object-cover scale-105"
+                loading={isPriority ? 'eager' : 'lazy'}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10 backdrop-blur-[1px]" />
+            </>
+          )}
+          {/* Header with Live/Time badge */}
+          <div className="flex justify-between items-center mb-2 md:mb-3">
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
+                  • LIVE
+                </Badge>
+              ) : (
+                <Badge className="bg-secondary text-secondary-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatTime(match.date)}
+                </Badge>
+              )}
             </div>
-
-            {/* Date, Time and Stream Info with background */}
-            <div className="flex justify-between items-center pt-0.5 border-t border-border/60 bg-background/60 backdrop-blur-sm px-1.5 py-0.5 rounded">
-              <div className="flex items-center gap-0.5 text-muted-foreground text-[8px] md:text-[9px]">
-                <Clock className="w-2 h-2 md:w-2.5 md:h-2.5" />
-                <span className="truncate">{formatTime(match.date)}</span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <div className="flex items-center space-x-0.5 text-muted-foreground">
-                  <Play className="w-2 h-2 md:w-2.5 md:h-2.5" />
-                  <span className="text-[8px] md:text-[9px] font-medium">
-                    {hasStream ? `${match.sources.length}` : '0'}
+          </div>
+          
+          {/* Teams Section */}
+          {hasTeams ? (
+            <div className="flex items-stretch justify-between flex-1 min-h-0">
+              {/* Home Team */}
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {homeBadge && (
+                  <img 
+                    src={homeBadge} 
+                    alt={home}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words hyphens-auto px-1">
+                    {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
                   </span>
                 </div>
-                {hasStream && (
-                  <ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+
+              {/* VS Section */}
+              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
+                <div className="text-muted-foreground text-[10px] md:text-sm font-bold">VS</div>
+              </div>
+
+              {/* Away Team */}
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {awayBadge && (
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 )}
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words hyphens-auto px-1">
+                    {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                  </span>
+                </div>
               </div>
             </div>
+          ) : (
+            /* No Teams Available */
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center space-y-1">
+                <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
+                  <span className="px-2 py-1 rounded-md bg-background/60 backdrop-blur">
+                    {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
+                  </span>
+                </h3>
+                <p className="text-muted-foreground text-[10px] md:text-xs">
+                  <span className="px-2 py-0.5 rounded bg-background/50 backdrop-blur">
+                    {formatDate(match.date)} • {formatTime(match.date)}
+                  </span>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
+            <div className="text-muted-foreground text-[10px] md:text-xs">
+              {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center space-x-1 text-muted-foreground">
+                <Play className="w-3 h-3" />
+                <span className="text-[10px] md:text-xs font-medium">
+                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+                </span>
+              </div>
+              {hasStream && (
+                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              )}
+            </div>
           </div>
+
         </div>
       </AspectRatio>
     </Card>
