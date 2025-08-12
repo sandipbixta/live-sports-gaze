@@ -97,7 +97,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
         ratio={16/10} 
         className="w-full"
       >
-        <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
+        <div className="absolute inset-0 p-1.5 md:p-2 flex flex-col h-full">
           {/* Background Image - Always show poster (API or sport fallback) */}
           <img
             src={finalPosterUrl}
@@ -137,28 +137,28 @@ const MatchCard: React.FC<MatchCardProps> = ({
           <div className="relative z-10 space-y-2">
             {/* Match Title with smaller text */}
             <div className="space-y-1">
-              <h3 className="text-foreground font-semibold text-xs md:text-sm leading-tight">
-                <span className="bg-background/80 backdrop-blur-sm px-2 py-1 rounded-md">
+              <h3 className="text-foreground font-medium text-[10px] md:text-xs leading-tight line-clamp-2">
+                <span className="bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
                   {cleanTitle}
                 </span>
               </h3>
             </div>
 
             {/* Date, Time and Stream Info with background */}
-            <div className="flex justify-between items-center pt-1 border-t border-border/60 bg-background/60 backdrop-blur-sm px-2 py-1 rounded-md">
-              <div className="flex items-center gap-1 text-muted-foreground text-[9px] md:text-[10px]">
-                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                <span>{formatDate(match.date)} • {formatTime(match.date)}</span>
+            <div className="flex justify-between items-center pt-0.5 border-t border-border/60 bg-background/60 backdrop-blur-sm px-1.5 py-0.5 rounded">
+              <div className="flex items-center gap-0.5 text-muted-foreground text-[8px] md:text-[9px]">
+                <Clock className="w-2 h-2 md:w-2.5 md:h-2.5" />
+                <span className="truncate">{formatTime(match.date)}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="flex items-center space-x-1 text-muted-foreground">
-                  <Play className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                  <span className="text-[9px] md:text-[10px] font-medium">
-                    {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+              <div className="flex items-center gap-0.5">
+                <div className="flex items-center space-x-0.5 text-muted-foreground">
+                  <Play className="w-2 h-2 md:w-2.5 md:h-2.5" />
+                  <span className="text-[8px] md:text-[9px] font-medium">
+                    {hasStream ? `${match.sources.length}` : '0'}
                   </span>
                 </div>
                 {hasStream && (
-                  <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
                 )}
               </div>
             </div>
