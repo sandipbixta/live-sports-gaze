@@ -45,6 +45,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
+  // Use poster image as background when no teams (e.g., WWE, F1)
+  const showPosterBackground = !hasTeams && !!match.poster;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -54,6 +56,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
+          {showPosterBackground && (
+            <>
+              <img
+                src={match.poster!}
+                alt={`${match.title} poster`}
+                className="absolute inset-0 w-full h-full object-cover scale-105"
+                loading={isPriority ? 'eager' : 'lazy'}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10 backdrop-blur-[2px]" />
+            </>
+          )}
           {/* Header with Live/Time badge */}
           <div className="flex justify-between items-center mb-2 md:mb-3">
             <div className="flex items-center gap-2">
@@ -119,11 +132,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
           ) : (
             /* No Teams Available */
             <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <h3 className="text-foreground font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
-                  {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
+              <div className="text-center space-y-1">
+                <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
+                  <span className="px-2 py-1 rounded-md bg-background/60 backdrop-blur">
+                    {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
+                  </span>
                 </h3>
-                <p className="text-muted-foreground text-[10px] md:text-xs">{formatDate(match.date)} • {formatTime(match.date)}</p>
+                <p className="text-muted-foreground text-[10px] md:text-xs">
+                  <span className="px-2 py-0.5 rounded bg-background/50 backdrop-blur">
+                    {formatDate(match.date)} • {formatTime(match.date)}
+                  </span>
+                </p>
               </div>
             </div>
           )}
