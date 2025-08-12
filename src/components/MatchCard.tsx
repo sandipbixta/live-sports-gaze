@@ -66,138 +66,62 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
-          {showPosterBackground && (
+          {/* Background Image - Always show if available */}
+          {backgroundImage && (
             <>
               <img
-                src={backgroundImage!}
-                alt={`${match.title} poster`}
-                className="absolute inset-0 w-full h-full object-cover scale-105"
+                src={backgroundImage}
+                alt={`${cleanTitle} poster`}
+                className="absolute inset-0 w-full h-full object-cover"
                 loading={isPriority ? 'eager' : 'lazy'}
                 onLoad={() => setPosterLoaded(true)}
                 onError={() => setPosterError(true)}
               />
-              {/* Only show overlay if poster loaded successfully */}
-              {usePosterLayout && (
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10" />
-              )}
+              {/* Minimal overlay - just a subtle gradient at bottom for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </>
           )}
 
-          {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-2 md:mb-3">
-            <div className="flex items-center gap-2">
-              {isLive ? (
-                <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
-                  • LIVE
-                </Badge>
-              ) : (
-                <Badge className="bg-secondary text-secondary-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatTime(match.date)}
-                </Badge>
-              )}
-            </div>
+          {/* Live Badge - Top Left */}
+          <div className="relative z-10 flex justify-start items-start mb-2">
+            {isLive && (
+              <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
+                • LIVE
+              </Badge>
+            )}
           </div>
-          
-          {/* Content section: WWE-style when poster exists; normal card otherwise */}
-          {usePosterLayout ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center space-y-1 max-w-[85%]">
-                 <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
-                   <span className="px-2.5 py-1 rounded-md bg-background/60">
-                     {cleanTitle}
-                   </span>
-                 </h3>
-                <p className="text-muted-foreground text-[10px] md:text-xs">
-                  <span className="px-2 py-0.5 rounded bg-background/50">
-                    {formatDate(match.date)} • {formatTime(match.date)}
+
+          {/* Spacer to push content to bottom */}
+          <div className="flex-1"></div>
+
+          {/* Bottom Content */}
+          <div className="relative z-10 space-y-2">
+            {/* Match Title */}
+            <div className="space-y-1">
+              <h3 className="text-foreground font-bold text-sm md:text-lg leading-tight">
+                {cleanTitle}
+              </h3>
+            </div>
+
+            {/* Date, Time and Stream Info */}
+            <div className="flex justify-between items-center pt-2 border-t border-border/60">
+              <div className="flex items-center gap-2 text-muted-foreground text-[10px] md:text-xs">
+                <Clock className="w-3 h-3" />
+                <span>{formatDate(match.date)} • {formatTime(match.date)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center space-x-1 text-muted-foreground">
+                  <Play className="w-3 h-3" />
+                  <span className="text-[10px] md:text-xs font-medium">
+                    {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
                   </span>
-                </p>
-              </div>
-            </div>
-          ) : (
-            hasTeams ? (
-              <div className="flex items-stretch justify-between flex-1 min-h-0">
-                {/* Home Team */}
-                <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                  {homeBadge && (
-                    <img 
-                      src={homeBadge} 
-                      alt={home}
-                      className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                    <span className="line-clamp-2 break-words hyphens-auto px-1">
-                      {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                    </span>
-                  </div>
                 </div>
-
-                {/* VS Section */}
-                <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                  <div className="text-muted-foreground text-[10px] md:text-sm font-bold">VS</div>
-                </div>
-
-                {/* Away Team */}
-                <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                  {awayBadge && (
-                    <img 
-                      src={awayBadge} 
-                      alt={away}
-                      className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  )}
-                  <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                    <span className="line-clamp-2 break-words hyphens-auto px-1">
-                      {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                    </span>
-                  </div>
-                </div>
+                {hasStream && (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
               </div>
-            ) : (
-              /* Fallback: no teams */
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center space-y-1">
-                   <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
-                     <span className="px-2 py-1 rounded-md bg-background/60">
-                       {cleanTitle}
-                     </span>
-                   </h3>
-                  <p className="text-muted-foreground text-[10px] md:text-xs">
-                    <span className="px-2 py-0.5 rounded bg-background/50">
-                      {formatDate(match.date)} • {formatTime(match.date)}
-                    </span>
-                  </p>
-                </div>
-              </div>
-            )
-          )}
-
-          {/* Footer */}
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
-            <div className="text-muted-foreground text-[10px] md:text-xs">
-              {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center space-x-1 text-muted-foreground">
-                <Play className="w-3 h-3" />
-                <span className="text-[10px] md:text-xs font-medium">
-                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-                </span>
-              </div>
-              {hasStream && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
             </div>
           </div>
-
         </div>
       </AspectRatio>
     </Card>
