@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
+import { getSportPoster } from '../utils/sportPosters';
 
 interface MatchCardProps {
   match: Match;
@@ -45,7 +46,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
-  const backgroundImage = match.poster;
+  // Pick match poster or a sport-specific fallback image
+  const backgroundImage = match.poster || getSportPoster(sportId || match.sportId || match.category);
   const showPosterBackground = !!backgroundImage;
   
   // Create the content element that will be used inside either Link or div
@@ -83,21 +85,69 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           </div>
           
-          {/* Unified Title Overlay (WWE-style) */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center space-y-1 max-w-[85%]">
-              <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
-                <span className="px-2.5 py-1 rounded-md bg-background/60 backdrop-blur-[2px]">
-                  {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
-                </span>
-              </h3>
-              <p className="text-muted-foreground text-[10px] md:text-xs">
-                <span className="px-2 py-0.5 rounded bg-background/50 backdrop-blur-[2px]">
-                  {formatDate(match.date)} • {formatTime(match.date)}
-                </span>
-              </p>
+          {/* Teams Section */}
+          {hasTeams ? (
+            <div className="flex items-stretch justify-between flex-1 min-h-0">
+              {/* Home Team */}
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {homeBadge && (
+                  <img 
+                    src={homeBadge} 
+                    alt={home}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words hyphens-auto px-1">
+                    {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                  </span>
+                </div>
+              </div>
+
+              {/* VS Section */}
+              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
+                <div className="text-muted-foreground text-[10px] md:text-sm font-bold">VS</div>
+              </div>
+
+              {/* Away Team */}
+              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
+                {awayBadge && (
+                  <img 
+                    src={awayBadge} 
+                    alt={away}
+                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
+                  <span className="line-clamp-2 break-words hyphens-auto px-1">
+                    {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            /* No Teams Available */
+            <div className="flex-1 flex items-center justify-center">
+              <div className="text-center space-y-1">
+                <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
+                  <span className="px-2 py-1 rounded-md bg-background/60 backdrop-blur">
+                    {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
+                  </span>
+                </h3>
+                <p className="text-muted-foreground text-[10px] md:text-xs">
+                  <span className="px-2 py-0.5 rounded bg-background/50 backdrop-blur">
+                    {formatDate(match.date)} • {formatTime(match.date)}
+                  </span>
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
