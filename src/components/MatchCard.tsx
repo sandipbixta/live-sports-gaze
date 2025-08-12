@@ -101,7 +101,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Background Image - Always show poster (API or sport fallback) */}
           <img
             src={finalPosterUrl}
-            alt={`${cleanTitle} poster`}
+            alt={cleanTitle}
             className="absolute inset-0 w-full h-full object-cover"
             loading={isPriority ? 'eager' : 'lazy'}
             onLoad={() => {
