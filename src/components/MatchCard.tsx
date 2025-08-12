@@ -64,16 +64,28 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Clean up the title by removing "poster" word
   const cleanTitle = match.title.replace(/\s*poster\s*/gi, '').replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim();
   
-  // Check if poster exists and is a valid URL
-  const hasValidApiPoster = backgroundImage && 
-    typeof backgroundImage === 'string' && 
-    (backgroundImage.startsWith('http') || backgroundImage.startsWith('//')) &&
-    !backgroundImage.toLowerCase().includes('poster');
+  // Check if poster exists and construct proper URL
+  const hasApiPoster = backgroundImage && typeof backgroundImage === 'string';
   
-  // Use API poster if valid, otherwise use sport-specific poster
-  const finalPosterUrl = hasValidApiPoster 
-    ? backgroundImage 
-    : getSportPosterUrl(match.sportId, match.category);
+  // Construct full URL for API posters
+  let fullPosterUrl = '';
+  if (hasApiPoster) {
+    if (backgroundImage.startsWith('http')) {
+      // Already a full URL
+      fullPosterUrl = backgroundImage;
+    } else if (backgroundImage.startsWith('/')) {
+      // Relative path, add base URL
+      fullPosterUrl = `https://streamed.pk${backgroundImage}`;
+    } else {
+      // Use sport fallback
+      fullPosterUrl = getSportPosterUrl(match.sportId, match.category);
+    }
+  } else {
+    // No API poster, use sport fallback
+    fullPosterUrl = getSportPosterUrl(match.sportId, match.category);
+  }
+  
+  const finalPosterUrl = fullPosterUrl;
   
   const [posterLoaded, setPosterLoaded] = React.useState(false);
   const [posterError, setPosterError] = React.useState(false);
