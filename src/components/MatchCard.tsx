@@ -46,17 +46,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const isLive = isMatchLive(match);
   const backgroundImage = match.poster;
   
+  // Debug logging for poster data
+  console.log('MatchCard Debug:', {
+    matchId: match.id,
+    title: match.title,
+    poster: match.poster,
+    category: match.category,
+    sportId: match.sportId
+  });
+  
   // Clean up the title by removing "poster" word
   const cleanTitle = match.title.replace(/\s*poster\s*/gi, '').replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim();
   
-  // Only show poster background if it exists and doesn't contain "poster" text (which means it's a placeholder)
-  const showPosterBackground = !!backgroundImage && !backgroundImage.toLowerCase().includes('poster');
+  // Check if poster exists and is a valid URL (not just placeholder text)
+  const isValidPoster = backgroundImage && 
+    typeof backgroundImage === 'string' && 
+    (backgroundImage.startsWith('http') || backgroundImage.startsWith('//')) &&
+    !backgroundImage.toLowerCase().includes('poster');
   
   const [posterLoaded, setPosterLoaded] = React.useState(false);
   const [posterError, setPosterError] = React.useState(false);
-  
-  // Final decision on whether to show poster layout
-  const usePosterLayout = showPosterBackground && posterLoaded && !posterError;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -66,16 +75,22 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
-          {/* Background Image - Always show if available */}
-          {backgroundImage && (
+          {/* Background Image - Only show if it's a valid poster URL */}
+          {isValidPoster && (
             <>
               <img
                 src={backgroundImage}
                 alt={`${cleanTitle} poster`}
                 className="absolute inset-0 w-full h-full object-cover"
                 loading={isPriority ? 'eager' : 'lazy'}
-                onLoad={() => setPosterLoaded(true)}
-                onError={() => setPosterError(true)}
+                onLoad={() => {
+                  setPosterLoaded(true);
+                  console.log('Poster loaded successfully:', backgroundImage);
+                }}
+                onError={(e) => {
+                  setPosterError(true);
+                  console.error('Poster failed to load:', backgroundImage, e);
+                }}
               />
               {/* Minimal overlay - just a subtle gradient at bottom for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
