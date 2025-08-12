@@ -46,6 +46,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const isLive = isMatchLive(match);
   const backgroundImage = match.poster;
   
+  // Clean up the title by removing "poster" word
+  const cleanTitle = match.title.replace(/\s*poster\s*/gi, '').replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim();
+  
   // Only show poster background if it exists and doesn't contain "poster" text (which means it's a placeholder)
   const showPosterBackground = !!backgroundImage && !backgroundImage.toLowerCase().includes('poster');
   
@@ -100,11 +103,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {usePosterLayout ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-1 max-w-[85%]">
-                <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
-                  <span className="px-2.5 py-1 rounded-md bg-background/60">
-                    {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
-                  </span>
-                </h3>
+                 <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
+                   <span className="px-2.5 py-1 rounded-md bg-background/60">
+                     {cleanTitle}
+                   </span>
+                 </h3>
                 <p className="text-muted-foreground text-[10px] md:text-xs">
                   <span className="px-2 py-0.5 rounded bg-background/50">
                     {formatDate(match.date)} • {formatTime(match.date)}
@@ -162,11 +165,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
               /* Fallback: no teams */
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center space-y-1">
-                  <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
-                    <span className="px-2 py-1 rounded-md bg-background/60">
-                      {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
-                    </span>
-                  </h3>
+                   <h3 className="text-foreground font-bold text-[10px] md:text-sm leading-tight">
+                     <span className="px-2 py-1 rounded-md bg-background/60">
+                       {cleanTitle}
+                     </span>
+                   </h3>
                   <p className="text-muted-foreground text-[10px] md:text-xs">
                     <span className="px-2 py-0.5 rounded bg-background/50">
                       {formatDate(match.date)} • {formatTime(match.date)}
