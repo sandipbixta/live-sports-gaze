@@ -135,33 +135,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
           {/* Bottom Content with enhanced text backgrounds */}
           <div className="relative z-10 space-y-2">
-            {/* Team Logos */}
-            {hasTeams && (homeBadge || awayBadge) && (
-              <div className="flex justify-center items-center gap-3 mb-2">
-                {homeBadge && (
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-background/80 backdrop-blur-sm rounded-full p-1">
-                    <img 
-                      src={homeBadge} 
-                      alt={home} 
-                      className="w-full h-full object-contain"
-                      onError={(e) => e.currentTarget.style.display = 'none'}
-                    />
-                  </div>
-                )}
-                <span className="text-white font-medium text-xs bg-background/60 backdrop-blur-sm px-2 py-1 rounded">VS</span>
-                {awayBadge && (
-                  <div className="w-8 h-8 md:w-10 md:h-10 bg-background/80 backdrop-blur-sm rounded-full p-1">
-                    <img 
-                      src={awayBadge} 
-                      alt={away} 
-                      className="w-full h-full object-contain"
-                      onError={(e) => e.currentTarget.style.display = 'none'}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Match Title with smaller text */}
             <div className="space-y-1">
               <h3 className="text-foreground font-semibold text-xs md:text-sm leading-tight">
