@@ -45,7 +45,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
   const backgroundImage = match.poster;
-  const showPosterBackground = !!backgroundImage;
+  
+  // Only show poster background if it exists and doesn't contain "poster" text (which means it's a placeholder)
+  const showPosterBackground = !!backgroundImage && !backgroundImage.toLowerCase().includes('poster');
+  
+  const [posterLoaded, setPosterLoaded] = React.useState(false);
+  const [posterError, setPosterError] = React.useState(false);
+  
+  // Final decision on whether to show poster layout
+  const usePosterLayout = showPosterBackground && posterLoaded && !posterError;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -62,9 +70,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 alt={`${match.title} poster`}
                 className="absolute inset-0 w-full h-full object-cover scale-105"
                 loading={isPriority ? 'eager' : 'lazy'}
+                onLoad={() => setPosterLoaded(true)}
+                onError={() => setPosterError(true)}
               />
-              {/* Reduce blur intensity by removing backdrop blur; keep soft gradient for readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10" />
+              {/* Only show overlay if poster loaded successfully */}
+              {usePosterLayout && (
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10" />
+              )}
             </>
           )}
 
@@ -85,7 +97,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
           
           {/* Content section: WWE-style when poster exists; normal card otherwise */}
-          {showPosterBackground ? (
+          {usePosterLayout ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-1 max-w-[85%]">
                 <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
