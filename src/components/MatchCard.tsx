@@ -123,7 +123,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <h3 className="text-foreground font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
                   {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
                 </h3>
-                <p className="text-muted-foreground text-[10px] md:text-xs">{formatDate(match.date)}</p>
+                <p className="text-muted-foreground text-[10px] md:text-xs">{formatDate(match.date)} • {formatTime(match.date)}</p>
               </div>
             </div>
           )}
@@ -131,7 +131,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Footer */}
           <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
             <div className="text-muted-foreground text-[10px] md:text-xs">
-              {format(match.date, 'EEE, MMM d')}
+              {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center space-x-1 text-muted-foreground">
