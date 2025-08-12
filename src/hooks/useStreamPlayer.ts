@@ -94,7 +94,8 @@ export const useStreamPlayer = () => {
     if (match.sources && match.sources.length > 0) {
       // Force fresh load
       setTimeout(() => {
-        fetchStreamData(match.sources[0]);
+        const firstNonAdmin = match.sources.find(s => !s.source?.toLowerCase().includes('admin'));
+        fetchStreamData(firstNonAdmin || match.sources[0]);
       }, 100);
     }
   };
@@ -118,7 +119,8 @@ export const useStreamPlayer = () => {
     if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
       // Force fresh load with delay
       setTimeout(() => {
-        fetchStreamData(featuredMatch.sources[0]);
+        const firstNonAdmin = featuredMatch.sources.find(s => !s.source?.toLowerCase().includes('admin'));
+        fetchStreamData(firstNonAdmin || featuredMatch.sources[0]);
       }, 100);
     }
   };

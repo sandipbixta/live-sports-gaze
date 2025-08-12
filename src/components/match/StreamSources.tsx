@@ -25,12 +25,16 @@ const StreamSources = ({
   const isIOS = typeof navigator !== 'undefined' && ((/iPhone|iPad|iPod/i.test(navigator.userAgent)) || ((navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
   const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>(() => (isAndroid ? 'android' : isIOS ? 'ios' : 'all'));
 
+  // Hide admin sources entirely from the UI
+  const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
+  const visibleSources = sources.filter(s => !isAdminSourceName(s.source));
+
   // Fetch all available streams for each source
   useEffect(() => {
     const fetchAllStreams = async () => {
-      if (!sources || sources.length === 0) return;
+      if (!visibleSources || visibleSources.length === 0) return;
 
-      for (const source of sources) {
+      for (const source of visibleSources) {
         const sourceKey = `${source.source}/${source.id}`;
         
         if (allStreams[sourceKey]) continue; // Already fetched
@@ -88,13 +92,13 @@ const StreamSources = ({
     fetchAllStreams();
   }, [sources]);
 
-  if (!sources || sources.length === 0) {
+  if (!visibleSources || visibleSources.length === 0) {
     return null;
   }
 
 
   // Group sources by source name
-  const groupedSources = sources.reduce((groups: Record<string, Source[]>, source) => {
+  const groupedSources = visibleSources.reduce((groups: Record<string, Source[]>, source) => {
     const groupName = source.source;
     if (!groups[groupName]) {
       groups[groupName] = [];
@@ -264,7 +268,7 @@ const StreamSources = ({
                   return `Server ${index + 1}`;
                 };
                 
-                const displayName = getDisplayName(stream, sources.find(s => `${s.source}/${s.id}` === sourceKey) || sources[0], index);
+                const displayName = getDisplayName(stream, visibleSources.find(s => `${s.source}/${s.id}` === sourceKey) || visibleSources[0], index);
                 // Heuristic platform label based on URL type
                 const isM3U8 = /\.m3u8(\?|$)/i.test(stream?.embedUrl || '');
                 
