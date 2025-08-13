@@ -42,11 +42,21 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
-  const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
   const backgroundImage = match.poster;
-  const showPosterBackground = !!backgroundImage;
+  
+  // Clean up the title by removing "poster" word
+  const cleanTitle = match.title.replace(/\s*poster\s*/gi, '').replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim();
+  
+  // Only show poster background if it exists and doesn't contain "poster" text (which means it's a placeholder)
+  const showPosterBackground = !!backgroundImage && !backgroundImage.toLowerCase().includes('poster');
+  
+  const [posterLoaded, setPosterLoaded] = React.useState(false);
+  const [posterError, setPosterError] = React.useState(false);
+  
+  // Final decision on whether to show poster layout
+  const usePosterLayout = showPosterBackground && posterLoaded && !posterError;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -56,67 +66,62 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
-          {showPosterBackground && (
+          {/* Background Image - Always show if available */}
+          {backgroundImage && (
             <>
               <img
-                src={backgroundImage!}
-                alt={`${match.title} poster`}
-                className="absolute inset-0 w-full h-full object-cover scale-105"
+                src={backgroundImage}
+                alt={`${cleanTitle} poster`}
+                className="absolute inset-0 w-full h-full object-cover"
                 loading={isPriority ? 'eager' : 'lazy'}
+                onLoad={() => setPosterLoaded(true)}
+                onError={() => setPosterError(true)}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10 backdrop-blur-[1px]" />
+              {/* Minimal overlay - just a subtle gradient at bottom for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </>
           )}
-          {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-2 md:mb-3">
-            <div className="flex items-center gap-2">
-              {isLive ? (
-                <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
-                  • LIVE
-                </Badge>
-              ) : (
-                <Badge className="bg-secondary text-secondary-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatTime(match.date)}
-                </Badge>
-              )}
-            </div>
+
+          {/* Live Badge - Top Left */}
+          <div className="relative z-10 flex justify-start items-start mb-2">
+            {isLive && (
+              <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
+                • LIVE
+              </Badge>
+            )}
           </div>
-          
-          {/* Unified Title Overlay (WWE-style) */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center space-y-1 max-w-[85%]">
-              <h3 className="text-foreground font-bold text-xs md:text-base leading-tight">
-                <span className="px-2.5 py-1 rounded-md bg-background/60 backdrop-blur-[2px]">
-                  {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
-                </span>
+
+          {/* Spacer to push content to bottom */}
+          <div className="flex-1"></div>
+
+          {/* Bottom Content */}
+          <div className="relative z-10 space-y-2">
+            {/* Match Title */}
+            <div className="space-y-1">
+              <h3 className="text-foreground font-bold text-sm md:text-lg leading-tight">
+                {cleanTitle}
               </h3>
-              <p className="text-muted-foreground text-[10px] md:text-xs">
-                <span className="px-2 py-0.5 rounded bg-background/50 backdrop-blur-[2px]">
-                  {formatDate(match.date)} • {formatTime(match.date)}
-                </span>
-              </p>
             </div>
-          </div>
 
-          {/* Footer */}
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
-            <div className="text-muted-foreground text-[10px] md:text-xs">
-              {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center space-x-1 text-muted-foreground">
-                <Play className="w-3 h-3" />
-                <span className="text-[10px] md:text-xs font-medium">
-                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-                </span>
+            {/* Date, Time and Stream Info */}
+            <div className="flex justify-between items-center pt-2 border-t border-border/60">
+              <div className="flex items-center gap-2 text-muted-foreground text-[10px] md:text-xs">
+                <Clock className="w-3 h-3" />
+                <span>{formatDate(match.date)} • {formatTime(match.date)}</span>
               </div>
-              {hasStream && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center space-x-1 text-muted-foreground">
+                  <Play className="w-3 h-3" />
+                  <span className="text-[10px] md:text-xs font-medium">
+                    {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+                  </span>
+                </div>
+                {hasStream && (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+              </div>
             </div>
           </div>
-
         </div>
       </AspectRatio>
     </Card>
