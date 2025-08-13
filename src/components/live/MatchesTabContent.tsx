@@ -2,7 +2,7 @@
 import React from 'react';
 import { Match, Sport } from '../../types/sports';
 import { TabsContent } from '../ui/tabs';
-import MatchCard from '../MatchCard';
+import ModernMatchCard from '../ModernMatchCard';
 import { Button } from '../ui/button';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { Badge } from '../ui/badge';
@@ -102,7 +102,7 @@ const MatchesTabContent: React.FC<MatchesTabContentProps> = ({
               className="cursor-pointer"
               onClick={() => onMatchSelect(match)}
             >
-              <MatchCard 
+              <ModernMatchCard 
                 match={match}
                 sportId={match.sportId || "1"}
                 onClick={() => onMatchSelect(match)}
@@ -150,7 +150,7 @@ const MatchesTabContent: React.FC<MatchesTabContentProps> = ({
                 className="cursor-pointer"
                 onClick={() => onMatchSelect(match)}
               >
-                <MatchCard 
+                <ModernMatchCard 
                   match={match}
                   sportId={match.sportId || "1"}
                   onClick={() => onMatchSelect(match)}

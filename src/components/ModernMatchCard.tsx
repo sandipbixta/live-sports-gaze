@@ -65,26 +65,26 @@ const ModernMatchCard: React.FC<ModernMatchCardProps> = ({
   // Create the content element
   const cardContent = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-card text-card-foreground rounded-xl">
-      <AspectRatio 
-        ratio={16/9} 
-        className="w-full"
-      >
-        <div className={`absolute inset-0 bg-gradient-to-br ${getGradientForSport(match.category)} p-4 flex flex-col h-full`}>
-          {/* Live Badge - Top Right */}
-          <div className="flex justify-end items-start mb-4">
-            {isLive && (
-              <Badge className="bg-red-500 text-white text-xs px-2 py-1 font-medium animate-pulse">
-                • LIVE
-              </Badge>
-            )}
-          </div>
+      <div className="flex flex-col h-full">
+        <AspectRatio 
+          ratio={16/9} 
+          className="w-full"
+        >
+          <div className={`relative h-full w-full bg-gradient-to-br ${getGradientForSport(match.category)} p-4 flex items-center justify-center`}>
+            {/* Live Badge - Top Right */}
+            <div className="absolute top-3 right-3">
+              {isLive && (
+                <Badge className="bg-red-500 text-white text-xs px-2 py-1 font-medium animate-pulse">
+                  • LIVE
+                </Badge>
+              )}
+            </div>
 
-          {/* Team Logos */}
-          <div className="flex-1 flex items-center justify-center gap-6 mb-4">
-            {/* Home Team */}
-            <div className="flex flex-col items-center">
+            {/* Team Logos */}
+            <div className="flex items-center justify-center gap-6">
+              {/* Home Team */}
               {homeBadge && (
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full p-2 mb-2 backdrop-blur-sm">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full p-2 backdrop-blur-sm">
                   <img
                     src={homeBadge}
                     alt={`${home} logo`}
@@ -93,17 +93,13 @@ const ModernMatchCard: React.FC<ModernMatchCardProps> = ({
                   />
                 </div>
               )}
-            </div>
 
-            {/* VS Text */}
-            <div className="text-white/80 font-bold text-sm md:text-base">
-              VS
-            </div>
+              {/* VS Text */}
+              <div className="text-white/80 font-bold text-sm md:text-base">VS</div>
 
-            {/* Away Team */}
-            <div className="flex flex-col items-center">
+              {/* Away Team */}
               {awayBadge && (
-                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full p-2 mb-2 backdrop-blur-sm">
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full p-2 backdrop-blur-sm">
                   <img
                     src={awayBadge}
                     alt={`${away} logo`}
@@ -114,28 +110,24 @@ const ModernMatchCard: React.FC<ModernMatchCardProps> = ({
               )}
             </div>
           </div>
+        </AspectRatio>
 
-          {/* Match Title */}
-          <div className="text-center mb-4">
-            <h3 className="text-white font-bold text-sm md:text-lg leading-tight">
-              {cleanTitle}
-            </h3>
+        {/* Bottom info bar */}
+        <div className="px-4 py-3 border-t border-border bg-background/70">
+          <div className="mb-1">
+            <h3 className="text-foreground font-bold text-sm md:text-lg leading-tight">{cleanTitle}</h3>
           </div>
-
-          {/* Bottom Info */}
-          <div className="flex justify-between items-end text-white/90">
-            <div className="flex flex-col">
-              <span className="text-xs font-medium opacity-80">
-                {match.category?.charAt(0).toUpperCase() + match.category?.slice(1)}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs">
+          <div className="flex items-center justify-between text-muted-foreground text-xs">
+            <span className="font-medium">
+              {match.category?.charAt(0).toUpperCase() + match.category?.slice(1)}
+            </span>
+            <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               <span>{formatDate(match.date)}, {formatTime(match.date)}</span>
             </div>
           </div>
         </div>
-      </AspectRatio>
+      </div>
     </Card>
   );
 

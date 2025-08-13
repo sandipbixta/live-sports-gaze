@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Match } from '../types/sports';
-import MatchCard from './MatchCard';
+import ModernMatchCard from './ModernMatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
 import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
@@ -43,7 +43,7 @@ const PopularGames: React.FC<PopularGamesProps> = ({
       <h2 className="text-xl font-bold mb-3 text-foreground">Trending Games</h2>
       <div className={`grid grid-cols-2 ${!isMobile ? 'md:grid-cols-4' : ''} gap-2`}>
         {filteredMatches.slice(0, 4).map((match, index) => (
-          <MatchCard 
+          <ModernMatchCard 
             key={`trending-${match.id}-${index}`}
             match={match}
             sportId={selectedSport || ''}

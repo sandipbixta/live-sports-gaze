@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
-import MatchCard from '@/components/MatchCard';
+import ModernMatchCard from '@/components/ModernMatchCard';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 import { useEffect, useState } from 'react';
@@ -153,7 +153,7 @@ const StreamTab = ({
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {sortedPopularMatches.slice(0, 6).map((m, index) => (
-              <MatchCard
+              <ModernMatchCard
                 key={`streamtab-trending-${m.id}-${index}`}
                 match={m}
                 sportId={sportId}

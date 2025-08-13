@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Match } from '../types/sports';
-import MatchCard from './MatchCard';
+import ModernMatchCard from './ModernMatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Clock } from 'lucide-react';
 
@@ -64,7 +64,7 @@ const MatchSection: React.FC<MatchSectionProps> = ({
       </h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
         {matches.map((match, index) => (
-          <MatchCard 
+          <ModernMatchCard 
             key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}
             match={match}
             sportId={sportId}
