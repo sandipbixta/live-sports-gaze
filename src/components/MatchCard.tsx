@@ -62,7 +62,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-card text-card-foreground rounded-xl">
       <AspectRatio 
-        ratio={16/10} 
+        ratio={16/9} 
         className="w-full"
       >
         <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
@@ -72,7 +72,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <img
                 src={backgroundImage}
                 alt={`${cleanTitle} poster`}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover [object-position:50%_28%] md:[object-position:50%_32%]"
                 loading={isPriority ? 'eager' : 'lazy'}
                 onLoad={() => setPosterLoaded(true)}
                 onError={() => setPosterError(true)}
