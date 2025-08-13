@@ -64,7 +64,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 className="absolute inset-0 w-full h-full object-cover scale-105"
                 loading={isPriority ? 'eager' : 'lazy'}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10 backdrop-blur-[1px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-background/10 backdrop-blur-[2px]" />
             </>
           )}
           {/* Header with Live/Time badge */}
