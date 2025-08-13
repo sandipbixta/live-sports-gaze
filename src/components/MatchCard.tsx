@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
-import { getSportPoster } from '../utils/sportPosters';
 
 interface MatchCardProps {
   match: Match;
@@ -46,9 +45,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
-  // Pick match poster or a sport-specific fallback image
-  const backgroundImage = match.poster || getSportPoster(sportId || match.sportId || match.category);
-  const showPosterBackground = !!backgroundImage;
+  // Use poster image as background when no teams (e.g., WWE, F1)
+  const showPosterBackground = !hasTeams && !!match.poster;
   
   // Create the content element that will be used inside either Link or div
   const cardContent = (
@@ -61,7 +59,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {showPosterBackground && (
             <>
               <img
-                src={backgroundImage!}
+                src={match.poster!}
                 alt={`${match.title} poster`}
                 className="absolute inset-0 w-full h-full object-cover scale-105"
                 loading={isPriority ? 'eager' : 'lazy'}
