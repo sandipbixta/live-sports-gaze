@@ -16,7 +16,7 @@ import StreamTab from '@/components/match/StreamTab';
 import HighlightsTab from '@/components/match/HighlightsTab';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
-import ModernMatchCard from '@/components/ModernMatchCard';
+import MatchCard from '@/components/MatchCard';
 
 const Match = () => {
   const { toast } = useToast();
@@ -240,7 +240,7 @@ const Match = () => {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
               {trendingMatches.map((trendingMatch) => (
-                <ModernMatchCard 
+                <MatchCard 
                   key={trendingMatch.id}
                   match={trendingMatch}
                   sportId={sportId || ''}
