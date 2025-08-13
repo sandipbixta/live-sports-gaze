@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
+import { getSportPoster } from '../utils/sportPosters';
 
 interface MatchCardProps {
   match: Match;
@@ -45,7 +46,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasTeamLogos = homeBadge && awayBadge;
   const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
-  const backgroundImage = match.poster;
+  // Pick match poster or a sport-specific fallback image
+  const backgroundImage = match.poster || getSportPoster(sportId || match.sportId || match.category);
   const showPosterBackground = !!backgroundImage;
   
   // Create the content element that will be used inside either Link or div
