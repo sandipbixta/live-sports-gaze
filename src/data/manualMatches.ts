@@ -12,7 +12,7 @@ const getTomorrowDate = () => {
 export const manualMatches: ManualMatch[] = [
   {
     id: "",
-    title: "Premier League",
+    title: "FC Barcelons vs Vissel kobe",
     date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
@@ -51,7 +51,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: false,
-    image: "https://i.imgur.com/iKmOh9B.jpeg",
+    image: "",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
       description: "Watch Fifa club world cup live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
