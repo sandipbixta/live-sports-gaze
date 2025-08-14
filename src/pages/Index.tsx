@@ -110,8 +110,8 @@ const Index = () => {
   // Separate useEffect for handling sport auto-selection to avoid dependency issues
   useEffect(() => {
     if (sports.length > 0 && !selectedSport && !loadingSports) {
-      console.log('🏈 Auto-selecting "All Sports" (separate effect)');
-      handleSelectSport('all');
+      console.log('🏈 Auto-selecting "All Sports" as default');
+      setSelectedSport('all');
     }
   }, [sports, selectedSport, loadingSports]);
 

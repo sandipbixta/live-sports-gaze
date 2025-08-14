@@ -87,9 +87,9 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-36 bg-[#242836] rounded-xl animate-pulse"></div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+          <div key={i} className="h-32 bg-[#242836] rounded-xl animate-pulse"></div>
         ))}
       </div>
     );
@@ -118,7 +118,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             </span>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {matches.map((match) => (
               <MatchCard
                 key={`${match.sportId || sportId}-${match.id}`}
