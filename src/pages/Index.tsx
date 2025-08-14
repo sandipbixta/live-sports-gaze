@@ -9,6 +9,7 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
+import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
@@ -109,10 +110,8 @@ const Index = () => {
   // Separate useEffect for handling sport auto-selection to avoid dependency issues
   useEffect(() => {
     if (sports.length > 0 && !selectedSport && !loadingSports) {
-      const footballSport = sports.find(s => s.name.toLowerCase() === 'football');
-      const selectedSportId = footballSport ? footballSport.id : sports[0].id;
-      console.log('🏈 Auto-selecting sport (separate effect):', selectedSportId);
-      handleSelectSport(selectedSportId);
+      console.log('🏈 Auto-selecting "All Sports" (separate effect)');
+      handleSelectSport('all');
     }
   }, [sports, selectedSport, loadingSports]);
 
@@ -127,6 +126,14 @@ const Index = () => {
     if (selectedSport === sportId) return;
     
     setSelectedSport(sportId);
+    
+    // For "All Sports", we don't need to load specific matches
+    // as AllSportsLiveMatches component handles its own data fetching
+    if (sportId === 'all') {
+      setMatches([]);
+      return;
+    }
+    
     setLoadingMatches(true);
     console.log('🔄 Loading matches for sport:', sportId);
     
@@ -251,30 +258,46 @@ const Index = () => {
             <div className="mb-8">
               {selectedSport && (
                 <>
-                  <div className="mb-4">
-                    <h2 className="text-xl font-bold text-white">
-                      {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                    </h2>
-                    <p className="text-gray-400 text-sm">
-                      {filteredMatches.length} matches available
-                    </p>
-                  </div>
-                  <MatchesList
-                    matches={filteredMatches}
-                    sportId={selectedSport}
-                    isLoading={loadingMatches}
-                    trendingSection={
-                      popularMatches.length > 0 && !searchTerm.trim() ? (
-                        <>
-                          <PopularMatches 
-                            popularMatches={popularMatches} 
-                            selectedSport={selectedSport}
-                          />
-                          <Separator className="my-8 bg-[#343a4d]" />
-                        </>
-                      ) : null
-                    }
-                  />
+                  {selectedSport === 'all' ? (
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-xl font-bold text-white">
+                          Live Matches - All Sports
+                        </h2>
+                        <p className="text-gray-400 text-sm">
+                          Currently live matches from all sports categories
+                        </p>
+                      </div>
+                      <AllSportsLiveMatches searchTerm={searchTerm} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <h2 className="text-xl font-bold text-white">
+                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                        </h2>
+                        <p className="text-gray-400 text-sm">
+                          {filteredMatches.length} matches available
+                        </p>
+                      </div>
+                      <MatchesList
+                        matches={filteredMatches}
+                        sportId={selectedSport}
+                        isLoading={loadingMatches}
+                        trendingSection={
+                          popularMatches.length > 0 && !searchTerm.trim() ? (
+                            <>
+                              <PopularMatches 
+                                popularMatches={popularMatches} 
+                                selectedSport={selectedSport}
+                              />
+                              <Separator className="my-8 bg-[#343a4d]" />
+                            </>
+                          ) : null
+                        }
+                      />
+                    </>
+                  )}
                 </>
               )}
             </div>

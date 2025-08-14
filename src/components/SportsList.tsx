@@ -26,6 +26,19 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
   return (
     <div>
       <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none">
+        {/* All Sports button */}
+        <Button
+          onClick={() => onSelectSport('all')}
+          className={`px-6 py-2 rounded-lg transition-all whitespace-nowrap ${
+            selectedSport === 'all'
+              ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
+              : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+          }`}
+          variant={selectedSport === 'all' ? "default" : "outline"}
+        >
+          All Sports
+        </Button>
+        
         {sports.map((sport) => (
           <Button
             key={sport.id}
