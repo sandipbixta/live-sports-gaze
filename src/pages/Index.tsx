@@ -9,7 +9,6 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
-import LiveMatchesSection from '../components/LiveMatchesSection';
 
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
@@ -197,9 +196,6 @@ const Index = () => {
         {/* This section now omitted, per your request */}
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
-
-        {/* Live Matches Section */}
-        <LiveMatchesSection />
 
         {/* Direct Link Advertisement removed */}
         {/* <div className="mb-4 sm:mb-6">
