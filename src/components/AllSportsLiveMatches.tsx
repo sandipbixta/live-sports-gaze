@@ -32,11 +32,14 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         const cleanMatches = filterCleanMatches(matchesData);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         
-        // Filter only live matches
-        const liveOnly = consolidatedMatches.filter(isMatchLive);
-        
-        setLiveMatches(liveOnly);
-        console.log(`✅ Loaded ${liveOnly.length} live matches from all sports`);
+        // Since fetchLiveMatches already returns live matches, no need to filter again
+        setLiveMatches(consolidatedMatches);
+        console.log(`✅ Loaded ${consolidatedMatches.length} live matches from all sports`);
+        console.log('Live matches by sport:', consolidatedMatches.reduce((acc, match) => {
+          const sport = match.sportId || match.category || 'unknown';
+          acc[sport] = (acc[sport] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>));
         
       } catch (error) {
         console.error('Error loading live matches:', error);
