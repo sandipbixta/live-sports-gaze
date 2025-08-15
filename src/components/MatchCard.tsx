@@ -45,7 +45,30 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  const content = (
+  // Poster only for selected sports
+  const posterSports = ['wrestling', 'f1', 'ufc', 'golf', 'hockey', 'motorsport'];
+  const canUsePoster =
+    posterSports.includes((sportId || match.sportId)?.toLowerCase()) &&
+    match.poster &&
+    !match.poster.includes('streamed.su');
+  const posterUrl = canUsePoster ? `https://streamed.pk${match.poster}.webp` : null;
+
+  const cardContent = posterUrl ? (
+    // Poster Layout
+    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
+      <AspectRatio ratio={16 / 10} className="w-full">
+        <img
+          src={posterUrl}
+          alt={match.title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/40 text-white text-sm font-semibold text-center">
+          {home || away ? `${home} vs ${away}` : match.title}
+        </div>
+      </AspectRatio>
+    </Card>
+  ) : (
+    // Badge Layout
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
       <AspectRatio ratio={16 / 10} className="w-full">
         {/* Plain background */}
@@ -78,12 +101,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
             ) : (
               <Badge className="bg-white/20 text-white text-xs px-2 py-0.5 font-medium flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {formatTime(match.date)}
+                {match.date ? formatTime(match.date) : 'Time TBD'}
               </Badge>
             )}
           </div>
 
-          {/* Teams / Title */}
+          {/* Teams Section */}
           {home || away ? (
             <div className="flex items-center justify-center gap-6">
               {/* Home */}
@@ -118,21 +141,20 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
             </div>
           ) : (
-            // Fallback if no teams
             <div className="text-center">
               <span className="text-white font-bold text-sm md:text-base">{match.title}</span>
             </div>
           )}
 
-          {/* Match Time (always visible) */}
+          {/* Match Time */}
           <div className="text-white/90 text-xs mt-2 text-center">
-            {formatDate(match.date)} • {formatTime(match.date)}
+            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
           </div>
 
           {/* Footer */}
           <div className="flex justify-between items-center mt-4 text-white/90 text-xs">
             <div>
-              {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
+              {match.date ? `${format(match.date, 'EEE, MMM d')} • ${formatTime(match.date)}` : 'Time TBD'}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center space-x-1">
@@ -154,7 +176,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   if (preventNavigation || onClick) {
     return (
       <div className={`cursor-pointer ${className}`} onClick={onClick}>
-        {content}
+        {cardContent}
       </div>
     );
   }
@@ -162,12 +184,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
   if (hasStream) {
     return (
       <Link to={`/match/${sportId || match.sportId}/${match.id}`} className={`block ${className}`}>
-        {content}
+        {cardContent}
       </Link>
     );
   }
 
-  return <div className={className}>{content}</div>;
+  return <div className={className}>{cardContent}</div>;
 };
 
 export default MatchCard;
