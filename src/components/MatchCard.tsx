@@ -45,8 +45,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Poster only for selected sports
-  const posterSports = ['wrestling', 'f1', 'ufc', 'golf', 'hockey', 'motorsport'];
+  // Sports that use poster
+  const posterSports = ['cricket', 'wrestling', 'ufc', 'motorsport', 'golf', 'hockey'];
   const canUsePoster =
     posterSports.includes((sportId || match.sportId)?.toLowerCase()) &&
     match.poster &&
@@ -56,14 +56,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = posterUrl ? (
     // Poster Layout
     <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
-      <AspectRatio ratio={16 / 10} className="w-full">
+      <AspectRatio ratio={16 / 10} className="w-full relative">
         <img
           src={posterUrl}
           alt={match.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/40 text-white text-sm font-semibold text-center">
-          {home || away ? `${home} vs ${away}` : match.title}
+        {/* Overlay for title */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
+          {match.title}
         </div>
       </AspectRatio>
     </Card>
