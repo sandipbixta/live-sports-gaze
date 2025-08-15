@@ -47,10 +47,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const isLive = isMatchLive(match);
 
   const content = (
-    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-card text-card-foreground rounded-xl">
+    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
       <AspectRatio ratio={16 / 10} className="w-full">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600" />
+        {/* Plain background */}
+        <div className="absolute inset-0 bg-gray-900" />
 
         {/* BIG shadow badges */}
         {homeBadge && (
@@ -68,16 +68,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           />
         )}
 
-        {/* Content */}
+        {/* Foreground content */}
         <div className="relative z-10 flex flex-col justify-between p-4 h-full">
           {/* Header */}
           <div className="flex justify-between items-center">
             {isLive ? (
-              <Badge className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 font-medium animate-pulse">
+              <Badge className="bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
                 • LIVE
               </Badge>
             ) : (
-              <Badge className="bg-secondary text-secondary-foreground text-xs px-2 py-0.5 font-medium flex items-center gap-1">
+              <Badge className="bg-white/20 text-white text-xs px-2 py-0.5 font-medium flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {formatTime(match.date)}
               </Badge>
@@ -95,9 +95,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
                 />
               )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">
-                {home}
-              </span>
+              <span className="text-white text-sm font-semibold mt-1 text-center">{home}</span>
             </div>
 
             {/* VS */}
@@ -112,9 +110,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
                 />
               )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">
-                {away}
-              </span>
+              <span className="text-white text-sm font-semibold mt-1 text-center">{away}</span>
             </div>
           </div>
 
