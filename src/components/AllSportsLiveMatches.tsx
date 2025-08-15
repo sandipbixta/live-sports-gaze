@@ -108,9 +108,19 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     );
   }
 
+  // Sort sports to show football first
+  const sortedSports = Object.entries(matchesBySport).sort(([sportIdA], [sportIdB]) => {
+    const isFootballA = sportIdA.toLowerCase().includes('football') || sportIdA.toLowerCase().includes('soccer') || sportIdA === '1';
+    const isFootballB = sportIdB.toLowerCase().includes('football') || sportIdB.toLowerCase().includes('soccer') || sportIdB === '1';
+    
+    if (isFootballA && !isFootballB) return -1;
+    if (!isFootballA && isFootballB) return 1;
+    return 0;
+  });
+
   return (
     <div className="space-y-8">
-      {Object.entries(matchesBySport).map(([sportId, matches]) => (
+      {sortedSports.map(([sportId, matches]) => (
         <div key={sportId} className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white">
