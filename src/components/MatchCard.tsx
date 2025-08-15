@@ -16,12 +16,12 @@ interface MatchCardProps {
   preventNavigation?: boolean;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ 
-  match, 
-  className = '', 
-  sportId, 
-  onClick, 
-  preventNavigation 
+const MatchCard: React.FC<MatchCardProps> = ({
+  match,
+  className = '',
+  sportId,
+  onClick,
+  preventNavigation,
 }) => {
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -33,7 +33,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return format(date, 'EEEE, MMM d');
   };
 
-  // Badge URLs
   const homeBadge = match.teams?.home?.badge
     ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp`
     : '';
@@ -85,38 +84,45 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
 
           {/* Teams / Title */}
-          <div className="flex items-center justify-center gap-6">
-            {/* Home */}
-            <div className="flex flex-col items-center">
-              {homeBadge && (
-                <img
-                  src={homeBadge}
-                  alt={home || 'Home Team'}
-                  className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
-                />
-              )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">
-                {home || match.title || 'Home Team'}
-              </span>
-            </div>
+          {home || away ? (
+            <div className="flex items-center justify-center gap-6">
+              {/* Home */}
+              <div className="flex flex-col items-center">
+                {homeBadge && (
+                  <img
+                    src={homeBadge}
+                    alt={home || 'Home Team'}
+                    className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                  />
+                )}
+                <span className="text-white text-sm font-semibold mt-1 text-center">
+                  {home || 'Home Team'}
+                </span>
+              </div>
 
-            {/* VS */}
-            <span className="text-white font-bold text-lg md:text-xl">VS</span>
+              {/* VS */}
+              <span className="text-white font-bold text-lg md:text-xl">VS</span>
 
-            {/* Away */}
-            <div className="flex flex-col items-center">
-              {awayBadge && (
-                <img
-                  src={awayBadge}
-                  alt={away || 'Away Team'}
-                  className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
-                />
-              )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">
-                {away || match.title || 'Away Team'}
-              </span>
+              {/* Away */}
+              <div className="flex flex-col items-center">
+                {awayBadge && (
+                  <img
+                    src={awayBadge}
+                    alt={away || 'Away Team'}
+                    className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                  />
+                )}
+                <span className="text-white text-sm font-semibold mt-1 text-center">
+                  {away || 'Away Team'}
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            // Fallback if no teams
+            <div className="text-center">
+              <span className="text-white font-bold text-sm md:text-base">{match.title}</span>
+            </div>
+          )}
 
           {/* Match Time (always visible) */}
           <div className="text-white/90 text-xs mt-2 text-center">
