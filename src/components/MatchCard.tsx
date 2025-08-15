@@ -12,7 +12,6 @@ interface MatchCardProps {
   match: Match;
   className?: string;
   sportId?: string;
-  isPriority?: boolean;
   onClick?: () => void;
   preventNavigation?: boolean;
 }
@@ -21,7 +20,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
   match, 
   className = '', 
   sportId, 
-  isPriority, 
   onClick, 
   preventNavigation 
 }) => {
@@ -35,154 +33,130 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return format(date, 'EEEE, MMM d');
   };
 
-  // Use badge for team images with streamed.pk API
-  const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : '';
-  const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : '';
-  
+  // Badge URLs
+  const homeBadge = match.teams?.home?.badge
+    ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp`
+    : '';
+  const awayBadge = match.teams?.away?.badge
+    ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
+    : '';
+
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
-  const hasTeamLogos = homeBadge && awayBadge;
-  const hasTeams = !!home && !!away;
   const isLive = isMatchLive(match);
-  
-  // Create the content element that will be used inside either Link or div
-  const cardContent = (
+
+  const content = (
     <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-card text-card-foreground rounded-xl">
-      <AspectRatio 
-        ratio={16/10} 
-        className="w-full"
-      >
-        <div className="absolute inset-0 p-2 md:p-4 flex flex-col h-full">
-          {/* Header with Live/Time badge */}
-          <div className="flex justify-between items-center mb-2 md:mb-3">
-            <div className="flex items-center gap-2">
-              {isLive ? (
-                <Badge className="bg-destructive text-destructive-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium animate-pulse">
-                  • LIVE
-                </Badge>
-              ) : (
-                <Badge className="bg-secondary text-secondary-foreground text-[10px] md:text-xs px-1.5 py-0.5 font-medium flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {formatTime(match.date)}
-                </Badge>
+      <AspectRatio ratio={16 / 10} className="w-full">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600" />
+
+        {/* BIG shadow badges */}
+        {homeBadge && (
+          <img
+            src={homeBadge}
+            alt={home}
+            className="absolute left-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
+          />
+        )}
+        {awayBadge && (
+          <img
+            src={awayBadge}
+            alt={away}
+            className="absolute right-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
+          />
+        )}
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-between p-4 h-full">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            {isLive ? (
+              <Badge className="bg-destructive text-destructive-foreground text-xs px-2 py-0.5 font-medium animate-pulse">
+                • LIVE
+              </Badge>
+            ) : (
+              <Badge className="bg-secondary text-secondary-foreground text-xs px-2 py-0.5 font-medium flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {formatTime(match.date)}
+              </Badge>
+            )}
+          </div>
+
+          {/* Teams */}
+          <div className="flex items-center justify-center gap-6">
+            {/* Home */}
+            <div className="flex flex-col items-center">
+              {homeBadge && (
+                <img
+                  src={homeBadge}
+                  alt={home}
+                  className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                />
               )}
+              <span className="text-white text-sm font-semibold mt-1 text-center">
+                {home}
+              </span>
+            </div>
+
+            {/* VS */}
+            <span className="text-white font-bold text-lg md:text-xl">VS</span>
+
+            {/* Away */}
+            <div className="flex flex-col items-center">
+              {awayBadge && (
+                <img
+                  src={awayBadge}
+                  alt={away}
+                  className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                />
+              )}
+              <span className="text-white text-sm font-semibold mt-1 text-center">
+                {away}
+              </span>
             </div>
           </div>
-          
-          {/* Teams Section */}
-          {hasTeams ? (
-            <div className="flex items-stretch justify-between flex-1 min-h-0">
-              {/* Home Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                {homeBadge && (
-                  <img 
-                    src={homeBadge} 
-                    alt={home}
-                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                )}
-                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto px-1">
-                    {home.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                  </span>
-                </div>
-              </div>
-
-              {/* VS Section */}
-              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1 px-1.5 min-w-fit">
-                <div className="text-muted-foreground text-[10px] md:text-sm font-bold">VS</div>
-              </div>
-
-              {/* Away Team */}
-              <div className="flex flex-col items-center justify-center flex-1 min-w-0 px-0.5">
-                {awayBadge && (
-                  <img 
-                    src={awayBadge} 
-                    alt={away}
-                    className="w-6 h-6 md:w-8 md:h-8 mb-1 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                )}
-                <div className="text-foreground text-[10px] md:text-sm font-semibold text-center leading-tight w-full h-8 md:h-10 flex items-center justify-center">
-                  <span className="line-clamp-2 break-words hyphens-auto px-1">
-                    {away.replace(/([a-z])([A-Z][a-z])/g, '$1 $2')}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* No Teams Available */
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <h3 className="text-foreground font-bold text-[10px] md:text-sm mb-1 leading-tight px-2">
-                  {match.title.replace(/([a-z])([A-Z][a-z])/g, '$1 $2').replace(/vs/gi, ' vs ').replace(/\s+/g, ' ').trim()}
-                </h3>
-                <p className="text-muted-foreground text-[10px] md:text-xs">{formatDate(match.date)} • {formatTime(match.date)}</p>
-              </div>
-            </div>
-          )}
 
           {/* Footer */}
-          <div className="flex justify-between items-center mt-3 pt-2 border-t border-border/60">
-            <div className="text-muted-foreground text-[10px] md:text-xs">
+          <div className="flex justify-between items-center mt-4 text-white/90 text-xs">
+            <div>
               {format(match.date, 'EEE, MMM d')} • {formatTime(match.date)}
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex items-center space-x-1 text-muted-foreground">
+              <div className="flex items-center space-x-1">
                 <Play className="w-3 h-3" />
-                <span className="text-[10px] md:text-xs font-medium">
+                <span>
                   {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
                 </span>
               </div>
               {hasStream && (
-                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <ChevronRight className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
               )}
             </div>
           </div>
-
         </div>
       </AspectRatio>
     </Card>
   );
 
-  // Handle click and navigation logic
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    }
-  };
-
-  // If preventNavigation is true or onClick is provided, make it a clickable div
   if (preventNavigation || onClick) {
     return (
-      <div 
-        className={`cursor-pointer ${className}`}
-        onClick={handleClick}
-      >
-        {cardContent}
+      <div className={`cursor-pointer ${className}`} onClick={onClick}>
+        {content}
       </div>
     );
   }
 
-  // If there are streams, make it a Link; otherwise just show the card
   if (hasStream) {
     return (
-      <Link 
-        to={`/match/${sportId || match.sportId}/${match.id}`} 
-        className={`block ${className}`}
-      >
-        {cardContent}
+      <Link to={`/match/${sportId || match.sportId}/${match.id}`} className={`block ${className}`}>
+        {content}
       </Link>
     );
   }
 
-  return <div className={className}>{cardContent}</div>;
+  return <div className={className}>{content}</div>;
 };
 
 export default MatchCard;
