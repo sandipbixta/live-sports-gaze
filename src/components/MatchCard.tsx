@@ -56,14 +56,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {homeBadge && (
           <img
             src={homeBadge}
-            alt={home}
+            alt={home || 'Home Team'}
             className="absolute left-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
           />
         )}
         {awayBadge && (
           <img
             src={awayBadge}
-            alt={away}
+            alt={away || 'Away Team'}
             className="absolute right-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
           />
         )}
@@ -71,7 +71,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {/* Foreground content */}
         <div className="relative z-10 flex flex-col justify-between p-4 h-full">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mb-2">
             {isLive ? (
               <Badge className="bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
                 • LIVE
@@ -84,18 +84,20 @@ const MatchCard: React.FC<MatchCardProps> = ({
             )}
           </div>
 
-          {/* Teams */}
+          {/* Teams / Title */}
           <div className="flex items-center justify-center gap-6">
             {/* Home */}
             <div className="flex flex-col items-center">
               {homeBadge && (
                 <img
                   src={homeBadge}
-                  alt={home}
+                  alt={home || 'Home Team'}
                   className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
                 />
               )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">{home}</span>
+              <span className="text-white text-sm font-semibold mt-1 text-center">
+                {home || match.title || 'Home Team'}
+              </span>
             </div>
 
             {/* VS */}
@@ -106,12 +108,19 @@ const MatchCard: React.FC<MatchCardProps> = ({
               {awayBadge && (
                 <img
                   src={awayBadge}
-                  alt={away}
+                  alt={away || 'Away Team'}
                   className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
                 />
               )}
-              <span className="text-white text-sm font-semibold mt-1 text-center">{away}</span>
+              <span className="text-white text-sm font-semibold mt-1 text-center">
+                {away || match.title || 'Away Team'}
+              </span>
             </div>
+          </div>
+
+          {/* Match Time (always visible) */}
+          <div className="text-white/90 text-xs mt-2 text-center">
+            {formatDate(match.date)} • {formatTime(match.date)}
           </div>
 
           {/* Footer */}
