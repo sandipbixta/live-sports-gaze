@@ -22,7 +22,8 @@ const MatchesList: React.FC<MatchesListProps> = ({
   trendingSection
 }) => {
   // Filter out advertisement and invalid matches, then consolidate duplicates
-  const cleanMatches = filterCleanMatches(matches);
+  // Only show live matches as requested
+  const cleanMatches = filterCleanMatches(matches.filter(match => isMatchLive(match)));
   const filteredMatches = consolidateMatches(cleanMatches);
   
   // Report displayed match IDs to parent component
@@ -33,41 +34,33 @@ const MatchesList: React.FC<MatchesListProps> = ({
     }
   }, [filteredMatches, onMatchesDisplayed]);
 
-  // Separate matches into live and upcoming
-  const liveMatches = filteredMatches.filter(match => isMatchLive(match));
-  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
-
   if (isLoading) {
     return <LoadingGrid />;
   }
 
   if (filteredMatches.length === 0) {
-    return <EmptyState />;
+    return (
+      <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
+        <div className="text-4xl mb-4">📺</div>
+        <h3 className="text-xl font-bold text-white mb-2">No Live Matches</h3>
+        <p className="text-gray-400">There are currently no live matches available for this sport.</p>
+      </div>
+    );
   }
 
   return (
     <div>
-      {/* Live Matches Section */}
-      <MatchSection
-        matches={liveMatches}
-        sportId={sportId}
-        title="Live Matches"
-        isLive={true}
-        showEmptyMessage={liveMatches.length === 0 && upcomingMatches.length > 0}
-        emptyMessage="No live matches available right now."
-      />
-      
       {/* Trending Section (if provided) */}
       {trendingSection}
       
-      {/* Upcoming Matches Section */}
+      {/* Live Matches Section - Only showing live matches */}
       <MatchSection
-        matches={upcomingMatches}
+        matches={filteredMatches}
         sportId={sportId}
-        title="Upcoming Matches"
-        isLive={false}
-        showEmptyMessage={upcomingMatches.length === 0 && liveMatches.length > 0}
-        emptyMessage="No upcoming matches scheduled at this time."
+        title="Live Matches"
+        isLive={true}
+        showEmptyMessage={false}
+        emptyMessage=""
       />
     </div>
   );

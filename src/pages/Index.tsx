@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -41,12 +41,13 @@ const Index = () => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation
+  // Memoize popular matches calculation - only show live matches
   const popularMatches = useMemo(() => {
     return matches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news')
+      !match.id.includes('sky-sports-news') &&
+      isMatchLive(match) // Only show live matches
     );
   }, [matches]);
 
@@ -146,10 +147,11 @@ const Index = () => {
         console.log('📥 Raw matches data:', rawMatchesData.length);
         
         // Filter and consolidate matches to remove duplicates and combine stream sources
-        const cleanMatches = filterCleanMatches(rawMatchesData);
-        console.log('🧹 Clean matches:', cleanMatches.length);
+        // Only show live matches
+        const cleanMatches = filterCleanMatches(rawMatchesData.filter(match => isMatchLive(match)));
+        console.log('🧹 Clean live matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
-        console.log('🔗 Consolidated matches:', consolidatedMatches.length);
+        console.log('🔗 Consolidated live matches:', consolidatedMatches.length);
         
         setMatches(consolidatedMatches);
         
