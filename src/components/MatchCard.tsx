@@ -73,7 +73,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <img
                   src={homeBadge}
                   alt={match.teams?.home?.name || 'Home'}
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
               )}
             </div>
@@ -82,7 +82,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <img
                   src={awayBadge}
                   alt={match.teams?.away?.name || 'Away'}
-                  className="w-16 h-16 object-contain"
+                  className="w-20 h-20 object-contain"
                 />
               )}
             </div>
