@@ -54,17 +54,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const posterUrl = canUsePoster ? `https://streamed.pk${match.poster}.webp` : null;
 
   const cardContent = posterUrl ? (
-    // Poster Layout
+    // Poster Layout (Compact)
     <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
-      <AspectRatio ratio={16 / 10} className="w-full relative">
+      <AspectRatio ratio={16 / 9} className="w-full relative">
         <img
           src={posterUrl}
           alt={match.title}
           className="w-full h-full object-cover"
         />
-        {/* Overlay for title */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
+        {/* Top overlay for title */}
+        <div className="absolute top-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
           {match.title}
+        </div>
+        {/* Bottom overlay for date/time and streams */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 flex justify-between items-center text-xs">
+          <span>
+            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
+          </span>
+          <span>
+            {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+          </span>
         </div>
       </AspectRatio>
     </Card>
@@ -132,65 +141,4 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 {awayBadge && (
                   <img
                     src={awayBadge}
-                    alt={away || 'Away Team'}
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
-                  />
-                )}
-                <span className="text-white text-sm font-semibold mt-1 text-center">
-                  {away || 'Away Team'}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center">
-              <span className="text-white font-bold text-sm md:text-base">{match.title}</span>
-            </div>
-          )}
-
-          {/* Match Time */}
-          <div className="text-white/90 text-xs mt-2 text-center">
-            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
-          </div>
-
-          {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-white/90 text-xs">
-            <div>
-              {match.date ? `${format(match.date, 'EEE, MMM d')} • ${formatTime(match.date)}` : 'Time TBD'}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center space-x-1">
-                <Play className="w-3 h-3" />
-                <span>
-                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-                </span>
-              </div>
-              {hasStream && (
-                <ChevronRight className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
-              )}
-            </div>
-          </div>
-        </div>
-      </AspectRatio>
-    </Card>
-  );
-
-  if (preventNavigation || onClick) {
-    return (
-      <div className={`cursor-pointer ${className}`} onClick={onClick}>
-        {cardContent}
-      </div>
-    );
-  }
-
-  if (hasStream) {
-    return (
-      <Link to={`/match/${sportId || match.sportId}/${match.id}`} className={`block ${className}`}>
-        {cardContent}
-      </Link>
-    );
-  }
-
-  return <div className={className}>{cardContent}</div>;
-};
-
-export default MatchCard;
+                    alt={away || 'Awa
