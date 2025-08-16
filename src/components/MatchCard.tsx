@@ -47,7 +47,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : null;
 
   // Determine thumbnail logic
-  const showSplit = !posterUrl; // split only if no poster
+  const showSplit = !posterUrl && (homeBadge || awayBadge); // split only if no poster but badges exist
+  const showDamiLogo = !posterUrl && !homeBadge && !awayBadge; // show full DamiTV logo if nothing else
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
@@ -55,29 +56,44 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="relative w-full h-48 md:h-40 overflow-hidden rounded-2xl"
         style={{ boxShadow: '0 8px 20px rgba(0,0,0,0.6)' }}
       >
-        {showSplit ? (
+        {/* Poster exists */}
+        {posterUrl && (
+          <img
+            src={posterUrl}
+            alt={match.title}
+            className="w-full h-full object-cover"
+          />
+        )}
+
+        {/* Split half for badges */}
+        {showSplit && (
           <div className="flex w-full h-full">
-            {/* Home half */}
-            <div className="w-1/2 h-full">
-              <img
-                src={homeBadge || DAMITV_LOGO}
-                alt={match.teams?.home?.name || 'Home'}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-1/2 h-full flex items-center justify-center bg-gray-800">
+              {homeBadge && (
+                <img
+                  src={homeBadge}
+                  alt={match.teams?.home?.name || 'Home'}
+                  className="w-16 h-16 object-contain"
+                />
+              )}
             </div>
-            {/* Away half */}
-            <div className="w-1/2 h-full">
-              <img
-                src={awayBadge || DAMITV_LOGO}
-                alt={match.teams?.away?.name || 'Away'}
-                className="w-full h-full object-cover"
-              />
+            <div className="w-1/2 h-full flex items-center justify-center bg-gray-800">
+              {awayBadge && (
+                <img
+                  src={awayBadge}
+                  alt={match.teams?.away?.name || 'Away'}
+                  className="w-16 h-16 object-contain"
+                />
+              )}
             </div>
           </div>
-        ) : (
+        )}
+
+        {/* Full DamiTV logo fallback */}
+        {showDamiLogo && (
           <img
-            src={posterUrl || DAMITV_LOGO}
-            alt={match.title}
+            src={DAMITV_LOGO}
+            alt="DamiTV"
             className="w-full h-full object-cover"
           />
         )}
