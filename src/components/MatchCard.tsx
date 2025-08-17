@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Clock, Play, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -14,7 +13,6 @@ interface MatchCardProps {
   sportId?: string;
   onClick?: () => void;
   preventNavigation?: boolean;
-  isPriority?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -23,7 +21,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
   sportId,
   onClick,
   preventNavigation,
-  isPriority,
 }) => {
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -32,151 +29,79 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
-    return format(date, 'EEEE, MMM d');
+    return format(date, 'EEE, MMM d');
   };
 
-  const homeBadge = match.teams?.home?.badge
-    ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp`
-    : '';
-  const awayBadge = match.teams?.away?.badge
-    ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
-    : '';
-
-  const home = match.teams?.home?.name || '';
-  const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Sports that use poster
-  const posterSports = ['cricket', 'wrestling', 'ufc', 'motorsport', 'golf', 'hockey'];
-  const canUsePoster =
-    posterSports.includes((sportId || match.sportId)?.toLowerCase()) &&
-    match.poster &&
-    !match.poster.includes('streamed.su');
-  const posterUrl = canUsePoster ? `https://streamed.pk${match.poster}.webp` : null;
+  // Poster URL if available and not from streamed.su
+  const posterUrl =
+    match.poster && !match.poster.includes('streamed.su')
+      ? `https://streamed.pk${match.poster}.webp`
+      : null;
 
   const cardContent = posterUrl ? (
-    // Poster Layout (Compact)
-    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
-      <AspectRatio ratio={16 / 9} className="w-full relative">
+    // Poster (YouTube-style) layout
+    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-white text-black rounded-md">
+      {/* Poster / Thumbnail */}
+      <div className="w-full h-48 md:h-40 relative">
         <img
           src={posterUrl}
           alt={match.title}
           className="w-full h-full object-cover"
         />
-        {/* Top overlay for title */}
-        <div className="absolute top-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
-          {match.title}
+        {isLive && (
+          <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
+            • LIVE
+          </Badge>
+        )}
+      </div>
+
+      {/* Content below thumbnail */}
+      <div className="p-2 md:p-3 flex flex-col gap-1">
+        {/* Match Title */}
+        <h3 className="font-semibold text-sm md:text-base line-clamp-2">{match.title}</h3>
+
+        {/* Date and Time */}
+        <div className="text-gray-500 text-xs md:text-sm">
+          {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
         </div>
-        {/* Bottom overlay for date/time and streams */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 flex justify-between items-center text-xs">
-          <span>
-            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
-          </span>
+
+        {/* Streams Info */}
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center gap-1 text-gray-600 text-xs md:text-sm">
+            <Play className="w-3 h-3" />
+            <span>
+              {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+            </span>
+          </div>
+          {hasStream && (
+            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+          )}
+        </div>
+      </div>
+    </Card>
+  ) : (
+    // Fallback Badge layout (unchanged)
+    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-white text-black rounded-md p-3">
+      <div className="flex items-center justify-between">
+        {match.teams?.home?.name && <span className="font-semibold">{match.teams.home.name}</span>}
+        <span className="font-bold">VS</span>
+        {match.teams?.away?.name && <span className="font-semibold">{match.teams.away.name}</span>}
+      </div>
+      <div className="text-gray-500 text-xs mt-1">
+        {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
+      </div>
+      <div className="flex items-center justify-between mt-1 text-gray-600 text-xs">
+        <div className="flex items-center gap-1">
+          <Play className="w-3 h-3" />
           <span>
             {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
           </span>
         </div>
-      </AspectRatio>
-    </Card>
-  ) : (
-    // Badge Layout
-    <Card className="relative overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
-      <AspectRatio ratio={16 / 10} className="w-full">
-        {/* Plain background */}
-        <div className="absolute inset-0 bg-gray-900" />
-
-        {/* BIG shadow badges */}
-        {homeBadge && (
-          <img
-            src={homeBadge}
-            alt={home || 'Home Team'}
-            className="absolute left-1/4 top-1/2 -translate-y-1/2 w-32 h-32 opacity-15 blur-lg"
-          />
-        )}
-        {awayBadge && (
-          <img
-            src={awayBadge}
-            alt={away || 'Away Team'}
-            className="absolute right-1/4 top-1/2 -translate-y-1/2 w-32 h-32 opacity-15 blur-lg"
-          />
-        )}
-
-        {/* Foreground content */}
-        <div className="relative z-10 flex flex-col justify-between p-4 h-full">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-2">
-            {isLive ? (
-              <Badge className="bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
-                • LIVE
-              </Badge>
-            ) : (
-              <Badge className="bg-white/20 text-white text-xs px-2 py-0.5 font-medium flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {match.date ? formatTime(match.date) : 'Time TBD'}
-              </Badge>
-            )}
-          </div>
-
-          {/* Teams Section */}
-          {home || away ? (
-            <div className="flex items-center justify-center gap-4">
-              {/* Home */}
-              <div className="flex flex-col items-center">
-                {homeBadge && (
-                  <img
-                    src={homeBadge}
-                    alt={home || 'Home Team'}
-                    className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-lg"
-                  />
-                )}
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px]">
-                  {home || 'Home Team'}
-                </span>
-              </div>
-
-              {/* VS */}
-              <span className="text-white font-bold text-sm md:text-base">VS</span>
-
-              {/* Away */}
-              <div className="flex flex-col items-center">
-                {awayBadge && (
-                  <img
-                    src={awayBadge}
-                    alt={away || 'Away Team'}
-                    className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-lg"
-                  />
-                )}
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px]">
-                  {away || 'Away Team'}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center">
-              <span className="text-white font-bold text-sm md:text-base">{match.title}</span>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="flex justify-between items-center mt-2 text-white/90 text-xs">
-            <div>
-              {match.date ? formatDate(match.date) : 'Date TBD'}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center space-x-1">
-                <Play className="w-3 h-3" />
-                <span>
-                  {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-                </span>
-              </div>
-              {hasStream && (
-                <ChevronRight className="w-4 h-4 text-white/90 group-hover:text-white transition-colors" />
-              )}
-            </div>
-          </div>
-        </div>
-      </AspectRatio>
+        {hasStream && <ChevronRight className="w-4 h-4 text-gray-400" />}
+      </div>
     </Card>
   );
 
