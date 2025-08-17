@@ -42,8 +42,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
       : null;
 
   const cardContent = posterUrl ? (
-    // Poster (YouTube-style) layout
-    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-white text-black rounded-md">
+    // Poster (YouTube-style) layout - dark theme
+    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-gray-900 text-white rounded-md">
       {/* Poster / Thumbnail */}
       <div className="w-full h-48 md:h-40 relative">
         <img
@@ -64,43 +64,43 @@ const MatchCard: React.FC<MatchCardProps> = ({
         <h3 className="font-semibold text-sm md:text-base line-clamp-2">{match.title}</h3>
 
         {/* Date and Time */}
-        <div className="text-gray-500 text-xs md:text-sm">
+        <div className="text-gray-400 text-xs md:text-sm">
           {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
         </div>
 
         {/* Streams Info */}
         <div className="flex items-center justify-between mt-1">
-          <div className="flex items-center gap-1 text-gray-600 text-xs md:text-sm">
+          <div className="flex items-center gap-1 text-gray-500 text-xs md:text-sm">
             <Play className="w-3 h-3" />
             <span>
               {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
             </span>
           </div>
           {hasStream && (
-            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
           )}
         </div>
       </div>
     </Card>
   ) : (
-    // Fallback Badge layout (unchanged)
-    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-white text-black rounded-md p-3">
+    // Fallback Badge layout (dark theme)
+    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-gray-900 text-white rounded-md p-3">
       <div className="flex items-center justify-between">
         {match.teams?.home?.name && <span className="font-semibold">{match.teams.home.name}</span>}
         <span className="font-bold">VS</span>
         {match.teams?.away?.name && <span className="font-semibold">{match.teams.away.name}</span>}
       </div>
-      <div className="text-gray-500 text-xs mt-1">
+      <div className="text-gray-400 text-xs mt-1">
         {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
       </div>
-      <div className="flex items-center justify-between mt-1 text-gray-600 text-xs">
+      <div className="flex items-center justify-between mt-1 text-gray-500 text-xs">
         <div className="flex items-center gap-1">
           <Play className="w-3 h-3" />
           <span>
             {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
           </span>
         </div>
-        {hasStream && <ChevronRight className="w-4 h-4 text-gray-400" />}
+        {hasStream && <ChevronRight className="w-4 h-4 text-gray-500" />}
       </div>
     </Card>
   );
