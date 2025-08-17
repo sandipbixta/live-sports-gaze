@@ -53,7 +53,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
       <div
-        className="relative w-full h-48 md:h-40 overflow-hidden rounded-2xl"
+        className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl"
         style={{ boxShadow: '0 8px 20px rgba(0,0,0,0.6)' }}
       >
         {/* Poster exists */}
@@ -73,7 +73,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <img
                   src={homeBadge}
                   alt={match.teams?.home?.name || 'Home'}
-                  className="w-20 h-20 object-contain"
+                  className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
                 />
               )}
             </div>
@@ -82,7 +82,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <img
                   src={awayBadge}
                   alt={match.teams?.away?.name || 'Away'}
-                  className="w-20 h-20 object-contain"
+                  className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
                 />
               )}
             </div>
