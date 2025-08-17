@@ -14,6 +14,7 @@ interface MatchCardProps {
   sportId?: string;
   onClick?: () => void;
   preventNavigation?: boolean;
+  isPriority?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -22,6 +23,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   sportId,
   onClick,
   preventNavigation,
+  isPriority,
 }) => {
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -54,17 +56,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const posterUrl = canUsePoster ? `https://streamed.pk${match.poster}.webp` : null;
 
   const cardContent = posterUrl ? (
-    // Poster Layout
+    // Poster Layout (Compact)
     <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg bg-gray-900 text-white rounded-xl">
-      <AspectRatio ratio={16 / 10} className="w-full relative">
+      <AspectRatio ratio={16 / 9} className="w-full relative">
         <img
           src={posterUrl}
           alt={match.title}
           className="w-full h-full object-cover"
         />
-        {/* Overlay for title */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
+        {/* Top overlay for title */}
+        <div className="absolute top-0 left-0 right-0 p-2 bg-black/50 text-white text-sm font-semibold text-center">
           {match.title}
+        </div>
+        {/* Bottom overlay for date/time and streams */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/50 flex justify-between items-center text-xs">
+          <span>
+            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
+          </span>
+          <span>
+            {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+          </span>
         </div>
       </AspectRatio>
     </Card>
@@ -80,14 +91,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
           <img
             src={homeBadge}
             alt={home || 'Home Team'}
-            className="absolute left-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
+            className="absolute left-1/4 top-1/2 -translate-y-1/2 w-32 h-32 opacity-15 blur-lg"
           />
         )}
         {awayBadge && (
           <img
             src={awayBadge}
             alt={away || 'Away Team'}
-            className="absolute right-1/4 top-1/2 -translate-y-1/2 w-40 h-40 opacity-20 blur-lg"
+            className="absolute right-1/4 top-1/2 -translate-y-1/2 w-32 h-32 opacity-15 blur-lg"
           />
         )}
 
@@ -109,23 +120,23 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
           {/* Teams Section */}
           {home || away ? (
-            <div className="flex items-center justify-center gap-6">
+            <div className="flex items-center justify-center gap-4">
               {/* Home */}
               <div className="flex flex-col items-center">
                 {homeBadge && (
                   <img
                     src={homeBadge}
                     alt={home || 'Home Team'}
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                    className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-lg"
                   />
                 )}
-                <span className="text-white text-sm font-semibold mt-1 text-center">
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px]">
                   {home || 'Home Team'}
                 </span>
               </div>
 
               {/* VS */}
-              <span className="text-white font-bold text-lg md:text-xl">VS</span>
+              <span className="text-white font-bold text-sm md:text-base">VS</span>
 
               {/* Away */}
               <div className="flex flex-col items-center">
@@ -133,10 +144,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   <img
                     src={awayBadge}
                     alt={away || 'Away Team'}
-                    className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-lg"
+                    className="w-8 h-8 md:w-10 md:h-10 object-contain drop-shadow-lg"
                   />
                 )}
-                <span className="text-white text-sm font-semibold mt-1 text-center">
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px]">
                   {away || 'Away Team'}
                 </span>
               </div>
@@ -147,15 +158,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
 
-          {/* Match Time */}
-          <div className="text-white/90 text-xs mt-2 text-center">
-            {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
-          </div>
-
           {/* Footer */}
-          <div className="flex justify-between items-center mt-4 text-white/90 text-xs">
+          <div className="flex justify-between items-center mt-2 text-white/90 text-xs">
             <div>
-              {match.date ? `${format(match.date, 'EEE, MMM d')} • ${formatTime(match.date)}` : 'Time TBD'}
+              {match.date ? formatDate(match.date) : 'Date TBD'}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex items-center space-x-1">
