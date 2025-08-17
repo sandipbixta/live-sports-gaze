@@ -54,19 +54,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   // Generate thumbnail background with priority: poster > badges > default logo
   const generateThumbnail = () => {
-    // Priority 1: Use poster if available
-    const posterSports = ['cricket', 'wrestling', 'ufc', 'motorsport', 'golf', 'hockey'];
-    const canUsePoster =
-      posterSports.includes((sportId || match.sportId)?.toLowerCase()) &&
-      match.poster &&
-      !match.poster.includes('streamed.su');
-    
-    if (canUsePoster) {
+    // Priority 1: Use API poster if available (as per API docs)
+    if (match.poster) {
       return (
         <img
           src={`https://streamed.pk${match.poster}.webp`}
           alt={match.title}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
       );
     }
