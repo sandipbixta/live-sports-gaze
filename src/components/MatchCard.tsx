@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
+import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 
 interface MatchCardProps {
   match: Match;
@@ -51,8 +52,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Generate thumbnail background
+  // Generate thumbnail background with priority: poster > badges > default logo
   const generateThumbnail = () => {
+    // Priority 1: Use poster if available
     const posterSports = ['cricket', 'wrestling', 'ufc', 'motorsport', 'golf', 'hockey'];
     const canUsePoster =
       posterSports.includes((sportId || match.sportId)?.toLowerCase()) &&
@@ -69,27 +71,27 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Default thumbnail with team badges
-    return (
-      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center relative overflow-hidden">
-        {/* Background team badges */}
-        {homeBadge && (
-          <img
-            src={homeBadge}
-            alt={home || 'Home Team'}
-            className="absolute left-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
-          />
-        )}
-        {awayBadge && (
-          <img
-            src={awayBadge}
-            alt={away || 'Away Team'}
-            className="absolute right-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
-          />
-        )}
-        
-        {/* Teams display */}
-        {home || away ? (
+    // Priority 2: Use team badges if available
+    if (homeBadge || awayBadge) {
+      return (
+        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center relative overflow-hidden">
+          {/* Background team badges */}
+          {homeBadge && (
+            <img
+              src={homeBadge}
+              alt={home || 'Home Team'}
+              className="absolute left-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
+            />
+          )}
+          {awayBadge && (
+            <img
+              src={awayBadge}
+              alt={away || 'Away Team'}
+              className="absolute right-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
+            />
+          )}
+          
+          {/* Teams display */}
           <div className="flex items-center gap-3 z-10 relative">
             {homeBadge && (
               <img
@@ -107,11 +109,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
               />
             )}
           </div>
-        ) : (
-          <div className="flex items-center justify-center text-muted-foreground">
-            <Play className="w-8 h-8" />
-          </div>
-        )}
+        </div>
+      );
+    }
+
+    // Priority 3: Use default TV logo
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+        <img
+          src={defaultTvLogo}
+          alt="Live Stream"
+          className="w-16 h-16 object-contain opacity-60"
+        />
       </div>
     );
   };
