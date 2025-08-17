@@ -14,9 +14,9 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
   if (isLoading) {
     return (
       <div>
-        <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="w-32 h-10 bg-[#242836] animate-pulse rounded-lg flex-shrink-0"></div>
+        <div className="grid grid-cols-5 gap-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-12 bg-[#242836] animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -25,11 +25,11 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
 
   return (
     <div>
-      <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none">
+      <div className="grid grid-cols-5 gap-3">
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
-          className={`px-6 py-2 rounded-lg transition-all whitespace-nowrap ${
+          className={`px-4 py-3 rounded-lg transition-all text-center ${
             selectedSport === 'all'
               ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
               : 'bg-[#242836] text-white hover:bg-[#343a4d]'
@@ -39,11 +39,11 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
           All Sports
         </Button>
         
-        {sports.map((sport) => (
+        {sports.slice(0, 4).map((sport) => (
           <Button
             key={sport.id}
             onClick={() => onSelectSport(sport.id)}
-            className={`px-6 py-2 rounded-lg transition-all whitespace-nowrap ${
+            className={`px-4 py-3 rounded-lg transition-all text-center ${
               selectedSport === sport.id
                 ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
                 : 'bg-[#242836] text-white hover:bg-[#343a4d]'
