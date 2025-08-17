@@ -51,7 +51,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: true,
-    image: "",
+    image: "https://imgur.com/o7RM64a",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
       description: "Watch Fifa club world cup live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
