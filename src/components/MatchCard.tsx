@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
+import { usePopunderAd } from '../hooks/usePopunderAd';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 
 interface MatchCardProps {
@@ -25,6 +26,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   preventNavigation,
   isPriority,
 }) => {
+  const { triggerPopunder } = usePopunderAd();
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -225,7 +227,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer">
+    <div className="group cursor-pointer" onClick={() => hasStream && triggerPopunder()}>
       {/* Thumbnail Section */}
       <div className="relative mb-3">
         <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">

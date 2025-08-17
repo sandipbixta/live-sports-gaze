@@ -4,6 +4,7 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
 import StreamIframe from './StreamIframe';
+import { usePopunderAd } from '../../hooks/usePopunderAd';
 
 
 interface SimpleVideoPlayerProps {
@@ -17,6 +18,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   isLoading = false,
   onRetry
 }) => {
+  const { triggerPopunder } = usePopunderAd();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
@@ -25,9 +27,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const [showExternal, setShowExternal] = useState(false);
+  
   useEffect(() => {
     setError(false);
-  }, [stream]);
+    // Trigger popunder when a new stream loads
+    if (stream?.embedUrl) {
+      triggerPopunder();
+    }
+  }, [stream, triggerPopunder]);
 
   const handleRetry = () => {
     setError(false);
