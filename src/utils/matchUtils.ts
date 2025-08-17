@@ -83,3 +83,16 @@ export const isMatchLive = (match: Match): boolean => {
          matchTime - now < oneHourInMs && 
          now - matchTime < threeHoursInMs;
 };
+
+export const isMatchEnded = (match: Match): boolean => {
+  const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+  const now = new Date().getTime();
+  const threeHoursInMs = 3 * 60 * 60 * 1000;
+  
+  // Match is ended if it's more than 3 hours past match time and not live
+  return now - matchTime > threeHoursInMs && !isMatchLive(match);
+};
+
+export const filterActiveMatches = (matches: Match[]): Match[] => {
+  return matches.filter(match => !isMatchEnded(match));
+};

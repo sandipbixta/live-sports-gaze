@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -41,9 +41,10 @@ const Index = () => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation
+  // Memoize popular matches calculation - exclude ended matches
   const popularMatches = useMemo(() => {
-    return matches.filter(match => 
+    const activeMatches = filterActiveMatches(matches);
+    return activeMatches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')

@@ -4,7 +4,7 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -19,10 +19,10 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Filter out advertisement matches and excluded IDs, then consolidate duplicates properly
-  const cleanMatches = filterCleanMatches(
+  // Filter out advertisement matches, excluded IDs, and ended matches, then consolidate duplicates properly
+  const cleanMatches = filterActiveMatches(filterCleanMatches(
     popularMatches.filter(match => !excludeMatchIds.includes(match.id))
-  );
+  ));
   
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = consolidateMatches(cleanMatches);

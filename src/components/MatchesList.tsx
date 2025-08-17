@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Match } from '../types/sports';
-import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
 import EmptyState from './EmptyState';
@@ -21,8 +21,8 @@ const MatchesList: React.FC<MatchesListProps> = ({
   onMatchesDisplayed,
   trendingSection
 }) => {
-  // Filter out advertisement and invalid matches, then consolidate duplicates
-  const cleanMatches = filterCleanMatches(matches);
+  // Filter out advertisement matches and ended matches, then consolidate duplicates
+  const cleanMatches = filterActiveMatches(filterCleanMatches(matches));
   const filteredMatches = consolidateMatches(cleanMatches);
   
   // Report displayed match IDs to parent component
