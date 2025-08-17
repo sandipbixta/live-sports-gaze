@@ -23,7 +23,7 @@ const StreamSources = ({
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isIOS = typeof navigator !== 'undefined' && ((/iPhone|iPad|iPod/i.test(navigator.userAgent)) || ((navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
-  const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>(() => (isAndroid ? 'android' : isIOS ? 'ios' : 'all'));
+  const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>('all');
 
   // Hide admin sources entirely from the UI
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
