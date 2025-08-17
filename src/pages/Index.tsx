@@ -56,12 +56,12 @@ const Index = () => {
     const filtered = matches.filter(match => {
       const isPopular = isPopularLeague(match.title);
       const notSkyNews = !match.title.toLowerCase().includes('sky sports news') && !match.id.includes('sky-sports-news');
-      const isLive = isMatchLive(match);
       const isSameSpot = match.sportId === selectedSport;
       
-      console.log(`🏈 Match: ${match.title}, sportId: ${match.sportId}, selectedSport: ${selectedSport}, isPopular: ${isPopular}, isLive: ${isLive}, isSameSpot: ${isSameSpot}`);
+      console.log(`🏈 Match: ${match.title}, sportId: ${match.sportId}, selectedSport: ${selectedSport}, isPopular: ${isPopular}, isSameSpot: ${isSameSpot}`);
       
-      return isPopular && notSkyNews && isLive && isSameSpot;
+      // Show both live and upcoming matches in featured section
+      return isPopular && notSkyNews && isSameSpot;
     });
     
     console.log('✅ Filtered popular matches:', filtered.length);
