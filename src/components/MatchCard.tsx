@@ -40,32 +40,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const getPosterUrl = () => {
     if (!match.poster) return null;
     
-    // Try different base URLs and formats
+    // If poster already starts with http, use it as is
+    if (match.poster.startsWith('http')) {
+      return match.poster;
+    }
+    
+    // Try different combinations for relative paths
     const baseUrls = ['https://streamed.pk', 'https://streamed.su'];
     const formats = ['.webp', '.jpg', '.png', ''];
     
-    // Start with the original poster path
-    let posterPath = match.poster;
-    
-    // Clean up the path
-    if (posterPath.startsWith('http')) {
-      // Extract just the path if it's a full URL
-      try {
-        posterPath = new URL(posterPath).pathname;
-      } catch {
-        // If URL parsing fails, use as is
-      }
-    }
-    
-    // Try each combination
     for (const baseUrl of baseUrls) {
       for (const format of formats) {
-        if (posterPath.includes(format) && format !== '') continue; // Skip if format already exists
-        return `${baseUrl}${posterPath}${format}`;
+        // Skip if format already exists in the path
+        if (format && match.poster.includes(format)) continue;
+        
+        const url = `${baseUrl}${match.poster}${format}`;
+        return url; // Return first attempt to test
       }
     }
     
-    return null;
+    return `https://streamed.pk${match.poster}`;
   };
 
   const posterUrl = getPosterUrl();
