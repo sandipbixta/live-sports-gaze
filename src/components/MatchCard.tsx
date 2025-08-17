@@ -141,14 +141,22 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use default TV logo
+    // Priority 3: Use default image for matches without logos/badges or posters
     return (
-      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+      <div className="w-full h-full relative overflow-hidden">
         <img
-          src={defaultTvLogo}
+          src="https://i.imgur.com/47knf0G.jpg"
           alt="Live Stream"
-          className="w-16 h-16 object-contain opacity-60"
+          className="w-full h-full object-cover"
+          loading="lazy"
         />
+        {/* Dark overlay for better text contrast */}
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-white font-semibold text-lg drop-shadow-md">
+            {match.title}
+          </span>
+        </div>
       </div>
     );
   };
