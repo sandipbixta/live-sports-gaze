@@ -36,26 +36,53 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Poster URL if available and not from streamed.su
+  // Poster from API if available and not from streamed.su
   const posterUrl =
     match.poster && !match.poster.includes('streamed.su')
       ? `https://streamed.pk${match.poster}.webp`
-      : FALLBACK_LOGO;
+      : null;
+
+  // Team badges (home/away) from API
+  const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : null;
+  const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : null;
+
+  // Decide main thumbnail: poster > fallback logo
+  const mainThumbnail = posterUrl || FALLBACK_LOGO;
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
       {/* Poster / Thumbnail */}
       <div
         className="relative w-full h-48 md:h-40 overflow-hidden rounded-2xl"
-        style={{
-          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.6)', // black shadow for corners
-        }}
+        style={{ boxShadow: '0 8px 20px rgba(0,0,0,0.6)' }}
       >
         <img
-          src={posterUrl}
+          src={mainThumbnail}
           alt={match.title}
           className="w-full h-full object-cover"
         />
+
+        {/* Overlay team badges if poster exists */}
+        {posterUrl && (homeBadge || awayBadge) && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-2">
+            {homeBadge && (
+              <img
+                src={homeBadge}
+                alt={match.teams?.home?.name}
+                className="w-8 h-8 rounded-full border border-white"
+              />
+            )}
+            {awayBadge && (
+              <img
+                src={awayBadge}
+                alt={match.teams?.away?.name}
+                className="w-8 h-8 rounded-full border border-white"
+              />
+            )}
+          </div>
+        )}
+
+        {/* Live badge */}
         {isLive && (
           <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
             • LIVE
