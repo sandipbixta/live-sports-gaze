@@ -46,67 +46,56 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : null;
   const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : null;
 
-  // Determine the main thumbnail
-  let mainThumbnail = DAMITV_LOGO; // default fallback
-
-  if (posterUrl) {
-    mainThumbnail = posterUrl; // use poster if exists
-  } else if (homeBadge || awayBadge) {
-    // If no poster but team badges exist, we can show the home badge as main
-    mainThumbnail = homeBadge || awayBadge || DAMITV_LOGO;
-  }
+  // Determine thumbnail logic
+  const showSplit = !posterUrl && (homeBadge || awayBadge); // split only if no poster but badges exist
+  const showDamiLogo = !posterUrl && !homeBadge && !awayBadge; // show full DamiTV logo if nothing else
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
-      {/* Poster / Thumbnail */}
       <div
         className="relative w-full h-48 md:h-40 overflow-hidden rounded-2xl"
         style={{ boxShadow: '0 8px 20px rgba(0,0,0,0.6)' }}
       >
-        <img
-          src={mainThumbnail}
-          alt={match.title}
-          className="w-full h-full object-cover"
-        />
+        {/* Poster exists */}
+        {posterUrl && (
+          <img
+            src={posterUrl}
+            alt={match.title}
+            className="w-full h-full object-cover"
+          />
+        )}
 
-        {/* Overlay team badges if poster exists */}
-        {posterUrl && (homeBadge || awayBadge) && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-2">
-            {homeBadge && (
-              <img
-                src={homeBadge}
-                alt={match.teams?.home?.name}
-                className="w-8 h-8 rounded-full border border-white"
-              />
-            )}
-            {awayBadge && (
-              <img
-                src={awayBadge}
-                alt={match.teams?.away?.name}
-                className="w-8 h-8 rounded-full border border-white"
-              />
-            )}
+        {/* Split half for badges */}
+        {showSplit && (
+          <div className="flex w-full h-full">
+            <div className="w-1/2 h-full flex items-center justify-center bg-gray-800">
+              {homeBadge && (
+                <img
+                  src={homeBadge}
+                  alt={match.teams?.home?.name || 'Home'}
+                  className="w-16 h-16 object-contain"
+                />
+              )}
+            </div>
+            <div className="w-1/2 h-full flex items-center justify-center bg-gray-800">
+              {awayBadge && (
+                <img
+                  src={awayBadge}
+                  alt={match.teams?.away?.name || 'Away'}
+                  className="w-16 h-16 object-contain"
+                />
+              )}
+            </div>
           </div>
         )}
 
-        {/* If no poster but badges exist, show them on top-left */}
-        {!posterUrl && (homeBadge || awayBadge) && (
-          <div className="absolute top-2 left-2 flex items-center gap-2">
-            {homeBadge && (
-              <img
-                src={homeBadge}
-                alt={match.teams?.home?.name}
-                className="w-8 h-8 rounded-full border border-white"
-              />
-            )}
-            {awayBadge && (
-              <img
-                src={awayBadge}
-                alt={match.teams?.away?.name}
-                className="w-8 h-8 rounded-full border border-white"
-              />
-            )}
-          </div>
+        {/* Full DamiTV logo fallback */}
+        {showDamiLogo && (
+          <img
+            src={DAMITV_LOGO}
+            alt="DamiTV"
+            className="w-full h-full object-cover"
+          />
         )}
 
         {/* Live badge */}
@@ -119,17 +108,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
       {/* Content below thumbnail */}
       <div className="mt-2 flex flex-col gap-1">
-        {/* Match Title */}
         <h3 className="font-semibold text-sm md:text-base line-clamp-2 text-white">
           {match.title || `${match.teams?.home?.name || ''} vs ${match.teams?.away?.name || ''}`}
         </h3>
-
-        {/* Date and Time */}
         <div className="text-gray-400 text-xs md:text-sm">
           {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
         </div>
-
-        {/* Streams Info */}
         <div className="flex items-center justify-between mt-1">
           <div className="flex items-center gap-1 text-gray-400 text-xs md:text-sm">
             <Play className="w-3 h-3" />
