@@ -232,13 +232,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {generateThumbnail()}
           
           {/* Duration/Status badge */}
-          <div className="absolute bottom-2 right-2">
+          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
             {isLive ? (
-              <Badge className="bg-destructive text-destructive-foreground px-2 py-1 text-xs font-medium animate-pulse">
+              <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
                 LIVE
               </Badge>
             ) : (
-              <Badge className="bg-background/80 text-foreground px-2 py-1 text-xs font-medium backdrop-blur-sm">
+              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm">
                 {match.date ? formatTime(match.date) : 'Scheduled'}
               </Badge>
             )}
@@ -246,10 +246,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
           {/* Stream count overlay */}
           {hasStream && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-background/80 text-foreground px-2 py-1 text-xs font-medium backdrop-blur-sm flex items-center gap-1">
-                <Play className="w-3 h-3" />
-                {match.sources.length}
+            <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
+              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm flex items-center gap-1">
+                <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <span className="hidden xs:inline">{match.sources.length}</span>
               </Badge>
             </div>
           )}
