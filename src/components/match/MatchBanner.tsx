@@ -29,15 +29,7 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
 
   if (isMobile) {
     return (
-      <div 
-        className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4 relative"
-        style={{
-          backgroundImage: `linear-gradient(rgba(21, 25, 34, 0.8), rgba(36, 40, 54, 0.8)), url('/lovable-uploads/eea0415f-461e-4279-a1d2-06165804c368.png')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
+      <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4">
         <div className="container mx-auto">
           <div className="flex flex-col items-center">
             {hasTeams ? (
@@ -96,15 +88,7 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
 
   // Desktop layout
   return (
-    <div 
-      className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4 relative"
-      style={{
-        backgroundImage: `linear-gradient(rgba(21, 25, 34, 0.8), rgba(36, 40, 54, 0.8)), url('/lovable-uploads/eea0415f-461e-4279-a1d2-06165804c368.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
+    <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-16 lg:space-x-20">
           {hasTeams ? (
