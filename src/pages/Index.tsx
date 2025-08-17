@@ -41,15 +41,20 @@ const Index = () => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation - exclude ended matches
+  // Memoize popular matches calculation - exclude ended matches and filter by selected sport
   const popularMatches = useMemo(() => {
+    // If "All Sports" is selected, don't show popular matches section to avoid duplication
+    if (selectedSport === 'all') {
+      return [];
+    }
+    
     const activeMatches = filterActiveMatches(matches);
     return activeMatches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
     );
-  }, [matches]);
+  }, [matches, selectedSport]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
