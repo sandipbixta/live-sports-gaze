@@ -66,42 +66,75 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 2: Use team badges if available
+    // Priority 2: Use team badges with background images if available
     if (homeBadge || awayBadge) {
+      // Background images array
+      const backgroundImages = [
+        "https://i.imgur.com/1xsz109.jpg",
+        "https://i.imgur.com/sVc77ht.jpg", 
+        "https://i.imgur.com/1Tw0JRU.jpg",
+        "https://i.imgur.com/MtYQroI.jpg",
+        "https://i.imgur.com/EsEKzFs.jpg",
+        "https://i.imgur.com/XT3MN8i.jpg"
+      ];
+      
+      // Select background based on match id for consistency
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % backgroundImages.length;
+      const selectedBg = backgroundImages[bgIndex];
+
       return (
-        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center relative overflow-hidden">
-          {/* Background team badges */}
+        <div className="w-full h-full relative overflow-hidden">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+            style={{ backgroundImage: `url(${selectedBg})` }}
+          />
+          
+          {/* Dark overlay for better contrast */}
+          <div className="absolute inset-0 bg-black/40" />
+          
+          {/* Background team badges with blur */}
           {homeBadge && (
             <img
               src={homeBadge}
               alt={home || 'Home Team'}
-              className="absolute left-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
+              className="absolute left-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
             />
           )}
           {awayBadge && (
             <img
               src={awayBadge}
               alt={away || 'Away Team'}
-              className="absolute right-1/4 top-1/2 -translate-y-1/2 w-20 h-20 opacity-10 blur-sm"
+              className="absolute right-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
             />
           )}
           
-          {/* Teams display */}
-          <div className="flex items-center gap-3 z-10 relative">
+          {/* Teams display with enhanced badges */}
+          <div className="flex items-center gap-4 z-10 relative h-full justify-center">
             {homeBadge && (
-              <img
-                src={homeBadge}
-                alt={home || 'Home Team'}
-                className="w-8 h-8 object-contain"
-              />
+              <div className="flex flex-col items-center">
+                <img
+                  src={homeBadge}
+                  alt={home || 'Home Team'}
+                  className="w-12 h-12 object-contain drop-shadow-2xl shadow-black/50 filter brightness-110"
+                />
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-lg">
+                  {home || 'Home Team'}
+                </span>
+              </div>
             )}
-            <span className="text-muted-foreground text-sm font-medium">VS</span>
+            <span className="text-white font-bold text-lg drop-shadow-lg">VS</span>
             {awayBadge && (
-              <img
-                src={awayBadge}
-                alt={away || 'Away Team'}
-                className="w-8 h-8 object-contain"
-              />
+              <div className="flex flex-col items-center">
+                <img
+                  src={awayBadge}
+                  alt={away || 'Away Team'}
+                  className="w-12 h-12 object-contain drop-shadow-2xl shadow-black/50 filter brightness-110"
+                />
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-lg">
+                  {away || 'Away Team'}
+                </span>
+              </div>
             )}
           </div>
         </div>
