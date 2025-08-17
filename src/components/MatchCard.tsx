@@ -62,6 +62,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
     ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
     : null;
 
+  // Debug logging to check badge data
+  if (!posterUrl && (!homeBadge && !awayBadge)) {
+    console.log('🔍 Match without poster/badges:', {
+      id: match.id,
+      title: match.title,
+      teams: match.teams,
+      homeBadge: match.teams?.home?.badge,
+      awayBadge: match.teams?.away?.badge,
+      poster: match.poster
+    });
+  }
+
   // Logic: poster → badge with overlay → damitv logo
   const hasPoster = !!posterUrl;
   const hasBadge = !posterUrl && (homeBadge || awayBadge);
