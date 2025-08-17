@@ -19,11 +19,11 @@ const PopularGames: React.FC<PopularGamesProps> = ({
 }) => {
   const isMobile = useIsMobile();
   
-  // Filter out advertisement matches, excluded IDs, and non-live matches, then consolidate duplicates properly
+  // Filter out advertisement matches and excluded IDs, then consolidate duplicates properly
   const cleanMatches = filterCleanMatches(
     popularMatches.filter(match => 
-      !excludeMatchIds.includes(match.id) && 
-      isMatchLive(match) // Only show live matches
+      !excludeMatchIds.includes(match.id)
+      // Show both live and upcoming matches for featured section
     )
   );
   
