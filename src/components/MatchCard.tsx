@@ -46,7 +46,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     <div className={`flex flex-col ${className} cursor-pointer group`}>
       {/* Poster / Thumbnail */}
       <div
-        className="relative w-full h-48 md:h-40 overflow-hidden rounded-lg"
+        className="relative w-full h-48 md:h-40 overflow-hidden rounded-2xl"
         style={{
           boxShadow: '0 8px 20px rgba(0, 0, 0, 0.6)', // black shadow for corners
         }}
