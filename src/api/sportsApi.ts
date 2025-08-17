@@ -125,36 +125,54 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     }))
     // Filter matches to only include ones that actually belong to the requested sport
     .filter(match => {
-      const matchCategory = match.category || match.sportId;
+      const matchCategory = (match.category || match.sportId || '').toLowerCase();
+      const requestedSport = sportId.toLowerCase();
       
-      // Create sport mapping to handle API inconsistencies
+      // If requesting 'all', include everything
+      if (requestedSport === 'all') {
+        return true;
+      }
+      
+      // Exact match first
+      if (matchCategory === requestedSport) {
+        return true;
+      }
+      
+      // Create comprehensive sport mapping to handle API inconsistencies
       const sportMapping: { [key: string]: string[] } = {
         'football': ['football', 'soccer'],
-        'basketball': ['basketball'],
+        'basketball': ['basketball', 'basket'],
         'tennis': ['tennis'],
-        'hockey': ['hockey'],
+        'hockey': ['hockey', 'ice-hockey'],
         'baseball': ['baseball'],
-        'american-football': ['american-football', 'nfl'],
-        'motor-sports': ['motor-sports', 'motorsports', 'racing'],
-        'fight': ['fight', 'boxing', 'mma', 'ufc'],
+        'american-football': ['american-football', 'nfl', 'american football'],
+        'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
+        'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
         'rugby': ['rugby'],
         'golf': ['golf'],
         'cricket': ['cricket'],
-        'darts': ['darts'],
-        'billiards': ['billiards', 'pool', 'snooker'],
-        'afl': ['afl'],
+        'darts': ['darts', 'dart'],
+        'billiards': ['billiards', 'pool', 'snooker', 'billiard'],
+        'afl': ['afl', 'australian football'],
         'other': ['other']
       };
       
-      // If requesting specific sport, filter by category
-      if (sportId !== 'all') {
-        const allowedCategories = sportMapping[sportId] || [sportId];
-        return allowedCategories.some(cat => 
-          matchCategory.toLowerCase().includes(cat.toLowerCase())
-        );
+      const allowedCategories = sportMapping[requestedSport] || [requestedSport];
+      
+      // Check if the match category contains any of the allowed terms
+      const isMatch = allowedCategories.some(cat => {
+        const categoryLower = cat.toLowerCase();
+        return matchCategory.includes(categoryLower) || categoryLower.includes(matchCategory);
+      });
+      
+      // Debug logging for problematic sports
+      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'darts', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
+        if (!isMatch) {
+          console.log(`🚫 Filtered out: "${match.title}" (category: "${matchCategory}") for sport: "${requestedSport}"`);
+        }
       }
       
-      return true; // Include all matches for 'all' sport selection
+      return isMatch;
     });
     
     setCachedData(cacheKey, validMatches);
@@ -191,34 +209,44 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
             }))
             // Apply same filtering logic for mobile retry
             .filter(match => {
-              const matchCategory = match.category || match.sportId;
+              const matchCategory = (match.category || match.sportId || '').toLowerCase();
+              const requestedSport = sportId.toLowerCase();
+              
+              // If requesting 'all', include everything
+              if (requestedSport === 'all') {
+                return true;
+              }
+              
+              // Exact match first
+              if (matchCategory === requestedSport) {
+                return true;
+              }
               
               const sportMapping: { [key: string]: string[] } = {
                 'football': ['football', 'soccer'],
-                'basketball': ['basketball'],
+                'basketball': ['basketball', 'basket'],
                 'tennis': ['tennis'],
-                'hockey': ['hockey'],
+                'hockey': ['hockey', 'ice-hockey'],
                 'baseball': ['baseball'],
-                'american-football': ['american-football', 'nfl'],
-                'motor-sports': ['motor-sports', 'motorsports', 'racing'],
-                'fight': ['fight', 'boxing', 'mma', 'ufc'],
+                'american-football': ['american-football', 'nfl', 'american football'],
+                'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
+                'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
                 'rugby': ['rugby'],
                 'golf': ['golf'],
                 'cricket': ['cricket'],
-                'darts': ['darts'],
-                'billiards': ['billiards', 'pool', 'snooker'],
-                'afl': ['afl'],
+                'darts': ['darts', 'dart'],
+                'billiards': ['billiards', 'pool', 'snooker', 'billiard'],
+                'afl': ['afl', 'australian football'],
                 'other': ['other']
               };
               
-              if (sportId !== 'all') {
-                const allowedCategories = sportMapping[sportId] || [sportId];
-                return allowedCategories.some(cat => 
-                  matchCategory.toLowerCase().includes(cat.toLowerCase())
-                );
-              }
+              const allowedCategories = sportMapping[requestedSport] || [requestedSport];
               
-              return true;
+              // Check if the match category contains any of the allowed terms
+              return allowedCategories.some(cat => {
+                const categoryLower = cat.toLowerCase();
+                return matchCategory.includes(categoryLower) || categoryLower.includes(matchCategory);
+              });
             });
             setCachedData(cacheKey, validMatches);
             console.log(`✅ Mobile retry successful: ${validMatches.length} matches for ${sportId} (filtered from ${retryData.length} total)`);
