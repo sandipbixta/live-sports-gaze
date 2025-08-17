@@ -14,7 +14,7 @@ interface MatchCardProps {
   preventNavigation?: boolean;
 }
 
-const FALLBACK_LOGO = 'https://i.imgur.com/WUguNZl.png';
+const DAMITV_LOGO = 'https://i.imgur.com/WUguNZl.png';
 
 const MatchCard: React.FC<MatchCardProps> = ({
   match,
@@ -46,8 +46,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : null;
   const awayBadge = match.teams?.away?.badge ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp` : null;
 
-  // Decide main thumbnail: poster > fallback logo
-  const mainThumbnail = posterUrl || FALLBACK_LOGO;
+  // Determine the main thumbnail
+  let mainThumbnail = DAMITV_LOGO; // default fallback
+
+  if (posterUrl) {
+    mainThumbnail = posterUrl; // use poster if exists
+  } else if (homeBadge || awayBadge) {
+    // If no poster but team badges exist, we can show the home badge as main
+    mainThumbnail = homeBadge || awayBadge || DAMITV_LOGO;
+  }
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
@@ -82,9 +89,29 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         )}
 
+        {/* If no poster but badges exist, show them on top-left */}
+        {!posterUrl && (homeBadge || awayBadge) && (
+          <div className="absolute top-2 left-2 flex items-center gap-2">
+            {homeBadge && (
+              <img
+                src={homeBadge}
+                alt={match.teams?.home?.name}
+                className="w-8 h-8 rounded-full border border-white"
+              />
+            )}
+            {awayBadge && (
+              <img
+                src={awayBadge}
+                alt={match.teams?.away?.name}
+                className="w-8 h-8 rounded-full border border-white"
+              />
+            )}
+          </div>
+        )}
+
         {/* Live badge */}
         {isLive && (
-          <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
+          <Badge className="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-0.5 font-medium animate-pulse">
             • LIVE
           </Badge>
         )}
