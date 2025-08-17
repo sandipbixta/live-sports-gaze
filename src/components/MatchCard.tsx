@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Play, ChevronRight } from 'lucide-react';
+import { Play, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
@@ -13,6 +13,8 @@ interface MatchCardProps {
   onClick?: () => void;
   preventNavigation?: boolean;
 }
+
+const FALLBACK_LOGO = 'https://i.imgur.com/WUguNZl.png';
 
 const MatchCard: React.FC<MatchCardProps> = ({
   match,
@@ -38,12 +40,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const posterUrl =
     match.poster && !match.poster.includes('streamed.su')
       ? `https://streamed.pk${match.poster}.webp`
-      : null;
+      : FALLBACK_LOGO;
 
-  const cardContent = posterUrl ? (
+  const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
       {/* Poster / Thumbnail */}
-      <div className="relative w-full h-48 md:h-40 overflow-hidden rounded-lg shadow-lg">
+      <div
+        className="relative w-full h-48 md:h-40 overflow-hidden rounded-lg"
+        style={{
+          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.6)', // black shadow for corners
+        }}
+      >
         <img
           src={posterUrl}
           alt={match.title}
@@ -60,7 +67,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
       <div className="mt-2 flex flex-col gap-1">
         {/* Match Title */}
         <h3 className="font-semibold text-sm md:text-base line-clamp-2 text-white">
-          {match.title}
+          {match.title || `${match.teams?.home?.name || ''} vs ${match.teams?.away?.name || ''}`}
         </h3>
 
         {/* Date and Time */}
@@ -79,29 +86,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasStream && (
             <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
           )}
-        </div>
-      </div>
-    </div>
-  ) : (
-    // Fallback Badge layout (unchanged)
-    <div className={`flex flex-col ${className} cursor-pointer group`}>
-      <div className="bg-gray-900 p-3 rounded-lg flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          {match.teams?.home?.name && <span className="font-semibold text-white">{match.teams.home.name}</span>}
-          <span className="font-bold text-white">VS</span>
-          {match.teams?.away?.name && <span className="font-semibold text-white">{match.teams.away.name}</span>}
-        </div>
-        <div className="text-gray-400 text-xs">
-          {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
-        </div>
-        <div className="flex items-center justify-between text-gray-400 text-xs mt-1">
-          <div className="flex items-center gap-1">
-            <Play className="w-3 h-3" />
-            <span>
-              {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-            </span>
-          </div>
-          {hasStream && <ChevronRight className="w-4 h-4 text-gray-400" />}
         </div>
       </div>
     </div>
