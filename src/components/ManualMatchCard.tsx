@@ -34,10 +34,33 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
     timeZone: "Australia/Sydney"
   });
 
-  // Check if we have a valid image URL
-  const hasValidImage = match.image && 
-    match.image !== "https://imgur.com/undefined" && 
-    match.image.trim() !== "";
+  // Enhanced poster logic similar to MatchCard
+  const getPosterUrl = () => {
+    if (!match.image) return null;
+    
+    // If it's already a full URL, use it directly
+    if (match.image.startsWith('http')) {
+      return match.image;
+    }
+    
+    // If it's a relative path, try different base URLs
+    const basePaths = [
+      'https://streamed.pk',
+      'https://streamed.su'
+    ];
+    
+    for (const basePath of basePaths) {
+      const fullUrl = `${basePath}${match.image}`;
+      return fullUrl;
+    }
+    
+    return match.image;
+  };
+
+  const posterUrl = getPosterUrl();
+  const hasValidImage = posterUrl && 
+    posterUrl !== "https://imgur.com/undefined" && 
+    posterUrl.trim() !== "";
 
   return (
     <div
@@ -60,7 +83,7 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
         {/* Background Image or Fallback */}
         {hasValidImage ? (
           <img
-            src={match.image}
+            src={posterUrl}
             alt={match.title || `${match.teams.home} vs ${match.teams.away}`}
             className="w-full h-full object-cover"
             draggable={false}
