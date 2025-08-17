@@ -36,11 +36,39 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Poster from API if available and not from streamed.su
-  const posterUrl =
-    match.poster && !match.poster.includes('streamed.su')
-      ? `https://streamed.pk${match.poster}.webp`
-      : null;
+  // Enhanced poster fetching logic - try multiple sources and formats
+  const getPosterUrl = () => {
+    if (!match.poster) return null;
+    
+    // Try different base URLs and formats
+    const baseUrls = ['https://streamed.pk', 'https://streamed.su'];
+    const formats = ['.webp', '.jpg', '.png', ''];
+    
+    // Start with the original poster path
+    let posterPath = match.poster;
+    
+    // Clean up the path
+    if (posterPath.startsWith('http')) {
+      // Extract just the path if it's a full URL
+      try {
+        posterPath = new URL(posterPath).pathname;
+      } catch {
+        // If URL parsing fails, use as is
+      }
+    }
+    
+    // Try each combination
+    for (const baseUrl of baseUrls) {
+      for (const format of formats) {
+        if (posterPath.includes(format) && format !== '') continue; // Skip if format already exists
+        return `${baseUrl}${posterPath}${format}`;
+      }
+    }
+    
+    return null;
+  };
+
+  const posterUrl = getPosterUrl();
 
   // Team badges (home/away) from API
   const homeBadge = match.teams?.home?.badge ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp` : null;
