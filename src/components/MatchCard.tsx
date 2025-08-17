@@ -62,12 +62,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
     ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
     : null;
 
-  // Decide fallback background (based on match.id for consistency)
-  const fallbackBg =
-    fallbackImages[Math.abs(match.id?.toString().charCodeAt(0) || 0) % fallbackImages.length];
-
-  const showBadgesOnFallback = !posterUrl && (homeBadge || awayBadge);
-  const showDamiLogo = !posterUrl && !homeBadge && !awayBadge;
+  // Logic: poster → badge with overlay → damitv logo
+  const hasPoster = !!posterUrl;
+  const hasBadge = !posterUrl && (homeBadge || awayBadge);
+  const useDamiLogo = !posterUrl && !homeBadge && !awayBadge;
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
@@ -75,20 +73,20 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="relative w-full aspect-video overflow-hidden rounded-xl bg-gray-900"
         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
       >
-        {/* Poster exists */}
-        {posterUrl && (
+        {/* 1. If poster exists → show poster */}
+        {hasPoster && (
           <img src={posterUrl} alt={match.title} className="w-full h-full object-cover" />
         )}
 
-        {/* Background fallback with badges */}
-        {showBadgesOnFallback && (
+        {/* 2. If no poster but badge exists → show badge with dark overlay */}
+        {hasBadge && (
           <>
-            {/* Fallback background */}
-            <img src={fallbackBg} alt="Fallback" className="w-full h-full object-cover" />
-
-            {/* Overlay badges with black-lite shadow */}
-            <div className="absolute inset-0 flex">
-              <div className="w-1/2 h-full flex items-center justify-center bg-black/40">
+            {/* Dark background with overlay */}
+            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900"></div>
+            
+            {/* Team badges with dark overlay */}
+            <div className="absolute inset-0 flex bg-black/40">
+              <div className="w-1/2 h-full flex items-center justify-center">
                 {homeBadge && (
                   <img
                     src={homeBadge}
@@ -97,7 +95,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   />
                 )}
               </div>
-              <div className="w-1/2 h-full flex items-center justify-center bg-black/40">
+              <div className="w-1/2 h-full flex items-center justify-center">
                 {awayBadge && (
                   <img
                     src={awayBadge}
@@ -110,8 +108,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </>
         )}
 
-        {/* Full DamiTV logo fallback */}
-        {showDamiLogo && (
+        {/* 3. If neither poster nor badge → fallback to DamiTV logo */}
+        {useDamiLogo && (
           <img src={DAMITV_LOGO} alt="DamiTV" className="w-full h-full object-cover" />
         )}
 
