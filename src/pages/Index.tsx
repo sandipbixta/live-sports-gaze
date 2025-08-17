@@ -44,18 +44,28 @@ const Index = () => {
 
   // Memoize popular matches calculation - filter by selected sport and only show live matches
   const popularMatches = useMemo(() => {
+    console.log('🔍 Calculating popular matches for sport:', selectedSport);
+    console.log('📊 Total matches available:', matches.length);
+    
     // If no sport is selected or "all" is selected, return empty array since trending is handled elsewhere
     if (!selectedSport || selectedSport === 'all') {
+      console.log('⚪ No sport selected or "all" selected, returning empty popular matches');
       return [];
     }
     
-    return matches.filter(match => 
-      isPopularLeague(match.title) && 
-      !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news') &&
-      isMatchLive(match) && // Only show live matches
-      match.sportId === selectedSport // Filter by selected sport
-    );
+    const filtered = matches.filter(match => {
+      const isPopular = isPopularLeague(match.title);
+      const notSkyNews = !match.title.toLowerCase().includes('sky sports news') && !match.id.includes('sky-sports-news');
+      const isLive = isMatchLive(match);
+      const isSameSpot = match.sportId === selectedSport;
+      
+      console.log(`🏈 Match: ${match.title}, sportId: ${match.sportId}, selectedSport: ${selectedSport}, isPopular: ${isPopular}, isLive: ${isLive}, isSameSpot: ${isSameSpot}`);
+      
+      return isPopular && notSkyNews && isLive && isSameSpot;
+    });
+    
+    console.log('✅ Filtered popular matches:', filtered.length);
+    return filtered;
   }, [matches, selectedSport]);
 
   // Memoize filtered matches
