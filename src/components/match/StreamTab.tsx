@@ -153,10 +153,11 @@ const StreamTab = ({
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {sortedPopularMatches.slice(0, 6).map((m, index) => (
-               <MatchCard
+              <MatchCard
                 key={`streamtab-trending-${m.id}-${index}`}
                 match={m}
                 sportId={sportId}
+                isPriority
               />
             ))}
           </div>

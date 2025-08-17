@@ -1,30 +1,12 @@
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from './use-mobile';
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef } from 'react';
 
 export const useMatchNavigation = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const isMobile = useIsMobile();
   const lastNavigateTime = useRef(0);
-  const navigationHistory = useRef<string[]>([]);
-
-  // Track navigation history
-  useEffect(() => {
-    const currentPath = location.pathname + location.search;
-    const history = navigationHistory.current;
-    
-    // Only add to history if it's different from the last entry
-    if (history.length === 0 || history[history.length - 1] !== currentPath) {
-      history.push(currentPath);
-      
-      // Keep only the last 10 entries to prevent memory issues
-      if (history.length > 10) {
-        history.shift();
-      }
-    }
-  }, [location]);
 
   const handleGoBack = useCallback((e?: React.MouseEvent | React.TouchEvent) => {
     e?.preventDefault();
@@ -38,30 +20,11 @@ export const useMatchNavigation = () => {
     }
     lastNavigateTime.current = now;
     
-    console.log('Back button clicked, checking history...');
+    console.log('Back button clicked, navigating...');
     
     try {
-      const history = navigationHistory.current;
-      
-      // If we have at least 2 entries (current + previous), go back
-      if (history.length >= 2) {
-        // Remove current page
-        history.pop();
-        const previousPage = history[history.length - 1];
-        
-        console.log('Navigating back to:', previousPage);
-        navigate(previousPage, { replace: true });
-      } else {
-        // Try browser back button first
-        if (window.history.length > 1) {
-          console.log('Using browser back navigation');
-          navigate(-1);
-        } else {
-          // Fallback to home if no history
-          console.log('No history available, going to home');
-          navigate('/', { replace: true });
-        }
-      }
+      // Simple and reliable navigation
+      navigate(-1);
     } catch (error) {
       console.error('Navigation failed, falling back to home:', error);
       navigate('/', { replace: true });

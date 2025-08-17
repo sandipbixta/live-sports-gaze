@@ -50,12 +50,7 @@ const ChannelPlayer = () => {
   }, [country, channelId, navigate]);
 
   const handleGoBack = () => {
-    // Try to go back to previous page, fallback to channels if no history
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/channels');
-    }
+    navigate('/channels');
   };
 
   const handleRetry = () => {
