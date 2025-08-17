@@ -53,8 +53,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
       <div
-        className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl"
-        style={{ boxShadow: '0 8px 20px rgba(0,0,0,0.6)' }}
+        className="relative w-full aspect-video overflow-hidden rounded-xl bg-gray-900"
+        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
       >
         {/* Poster exists */}
         {posterUrl && (
