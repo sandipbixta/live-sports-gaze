@@ -18,6 +18,7 @@ const DAMITV_LOGO = 'https://i.imgur.com/WUguNZl.png';
 
 // Fallback backgrounds (rotate randomly or assign based on match ID for consistency)
 const fallbackImages = [
+  '/lovable-uploads/eea0415f-461e-4279-a1d2-06165804c368.png',
   'https://i.imgur.com/1xsz109.jpg',
   'https://i.imgur.com/sVc77ht.jpg',
   'https://i.imgur.com/1Tw0JRU.jpg',
