@@ -49,7 +49,7 @@ const ManualMatchPlayer = () => {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Match Not Found</h1>
           <p className="text-gray-400 mb-6">The requested match could not be found.</p>
-          <Button onClick={() => navigate('/')} className="bg-[#ff5a36] hover:bg-[#e64d2e]">
+          <Button onClick={() => navigate(-1)} className="bg-[#ff5a36] hover:bg-[#e64d2e]">
             Go Back Home
           </Button>
         </div>
@@ -159,7 +159,7 @@ const ManualMatchPlayer = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate('/')}
+              onClick={() => navigate(-1)}
               className="text-gray-400 hover:text-white hover:bg-[#343a4d]"
             >
               <ArrowLeft size={20} />
