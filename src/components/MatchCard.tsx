@@ -231,18 +231,21 @@ const MatchCard: React.FC<MatchCardProps> = ({
         <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">
           {generateThumbnail()}
           
-          {/* Duration/Status badge */}
-          <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
-            {isLive ? (
+          {/* Time badge - top right */}
+          <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
+            <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm">
+              {match.date ? formatTime(match.date) : 'TBD'}
+            </Badge>
+          </div>
+
+          {/* Live status badge - bottom right */}
+          {isLive && (
+            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
               <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
                 LIVE
               </Badge>
-            ) : (
-              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm">
-                {match.date ? formatTime(match.date) : 'Scheduled'}
-              </Badge>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Stream count overlay */}
           {hasStream && (
