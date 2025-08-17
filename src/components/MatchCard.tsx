@@ -66,6 +66,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasPoster = !!posterUrl;
   const hasBadge = !posterUrl && (homeBadge || awayBadge);
   const useDamiLogo = !posterUrl && !homeBadge && !awayBadge;
+  
+  // Get consistent fallback background for badge cards
+  const fallbackBg = fallbackImages[Math.abs(match.id?.toString().charCodeAt(0) || 0) % fallbackImages.length];
 
   const cardContent = (
     <div className={`flex flex-col ${className} cursor-pointer group`}>
@@ -81,10 +84,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {/* 2. If no poster but badge exists → show badge with dark overlay */}
         {hasBadge && (
           <>
-            {/* Dark background with overlay */}
-            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900"></div>
+            {/* Fallback background image */}
+            <img src={fallbackBg} alt="Background" className="w-full h-full object-cover" />
             
-            {/* Team badges with dark overlay */}
+            {/* Team badges with shadow overlay */}
             <div className="absolute inset-0 flex bg-black/40">
               <div className="w-1/2 h-full flex items-center justify-center">
                 {homeBadge && (
