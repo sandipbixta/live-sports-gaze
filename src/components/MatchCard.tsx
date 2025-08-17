@@ -150,13 +150,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        {/* Dark overlay for better text contrast */}
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-white font-semibold text-lg drop-shadow-md">
-            {match.title}
-          </span>
-        </div>
+        {/* Dark overlay for better contrast */}
+        <div className="absolute inset-0 bg-black/20" />
       </div>
     );
   };
