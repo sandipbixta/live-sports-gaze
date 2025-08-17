@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Play, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -42,10 +41,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
       : null;
 
   const cardContent = posterUrl ? (
-    // Poster (YouTube-style) layout - dark theme
-    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-gray-900 text-white rounded-md">
+    <div className={`flex flex-col ${className} cursor-pointer group`}>
       {/* Poster / Thumbnail */}
-      <div className="w-full h-48 md:h-40 relative">
+      <div className="relative w-full h-48 md:h-40 overflow-hidden rounded-lg shadow-lg">
         <img
           src={posterUrl}
           alt={match.title}
@@ -59,9 +57,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
       </div>
 
       {/* Content below thumbnail */}
-      <div className="p-2 md:p-3 flex flex-col gap-1">
+      <div className="mt-2 flex flex-col gap-1">
         {/* Match Title */}
-        <h3 className="font-semibold text-sm md:text-base line-clamp-2">{match.title}</h3>
+        <h3 className="font-semibold text-sm md:text-base line-clamp-2 text-white">
+          {match.title}
+        </h3>
 
         {/* Date and Time */}
         <div className="text-gray-400 text-xs md:text-sm">
@@ -70,58 +70,56 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
         {/* Streams Info */}
         <div className="flex items-center justify-between mt-1">
-          <div className="flex items-center gap-1 text-gray-500 text-xs md:text-sm">
+          <div className="flex items-center gap-1 text-gray-400 text-xs md:text-sm">
             <Play className="w-3 h-3" />
             <span>
               {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
             </span>
           </div>
           {hasStream && (
-            <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
+            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
           )}
         </div>
       </div>
-    </Card>
+    </div>
   ) : (
-    // Fallback Badge layout (dark theme)
-    <Card className="overflow-hidden h-full transition-all duration-300 group hover:scale-[1.02] hover:shadow-md bg-gray-900 text-white rounded-md p-3">
-      <div className="flex items-center justify-between">
-        {match.teams?.home?.name && <span className="font-semibold">{match.teams.home.name}</span>}
-        <span className="font-bold">VS</span>
-        {match.teams?.away?.name && <span className="font-semibold">{match.teams.away.name}</span>}
-      </div>
-      <div className="text-gray-400 text-xs mt-1">
-        {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
-      </div>
-      <div className="flex items-center justify-between mt-1 text-gray-500 text-xs">
-        <div className="flex items-center gap-1">
-          <Play className="w-3 h-3" />
-          <span>
-            {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
-          </span>
+    // Fallback Badge layout (unchanged)
+    <div className={`flex flex-col ${className} cursor-pointer group`}>
+      <div className="bg-gray-900 p-3 rounded-lg flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          {match.teams?.home?.name && <span className="font-semibold text-white">{match.teams.home.name}</span>}
+          <span className="font-bold text-white">VS</span>
+          {match.teams?.away?.name && <span className="font-semibold text-white">{match.teams.away.name}</span>}
         </div>
-        {hasStream && <ChevronRight className="w-4 h-4 text-gray-500" />}
+        <div className="text-gray-400 text-xs">
+          {match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD'}
+        </div>
+        <div className="flex items-center justify-between text-gray-400 text-xs mt-1">
+          <div className="flex items-center gap-1">
+            <Play className="w-3 h-3" />
+            <span>
+              {hasStream ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}` : 'No streams'}
+            </span>
+          </div>
+          {hasStream && <ChevronRight className="w-4 h-4 text-gray-400" />}
+        </div>
       </div>
-    </Card>
+    </div>
   );
 
   if (preventNavigation || onClick) {
-    return (
-      <div className={`cursor-pointer ${className}`} onClick={onClick}>
-        {cardContent}
-      </div>
-    );
+    return <div onClick={onClick}>{cardContent}</div>;
   }
 
   if (hasStream) {
     return (
-      <Link to={`/match/${sportId || match.sportId}/${match.id}`} className={`block ${className}`}>
+      <Link to={`/match/${sportId || match.sportId}/${match.id}`}>
         {cardContent}
       </Link>
     );
   }
 
-  return <div className={className}>{cardContent}</div>;
+  return <>{cardContent}</>;
 };
 
 export default MatchCard;
