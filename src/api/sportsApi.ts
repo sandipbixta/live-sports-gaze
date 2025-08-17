@@ -111,7 +111,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       throw new Error('Invalid matches data format');
     }
     
-    // Transform API matches to our format
+    // Transform API matches to our format and filter by actual sport category
     const validMatches = matches.filter(match => 
       match && 
       match.id && 
@@ -122,10 +122,43 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       ...match,
       sportId: match.category || sportId, // Map category to sportId for compatibility
       category: match.category || sportId
-    }));
+    }))
+    // Filter matches to only include ones that actually belong to the requested sport
+    .filter(match => {
+      const matchCategory = match.category || match.sportId;
+      
+      // Create sport mapping to handle API inconsistencies
+      const sportMapping: { [key: string]: string[] } = {
+        'football': ['football', 'soccer'],
+        'basketball': ['basketball'],
+        'tennis': ['tennis'],
+        'hockey': ['hockey'],
+        'baseball': ['baseball'],
+        'american-football': ['american-football', 'nfl'],
+        'motor-sports': ['motor-sports', 'motorsports', 'racing'],
+        'fight': ['fight', 'boxing', 'mma', 'ufc'],
+        'rugby': ['rugby'],
+        'golf': ['golf'],
+        'cricket': ['cricket'],
+        'darts': ['darts'],
+        'billiards': ['billiards', 'pool', 'snooker'],
+        'afl': ['afl'],
+        'other': ['other']
+      };
+      
+      // If requesting specific sport, filter by category
+      if (sportId !== 'all') {
+        const allowedCategories = sportMapping[sportId] || [sportId];
+        return allowedCategories.some(cat => 
+          matchCategory.toLowerCase().includes(cat.toLowerCase())
+        );
+      }
+      
+      return true; // Include all matches for 'all' sport selection
+    });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
     return validMatches;
   } catch (error) {
     console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
@@ -155,9 +188,40 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
               ...match,
               sportId: match.category || sportId,
               category: match.category || sportId
-            }));
+            }))
+            // Apply same filtering logic for mobile retry
+            .filter(match => {
+              const matchCategory = match.category || match.sportId;
+              
+              const sportMapping: { [key: string]: string[] } = {
+                'football': ['football', 'soccer'],
+                'basketball': ['basketball'],
+                'tennis': ['tennis'],
+                'hockey': ['hockey'],
+                'baseball': ['baseball'],
+                'american-football': ['american-football', 'nfl'],
+                'motor-sports': ['motor-sports', 'motorsports', 'racing'],
+                'fight': ['fight', 'boxing', 'mma', 'ufc'],
+                'rugby': ['rugby'],
+                'golf': ['golf'],
+                'cricket': ['cricket'],
+                'darts': ['darts'],
+                'billiards': ['billiards', 'pool', 'snooker'],
+                'afl': ['afl'],
+                'other': ['other']
+              };
+              
+              if (sportId !== 'all') {
+                const allowedCategories = sportMapping[sportId] || [sportId];
+                return allowedCategories.some(cat => 
+                  matchCategory.toLowerCase().includes(cat.toLowerCase())
+                );
+              }
+              
+              return true;
+            });
             setCachedData(cacheKey, validMatches);
-            console.log(`✅ Mobile retry successful: ${validMatches.length} matches for ${sportId}`);
+            console.log(`✅ Mobile retry successful: ${validMatches.length} matches for ${sportId} (filtered from ${retryData.length} total)`);
             return validMatches;
           }
         }
