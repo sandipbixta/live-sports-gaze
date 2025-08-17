@@ -46,40 +46,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Enhanced poster logic with multiple sources for football matches
+  // Poster logic
   const getPosterUrl = () => {
-    if (!match.poster && !match.id) return null;
-    
-    // If poster exists, try multiple base URLs
-    if (match.poster) {
-      const basePaths = [
-        'https://streamed.pk',
-        'https://streamed.su'
-      ];
-      
-      for (const basePath of basePaths) {
-        if (match.poster.startsWith('http')) {
-          return match.poster;
-        } else {
-          return `${basePath}${match.poster}`;
-        }
-      }
-    }
-    
-    // For football matches without posters, try to generate poster URLs
-    if (match.sportId === 'football' || match.category === 'football') {
-      const posterVariations = [
-        `https://streamed.pk/api/images/poster/${match.id}.webp`,
-        `https://streamed.su/api/images/poster/${match.id}.webp`,
-        `https://streamed.pk/api/images/poster/${match.id}.jpg`,
-        `https://streamed.su/api/images/poster/${match.id}.jpg`
-      ];
-      
-      // Return the first variation for now (we'll handle failures in onError)
-      return posterVariations[0];
-    }
-    
-    return null;
+    if (!match.poster) return null;
+    return `https://streamed.pk${match.poster}`;
   };
 
   const posterUrl = getPosterUrl();
@@ -92,7 +62,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
     : null;
 
-  // Generate fallback background (based on match.id for consistency)
+  // Decide fallback background (based on match.id for consistency)
   const fallbackBg =
     fallbackImages[Math.abs(match.id?.toString().charCodeAt(0) || 0) % fallbackImages.length];
 
@@ -105,25 +75,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
         className="relative w-full aspect-video overflow-hidden rounded-xl bg-gray-900"
         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
       >
-        {/* Poster exists or attempted */}
+        {/* Poster exists */}
         {posterUrl && (
-          <img 
-            src={posterUrl} 
-            alt={match.title} 
-            className="w-full h-full object-cover" 
-            onError={(e) => {
-              // If football poster fails, try alternative sources
-              const currentSrc = (e.target as HTMLImageElement).src;
-              const isFirstAttempt = currentSrc.includes('streamed.pk');
-              
-              if (isFirstAttempt && (match.sportId === 'football' || match.category === 'football')) {
-                (e.target as HTMLImageElement).src = currentSrc.replace('streamed.pk', 'streamed.su');
-              } else {
-                // Hide failed image and show fallback
-                (e.target as HTMLImageElement).style.display = 'none';
-              }
-            }}
-          />
+          <img src={posterUrl} alt={match.title} className="w-full h-full object-cover" />
         )}
 
         {/* Background fallback with badges */}
