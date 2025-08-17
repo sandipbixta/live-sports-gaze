@@ -14,17 +14,16 @@ interface MatchCardProps {
   preventNavigation?: boolean;
 }
 
-const DAMITV_LOGO = 'https://i.imgur.com/WUguNZl.png';
-
-// Fallback backgrounds (rotate randomly or assign based on match ID for consistency)
-const fallbackImages = [
-  'https://i.imgur.com/1xsz109.jpg',
-  'https://i.imgur.com/sVc77ht.jpg',
-  'https://i.imgur.com/1Tw0JRU.jpg',
-  'https://i.imgur.com/MtYQroI.jpg',
-  'https://i.imgur.com/EsEKzFs.jpg',
-  'https://i.imgur.com/XT3MN8i.jpg',
+const fallbackBackgrounds = [
+  "https://imgur.com/1xsz109.jpg",
+  "https://imgur.com/sVc77ht.jpg", 
+  "https://imgur.com/1Tw0JRU.jpg",
+  "https://imgur.com/MtYQroI.jpg",
+  "https://imgur.com/EsEKzFs.jpg",
+  "https://imgur.com/XT3MN8i.jpg",
 ];
+
+const damitvLogo = "https://damitv.pro/logo.png";
 
 const MatchCard: React.FC<MatchCardProps> = ({
   match,
@@ -46,73 +45,54 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Poster logic
-  const getPosterUrl = () => {
-    if (!match.poster) return null;
-    return `https://streamed.pk${match.poster}`;
-  };
-
-  const posterUrl = getPosterUrl();
-
-  // Team badges
+  // Get poster URL
+  const poster = match.poster ? `https://streamed.pk${match.poster}` : undefined;
+  
+  // Get team badges  
   const homeBadge = match.teams?.home?.badge
     ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp`
     : null;
   const awayBadge = match.teams?.away?.badge
     ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
     : null;
+  
+  // Use the first available badge if no poster
+  const badge = homeBadge || awayBadge;
+  
+  // Pick random background if no poster or badge
+  const randomBg = fallbackBackgrounds[Math.abs(match.id?.toString().charCodeAt(0) || 0) % fallbackBackgrounds.length];
 
-  // Decide fallback background (based on match.id for consistency)
-  const fallbackBg =
-    fallbackImages[Math.abs(match.id?.toString().charCodeAt(0) || 0) % fallbackImages.length];
+  let backgroundImage = poster || badge || randomBg;
+  let isBadge = !poster && !!badge;
+  let isFallback = !poster && !badge;
 
-  const showBadgesOnFallback = !posterUrl && (homeBadge || awayBadge);
-  const showDamiLogo = !posterUrl && !homeBadge && !awayBadge;
+  const title = match.title || `${match.teams?.home?.name || ''} vs ${match.teams?.away?.name || ''}`;
+  const date = match.date ? `${formatDate(match.date)} • ${formatTime(match.date)}` : 'Time TBD';
+  const homeTeam = match.teams?.home?.name || '';
+  const awayTeam = match.teams?.away?.name || '';
 
   const cardContent = (
-    <div className={`flex flex-col ${className} cursor-pointer group`}>
+    <div className={`cursor-pointer group ${className}`}>
       <div
-        className="relative w-full aspect-video overflow-hidden rounded-xl bg-gray-900"
-        style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}
+        className="relative w-full h-64 rounded-2xl overflow-hidden shadow-lg flex items-end"
+        style={{
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
-        {/* Poster exists */}
-        {posterUrl && (
-          <img src={posterUrl} alt={match.title} className="w-full h-full object-cover" />
-        )}
+        {/* Overlay if badge */}
+        {isBadge && <div className="absolute inset-0 bg-black/40"></div>}
 
-        {/* Background fallback with badges */}
-        {showBadgesOnFallback && (
-          <>
-            {/* Fallback background */}
-            <img src={fallbackBg} alt="Fallback" className="w-full h-full object-cover" />
-
-            {/* Overlay badges with black-lite shadow */}
-            <div className="absolute inset-0 flex">
-              <div className="w-1/2 h-full flex items-center justify-center bg-black/40">
-                {homeBadge && (
-                  <img
-                    src={homeBadge}
-                    alt={match.teams?.home?.name || 'Home'}
-                    className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,0.7)]"
-                  />
-                )}
-              </div>
-              <div className="w-1/2 h-full flex items-center justify-center bg-black/40">
-                {awayBadge && (
-                  <img
-                    src={awayBadge}
-                    alt={match.teams?.away?.name || 'Away'}
-                    className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,0.7)]"
-                  />
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Full DamiTV logo fallback */}
-        {showDamiLogo && (
-          <img src={DAMITV_LOGO} alt="DamiTV" className="w-full h-full object-cover" />
+        {/* Overlay if fallback damitv logo */}
+        {isFallback && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <img
+              src={damitvLogo}
+              alt="Damitv Logo"
+              className="w-24 h-24 opacity-90"
+            />
+          </div>
         )}
 
         {/* Live badge */}
@@ -121,31 +101,25 @@ const MatchCard: React.FC<MatchCardProps> = ({
             • LIVE
           </Badge>
         )}
-      </div>
 
-      {/* Content below thumbnail */}
-      <div className="mt-2 flex flex-col gap-1">
-        <h3 className="font-semibold text-sm md:text-base line-clamp-2 text-white">
-          {match.title ||
-            `${match.teams?.home?.name || ''} vs ${match.teams?.away?.name || ''}`}
-        </h3>
-        <div className="text-gray-400 text-xs md:text-sm">
-          {match.date
-            ? `${formatDate(match.date)} • ${formatTime(match.date)}`
-            : 'Time TBD'}
-        </div>
-        <div className="flex items-center justify-between mt-1">
-          <div className="flex items-center gap-1 text-gray-400 text-xs md:text-sm">
+        {/* Card content */}
+        <div className="relative z-10 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+          <h3 className="text-white text-lg font-bold line-clamp-1">{title}</h3>
+          <p className="text-gray-200 text-sm">{date}</p>
+          <p className="text-gray-100 text-sm">
+            {homeTeam} vs {awayTeam}
+          </p>
+          <div className="flex items-center gap-1 text-gray-300 text-xs mt-1">
             <Play className="w-3 h-3" />
             <span>
               {hasStream
                 ? `${match.sources.length} stream${match.sources.length > 1 ? 's' : ''}`
                 : 'No streams'}
             </span>
+            {hasStream && (
+              <ChevronRight className="w-4 h-4 ml-auto group-hover:text-white transition-colors" />
+            )}
           </div>
-          {hasStream && (
-            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-          )}
         </div>
       </div>
     </div>
