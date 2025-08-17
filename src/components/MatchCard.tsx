@@ -116,22 +116,22 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <img
                   src={homeBadge}
                   alt={home || 'Home Team'}
-                  className="w-12 h-12 object-contain drop-shadow-2xl shadow-black/50 filter brightness-110"
+                  className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
                 />
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-lg">
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
                   {home || 'Home Team'}
                 </span>
               </div>
             )}
-            <span className="text-white font-bold text-lg drop-shadow-lg">VS</span>
+            <span className="text-white font-bold text-lg drop-shadow-sm">VS</span>
             {awayBadge && (
               <div className="flex flex-col items-center">
                 <img
                   src={awayBadge}
                   alt={away || 'Away Team'}
-                  className="w-12 h-12 object-contain drop-shadow-2xl shadow-black/50 filter brightness-110"
+                  className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
                 />
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-lg">
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
                   {away || 'Away Team'}
                 </span>
               </div>
