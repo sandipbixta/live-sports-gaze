@@ -56,14 +56,22 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const generateThumbnail = () => {
     // Priority 1: Use API poster if available (as per API docs)
     if (match.poster) {
+      console.log('Match with poster:', match.title, 'Poster URL:', `https://streamed.pk${match.poster}.webp`);
       return (
         <img
           src={`https://streamed.pk${match.poster}.webp`}
           alt={match.title}
           className="w-full h-full object-cover"
           loading="lazy"
+          onError={(e) => {
+            console.error('Poster failed to load for:', match.title, 'URL:', `https://streamed.pk${match.poster}.webp`);
+            // Fallback to badges if poster fails
+            e.currentTarget.style.display = 'none';
+          }}
         />
       );
+    } else {
+      console.log('No poster found for match:', match.title, 'Has teams:', !!(homeBadge || awayBadge));
     }
 
     // Priority 2: Use team badges with background images if available
