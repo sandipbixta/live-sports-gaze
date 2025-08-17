@@ -6,6 +6,38 @@ export const isPopularLeague = (title: string): boolean => {
 
 // Enhanced function to calculate trending score and identify trending matches
 export const isTrendingMatch = (title: string): { isTrending: boolean; score: number; reason: string; seoTerms?: string[] } => {
+  // For football matches, only show top 5 European leagues (2025-2026 season)
+  const isFootballTopLeague = (matchTitle: string): boolean => {
+    const lowerTitle = matchTitle.toLowerCase();
+    const topFootballLeagues = [
+      'premier league', 'epl', 'english premier league',
+      'la liga', 'spanish league', 'primera division',
+      'serie a', 'italian league', 'calcio',
+      'ligue 1', 'french league', 'ligue 1 uber eats',
+      'bundesliga', 'german league', '1. bundesliga'
+    ];
+    
+    return topFootballLeagues.some(league => lowerTitle.includes(league));
+  };
+  
+  // Check if this is a football match and if it's from a top league
+  const lowerTitle = title.toLowerCase();
+  const isFootballMatch = lowerTitle.includes('football') || lowerTitle.includes('soccer') || 
+                          lowerTitle.includes('premier league') || lowerTitle.includes('la liga') || 
+                          lowerTitle.includes('serie a') || lowerTitle.includes('ligue 1') || 
+                          lowerTitle.includes('bundesliga') || lowerTitle.includes('epl') ||
+                          // Check for common football club patterns
+                          ['vs', 'v ', 'fc ', 'united', 'city', 'real ', 'barcelona', 'madrid', 'milan', 'juventus', 'psg', 'bayern', 'arsenal', 'chelsea', 'liverpool', 'manchester'].some(term => lowerTitle.includes(term));
+  
+  // If it's a football match but not from top leagues, return not trending
+  if (isFootballMatch && !isFootballTopLeague(title)) {
+    return {
+      isTrending: false,
+      score: 0,
+      reason: 'Football match not from top 5 European leagues',
+      seoTerms: []
+    };
+  }
   // First-division leagues
   const topLeagues = [
     // Top European leagues with high Google trends
@@ -144,14 +176,14 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'benzema', weight: 7, seoTerms: ['karim benzema', 'benz', 'benzema game'] }
   ];
   
-  const lowerTitle = title.toLowerCase();
+  const titleLower = title.toLowerCase();
   let trendingScore = 0;
   let trendingReason = '';
   let allSeoTerms: string[] = [];
   
   // Check if any top league keyword is in the title
   for (const league of topLeagues) {
-    if (lowerTitle.includes(league.name)) {
+    if (titleLower.includes(league.name)) {
       trendingScore += league.weight;
       trendingReason = trendingReason || `Contains popular league: ${league.name}`;
       if (league.seoTerms) allSeoTerms = [...allSeoTerms, ...league.seoTerms];
@@ -160,7 +192,7 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   
   // Check if any top club is in the title
   for (const club of topClubs) {
-    if (lowerTitle.includes(club.name)) {
+    if (titleLower.includes(club.name)) {
       trendingScore += club.weight;
       trendingReason = trendingReason || `Features popular team: ${club.name}`;
       if (club.seoTerms) allSeoTerms = [...allSeoTerms, ...club.seoTerms];
@@ -169,7 +201,7 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   
   // Check for popular players
   for (const player of topPlayers) {
-    if (lowerTitle.includes(player.name)) {
+    if (titleLower.includes(player.name)) {
       trendingScore += player.weight;
       trendingReason = trendingReason || `Features star player: ${player.name}`;
       if (player.seoTerms) allSeoTerms = [...allSeoTerms, ...player.seoTerms];
@@ -177,14 +209,14 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   }
   
   // Check for special patterns like derbies or rivalries
-  if (lowerTitle.includes(' vs ') || lowerTitle.includes(' v ')) {
+  if (titleLower.includes(' vs ') || titleLower.includes(' v ')) {
     trendingScore += 3; // VS matches tend to get more attention
     allSeoTerms.push('live match', 'watch online', 'stream free');
     
     // Common derby names and high-profile international matchups
     const derbies = ['north london', 'manchester', 'merseyside', 'madrid', 'milan', 'london', 'el clasico', 'spain vs france', 'france vs spain', 'england vs germany', 'germany vs england'];
     for (const derby of derbies) {
-      if (lowerTitle.includes(derby)) {
+      if (titleLower.includes(derby)) {
         trendingScore += 5;
         trendingReason = `Features ${derby} match`;
         allSeoTerms.push(`${derby} stream`, `${derby} live`, `watch ${derby}`);
@@ -194,15 +226,15 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   }
   
   // Add bonus for finals, semifinals, etc.
-  if (lowerTitle.includes('final')) {
+  if (titleLower.includes('final')) {
     trendingScore += 6;
     allSeoTerms.push('final stream', 'final live', 'watch final online');
   }
-  if (lowerTitle.includes('semi')) {
+  if (titleLower.includes('semi')) {
     trendingScore += 4;
     allSeoTerms.push('semifinal stream', 'semi final live', 'watch semifinal');
   }
-  if (lowerTitle.includes('quarter')) {
+  if (titleLower.includes('quarter')) {
     trendingScore += 3;
     allSeoTerms.push('quarterfinal stream', 'quarter final live');
   }
@@ -218,7 +250,7 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   );
   
   // Format title for SEO
-  const seoFormattedTitle = lowerTitle
+  const seoFormattedTitle = titleLower
     .replace(' vs ', ' vs ')
     .replace(' - ', ' ')
     .trim();
