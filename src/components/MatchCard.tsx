@@ -55,24 +55,84 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Generate thumbnail background with priority: poster > badges > default logo
   const generateThumbnail = () => {
     // Priority 1: Use API poster if available (as per API docs)
-    if (match.poster) {
-      console.log('Match with poster:', match.title, 'Poster URL:', `https://streamed.pk${match.poster}.webp`);
+    if (match.poster && match.poster.trim() !== '') {
+      const posterUrl = match.poster.startsWith('http') 
+        ? match.poster 
+        : `https://streamed.pk${match.poster}.webp`;
+      
       return (
-        <img
-          src={`https://streamed.pk${match.poster}.webp`}
-          alt={match.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          onError={(e) => {
-            console.error('Poster failed to load for:', match.title, 'URL:', `https://streamed.pk${match.poster}.webp`);
-            // Fallback to badges if poster fails
-            e.currentTarget.style.display = 'none';
-          }}
-        />
+        <div className="w-full h-full relative">
+          <img
+            src={posterUrl}
+            alt={match.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              console.error('Poster failed to load for:', match.title, 'URL:', posterUrl);
+              // Hide the image and show badge fallback
+              const container = e.currentTarget.parentElement;
+              if (container) {
+                container.innerHTML = '';
+                container.appendChild(createBadgeFallback());
+              }
+            }}
+          />
+        </div>
       );
-    } else {
-      console.log('No poster found for match:', match.title, 'Has teams:', !!(homeBadge || awayBadge));
     }
+
+    // Helper function to create badge fallback
+    const createBadgeFallback = () => {
+      const div = document.createElement('div');
+      div.innerHTML = badgeFallbackHTML();
+      return div.firstElementChild as HTMLElement;
+    };
+
+    const badgeFallbackHTML = () => {
+      if (homeBadge || awayBadge) {
+        return badgeLayoutHTML();
+      }
+      return defaultImageHTML();
+    };
+
+    const badgeLayoutHTML = () => `
+      <div class="w-full h-full relative overflow-hidden">
+        ${backgroundImages()}
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="flex items-center gap-4 z-10 relative h-full justify-center">
+          ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
+          <span class="text-white font-bold text-lg drop-shadow-sm">VS</span>
+          ${awayBadge ? badgeHTML(awayBadge, away || 'Away Team') : ''}
+        </div>
+      </div>
+    `;
+
+    const backgroundImages = () => {
+      const bgImages = [
+        "https://i.imgur.com/1xsz109.jpg",
+        "https://i.imgur.com/sVc77ht.jpg", 
+        "https://i.imgur.com/1Tw0JRU.jpg",
+        "https://i.imgur.com/MtYQroI.jpg",
+        "https://i.imgur.com/EsEKzFs.jpg",
+        "https://i.imgur.com/XT3MN8i.jpg"
+      ];
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % bgImages.length;
+      return `<div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url(${bgImages[bgIndex]})"></div>`;
+    };
+
+    const badgeHTML = (badgeUrl: string, altText: string) => `
+      <div class="flex flex-col items-center">
+        <img src="${badgeUrl}" alt="${altText}" class="w-14 h-14 object-contain drop-shadow-md filter brightness-110" />
+        <span class="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">${altText}</span>
+      </div>
+    `;
+
+    const defaultImageHTML = () => `
+      <div class="w-full h-full relative overflow-hidden">
+        <img src="https://i.imgur.com/47knf0G.jpg" alt="Live Stream" class="w-full h-full object-cover" loading="lazy" />
+        <div class="absolute inset-0 bg-black/20"></div>
+      </div>
+    `;
 
     // Priority 2: Use team badges with background images if available
     if (homeBadge || awayBadge) {
