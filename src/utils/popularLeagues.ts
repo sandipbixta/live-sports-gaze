@@ -4,52 +4,30 @@ export const isPopularLeague = (title: string): boolean => {
   return result.isTrending;
 };
 
-// Enhanced function to calculate trending score and identify trending matches
+// Enhanced function to calculate trending score and identify trending matches - Top 5 European Leagues + UEFA only
 export const isTrendingMatch = (title: string): { isTrending: boolean; score: number; reason: string; seoTerms?: string[] } => {
-  // First-division leagues
+  // Top 5 European leagues + UEFA competitions only
   const topLeagues = [
-    // Top European leagues with high Google trends
+    // Top 5 European leagues
     { name: 'premier league', weight: 10, seoTerms: ['epl', 'english premier league', 'premier league stream'] }, 
-    { name: 'epl', weight: 9, seoTerms: ['premier league', 'english premier league', 'epl stream'] },
-    { name: 'la liga', weight: 9, seoTerms: ['spanish league', 'la liga stream', 'spanish football'] },
-    { name: 'serie a', weight: 8, seoTerms: ['italian league', 'serie a stream', 'calcio stream'] },
-    { name: 'bundesliga', weight: 8, seoTerms: ['german league', 'bundesliga stream', 'german football'] },
-    { name: 'ligue 1', weight: 7, seoTerms: ['french league', 'ligue 1 stream', 'french football'] },
+    { name: 'epl', weight: 10, seoTerms: ['premier league', 'english premier league', 'epl stream'] },
+    { name: 'la liga', weight: 10, seoTerms: ['spanish league', 'la liga stream', 'spanish football'] },
+    { name: 'serie a', weight: 10, seoTerms: ['italian league', 'serie a stream', 'calcio stream'] },
+    { name: 'bundesliga', weight: 10, seoTerms: ['german league', 'bundesliga stream', 'german football'] },
+    { name: 'ligue 1', weight: 10, seoTerms: ['french league', 'ligue 1 stream', 'french football'] },
     
-    // UEFA Competitions (high search volume)
+    // UEFA Competitions only
     { name: 'champions league', weight: 10, seoTerms: ['ucl', 'champions league stream', 'ucl live'] },
-    { name: 'ucl', weight: 9, seoTerms: ['champions league', 'uefa champions league', 'ucl stream'] },
-    { name: 'europa league', weight: 8, seoTerms: ['uel', 'europa league stream', 'uefa europa'] },
-    { name: 'conference league', weight: 6, seoTerms: ['uecl', 'conference league stream', 'uefa conference'] },
-    { name: 'uefa', weight: 7, seoTerms: ['uefa stream', 'european football', 'uefa matches'] },
-    { name: 'euro', weight: 10, seoTerms: ['euro championship', 'european championship', 'euro qualifiers'] }, 
-    { name: 'world cup', weight: 10, seoTerms: ['fifa world cup', 'world cup stream', 'wc qualifiers'] },
-    { name: 'nations league', weight: 9, seoTerms: ['uefa nations league', 'nations league stream', 'national teams'] }, // Increased weight
-    { name: 'uefa nations league', weight: 10, seoTerms: ['nations league', 'uefa nations', 'national teams'] }, // Added explicit match
-    { name: 'national league', weight: 8, seoTerms: ['nations league', 'uefa nations league', 'national teams'] }, // Alternative naming
-    
-    // FIFA Club World Cup - Enhanced detection with high priority
-    { name: 'fifa club world cup', weight: 10, seoTerms: ['club world cup stream', 'fifa cwc', 'cwc 2025', 'fifa club world cup 2025'] },
-    { name: 'club world cup', weight: 10, seoTerms: ['fifa club world cup', 'fifa cwc', 'cwc stream', 'club world cup 2025'] },
-    { name: 'fifa cwc', weight: 10, seoTerms: ['club world cup', 'fifa club world cup', 'cwc 2025'] },
-    { name: 'cwc', weight: 9, seoTerms: ['club world cup', 'fifa club world cup', 'fifa cwc'] },
-    { name: 'fifa 2025', weight: 9, seoTerms: ['fifa club world cup 2025', 'cwc 2025', 'club world cup'] },
-    { name: 'club world cup 2025', weight: 10, seoTerms: ['fifa club world cup', 'fifa cwc', 'cwc 2025'] },
-    
-    // Other major competitions with high global interest
-    { name: 'copa libertadores', weight: 8, seoTerms: ['libertadores stream', 'south american football'] },
-    { name: 'copa america', weight: 9, seoTerms: ['copa america stream', 'conmebol', 'south american championship'] },
-    { name: 'fa cup', weight: 7, seoTerms: ['fa cup stream', 'english cup', 'football association cup'] },
-    { name: 'super copa', weight: 7, seoTerms: ['super cup stream', 'supercopa'] },
-    { name: 'supercup', weight: 7, seoTerms: ['super cup', 'uefa supercup', 'supercup stream'] },
-    { name: 'super cup', weight: 7, seoTerms: ['supercup', 'uefa super cup', 'super cup stream'] },
-    { name: 'copa del rey', weight: 6, seoTerms: ['spanish cup', 'copa del rey stream'] },
-    { name: 'dfb pokal', weight: 6, seoTerms: ['german cup', 'dfb pokal stream'] },
-    { name: 'coppa italia', weight: 6, seoTerms: ['italian cup', 'coppa italia stream'] },
-    { name: 'carabao cup', weight: 6, seoTerms: ['league cup', 'efl cup', 'carabao cup stream'] },
-    { name: 'community shield', weight: 7, seoTerms: ['fa community shield', 'charity shield', 'english super cup'] },
-    { name: 'clasico', weight: 10, seoTerms: ['el clasico stream', 'barcelona vs real madrid', 'madrid barcelona'] }, // El Clasico gets massive search volume
-    { name: 'derby', weight: 8, seoTerms: ['football derby', 'derby stream', 'rivalry match'] }, // Derby matches trend highly
+    { name: 'ucl', weight: 10, seoTerms: ['champions league', 'uefa champions league', 'ucl stream'] },
+    { name: 'europa league', weight: 10, seoTerms: ['uel', 'europa league stream', 'uefa europa'] },
+    { name: 'conference league', weight: 10, seoTerms: ['uecl', 'conference league stream', 'uefa conference'] },
+    { name: 'uefa', weight: 10, seoTerms: ['uefa stream', 'european football', 'uefa matches'] },
+    { name: 'euro', weight: 10, seoTerms: ['euro championship', 'european championship', 'euro qualifiers'] },
+    { name: 'nations league', weight: 10, seoTerms: ['uefa nations league', 'nations league stream', 'national teams'] },
+    { name: 'uefa nations league', weight: 10, seoTerms: ['nations league', 'uefa nations', 'national teams'] },
+    { name: 'uefa super cup', weight: 10, seoTerms: ['super cup', 'uefa supercup', 'supercup stream'] },
+    { name: 'supercup', weight: 10, seoTerms: ['super cup', 'uefa super cup', 'supercup stream'] },
+    { name: 'super cup', weight: 10, seoTerms: ['supercup', 'uefa super cup', 'super cup stream'] },
   ];
   
   // Top clubs that typically trend on Google searches - Enhanced with CWC participants
