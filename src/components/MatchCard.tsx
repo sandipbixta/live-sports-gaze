@@ -117,7 +117,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
         "https://i.imgur.com/XT3MN8i.jpg"
       ];
       const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % bgImages.length;
-      return `<div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url(${bgImages[bgIndex]})"></div>`;
+      return `<div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url(${bgImages[bgIndex]})"></div><div class="absolute inset-0 bg-black/20"></div>`;
     };
 
     const badgeHTML = (badgeUrl: string, altText: string) => `
@@ -158,8 +158,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
             style={{ backgroundImage: `url(${selectedBg})` }}
           />
           
-          {/* Dark overlay for better contrast */}
-          <div className="absolute inset-0 bg-black/40" />
+          {/* Dark overlay for better contrast - reduced opacity */}
+          <div className="absolute inset-0 bg-black/20" />
           
           {/* Background team badges with blur */}
           {homeBadge && (
