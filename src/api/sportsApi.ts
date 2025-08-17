@@ -1,6 +1,5 @@
 
 import { Sport, Match, Stream } from '../types/sports';
-import { teamLogoService } from '../services/teamLogoService';
 
 const API_BASE = 'https://streamed.pk/api';
 
@@ -96,7 +95,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
-    console.log(`🚀 Fetching matches for sport: ${sportId} from API endpoint`);
     const response = await fetch(`${API_BASE}/matches/${sportId}`, {
       signal: controller.signal,
       headers: {
@@ -112,43 +110,23 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!Array.isArray(matches)) {
       throw new Error('Invalid matches data format');
     }
-
-    console.log(`📊 Raw API response: ${matches.length} matches for sport: ${sportId}`);
-    console.log(`🔍 Sample API data:`, matches.slice(0, 3).map(m => ({ id: m.id, title: m.title, category: m.category, sportId: m.sportId })));
     
-    // Transform API matches to our format and ensure proper sport filtering
+    // Transform API matches to our format
     const validMatches = matches.filter(match => 
       match && 
       match.id && 
       match.title && 
       match.date &&
       Array.isArray(match.sources)
-    ).map(match => {
-      // Enhance match with logos using the team logo service
-      const enhancedMatch = teamLogoService.enhanceMatchWithLogos({
-        ...match,
-        sportId: match.category || sportId, // Map category to sportId for compatibility
-        category: match.category || sportId
-      });
-      
-      return enhancedMatch;
-    });
-
-    // Additional client-side filtering to ensure we only get matches for the requested sport
-    const filteredBySport = validMatches.filter(match => {
-      const matchSportId = match.category || match.sportId;
-      const isCorrectSport = matchSportId === sportId;
-      
-      if (!isCorrectSport) {
-        console.log(`⚠️ Filtering out match with wrong sport: "${match.title}" (expected: ${sportId}, got: ${matchSportId})`);
-      }
-      
-      return isCorrectSport;
-    });
+    ).map(match => ({
+      ...match,
+      sportId: match.category || sportId, // Map category to sportId for compatibility
+      category: match.category || sportId
+    }));
     
-    setCachedData(cacheKey, filteredBySport);
-    console.log(`✅ Fetched ${filteredBySport.length} filtered matches for sport ${sportId} from streamed.pk API`);
-    return filteredBySport;
+    setCachedData(cacheKey, validMatches);
+    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from streamed.pk API`);
+    return validMatches;
   } catch (error) {
     console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
     

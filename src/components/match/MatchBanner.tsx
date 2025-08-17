@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Match } from '@/types/sports';
@@ -9,23 +10,10 @@ interface MatchBannerProps {
   isMobile: boolean;
 }
 
-// Background images for banners - different image for each match
-const bannerBackgrounds = [
-  'https://i.imgur.com/1xsz109.jpg',
-  'https://i.imgur.com/sVc77ht.jpg',
-  'https://i.imgur.com/1Tw0JRU.jpg',
-  'https://i.imgur.com/MtYQroI.jpg',
-  'https://i.imgur.com/EsEKzFs.jpg',
-  'https://i.imgur.com/XT3MN8i.jpg',
-];
-
 const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMobile }) => {
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const hasTeams = !!home && !!away;
-
-  // Select background image based on match ID for consistency
-  const backgroundImage = bannerBackgrounds[Math.abs(match.id?.toString().charCodeAt(0) || 0) % bannerBackgrounds.length];
 
   const formatTime = (timestamp: number) => {
     return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -41,15 +29,7 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
 
   if (isMobile) {
     return (
-      <div 
-        className="relative py-4 sm:py-6 md:py-10 px-2 sm:px-4"
-        style={{
-          backgroundImage: `linear-gradient(rgba(21, 25, 34, 0.85), rgba(36, 40, 54, 0.85)), url('${backgroundImage}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
+      <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4">
         <div className="container mx-auto">
           <div className="flex flex-col items-center">
             {hasTeams ? (
@@ -67,10 +47,10 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
                 {/* VS section */}
                 <div className="flex flex-col items-center w-1/3">
                   <div className="text-xl sm:text-2xl font-bold text-white mb-0 sm:mb-1">VS</div>
-                  <div className="text-gray-300 text-[10px] sm:text-xs">
+                  <div className="text-gray-400 text-[10px] sm:text-xs">
                     {formatTime(match.date)}
                   </div>
-                  <div className="text-gray-300 text-[10px] sm:text-xs">
+                  <div className="text-gray-400 text-[10px] sm:text-xs">
                     {formatDate(match.date)}
                   </div>
                 </div>
@@ -88,7 +68,7 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
               // Non-team content (e.g., motorsports)
               <div className="flex flex-col items-center justify-center mb-3 sm:mb-4">
                 <h2 className="text-base sm:text-lg font-bold text-white mb-1">{match.title}</h2>
-                <div className="text-gray-300 text-[10px] sm:text-xs">
+                <div className="text-gray-400 text-[10px] sm:text-xs">
                   {formatTime(match.date)} - {formatDate(match.date)}
                 </div>
               </div>
@@ -108,15 +88,7 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
 
   // Desktop layout
   return (
-    <div 
-      className="relative py-4 sm:py-6 md:py-10 px-2 sm:px-4"
-      style={{
-        backgroundImage: `linear-gradient(rgba(21, 25, 34, 0.85), rgba(36, 40, 54, 0.85)), url('${backgroundImage}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
+    <div className="bg-gradient-to-r from-[#151922] to-[#242836] py-4 sm:py-6 md:py-10 px-2 sm:px-4">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-16 lg:space-x-20">
           {hasTeams ? (
@@ -130,10 +102,10 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
               
               <div className="flex flex-col items-center">
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2 md:mb-3">VS</div>
-                <div className="flex items-center space-x-2 text-gray-300 text-xs md:text-sm">
+                <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm">
                   <span>{formatTime(match.date)}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-gray-300 text-xs md:text-sm mt-1">
+                <div className="flex items-center space-x-2 text-gray-400 text-xs md:text-sm mt-1">
                   <span>{formatDate(match.date)}</span>
                 </div>
               </div>
@@ -149,10 +121,10 @@ const MatchBanner: React.FC<MatchBannerProps> = ({ match, streamAvailable, isMob
             <div className="flex flex-col items-center justify-center">
               <h2 className="text-xl md:text-2xl font-bold text-white mb-2">{match.title}</h2>
               <div className="flex flex-col items-center space-y-1">
-                <div className="text-gray-300 text-sm md:text-base">
+                <div className="text-gray-400 text-sm md:text-base">
                   {formatTime(match.date)}
                 </div>
-                <div className="text-gray-300 text-sm md:text-base">
+                <div className="text-gray-400 text-sm md:text-base">
                   {formatDate(match.date)}
                 </div>
               </div>

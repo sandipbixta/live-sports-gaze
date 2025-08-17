@@ -4,7 +4,7 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -21,10 +21,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   
   // Filter out advertisement matches and excluded IDs, then consolidate duplicates properly
   const cleanMatches = filterCleanMatches(
-    popularMatches.filter(match => 
-      !excludeMatchIds.includes(match.id)
-      // Show both live and upcoming matches for featured section
-    )
+    popularMatches.filter(match => !excludeMatchIds.includes(match.id))
   );
   
   // Consolidate matches (merges duplicate matches with their stream sources)
@@ -46,10 +43,11 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
       <h2 className="text-xl font-bold mb-3 text-white">Trending Matches</h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 6).map((match, index) => (
-           <MatchCard 
+          <MatchCard 
             key={`popular-${match.id}-${index}`}
             match={match}
             sportId={selectedSport || ''}
+            isPriority={true}
           />
         ))}
       </div>

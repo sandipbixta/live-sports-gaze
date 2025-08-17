@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
-
 
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
@@ -42,31 +41,14 @@ const Index = () => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation - filter by selected sport and only show live matches
+  // Memoize popular matches calculation
   const popularMatches = useMemo(() => {
-    console.log('🔍 Calculating popular matches for sport:', selectedSport);
-    console.log('📊 Total matches available:', matches.length);
-    
-    // If no sport is selected or "all" is selected, return empty array since trending is handled elsewhere
-    if (!selectedSport || selectedSport === 'all') {
-      console.log('⚪ No sport selected or "all" selected, returning empty popular matches');
-      return [];
-    }
-    
-    const filtered = matches.filter(match => {
-      const isPopular = isPopularLeague(match.title);
-      const notSkyNews = !match.title.toLowerCase().includes('sky sports news') && !match.id.includes('sky-sports-news');
-      const isSameSpot = match.sportId === selectedSport;
-      
-      console.log(`🏈 Match: ${match.title}, sportId: ${match.sportId}, selectedSport: ${selectedSport}, isPopular: ${isPopular}, isSameSpot: ${isSameSpot}`);
-      
-      // Show both live and upcoming matches in featured section
-      return isPopular && notSkyNews && isSameSpot;
-    });
-    
-    console.log('✅ Filtered popular matches:', filtered.length);
-    return filtered;
-  }, [matches, selectedSport]);
+    return matches.filter(match => 
+      isPopularLeague(match.title) && 
+      !match.title.toLowerCase().includes('sky sports news') && 
+      !match.id.includes('sky-sports-news')
+    );
+  }, [matches]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
@@ -164,11 +146,10 @@ const Index = () => {
         console.log('📥 Raw matches data:', rawMatchesData.length);
         
         // Filter and consolidate matches to remove duplicates and combine stream sources
-        // Only show live matches
-        const cleanMatches = filterCleanMatches(rawMatchesData.filter(match => isMatchLive(match)));
-        console.log('🧹 Clean live matches:', cleanMatches.length);
+        const cleanMatches = filterCleanMatches(rawMatchesData);
+        console.log('🧹 Clean matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
-        console.log('🔗 Consolidated live matches:', consolidatedMatches.length);
+        console.log('🔗 Consolidated matches:', consolidatedMatches.length);
         
         setMatches(consolidatedMatches);
         
@@ -220,9 +201,6 @@ const Index = () => {
           </div>
         </section> */}
         {/* This section now omitted, per your request */}
-
-        {/* TopEmbed Live Matches - shown at the top */}
-        
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 

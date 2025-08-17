@@ -22,7 +22,6 @@ const MatchesList: React.FC<MatchesListProps> = ({
   trendingSection
 }) => {
   // Filter out advertisement and invalid matches, then consolidate duplicates
-  // Show both live and upcoming matches for sports pages
   const cleanMatches = filterCleanMatches(matches);
   const filteredMatches = consolidateMatches(cleanMatches);
   
@@ -34,59 +33,42 @@ const MatchesList: React.FC<MatchesListProps> = ({
     }
   }, [filteredMatches, onMatchesDisplayed]);
 
+  // Separate matches into live and upcoming
+  const liveMatches = filteredMatches.filter(match => isMatchLive(match));
+  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
+
   if (isLoading) {
     return <LoadingGrid />;
   }
 
   if (filteredMatches.length === 0) {
-    return (
-      <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
-        <div className="text-4xl mb-4">📺</div>
-        <h3 className="text-xl font-bold text-white mb-2">No Matches Available</h3>
-        <p className="text-gray-400">There are currently no matches available for this sport.</p>
-      </div>
-    );
+    return <EmptyState />;
   }
-
-  // Separate live and upcoming matches
-  const liveMatches = filteredMatches.filter(match => isMatchLive(match));
-  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
 
   return (
     <div>
+      {/* Live Matches Section */}
+      <MatchSection
+        matches={liveMatches}
+        sportId={sportId}
+        title="Live Matches"
+        isLive={true}
+        showEmptyMessage={liveMatches.length === 0 && upcomingMatches.length > 0}
+        emptyMessage="No live matches available right now."
+      />
+      
       {/* Trending Section (if provided) */}
       {trendingSection}
       
-      {/* Live Matches Section */}
-      {liveMatches.length > 0 && (
-        <>
-          <MatchSection
-            matches={liveMatches}
-            sportId={sportId}
-            title="Live Matches"
-            isLive={true}
-            showEmptyMessage={false}
-            emptyMessage=""
-          />
-          {upcomingMatches.length > 0 && (
-            <div className="my-8">
-              <div className="h-px bg-[#343a4d]"></div>
-            </div>
-          )}
-        </>
-      )}
-      
       {/* Upcoming Matches Section */}
-      {upcomingMatches.length > 0 && (
-        <MatchSection
-          matches={upcomingMatches}
-          sportId={sportId}
-          title="Upcoming Matches"
-          isLive={false}
-          showEmptyMessage={false}
-          emptyMessage=""
-        />
-      )}
+      <MatchSection
+        matches={upcomingMatches}
+        sportId={sportId}
+        title="Upcoming Matches"
+        isLive={false}
+        showEmptyMessage={upcomingMatches.length === 0 && liveMatches.length > 0}
+        emptyMessage="No upcoming matches scheduled at this time."
+      />
     </div>
   );
 };
