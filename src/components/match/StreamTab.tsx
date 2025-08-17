@@ -148,11 +148,11 @@ const StreamTab = ({
             <span className="text-xl">🔥</span>
             <h3 className="text-xl font-bold text-foreground">Trending Matches</h3>
             <span className="text-xs px-2 py-1 rounded-lg bg-card text-muted-foreground border border-border">
-              {Math.min(sortedPopularMatches.length, 6)} matches
+              {Math.min(sortedPopularMatches.length, 5)} matches
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {sortedPopularMatches.slice(0, 6).map((m, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+            {sortedPopularMatches.slice(0, 5).map((m, index) => (
               <MatchCard
                 key={`streamtab-trending-${m.id}-${index}`}
                 match={m}
