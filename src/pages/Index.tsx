@@ -10,7 +10,7 @@ import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
-import TopEmbedMatches from '../components/TopEmbedMatches';
+
 
 import PromotionBoxes from '../components/PromotionBoxes';
 import { Separator } from '../components/ui/separator';
@@ -206,7 +206,7 @@ const Index = () => {
         {/* This section now omitted, per your request */}
 
         {/* TopEmbed Live Matches - shown at the top */}
-        <TopEmbedMatches />
+        
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
