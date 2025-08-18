@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
+import { teamLogoService } from '../services/teamLogoService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 
 interface MatchCardProps {
@@ -40,12 +41,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return format(date, 'MMM d, yyyy');
   };
 
-  const homeBadge = match.teams?.home?.badge
-    ? `https://streamed.pk/api/images/badge/${match.teams.home.badge}.webp`
-    : '';
-  const awayBadge = match.teams?.away?.badge
-    ? `https://streamed.pk/api/images/badge/${match.teams.away.badge}.webp`
-    : '';
+  // Get team badges with fallbacks
+  const getTeamBadge = (team: any) => {
+    if (team?.badge) {
+      return `https://streamed.pk/api/images/badge/${team.badge}.webp`;
+    }
+    // Try to get logo from team logo service
+    const logoFromService = teamLogoService.getTeamLogo(team?.name || '', team?.badge);
+    return logoFromService || '';
+  };
+
+  const homeBadge = getTeamBadge(match.teams?.home);
+  const awayBadge = getTeamBadge(match.teams?.away);
 
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
@@ -122,7 +129,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
     const badgeHTML = (badgeUrl: string, altText: string) => `
       <div class="flex flex-col items-center">
-        <img src="${badgeUrl}" alt="${altText}" class="w-14 h-14 object-contain drop-shadow-md filter brightness-110" />
+        <img 
+          src="${badgeUrl}" 
+          alt="${altText}" 
+          class="w-14 h-14 object-contain drop-shadow-md filter brightness-110" 
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
+        />
+        <div class="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold" style="display:none;">
+          ${altText.substring(0, 2).toUpperCase()}
+        </div>
         <span class="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">${altText}</span>
       </div>
     `;
@@ -181,6 +196,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
               src={homeBadge}
               alt={home || 'Home Team'}
               className="absolute left-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
+              onError={(e) => {
+                console.log('Home badge failed to load:', homeBadge);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           )}
           {awayBadge && (
@@ -188,36 +207,74 @@ const MatchCard: React.FC<MatchCardProps> = ({
               src={awayBadge}
               alt={away || 'Away Team'}
               className="absolute right-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
+              onError={(e) => {
+                console.log('Away badge failed to load:', awayBadge);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
             />
           )}
           
           {/* Teams display with enhanced badges */}
           <div className="flex items-center gap-4 z-10 relative h-full justify-center">
-            {homeBadge && (
+            {homeBadge ? (
               <div className="flex flex-col items-center">
                 <img
                   src={homeBadge}
                   alt={home || 'Home Team'}
                   className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
+                  onError={(e) => {
+                    console.log('Home team badge failed to load:', homeBadge);
+                    // Show team initials fallback
+                    const fallback = document.createElement('div');
+                    fallback.className = 'w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold';
+                    fallback.textContent = (home || 'HT').substring(0, 2).toUpperCase();
+                    (e.target as HTMLImageElement).parentNode?.replaceChild(fallback, e.target as HTMLImageElement);
+                  }}
                 />
                 <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
                   {home || 'Home Team'}
                 </span>
               </div>
-            )}
+            ) : home ? (
+              <div className="flex flex-col items-center">
+                <div className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {home.substring(0, 2).toUpperCase()}
+                </div>
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                  {home}
+                </span>
+              </div>
+            ) : null}
             <span className="text-white font-bold text-lg drop-shadow-sm">VS</span>
-            {awayBadge && (
+            {awayBadge ? (
               <div className="flex flex-col items-center">
                 <img
                   src={awayBadge}
                   alt={away || 'Away Team'}
                   className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
+                  onError={(e) => {
+                    console.log('Away team badge failed to load:', awayBadge);
+                    // Show team initials fallback
+                    const fallback = document.createElement('div');
+                    fallback.className = 'w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold';
+                    fallback.textContent = (away || 'AT').substring(0, 2).toUpperCase();
+                    (e.target as HTMLImageElement).parentNode?.replaceChild(fallback, e.target as HTMLImageElement);
+                  }}
                 />
                 <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
                   {away || 'Away Team'}
                 </span>
               </div>
-            )}
+            ) : away ? (
+              <div className="flex flex-col items-center">
+                <div className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {away.substring(0, 2).toUpperCase()}
+                </div>
+                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                  {away}
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
       );
