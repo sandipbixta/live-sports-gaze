@@ -97,7 +97,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
     const badgeLayoutHTML = () => `
       <div class="w-full h-full relative overflow-hidden">
-        ${backgroundImages()}
+        ${getBackgroundImages()}
         <div class="absolute inset-0 bg-black/40"></div>
         <div class="flex items-center gap-4 z-10 relative h-full justify-center">
           ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
@@ -107,7 +107,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
       </div>
     `;
 
-    const backgroundImages = () => {
+    const getBackgroundImages = () => {
       const bgImages = [
         "https://i.imgur.com/1xsz109.jpg",
         "https://i.imgur.com/sVc77ht.jpg", 
@@ -127,17 +127,31 @@ const MatchCard: React.FC<MatchCardProps> = ({
       </div>
     `;
 
-    const defaultImageHTML = () => `
-      <div class="w-full h-full relative overflow-hidden">
-        <img src="https://i.imgur.com/47knf0G.jpg" alt="Live Stream" class="w-full h-full object-cover" loading="lazy" />
-        <div class="absolute inset-0 bg-black/20"></div>
-      </div>
-    `;
+    const defaultImageHTML = () => {
+      const bgImages = [
+        "https://i.imgur.com/1xsz109.jpg",
+        "https://i.imgur.com/sVc77ht.jpg", 
+        "https://i.imgur.com/1Tw0JRU.jpg",
+        "https://i.imgur.com/MtYQroI.jpg",
+        "https://i.imgur.com/EsEKzFs.jpg",
+        "https://i.imgur.com/XT3MN8i.jpg"
+      ];
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % bgImages.length;
+      return `
+        <div class="w-full h-full relative overflow-hidden">
+          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url(${bgImages[bgIndex]})"></div>
+          <div class="absolute inset-0 bg-black/40"></div>
+          <div class="absolute inset-0 flex items-center justify-center z-10">
+            <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
+          </div>
+        </div>
+      `;
+    };
 
     // Priority 2: Use team badges with background images if available
     if (homeBadge || awayBadge) {
       // Background images array
-      const backgroundImages = [
+      const badgeBackgroundImages = [
         "https://i.imgur.com/1xsz109.jpg",
         "https://i.imgur.com/sVc77ht.jpg", 
         "https://i.imgur.com/1Tw0JRU.jpg",
@@ -147,8 +161,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
       ];
       
       // Select background based on match id for consistency
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % backgroundImages.length;
-      const selectedBg = backgroundImages[bgIndex];
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % badgeBackgroundImages.length;
+      const selectedBg = badgeBackgroundImages[bgIndex];
 
       return (
         <div className="w-full h-full relative overflow-hidden">
@@ -209,17 +223,32 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use default image for matches without logos/badges or posters
+    // Priority 3: Use default image with DAMITV text for matches without logos/badges or posters
+    const defaultBackgroundImages = [
+      "https://i.imgur.com/1xsz109.jpg",
+      "https://i.imgur.com/sVc77ht.jpg", 
+      "https://i.imgur.com/1Tw0JRU.jpg",
+      "https://i.imgur.com/MtYQroI.jpg",
+      "https://i.imgur.com/EsEKzFs.jpg",
+      "https://i.imgur.com/XT3MN8i.jpg"
+    ];
+    
+    const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % defaultBackgroundImages.length;
+    const selectedBg = defaultBackgroundImages[bgIndex];
+
     return (
       <div className="w-full h-full relative overflow-hidden">
-        <img
-          src="https://i.imgur.com/47knf0G.jpg"
-          alt="Live Stream"
-          className="w-full h-full object-cover"
-          loading="lazy"
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${selectedBg})` }}
         />
         {/* Dark overlay for better contrast */}
-        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute inset-0 bg-black/40" />
+        {/* DAMITV Text */}
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
+        </div>
       </div>
     );
   };
