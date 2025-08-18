@@ -147,7 +147,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
           // Run AutoTag after aclib is loaded
           if (window.aclib && window.aclib.runAutoTag) {
             window.aclib.runAutoTag({
-              zoneId: 'bz3drbnei2',
+              zoneId: 'gpxf4edoxs',
             });
           }
         };
@@ -160,7 +160,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       } else {
         // aclib already loaded, run AutoTag directly
         window.aclib.runAutoTag({
-          zoneId: 'bz3drbnei2',
+          zoneId: 'gpxf4edoxs',
         });
       }
     }
