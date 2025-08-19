@@ -40,37 +40,21 @@ const FeaturedChannels = () => {
         </Link>
       </div>
 
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        plugins={[
-          Autoplay({
-            delay: 3000,
-            stopOnInteraction: false,
-            stopOnMouseEnter: true,
-          }),
-        ]}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {featuredChannels.map(channel => (
-            <CarouselItem key={channel.id} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6">
-              <Link 
-                to={`/channels?channel=${channel.id}`}
-                className="block"
-              >
-                <ChannelCard
-                  title={channel.title}
-                  embedUrl={channel.embedUrl}
-                  logo={channel.logo}
-                />
-              </Link>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12 gap-4 grid-rows-2">
+        {featuredChannels.slice(0, 24).map(channel => (
+          <Link 
+            key={channel.id}
+            to={`/channels?channel=${channel.id}`}
+            className="block"
+          >
+            <ChannelCard
+              title={channel.title}
+              embedUrl={channel.embedUrl}
+              logo={channel.logo}
+            />
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
