@@ -8,6 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
+import { teamLogoService } from '@/services/teamLogoService';
 
 
 // Component imports
@@ -74,7 +75,11 @@ const Match = () => {
         console.log(`Loading match: sportId=${sportId}, matchId=${matchId}`);
         const matchData = await fetchMatch(sportId, matchId);
         console.log('Match data loaded:', matchData);
-        setMatch(matchData);
+        
+        // Enhance match with team logos for better sharing
+        const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
+        console.log('Enhanced match with logos:', enhancedMatch);
+        setMatch(enhancedMatch);
         
         // Auto-load stream if available
         if (matchData?.sources?.length > 0) {
@@ -152,8 +157,12 @@ const Match = () => {
     : `Watch ${matchTitle} live stream online for free. Stream this sports match with high-quality video on DamiTV.`;
   
   // Dynamic favicon and Open Graph image based on team logos
-  const dynamicFavicon = match.teams?.home?.logo || match.teams?.away?.logo || '/favicon.ico';
-  const ogImage = match.teams?.home?.logo || match.teams?.away?.logo || 'https://damitv.pro/logo.png';
+  const homeLogo = match.teams?.home?.logo;
+  const awayLogo = match.teams?.away?.logo;
+  const dynamicFavicon = homeLogo || awayLogo || '/favicon.ico';
+  
+  // Create a better sharing image - prefer team logos over fallback
+  const ogImage = homeLogo || awayLogo || `https://via.placeholder.com/1200x630/1a1a1a/ffffff?text=${encodeURIComponent(matchTitle)}`;
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
