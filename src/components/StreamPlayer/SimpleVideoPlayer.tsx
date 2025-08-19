@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink, RectangleHorizontal } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 
 
@@ -19,6 +19,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -50,6 +51,10 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         setIsFullscreen(false);
       });
     }
+  };
+
+  const toggleTheaterMode = () => {
+    setIsTheaterMode(!isTheaterMode);
   };
 
   useEffect(() => {
@@ -136,7 +141,13 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative bg-black rounded-lg overflow-hidden ${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-4xl mx-auto aspect-video'}`}
+      className={`relative bg-black rounded-lg overflow-hidden ${
+        isFullscreen 
+          ? 'w-screen h-screen' 
+          : isTheaterMode 
+            ? 'w-full max-w-6xl mx-auto aspect-video'
+            : 'w-full max-w-4xl mx-auto aspect-video'
+      }`}
     >
       {isM3U8 ? (
         <video
@@ -167,13 +178,24 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </div>
       )}
 
-      <Button
-        onClick={toggleFullscreen}
-        className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white border-0"
-        size="sm"
-      >
-        <Maximize className="w-4 h-4" />
-      </Button>
+      <div className="absolute top-4 right-4 flex gap-2">
+        <Button
+          onClick={toggleTheaterMode}
+          className="bg-black/50 hover:bg-black/70 text-white border-0"
+          size="sm"
+          title="Theater Mode"
+        >
+          <RectangleHorizontal className="w-4 h-4" />
+        </Button>
+        <Button
+          onClick={toggleFullscreen}
+          className="bg-black/50 hover:bg-black/70 text-white border-0"
+          size="sm"
+          title="Fullscreen"
+        >
+          <Maximize className="w-4 h-4" />
+        </Button>
+      </div>
       
       {/* Stream info overlay */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
