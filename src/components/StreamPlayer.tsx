@@ -9,6 +9,8 @@ interface StreamPlayerProps {
   isManualChannel?: boolean;
   isTvChannel?: boolean;
   title?: string;
+  isTheaterMode?: boolean;
+  setIsTheaterMode?: (mode: boolean) => void;
 }
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ 
@@ -17,13 +19,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   onRetry,
   isManualChannel = false,
   isTvChannel = false,
-  title
+  title,
+  isTheaterMode = false,
+  setIsTheaterMode
 }) => {
   return (
     <SimpleVideoPlayer 
       stream={stream}
       isLoading={isLoading}
       onRetry={onRetry}
+      isTheaterMode={isTheaterMode}
+      setIsTheaterMode={setIsTheaterMode}
     />
   );
 };

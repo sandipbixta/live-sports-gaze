@@ -18,7 +18,10 @@ interface StreamTabProps {
   activeSource: string | null;
   handleSourceChange: (source: string, id: string, streamNo?: number) => void;
   popularMatches: MatchType[];
+  trendingMatches: MatchType[];
   sportId: string;
+  isTheaterMode: boolean;
+  setIsTheaterMode: (mode: boolean) => void;
 }
 
 const StreamTab = ({ 
@@ -28,7 +31,10 @@ const StreamTab = ({
   activeSource, 
   handleSourceChange, 
   popularMatches,
-  sportId 
+  trendingMatches,
+  sportId,
+  isTheaterMode,
+  setIsTheaterMode
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
@@ -94,16 +100,18 @@ const StreamTab = ({
     );
   };
 
-  const sortedPopularMatches = [...popularMatches].sort((a, b) => {
+  // Use trending matches for sidebar, they have better data
+  const sidebarMatches = trendingMatches.length > 0 ? trendingMatches : popularMatches;
+  const sortedSidebarMatches = [...sidebarMatches].sort((a, b) => {
     const aTrending = isTrendingMatch(a.title);
     const bTrending = isTrendingMatch(b.title);
     return bTrending.score - aTrending.score;
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left Column - Video Player */}
-      <div className="lg:col-span-2">
+    <div className={isTheaterMode ? "space-y-6" : "grid grid-cols-1 lg:grid-cols-3 gap-6"}>
+      {/* Video Player Section */}
+      <div className={isTheaterMode ? "w-full" : "lg:col-span-2"}>
         <StreamPlayer
           stream={stream}
           isLoading={loadingStream}
@@ -111,6 +119,8 @@ const StreamTab = ({
           title={match.title}
           isManualChannel={false}
           isTvChannel={false}
+          isTheaterMode={isTheaterMode}
+          setIsTheaterMode={setIsTheaterMode}
         />
         
         <StreamSources
@@ -145,19 +155,19 @@ const StreamTab = ({
         )}
       </div>
 
-      {/* Right Column - Trending Matches */}
-      <div className="lg:col-span-1">
-        {sortedPopularMatches.length > 0 ? (
+      {/* Trending Matches Section */}
+      <div className={isTheaterMode ? "w-full mt-8" : "lg:col-span-1"}>
+        {sortedSidebarMatches.length > 0 ? (
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xl">🔥</span>
               <h3 className="text-lg font-bold text-foreground">Trending</h3>
               <span className="text-xs px-2 py-1 rounded-lg bg-card text-muted-foreground border border-border">
-                {Math.min(sortedPopularMatches.length, 8)} matches
+                {Math.min(sortedSidebarMatches.length, 8)} matches
               </span>
             </div>
-            <div className="space-y-3">
-              {sortedPopularMatches.slice(0, 8).map((m, index) => (
+            <div className={isTheaterMode ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4" : "space-y-3"}>
+              {sortedSidebarMatches.slice(0, isTheaterMode ? 12 : 8).map((m, index) => (
                 <MatchCard
                   key={`sidebar-trending-${m.id}-${index}`}
                   match={m}
