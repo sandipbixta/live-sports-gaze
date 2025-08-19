@@ -217,15 +217,6 @@ const Match = () => {
           sportId={sportId || ''}
         />
 
-        {/* Direct Link Advertisement - mobile optimized */}
-        <div className="my-6 sm:my-8">
-          <Advertisement type="direct-link" className="w-full" />
-        </div>
-
-        {/* AutoTag Advertisement */}
-        <div className="my-6 sm:my-8">
-          <Advertisement type="autotag" className="w-full" />
-        </div>
 
         {/* Trending Matches Section */}
         {trendingMatches.length > 0 && (
