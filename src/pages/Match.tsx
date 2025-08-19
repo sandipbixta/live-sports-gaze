@@ -150,6 +150,10 @@ const Match = () => {
   const pageDescription = teams 
     ? `Watch ${teams} live stream online for free. Stream this ${match.title} match with high-quality video on DamiTV.` 
     : `Watch ${matchTitle} live stream online for free. Stream this sports match with high-quality video on DamiTV.`;
+  
+  // Dynamic favicon and Open Graph image based on team logos
+  const dynamicFavicon = match.teams?.home?.logo || match.teams?.away?.logo || '/favicon.ico';
+  const ogImage = match.teams?.home?.logo || match.teams?.away?.logo || 'https://damitv.pro/logo.png';
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
@@ -158,6 +162,28 @@ const Match = () => {
         <meta name="description" content={pageDescription} />
         <meta name="keywords" content={`${matchTitle} live stream, ${teams} live, watch ${match.title}, free stream ${teams}`} />
         <link rel="canonical" href={`https://damitv.pro/match/${sportId}/${matchId}`} />
+        
+        {/* Dynamic favicon based on match */}
+        <link rel="icon" href={dynamicFavicon} type="image/png" />
+        
+        {/* Open Graph meta tags for social sharing */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:url" content={`https://damitv.pro/match/${sportId}/${matchId}`} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="DamiTV" />
+        
+        {/* Twitter Card meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={ogImage} />
+        
+        {/* Additional meta tags for better sharing */}
+        <meta property="article:author" content="DamiTV" />
+        <meta property="article:section" content="Sports" />
+        <meta name="theme-color" content="#1a1a1a" />
         {/* Schema.org structured data for sports event */}
         <script type="application/ld+json">
         {`
