@@ -14,7 +14,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
   if (isLoading) {
     return (
       <div>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-6 lg:grid-cols-11 gap-2">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="h-8 bg-[#242836] animate-pulse rounded-lg"></div>
           ))}
@@ -25,7 +25,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
 
   return (
     <div>
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-6 lg:grid-cols-11 gap-2">
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
