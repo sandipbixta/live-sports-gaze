@@ -7,6 +7,7 @@ import { ArrowLeft, Share, Star, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import TelegramBanner from '@/components/TelegramBanner';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -114,6 +115,11 @@ const ChannelPlayer = () => {
             </Badge>
           </div>
         </div>
+      </div>
+
+      {/* Telegram Banner */}
+      <div className="px-4 pt-4">
+        <TelegramBanner />
       </div>
 
       {/* Video Player - Full width, optimized for mobile */}
