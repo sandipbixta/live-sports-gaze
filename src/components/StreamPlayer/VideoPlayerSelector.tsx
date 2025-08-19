@@ -18,7 +18,7 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
 }) => {
   // Always use the simplest possible iframe approach
   return (
-    <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto aspect-video bg-black rounded-lg overflow-hidden">
       <iframe
         src={src}
         width="100%"
