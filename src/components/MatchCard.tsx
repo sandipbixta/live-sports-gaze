@@ -16,6 +16,8 @@ interface MatchCardProps {
   onClick?: () => void;
   preventNavigation?: boolean;
   isPriority?: boolean;
+  compact?: boolean;
+  hideTitle?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -25,6 +27,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   onClick,
   preventNavigation,
   isPriority,
+  compact = false,
+  hideTitle = false,
 }) => {
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -313,13 +317,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const cardContent = (
     <div className="group cursor-pointer">
       {/* Thumbnail Section */}
-      <div className="relative mb-3">
-        <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">
+      <div className={`relative ${compact ? 'mb-2' : 'mb-3'}`}>
+        <AspectRatio ratio={compact ? 16 / 12 : 16 / 9} className="overflow-hidden rounded-xl bg-muted">
           {generateThumbnail()}
           
           {/* Time badge - top right */}
           <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
-            <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm">
+            <Badge className={`bg-background/90 text-foreground backdrop-blur-sm ${compact ? 'px-1 py-0.5 text-[9px]' : 'px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs'} font-medium`}>
               {match.date ? formatTime(match.date) : 'TBD'}
             </Badge>
           </div>
@@ -327,7 +331,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Live status badge - bottom right */}
           {isLive && (
             <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
-              <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
+              <Badge className={`bg-destructive text-destructive-foreground animate-pulse font-medium ${compact ? 'px-1 py-0.5 text-[9px]' : 'px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs'}`}>
                 LIVE
               </Badge>
             </div>
@@ -336,9 +340,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Stream count overlay */}
           {hasStream && (
             <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
-              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm flex items-center gap-1">
-                <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span className="hidden xs:inline">{match.sources.length}</span>
+              <Badge className={`bg-background/90 text-foreground backdrop-blur-sm flex items-center gap-1 font-medium ${compact ? 'px-1 py-0.5 text-[9px]' : 'px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs'}`}>
+                <Play className={compact ? "w-2 h-2" : "w-2.5 h-2.5 sm:w-3 sm:h-3"} />
+                {!compact && <span className="hidden xs:inline">{match.sources.length}</span>}
               </Badge>
             </div>
           )}
@@ -346,43 +350,49 @@ const MatchCard: React.FC<MatchCardProps> = ({
       </div>
 
       {/* Content Section */}
-      <div className="space-y-2">
-        {/* Title */}
-        <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-          {home && away ? `${home} vs ${away}` : match.title}
-        </h3>
+      {!hideTitle && (
+        <div className={compact ? 'space-y-1' : 'space-y-2'}>
+          {/* Title */}
+          <h3 className={`font-semibold line-clamp-2 text-foreground group-hover:text-primary transition-colors ${compact ? 'text-xs' : 'text-sm'}`}>
+            {home && away ? `${home} vs ${away}` : match.title}
+          </h3>
 
-        {/* Metadata */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {match.date ? formatFullDate(match.date) : 'Date TBD'}
-          </div>
-          
-          {hasStream && (
-            <>
-              <span>•</span>
+          {/* Metadata */}
+          {!compact && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
+                <Calendar className="w-3 h-3" />
+                {match.date ? formatFullDate(match.date) : 'Date TBD'}
               </div>
-            </>
+              
+              {hasStream && (
+                <>
+                  <span>•</span>
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
+                  </div>
+                </>
+              )}
+            </div>
           )}
-        </div>
 
-        {/* Status indicator */}
-        <div className="text-xs">
-          {isLive ? (
-            <span className="text-destructive font-medium">Live now</span>
-          ) : match.date ? (
-            <span className="text-muted-foreground">
-              {match.date > Date.now() ? 'Upcoming' : 'Ended'}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Scheduled</span>
+          {/* Status indicator */}
+          {!compact && (
+            <div className="text-xs">
+              {isLive ? (
+                <span className="text-destructive font-medium">Live now</span>
+              ) : match.date ? (
+                <span className="text-muted-foreground">
+                  {match.date > Date.now() ? 'Upcoming' : 'Ended'}
+                </span>
+              ) : (
+                <span className="text-muted-foreground">Scheduled</span>
+              )}
+            </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 

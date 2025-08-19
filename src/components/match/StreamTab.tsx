@@ -166,14 +166,16 @@ const StreamTab = ({
                 {Math.min(sortedSidebarMatches.length, 8)} matches
               </span>
             </div>
-            <div className={isTheaterMode ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4" : "space-y-3"}>
+            <div className={isTheaterMode ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4" : "space-y-2"}>
               {sortedSidebarMatches.slice(0, isTheaterMode ? 12 : 8).map((m, index) => (
                 <MatchCard
                   key={`sidebar-trending-${m.id}-${index}`}
                   match={m}
                   sportId={sportId}
                   isPriority
-                  className="transform hover:scale-102 transition-transform"
+                  compact={!isTheaterMode}
+                  hideTitle={false}
+                  className={!isTheaterMode ? "transform hover:scale-102 transition-transform" : ""}
                 />
               ))}
             </div>
