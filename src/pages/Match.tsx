@@ -7,6 +7,7 @@ import { fetchMatch, fetchStream, fetchMatches } from '@/api/sportsApi';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
+import TelegramBanner from '@/components/TelegramBanner';
 
 
 // Component imports
@@ -197,6 +198,11 @@ const Match = () => {
       <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
+        {/* Telegram Banner */}
+        <div className="mb-4">
+          <TelegramBanner />
+        </div>
+
         {/* Banner Advertisement - mobile responsive */}
         <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
