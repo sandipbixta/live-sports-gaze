@@ -14,9 +14,9 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
   if (isLoading) {
     return (
       <div>
-        <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="w-32 h-10 bg-[#242836] animate-pulse rounded-lg flex-shrink-0"></div>
+            <div key={i} className="h-10 bg-[#242836] animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
@@ -25,7 +25,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
 
   return (
     <div>
-      <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
