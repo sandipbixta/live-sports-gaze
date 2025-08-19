@@ -32,6 +32,7 @@ const StreamTab = ({
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -109,6 +110,8 @@ const StreamTab = ({
         title={match.title}
         isManualChannel={false}
         isTvChannel={false}
+        isTheaterMode={isTheaterMode}
+        onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
       />
       
       <StreamSources
@@ -142,7 +145,8 @@ const StreamTab = ({
         </Card>
       )}
       
-      {sortedPopularMatches.length > 0 && (
+      {/* Hide trending matches in theater mode or show them normally */}
+      {!isTheaterMode && sortedPopularMatches.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🔥</span>
@@ -164,7 +168,7 @@ const StreamTab = ({
         </div>
       )}
       
-      {sortedPopularMatches.length === 0 && (
+      {!isTheaterMode && sortedPopularMatches.length === 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🔥</span>

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 
 
@@ -10,12 +10,16 @@ interface SimpleVideoPlayerProps {
   stream: Stream | null;
   isLoading?: boolean;
   onRetry?: () => void;
+  isTheaterMode?: boolean;
+  onTheaterModeToggle?: () => void;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   stream,
   isLoading = false,
-  onRetry
+  onRetry,
+  isTheaterMode = false,
+  onTheaterModeToggle
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -89,7 +93,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-5xl mx-auto aspect-video bg-black rounded-lg flex items-center justify-center">
+      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-black rounded-lg flex items-center justify-center`}>
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p>Loading stream...</p>
@@ -100,7 +104,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   if (!stream || error) {
     return (
-      <div className="w-full max-w-5xl mx-auto aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gray-900 rounded-lg flex items-center justify-center`}>
         <div className="text-center text-white p-6">
           <Play className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <h3 className="text-lg font-semibold mb-2">
@@ -136,7 +140,11 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative bg-black rounded-lg overflow-hidden ${isFullscreen ? 'w-screen h-screen' : 'w-full max-w-5xl mx-auto aspect-video'}`}
+      className={`relative bg-black rounded-lg overflow-hidden ${
+        isFullscreen ? 'w-screen h-screen' : 
+        isTheaterMode ? 'w-full max-w-none aspect-video' : 
+        'w-full max-w-5xl mx-auto aspect-video'
+      }`}
     >
       {isM3U8 ? (
         <video
@@ -167,13 +175,25 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </div>
       )}
 
-      <Button
-        onClick={toggleFullscreen}
-        className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white border-0"
-        size="sm"
-      >
-        <Maximize className="w-4 h-4" />
-      </Button>
+      {/* Theater mode and fullscreen buttons */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        {onTheaterModeToggle && (
+          <Button
+            onClick={onTheaterModeToggle}
+            className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isTheaterMode ? 'bg-blue-600/70 hover:bg-blue-600/90' : ''}`}
+            size="sm"
+          >
+            <Monitor className="w-4 h-4" />
+          </Button>
+        )}
+        <Button
+          onClick={toggleFullscreen}
+          className="bg-black/50 hover:bg-black/70 text-white border-0"
+          size="sm"
+        >
+          <Maximize className="w-4 h-4" />
+        </Button>
+      </div>
       
       {/* Stream info overlay */}
       <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
