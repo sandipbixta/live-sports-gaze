@@ -30,7 +30,6 @@ const Match = () => {
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
   const [retryCounter, setRetryCounter] = useState(0);
-  const [isTheaterMode, setIsTheaterMode] = useState(false);
   
   // Memoized stream fetching function
   const fetchStreamData = useCallback(async (source: string, id: string, streamNo?: number) => {
@@ -214,10 +213,7 @@ const Match = () => {
             activeSource={activeSource}
             handleSourceChange={handleSourceChange}
             popularMatches={popularMatches}
-            trendingMatches={trendingMatches}
             sportId={sportId || ''}
-            isTheaterMode={isTheaterMode}
-            setIsTheaterMode={setIsTheaterMode}
           />
         )}
         
@@ -233,11 +229,11 @@ const Match = () => {
           <Advertisement type="autotag" className="w-full" />
         </div>
 
-        {/* Trending Matches Section - Hide when theater mode is active */}
-        {!isTheaterMode && trendingMatches.length > 0 && (
+        {/* Trending Matches Section */}
+        {trendingMatches.length > 0 && (
           <div className="mt-8 sm:mt-12">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-              🔥 More Trending Matches
+              🔥 Trending Matches
               <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
                 {trendingMatches.length} matches
               </span>

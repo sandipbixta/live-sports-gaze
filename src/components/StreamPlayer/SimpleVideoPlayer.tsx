@@ -10,19 +10,16 @@ interface SimpleVideoPlayerProps {
   stream: Stream | null;
   isLoading?: boolean;
   onRetry?: () => void;
-  isTheaterMode?: boolean;
-  setIsTheaterMode?: (mode: boolean) => void;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   stream,
   isLoading = false,
-  onRetry,
-  isTheaterMode = false,
-  setIsTheaterMode
+  onRetry
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -57,9 +54,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   };
 
   const toggleTheaterMode = () => {
-    if (setIsTheaterMode) {
-      setIsTheaterMode(!isTheaterMode);
-    }
+    setIsTheaterMode(!isTheaterMode);
   };
 
   useEffect(() => {

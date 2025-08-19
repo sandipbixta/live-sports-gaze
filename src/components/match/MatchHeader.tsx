@@ -28,7 +28,7 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
               <ChevronLeft className="mr-1" />
               Back
             </Button>
-            
+            <h1 className="text-base sm:text-xl font-bold text-white truncate">{match.title}</h1>
           </div>
         </div>
       </header>
