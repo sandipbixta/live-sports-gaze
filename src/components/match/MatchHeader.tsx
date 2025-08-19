@@ -15,7 +15,7 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
     
   return (
     <>
-      {/* Header with navigation */}
+      {/* Header with navigation only */}
       <header className="bg-sports-darker shadow-md">
         <div className="container mx-auto py-2 sm:py-4 px-2 sm:px-4">
           <div className="flex items-center">
@@ -28,17 +28,9 @@ const MatchHeader = ({ match, streamAvailable }: MatchHeaderProps) => {
               <ChevronLeft className="mr-1" />
               Back
             </Button>
-            <h1 className="text-base sm:text-xl font-bold text-white truncate">{match.title}</h1>
           </div>
         </div>
       </header>
-      
-      {/* Match banner */}
-      <MatchBanner 
-        match={match} 
-        streamAvailable={streamAvailable} 
-        isMobile={isMobile} 
-      />
     </>
   );
 };
