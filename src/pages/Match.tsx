@@ -11,9 +11,7 @@ import { isTrendingMatch } from '@/utils/popularLeagues';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
-import TabsNavigation from '@/components/match/TabsNavigation';
 import StreamTab from '@/components/match/StreamTab';
-import HighlightsTab from '@/components/match/HighlightsTab';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
@@ -25,7 +23,7 @@ const Match = () => {
   const [stream, setStream] = useState<Stream | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStream, setLoadingStream] = useState(false);
-  const [activeTab, setActiveTab] = useState('stream');
+  
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
@@ -197,7 +195,6 @@ const Match = () => {
       
       
       <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
-      <TabsNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         {/* Banner Advertisement - mobile responsive */}
@@ -205,19 +202,20 @@ const Match = () => {
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
-        {activeTab === 'stream' && (
-          <StreamTab
-            match={match}
-            stream={stream}
-            loadingStream={loadingStream}
-            activeSource={activeSource}
-            handleSourceChange={handleSourceChange}
-            popularMatches={popularMatches}
-            sportId={sportId || ''}
-          />
-        )}
+        {/* Match Title */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white">{match.title}</h1>
+        </div>
         
-        {activeTab === 'highlights' && <HighlightsTab />}
+        <StreamTab
+          match={match}
+          stream={stream}
+          loadingStream={loadingStream}
+          activeSource={activeSource}
+          handleSourceChange={handleSourceChange}
+          popularMatches={popularMatches}
+          sportId={sportId || ''}
+        />
 
         {/* Direct Link Advertisement - mobile optimized */}
         <div className="my-6 sm:my-8">
