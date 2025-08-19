@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
+import { usePopunderAd } from "./hooks/usePopunderAd";
 
 // Import pages directly instead of lazy loading to avoid module import errors
 import Index from "./pages/Index";
@@ -32,6 +34,10 @@ const queryClient = new QueryClient({
 });
 
 const App: React.FC = () => {
+  // Initialize ad hooks
+  useDirectLinkAd();
+  usePopunderAd();
+
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>

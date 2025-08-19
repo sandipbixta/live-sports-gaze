@@ -1,23 +1,37 @@
-import { useEffect } from 'react';
-
-const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
-const SESSION_KEY = "directLinkAdOpened";
+import { useEffect, useRef } from 'react';
+import { adConfig, shouldShowAds, isAdCooldownPassed, markAdTriggered } from '@/utils/adConfig';
 
 export const useDirectLinkAd = () => {
+  const clickCountRef = useRef(0);
+  const requiredClicks = 3; // Require 3 clicks before triggering
+
   useEffect(() => {
+    if (!shouldShowAds()) {
+      return;
+    }
+
     const handleGlobalClick = () => {
-      // Check if ad was already opened in this session
-      if (sessionStorage.getItem(SESSION_KEY)) {
+      // Check if cooldown period has passed
+      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, adConfig.directLink.cooldownMinutes)) {
         return;
       }
 
-      // Mark as opened and open the ad
-      sessionStorage.setItem(SESSION_KEY, "true");
-      window.open(AD_URL, "_blank", "noopener noreferrer");
+      // Increment click count
+      clickCountRef.current += 1;
+
+      // Only trigger after required number of clicks
+      if (clickCountRef.current >= requiredClicks) {
+        // Mark as triggered and open the ad
+        markAdTriggered(adConfig.directLink.sessionKey);
+        window.open(adConfig.directLink.url, "_blank", "noopener noreferrer");
+        
+        // Reset click count
+        clickCountRef.current = 0;
+      }
     };
 
     // Add click listener to document
-    document.addEventListener('click', handleGlobalClick, { once: true });
+    document.addEventListener('click', handleGlobalClick);
 
     return () => {
       document.removeEventListener('click', handleGlobalClick);
