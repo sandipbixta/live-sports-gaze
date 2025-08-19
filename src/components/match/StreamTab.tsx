@@ -168,19 +168,6 @@ const StreamTab = ({
         </div>
       )}
       
-      {!isTheaterMode && sortedPopularMatches.length === 0 && (
-        <div className="mt-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">🔥</span>
-            <h3 className="text-xl font-bold text-white">Trending Matches</h3>
-          </div>
-          <Card className="bg-sports-card border-sports">
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">No trending matches available at this time.</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 };
