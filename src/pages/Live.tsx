@@ -17,6 +17,7 @@ import FeaturedPlayer from '../components/live/FeaturedPlayer';
 import SportFilterPills from '../components/live/SportFilterPills';
 import MatchesTabContent from '../components/live/MatchesTabContent';
 import MatchSection from '../components/MatchSection';
+import TelegramBanner from '../components/TelegramBanner';
 
 const Live = () => {
   const { toast } = useToast();
@@ -134,7 +135,10 @@ const Live = () => {
         </script>
       </Helmet>
       
-      
+      {/* Telegram Banner */}
+      <div className="mb-6">
+        <TelegramBanner />
+      </div>
       
       <div className="mb-8">
         <LiveHeader

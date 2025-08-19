@@ -19,6 +19,7 @@ import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
+import TelegramBanner from '../components/TelegramBanner';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -210,10 +211,10 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Direct Link Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="direct-link" className="w-full" />
-        </div> */}
+        {/* Telegram Banner */}
+        <div className="mb-6">
+          <TelegramBanner />
+        </div>
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">

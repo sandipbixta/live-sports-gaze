@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Helmet } from 'react-helmet-async';
 import { Calendar } from 'lucide-react';
+import TelegramBanner from '../components/TelegramBanner';
 
 const Channels = () => {
   const isMobile = useIsMobile();
@@ -139,10 +140,10 @@ const Channels = () => {
           Watch international sports channels from around the world with our comprehensive TV guide and live streams.
         </p>
         
-        {/* Banner Advertisement removed */}
-        {/* <div className={`mb-4 sm:mb-6 ${isMobile ? 'overflow-x-hidden' : ''}`}>
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
+        {/* Telegram Banner */}
+        <div className="mb-6">
+          <TelegramBanner />
+        </div>
         
         <ChannelsGrid />
         

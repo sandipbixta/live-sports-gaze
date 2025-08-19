@@ -13,6 +13,7 @@ import DatePagination from '../components/DatePagination';
 import PopularGames from '../components/PopularGames';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
+import TelegramBanner from '../components/TelegramBanner';
 // import Advertisement from '../components/Advertisement';
 
 const Schedule = () => {
@@ -170,10 +171,10 @@ const Schedule = () => {
           showCalendar={false}
         />
         
-        {/* Banner Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
+        {/* Telegram Banner */}
+        <div className="mb-6">
+          <TelegramBanner />
+        </div>
         
         <div className="mb-6">
           <DatePagination 

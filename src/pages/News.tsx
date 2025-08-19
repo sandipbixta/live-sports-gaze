@@ -8,6 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import SocialBar from '../components/SocialBar';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Share } from 'lucide-react';
+import TelegramBanner from '../components/TelegramBanner';
 
 const News = () => {
   const { toast } = useToast();
@@ -87,10 +88,10 @@ const News = () => {
           </Button>
         </div>
         
-        {/* Banner Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
+        {/* Telegram Banner */}
+        <div className="mb-6">
+          <TelegramBanner />
+        </div>
         
         {/* Email signup for returning visitors */}
         <div className="bg-white dark:bg-black rounded-xl p-4 sm:p-5 border border-black dark:border-white mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
