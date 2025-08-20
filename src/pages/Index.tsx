@@ -24,6 +24,7 @@ import TelegramBanner from '../components/TelegramBanner';
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
+const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
 
 const Index = () => {
   const { toast } = useToast();
@@ -309,10 +310,17 @@ const Index = () => {
               )}
             </div>
             
-            <div className="mb-8">
-              <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                <NewsSection />
-              </React.Suspense>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <div className="lg:col-span-2">
+                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                  <NewsSection />
+                </React.Suspense>
+              </div>
+              <div>
+                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                  <TrendingTopics />
+                </React.Suspense>
+              </div>
             </div>
             
             <PromotionBoxes />

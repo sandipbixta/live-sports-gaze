@@ -9,7 +9,8 @@ import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
-
+import SEOMetaTags from '@/components/SEOMetaTags';
+import SocialShare from '@/components/SocialShare';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -149,88 +150,46 @@ const Match = () => {
   }
   
   // Format match title for SEO
-  const matchTitle = match.title || 'Sports Match';
-  const teams = match.teams ? `${match.teams.home?.name || ''} vs ${match.teams.away?.name || ''}` : '';
-  const pageTitle = teams ? `${teams} - Live Stream | DamiTV` : `${matchTitle} - Live Stream | DamiTV`;
-  const pageDescription = teams 
-    ? `Watch ${teams} live stream online for free. Stream this ${match.title} match with high-quality video on DamiTV.` 
-    : `Watch ${matchTitle} live stream online for free. Stream this sports match with high-quality video on DamiTV.`;
-  
-  // Dynamic favicon and Open Graph image based on team logos
-  const homeLogo = match.teams?.home?.logo;
-  const awayLogo = match.teams?.away?.logo;
-  const dynamicFavicon = homeLogo || awayLogo || '/favicon.ico';
-  
-  // Create a better sharing image - prefer team logos over fallback
-  const ogImage = homeLogo || awayLogo || `https://via.placeholder.com/1200x630/1a1a1a/ffffff?text=${encodeURIComponent(matchTitle)}`;
+  const homeTeam = match.teams?.home?.name || '';
+  const awayTeam = match.teams?.away?.name || '';
+  const matchTitle = homeTeam && awayTeam ? `${homeTeam} vs ${awayTeam}` : match.title;
+  const matchDescription = `Watch ${matchTitle} live stream online for free on DamiTV. HD quality streaming with multiple sources available.`;
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
+      <SEOMetaTags
+        title={`${matchTitle} - Live Stream | DamiTV`}
+        description={matchDescription}
+        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, live football streaming, watch ${homeTeam} vs ${awayTeam}`}
+        canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
+        matchInfo={{
+          homeTeam,
+          awayTeam,
+          league: match.category || 'Football',
+          date: match.date ? new Date(match.date) : new Date(),
+        }}
+        breadcrumbs={[
+          { name: 'Home', url: 'https://damitv.pro/' },
+          { name: 'Live Matches', url: 'https://damitv.pro/live' },
+          { name: matchTitle, url: `https://damitv.pro/match/${sportId}/${matchId}` }
+        ]}
+      />
+
       <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta name="keywords" content={`${matchTitle} live stream, ${teams} live, watch ${match.title}, free stream ${teams}`} />
-        <link rel="canonical" href={`https://damitv.pro/match/${sportId}/${matchId}`} />
-        
-        {/* Dynamic favicon based on match */}
-        <link rel="icon" href={dynamicFavicon} type="image/png" />
-        
-        {/* Open Graph meta tags for social sharing */}
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:url" content={`https://damitv.pro/match/${sportId}/${matchId}`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="DamiTV" />
-        
-        {/* Twitter Card meta tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={ogImage} />
-        
-        {/* Additional meta tags for better sharing */}
-        <meta property="article:author" content="DamiTV" />
-        <meta property="article:section" content="Sports" />
-        <meta name="theme-color" content="#1a1a1a" />
-        {/* Schema.org structured data for sports event */}
-        <script type="application/ld+json">
-        {`
-          {
-            "@context": "https://schema.org",
-            "@type": "SportsEvent",
-            "name": "${matchTitle}",
-            "description": "${pageDescription}",
-            "startDate": "${new Date().toISOString()}",
-            "url": "https://damitv.pro/match/${sportId}/${matchId}",
-            "location": {
-              "@type": "VirtualLocation",
-              "name": "DamiTV Streaming Platform"
-            },
-            "competitor": [
-              {
-                "@type": "SportsTeam",
-                "name": "${match.teams?.home?.name || 'Home Team'}"
-              },
-              {
-                "@type": "SportsTeam",
-                "name": "${match.teams?.away?.name || 'Away Team'}"
-              }
-            ],
-            "video": {
-              "@type": "VideoObject",
-              "name": "${matchTitle} Live Stream",
-              "description": "Live streaming video for ${matchTitle}",
-              "uploadDate": "${new Date().toISOString()}",
-              "thumbnailUrl": "${match.teams?.home?.logo || match.teams?.away?.logo || 'https://damitv.pro/logo.png'}"
-            }
-          }
-        `}
-        </script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
       </Helmet>
       
-      
-      <MatchHeader match={match} streamAvailable={!!stream && stream.id !== "error"} />
+      <MatchHeader 
+        match={match} 
+        streamAvailable={!!stream && stream.id !== "error"}
+        socialShare={
+          <SocialShare 
+            title={matchTitle}
+            description={matchDescription}
+            url={`https://damitv.pro/match/${sportId}/${matchId}`}
+          />
+        }
+      />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         {/* Telegram Banner */}

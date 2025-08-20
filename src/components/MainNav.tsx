@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import Clock from "./Clock";
 import ThemeToggle from "./ThemeToggle";
+import PushNotifications from "./PushNotifications";
 
 const MainNav = () => {
   const isMobile = useIsMobile();
@@ -59,6 +60,7 @@ const MainNav = () => {
       </NavigationMenu>
       
       <div className="hidden md:flex items-center gap-2 ml-auto">
+        <PushNotifications />
         <ThemeToggle />
         <Clock />
       </div>
