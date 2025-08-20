@@ -21,6 +21,18 @@ const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
+// Helper function to reorder sports list - move tennis to the end
+const reorderSports = (sports: Sport[]): Sport[] => {
+  const tennisIndex = sports.findIndex(sport => sport.id === 'tennis');
+  if (tennisIndex === -1) return sports; // Tennis not found, return as is
+  
+  const sportsWithoutTennis = sports.filter(sport => sport.id !== 'tennis');
+  const tennisSport = sports[tennisIndex];
+  
+  // Add tennis at the end
+  return [...sportsWithoutTennis, tennisSport];
+};
+
 export const fetchSports = async (): Promise<Sport[]> => {
   const cacheKey = 'sports';
   const cached = getCachedData(cacheKey);
@@ -50,9 +62,11 @@ export const fetchSports = async (): Promise<Sport[]> => {
       throw new Error('Invalid sports data format');
     }
     
-    setCachedData(cacheKey, data);
-    console.log(`✅ Fetched ${data.length} sports from streamed.pk API`);
-    return data;
+    // Reorder sports to move tennis to the end
+    const reorderedData = reorderSports(data);
+    setCachedData(cacheKey, reorderedData);
+    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
+    return reorderedData;
   } catch (error) {
     console.error('❌ Error fetching sports from streamed.pk:', error);
     
@@ -68,9 +82,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
         if (retryResponse.ok) {
           const retryData = await retryResponse.json();
           if (Array.isArray(retryData)) {
-            setCachedData(cacheKey, retryData);
-            console.log(`✅ Mobile retry successful: ${retryData.length} sports`);
-            return retryData;
+            const reorderedRetryData = reorderSports(retryData);
+            setCachedData(cacheKey, reorderedRetryData);
+            console.log(`✅ Mobile retry successful: ${reorderedRetryData.length} sports`);
+            return reorderedRetryData;
           }
         }
       } catch (retryError) {
