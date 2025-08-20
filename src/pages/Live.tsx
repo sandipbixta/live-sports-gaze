@@ -237,6 +237,8 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Live`}
                       isLive={true}
+                      onMatchSelect={handleMatchSelect}
+                      preventNavigation={true}
                     />
                   ))}
                 </div>
@@ -271,6 +273,8 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Upcoming`}
                       isLive={false}
+                      onMatchSelect={handleMatchSelect}
+                      preventNavigation={true}
                     />
                   ))}
                 </div>

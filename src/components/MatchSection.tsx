@@ -12,6 +12,8 @@ interface MatchSectionProps {
   isLive?: boolean;
   showEmptyMessage?: boolean;
   emptyMessage?: string;
+  onMatchSelect?: (match: Match) => void;
+  preventNavigation?: boolean;
 }
 
 const MatchSection: React.FC<MatchSectionProps> = ({
@@ -20,7 +22,9 @@ const MatchSection: React.FC<MatchSectionProps> = ({
   title,
   isLive = false,
   showEmptyMessage = false,
-  emptyMessage = "No matches available at this time."
+  emptyMessage = "No matches available at this time.",
+  onMatchSelect,
+  preventNavigation = false
 }) => {
   const isMobile = useIsMobile();
 
@@ -64,11 +68,18 @@ const MatchSection: React.FC<MatchSectionProps> = ({
       </h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
         {matches.map((match, index) => (
-          <MatchCard 
+          <div 
             key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}
-            match={match}
-            sportId={sportId}
-          />
+            className={preventNavigation ? "cursor-pointer" : ""}
+            onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
+          >
+            <MatchCard 
+              match={match}
+              sportId={sportId}
+              onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
+              preventNavigation={preventNavigation}
+            />
+          </div>
         ))}
       </div>
     </div>
