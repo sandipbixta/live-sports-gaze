@@ -2,30 +2,37 @@
 // Ad configuration utility
 export const adConfig = {
   socialBar: {
-    scriptSrc: '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js'
+    scriptSrc: '//uncertainbill.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js'
   },
   banner: {
-    key: '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
-    scriptSrc: '//monkeyhundredsarmed.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js',
-    desktop: {
+    large: {
+      key: '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
+      scriptSrc: '//uncertainbill.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js',
       width: 728,
       height: 90
     },
-    mobile: {
-      width: 320,
-      height: 50
+    medium: {
+      key: '24887eba6a7c2444602020b1915f8a43',
+      scriptSrc: '//uncertainbill.com/24887eba6a7c2444602020b1915f8a43/invoke.js',
+      width: 468,
+      height: 60
     }
+  },
+  container: {
+    key: 'a873bc1d3d203f2f13c32a99592441b8',
+    scriptSrc: '//uncertainbill.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js',
+    containerId: 'container-a873bc1d3d203f2f13c32a99592441b8'
   },
   directLink: {
     url: 'https://uncertainbill.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-    cooldownMinutes: 30, // Only trigger once every 30 minutes
+    cooldownMinutes: 30,
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
     scriptSrc: '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
-    cooldownMinutes: 60, // Only trigger once every hour
+    cooldownMinutes: 60,
     sessionKey: 'popunderAdTriggered',
-    delaySeconds: 5 // Wait 5 seconds after page load
+    delaySeconds: 5
   }
 };
 
@@ -53,10 +60,16 @@ export const markAdTriggered = (sessionKey: string): void => {
   localStorage.setItem(sessionKey, Date.now().toString());
 };
 
+// Helper to get appropriate ad dimensions and config based on device type
+export const getBannerAdConfig = (isMobile: boolean) => {
+  return isMobile ? adConfig.banner.medium : adConfig.banner.large;
+};
+
 // Helper to get appropriate ad dimensions based on device type
 export const getAdDimensions = (type: 'banner', isMobile: boolean) => {
   if (type === 'banner') {
-    return isMobile ? adConfig.banner.mobile : adConfig.banner.desktop;
+    const config = getBannerAdConfig(isMobile);
+    return { width: config.width, height: config.height };
   }
   return { width: 300, height: 250 }; // Default
 };
