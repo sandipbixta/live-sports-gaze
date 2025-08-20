@@ -137,8 +137,6 @@ const TrendingTopics: React.FC = () => {
                       {topic.category}
                     </Badge>
                     <span>•</span>
-                    <span>{formatViews(topic.views)} watching</span>
-                    <span>•</span>
                     <span>{topic.timeAgo}</span>
                   </div>
                 </div>
