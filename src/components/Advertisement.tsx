@@ -135,32 +135,32 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       adRef.current.appendChild(link);
       
     } else if (type === 'autotag') {
-      // AutoTag ad - aclib integration
-      // First load the aclib library if not already loaded
+      // AutoTag ad - adblock bypass integration
+      // First load the local aclib library if not already loaded
       if (!window.aclib) {
         const aclibScript = document.createElement('script');
         aclibScript.type = 'text/javascript';
-        aclibScript.src = '//acscdn.com/script/aclib.js';
+        aclibScript.src = '/js/aclib.js'; // Local adblock bypass library
         aclibScript.async = true;
         
         aclibScript.onload = () => {
           // Run AutoTag after aclib is loaded
           if (window.aclib && window.aclib.runAutoTag) {
             window.aclib.runAutoTag({
-              zoneId: 'gpxf4edoxs',
+              zoneId: 'bz3drbnei2', // Updated zone ID for adblock bypass
             });
           }
         };
         
         aclibScript.onerror = () => {
-          console.log('AutoTag aclib script failed to load');
+          console.log('AutoTag aclib script failed to load - ensure adblock bypass script is installed');
         };
         
         document.head.appendChild(aclibScript);
       } else {
         // aclib already loaded, run AutoTag directly
         window.aclib.runAutoTag({
-          zoneId: 'gpxf4edoxs',
+          zoneId: 'bz3drbnei2', // Updated zone ID for adblock bypass
         });
       }
     }
