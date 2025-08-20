@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import ChannelsGrid from '../components/ChannelsGrid';
-// import Advertisement from '../components/Advertisement';
+import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -143,6 +143,11 @@ const Channels = () => {
         {/* Telegram Banner */}
         <div className="mb-6">
           <TelegramBanner />
+        </div>
+        
+        {/* Video Advertisement */}
+        <div className="mb-6">
+          <Advertisement type="video" className="w-full" />
         </div>
         
         <ChannelsGrid />
