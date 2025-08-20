@@ -108,14 +108,49 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     );
   }
 
-  // Sort sports to show football first
-  const sortedSports = Object.entries(matchesBySport).sort(([sportIdA], [sportIdB]) => {
-    const isFootballA = sportIdA.toLowerCase().includes('football') || sportIdA.toLowerCase().includes('soccer') || sportIdA === '1';
-    const isFootballB = sportIdB.toLowerCase().includes('football') || sportIdB.toLowerCase().includes('soccer') || sportIdB === '1';
+  // Define preferred sport order with tennis at the end
+  const getSportPriority = (sportId: string): number => {
+    const sportOrder: { [key: string]: number } = {
+      'football': 1,
+      'basketball': 2, 
+      'american-football': 3,
+      'hockey': 4,
+      'baseball': 5,
+      'motor-sports': 6,
+      'fight': 7,
+      'rugby': 8,
+      'cricket': 9,
+      'golf': 10,
+      'billiards': 11,
+      'afl': 12,
+      'darts': 13,
+      'other': 14,
+      'tennis': 15  // Tennis moved to last position
+    };
     
-    if (isFootballA && !isFootballB) return -1;
-    if (!isFootballA && isFootballB) return 1;
-    return 0;
+    const normalizedSportId = sportId.toLowerCase();
+    
+    // Check for exact match first
+    if (sportOrder[normalizedSportId] !== undefined) {
+      return sportOrder[normalizedSportId];
+    }
+    
+    // Check for partial matches
+    for (const [sport, priority] of Object.entries(sportOrder)) {
+      if (normalizedSportId.includes(sport) || sport.includes(normalizedSportId)) {
+        return priority;
+      }
+    }
+    
+    // Unknown sports get high priority (but before tennis)
+    return 14.5;
+  };
+
+  // Sort sports by priority with tennis at the end
+  const sortedSports = Object.entries(matchesBySport).sort(([sportIdA], [sportIdB]) => {
+    const priorityA = getSportPriority(sportIdA);
+    const priorityB = getSportPriority(sportIdB);
+    return priorityA - priorityB;
   });
 
   return (
