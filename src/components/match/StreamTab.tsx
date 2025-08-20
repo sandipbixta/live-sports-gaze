@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
+import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 import { useEffect, useState } from 'react';
@@ -103,6 +104,11 @@ const StreamTab = ({
 
   return (
     <div>
+      {/* Video Advertisement */}
+      <div className="mb-4">
+        <Advertisement type="video" className="w-full" />
+      </div>
+      
       <StreamPlayer
         stream={stream}
         isLoading={loadingStream}

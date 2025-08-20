@@ -87,7 +87,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       // Video ad - new ad script
       const script = document.createElement('script');
       script.type = 'text/javascript';
-      script.src = '//monkeyhundredsarmed.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
+      script.src = '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
       script.async = true;
       
       // Add error handling

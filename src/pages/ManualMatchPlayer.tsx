@@ -6,6 +6,7 @@ import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
 import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
+import Advertisement from '@/components/Advertisement';
 
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
@@ -219,6 +220,11 @@ const ManualMatchPlayer = () => {
                   </h2>
                 </div>
               )}
+              
+              {/* Video Advertisement */}
+              <div className="mb-4">
+                <Advertisement type="video" className="w-full" />
+              </div>
               
               <div className="relative aspect-video bg-black" data-player-container>
                 {selectedLink ? (
