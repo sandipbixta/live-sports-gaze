@@ -219,18 +219,18 @@ const Index = () => {
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-white">Featured Sports</h1>
+            <h1 className="text-2xl font-bold text-foreground">Featured Sports</h1>
             <div className="flex gap-2">
               <Button 
                 variant="outline" 
-                className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent"
+                className="text-foreground border-border hover:bg-muted bg-background"
                 onClick={() => setShowLiveSports(!showLiveSports)}
               >
                 <Tv className="mr-2 h-4 w-4" /> 
                 {showLiveSports ? 'Hide Live Sports' : 'Live Sports'}
               </Button>
               <Link to="/schedule">
-                <Button variant="outline" className="text-white border-[#343a4d] hover:bg-[#343a4d] bg-transparent">
+                <Button variant="outline" className="text-foreground border-border hover:bg-muted bg-background">
                   <Calendar className="mr-2 h-4 w-4" /> View Schedule
                 </Button>
               </Link>
@@ -239,7 +239,7 @@ const Index = () => {
           
           {showLiveSports ? (
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-white mb-4">Live Sports Streams</h2>
+              <h2 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h2>
               <LiveSportsWidget />
             </div>
           ) : (
@@ -269,7 +269,7 @@ const Index = () => {
                   {selectedSport === 'all' ? (
                     <div>
                       <div className="mb-4">
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-foreground">
                           Live Matches - All Sports
                         </h2>
                         <p className="text-gray-400 text-sm">
@@ -281,7 +281,7 @@ const Index = () => {
                   ) : (
                     <>
                       <div className="mb-4">
-                        <h2 className="text-xl font-bold text-white">
+                        <h2 className="text-xl font-bold text-foreground">
                           {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
                         </h2>
                         <p className="text-gray-400 text-sm">

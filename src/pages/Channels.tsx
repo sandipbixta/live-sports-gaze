@@ -128,9 +128,9 @@ const Channels = () => {
       
       <div className="mb-6 sm:mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-white">Live TV Channels</h1>
+          <h1 className="text-3xl font-bold text-foreground">Live TV Channels</h1>
           <Link to="/schedule" className="hidden sm:flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]">
+            <Button variant="outline" size="sm" className="bg-background border-border text-foreground hover:bg-muted">
               <Calendar className="h-4 w-4 mr-2" />
               Full Schedule
             </Button>
@@ -160,7 +160,7 @@ const Channels = () => {
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h3 className="text-xl font-bold text-white">Latest Sports Updates</h3>
+            <h3 className="text-xl font-bold text-foreground">Latest Sports Updates</h3>
             <p className="text-sm text-gray-300">Get breaking news and match reports</p>
           </div>
           <Link to="/news">

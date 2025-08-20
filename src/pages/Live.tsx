@@ -183,20 +183,20 @@ const Live = () => {
           <TabsList className="bg-[#242836] border border-[#343a4d]">
             <TabsTrigger 
               value="all" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-muted data-[state=active]:text-foreground"
             >
               All Matches
             </TabsTrigger>
             <TabsTrigger 
               value="live" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-muted data-[state=active]:text-foreground"
             >
               <span className="inline-block h-2 w-2 bg-[#ff5a36] rounded-full animate-pulse mr-1"></span>
               Live Now ({liveMatches.length})
             </TabsTrigger>
             <TabsTrigger 
               value="upcoming" 
-              className="data-[state=active]:bg-[#343a4d] data-[state=active]:text-white"
+              className="data-[state=active]:bg-muted data-[state=active]:text-foreground"
             >
               <Clock size={14} className="mr-1" />
               Upcoming ({upcomingMatches.length})
@@ -324,7 +324,7 @@ const Live = () => {
       <Link to="/channels" className="block w-full">
         <div className="bg-[#242836] hover:bg-[#2a2f3f] border border-[#343a4d] rounded-xl p-6 text-center transition-all">
           <Radio className="h-10 w-10 text-[#9b87f5] mx-auto mb-4" aria-hidden="true" />
-          <h3 className="text-xl font-semibold text-white">Live TV Channels</h3>
+          <h3 className="text-xl font-semibold text-foreground">Live TV Channels</h3>
           <p className="text-gray-300 mt-2">Access 70+ international sports channels from around the world</p>
           <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
         </div>
