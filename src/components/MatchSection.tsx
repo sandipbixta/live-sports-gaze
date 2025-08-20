@@ -66,7 +66,7 @@ const MatchSection: React.FC<MatchSectionProps> = ({
           {matches.length} {matches.length === 1 ? 'match' : 'matches'}
         </span>
       </h2>
-      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
         {matches.map((match, index) => (
           <div 
             key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}
