@@ -30,7 +30,7 @@ export const adConfig = {
   },
   popunder: {
     scriptSrc: '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
-    cooldownMinutes: 10,
+    cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3
   }
