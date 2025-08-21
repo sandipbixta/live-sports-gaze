@@ -10,7 +10,7 @@ import ThemeToggle from './ThemeToggle';
 import BannerAd from './BannerAd';
 import SocialBarAd from './SocialBarAd';
 import ContainerAd from './ContainerAd';
-import { useDirectLinkAd } from '@/hooks/useDirectLinkAd';
+
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -24,9 +24,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onSearch
 }) => {
   const isMobile = useIsMobile();
-  
-  // Initialize direct link ad functionality
-  useDirectLinkAd();
   
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
