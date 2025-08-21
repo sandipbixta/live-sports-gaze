@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 import Advertisement from '@/components/Advertisement';
+import RectangleAd from '@/components/RectangleAd';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -135,6 +136,11 @@ const ChannelPlayer = () => {
           isLoading={false}
           onRetry={handleRetry}
         />
+      </div>
+
+      {/* Rectangle Advertisement */}
+      <div className="px-4 py-4">
+        <RectangleAd />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 p-4">
