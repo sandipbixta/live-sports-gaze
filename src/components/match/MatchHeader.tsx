@@ -1,8 +1,9 @@
 
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Match } from '@/types/sports';
 import { useMatchNavigation } from '@/hooks/useMatchNavigation';
+import { useNavigate } from 'react-router-dom';
 import MatchBanner from './MatchBanner';
 
 interface MatchHeaderProps {
@@ -13,6 +14,7 @@ interface MatchHeaderProps {
 
 const MatchHeader = ({ match, streamAvailable, socialShare }: MatchHeaderProps) => {
   const { handleGoBack, isMobile } = useMatchNavigation();
+  const navigate = useNavigate();
     
   return (
     <>
@@ -20,15 +22,26 @@ const MatchHeader = ({ match, streamAvailable, socialShare }: MatchHeaderProps) 
       <header className="bg-sports-darker shadow-md">
         <div className="container mx-auto py-2 sm:py-4 px-2 sm:px-4">
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleGoBack}
-              className="text-gray-300 hover:text-white mr-2 sm:mr-4 touch-manipulation min-h-[44px] min-w-[44px]"
-            >
-              <ChevronLeft className="mr-1" />
-              Back
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleGoBack}
+                className="text-gray-300 hover:text-white touch-manipulation min-h-[44px] min-w-[44px]"
+              >
+                <ChevronLeft className="mr-1" />
+                Back
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="text-gray-300 hover:text-white touch-manipulation min-h-[44px] min-w-[44px]"
+              >
+                <Home className="mr-1" />
+                Home
+              </Button>
+            </div>
             
             {socialShare && (
               <div className="flex items-center gap-2">
