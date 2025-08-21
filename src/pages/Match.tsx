@@ -196,11 +196,6 @@ const Match = () => {
         <div className="mb-4">
           <TelegramBanner />
         </div>
-
-        {/* Banner Advertisement - mobile responsive */}
-        <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div>
         
         {/* Match Title */}
         <div className="text-center mb-1">
