@@ -152,10 +152,20 @@ const Channels = () => {
         
         <ChannelsGrid />
         
-        {/* Direct Link Advertisement removed */}
-        {/* <div className="my-6 sm:my-8">
+        {/* Native Bar Advertisement - after channels grid */}
+        <div className="my-6">
+          <Advertisement type="native-bar" className="w-full" />
+        </div>
+        
+        {/* Direct Link Advertisement - re-enabled */}
+        <div className="my-6 sm:my-8">
           <Advertisement type="direct-link" className="w-full" />
-        </div> */}
+        </div>
+        
+        {/* AutoTag Advertisement - adblock bypass */}
+        <div className="my-4">
+          <Advertisement type="autotag" className="w-full" />
+        </div>
         
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
@@ -173,6 +183,11 @@ const Channels = () => {
         {/* Sports News section */}
         <div className="mt-8">
           <NewsSection />
+        </div>
+        
+        {/* Sidebar Advertisement - at the bottom */}
+        <div className="mt-6">
+          <Advertisement type="sidebar" className="w-full" />
         </div>
       </div>
     </PageLayout>
