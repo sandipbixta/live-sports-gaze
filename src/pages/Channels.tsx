@@ -141,12 +141,12 @@ const Channels = () => {
         </p>
         
         {/* Telegram Banner */}
-        <div className="mb-6">
+        <div className="mb-4">
           <TelegramBanner />
         </div>
         
         {/* Video Advertisement */}
-        <div className="mb-6">
+        <div className="mb-4">
           <Advertisement type="video" className="w-full" />
         </div>
         

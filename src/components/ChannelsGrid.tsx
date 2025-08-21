@@ -48,8 +48,8 @@ const ChannelsGrid = () => {
   }, [searchTerm, selectedCountry, channelsByCountry]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <h2 className="text-2xl font-bold text-white mb-4">All Channels by Country</h2>
+    <div className="flex flex-col gap-4">
+      <h2 className="text-2xl font-bold text-white mb-2">All Channels by Country</h2>
       
       {/* Search Bar */}
       <div className="bg-[#1a1f2e] rounded-xl border border-[#343a4d] p-4">
