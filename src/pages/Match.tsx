@@ -238,6 +238,11 @@ const Match = () => {
             </div>
           </div>
         )}
+
+        {/* Video Advertisement - After trending matches */}
+        <div className="mt-8">
+          <Advertisement type="video" className="w-full" />
+        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">

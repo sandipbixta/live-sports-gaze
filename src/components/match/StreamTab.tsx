@@ -104,11 +104,6 @@ const StreamTab = ({
 
   return (
     <div>
-      {/* Video Advertisement */}
-      <div className="mb-2">
-        <Advertisement type="video" className="w-full" />
-      </div>
-      
       <StreamPlayer
         stream={stream}
         isLoading={loadingStream}
