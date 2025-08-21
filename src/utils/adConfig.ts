@@ -18,6 +18,12 @@ export const adConfig = {
       height: 60
     }
   },
+  rectangle: {
+    key: '7c589340b2a1155dcea92f44cc468438',
+    scriptSrc: '//uncertainbill.com/7c589340b2a1155dcea92f44cc468438/invoke.js',
+    width: 300,
+    height: 250
+  },
   container: {
     key: 'a873bc1d3d203f2f13c32a99592441b8',
     scriptSrc: '//uncertainbill.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js',
