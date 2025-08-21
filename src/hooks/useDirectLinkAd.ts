@@ -11,21 +11,23 @@ export const useDirectLinkAd = () => {
     }
 
     const handleGlobalClick = () => {
-      // Check if cooldown period has passed
-      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, adConfig.directLink.cooldownMinutes)) {
+      // Check if short cooldown period has passed (to prevent spam)
+      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, 1)) { // 1 minute cooldown instead of 30
         return;
       }
 
       // Increment click count
       clickCountRef.current += 1;
+      console.log(`Direct link ad: Click ${clickCountRef.current}/${requiredClicks}`);
 
       // Only trigger after required number of clicks
       if (clickCountRef.current >= requiredClicks) {
         // Mark as triggered and open the ad
         markAdTriggered(adConfig.directLink.sessionKey);
         window.open(adConfig.directLink.url, "_blank", "noopener noreferrer");
+        console.log('Direct link ad triggered!');
         
-        // Reset click count
+        // Reset click count for next cycle
         clickCountRef.current = 0;
       }
     };
