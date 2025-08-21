@@ -3,7 +3,7 @@ import { adConfig, shouldShowAds, isAdCooldownPassed, markAdTriggered } from '@/
 
 export const useDirectLinkAd = () => {
   const clickCountRef = useRef(0);
-  const requiredClicks = 3; // Require 3 clicks before triggering
+  const requiredClicks = 2; // Require 2 clicks before triggering
 
   useEffect(() => {
     if (!shouldShowAds()) {
@@ -12,7 +12,7 @@ export const useDirectLinkAd = () => {
 
     const handleGlobalClick = () => {
       // Check if short cooldown period has passed (to prevent spam)
-      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, 1)) { // 1 minute cooldown instead of 30
+      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, 0.5)) { // 30 seconds cooldown
         return;
       }
 

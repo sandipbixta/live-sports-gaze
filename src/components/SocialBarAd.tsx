@@ -5,8 +5,8 @@ const SocialBarAd: React.FC = () => {
   useEffect(() => {
     if (!shouldShowAds()) return;
 
-    // Check cooldown (15 minutes for social bar)
-    if (!isAdCooldownPassed('socialBarAdTriggered', 15)) {
+    // Check cooldown (5 minutes for social bar)
+    if (!isAdCooldownPassed('socialBarAdTriggered', 5)) {
       return;
     }
 
