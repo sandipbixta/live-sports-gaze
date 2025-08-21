@@ -105,7 +105,7 @@ const StreamTab = ({
   return (
     <div>
       {/* Video Advertisement */}
-      <div className="mb-4">
+      <div className="mb-2">
         <Advertisement type="video" className="w-full" />
       </div>
       

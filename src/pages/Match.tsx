@@ -203,7 +203,7 @@ const Match = () => {
         </div>
         
         {/* Match Title */}
-        <div className="text-center mb-3">
+        <div className="text-center mb-1">
           <h1 className="text-2xl md:text-3xl font-bold text-white">{match.title}</h1>
         </div>
         
