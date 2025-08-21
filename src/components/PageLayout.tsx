@@ -7,7 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import Clock from './Clock';
 import ThemeToggle from './ThemeToggle';
-import BannerAd from './BannerAd';
+
 import { useDirectLinkAd } from '@/hooks/useDirectLinkAd';
 
 interface PageLayoutProps {
@@ -72,8 +72,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </header>
 
-      {/* Moved BannerAd here so it shows under the menu/header bar */}
-      <BannerAd />
       
       <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
