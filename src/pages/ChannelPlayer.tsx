@@ -124,11 +124,6 @@ const ChannelPlayer = () => {
         <TelegramBanner />
       </div>
 
-      {/* Video Advertisement */}
-      <div className="px-4 mb-4">
-        <Advertisement type="video" className="w-full" />
-      </div>
-
       {/* Video Player - Full width, optimized for mobile */}
       <div className="w-full">
         <StreamPlayer
@@ -241,6 +236,11 @@ const ChannelPlayer = () => {
             </ScrollArea>
           </div>
         </div>
+      </div>
+
+      {/* Video Advertisement - moved below channel list */}
+      <div className="px-4 mb-4">
+        <Advertisement type="video" className="w-full" />
       </div>
     </div>
   );
