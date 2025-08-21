@@ -133,11 +133,6 @@ const ChannelPlayer = () => {
         />
       </div>
 
-      {/* Rectangle Advertisement */}
-      <div className="px-4 py-4">
-        <RectangleAd />
-      </div>
-
       <div className="flex flex-col lg:flex-row gap-4 p-4">
         {/* Channel Info */}
         <div className="flex-1">
