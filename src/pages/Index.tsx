@@ -20,6 +20,7 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
+import RectangleAd from '../components/RectangleAd';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -251,6 +252,9 @@ const Index = () => {
             />
           )}
         </div>
+        
+        {/* Rectangle Advertisement */}
+        <RectangleAd />
         
         {!showLiveSports && (
           <>

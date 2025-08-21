@@ -18,6 +18,7 @@ import SportFilterPills from '../components/live/SportFilterPills';
 import MatchesTabContent from '../components/live/MatchesTabContent';
 import MatchSection from '../components/MatchSection';
 import TelegramBanner from '../components/TelegramBanner';
+import RectangleAd from '../components/RectangleAd';
 
 const Live = () => {
   const { toast } = useToast();
@@ -171,6 +172,9 @@ const Live = () => {
         activeSportFilter={activeSportFilter}
         onSportFilterChange={setActiveSportFilter}
       />
+      
+      {/* Rectangle Advertisement */}
+      <RectangleAd />
       
       {/* Tabs Navigation for All/Live/Upcoming */}
       <Tabs 
