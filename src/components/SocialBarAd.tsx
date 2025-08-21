@@ -5,8 +5,8 @@ const SocialBarAd: React.FC = () => {
   useEffect(() => {
     if (!shouldShowAds()) return;
 
-    // Check cooldown (5 minutes for social bar)
-    if (!isAdCooldownPassed('socialBarAdTriggered', 5)) {
+    // Check cooldown (30 seconds for social bar)
+    if (!isAdCooldownPassed('socialBarAdTriggered', 0.5)) {
       return;
     }
 
@@ -33,7 +33,7 @@ const SocialBarAd: React.FC = () => {
         if (script.parentNode) {
           script.parentNode.removeChild(script);
         }
-      }, 15000);
+      }, 5000);
       
     } catch (error) {
       console.warn('Error loading social bar ad:', error);
