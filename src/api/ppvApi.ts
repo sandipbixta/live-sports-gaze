@@ -30,7 +30,7 @@ interface PPVApiResponse {
   streams: PPVCategory[];
 }
 
-const PPV_API_BASE = 'https://your-ppv-api-domain.com'; // TODO: Replace with actual PPV API base URL (without /api)
+const PPV_API_BASE = 'https://ppvs.su';
 
 // Cache for API responses
 const cache = new Map<string, { data: any; timestamp: number }>();
