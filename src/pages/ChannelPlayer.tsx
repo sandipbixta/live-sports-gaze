@@ -17,7 +17,7 @@ const ChannelPlayer = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);
-  const [playerType, setPlayerType] = useState<PlayerType>('custom');
+  const [playerType, setPlayerType] = useState<PlayerType>('extracted');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
@@ -141,8 +141,9 @@ const ChannelPlayer = () => {
             <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { type: 'custom' as PlayerType, name: 'Custom Player', desc: 'Clean controls, no weird buttons (recommended)' },
-                { type: 'iframe' as PlayerType, name: 'Iframe Player', desc: 'Standard embed player' },
+                { type: 'extracted' as PlayerType, name: 'Stream Extractor', desc: 'Extracts direct stream (BEST - full control)' },
+                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Clean visual controls over embed' },
+                { type: 'iframe' as PlayerType, name: 'Standard Embed', desc: 'Direct embed with provider controls' },
                 { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Auto-detects stream type' },
                 { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe fallback' },
                 { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'For direct video streams only' }
