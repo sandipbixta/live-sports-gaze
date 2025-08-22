@@ -148,10 +148,8 @@ const CustomChannelPlayer: React.FC<CustomChannelPlayerProps> = ({
               </button>
             </div>
 
-            {/* Center - Stream title */}
-            <div className="flex-1 text-center">
-              <h3 className="text-sm font-medium truncate px-4">{title}</h3>
-            </div>
+            {/* Center spacer */}
+            <div className="flex-1"></div>
 
             {/* Right controls */}
             <div className="flex items-center gap-3">

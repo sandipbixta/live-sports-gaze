@@ -195,10 +195,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </Button>
       </div>
       
-      {/* Stream info overlay */}
-      <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
-        {stream.language} • {stream.hd ? 'HD' : 'SD'}
-      </div>
     </div>
   );
 };

@@ -282,15 +282,8 @@ const ExtractedVideoPlayer: React.FC<ExtractedVideoPlayerProps> = ({
               />
             </div>
 
-            {/* Center - Stream title */}
-            <div className="flex-1 text-center">
-              <h3 className="text-sm font-medium truncate px-4">{title}</h3>
-              {extractedStream && (
-                <p className="text-xs text-muted-foreground">
-                  {extractedStream.type.toUpperCase()} Stream
-                </p>
-              )}
-            </div>
+            {/* Center spacer */}
+            <div className="flex-1"></div>
 
             {/* Right controls */}
             <div className="flex items-center gap-3">
