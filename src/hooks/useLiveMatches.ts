@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
-import { fetchMatches, fetchStream, fetchSports, fetchLiveMatches, fetchAllMatches } from '../api/sportsApi';
+import { fetchMatches, fetchStream, fetchSports, fetchLiveMatches, fetchAllMatches } from '../api/ppvApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
 
 export const useLiveMatches = () => {

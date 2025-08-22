@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
-import { fetchLiveMatches, fetchSports } from '../api/sportsApi';
+import { fetchLiveMatches, fetchSports } from '../api/ppvApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';

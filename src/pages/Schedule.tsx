@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches } from '../api/sportsApi';
+import { fetchSports, fetchMatches } from '../api/ppvApi';
 import SportsList from '../components/SportsList';
 import { Separator } from '../components/ui/separator';
 import { format, addDays, startOfDay } from 'date-fns';

@@ -29,6 +29,13 @@ export interface Match {
   sources: Source[];
   related?: Match[];       // Related matches
   sportId?: string;        // Added for compatibility - maps to category
+  ppvData?: {              // PPV API specific data
+    iframe?: string;
+    tag?: string;
+    ends_at?: number;
+    always_live?: number;
+    allowpaststreams?: number;
+  };
 }
 
 export interface Stream {
