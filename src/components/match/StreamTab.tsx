@@ -104,47 +104,62 @@ const StreamTab = ({
 
   return (
     <div>
-      <StreamPlayer
-        stream={stream}
-        isLoading={loadingStream}
-        onRetry={handleRetry}
-        title={match.title}
-        isManualChannel={false}
-        isTvChannel={false}
-        isTheaterMode={isTheaterMode}
-        onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
-      />
-      
-      <StreamSources
-        sources={match.sources}
-        activeSource={activeSource}
-        onSourceChange={handleSourceChange}
-        streamId={streamId}
-      />
-      
-      {!loadingStream && (
-        <div className="flex justify-center mt-4">
-          {isMatchLive() ? (
-            <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
-              <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
-              LIVE NOW
-            </Badge>
-          ) : (
-            <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
-              <Clock size={14} />
-              Starts at {formatMatchTime(match.date)}
-            </Badge>
+      {/* Video Player and Ads Layout */}
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+        {/* Left Side - Video Player (2/3 width) */}
+        <div className="flex-1 lg:w-2/3">
+          <StreamPlayer
+            stream={stream}
+            isLoading={loadingStream}
+            onRetry={handleRetry}
+            title={match.title}
+            isManualChannel={false}
+            isTvChannel={false}
+            isTheaterMode={isTheaterMode}
+            onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
+          />
+          
+          <StreamSources
+            sources={match.sources}
+            activeSource={activeSource}
+            onSourceChange={handleSourceChange}
+            streamId={streamId}
+          />
+          
+          {!loadingStream && (
+            <div className="flex justify-center mt-4">
+              {isMatchLive() ? (
+                <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
+                  <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+                  LIVE NOW
+                </Badge>
+              ) : (
+                <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
+                  <Clock size={14} />
+                  Starts at {formatMatchTime(match.date)}
+                </Badge>
+              )}
+            </div>
+          )}
+          
+          {!stream && !loadingStream && (
+            <Card className="bg-sports-card border-sports mt-6">
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-400">Stream will be available closer to match time.</p>
+              </CardContent>
+            </Card>
           )}
         </div>
-      )}
-      
-      {!stream && !loadingStream && (
-        <Card className="bg-sports-card border-sports mt-6">
-          <CardContent className="p-6 text-center">
-            <p className="text-gray-400">Stream will be available closer to match time.</p>
-          </CardContent>
-        </Card>
-      )}
+
+        {/* Right Side - Video Ads (1/3 width) */}
+        <div className="lg:w-1/3 flex flex-col gap-4">
+          <div className="sticky top-4">
+            <Advertisement type="video" className="w-full mb-4" />
+            <Advertisement type="banner" className="w-full mb-4" />
+            <Advertisement type="sidebar" className="w-full" />
+          </div>
+        </div>
+      </div>
       
       {/* Hide trending matches in theater mode or show them normally */}
       {!isTheaterMode && sortedPopularMatches.length > 0 && (

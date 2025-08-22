@@ -166,18 +166,30 @@ const ChannelPlayer = () => {
         </div>
       )}
 
-      {/* Video Player - Full width, optimized for mobile */}
-      <div className="w-full">
-        <ChannelPlayerSelector
-          stream={stream}
-          isLoading={false}
-          onRetry={handleRetry}
-          playerType={playerType}
-          title={channel.title}
-        />
+      {/* Video Player and Ads Layout */}
+      <div className="flex flex-col lg:flex-row gap-4 p-4">
+        {/* Left Side - Video Player (2/3 width) */}
+        <div className="flex-1 lg:w-2/3">
+          <ChannelPlayerSelector
+            stream={stream}
+            isLoading={false}
+            onRetry={handleRetry}
+            playerType={playerType}
+            title={channel.title}
+          />
+        </div>
+
+        {/* Right Side - Video Ads (1/3 width) */}
+        <div className="lg:w-1/3 flex flex-col gap-4">
+          <div className="sticky top-20">
+            <Advertisement type="video" className="w-full mb-4" />
+            <Advertisement type="banner" className="w-full mb-4" />
+            <Advertisement type="sidebar" className="w-full" />
+          </div>
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 p-4">
+      <div className="flex flex-col lg:flex-row gap-4 px-4">
         {/* Channel Info */}
         <div className="flex-1">
           <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">

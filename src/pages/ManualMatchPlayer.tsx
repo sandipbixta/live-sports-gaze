@@ -193,8 +193,9 @@ const ManualMatchPlayer = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Side - Video Player (2/3 width) */}
+          <div className="flex-1 lg:w-2/3">
             <div className="bg-[#242836] rounded-lg overflow-hidden border border-[#343a4d]">
               <div className="bg-[#1a1f2e] p-3 border-b border-[#343a4d]">
                 <div className="flex items-center justify-between">
@@ -221,11 +222,6 @@ const ManualMatchPlayer = () => {
                 </div>
               )}
               
-              {/* Video Advertisement */}
-              <div className="mb-4">
-                <Advertisement type="video" className="w-full" />
-              </div>
-              
               <div className="relative aspect-video bg-black" data-player-container>
                 {selectedLink ? (
                   <VideoPlayerSelector
@@ -245,41 +241,51 @@ const ManualMatchPlayer = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Stream Sources</h3>
-              <div className="space-y-2">
-                {match.links.map((link) => (
-                  <Button
-                    key={link.id}
-                    onClick={() => setSelectedLink(link)}
-                    variant={selectedLink?.id === link.id ? "default" : "outline"}
-                    className={`w-full justify-start text-left ${
-                      selectedLink?.id === link.id
-                        ? "bg-[#ff5a36] hover:bg-[#e64d2e] text-white"
-                        : "bg-transparent border-[#343a4d] text-gray-300 hover:bg-[#343a4d] hover:text-white"
-                    }`}
-                  >
-                    <Play size={14} className="mr-2" />
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{link.name}</span>
-                      {link.quality && (
-                        <span className="text-xs opacity-75">{link.quality}</span>
-                      )}
-                    </div>
-                  </Button>
-                ))}
-              </div>
-              
-              <div className="mt-6 pt-4 border-t border-[#343a4d]">
-                <h4 className="text-md font-semibold text-white mb-2">Match Details</h4>
-                <div className="space-y-2 text-sm text-gray-400">
-                  <p><span className="text-white">Title:</span> {match.title}</p>
-                  <p><span className="text-white">Date:</span> {formattedDate}</p>
-                  <p><span className="text-white">Time:</span> {formattedTime}</p>
-                  {match.seo?.category && (
-                    <p><span className="text-white">Category:</span> {match.seo.category}</p>
-                  )}
+          {/* Right Side - Video Ads and Stream Sources (1/3 width) */}
+          <div className="lg:w-1/3 flex flex-col gap-4">
+            {/* Video Ads */}
+            <div className="sticky top-4">
+              <Advertisement type="video" className="w-full mb-4" />
+              <Advertisement type="banner" className="w-full mb-4" />
+            </div>
+            
+            {/* Stream Sources */}
+            <div>
+              <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-4">
+                <h3 className="text-lg font-semibold text-white mb-4">Stream Sources</h3>
+                <div className="space-y-2">
+                  {match.links.map((link) => (
+                    <Button
+                      key={link.id}
+                      onClick={() => setSelectedLink(link)}
+                      variant={selectedLink?.id === link.id ? "default" : "outline"}
+                      className={`w-full justify-start text-left ${
+                        selectedLink?.id === link.id
+                          ? "bg-[#ff5a36] hover:bg-[#e64d2e] text-white"
+                          : "bg-transparent border-[#343a4d] text-gray-300 hover:bg-[#343a4d] hover:text-white"
+                      }`}
+                    >
+                      <Play size={14} className="mr-2" />
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">{link.name}</span>
+                        {link.quality && (
+                          <span className="text-xs opacity-75">{link.quality}</span>
+                        )}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-[#343a4d]">
+                  <h4 className="text-md font-semibold text-white mb-2">Match Details</h4>
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <p><span className="text-white">Title:</span> {match.title}</p>
+                    <p><span className="text-white">Date:</span> {formattedDate}</p>
+                    <p><span className="text-white">Time:</span> {formattedTime}</p>
+                    {match.seo?.category && (
+                      <p><span className="text-white">Category:</span> {match.seo.category}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
