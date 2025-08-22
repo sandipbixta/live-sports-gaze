@@ -53,17 +53,23 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         ref={videoRef}
         src={src}
         className="w-full h-full"
+        width="1920"
+        height="1080"
         allowFullScreen
         title="Live Sports Stream - DAMITV"
         onLoad={handleLoad}
         onError={handleError}
         onClick={handleIframeClick}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
         referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
+        frameBorder="0"
+        scrolling="no"
         style={{ 
           border: 'none',
           pointerEvents: isMobile ? 'auto' : 'auto',
+          minWidth: '100%',
+          minHeight: '100%',
           ...(isMobile && {
             touchAction: 'manipulation',
             WebkitOverflowScrolling: 'touch',
