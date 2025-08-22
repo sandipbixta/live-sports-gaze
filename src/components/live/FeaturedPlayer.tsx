@@ -68,7 +68,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
 
   return (
     <div className="mb-6">
-      <div className="flex justify-between items-center mb-3">
+      <div className="w-full max-w-5xl mx-auto flex justify-between items-center mb-3">
         <h2 className="text-lg font-bold text-white truncate pr-4">{featuredMatch.title}</h2>
         {streamLoading ? (
           <div className="text-xs text-[#9b87f5] flex items-center gap-1 flex-shrink-0">
