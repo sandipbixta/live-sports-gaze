@@ -17,7 +17,7 @@ const ChannelPlayer = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);
-  const [playerType, setPlayerType] = useState<PlayerType>('extracted');
+  const [playerType, setPlayerType] = useState<PlayerType>('simple');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
@@ -141,11 +141,11 @@ const ChannelPlayer = () => {
             <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { type: 'extracted' as PlayerType, name: 'Stream Extractor', desc: 'Extracts direct stream (BEST - full control)' },
-                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Clean visual controls over embed' },
-                { type: 'iframe' as PlayerType, name: 'Standard Embed', desc: 'Direct embed with provider controls' },
-                { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Auto-detects stream type' },
+                { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working option (recommended)' },
+                { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Shows provider controls' },
+                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls (limited function)' },
                 { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe fallback' },
+                { type: 'extracted' as PlayerType, name: 'Stream Extractor', desc: 'Advanced (may not work with protected sites)' },
                 { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'For direct video streams only' }
               ].map((player) => (
                 <button
