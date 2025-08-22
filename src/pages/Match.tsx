@@ -231,9 +231,9 @@ const Match = () => {
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
-        {/* Match Title */}
-        <div className="text-center mb-1">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">{match.title}</h1>
+        {/* Match Title - Centered above video player */}
+        <div className="w-full flex justify-center mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-white text-center max-w-4xl px-4">{match.title}</h1>
         </div>
         
         <StreamTab
