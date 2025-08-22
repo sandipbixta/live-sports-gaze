@@ -132,16 +132,24 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:type" content="image/jpeg" />
       <meta property="og:url" content={canonicalUrl || window.location.href} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content="article" />
       <meta property="og:site_name" content="DamiTV" />
+      <meta property="article:author" content="DamiTV" />
+      <meta property="article:publisher" content="DamiTV" />
       
       {/* Twitter Cards */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image:width" content="1200" />
+      <meta name="twitter:image:height" content="630" />
       <meta name="twitter:site" content="@damitv_official" />
+      <meta name="twitter:creator" content="@damitv_official" />
       
       {/* Additional SEO */}
       <meta name="robots" content="index, follow, max-image-preview:large" />

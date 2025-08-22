@@ -158,9 +158,12 @@ const Match = () => {
   // Generate match poster URL for social sharing
   const getMatchPosterUrl = () => {
     if (match.poster && match.poster.trim() !== '') {
-      return match.poster.startsWith('http') 
+      const baseUrl = match.poster.startsWith('http') 
         ? match.poster 
         : `https://streamed.pk${match.poster}.webp`;
+      // Add cache busting parameter for fresh social media sharing
+      const cacheBuster = `?v=${Date.now()}`;
+      return baseUrl + cacheBuster;
     }
     return 'https://i.imgur.com/m4nV9S8.png'; // Fallback to DamiTV logo
   };
