@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stream } from '../types/sports';
 import SimpleVideoPlayer from './StreamPlayer/SimpleVideoPlayer';
+import StreamOptimizer from './StreamPlayer/StreamOptimizer';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -24,13 +25,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   onTheaterModeToggle
 }) => {
   return (
-    <SimpleVideoPlayer 
-      stream={stream}
-      isLoading={isLoading}
-      onRetry={onRetry}
-      isTheaterMode={isTheaterMode}
-      onTheaterModeToggle={onTheaterModeToggle}
-    />
+    <>
+      <StreamOptimizer stream={stream} />
+      <SimpleVideoPlayer 
+        stream={stream}
+        isLoading={isLoading}
+        onRetry={onRetry}
+        isTheaterMode={isTheaterMode}
+        onTheaterModeToggle={onTheaterModeToggle}
+      />
+    </>
   );
 };
 

@@ -70,6 +70,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
           pointerEvents: isMobile ? 'auto' : 'auto',
           minWidth: '100%',
           minHeight: '100%',
+          willChange: 'transform',
+          isolation: 'isolate',
           ...(isMobile && {
             touchAction: 'manipulation',
             WebkitOverflowScrolling: 'touch',
