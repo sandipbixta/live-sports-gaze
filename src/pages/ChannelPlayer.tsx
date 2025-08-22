@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import StreamPlayer from '@/components/StreamPlayer';
+import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
 import { getChannelsByCountry } from '@/data/tvChannels';
-import { ArrowLeft, Share, Star, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Share, Star, ChevronRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,6 +17,8 @@ const ChannelPlayer = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);
+  const [playerType, setPlayerType] = useState<PlayerType>('simple');
+  const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
     const loadChannel = () => {
@@ -112,6 +114,14 @@ const ChannelPlayer = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowPlayerSettings(!showPlayerSettings)}
+              className="text-white hover:bg-[#242836]"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
             <Badge className="bg-red-500 text-white text-xs">
               • LIVE
             </Badge>
@@ -124,12 +134,44 @@ const ChannelPlayer = () => {
         <TelegramBanner />
       </div>
 
+      {/* Player Settings Panel */}
+      {showPlayerSettings && (
+        <div className="px-4 pb-4">
+          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+            <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { type: 'simple' as PlayerType, name: 'Simple Player', desc: 'Default with HLS support' },
+                { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'Native with custom controls' },
+                { type: 'iframe' as PlayerType, name: 'Iframe Player', desc: 'Embedded player' },
+                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Minimal iframe' }
+              ].map((player) => (
+                <button
+                  key={player.type}
+                  onClick={() => setPlayerType(player.type)}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    playerType === player.type
+                      ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                      : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                  }`}
+                >
+                  <div className="font-medium text-sm">{player.name}</div>
+                  <div className="text-xs text-gray-400 mt-1">{player.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Video Player - Full width, optimized for mobile */}
       <div className="w-full">
-        <StreamPlayer
+        <ChannelPlayerSelector
           stream={stream}
           isLoading={false}
           onRetry={handleRetry}
+          playerType={playerType}
+          title={channel.title}
         />
       </div>
 
