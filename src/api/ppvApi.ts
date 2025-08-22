@@ -30,7 +30,7 @@ interface PPVApiResponse {
   streams: PPVCategory[];
 }
 
-const PPV_API_BASE = 'https://api.ppv-domain.com/api'; // TODO: Replace with actual PPV API base URL
+const PPV_API_BASE = 'https://your-ppv-api-domain.com'; // TODO: Replace with actual PPV API base URL (without /api)
 
 // Cache for API responses
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -79,7 +79,7 @@ export const fetchPPVStreams = async (): Promise<PPVApiResponse> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${PPV_API_BASE}/streams`, {
+    const response = await fetch(`${PPV_API_BASE}/api/streams`, {
       headers: {
         'Accept': 'application/json'
       }
@@ -96,7 +96,7 @@ export const fetchPPVStreams = async (): Promise<PPVApiResponse> => {
     }
 
     setCachedData(cacheKey, data);
-    console.log(`✅ Fetched PPV streams: ${data.streams.length} categories`);
+    console.log(`✅ Fetched PPV streams: ${data.streams.length} categories, performance: ${data.performance}ms`);
     return data;
   } catch (error) {
     console.error('❌ Error fetching PPV streams:', error);
