@@ -4,8 +4,9 @@ import SimpleVideoPlayer from './SimpleVideoPlayer';
 import Html5VideoPlayer from './Html5VideoPlayer';
 import IframeVideoPlayer from './IframeVideoPlayer';
 import VideoPlayerSelector from './VideoPlayerSelector';
+import CustomChannelPlayer from './CustomChannelPlayer';
 
-export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic';
+export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom';
 
 interface ChannelPlayerSelectorProps {
   stream: Stream | null;
@@ -64,6 +65,17 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     : stream.embedUrl || '';
 
   switch (playerType) {
+    case 'custom':
+      return (
+        <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
+          <CustomChannelPlayer
+            embedUrl={embedUrl}
+            title={title}
+            onError={handleError}
+          />
+        </div>
+      );
+    
     case 'html5':
       return (
         <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
