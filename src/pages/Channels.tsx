@@ -145,11 +145,6 @@ const Channels = () => {
           <TelegramBanner />
         </div>
         
-        {/* Video Advertisement */}
-        <div className="mb-4">
-          <Advertisement type="video" className="w-full" />
-        </div>
-        
         <ChannelsGrid />
         
         {/* Native Bar Advertisement - after channels grid */}
@@ -183,6 +178,11 @@ const Channels = () => {
         {/* Sports News section */}
         <div className="mt-8">
           <NewsSection />
+        </div>
+        
+        {/* Video Advertisement - moved to bottom */}
+        <div className="mt-6">
+          <Advertisement type="video" className="w-full" />
         </div>
         
         {/* Sidebar Advertisement - at the bottom */}
