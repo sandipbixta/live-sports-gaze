@@ -31,8 +31,7 @@ const MatchSection: React.FC<MatchSectionProps> = ({
   if (matches.length === 0 && showEmptyMessage) {
     return (
       <div className="mb-8">
-      <div className="w-full max-w-5xl mx-auto mb-4">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
           {isLive ? (
             <span className="inline-block h-3 w-3 bg-[#ff5a36] rounded-full"></span>
           ) : (
@@ -43,7 +42,6 @@ const MatchSection: React.FC<MatchSectionProps> = ({
             0 matches
           </span>
         </h2>
-      </div>
         <div className="bg-[#242836] border-[#343a4d] rounded-xl p-4 text-center mb-8">
           <p className="text-gray-300 text-sm">{emptyMessage}</p>
         </div>
@@ -57,19 +55,17 @@ const MatchSection: React.FC<MatchSectionProps> = ({
 
   return (
     <div className="mb-8">
-      <div className="w-full max-w-5xl mx-auto mb-4">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-          {isLive ? (
-            <span className="inline-block h-3 w-3 bg-[#ff5a36] rounded-full animate-pulse"></span>
-          ) : (
-            <Clock size={18} className="text-[#1EAEDB]" />
-          )}
-          {title}
-          <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
-            {matches.length} {matches.length === 1 ? 'match' : 'matches'}
-          </span>
-        </h2>
-      </div>
+      <h2 className="text-2xl font-bold mb-4 text-white flex items-center gap-2">
+        {isLive ? (
+          <span className="inline-block h-3 w-3 bg-[#ff5a36] rounded-full animate-pulse"></span>
+        ) : (
+          <Clock size={18} className="text-[#1EAEDB]" />
+        )}
+        {title}
+        <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+          {matches.length} {matches.length === 1 ? 'match' : 'matches'}
+        </span>
+      </h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
         {matches.map((match, index) => (
           <div 
