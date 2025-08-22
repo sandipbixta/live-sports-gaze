@@ -17,7 +17,7 @@ const ChannelPlayer = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);
-  const [playerType, setPlayerType] = useState<PlayerType>('simple');
+  const [playerType, setPlayerType] = useState<PlayerType>('html5');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
@@ -141,10 +141,10 @@ const ChannelPlayer = () => {
             <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { type: 'simple' as PlayerType, name: 'Simple Player', desc: 'Default with HLS support' },
-                { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'Native with custom controls' },
-                { type: 'iframe' as PlayerType, name: 'Iframe Player', desc: 'Embedded player' },
-                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Minimal iframe' }
+                { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'Clean controls, best quality' },
+                { type: 'simple' as PlayerType, name: 'HLS Player', desc: 'With stream detection' },
+                { type: 'iframe' as PlayerType, name: 'Embed Player', desc: 'Direct embed (may have weird controls)' },
+                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe fallback' }
               ].map((player) => (
                 <button
                   key={player.type}
