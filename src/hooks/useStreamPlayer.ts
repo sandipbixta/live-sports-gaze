@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source } from '../types/sports';
-import { fetchStream } from '../api/ppvApi';
+import { fetchStream } from '../api/sportsApi';
 
 export const useStreamPlayer = () => {
   const { toast } = useToast();

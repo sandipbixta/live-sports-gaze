@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { fetchSports, fetchMatches } from '../api/ppvApi';
+import { fetchSports, fetchMatches } from '../api/sportsApi';
 import { Sport, Match } from '../types/sports';
 import { Play, Clock, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';

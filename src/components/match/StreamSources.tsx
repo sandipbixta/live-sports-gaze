@@ -2,7 +2,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
-import { fetchStream } from '@/api/ppvApi';
+import { fetchStream } from '@/api/sportsApi';
 import { Loader, Play } from 'lucide-react';
 import { getLanguageName } from '@/utils/languageDetection';
 

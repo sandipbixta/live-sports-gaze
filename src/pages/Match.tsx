@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
-import { fetchMatch, fetchStream, fetchMatches } from '@/api/ppvApi';
+import { fetchMatch, fetchStream, fetchMatches } from '@/api/sportsApi';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
