@@ -12,6 +12,7 @@ interface SocialShareProps {
   title: string;
   url?: string;
   description?: string;
+  image?: string;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
   title, 
   url = window.location.href, 
   description = "Watch live sports streaming on DamiTV", 
+  image,
   className = "" 
 }) => {
   const [copied, setCopied] = useState(false);

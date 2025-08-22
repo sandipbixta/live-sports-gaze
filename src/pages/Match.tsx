@@ -155,6 +155,18 @@ const Match = () => {
   const matchTitle = homeTeam && awayTeam ? `${homeTeam} vs ${awayTeam}` : match.title;
   const matchDescription = `Watch ${matchTitle} live stream online for free on DamiTV. HD quality streaming with multiple sources available.`;
 
+  // Generate match poster URL for social sharing
+  const getMatchPosterUrl = () => {
+    if (match.poster && match.poster.trim() !== '') {
+      return match.poster.startsWith('http') 
+        ? match.poster 
+        : `https://streamed.pk${match.poster}.webp`;
+    }
+    return 'https://i.imgur.com/m4nV9S8.png'; // Fallback to DamiTV logo
+  };
+
+  const matchPosterUrl = getMatchPosterUrl();
+
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
       <SEOMetaTags
@@ -162,6 +174,7 @@ const Match = () => {
         description={matchDescription}
         keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, live football streaming, watch ${homeTeam} vs ${awayTeam}`}
         canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
+        ogImage={matchPosterUrl}
         matchInfo={{
           homeTeam,
           awayTeam,
@@ -186,6 +199,7 @@ const Match = () => {
           <SocialShare 
             title={matchTitle}
             description={matchDescription}
+            image={matchPosterUrl}
             url={`https://damitv.pro/match/${sportId}/${matchId}`}
           />
         }
