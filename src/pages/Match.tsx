@@ -29,6 +29,7 @@ const Match = () => {
   
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
+  const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
   const [retryCounter, setRetryCounter] = useState(0);
   
@@ -95,8 +96,19 @@ const Match = () => {
           setPopularMatches(matchData.related.slice(0, 3));
         }
 
-        // Load trending matches from all sports
+        // Load all matches for recommended and trending sections
         const allMatches = await fetchMatches(sportId);
+        
+        // Filter live matches for recommended section (exclude current match)
+        const liveMatches = allMatches.filter(match => 
+          !match.title.toLowerCase().includes('sky sports news') && 
+          !match.id.includes('sky-sports-news') &&
+          match.id !== matchId && // Don't show current match
+          match.date <= Date.now() && // Live matches (started)
+          match.date > Date.now() - (24 * 60 * 60 * 1000) // Within last 24 hours
+        ).slice(0, 6); // Show top 6 live matches
+        
+        setRecommendedMatches(liveMatches);
         
         // Filter and sort by trending score
         const trending = allMatches
@@ -234,6 +246,26 @@ const Match = () => {
           sportId={sportId || ''}
         />
 
+        {/* Recommended Live Matches Section */}
+        {recommendedMatches.length > 0 && (
+          <div className="mt-8 sm:mt-12">
+            <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+              🎯 Recommended Live Games
+              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
+                {recommendedMatches.length} live
+              </span>
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+              {recommendedMatches.map((recommendedMatch) => (
+                <MatchCard 
+                  key={recommendedMatch.id}
+                  match={recommendedMatch}
+                  sportId={sportId || ''}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Trending Matches Section */}
         {trendingMatches.length > 0 && (
