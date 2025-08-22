@@ -78,12 +78,56 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
-      hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false, // Disable for better buffering
+        maxBufferLength: 30, // Buffer 30 seconds ahead
+        maxMaxBufferLength: 60, // Maximum buffer length
+        maxBufferSize: 60 * 1000 * 1000, // 60MB max buffer size
+        maxBufferHole: 0.5, // Handle buffer holes quickly
+        highBufferWatchdogPeriod: 2, // Check buffer health every 2 seconds
+        nudgeOffset: 0.1, // Small nudge for smoother playback
+        nudgeMaxRetry: 3,
+        maxLoadingDelay: 4, // Max loading delay
+        maxFragLookUpTolerance: 0.25, // Fragment lookup tolerance
+        liveSyncDurationCount: 3, // Live sync segments
+        liveMaxLatencyDurationCount: 10, // Max latency for live
+        enableSoftwareAES: true, // Software AES decryption
+        startFragPrefetch: true, // Prefetch fragments
+        testBandwidth: true // Test bandwidth for quality selection
+      });
+      
       hls.loadSource(src);
       hls.attachMedia(videoRef.current);
+      
+      // Enhanced error handling with recovery
       hls.on(Hls.Events.ERROR, (_event, data) => {
         console.error('HLS error', data);
-        setError(true);
+        if (data.fatal) {
+          switch(data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('Network error, attempting recovery...');
+              hls?.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, attempting recovery...');
+              hls?.recoverMediaError();
+              break;
+            default:
+              console.log('Fatal error, destroying HLS instance');
+              setError(true);
+              break;
+          }
+        }
+      });
+
+      // Quality level management for better performance
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log('HLS manifest parsed, levels:', hls?.levels?.length);
+        // Start with auto quality selection
+        if (hls && hls.levels.length > 1) {
+          hls.currentLevel = -1; // Auto quality
+        }
       });
     }
     return () => {
@@ -152,8 +196,15 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           className="w-full h-full object-contain"
           controls
           autoPlay
+          muted={false}
           playsInline
+          preload="auto"
+          crossOrigin="anonymous"
           onError={() => setError(true)}
+          onLoadStart={() => console.log('Video load started')}
+          onCanPlay={() => console.log('Video can play')}
+          onPlaying={() => console.log('Video playing')}
+          onWaiting={() => console.log('Video buffering...')}
         />
       ) : (
         <StreamIframe

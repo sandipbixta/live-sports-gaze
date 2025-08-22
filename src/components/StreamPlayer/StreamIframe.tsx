@@ -59,8 +59,9 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         onError={handleError}
         onClick={handleIframeClick}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        referrerPolicy="origin-when-cross-origin"
+        referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
         style={{ 
           border: 'none',
           pointerEvents: isMobile ? 'auto' : 'auto',

@@ -17,12 +17,10 @@ export const useStreamBypass = (stream: Stream | null) => {
       const baseUrl = stream.embedUrl;
       const url = new URL(baseUrl);
       
-      // Only add essential cache busting - too many parameters cause conflicts
-      url.searchParams.set('_t', Date.now().toString());
-      
-      // Only add retry parameter if actually retrying (not on first load)
+      // Reduce cache busting - only on retries to allow better caching
       if (retryCount > 0) {
         url.searchParams.set('_retry', retryCount.toString());
+        url.searchParams.set('_t', Math.floor(Date.now() / 30000).toString()); // 30-second cache windows
       }
       
       console.log('🎯 Generated clean video URL:', url.toString());
@@ -71,7 +69,7 @@ export const useStreamBypass = (stream: Stream | null) => {
           console.log('⏰ Initial load timeout, will auto-retry if needed...');
           setIframeTimeout(true);
         }
-      }, 20000); // 20 seconds - longer timeout for better reliability
+      }, 10000); // 10 seconds - balanced timeout for better user experience
 
       return () => clearTimeout(timer);
     }
