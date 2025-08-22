@@ -143,9 +143,14 @@ export const useLiveMatches = () => {
     fetchLiveContent();
   }, [fetchLiveContent]);
 
-  const handleRetryLoading = () => {
+  const handleRetryLoading = useCallback(() => {
+    setLoading(true);
     setRetryCount(prev => prev + 1);
-  };
+    toast({
+      title: "Refreshing",
+      description: "Loading latest matches...",
+    });
+  }, [toast]);
 
   return {
     allMatches,
