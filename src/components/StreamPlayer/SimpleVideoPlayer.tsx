@@ -195,11 +195,11 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   }
 
   return (
-    <div className={`flex ${isTheaterMode ? 'w-full' : 'max-w-5xl mx-auto'} gap-4`}>
+    <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl mx-auto'}`}>
       <div 
         ref={containerRef}
-        className={`relative bg-black rounded-lg overflow-hidden flex-1 ${
-          isFullscreen ? 'w-screen h-screen' : 'aspect-video'
+        className={`relative bg-black rounded-lg overflow-hidden ${
+          isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
       {isM3U8 ? (
@@ -257,28 +257,20 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           <Maximize className="w-4 h-4" />
         </Button>
       </div>
+      </div>
       
-    </div>
-    
-    {/* Viewer Counter Sidebar - Only show when not in fullscreen */}
-    {showViewerCounter && !isFullscreen && viewerCount > 0 && (
-      <div className="w-72 flex-shrink-0">
-        <div className="bg-card border border-border rounded-lg p-4 sticky top-4">
+      {/* Viewer Counter Below Video - YouTube style */}
+      {showViewerCounter && !isFullscreen && viewerCount > 0 && (
+        <div className="mt-3 px-2">
           <ViewerCounter 
             viewerCount={viewerCount}
             isLive={isLive}
-            variant="large"
-            className="justify-center"
+            variant="compact"
+            className="text-sm"
           />
-          <div className="mt-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Join {viewerCount > 1 ? `${viewerCount - 1} others` : 'the stream'} watching live!
-            </p>
-          </div>
         </div>
-      </div>
-    )}
-  </div>
+      )}
+    </div>
   );
 };
 
