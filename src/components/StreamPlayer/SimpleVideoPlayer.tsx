@@ -80,21 +80,27 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     if (Hls.isSupported() && videoRef.current) {
       hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: false, // Disable for better buffering
-        maxBufferLength: 30, // Buffer 30 seconds ahead
-        maxMaxBufferLength: 60, // Maximum buffer length
-        maxBufferSize: 60 * 1000 * 1000, // 60MB max buffer size
-        maxBufferHole: 0.5, // Handle buffer holes quickly
-        highBufferWatchdogPeriod: 2, // Check buffer health every 2 seconds
-        nudgeOffset: 0.1, // Small nudge for smoother playback
-        nudgeMaxRetry: 3,
-        maxLoadingDelay: 4, // Max loading delay
-        maxFragLookUpTolerance: 0.25, // Fragment lookup tolerance
-        liveSyncDurationCount: 3, // Live sync segments
-        liveMaxLatencyDurationCount: 10, // Max latency for live
-        enableSoftwareAES: true, // Software AES decryption
-        startFragPrefetch: true, // Prefetch fragments
-        testBandwidth: true // Test bandwidth for quality selection
+        lowLatencyMode: false,
+        maxBufferLength: 15, // Reduced buffer for faster startup
+        maxMaxBufferLength: 30, // Reduced max buffer
+        maxBufferSize: 30 * 1000 * 1000, // 30MB max buffer size
+        maxBufferHole: 0.1, // Handle buffer holes very quickly
+        highBufferWatchdogPeriod: 1, // Check buffer health every second
+        nudgeOffset: 0.05, // Smaller nudge for smoother playback
+        nudgeMaxRetry: 5, // More retry attempts
+        maxLoadingDelay: 2, // Faster loading
+        maxFragLookUpTolerance: 0.1, // Tighter fragment tolerance
+        liveSyncDurationCount: 2, // Fewer live sync segments
+        liveMaxLatencyDurationCount: 5, // Lower max latency
+        enableSoftwareAES: true,
+        startFragPrefetch: true,
+        testBandwidth: true,
+        // Additional buffering optimizations
+        backBufferLength: 5, // Keep minimal back buffer
+        capLevelToPlayerSize: true, // Match quality to player size
+        abrEwmaDefaultEstimate: 500000, // Conservative bandwidth estimate
+        abrEwmaFastLive: 2.0, // Faster adaptation for live
+        abrEwmaSlowLive: 8.0 // Slower adaptation for stability
       });
       
       hls.loadSource(src);
