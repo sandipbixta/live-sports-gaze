@@ -4,6 +4,7 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
+import ViewerCounter from '../ViewerCounter';
 
 
 interface SimpleVideoPlayerProps {
@@ -12,6 +13,9 @@ interface SimpleVideoPlayerProps {
   onRetry?: () => void;
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
+  viewerCount?: number;
+  isLive?: boolean;
+  showViewerCounter?: boolean;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -19,7 +23,10 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   isLoading = false,
   onRetry,
   isTheaterMode = false,
-  onTheaterModeToggle
+  onTheaterModeToggle,
+  viewerCount = 0,
+  isLive = false,
+  showViewerCounter = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -188,14 +195,13 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   }
 
   return (
-    <div 
-      ref={containerRef}
-      className={`relative bg-black rounded-lg overflow-hidden ${
-        isFullscreen ? 'w-screen h-screen' : 
-        isTheaterMode ? 'w-full max-w-none aspect-video' : 
-        'w-full max-w-5xl mx-auto aspect-video'
-      }`}
-    >
+    <div className={`flex ${isTheaterMode ? 'w-full' : 'max-w-5xl mx-auto'} gap-4`}>
+      <div 
+        ref={containerRef}
+        className={`relative bg-black rounded-lg overflow-hidden flex-1 ${
+          isFullscreen ? 'w-screen h-screen' : 'aspect-video'
+        }`}
+      >
       {isM3U8 ? (
         <video
           ref={videoRef}
@@ -253,6 +259,26 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       </div>
       
     </div>
+    
+    {/* Viewer Counter Sidebar - Only show when not in fullscreen */}
+    {showViewerCounter && !isFullscreen && viewerCount > 0 && (
+      <div className="w-72 flex-shrink-0">
+        <div className="bg-card border border-border rounded-lg p-4 sticky top-4">
+          <ViewerCounter 
+            viewerCount={viewerCount}
+            isLive={isLive}
+            variant="large"
+            className="justify-center"
+          />
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              Join {viewerCount > 1 ? `${viewerCount - 1} others` : 'the stream'} watching live!
+            </p>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 

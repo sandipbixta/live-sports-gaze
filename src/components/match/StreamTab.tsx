@@ -131,6 +131,9 @@ const StreamTab = ({
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
+        viewerCount={viewerCount}
+        isLive={isMatchLive()}
+        showViewerCounter={isTracking && viewerCount > 0}
       />
       
       <StreamSources
