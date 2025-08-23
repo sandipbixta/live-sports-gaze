@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
+import ViewerCounter from './ViewerCounter';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 
 interface MatchCardProps {
@@ -16,6 +18,7 @@ interface MatchCardProps {
   onClick?: () => void;
   preventNavigation?: boolean;
   isPriority?: boolean;
+  showViewers?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -25,7 +28,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   onClick,
   preventNavigation,
   isPriority,
+  showViewers = false,
 }) => {
+  const { viewerCount } = useViewerTracking(match.id);
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -366,6 +371,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <Users className="w-3 h-3" />
                 {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
               </div>
+              {showViewers && (
+                <>
+                  <span>•</span>
+                  <ViewerCounter 
+                    viewerCount={viewerCount}
+                    isLive={isLive}
+                    variant="compact"
+                  />
+                </>
+              )}
             </>
           )}
         </div>

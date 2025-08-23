@@ -1,3 +1,6 @@
+import React, { useEffect, useState } from 'react';
+import { Clock } from 'lucide-react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
@@ -5,12 +8,11 @@ import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
 
-import { useEffect, useState } from 'react';
-import { Clock } from 'lucide-react';
-
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
+import ViewerCounter from '@/components/ViewerCounter';
 
 interface StreamTabProps {
   match: MatchType;
@@ -34,6 +36,9 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  
+  // Real-time viewer tracking
+  const { viewerCount, isTracking, startTracking, stopTracking } = useViewerTracking(match?.id || null);
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -102,6 +107,19 @@ const StreamTab = ({
     return bTrending.score - aTrending.score;
   });
 
+  // Start/stop viewer tracking based on stream availability
+  useEffect(() => {
+    if (stream && match && !loadingStream) {
+      startTracking();
+    } else {
+      stopTracking();
+    }
+    
+    return () => {
+      stopTracking();
+    };
+  }, [stream, match, loadingStream]);
+
   return (
     <div>
       <StreamPlayer
@@ -123,18 +141,30 @@ const StreamTab = ({
       />
       
       {!loadingStream && (
-        <div className="flex justify-center mt-4">
-          {isMatchLive() ? (
-            <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
-              <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
-              LIVE NOW
-            </Badge>
-          ) : (
-            <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
-              <Clock size={14} />
-              Starts at {formatMatchTime(match.date)}
-            </Badge>
-          )}
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <div className="flex items-center gap-3">
+            {isMatchLive() ? (
+              <Badge variant="live" className="flex items-center gap-1.5 px-3 py-1">
+                <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+                LIVE NOW
+              </Badge>
+            ) : (
+              <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
+                <Clock size={14} />
+                Starts at {formatMatchTime(match.date)}
+              </Badge>
+            )}
+            
+            {/* Show viewer count when tracking */}
+            {isTracking && viewerCount > 0 && (
+              <ViewerCounter 
+                viewerCount={viewerCount}
+                isLive={isMatchLive()}
+                variant="large"
+                className="ml-2"
+              />
+            )}
+          </div>
         </div>
       )}
       
