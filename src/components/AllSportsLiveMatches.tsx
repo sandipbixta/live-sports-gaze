@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
 
@@ -155,6 +156,47 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
+      {/* Top League Football Matches - Above Live Matches */}
+      {(() => {
+        const footballMatches = filteredMatches.filter(match => 
+          (match.sportId || match.category || '').toLowerCase() === 'football'
+        );
+        
+        const topLeagueFootballMatches = footballMatches
+          .filter(match => {
+            const trendingData = isTrendingMatch(match.title);
+            return trendingData.isTrending && trendingData.score >= 8; // Only top leagues/clubs
+          })
+          .sort((a, b) => {
+            const scoreA = isTrendingMatch(a.title).score;
+            const scoreB = isTrendingMatch(b.title).score;
+            return scoreB - scoreA;
+          })
+          .slice(0, 6);
+        
+        if (topLeagueFootballMatches.length > 0) {
+          return (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="text-xl">⚽</div>
+                <h3 className="text-xl font-bold text-white">Top League Football</h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {topLeagueFootballMatches.map((match) => (
+                  <MatchCard
+                    key={`top-football-${match.id}`}
+                    match={match}
+                    sportId={match.sportId || match.category}
+                    showViewers={true}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {/* Popular by Viewers Section */}
       {(() => {
         const popularMatches = filteredMatches
