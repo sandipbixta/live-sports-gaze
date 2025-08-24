@@ -1,6 +1,8 @@
 
 import React, { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
+import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
+import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import ChannelsGrid from '../components/ChannelsGrid';
 import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
@@ -23,9 +25,9 @@ const Channels = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>Live TV Channels | Watch Football Streams | DamiTV - Stream International Sports</title>
-        <meta name="description" content="Watch free live football TV channels, Premier League, Champions League, La Liga streams and more. Stream international sports TV channels in HD quality - updated daily with trending games." />
-        <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg" />
+        <title>{generateCompetitorTitle('Live TV Channels | Watch Football Streams', 'channels')}</title>
+        <meta name="description" content={generateCompetitorDescription('', 'channels')} />
+        <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg, totalsportek channels, hesgoal alternative, vipleague alternative" />
         <link rel="canonical" href="https://damitv.pro/channels" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         
@@ -189,6 +191,9 @@ const Channels = () => {
         <div className="mt-6">
           <Advertisement type="sidebar" className="w-full" />
         </div>
+        
+        {/* Hidden SEO content for competitor targeting */}
+        <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
       </div>
     </PageLayout>
   );

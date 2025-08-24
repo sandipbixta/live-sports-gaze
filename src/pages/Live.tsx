@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Link } from 'react-router-dom';
 import { Radio, Clock } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
+import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
+import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 
 import { useLiveMatches } from '../hooks/useLiveMatches';
@@ -112,17 +114,17 @@ const Live = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>Live Sports Streaming | Watch Live Football Matches Online Free | DamiTV</title>
-        <meta name="description" content="Watch live football matches, soccer games, and sports events streaming online for free. No registration required to stream live sports on DamiTV." />
-        <meta name="keywords" content="live football streaming, live soccer matches, watch sports online, free live sports, stream football live" />
+        <title>{generateCompetitorTitle('Live Sports Streaming | Watch Live Football Matches Online Free', 'live')}</title>
+        <meta name="description" content={generateCompetitorDescription('', 'live')} />
+        <meta name="keywords" content="live football streaming, live soccer matches, watch sports online, free live sports, stream football live, totalsportek alternative live, streameast live free, crackstreams live matches, daddylivehd live sports" />
         <link rel="canonical" href="https://damitv.pro/live" />
         <script type="application/ld+json">
         {`
           {
             "@context": "https://schema.org",
             "@type": "BroadcastEvent",
-            "name": "Live Sports Streaming",
-            "description": "Watch live football matches and sports events online",
+            "name": "Live Sports Streaming - Free Alternative to TotalSportek",
+            "description": "Watch live sports free - best alternative to TotalSportek, StreamEast, Crackstreams",
             "url": "https://damitv.pro/live",
             "isLiveBroadcast": true,
             "startDate": "${new Date().toISOString()}",
@@ -367,6 +369,9 @@ const Live = () => {
           <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
         </div>
       </Link>
+      
+      {/* Hidden SEO content for competitor targeting */}
+      <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
     </PageLayout>
   );
 };

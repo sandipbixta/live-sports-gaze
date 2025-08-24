@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { generateCompetitorKeywords } from '../utils/competitorSEO';
 
 interface SEOMetaTagsProps {
   title: string;
@@ -9,6 +10,7 @@ interface SEOMetaTagsProps {
   ogImage?: string;
   structuredData?: object;
   breadcrumbs?: Array<{name: string; url: string}>;
+  includeCompetitorKeywords?: boolean;
   matchInfo?: {
     homeTeam?: string;
     awayTeam?: string;
@@ -26,11 +28,12 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
   ogImage = 'https://i.imgur.com/m4nV9S8.png',
   structuredData,
   breadcrumbs,
+  includeCompetitorKeywords = true,
   matchInfo
 }) => {
-  // Generate dynamic keywords based on match info
+  // Generate dynamic keywords based on match info and competitor targeting
   const generateKeywords = () => {
-    const baseKeywords = keywords || 'live sports streaming, watch sports online, free sports streams';
+    let baseKeywords = keywords || 'live sports streaming, watch sports online, free sports streams';
     
     if (matchInfo) {
       const { homeTeam, awayTeam, league } = matchInfo;
@@ -43,7 +46,12 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
         'watch football online free'
       ].filter(Boolean).join(', ');
       
-      return `${baseKeywords}, ${matchKeywords}`;
+      baseKeywords = `${baseKeywords}, ${matchKeywords}`;
+    }
+    
+    // Add competitor keywords for better search visibility
+    if (includeCompetitorKeywords) {
+      return generateCompetitorKeywords(baseKeywords);
     }
     
     return baseKeywords;

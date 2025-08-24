@@ -17,6 +17,8 @@ import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
+import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
+import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
@@ -182,9 +184,9 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>DamiTV - Free Sports Streaming & TV Online</title>
-        <meta name="description" content="Enjoy a wide variety of live sports and free TV channels online on DamiTV. Stream all your favorite sports events and tournaments with no registration required." />
-        <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv" />
+        <title>{generateCompetitorTitle('DamiTV - Free Sports Streaming & TV Online', 'home')}</title>
+        <meta name="description" content={generateCompetitorDescription('', 'home')} />
+        <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative, daddylivehd alternative, crackstreams alternative" />
         <link rel="canonical" href="https://damitv.pro/" />
       </Helmet>
       
@@ -324,6 +326,9 @@ const Index = () => {
             </div>
             
             <PromotionBoxes />
+            
+            {/* Hidden SEO content for competitor targeting */}
+            <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
           </>
         )}
       </main>
