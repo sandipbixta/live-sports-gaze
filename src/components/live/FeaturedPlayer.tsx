@@ -42,12 +42,20 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
 
   // Auto-start tracking when component mounts and match is available
   React.useEffect(() => {
+    console.log('FeaturedPlayer viewer tracking effect:', { 
+      featuredMatchId: featuredMatch?.id, 
+      isTracking,
+      isLive
+    });
+    
     if (featuredMatch?.id && !isTracking) {
+      console.log('🎬 FeaturedPlayer: Starting viewer tracking');
       startTracking();
     }
     
     return () => {
       if (isTracking) {
+        console.log('🎬 FeaturedPlayer: Stopping viewer tracking');
         stopTracking();
       }
     };

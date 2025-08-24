@@ -24,13 +24,18 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
   // Fetch current viewer count
   const fetchViewerCount = async (currentMatchId: string) => {
     try {
+      console.log(`📊 Fetching viewer count for match: ${currentMatchId}`);
       const { data, error } = await supabase.rpc('get_viewer_count', {
         match_id_param: currentMatchId
       });
       
-      if (!error && data !== null) {
-        setViewerCount(data);
+      if (error) {
+        console.error('Error fetching viewer count:', error);
+        return;
       }
+      
+      console.log(`👥 Viewer count for ${currentMatchId}: ${data}`);
+      setViewerCount(data || 0);
     } catch (error) {
       console.error('Error fetching viewer count:', error);
     }
@@ -38,7 +43,10 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
 
   // Start tracking viewers for a match
   const startTracking = async () => {
-    if (!matchId || isTracking) return;
+    if (!matchId || isTracking) {
+      console.log(`⚠️ Cannot start tracking. MatchId: ${matchId}, isTracking: ${isTracking}`);
+      return;
+    }
 
     console.log(`🔴 Starting viewer tracking for match: ${matchId}`);
     setIsTracking(true);

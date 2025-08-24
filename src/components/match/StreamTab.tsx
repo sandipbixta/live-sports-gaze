@@ -109,9 +109,19 @@ const StreamTab = ({
 
   // Start/stop viewer tracking based on stream availability
   useEffect(() => {
+    console.log('StreamTab viewer tracking effect:', { 
+      stream: !!stream, 
+      match: !!match, 
+      matchId: match?.id,
+      loadingStream, 
+      isTracking 
+    });
+    
     if (stream && match && !loadingStream) {
+      console.log('🎬 StreamTab: Starting viewer tracking');
       startTracking();
     } else {
+      console.log('🎬 StreamTab: Stopping viewer tracking');
       stopTracking();
     }
     
