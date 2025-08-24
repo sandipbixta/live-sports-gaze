@@ -21,13 +21,20 @@ const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
-// Helper function to reorder sports list - move tennis to the end
-const reorderSports = (sports: Sport[]): Sport[] => {
-  const tennisIndex = sports.findIndex(sport => sport.id === 'tennis');
-  if (tennisIndex === -1) return sports; // Tennis not found, return as is
+// Helper function to filter and reorder sports list
+const filterAndReorderSports = (sports: Sport[]): Sport[] => {
+  // Filter out unwanted sports: golf, hockey, billiards
+  const excludedSports = ['golf', 'hockey', 'billiards'];
+  const filteredSports = sports.filter(sport => 
+    !excludedSports.includes(sport.id.toLowerCase())
+  );
   
-  const sportsWithoutTennis = sports.filter(sport => sport.id !== 'tennis');
-  const tennisSport = sports[tennisIndex];
+  // Move tennis to the end
+  const tennisIndex = filteredSports.findIndex(sport => sport.id === 'tennis');
+  if (tennisIndex === -1) return filteredSports; // Tennis not found, return as is
+  
+  const sportsWithoutTennis = filteredSports.filter(sport => sport.id !== 'tennis');
+  const tennisSport = filteredSports[tennisIndex];
   
   // Add tennis at the end
   return [...sportsWithoutTennis, tennisSport];
@@ -62,8 +69,8 @@ export const fetchSports = async (): Promise<Sport[]> => {
       throw new Error('Invalid sports data format');
     }
     
-    // Reorder sports to move tennis to the end
-    const reorderedData = reorderSports(data);
+    // Filter and reorder sports
+    const reorderedData = filterAndReorderSports(data);
     setCachedData(cacheKey, reorderedData);
     console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
     return reorderedData;
@@ -82,7 +89,7 @@ export const fetchSports = async (): Promise<Sport[]> => {
         if (retryResponse.ok) {
           const retryData = await retryResponse.json();
           if (Array.isArray(retryData)) {
-            const reorderedRetryData = reorderSports(retryData);
+            const reorderedRetryData = filterAndReorderSports(retryData);
             setCachedData(cacheKey, reorderedRetryData);
             console.log(`✅ Mobile retry successful: ${reorderedRetryData.length} sports`);
             return reorderedRetryData;
@@ -154,20 +161,18 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       }
       
       // Create comprehensive sport mapping to handle API inconsistencies
+      // Excluded: golf, hockey, billiards
       const sportMapping: { [key: string]: string[] } = {
         'football': ['football', 'soccer'],
         'basketball': ['basketball', 'basket'],
         'tennis': ['tennis'],
-        'hockey': ['hockey', 'ice-hockey'],
         'baseball': ['baseball'],
         'american-football': ['american-football', 'nfl', 'american football'],
         'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
         'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
         'rugby': ['rugby'],
-        'golf': ['golf'],
         'cricket': ['cricket'],
         'darts': ['darts', 'dart'],
-        'billiards': ['billiards', 'pool', 'snooker', 'billiard'],
         'afl': ['afl', 'australian football'],
         'other': ['other']
       };
@@ -237,20 +242,18 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
                 return true;
               }
               
+              // Excluded: golf, hockey, billiards
               const sportMapping: { [key: string]: string[] } = {
                 'football': ['football', 'soccer'],
                 'basketball': ['basketball', 'basket'],
                 'tennis': ['tennis'],
-                'hockey': ['hockey', 'ice-hockey'],
                 'baseball': ['baseball'],
                 'american-football': ['american-football', 'nfl', 'american football'],
                 'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
                 'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
                 'rugby': ['rugby'],
-                'golf': ['golf'],
                 'cricket': ['cricket'],
                 'darts': ['darts', 'dart'],
-                'billiards': ['billiards', 'pool', 'snooker', 'billiard'],
                 'afl': ['afl', 'australian football'],
                 'other': ['other']
               };
@@ -302,7 +305,13 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     ).map(match => ({
       ...match,
       sportId: match.category
-    }));
+    }))
+    // Filter out excluded sports: golf, hockey, billiards
+    .filter(match => {
+      const sportCategory = (match.sportId || match.category || '').toLowerCase();
+      const excludedSports = ['golf', 'hockey', 'billiards'];
+      return !excludedSports.includes(sportCategory);
+    });
     
     setCachedData(cacheKey, validMatches);
     console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
@@ -337,7 +346,13 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     ).map(match => ({
       ...match,
       sportId: match.category
-    }));
+    }))
+    // Filter out excluded sports: golf, hockey, billiards
+    .filter(match => {
+      const sportCategory = (match.sportId || match.category || '').toLowerCase();
+      const excludedSports = ['golf', 'hockey', 'billiards'];
+      return !excludedSports.includes(sportCategory);
+    });
     
     setCachedData(cacheKey, validMatches);
     console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
