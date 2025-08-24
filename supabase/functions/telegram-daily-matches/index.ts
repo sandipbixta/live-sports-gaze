@@ -119,7 +119,15 @@ const sendTelegramMessage = async (message: string): Promise<void> => {
   const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN');
   const chatId = Deno.env.get('TELEGRAM_CHAT_ID');
 
+  console.log('Environment check:');
+  console.log('- Bot token exists:', !!botToken);
+  console.log('- Chat ID exists:', !!chatId);
+  console.log('- Bot token length:', botToken?.length || 0);
+  console.log('- Chat ID value:', chatId);
+
   if (!botToken || !chatId) {
+    console.error('Missing environment variables!');
+    console.error('Available env vars:', Object.keys(Deno.env.toObject()));
     throw new Error('Missing Telegram bot token or chat ID');
   }
 
