@@ -2,3 +2,7 @@ project_id = "wxvsteaayxgygihpshoz"
 
 [functions.telegram-daily-matches]
 verify_jwt = false
+
+[functions.telegram-daily-matches.env]
+TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN"
+TELEGRAM_CHAT_ID = "TELEGRAM_CHAT_ID"
