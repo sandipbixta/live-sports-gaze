@@ -75,22 +75,25 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
 export const isMatchLive = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
-  const threeHoursInMs = 3 * 60 * 60 * 1000;
-  const oneHourInMs = 60 * 60 * 1000;
+  const fourHoursInMs = 4 * 60 * 60 * 1000;
+  const oneHourBeforeMs = 60 * 60 * 1000;
   
+  // Match is live if:
+  // 1. It has sources available
+  // 2. Current time is between 1 hour before match time and 4 hours after match time
   return match.sources && 
          match.sources.length > 0 && 
-         matchTime - now < oneHourInMs && 
-         now - matchTime < threeHoursInMs;
+         now >= matchTime - oneHourBeforeMs && 
+         now <= matchTime + fourHoursInMs;
 };
 
 export const isMatchEnded = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
-  const threeHoursInMs = 3 * 60 * 60 * 1000;
+  const fourHoursInMs = 4 * 60 * 60 * 1000;
   
-  // Match is ended if it's more than 3 hours past match time and not live
-  return now - matchTime > threeHoursInMs && !isMatchLive(match);
+  // Match is ended if it's more than 4 hours past match time and not live
+  return now - matchTime > fourHoursInMs && !isMatchLive(match);
 };
 
 export const filterActiveMatches = (matches: Match[]): Match[] => {
