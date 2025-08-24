@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Clock, Play, Users, Calendar } from 'lucide-react';
@@ -7,9 +7,9 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
-import { useViewerTracking } from '@/hooks/useViewerTracking';
 import ViewerCounter from './ViewerCounter';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MatchCardProps {
   match: Match;
@@ -30,7 +30,28 @@ const MatchCard: React.FC<MatchCardProps> = ({
   isPriority,
   showViewers = false,
 }) => {
-  const { viewerCount } = useViewerTracking(match.id);
+  const [viewerCount, setViewerCount] = useState(0);
+  
+  // Fetch viewer count when component mounts or match changes
+  useEffect(() => {
+    const fetchViewerCount = async () => {
+      if (match.id && showViewers) {
+        try {
+          const { data, error } = await supabase.rpc('get_viewer_count', {
+            match_id_param: match.id
+          });
+          
+          if (!error && data !== null) {
+            setViewerCount(data);
+          }
+        } catch (error) {
+          console.error('Error fetching viewer count for match:', match.id, error);
+        }
+      }
+    };
+
+    fetchViewerCount();
+  }, [match.id, showViewers]);
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
