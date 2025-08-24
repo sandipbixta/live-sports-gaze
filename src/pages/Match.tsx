@@ -83,12 +83,37 @@ const Match = () => {
         console.log('Enhanced match with logos:', enhancedMatch);
         setMatch(enhancedMatch);
         
-        // Auto-load stream if available
+        // Auto-load stream if available - improved reliability
         if (matchData?.sources?.length > 0) {
-          const { source, id } = matchData.sources[0];
-          setActiveSource(`${source}/${id}`);
+          console.log('🎯 Auto-loading first stream source for match:', matchData.title);
           
-          await fetchStreamData(source, id);
+          // Find the best source (prefer non-admin sources)
+          const preferredSource = matchData.sources.find(s => 
+            !s.source?.toLowerCase().includes('admin')
+          ) || matchData.sources[0];
+          
+          const { source, id } = preferredSource;
+          const sourceKey = `${source}/${id}`;
+          setActiveSource(sourceKey);
+          
+          console.log('🎬 Fetching stream from source:', sourceKey);
+          
+          // Add small delay to ensure UI is ready
+          setTimeout(async () => {
+            try {
+              await fetchStreamData(source, id);
+              console.log('✅ Auto-stream load completed');
+            } catch (error) {
+              console.error('❌ Auto-stream load failed:', error);
+              // Try the next available source if the first one fails
+              if (matchData.sources.length > 1) {
+                const nextSource = matchData.sources[1];
+                console.log('🔄 Trying next source:', nextSource.source, nextSource.id);
+                setActiveSource(`${nextSource.source}/${nextSource.id}`);
+                await fetchStreamData(nextSource.source, nextSource.id);
+              }
+            }
+          }, 200);
         }
         
         // Load popular matches (limited to 3)
