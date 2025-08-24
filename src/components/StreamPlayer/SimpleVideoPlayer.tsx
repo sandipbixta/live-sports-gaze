@@ -259,14 +259,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       </div>
       </div>
       
-      {/* Viewer Counter Below Video - Simple numbers only */}
-      {showViewerCounter && !isFullscreen && viewerCount > 0 && (
-        <div className="mt-3 px-2">
-          <span className="text-sm text-muted-foreground">
-            {viewerCount.toLocaleString()} {viewerCount === 1 ? 'viewer' : 'viewers'} watching
-          </span>
-        </div>
-      )}
     </div>
   );
 };

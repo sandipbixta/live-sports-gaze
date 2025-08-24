@@ -133,7 +133,7 @@ const StreamTab = ({
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         viewerCount={viewerCount}
         isLive={isMatchLive()}
-        showViewerCounter={isTracking && viewerCount > 0}
+        showViewerCounter={false}
       />
       
       <StreamSources
@@ -158,15 +158,7 @@ const StreamTab = ({
               </Badge>
             )}
             
-            {/* Show viewer count when tracking */}
-            {isTracking && viewerCount > 0 && (
-              <ViewerCounter 
-                viewerCount={viewerCount}
-                isLive={isMatchLive()}
-                variant="large"
-                className="ml-2"
-              />
-            )}
+            {/* Viewer count removed - only show in match cards */}
           </div>
         </div>
       )}
