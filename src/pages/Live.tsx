@@ -18,6 +18,7 @@ import SportFilterPills from '../components/live/SportFilterPills';
 import MatchesTabContent from '../components/live/MatchesTabContent';
 import MatchSection from '../components/MatchSection';
 import TelegramBanner from '../components/TelegramBanner';
+import { isTrendingMatch } from '../utils/popularLeagues';
 
 const Live = () => {
   const { toast } = useToast();
@@ -76,6 +77,19 @@ const Live = () => {
       matchesToFilter = liveMatches;
     } else if (activeTab === "upcoming") {
       matchesToFilter = upcomingMatches;
+    }
+    
+    // Filter football to show only top leagues/teams (trending matches)
+    if (activeSportFilter === "1" || activeSportFilter === "all") { // 1 is typically football/soccer
+      matchesToFilter = matchesToFilter.filter(match => {
+        // If it's football, only show top league matches
+        if (match.sportId === "1") {
+          const trendingResult = isTrendingMatch(match.title);
+          return trendingResult.isTrending; // Only show matches with trending score >= 5
+        }
+        // Show all matches for other sports
+        return true;
+      });
     }
     
     // Then filter by sport if not "all"
