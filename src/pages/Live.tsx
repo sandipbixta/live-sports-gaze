@@ -211,6 +211,35 @@ const Live = () => {
         </div>
         
         <TabsContent value="all" className="mt-0">
+          {/* Popular by Viewers Section */}
+          {(() => {
+            const popularMatches = liveMatches
+              .filter(match => match.popular || (match.sources && match.sources.length >= 2))
+              .sort((a, b) => {
+                // Sort by popular flag first, then by number of sources
+                if (a.popular && !b.popular) return -1;
+                if (!a.popular && b.popular) return 1;
+                return (b.sources?.length || 0) - (a.sources?.length || 0);
+              })
+              .slice(0, 6);
+            
+            if (popularMatches.length > 0) {
+              return (
+                <div className="mb-8">
+                  <MatchSection
+                    matches={popularMatches}
+                    sportId="popular"
+                    title="🔥 Popular by Viewers"
+                    isLive={true}
+                    onMatchSelect={handleMatchSelect}
+                    preventNavigation={true}
+                  />
+                </div>
+              );
+            }
+            return null;
+          })()}
+          
           {/* Live Matches Categorized by Sport */}
           {(() => {
             const liveMatchesFiltered = liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
