@@ -167,11 +167,30 @@ serve(async (req) => {
     // Send to Telegram
     await sendTelegramMessage(message);
     
+    // Group matches by sport for the response
+    const matchesBySport = matches.reduce((acc, match) => {
+      const sport = match.category || 'Other';
+      if (!acc[sport]) acc[sport] = [];
+      acc[sport].push({
+        title: match.title,
+        time: new Date(match.date).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }),
+        teams: match.teams
+      });
+      return acc;
+    }, {} as Record<string, any[]>);
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         matchesFound: matches.length,
-        message: 'Daily matches sent successfully' 
+        matchesBySport,
+        message: `Successfully sent ${matches.length} matches to Telegram`,
+        sentAt: new Date().toISOString(),
+        telegramMessage: message.substring(0, 500) + (message.length > 500 ? '...' : '')
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
