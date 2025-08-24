@@ -225,14 +225,77 @@ const Live = () => {
         </div>
         
         <TabsContent value="all" className="mt-0">
-          {/* Live Matches Categorized by Sport */}
+          {/* Top 5 Leagues - Live Matches */}
           {(() => {
             const liveMatchesFiltered = liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
+            const topLeagueMatches = liveMatchesFiltered.filter(match => {
+              if (match.sportId === "1") { // Football
+                const trendingResult = isTrendingMatch(match.title);
+                return trendingResult.isTrending;
+              }
+              return false;
+            });
             
-            if (liveMatchesFiltered.length > 0) {
-              // Group live matches by sport
+            if (topLeagueMatches.length > 0) {
+              return (
+                <div className="mb-8">
+                  <MatchSection
+                    matches={topLeagueMatches}
+                    sportId="1"
+                    title="🏆 Top Leagues - Live Now"
+                    isLive={true}
+                    onMatchSelect={handleMatchSelect}
+                    preventNavigation={true}
+                  />
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          {/* Top 5 Leagues - Upcoming Matches */}
+          {(() => {
+            const upcomingMatchesFiltered = upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
+            const topLeagueUpcoming = upcomingMatchesFiltered.filter(match => {
+              if (match.sportId === "1") { // Football
+                const trendingResult = isTrendingMatch(match.title);
+                return trendingResult.isTrending;
+              }
+              return false;
+            }).slice(0, 12);
+            
+            if (topLeagueUpcoming.length > 0) {
+              return (
+                <div className="mb-8">
+                  <MatchSection
+                    matches={topLeagueUpcoming}
+                    sportId="1"
+                    title="🏆 Top Leagues - Upcoming"
+                    isLive={false}
+                    onMatchSelect={handleMatchSelect}
+                    preventNavigation={true}
+                  />
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          {/* Other Live Matches Categorized by Sport */}
+          {(() => {
+            const liveMatchesFiltered = liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
+            const otherMatches = liveMatchesFiltered.filter(match => {
+              if (match.sportId === "1") { // Football
+                const trendingResult = isTrendingMatch(match.title);
+                return !trendingResult.isTrending; // Show non-trending football matches
+              }
+              return true; // Show all other sports
+            });
+            
+            if (otherMatches.length > 0) {
+              // Group other live matches by sport
               const liveMatchesBySport = sports.reduce((acc, sport) => {
-                const sportMatches = liveMatchesFiltered.filter(match => match.sportId === sport.id);
+                const sportMatches = otherMatches.filter(match => match.sportId === sport.id);
                 if (sportMatches.length > 0) {
                   acc[sport.id] = {
                     sport: sport,
@@ -246,10 +309,10 @@ const Live = () => {
                 <div className="space-y-8 mb-8">
                   {Object.values(liveMatchesBySport).map(({ sport, matches }) => (
                     <MatchSection
-                      key={`live-${sport.id}`}
+                      key={`live-other-${sport.id}`}
                       matches={matches}
                       sportId={sport.id}
-                      title={`${sport.name} - Live`}
+                      title={sport.id === "1" ? "⚽ Other Football Leagues - Live" : `${sport.name} - Live`}
                       isLive={true}
                       onMatchSelect={handleMatchSelect}
                       preventNavigation={true}
@@ -261,14 +324,21 @@ const Live = () => {
             return null;
           })()}
           
-          {/* Upcoming Matches Categorized by Sport */}
+          {/* Other Upcoming Matches Categorized by Sport */}
           {(() => {
-            const upcomingMatchesFiltered = upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id)).slice(0, 24);
+            const upcomingMatchesFiltered = upcomingMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
+            const otherUpcoming = upcomingMatchesFiltered.filter(match => {
+              if (match.sportId === "1") { // Football
+                const trendingResult = isTrendingMatch(match.title);
+                return !trendingResult.isTrending; // Show non-trending football matches
+              }
+              return true; // Show all other sports
+            }).slice(0, 24);
             
-            if (upcomingMatchesFiltered.length > 0) {
-              // Group upcoming matches by sport
+            if (otherUpcoming.length > 0) {
+              // Group other upcoming matches by sport
               const upcomingMatchesBySport = sports.reduce((acc, sport) => {
-                const sportMatches = upcomingMatchesFiltered.filter(match => match.sportId === sport.id);
+                const sportMatches = otherUpcoming.filter(match => match.sportId === sport.id);
                 if (sportMatches.length > 0) {
                   acc[sport.id] = {
                     sport: sport,
@@ -282,10 +352,10 @@ const Live = () => {
                 <div className="space-y-8">
                   {Object.values(upcomingMatchesBySport).map(({ sport, matches }) => (
                     <MatchSection
-                      key={`upcoming-${sport.id}`}
+                      key={`upcoming-other-${sport.id}`}
                       matches={matches}
                       sportId={sport.id}
-                      title={`${sport.name} - Upcoming`}
+                      title={sport.id === "1" ? "⚽ Other Football Leagues - Upcoming" : `${sport.name} - Upcoming`}
                       isLive={false}
                       onMatchSelect={handleMatchSelect}
                       preventNavigation={true}
