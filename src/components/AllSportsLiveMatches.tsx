@@ -162,10 +162,19 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           (match.sportId || match.category || '').toLowerCase() === 'football'
         );
         
+        // More specific filtering for actual top league matches
+        const topLeagueKeywords = [
+          'premier league', 'epl', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
+          'champions league', 'ucl', 'europa league', 'conference league',
+          'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
+          'barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
+          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid'
+        ];
+        
         const topLeagueFootballMatches = footballMatches
           .filter(match => {
-            const trendingData = isTrendingMatch(match.title);
-            return trendingData.isTrending && trendingData.score >= 8; // Only top leagues/clubs
+            const title = match.title.toLowerCase();
+            return topLeagueKeywords.some(keyword => title.includes(keyword));
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;
