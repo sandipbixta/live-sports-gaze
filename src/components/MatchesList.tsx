@@ -2,7 +2,6 @@
 import React from 'react';
 import { Match } from '../types/sports';
 import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
-import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
 import EmptyState from './EmptyState';
@@ -34,28 +33,9 @@ const MatchesList: React.FC<MatchesListProps> = ({
     }
   }, [filteredMatches, onMatchesDisplayed]);
 
-  // Separate matches into live and upcoming, and sort football matches by leagues
-  const sortMatches = (matches: Match[]) => {
-    if (sportId === '1' || sportId === 'football') {
-      const topLeagueMatches: Match[] = [];
-      const otherMatches: Match[] = [];
-      
-      matches.forEach(match => {
-        const { isTrending } = isTrendingMatch(match.title);
-        if (isTrending) {
-          topLeagueMatches.push(match);
-        } else {
-          otherMatches.push(match);
-        }
-      });
-      
-      return [...topLeagueMatches, ...otherMatches];
-    }
-    return matches;
-  };
-
-  const liveMatches = sortMatches(filteredMatches.filter(match => isMatchLive(match)));
-  const upcomingMatches = sortMatches(filteredMatches.filter(match => !isMatchLive(match)));
+  // Separate matches into live and upcoming
+  const liveMatches = filteredMatches.filter(match => isMatchLive(match));
+  const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
 
   if (isLoading) {
     return <LoadingGrid />;
