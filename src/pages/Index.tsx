@@ -22,6 +22,7 @@ import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
+import TelegramTestButton from '../components/TelegramTestButton';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -217,6 +218,11 @@ const Index = () => {
         {/* Telegram Banner */}
         <div className="mb-6">
           <TelegramBanner />
+        </div>
+
+        {/* Telegram Test Button */}
+        <div className="mb-6">
+          <TelegramTestButton />
         </div>
 
         <div className="mb-8">
