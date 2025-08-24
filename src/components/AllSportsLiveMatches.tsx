@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
 
@@ -68,7 +69,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     });
   }, [liveMatches, searchTerm]);
 
-  // Group matches by sport
+  // Group matches by sport and separate top leagues for football
   const matchesBySport = React.useMemo(() => {
     const grouped: { [sportId: string]: Match[] } = {};
     
@@ -79,6 +80,29 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       }
       grouped[sportId].push(match);
     });
+    
+    // For football, sort matches to show top leagues first
+    if (grouped['1'] || grouped['football']) {
+      const footballMatches = grouped['1'] || grouped['football'] || [];
+      const topLeagueMatches: Match[] = [];
+      const otherMatches: Match[] = [];
+      
+      footballMatches.forEach(match => {
+        const { isTrending } = isTrendingMatch(match.title);
+        if (isTrending) {
+          topLeagueMatches.push(match);
+        } else {
+          otherMatches.push(match);
+        }
+      });
+      
+      // Replace with sorted matches (top leagues first)
+      if (grouped['1']) {
+        grouped['1'] = [...topLeagueMatches, ...otherMatches];
+      } else {
+        grouped['football'] = [...topLeagueMatches, ...otherMatches];
+      }
+    }
     
     return grouped;
   }, [filteredMatches]);
@@ -167,13 +191,20 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {matches.map((match) => (
-              <MatchCard
-                key={`${match.sportId || sportId}-${match.id}`}
-                match={match}
-                sportId={match.sportId || sportId}
-              />
-            ))}
+            {matches.map((match, index) => {
+              // Check if this is a football match and if it's a trending match
+              const isFootball = sportId === '1' || sportId === 'football';
+              const { isTrending } = isFootball ? isTrendingMatch(match.title) : { isTrending: false };
+              
+              return (
+                <MatchCard
+                  key={`${match.sportId || sportId}-${match.id}`}
+                  match={match}
+                  sportId={match.sportId || sportId}
+                  className={isFootball && isTrending ? "ring-2 ring-yellow-500/50" : ""}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
