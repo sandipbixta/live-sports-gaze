@@ -133,7 +133,7 @@ const StreamTab = ({
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         viewerCount={viewerCount}
         isLive={isMatchLive()}
-        showViewerCounter={false}
+        showViewerCounter={true}
       />
       
       <StreamSources

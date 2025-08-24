@@ -7,6 +7,7 @@ import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
+import { useViewerTracking } from '../../hooks/useViewerTracking';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -33,6 +34,10 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
+
+  // Track viewers for the featured match
+  const isLive = featuredMatch ? isMatchLive(featuredMatch) : false;
+  const { viewerCount } = useViewerTracking(featuredMatch?.id || null);
 
   // Show loading only for initial load, not when we have matches
   if (loading && !featuredMatch) {
@@ -91,7 +96,10 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
       <StreamPlayer 
         stream={currentStream} 
         isLoading={streamLoading}
-        onRetry={onStreamRetry} 
+        onRetry={onStreamRetry}
+        viewerCount={viewerCount}
+        isLive={isLive}
+        showViewerCounter={true}
       />
       
       {/* Stream Sources - only show if match has sources */}
