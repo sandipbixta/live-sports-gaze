@@ -124,16 +124,23 @@ const Match = () => {
         // Load all matches for recommended and trending sections
         const allMatches = await fetchMatches(sportId);
         
-        // Filter live matches for recommended section (exclude current match)
-        const liveMatches = allMatches.filter(match => 
+        // Filter popular matches by viewers (exclude current match)
+        const popularByViewers = allMatches.filter(match => 
           !match.title.toLowerCase().includes('sky sports news') && 
           !match.id.includes('sky-sports-news') &&
           match.id !== matchId && // Don't show current match
           match.date <= Date.now() && // Live matches (started)
           match.date > Date.now() - (24 * 60 * 60 * 1000) // Within last 24 hours
-        ).slice(0, 6); // Show top 6 live matches
+        )
+        .sort((a, b) => {
+          // Sort by popular flag first, then by number of sources (more sources = more popular)
+          const aScore = (a.popular ? 100 : 0) + (a.sources?.length || 0);
+          const bScore = (b.popular ? 100 : 0) + (b.sources?.length || 0);
+          return bScore - aScore;
+        })
+        .slice(0, 6); // Show top 6 popular matches by viewers
         
-        setRecommendedMatches(liveMatches);
+        setRecommendedMatches(popularByViewers);
         
         // Filter and sort by trending score
         const trending = allMatches
@@ -275,9 +282,9 @@ const Match = () => {
         {recommendedMatches.length > 0 && (
           <div className="mt-8 sm:mt-12">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-              🎯 Recommended Live Games
+              🔥 Popular by Viewers
               <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
-                {recommendedMatches.length} live
+                {recommendedMatches.length} matches
               </span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
