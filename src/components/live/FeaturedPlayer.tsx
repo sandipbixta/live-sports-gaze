@@ -38,7 +38,20 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
 
   // Track viewers for the featured match
   const isLive = featuredMatch ? isMatchLive(featuredMatch) : false;
-  const { viewerCount } = useViewerTracking(featuredMatch?.id || null);
+  const { viewerCount, startTracking, stopTracking, isTracking } = useViewerTracking(featuredMatch?.id || null);
+
+  // Auto-start tracking when component mounts and match is available
+  React.useEffect(() => {
+    if (featuredMatch?.id && !isTracking) {
+      startTracking();
+    }
+    
+    return () => {
+      if (isTracking) {
+        stopTracking();
+      }
+    };
+  }, [featuredMatch?.id, isTracking, startTracking, stopTracking]);
 
   // Show loading only for initial load, not when we have matches
   if (loading && !featuredMatch) {
