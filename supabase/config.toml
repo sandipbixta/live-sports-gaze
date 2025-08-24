@@ -1,1 +1,4 @@
 project_id = "wxvsteaayxgygihpshoz"
+
+[functions.telegram-daily-matches]
+verify_jwt = false
