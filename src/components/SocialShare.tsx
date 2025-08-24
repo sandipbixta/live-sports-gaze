@@ -29,8 +29,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
   const shareData = {
     title,
     text: description,
-    url,
-    ...(image && { image }) // Include image if available
+    url
   };
 
   const handleNativeShare = async () => {
@@ -66,26 +65,22 @@ const SocialShare: React.FC<SocialShareProps> = ({
   };
 
   const shareToTwitter = () => {
-    const imageParam = image ? `&image=${encodeURIComponent(image)}` : '';
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&hashtags=DamiTV,LiveSports,Football${imageParam}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&hashtags=DamiTV,LiveSports,Football`;
     window.open(twitterUrl, '_blank', 'width=600,height=400');
   };
 
   const shareToFacebook = () => {
-    const imageParam = image ? `&picture=${encodeURIComponent(image)}` : '';
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}${imageParam}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`;
     window.open(facebookUrl, '_blank', 'width=600,height=400');
   };
 
   const shareToWhatsApp = () => {
-    const imageText = image ? `\n🖼️ ${image}` : '';
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${description} ${url}${imageText}`)}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${description} ${url}`)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const shareToTelegram = () => {
-    const imageParam = image ? `&photo=${encodeURIComponent(image)}` : '';
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}${imageParam}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
     window.open(telegramUrl, '_blank');
   };
 

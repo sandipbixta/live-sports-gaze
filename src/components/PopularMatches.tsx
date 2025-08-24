@@ -49,7 +49,6 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
             sportId={selectedSport || ''}
             isPriority={true}
             showViewers={true}
-            showShareButton={true}
           />
         ))}
       </div>

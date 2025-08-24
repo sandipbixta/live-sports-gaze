@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Clock, Play, Users, Calendar, Share2 } from 'lucide-react';
+import { Clock, Play, Users, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
 import ViewerCounter from './ViewerCounter';
-import SocialShare from './SocialShare';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,7 +19,6 @@ interface MatchCardProps {
   preventNavigation?: boolean;
   isPriority?: boolean;
   showViewers?: boolean;
-  showShareButton?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -31,7 +29,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
   preventNavigation,
   isPriority,
   showViewers = false,
-  showShareButton = false,
 }) => {
   const [viewerCount, setViewerCount] = useState(0);
   
@@ -87,26 +84,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
-
-  // Get match poster URL for sharing
-  const getMatchPosterUrl = () => {
-    if (match.poster && match.poster.trim() !== '') {
-      return match.poster.startsWith('http') 
-        ? match.poster 
-        : `https://streamed.pk${match.poster}.webp`;
-    }
-    return null;
-  };
-
-  const matchPosterUrl = getMatchPosterUrl();
-  const matchTitle = home && away ? `${home} vs ${away}` : match.title;
-  const matchUrl = `https://damitv.pro/match/${sportId || match.sportId}/${match.id}`;
-  const matchDescription = `Watch ${matchTitle} live stream free on DamiTV. ${isLive ? 'Live now!' : 'Scheduled for ' + formatFullDate(match.date)}`;
-
-  const handleShareClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   // Generate thumbnail background with priority: poster > badges > default logo
   const generateThumbnail = () => {
@@ -391,19 +368,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </Badge>
             </div>
           )}
-
-          {/* Share button overlay */}
-          {showShareButton && (
-            <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2" onClick={handleShareClick}>
-              <SocialShare
-                title={matchTitle}
-                description={matchDescription}
-                url={matchUrl}
-                image={matchPosterUrl}
-                className="!p-1.5 !border-0 bg-black/50 backdrop-blur-sm hover:bg-black/70"
-              />
-            </div>
-          )}
         </AspectRatio>
       </div>
 
@@ -411,7 +375,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
       <div className="space-y-2">
         {/* Title */}
         <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-          {matchTitle}
+          {home && away ? `${home} vs ${away}` : match.title}
         </h3>
 
         {/* Metadata */}
