@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
-import { fetchLiveMatches, fetchSports } from '../api/sportsApi';
+import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
 import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchCard from './MatchCard';
@@ -13,6 +13,7 @@ interface AllSportsLiveMatchesProps {
 const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm = '' }) => {
   const { toast } = useToast();
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,32 +22,37 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       try {
         setLoading(true);
         
-        // Fetch sports and live matches in parallel
-        const [sportsData, matchesData] = await Promise.all([
+        // Fetch sports, live matches, and all matches in parallel
+        const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
           fetchSports(),
-          fetchLiveMatches()
+          fetchLiveMatches(),
+          fetchAllMatches()
         ]);
         
         setSports(sportsData);
         
-        // Filter and consolidate matches
-        const cleanMatches = filterCleanMatches(matchesData);
-        const consolidatedMatches = consolidateMatches(cleanMatches);
+        // Filter and consolidate live matches
+        const cleanLiveMatches = filterCleanMatches(liveMatchesData);
+        const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
+        setLiveMatches(consolidatedLiveMatches);
         
-        // Since fetchLiveMatches already returns live matches, no need to filter again
-        setLiveMatches(consolidatedMatches);
-        console.log(`✅ Loaded ${consolidatedMatches.length} live matches from all sports`);
-        console.log('Live matches by sport:', consolidatedMatches.reduce((acc, match) => {
+        // Filter and consolidate all matches (for top league section)
+        const cleanAllMatches = filterCleanMatches(allMatchesData);
+        const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
+        setAllMatches(consolidatedAllMatches);
+        
+        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches from all sports`);
+        console.log('Live matches by sport:', consolidatedLiveMatches.reduce((acc, match) => {
           const sport = match.sportId || match.category || 'unknown';
           acc[sport] = (acc[sport] || 0) + 1;
           return acc;
         }, {} as Record<string, number>));
         
       } catch (error) {
-        console.error('Error loading live matches:', error);
+        console.error('Error loading matches:', error);
         toast({
           title: "Error",
-          description: "Failed to load live matches.",
+          description: "Failed to load matches.",
           variant: "destructive",
         });
       } finally {
@@ -156,9 +162,10 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
-      {/* Top League Football Matches - Above Live Matches */}
+      {/* Top League Football Matches - Live and Scheduled */}
       {(() => {
-        const footballMatches = filteredMatches.filter(match => 
+        // Get both live and scheduled football matches from allMatches
+        const allFootballMatches = allMatches.filter(match => 
           (match.sportId || match.category || '').toLowerCase() === 'football'
         );
         
@@ -175,7 +182,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'barcelona sc', 'barcelona sporting', 'guayaquil'
         ];
         
-        const topLeagueFootballMatches = footballMatches
+        const topLeagueFootballMatches = allFootballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
             // Exclude non-European Barcelona teams
