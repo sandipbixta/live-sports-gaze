@@ -167,13 +167,21 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'premier league', 'epl', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
           'champions league', 'ucl', 'europa league', 'conference league',
           'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
-          'barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
+          'fc barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
           'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid'
+        ];
+        
+        const excludeKeywords = [
+          'barcelona sc', 'barcelona sporting', 'guayaquil'
         ];
         
         const topLeagueFootballMatches = footballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
+            // Exclude non-European Barcelona teams
+            if (excludeKeywords.some(keyword => title.includes(keyword))) {
+              return false;
+            }
             return topLeagueKeywords.some(keyword => title.includes(keyword));
           })
           .sort((a, b) => {
