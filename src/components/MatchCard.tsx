@@ -392,16 +392,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <Users className="w-3 h-3" />
                 {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
               </div>
-              {showViewers && (
-                <>
-                  <span>•</span>
-                  <ViewerCounter 
-                    viewerCount={viewerCount}
-                    isLive={isLive}
-                    variant="compact"
-                  />
-                </>
-              )}
             </>
           )}
         </div>
