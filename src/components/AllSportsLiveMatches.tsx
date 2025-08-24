@@ -208,6 +208,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
                 key={`${match.sportId || sportId}-${match.id}`}
                 match={match}
                 sportId={match.sportId || sportId}
+                showViewers={true}
               />
             ))}
           </div>
