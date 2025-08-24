@@ -63,15 +63,33 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     loadLiveMatches();
   }, [toast]);
 
-  // Filter matches by search term
+  // Filter matches by search term and time restrictions
   const filteredMatches = React.useMemo(() => {
-    if (!searchTerm.trim()) return liveMatches;
+    const now = Date.now();
     
-    const lowercaseSearch = searchTerm.toLowerCase();
-    return liveMatches.filter(match => {
-      return match.title.toLowerCase().includes(lowercaseSearch) || 
-        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+    let matches = liveMatches;
+    
+    // Apply search filter if provided
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      matches = matches.filter(match => {
+        return match.title.toLowerCase().includes(lowercaseSearch) || 
+          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+      });
+    }
+    
+    // Apply time-based filtering for football matches
+    return matches.filter(match => {
+      const timeSinceStart = now - match.date;
+      
+      // Hide football matches after 2.5 hours (150 minutes)
+      const isFootball = (match.sportId || match.category || '').toLowerCase() === 'football';
+      if (isFootball && timeSinceStart > 150 * 60 * 1000) {
+        return false;
+      }
+      
+      return true;
     });
   }, [liveMatches, searchTerm]);
 
@@ -185,6 +203,14 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         const topLeagueFootballMatches = allFootballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
+            const now = Date.now();
+            const timeSinceStart = now - match.date;
+            
+            // Hide football matches after 2.5 hours (150 minutes)
+            if (timeSinceStart > 150 * 60 * 1000) {
+              return false;
+            }
+            
             // Exclude non-European Barcelona teams
             if (excludeKeywords.some(keyword => title.includes(keyword))) {
               return false;

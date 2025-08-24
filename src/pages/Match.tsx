@@ -125,13 +125,34 @@ const Match = () => {
         const allMatches = await fetchMatches(sportId);
         
         // Filter popular matches by viewers (exclude current match)
-        const popularByViewers = allMatches.filter(match => 
-          !match.title.toLowerCase().includes('sky sports news') && 
-          !match.id.includes('sky-sports-news') &&
-          match.id !== matchId && // Don't show current match
-          match.date <= Date.now() && // Live matches (started)
-          match.date > Date.now() - (24 * 60 * 60 * 1000) // Within last 24 hours
-        )
+        const popularByViewers = allMatches.filter(match => {
+          // Basic filters
+          if (match.title.toLowerCase().includes('sky sports news') || 
+              match.id.includes('sky-sports-news') ||
+              match.id === matchId) {
+            return false;
+          }
+          
+          // Time-based filters
+          const now = Date.now();
+          const matchStartTime = match.date;
+          const timeSinceStart = now - matchStartTime;
+          
+          // Don't show matches that haven't started yet
+          if (matchStartTime > now) return false;
+          
+          // Don't show matches older than 24 hours
+          if (timeSinceStart > 24 * 60 * 60 * 1000) return false;
+          
+          // Hide football matches after 2.5 hours (150 minutes)
+          const isFootball = match.category?.toLowerCase() === 'football' || 
+                            match.sportId?.toLowerCase() === 'football';
+          if (isFootball && timeSinceStart > 150 * 60 * 1000) {
+            return false;
+          }
+          
+          return true;
+        })
         .sort((a, b) => {
           // Sort by popular flag first, then by number of sources (more sources = more popular)
           const aScore = (a.popular ? 100 : 0) + (a.sources?.length || 0);
