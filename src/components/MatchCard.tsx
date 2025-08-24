@@ -409,7 +409,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {/* Status indicator */}
         <div className="text-xs">
           {isLive ? (
-            <span className="text-destructive font-medium">Live now</span>
+            <div className="flex items-center gap-2">
+              <span className="text-destructive font-medium">Live now</span>
+              {showViewers && (
+                <ViewerCounter 
+                  viewerCount={viewerCount}
+                  isLive={isLive}
+                  variant="compact"
+                />
+              )}
+            </div>
           ) : match.date ? (
             <span className="text-muted-foreground">
               {match.date > Date.now() ? 'Upcoming' : 'Ended'}
