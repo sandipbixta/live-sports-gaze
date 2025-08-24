@@ -133,8 +133,18 @@ const StreamTab = ({
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         viewerCount={viewerCount}
         isLive={isMatchLive()}
-        showViewerCounter={true}
+        showViewerCounter={false}
       />
+      
+      {/* Viewer counter below video player */}
+      <div className="mt-3 flex justify-start">
+        <ViewerCounter 
+          viewerCount={viewerCount}
+          isLive={isMatchLive()}
+          variant="default"
+          className="bg-card text-card-foreground border border-border"
+        />
+      </div>
       
       <StreamSources
         sources={match.sources}

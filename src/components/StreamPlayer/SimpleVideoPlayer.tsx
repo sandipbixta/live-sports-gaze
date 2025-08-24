@@ -258,17 +258,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </Button>
       </div>
 
-      {/* Viewer counter */}
-      {showViewerCounter && (
-        <div className="absolute bottom-4 left-4">
-          <ViewerCounter 
-            viewerCount={viewerCount}
-            isLive={isLive}
-            variant="default"
-            className="bg-black/50 backdrop-blur-sm text-white"
-          />
-        </div>
-      )}
       </div>
       
     </div>

@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
 import { useViewerTracking } from '../../hooks/useViewerTracking';
+import ViewerCounter from '../ViewerCounter';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -99,8 +100,18 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
         onRetry={onStreamRetry}
         viewerCount={viewerCount}
         isLive={isLive}
-        showViewerCounter={true}
+        showViewerCounter={false}
       />
+      
+      {/* Viewer counter below video player */}
+      <div className="mt-3 flex justify-start">
+        <ViewerCounter 
+          viewerCount={viewerCount}
+          isLive={isLive}
+          variant="default"
+          className="bg-[#242836] text-white border border-[#343a4d]"
+        />
+      </div>
       
       {/* Stream Sources - only show if match has sources */}
       {featuredMatch.sources && featuredMatch.sources.length > 0 && (
