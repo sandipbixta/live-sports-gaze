@@ -78,6 +78,8 @@ const MatchSection: React.FC<MatchSectionProps> = ({
               sportId={sportId}
               onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
               preventNavigation={preventNavigation}
+              showViewers={isLive}
+              showShareButton={true}
             />
           </div>
         ))}
