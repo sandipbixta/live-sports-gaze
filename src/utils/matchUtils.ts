@@ -76,14 +76,14 @@ export const isMatchLive = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
   const fourHoursInMs = 4 * 60 * 60 * 1000;
-  const oneHourBeforeMs = 60 * 60 * 1000;
+  const fiveMinutesBeforeMs = 5 * 60 * 1000; // Changed from 1 hour to 5 minutes
   
   // Match is live if:
   // 1. It has sources available
-  // 2. Current time is between 1 hour before match time and 4 hours after match time
+  // 2. Current time is between 5 minutes before match time and 4 hours after match time
   return match.sources && 
          match.sources.length > 0 && 
-         now >= matchTime - oneHourBeforeMs && 
+         now >= matchTime - fiveMinutesBeforeMs && 
          now <= matchTime + fourHoursInMs;
 };
 
