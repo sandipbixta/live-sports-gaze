@@ -16,13 +16,10 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [timedOut, setTimedOut] = useState(false);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
-  // Handle iframe clicks on mobile to prevent automatic opening
+  // Handle iframe clicks on mobile - allow interaction with video controls
   const handleIframeClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      // Prevent default behavior that might cause automatic opening
-      e.preventDefault();
-      console.log('Mobile iframe click prevented');
-    }
+    // Allow normal iframe interaction for video controls
+    console.log('Iframe clicked, allowing normal interaction');
   };
 
   useEffect(() => {
@@ -67,18 +64,10 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         scrolling="no"
         style={{ 
           border: 'none',
-          pointerEvents: isMobile ? 'auto' : 'auto',
+          pointerEvents: 'auto',
           minWidth: '100%',
           minHeight: '100%',
-          willChange: 'transform',
-          isolation: 'isolate',
-          ...(isMobile && {
-            touchAction: 'manipulation',
-            WebkitOverflowScrolling: 'touch',
-            WebkitTouchCallout: 'none',
-            WebkitUserSelect: 'none',
-            userSelect: 'none'
-          })
+          willChange: 'transform'
         }}
       />
 
