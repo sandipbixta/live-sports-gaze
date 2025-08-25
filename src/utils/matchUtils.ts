@@ -62,13 +62,54 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
     const title = match.title?.toLowerCase() || '';
     const id = match.id?.toLowerCase() || '';
     
-    return !title.includes('sky sports news') && 
-           !id.includes('sky-sports-news') &&
-           !title.includes('advertisement') &&
-           !title.includes('ad break') &&
-           !title.includes('promo') &&
-           match.title && // Must have a title
-           match.date; // Must have a date
+    // Extended unwanted content filter
+    const unwantedKeywords = [
+      'sky sports news',
+      'advertisement',
+      'ad break',
+      'promo',
+      'commercial',
+      'highlights only',
+      'preview',
+      'recap',
+      'analysis',
+      'talk show',
+      'studio',
+      'breaking news',
+      'weather',
+      'test transmission',
+      'technical difficulties',
+      'coming soon',
+      'maintenance',
+      'offline',
+      'no signal',
+      'unavailable',
+      'error'
+    ];
+    
+    // Check if title contains unwanted keywords
+    const hasUnwantedContent = unwantedKeywords.some(keyword => 
+      title.includes(keyword) || id.includes(keyword.replace(/\s+/g, '-'))
+    );
+    
+    // Minimum quality requirements
+    const hasValidTitle = match.title && match.title.length > 3;
+    const hasValidDate = match.date;
+    const hasMinimumSources = match.sources && match.sources.length > 0;
+    
+    // Filter out matches with suspicious titles (too short, all caps, weird characters)
+    const isSuspiciousTitle = !match.title || 
+      match.title.length < 4 || 
+      (match.title.length < 15 && match.title === match.title.toUpperCase()) ||
+      /^[0-9\s\-_]+$/.test(match.title) || // Only numbers, spaces, dashes, underscores
+      match.title.includes('???') ||
+      match.title.includes('***');
+    
+    return !hasUnwantedContent && 
+           hasValidTitle && 
+           hasValidDate && 
+           hasMinimumSources &&
+           !isSuspiciousTitle;
   });
 };
 
