@@ -4,7 +4,7 @@ import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Switch } from './ui/switch';
-import { useToast } from './ui/use-toast';
+import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
 import { Loader2, Send, Settings, Users, MessageCircle, Clock } from 'lucide-react';
 
