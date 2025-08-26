@@ -145,8 +145,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       'rugby': 7,
       'cricket': 8,
       'afl': 9,
-      'darts': 10,
-      'other': 11,
+      'other': 10,
       'tennis': 12  // Tennis moved to last position
     };
     

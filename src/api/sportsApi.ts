@@ -172,7 +172,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
         'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
         'rugby': ['rugby'],
         'cricket': ['cricket'],
-        'darts': ['darts', 'dart'],
         'afl': ['afl', 'australian football'],
         'other': ['other']
       };
@@ -186,7 +185,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       });
       
       // Debug logging for problematic sports
-      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'darts', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
+      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
         if (!isMatch) {
           console.log(`🚫 Filtered out: "${match.title}" (category: "${matchCategory}") for sport: "${requestedSport}"`);
         }
@@ -253,7 +252,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
                 'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
                 'rugby': ['rugby'],
                 'cricket': ['cricket'],
-                'darts': ['darts', 'dart'],
                 'afl': ['afl', 'australian football'],
                 'other': ['other']
               };
