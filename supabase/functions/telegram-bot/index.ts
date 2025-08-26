@@ -55,6 +55,54 @@ serve(async (req) => {
     const telegramApiUrl = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
 
     switch (action) {
+      case 'post_daily_matches':
+        // Fetch live matches for daily posting
+        try {
+          const matchesResponse = await fetch('https://streamed.pk/api/matches/live');
+          if (!matchesResponse.ok) {
+            throw new Error('Failed to fetch live matches');
+          }
+          
+          const allMatches = await matchesResponse.json();
+          
+          // Filter and format matches
+          const liveMatches = allMatches.filter((match: Match) => {
+            const now = Date.now();
+            const matchTime = match.date;
+            return matchTime <= now + (3 * 60 * 60 * 1000) && matchTime >= now - (3 * 60 * 60 * 1000);
+          });
+
+          const dailyMessage = formatDailyMatchesMessage(liveMatches);
+          
+          const dailyResponse = await fetch(`${telegramApiUrl}/sendMessage`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              chat_id: TELEGRAM_CHAT_ID,
+              text: dailyMessage,
+              parse_mode: 'HTML',
+              disable_web_page_preview: true
+            }),
+          });
+
+          const dailyResult = await dailyResponse.json();
+          
+          if (!dailyResponse.ok) {
+            console.error('Daily Telegram API error:', dailyResult);
+            throw new Error(dailyResult.description || 'Failed to send daily matches');
+          }
+
+          console.log('Daily matches posted successfully:', dailyResult);
+          return new Response(JSON.stringify({ success: true, result: dailyResult }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch (error) {
+          console.error('Error in daily posting:', error);
+          throw error;
+        }
+
       case 'send_message':
         const messageData: TelegramMessage = {
           chat_id: chatId || TELEGRAM_CHAT_ID,
@@ -154,6 +202,63 @@ serve(async (req) => {
     });
   }
 });
+
+function formatDailyMatchesMessage(matches: Match[]): string {
+  const now = new Date();
+  const header = `🌅 <b>DAILY SPORTS UPDATE</b> 🌅\n\n📅 ${now.toLocaleDateString()} - Scheduled Daily Broadcast\n\n`;
+  
+  if (matches.length === 0) {
+    return header + "⚠️ No live matches available at this time.\n\nCheck back later for exciting games! 🏆";
+  }
+
+  let message = header;
+  message += `📊 <b>Today's Live Matches: ${matches.length}</b>\n\n`;
+  
+  // Group matches by sport
+  const matchesBySport: { [key: string]: Match[] } = {};
+  matches.forEach(match => {
+    const sport = getSportEmoji(match.sportId);
+    if (!matchesBySport[sport]) {
+      matchesBySport[sport] = [];
+    }
+    matchesBySport[sport].push(match);
+  });
+
+  // Format each sport section
+  Object.entries(matchesBySport).forEach(([sportEmoji, sportMatches]) => {
+    message += `${sportEmoji} (${sportMatches.length} matches)\n`;
+    
+    sportMatches.slice(0, 3).forEach((match) => {
+      const matchTime = new Date(match.date);
+      const timeStr = matchTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      let matchTitle = match.title;
+      
+      // Format team names if available
+      if (match.teams?.home?.name && match.teams?.away?.name) {
+        matchTitle = `${match.teams.home.name} vs ${match.teams.away.name}`;
+      }
+      
+      // Add stream count
+      const streamCount = match.sources?.length || 0;
+      const streamEmoji = streamCount > 0 ? ` 📺×${streamCount}` : '';
+      
+      message += `  ▸ ${matchTitle}\n`;
+      message += `    🕒 ${timeStr}${streamEmoji}\n`;
+    });
+    
+    if (sportMatches.length > 3) {
+      message += `  📝 +${sportMatches.length - 3} more matches...\n`;
+    }
+    message += `\n`;
+  });
+
+  message += `🌐 Watch all matches live on your sports streaming platform!\n`;
+  message += `⏰ Next update in 12 hours\n`;
+  message += `\n#DailySports #LiveMatches #Streaming`;
+  
+  return message;
+}
 
 function formatLiveMatchesMessage(matches: Match[]): string {
   const now = new Date();
