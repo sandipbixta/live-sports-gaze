@@ -22,6 +22,7 @@ import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
+import TelegramBot from "./pages/TelegramBot";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -87,6 +88,11 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
+                </SEOPageTracker>
+              } />
+              <Route path="/telegram-bot" element={
+                <SEOPageTracker pageTitle="Telegram Bot Manager - Auto-Post Live Sports" contentType="news">
+                  <TelegramBot />
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />
