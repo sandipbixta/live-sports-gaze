@@ -34,11 +34,19 @@ serve(async (req) => {
     const TELEGRAM_BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
     const TELEGRAM_CHAT_ID = Deno.env.get('TELEGRAM_CHAT_ID');
 
+    console.log('Environment check:', {
+      bot_token_exists: !!TELEGRAM_BOT_TOKEN,
+      chat_id_exists: !!TELEGRAM_CHAT_ID,
+      chat_id_value: TELEGRAM_CHAT_ID ? 'set' : 'not set'
+    });
+
     if (!TELEGRAM_BOT_TOKEN) {
+      console.error('TELEGRAM_BOT_TOKEN is missing from environment');
       throw new Error('TELEGRAM_BOT_TOKEN is not configured');
     }
 
     if (!TELEGRAM_CHAT_ID) {
+      console.error('TELEGRAM_CHAT_ID is missing from environment');
       throw new Error('TELEGRAM_CHAT_ID is not configured');
     }
 
