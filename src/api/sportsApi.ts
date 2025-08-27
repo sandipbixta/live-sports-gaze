@@ -23,8 +23,8 @@ const setCachedData = (key: string, data: any) => {
 
 // Helper function to filter and reorder sports list
 const filterAndReorderSports = (sports: Sport[]): Sport[] => {
-  // Filter out unwanted sports: golf, hockey, billiards
-  const excludedSports = ['golf', 'hockey', 'billiards'];
+  // Filter out unwanted sports: golf, hockey, billiards, darts
+  const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
   const filteredSports = sports.filter(sport => 
     !excludedSports.includes(sport.id.toLowerCase())
   );
@@ -172,7 +172,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
         'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
         'rugby': ['rugby'],
         'cricket': ['cricket'],
-        'darts': ['darts', 'dart'],
         'afl': ['afl', 'australian football'],
         'other': ['other']
       };
@@ -186,7 +185,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       });
       
       // Debug logging for problematic sports
-      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'darts', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
+      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
         if (!isMatch) {
           console.log(`🚫 Filtered out: "${match.title}" (category: "${matchCategory}") for sport: "${requestedSport}"`);
         }
@@ -253,7 +252,6 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
                 'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
                 'rugby': ['rugby'],
                 'cricket': ['cricket'],
-                'darts': ['darts', 'dart'],
                 'afl': ['afl', 'australian football'],
                 'other': ['other']
               };
@@ -306,10 +304,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
       ...match,
       sportId: match.category
     }))
-    // Filter out excluded sports: golf, hockey, billiards
+    // Filter out excluded sports: golf, hockey, billiards, darts
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards'];
+      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
       return !excludedSports.includes(sportCategory);
     });
     
@@ -347,10 +345,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
       ...match,
       sportId: match.category
     }))
-    // Filter out excluded sports: golf, hockey, billiards
+    // Filter out excluded sports: golf, hockey, billiards, darts
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards'];
+      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
       return !excludedSports.includes(sportCategory);
     });
     

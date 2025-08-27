@@ -55,7 +55,25 @@ export const generateCompetitorKeywords = (baseKeywords: string = ''): string =>
     'reliable sports streaming sites',
     'hd sports streaming free',
     'mobile sports streaming',
-    'safe sports streaming sites'
+    'safe sports streaming sites',
+    
+    // Enhanced location-based keywords
+    'watch sports online free USA',
+    'free sports streaming UK',
+    'live football streams Europe',
+    'free sports streaming worldwide',
+    'international sports streaming',
+    'global sports streaming free',
+    
+    // Long-tail search terms people actually use
+    'where to watch live sports for free',
+    'how to stream sports without cable',
+    'free sports streaming no signup',
+    'watch live football matches online',
+    'best site to watch sports online free',
+    'live sports streaming reddit alternative',
+    'free sports streaming sites that work',
+    'watch sports online free no ads'
   ];
   
   const allKeywords = baseKeywords 
