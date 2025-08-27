@@ -62,34 +62,6 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
     const title = match.title?.toLowerCase() || '';
     const id = match.id?.toLowerCase() || '';
     
-    // Filter out unwanted football leagues/countries for football matches
-    const isFootball = match.category === 'football' || match.sportId === 'football';
-    if (isFootball) {
-      const homeTeam = match.teams?.home?.name?.toLowerCase() || '';
-      const awayTeam = match.teams?.away?.name?.toLowerCase() || '';
-      
-      const unwantedFootballRegions = [
-        'china', 'chinese', 'csl', 'super league china',
-        'korea', 'korean', 'k league', 'k-league', 'south korea',
-        'hong kong', 'hongkong', 'hk',
-        'thailand', 'thai', 'thai league',
-        'indonesia', 'indonesian', 'liga indonesia',
-        'bhutan', 'bhutanese',
-        'japan', 'japanese', 'j league', 'j-league'
-      ];
-      
-      const hasUnwantedRegion = unwantedFootballRegions.some(region => 
-        title.includes(region) || 
-        homeTeam.includes(region) || 
-        awayTeam.includes(region) ||
-        id.includes(region.replace(/\s+/g, '-'))
-      );
-      
-      if (hasUnwantedRegion) {
-        return false;
-      }
-    }
-    
     // Extended unwanted content filter
     const unwantedKeywords = [
       'sky sports news',

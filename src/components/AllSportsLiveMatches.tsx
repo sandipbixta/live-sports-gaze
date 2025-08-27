@@ -145,7 +145,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       'rugby': 7,
       'cricket': 8,
       'afl': 9,
-      'other': 10,
+      'darts': 10,
+      'other': 11,
       'tennis': 12  // Tennis moved to last position
     };
     
@@ -189,15 +190,11 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'champions league', 'ucl', 'europa league', 'conference league',
           'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
           'fc barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
-          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid', 'ajax', 'psv'
+          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid'
         ];
         
-        // More comprehensive exclusion for non-top league matches
         const excludeKeywords = [
-          'barcelona sc', 'barcelona sporting', 'guayaquil', 'u23', 'u21', 'u19', 'u18',
-          'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 'amateur',
-          'league two', 'league one', 'conference', 'non-league', 'women', 'female',
-          'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
+          'barcelona sc', 'barcelona sporting', 'guayaquil'
         ];
         
         const topLeagueFootballMatches = allFootballMatches
@@ -211,23 +208,11 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               return false;
             }
             
-            // Exclude lower league and non-professional matches
+            // Exclude non-European Barcelona teams
             if (excludeKeywords.some(keyword => title.includes(keyword))) {
               return false;
             }
-            
-            // Must contain at least one top league keyword
-            const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
-            
-            // Additional check: if it contains "vs" or "-", it should be a proper match format
-            const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
-            
-            // Debug logging
-            if (hasTopLeagueKeyword && hasProperFormat) {
-              console.log('🏆 Top League Football match found:', title);
-            }
-            
-            return hasTopLeagueKeyword && hasProperFormat;
+            return topLeagueKeywords.some(keyword => title.includes(keyword));
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;

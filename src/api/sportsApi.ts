@@ -23,8 +23,8 @@ const setCachedData = (key: string, data: any) => {
 
 // Helper function to filter and reorder sports list
 const filterAndReorderSports = (sports: Sport[]): Sport[] => {
-  // Filter out unwanted sports: golf, hockey, billiards, darts
-  const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
+  // Filter out unwanted sports: golf, hockey, billiards
+  const excludedSports = ['golf', 'hockey', 'billiards'];
   const filteredSports = sports.filter(sport => 
     !excludedSports.includes(sport.id.toLowerCase())
   );
@@ -172,6 +172,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
         'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
         'rugby': ['rugby'],
         'cricket': ['cricket'],
+        'darts': ['darts', 'dart'],
         'afl': ['afl', 'australian football'],
         'other': ['other']
       };
@@ -185,7 +186,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       });
       
       // Debug logging for problematic sports
-      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
+      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'darts', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
         if (!isMatch) {
           console.log(`🚫 Filtered out: "${match.title}" (category: "${matchCategory}") for sport: "${requestedSport}"`);
         }
@@ -252,6 +253,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
                 'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
                 'rugby': ['rugby'],
                 'cricket': ['cricket'],
+                'darts': ['darts', 'dart'],
                 'afl': ['afl', 'australian football'],
                 'other': ['other']
               };
@@ -287,7 +289,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/live`, {
       headers: {
-        'Accept': 'application/json'
+'Accept': 'application/json'
       }
     });
     
@@ -304,10 +306,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
       ...match,
       sportId: match.category
     }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
+    // Filter out excluded sports: golf, hockey, billiards
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
+      const excludedSports = ['golf', 'hockey', 'billiards'];
       return !excludedSports.includes(sportCategory);
     });
     
@@ -328,7 +330,7 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/all`, {
       headers: {
-        'Accept': 'application/json'
+'Accept': 'application/json'
       }
     });
     
@@ -345,10 +347,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
       ...match,
       sportId: match.category
     }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
+    // Filter out excluded sports: golf, hockey, billiards
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
+      const excludedSports = ['golf', 'hockey', 'billiards'];
       return !excludedSports.includes(sportCategory);
     });
     
@@ -406,15 +408,37 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const streamUrl = `${API_BASE}/stream/${source}/${id}`;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
+    const pkUrl = `${API_BASE}/stream/${source}/${id}`;
 
-    const response = await fetch(streamUrl, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json'
-      },
-      cache: 'no-store',
-    });
+    let response: Response | null = null;
+
+    if (isMobile) {
+      try {
+        console.log('📡 Trying streamed.su for stream (mobile first)...');
+        response = await fetch(suUrl, {
+          signal: controller.signal,
+          headers: {
+'Accept': 'application/json'
+          },
+          cache: 'no-store',
+        });
+      } catch (e) {
+        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
+      }
+    }
+
+    if (!response || !response.ok) {
+      console.log('↩️ Falling back to streamed.pk for stream...');
+      response = await fetch(pkUrl, {
+        signal: controller.signal,
+        headers: {
+'Accept': 'application/json'
+        },
+        cache: 'no-store',
+      });
+    }
     
     clearTimeout(timeoutId);
     
@@ -427,7 +451,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 
     // Normalize helper for embed URLs
     const normalize = (url: string) => {
-      if (!url) return url;
+      if (!url) return url as any;
       if (url.startsWith('//')) return 'https:' + url;
       if (url.startsWith('http://')) return url.replace(/^http:\/\//i, 'https://');
       return url;
