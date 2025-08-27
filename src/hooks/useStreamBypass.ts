@@ -69,7 +69,7 @@ export const useStreamBypass = (stream: Stream | null) => {
           console.log('⏰ Initial load timeout, will auto-retry if needed...');
           setIframeTimeout(true);
         }
-      }, 20000); // 20 seconds - increased timeout for better loading
+      }, 10000); // 10 seconds - balanced timeout for better user experience
 
       return () => clearTimeout(timer);
     }

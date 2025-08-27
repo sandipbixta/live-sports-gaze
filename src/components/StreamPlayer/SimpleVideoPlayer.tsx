@@ -75,7 +75,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   // Set up HLS for Android/Chrome when URL is .m3u8
   useEffect(() => {
     if (!isM3U8 || !stream?.embedUrl) return;
-    const src = stream.embedUrl;
+    const src = stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl;
 
     if (videoRef.current && (videoRef.current as any).canPlayType && videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
       // Native HLS support (Safari)
@@ -221,7 +221,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       ) : (
         <StreamIframe
           videoRef={iframeRef}
-          src={stream.embedUrl}
+          src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
           onLoad={() => setError(false)}
           onError={() => setError(true)}
         />

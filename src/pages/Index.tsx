@@ -117,10 +117,10 @@ const Index = () => {
     loadSports();
   }, []);
 
-  // Auto-select "All Sports" to show all streamed.pk matches by default
+  // Separate useEffect for handling sport auto-selection to avoid dependency issues
   useEffect(() => {
     if (sports.length > 0 && !selectedSport && !loadingSports) {
-      console.log('🏈 Auto-selecting "All Sports" to show all streamed.pk matches');
+      console.log('🏈 Auto-selecting "All Sports" as default');
       setSelectedSport('all');
     }
   }, [sports, selectedSport, loadingSports]);
@@ -256,39 +256,7 @@ const Index = () => {
         
         {!showLiveSports && (
           <>
-            {/* Always show live matches from streamed.pk prominently */}
-            <div className="mb-8">
-              <div className="mb-4">
-                <h2 className="text-xl font-bold text-foreground">
-                  🔴 Live Sports Streams
-                </h2>
-                <p className="text-gray-400 text-sm">
-                  Live matches from streamed.pk - {selectedSport === 'all' ? 'All Sports' : sports.find(s => s.id === selectedSport)?.name}
-                </p>
-              </div>
-              {selectedSport === 'all' || !selectedSport ? (
-                <AllSportsLiveMatches searchTerm={searchTerm} />
-              ) : (
-                <MatchesList
-                  matches={filteredMatches}
-                  sportId={selectedSport}
-                  isLoading={loadingMatches}
-                  trendingSection={
-                    popularMatches.length > 0 && !searchTerm.trim() ? (
-                      <>
-                        <PopularMatches 
-                          popularMatches={popularMatches} 
-                          selectedSport={selectedSport}
-                        />
-                        <Separator className="my-8 bg-[#343a4d]" />
-                      </>
-                    ) : null
-                  }
-                />
-              )}
-            </div>
             
-            <Separator className="my-8 bg-[#343a4d]" />
             
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
@@ -296,27 +264,53 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {selectedSport && selectedSport !== 'all' ? (
-              <div className="mb-8">
-                <div className="mb-4">
-                  <h2 className="text-xl font-bold text-foreground">
-                    Additional {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                  </h2>
-                  <p className="text-gray-400 text-sm">
-                    {filteredMatches.length} additional matches available
-                  </p>
-                </div>
-                {popularMatches.length > 0 && !searchTerm.trim() && (
-                  <>
-                    <PopularMatches 
-                      popularMatches={popularMatches} 
-                      selectedSport={selectedSport}
-                    />
-                    <Separator className="my-8 bg-[#343a4d]" />
-                  </>
-                )}
-              </div>
-            ) : null}
+            
+            <div className="mb-8">
+              {selectedSport && (
+                <>
+                  {selectedSport === 'all' ? (
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-xl font-bold text-foreground">
+                          Live Matches - All Sports
+                        </h2>
+                        <p className="text-gray-400 text-sm">
+                          Currently live matches from all sports categories
+                        </p>
+                      </div>
+                      <AllSportsLiveMatches searchTerm={searchTerm} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <h2 className="text-xl font-bold text-foreground">
+                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                        </h2>
+                        <p className="text-gray-400 text-sm">
+                          {filteredMatches.length} matches available
+                        </p>
+                      </div>
+                      <MatchesList
+                        matches={filteredMatches}
+                        sportId={selectedSport}
+                        isLoading={loadingMatches}
+                        trendingSection={
+                          popularMatches.length > 0 && !searchTerm.trim() ? (
+                            <>
+                              <PopularMatches 
+                                popularMatches={popularMatches} 
+                                selectedSport={selectedSport}
+                              />
+                              <Separator className="my-8 bg-[#343a4d]" />
+                            </>
+                          ) : null
+                        }
+                      />
+                    </>
+                  )}
+                </>
+              )}
+            </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div className="lg:col-span-2">

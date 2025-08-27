@@ -30,12 +30,10 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     setHadError(false);
     setTimedOut(false);
     const t = window.setTimeout(() => {
-      if (!loaded && !hadError) {
-        setTimedOut(true);
-      }
-    }, 15000); // Increased timeout to 15 seconds
+      setTimedOut(true);
+    }, 8000);
     return () => window.clearTimeout(t);
-  }, [src, loaded, hadError]);
+  }, [src]);
 
   const handleLoad = () => {
     setLoaded(true);
