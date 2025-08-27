@@ -1,7 +1,7 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = 'https://streamed.su/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -72,10 +72,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
     // Filter and reorder sports
     const reorderedData = filterAndReorderSports(data);
     setCachedData(cacheKey, reorderedData);
-    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
+    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.su API`);
     return reorderedData;
   } catch (error) {
-    console.error('❌ Error fetching sports from streamed.pk:', error);
+    console.error('❌ Error fetching sports from streamed.su:', error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -198,7 +198,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
+    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.su:`, error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -312,10 +312,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.su API`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching live matches from streamed.pk:', error);
+    console.error('❌ Error fetching live matches from streamed.su:', error);
     throw error;
   }
 };
@@ -353,10 +353,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} matches from streamed.su API`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching all matches from streamed.pk:', error);
+    console.error('❌ Error fetching all matches from streamed.su:', error);
     throw error;
   }
 };
@@ -396,46 +396,86 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 };
 
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
-  console.log(`🎯 Generating direct embed URL: source=${source}, id=${id}, streamNo=${streamNo}`);
-  
+  const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
+  const cached = getCachedData(cacheKey);
+  if (cached) return cached;
+
   try {
-    // Generate direct embed URL like streamed.pk actually uses
-    const baseEmbedUrl = streamNo 
-      ? `https://streamed.pk/embed/${source}/${id}/${streamNo}`
-      : `https://streamed.pk/embed/${source}/${id}`;
+    console.log(`📡 Fetching stream from streamed.su: source=${source}, id=${id}, streamNo=${streamNo}`);
     
-    // Add cache busting parameter to ensure fresh stream
-    const embedUrl = `${baseEmbedUrl}?t=${Date.now()}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+    const streamUrl = streamNo 
+      ? `${API_BASE}/stream/${source}/${id}/${streamNo}`
+      : `${API_BASE}/stream/${source}/${id}`;
+
+    const response = await fetch(streamUrl, {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json'
+      },
+      cache: 'no-store',
+    });
     
-    // Create stream object matching the Stream interface
-    const stream: Stream = {
-      id: `${source}-${id}-${streamNo || 1}`,
-      embedUrl,
-      streamNo: streamNo || 1,
-      hd: streamNo === 1 || !streamNo, // First stream is usually HD
-      language: 'en',
-      source: source
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
+
+    // Normalize helper for embed URLs
+    const normalize = (url: string) => {
+      if (!url) return url;
+      if (url.startsWith('//')) return 'https:' + url;
+      if (url.startsWith('http://')) return url.replace(/^http:\/\//i, 'https://');
+      return url;
     };
     
-    console.log(`✅ Generated direct embed URL: ${embedUrl}`);
-    
-    // Return single stream or array based on request
-    if (streamNo !== undefined) {
-      return stream;
-    } else {
-      // Generate multiple stream options
-      const streams = [1, 2, 3].map(num => ({
-        ...stream,
-        id: `${source}-${id}-${num}`,
-        embedUrl: `https://streamed.pk/embed/${source}/${id}/${num}?t=${Date.now()}`,
-        streamNo: num,
-        hd: num === 1
-      }));
+    // Handle response format with normalization
+    if (Array.isArray(data) && data.length > 0) {
+      const sanitized = data.map((stream: any) =>
+        stream && stream.embedUrl ? { ...stream, embedUrl: normalize(stream.embedUrl) } : stream
+      );
+      const validStreams = sanitized.filter(stream => stream && isValidStreamUrl(stream.embedUrl));
       
-      return streams;
+      if (validStreams.length === 0) {
+        throw new Error('No valid streams found in response');
+      }
+      
+      if (streamNo !== undefined) {
+        const specificStream = validStreams.find(stream => stream.streamNo === streamNo);
+        if (specificStream) {
+          setCachedData(cacheKey, specificStream);
+          console.log(`✅ Found specific stream ${streamNo} for ${source}/${id}`);
+          return specificStream;
+        }
+        // If specific stream not found, return the first valid stream
+        const firstStream = validStreams[0];
+        setCachedData(cacheKey, firstStream);
+        console.log(`⚠️ Stream ${streamNo} not found, returning first available stream`);
+        return firstStream;
+      }
+      
+      setCachedData(cacheKey, validStreams);
+      console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id}`);
+      return validStreams;
+    } else if (data && typeof data === 'object' && data.embedUrl) {
+      const single = { ...data, embedUrl: normalize(data.embedUrl) };
+      if (isValidStreamUrl(single.embedUrl)) {
+        setCachedData(cacheKey, single);
+        console.log(`✅ Fetched single stream for ${source}/${id}`);
+        return single;
+      }
     }
+    
+    throw new Error('No valid streams found in API response');
+    
   } catch (error) {
-    console.error(`❌ Error generating stream URL ${source}/${id}:`, error);
+    console.error(`❌ Error fetching stream ${source}/${id}:`, error);
     throw error;
   }
 };
