@@ -5,6 +5,8 @@ import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/ma
 import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
+import { Button } from './ui/button';
+import { Globe, Flag } from 'lucide-react';
 
 interface AllSportsLiveMatchesProps {
   searchTerm?: string;
@@ -16,6 +18,68 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [regionFilter, setRegionFilter] = useState<'all' | 'european' | 'usa'>('all');
+
+  // Helper functions for region filtering
+  const isEuropeanLeague = (title: string): boolean => {
+    const lowerTitle = title.toLowerCase();
+    
+    const europeanKeywords = [
+      // Top 5 European leagues
+      'premier league', 'epl', 'english premier league',
+      'la liga', 'spanish league', 'spanish football',
+      'serie a', 'italian league', 'calcio',
+      'bundesliga', 'german league', 'german football', 
+      'ligue 1', 'french league', 'french football',
+      
+      // UEFA competitions
+      'champions league', 'ucl', 'uefa champions league',
+      'europa league', 'uel', 'uefa europa',
+      'conference league', 'uecl', 'uefa conference',
+      'uefa', 'euro', 'nations league', 'uefa nations league',
+      'uefa super cup', 'supercup', 'super cup',
+      
+      // Major European clubs
+      'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
+      'barcelona', 'real madrid', 'atletico madrid',
+      'juventus', 'ac milan', 'inter milan', 'napoli', 'roma',
+      'bayern munich', 'dortmund', 'rb leipzig',
+      'psg', 'paris saint-germain', 'marseille', 'lyon',
+      
+      // European national teams
+      'spain', 'france', 'england', 'germany', 'italy', 'portugal', 'netherlands',
+      'belgium', 'croatia', 'poland', 'ukraine', 'denmark', 'switzerland'
+    ];
+    
+    return europeanKeywords.some(keyword => lowerTitle.includes(keyword));
+  };
+
+  const isUSALeague = (title: string): boolean => {
+    const lowerTitle = title.toLowerCase();
+    
+    const usaKeywords = [
+      // MLS teams and league
+      'mls', 'major league soccer',
+      'inter miami', 'miami', 'seattle sounders', 'sounders',
+      'atlanta united', 'lafc', 'los angeles fc', 'la galaxy',
+      'new york city fc', 'nycfc', 'new york red bulls',
+      'toronto fc', 'portland timbers', 'chicago fire',
+      'philadelphia union', 'columbus crew', 'fc dallas',
+      'vancouver whitecaps', 'montreal impact', 'cf montreal',
+      'orlando city', 'minnesota united', 'colorado rapids',
+      'sporting kansas city', 'real salt lake', 'houston dynamo',
+      'san jose earthquakes', 'dc united',
+      
+      // US National team
+      'usa', 'united states', 'usmnt', 'uswnt',
+      'america', 'american',
+      
+      // Other US leagues/competitions
+      'us open cup', 'concacaf', 'gold cup'
+    ];
+    
+    return usaKeywords.some(keyword => lowerTitle.includes(keyword));
+  };
 
   useEffect(() => {
     const loadLiveMatches = async () => {
@@ -179,9 +243,16 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       {/* Top League Football Matches - Live and Scheduled */}
       {(() => {
         // Get both live and scheduled football matches from allMatches
-        const allFootballMatches = allMatches.filter(match => 
+        let allFootballMatches = allMatches.filter(match => 
           (match.sportId || match.category || '').toLowerCase() === 'football'
         );
+
+        // Apply region filter
+        if (regionFilter === 'european') {
+          allFootballMatches = allFootballMatches.filter(match => isEuropeanLeague(match.title));
+        } else if (regionFilter === 'usa') {
+          allFootballMatches = allFootballMatches.filter(match => isUSALeague(match.title));
+        }
         
         // More specific filtering for actual top league matches
         const topLeagueKeywords = [
@@ -189,7 +260,9 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'champions league', 'ucl', 'europa league', 'conference league',
           'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
           'fc barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
-          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid', 'ajax', 'psv'
+          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid', 'ajax', 'psv',
+          // Add MLS keywords for USA filter
+          'mls', 'inter miami', 'seattle sounders', 'atlanta united', 'lafc', 'la galaxy'
         ];
         
         // More comprehensive exclusion for non-top league matches
@@ -235,14 +308,87 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             return scoreB - scoreA;
           })
           .slice(0, 6);
+
+        // Get counts for filter buttons
+        const europeanCount = allMatches.filter(match => 
+          (match.sportId || match.category || '').toLowerCase() === 'football' && isEuropeanLeague(match.title)
+        ).length;
+        
+        const usaCount = allMatches.filter(match => 
+          (match.sportId || match.category || '').toLowerCase() === 'football' && isUSALeague(match.title)
+        ).length;
+
+        const totalFootballCount = allMatches.filter(match => 
+          (match.sportId || match.category || '').toLowerCase() === 'football'
+        ).length;
         
         if (topLeagueFootballMatches.length > 0) {
           return (
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <div className="text-xl">⚽</div>
-                <h3 className="text-xl font-bold text-white">Top League Football</h3>
+                <h3 className="text-xl font-bold text-white">
+                  {regionFilter === 'european' ? 'European Football' : 
+                   regionFilter === 'usa' ? 'USA Football' : 'Top League Football'}
+                </h3>
               </div>
+              
+              {/* Region Filter Buttons */}
+              {totalFootballCount > 0 && (
+                <div className="mb-4 overflow-x-auto pb-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe size={16} className="text-[#9b87f5]" />
+                    <span className="text-sm font-medium text-gray-300">Filter by region:</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`${
+                        regionFilter === 'all' 
+                          ? 'bg-[#343a4d] border-[#ff5a36]' 
+                          : 'bg-[#242836] border-[#343a4d]'
+                      } whitespace-nowrap`}
+                      onClick={() => setRegionFilter('all')}
+                    >
+                      All ({totalFootballCount})
+                    </Button>
+                    
+                    {europeanCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`${
+                          regionFilter === 'european' 
+                            ? 'bg-[#343a4d] border-[#ff5a36]' 
+                            : 'bg-[#242836] border-[#343a4d]'
+                        } whitespace-nowrap flex items-center gap-1`}
+                        onClick={() => setRegionFilter('european')}
+                      >
+                        <Flag size={14} />
+                        European ({europeanCount})
+                      </Button>
+                    )}
+                    
+                    {usaCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`${
+                          regionFilter === 'usa' 
+                            ? 'bg-[#343a4d] border-[#ff5a36]' 
+                            : 'bg-[#242836] border-[#343a4d]'
+                        } whitespace-nowrap flex items-center gap-1`}
+                        onClick={() => setRegionFilter('usa')}
+                      >
+                        <Flag size={14} />
+                        USA ({usaCount})
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+              
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {topLeagueFootballMatches.map((match) => (
                   <MatchCard
