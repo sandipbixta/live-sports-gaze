@@ -1,7 +1,7 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 
-const API_BASE = 'https://streamed.su/api';
+const API_BASE = 'https://streamed.pk/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -72,10 +72,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
     // Filter and reorder sports
     const reorderedData = filterAndReorderSports(data);
     setCachedData(cacheKey, reorderedData);
-    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.su API`);
+    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
     return reorderedData;
   } catch (error) {
-    console.error('❌ Error fetching sports from streamed.su:', error);
+    console.error('❌ Error fetching sports from streamed.pk:', error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -198,7 +198,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.su:`, error);
+    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -287,7 +287,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/live`, {
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
     
@@ -312,10 +312,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.su API`);
+    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching live matches from streamed.su:', error);
+    console.error('❌ Error fetching live matches from streamed.pk:', error);
     throw error;
   }
 };
@@ -328,7 +328,7 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   try {
     const response = await fetch(`${API_BASE}/matches/all`, {
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
     
@@ -353,10 +353,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from streamed.su API`);
+    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching all matches from streamed.su:', error);
+    console.error('❌ Error fetching all matches from streamed.pk:', error);
     throw error;
   }
 };
@@ -401,14 +401,12 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   if (cached) return cached;
 
   try {
-    console.log(`📡 Fetching stream from streamed.su: source=${source}, id=${id}, streamNo=${streamNo}`);
+    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const streamUrl = streamNo 
-      ? `${API_BASE}/stream/${source}/${id}/${streamNo}`
-      : `${API_BASE}/stream/${source}/${id}`;
+    const streamUrl = `${API_BASE}/stream/${source}/${id}`;
 
     const response = await fetch(streamUrl, {
       signal: controller.signal,
