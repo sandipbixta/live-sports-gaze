@@ -396,6 +396,12 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 };
 
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
+  // Only allow specific sources
+  const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
+  if (!allowedSources.includes(source.toLowerCase())) {
+    throw new Error(`Source "${source}" is not allowed. Only Alpha, Bravo, Charlie, Delta, and Echo sources are supported.`);
+  }
+
   const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
