@@ -88,26 +88,29 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        maxBufferLength: 15, // Reduced buffer for faster startup
-        maxMaxBufferLength: 30, // Reduced max buffer
-        maxBufferSize: 30 * 1000 * 1000, // 30MB max buffer size
-        maxBufferHole: 0.1, // Handle buffer holes very quickly
-        highBufferWatchdogPeriod: 1, // Check buffer health every second
-        nudgeOffset: 0.05, // Smaller nudge for smoother playback
-        nudgeMaxRetry: 5, // More retry attempts
-        maxLoadingDelay: 2, // Faster loading
-        maxFragLookUpTolerance: 0.1, // Tighter fragment tolerance
-        liveSyncDurationCount: 2, // Fewer live sync segments
-        liveMaxLatencyDurationCount: 5, // Lower max latency
+        maxBufferLength: 30, // Increased buffer for smoother playback
+        maxMaxBufferLength: 60, // Increased max buffer
+        maxBufferSize: 60 * 1000 * 1000, // 60MB max buffer size
+        maxBufferHole: 0.5, // More tolerance for buffer holes
+        highBufferWatchdogPeriod: 2, // Less frequent buffer checks
+        nudgeOffset: 0.1, // Larger nudge for stability
+        nudgeMaxRetry: 10, // More retry attempts
+        maxLoadingDelay: 4, // More time for loading
+        maxFragLookUpTolerance: 0.25, // More tolerance
+        liveSyncDurationCount: 3, // More live sync segments
+        liveMaxLatencyDurationCount: 10, // Higher max latency for stability
         enableSoftwareAES: true,
         startFragPrefetch: true,
         testBandwidth: true,
-        // Additional buffering optimizations
-        backBufferLength: 5, // Keep minimal back buffer
-        capLevelToPlayerSize: true, // Match quality to player size
-        abrEwmaDefaultEstimate: 500000, // Conservative bandwidth estimate
-        abrEwmaFastLive: 2.0, // Faster adaptation for live
-        abrEwmaSlowLive: 8.0 // Slower adaptation for stability
+        // Optimized buffering for stability
+        backBufferLength: 10, // Keep more back buffer
+        capLevelToPlayerSize: false, // Don't restrict quality
+        abrEwmaDefaultEstimate: 1000000, // Higher bandwidth estimate
+        abrEwmaFastLive: 3.0, // Smoother adaptation for live
+        abrEwmaSlowLive: 9.0, // More stable adaptation
+        fragLoadingTimeOut: 20000, // 20s timeout for fragments
+        manifestLoadingTimeOut: 10000, // 10s timeout for manifest
+        levelLoadingTimeOut: 10000 // 10s timeout for levels
       });
       
       hls.loadSource(src);
