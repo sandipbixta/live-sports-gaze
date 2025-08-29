@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      iptv_providers: {
+        Row: {
+          base_url: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          output_format: string | null
+          password: string
+          playlist_type: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          base_url: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          output_format?: string | null
+          password: string
+          playlist_type?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          base_url?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          output_format?: string | null
+          password?: string
+          playlist_type?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
       match_viewers: {
         Row: {
           id: string

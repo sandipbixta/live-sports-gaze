@@ -1,3 +1,6 @@
+import { iptvOrgService } from '../services/iptvOrgService';
+import { iptvProviderService } from '../services/iptvProviderService';
+
 interface Channel {
   id: string;
   title: string;
@@ -5,6 +8,12 @@ interface Channel {
   embedUrl: string;
   category: 'sports' | 'news' | 'entertainment';
   logo?: string;
+}
+
+export interface TVChannel extends Channel {
+  group?: string;
+  language?: string;
+  provider?: string;
 }
 
 // Updated comprehensive channel list with all new channels
@@ -570,4 +579,50 @@ export const getChannelsByCountry = (): Record<string, Channel[]> => {
 export const getCountries = (): string[] => {
   const countries = [...new Set(tvChannels.map(channel => channel.country))];
   return countries.sort();
+};
+
+// Function to get enriched channels from IPTV-ORG
+export const getEnrichedChannels = async (): Promise<Record<string, TVChannel[]>> => {
+  const channelsByCountry = await iptvOrgService.getChannelsForOurCountries();
+  const enrichedChannels: Record<string, TVChannel[]> = {};
+
+  Object.entries(channelsByCountry).forEach(([countryName, channels]) => {
+    enrichedChannels[countryName] = channels.map(channel => 
+      iptvOrgService.convertToOurFormat(channel, countryName)
+    );
+  });
+
+  return enrichedChannels;
+};
+
+// Function to get channels from IPTV providers (like Starshare)
+export const getIPTVProviderChannels = async (): Promise<Record<string, TVChannel[]>> => {
+  const channelsByProvider = await iptvProviderService.getAllChannels();
+  const enrichedChannels: Record<string, TVChannel[]> = {};
+
+  Object.entries(channelsByProvider).forEach(([providerName, channels]) => {
+    enrichedChannels[providerName] = channels.map(channel => 
+      iptvProviderService.convertToOurFormat(channel, providerName)
+    );
+  });
+
+  return enrichedChannels;
+};
+
+// Combined function to get all channels from all sources
+export const getAllChannelSources = async (): Promise<Record<string, TVChannel[]>> => {
+  try {
+    const [iptvOrgChannels, providerChannels] = await Promise.all([
+      getEnrichedChannels(),
+      getIPTVProviderChannels()
+    ]);
+
+    return {
+      ...iptvOrgChannels,
+      ...providerChannels
+    };
+  } catch (error) {
+    console.error('Error fetching all channel sources:', error);
+    return {};
+  }
 };

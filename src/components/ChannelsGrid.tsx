@@ -1,9 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
-import { getChannelsByCountry } from '@/data/tvChannels';
+import { getChannelsByCountry, getAllChannelSources } from '@/data/tvChannels';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -16,6 +16,27 @@ const ChannelsGrid = () => {
   // Default to first country alphabetical if exists
   const [selectedCountry, setSelectedCountry] = useState(allCountryNames[0] || "");
   const [searchTerm, setSearchTerm] = useState('');
+  const [iptvChannels, setIptvChannels] = useState<Record<string, any[]>>({});
+  const [showIptvChannels, setShowIptvChannels] = useState(false);
+  const [isLoadingIptv, setIsLoadingIptv] = useState(false);
+
+  // Load IPTV channels on mount
+  useEffect(() => {
+    const loadIptvChannels = async () => {
+      try {
+        setIsLoadingIptv(true);
+        const channels = await getAllChannelSources();
+        setIptvChannels(channels);
+        console.log('IPTV channels loaded:', channels);
+      } catch (error) {
+        console.error('Error loading IPTV channels:', error);
+      } finally {
+        setIsLoadingIptv(false);
+      }
+    };
+
+    loadIptvChannels();
+  }, []);
 
   const handleSelectChannel = (channel: any, country: string) => {
     navigate(`/channel/${country}/${channel.id}`);
@@ -31,38 +52,88 @@ const ChannelsGrid = () => {
 
   // Filter channels based on search term
   const filteredChannels = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
-    }
-
-    // Search across all countries when there's a search term
-    const allChannels: any[] = [];
-    Object.entries(channelsByCountry).forEach(([country, channels]) => {
-      channels.forEach((channel: any) => {
-        if (channel.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-          allChannels.push({ ...channel, country });
-        }
+    if (showIptvChannels) {
+      // Show IPTV channels
+      let allIptvChannels: any[] = [];
+      Object.entries(iptvChannels).forEach(([provider, channels]) => {
+        channels.forEach((channel: any) => {
+          allIptvChannels.push({ ...channel, provider, country: channel.country || provider });
+        });
       });
-    });
-    return allChannels;
-  }, [searchTerm, selectedCountry, channelsByCountry]);
+
+      if (searchTerm.trim()) {
+        allIptvChannels = allIptvChannels.filter(channel =>
+          channel.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          channel.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (channel.provider && channel.provider.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+      }
+
+      return allIptvChannels;
+    } else {
+      // Show regular built-in channels
+      if (!searchTerm.trim()) {
+        return selectedCountry ? (channelsByCountry[selectedCountry] || []) : [];
+      }
+
+      // Search across all countries when there's a search term
+      const allChannels: any[] = [];
+      Object.entries(channelsByCountry).forEach(([country, channels]) => {
+        channels.forEach((channel: any) => {
+          if (channel.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+            allChannels.push({ ...channel, country });
+          }
+        });
+      });
+      return allChannels;
+    }
+  }, [searchTerm, selectedCountry, channelsByCountry, showIptvChannels, iptvChannels]);
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-white mb-2">All Channels by Country</h2>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-2xl font-bold text-white">
+          {showIptvChannels ? 'IPTV Channels' : 'All Channels by Country'}
+        </h2>
+        <button
+          onClick={() => setShowIptvChannels(!showIptvChannels)}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            showIptvChannels
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+          }`}
+          disabled={isLoadingIptv}
+        >
+          {isLoadingIptv ? 'Loading...' : showIptvChannels ? 'Show Built-in' : 'Show IPTV'}
+        </button>
+      </div>
       
       {/* Search Bar */}
       <div className="bg-[#1a1f2e] rounded-xl border border-[#343a4d] p-4">
         <SearchBar
           value={searchTerm}
           onChange={handleSearchChange}
-          placeholder="Search channels..."
+          placeholder={showIptvChannels ? "Search IPTV channels..." : "Search channels..."}
           className="w-full"
         />
       </div>
 
-      {/* Country Selector - only show when not searching */}
-      {!searchTerm.trim() && (
+      {/* IPTV Status */}
+      {showIptvChannels && Object.keys(iptvChannels).length > 0 && (
+        <div className="bg-secondary/50 rounded-lg p-4">
+          <h3 className="font-semibold mb-2 text-white">IPTV Sources Available:</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(iptvChannels).map(([provider, channels]) => (
+              <span key={provider} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                {provider} ({channels.length} channels)
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Country Selector - only show when not searching and not showing IPTV */}
+      {!searchTerm.trim() && !showIptvChannels && (
         <CountrySelector
           countries={allCountryNames}
           selected={selectedCountry}
@@ -71,12 +142,14 @@ const ChannelsGrid = () => {
       )}
 
       {/* Channels Display */}
-      {(searchTerm.trim() || selectedCountry) && (
+      {(searchTerm.trim() || selectedCountry || showIptvChannels) && (
         <div className="bg-[#151922] rounded-xl border border-[#343a4d] p-4">
           <h3 className="font-semibold text-white text-lg mb-2">
             {searchTerm.trim() 
               ? `Search Results for "${searchTerm}" (${filteredChannels.length} channels)`
-              : selectedCountry
+              : showIptvChannels
+                ? `IPTV Channels (${filteredChannels.length} available)`
+                : selectedCountry
             }
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -106,9 +179,11 @@ const ChannelsGrid = () => {
                   <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors">
                     {channel.title}
                   </h3>
-                  {/* Show country name when searching */}
-                  {searchTerm.trim() && channel.country && (
-                    <p className="text-xs text-gray-400 mt-1">{channel.country}</p>
+                   {/* Show country/provider name when searching or showing IPTV */}
+                  {(searchTerm.trim() || showIptvChannels) && channel.country && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      {showIptvChannels && channel.provider ? `${channel.provider} - ${channel.country}` : channel.country}
+                    </p>
                   )}
                 </div>
               </div>
