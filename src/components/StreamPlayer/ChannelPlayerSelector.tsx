@@ -6,9 +6,8 @@ import IframeVideoPlayer from './IframeVideoPlayer';
 import VideoPlayerSelector from './VideoPlayerSelector';
 import CustomChannelPlayer from './CustomChannelPlayer';
 import ExtractedVideoPlayer from './ExtractedVideoPlayer';
-import HLSVideoPlayer from './HLSVideoPlayer';
 
-export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted' | 'hls';
+export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted';
 
 interface ChannelPlayerSelectorProps {
   stream: Stream | null;
@@ -35,21 +34,8 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     console.log('✅ Channel player loaded successfully');
   };
 
-  const embedUrl = stream?.embedUrl?.startsWith('http://') 
-    ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
-    : stream?.embedUrl || '';
-
-  // Check if it's a direct stream (streamUrl exists)
-  const isDirectStream = !!stream?.streamUrl;
-  const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
-  
-  // Check if it's M3U8 playlist (not .ts streams)
-  const isM3U8Playlist = isDirectStream && sourceUrl.includes('.m3u8');
-  const isTSStream = isDirectStream && sourceUrl.includes('.ts');
-
   const handleError = () => {
-    console.error('❌ Channel player failed to load for URL:', stream?.streamUrl || stream?.embedUrl);
-    console.error('Stream type detected - Direct stream:', isDirectStream, 'TS Stream:', isTSStream, 'M3U8 Playlist:', isM3U8Playlist);
+    console.error('❌ Channel player failed to load');
     if (onRetry) onRetry();
   };
 
@@ -75,24 +61,16 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     );
   }
 
+  const embedUrl = stream.embedUrl?.startsWith('http://') 
+    ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
+    : stream.embedUrl || '';
+
   switch (playerType) {
-    case 'hls':
-      return (
-        <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
-          <HLSVideoPlayer
-            src={sourceUrl}
-            title={title}
-            onLoad={handleLoad}
-            onError={handleError}
-          />
-        </div>
-      );
-    
     case 'extracted':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
           <ExtractedVideoPlayer
-            embedUrl={isDirectStream ? sourceUrl : embedUrl}
+            embedUrl={embedUrl}
             title={title}
             onError={handleError}
           />
@@ -103,7 +81,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
           <CustomChannelPlayer
-            embedUrl={isDirectStream ? sourceUrl : embedUrl}
+            embedUrl={embedUrl}
             title={title}
             onError={handleError}
           />
@@ -114,7 +92,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
           <Html5VideoPlayer
-            src={sourceUrl}
+            src={embedUrl}
             onLoad={handleLoad}
             onError={handleError}
             videoRef={videoRef}
@@ -126,7 +104,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
           <IframeVideoPlayer
-            src={isDirectStream ? sourceUrl : embedUrl}
+            src={embedUrl}
             onLoad={handleLoad}
             onError={handleError}
             title={title}
@@ -137,50 +115,15 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     case 'basic':
       return (
         <VideoPlayerSelector
-          src={sourceUrl}
+          src={embedUrl}
           onLoad={handleLoad}
           onError={handleError}
           title={title}
-          isDirectStream={isDirectStream}
         />
       );
     
     case 'simple':
     default:
-      // For M3U8 playlists, use HLS player
-      if (isM3U8Playlist) {
-        return (
-          <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
-            <HLSVideoPlayer
-              src={sourceUrl}
-              title={title}
-              onLoad={handleLoad}
-              onError={handleError}
-            />
-          </div>
-        );
-      }
-      
-      // For .ts streams, try iframe approach first as fallback
-      if (isTSStream) {
-        return (
-          <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
-            <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-              <iframe
-                src={sourceUrl}
-                className="w-full h-full border-none"
-                allowFullScreen
-                allow="autoplay; encrypted-media"
-                title={title}
-                style={{ background: 'black' }}
-                onLoad={handleLoad}
-                onError={handleError}
-              />
-            </div>
-          </div>
-        );
-      }
-      
       return (
         <SimpleVideoPlayer
           stream={stream}

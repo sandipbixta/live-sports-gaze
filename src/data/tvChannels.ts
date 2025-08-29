@@ -2,34 +2,13 @@ interface Channel {
   id: string;
   title: string;
   country: string;
-  embedUrl?: string;
-  streamUrl?: string;
-  category: 'sports' | 'news' | 'entertainment' | 'cricket' | 'football' | 'rugby' | 'golf';
+  embedUrl: string;
+  category: 'sports' | 'news' | 'entertainment';
   logo?: string;
-  tvgId?: string;
-  groupTitle?: string;
 }
 
-import { parseM3U } from '../utils/m3uParser';
-import { fullM3uContent } from './fullM3uChannels';
-
-// Parse M3U8 channels from the full content
-const m3u8Channels = parseM3U(fullM3uContent).map(channel => ({
-  id: channel.id,
-  title: channel.title,
-  country: channel.country,
-  streamUrl: channel.streamUrl,
-  category: channel.category as Channel['category'],
-  logo: channel.logo,
-  tvgId: channel.tvgId,
-  groupTitle: channel.groupTitle
-}));
-
-// Updated comprehensive channel list combining existing embed channels with new M3U8 channels
+// Updated comprehensive channel list with all new channels
 export const tvChannels: Channel[] = [
-  // M3U8 Channels from supabase/m3u8 file
-  ...m3u8Channels,
-  
   // UK Channels
   { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-news-uk.png?raw=true" },
   { id: "sky-sports-main-event", title: "Sky Sports Main Event", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsMainEvent[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-main-event-icon-uk.png?raw=true" },
