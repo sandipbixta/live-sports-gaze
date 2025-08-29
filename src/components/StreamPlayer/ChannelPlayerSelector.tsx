@@ -35,8 +35,21 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     console.log('✅ Channel player loaded successfully');
   };
 
+  const embedUrl = stream?.embedUrl?.startsWith('http://') 
+    ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
+    : stream?.embedUrl || '';
+
+  // Check if it's a direct stream (streamUrl exists)
+  const isDirectStream = !!stream?.streamUrl;
+  const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
+  
+  // Check if it's M3U8 playlist (not .ts streams)
+  const isM3U8Playlist = isDirectStream && sourceUrl.includes('.m3u8');
+  const isTSStream = isDirectStream && sourceUrl.includes('.ts');
+
   const handleError = () => {
-    console.error('❌ Channel player failed to load');
+    console.error('❌ Channel player failed to load for URL:', stream?.streamUrl || stream?.embedUrl);
+    console.error('Stream type detected - Direct stream:', isDirectStream, 'TS Stream:', isTSStream, 'M3U8 Playlist:', isM3U8Playlist);
     if (onRetry) onRetry();
   };
 
@@ -61,18 +74,6 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       </div>
     );
   }
-
-  const embedUrl = stream.embedUrl?.startsWith('http://') 
-    ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
-    : stream.embedUrl || '';
-
-  // Check if it's a direct stream (streamUrl exists)
-  const isDirectStream = !!stream.streamUrl;
-  const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
-  
-  // Check if it's M3U8 playlist (not .ts streams)
-  const isM3U8Playlist = isDirectStream && sourceUrl.includes('.m3u8');
-  const isTSStream = isDirectStream && sourceUrl.includes('.ts');
 
   switch (playerType) {
     case 'hls':
@@ -160,16 +161,22 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
         );
       }
       
-      // For .ts streams, use HTML5 video player
+      // For .ts streams, try iframe approach first as fallback
       if (isTSStream) {
         return (
           <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
-            <Html5VideoPlayer
-              src={sourceUrl}
-              onLoad={handleLoad}
-              onError={handleError}
-              videoRef={videoRef}
-            />
+            <div className="w-full h-full bg-black rounded-lg overflow-hidden">
+              <iframe
+                src={sourceUrl}
+                className="w-full h-full border-none"
+                allowFullScreen
+                allow="autoplay; encrypted-media"
+                title={title}
+                style={{ background: 'black' }}
+                onLoad={handleLoad}
+                onError={handleError}
+              />
+            </div>
           </div>
         );
       }
