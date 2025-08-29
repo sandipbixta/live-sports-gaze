@@ -18,11 +18,9 @@ import Schedule from "./pages/Schedule";
 import Live from "./pages/Live";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
-import IPTVChannelPlayer from "./pages/IPTVChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
-import XtreamChannelPlayer from "./pages/XtreamChannelPlayer";
 import NotFound from "./pages/NotFound";
 
 // Optimized query client configuration
@@ -52,7 +50,7 @@ const App: React.FC = () => {
               <Sonner />
             <Routes>
               <Route path="/" element={
-                <SEOPageTracker pageTitle="DamiTV - Free Live Sports IPTV Channels" contentType="home">
+                <SEOPageTracker pageTitle="DamiTV - Free Live Football Streaming" contentType="home">
                   <Index />
                 </SEOPageTracker>
               } />
@@ -84,16 +82,6 @@ const App: React.FC = () => {
               <Route path="/channel/:country/:channelId" element={
                 <SEOPageTracker contentType="channels">
                   <ChannelPlayer />
-                </SEOPageTracker>
-              } />
-              <Route path="/iptv/:provider/:channelId" element={
-                <SEOPageTracker contentType="channels">
-                  <IPTVChannelPlayer />
-                </SEOPageTracker>
-              } />
-              <Route path="/xtream/:provider/:channelId" element={
-                <SEOPageTracker contentType="channels">
-                  <XtreamChannelPlayer />
                 </SEOPageTracker>
               } />
               <Route path="/news" element={

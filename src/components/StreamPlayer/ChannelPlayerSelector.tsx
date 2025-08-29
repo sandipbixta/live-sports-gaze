@@ -6,9 +6,8 @@ import IframeVideoPlayer from './IframeVideoPlayer';
 import VideoPlayerSelector from './VideoPlayerSelector';
 import CustomChannelPlayer from './CustomChannelPlayer';
 import ExtractedVideoPlayer from './ExtractedVideoPlayer';
-import IPTVPlayer from './IPTVPlayer';
 
-export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted' | 'iptv';
+export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted';
 
 interface ChannelPlayerSelectorProps {
   stream: Stream | null;
@@ -67,18 +66,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     : stream.embedUrl || '';
 
   switch (playerType) {
-      case 'iptv':
-        return (
-          <IPTVPlayer
-            streamUrl={stream.embedUrl}
-            title={title}
-            onError={onRetry}
-            onRetry={onRetry}
-            className="w-full"
-          />
-        );
-      
-      case 'extracted':
+    case 'extracted':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
           <ExtractedVideoPlayer
