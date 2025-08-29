@@ -74,12 +74,19 @@ class IPTVProviderService {
   async getAllChannels(): Promise<Record<string, IPTVChannel[]>> {
     try {
       console.log('🚀 Loading all IPTV channels...');
-      const providers = await this.getProviders();
-      console.log('📡 Found providers:', providers);
+      const [regularProviders, xtreamProviders] = await Promise.all([
+        this.getProviders(), // Regular IPTV providers
+        this.getXtreamProviders() // Xtream Codes providers
+      ]);
+      
+      console.log('📡 Found regular providers:', regularProviders);
+      console.log('🎬 Found Xtream providers:', xtreamProviders);
+      
       const channelsByProvider: Record<string, IPTVChannel[]> = {};
 
+      // Process regular IPTV providers
       await Promise.all(
-        providers.map(async (provider) => {
+        regularProviders.map(async (provider) => {
           try {
             console.log(`📺 Loading channels for: ${provider.name}`);
             const channels = await this.getChannelsForProvider(provider.id);
@@ -92,11 +99,80 @@ class IPTVProviderService {
         })
       );
 
+      // Process Xtream Codes providers
+      await Promise.all(
+        xtreamProviders.map(async (provider) => {
+          try {
+            console.log(`🎬 Loading Xtream channels for: ${provider.name}`);
+            const channels = await this.getXtreamChannelsForProvider(provider.id);
+            channelsByProvider[provider.name] = channels;
+            console.log(`✅ Loaded ${channels.length} Xtream channels for ${provider.name}`);
+          } catch (error) {
+            console.error(`❌ Error fetching Xtream channels for ${provider.name}:`, error);
+            channelsByProvider[provider.name] = [];
+          }
+        })
+      );
+
       console.log('🎯 All channels loaded:', channelsByProvider);
       return channelsByProvider;
     } catch (error) {
       console.error('💥 Error fetching all channels:', error);
       return {};
+    }
+  }
+
+  // Get Xtream Codes providers
+  async getXtreamProviders(): Promise<IPTVProvider[]> {
+    const cacheKey = 'xtream-providers';
+    const cached = this.cache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      console.log('📦 Using cached Xtream providers');
+      return cached.data;
+    }
+
+    try {
+      console.log('🌐 Fetching Xtream providers...');
+      const response = await fetch(`${this.baseUrl}?action=providers&type=xtream`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Xtream providers: ${response.status} ${response.statusText}`);
+      }
+      
+      const providers = await response.json();
+      console.log('✅ Xtream providers received:', providers);
+      this.cache.set(cacheKey, { data: providers, timestamp: Date.now() });
+      return providers;
+    } catch (error) {
+      console.error('❌ Error fetching Xtream providers:', error);
+      return [];
+    }
+  }
+
+  // Get channels for Xtream Codes provider
+  async getXtreamChannelsForProvider(providerId: string): Promise<IPTVChannel[]> {
+    const cacheKey = `xtream-channels-${providerId}`;
+    const cached = this.cache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      console.log(`📦 Using cached Xtream channels for provider: ${providerId}`);
+      return cached.data;
+    }
+
+    try {
+      console.log(`🎬 Fetching Xtream channels for provider: ${providerId}`);
+      const response = await fetch(`${this.baseUrl.replace('iptv-proxy', 'xtream-proxy')}?action=streams&provider=${providerId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Xtream channels: ${response.status} ${response.statusText}`);
+      }
+      
+      const channels = await response.json();
+      console.log(`✅ Xtream channels received for ${providerId}:`, channels.length);
+      this.cache.set(cacheKey, { data: channels, timestamp: Date.now() });
+      return channels;
+    } catch (error) {
+      console.error(`❌ Error fetching Xtream channels for ${providerId}:`, error);
+      return [];
     }
   }
 

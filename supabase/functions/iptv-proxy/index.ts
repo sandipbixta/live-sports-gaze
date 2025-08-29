@@ -43,18 +43,29 @@ Deno.serve(async (req) => {
     console.log(`IPTV Proxy request: action=${action}, provider=${providerId}`);
 
     if (action === 'providers') {
-      // Get all active IPTV providers - only return basic info, no credentials
+      // Get all active providers (both regular and Xtream Codes)
       const { data: providers, error } = await supabase
         .from('iptv_providers')
-        .select('id, name, is_active')
+        .select('id, name, is_active, playlist_type')
         .eq('is_active', true);
 
       if (error) {
-        console.error('Error fetching providers:', error);
+        console.error('❌ Error fetching providers:', error);
         throw error;
       }
 
-      return new Response(JSON.stringify(providers), {
+      // Filter by type if specified
+      const type = url.searchParams.get('type');
+      let filteredProviders = providers || [];
+      
+      if (type === 'xtream') {
+        filteredProviders = filteredProviders.filter(p => p.playlist_type === 'xtream_codes');
+      } else if (type === 'regular') {
+        filteredProviders = filteredProviders.filter(p => p.playlist_type !== 'xtream_codes');
+      }
+
+      console.log(`✅ Found ${filteredProviders.length} providers (type: ${type || 'all'})`);
+      return new Response(JSON.stringify(filteredProviders), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

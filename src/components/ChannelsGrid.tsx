@@ -45,8 +45,12 @@ const ChannelsGrid = () => {
 
   const handleSelectChannel = (channel: any, country: string) => {
     if (showIptvChannels && channel.provider) {
-      // Navigate to IPTV player route
-      navigate(`/iptv/${encodeURIComponent(channel.provider)}/${encodeURIComponent(channel.id)}`);
+      // Check if it's a Xtream channel
+      const isXtreamChannel = channel.id?.startsWith('xtream-');
+      const route = isXtreamChannel 
+        ? `/xtream/${encodeURIComponent(channel.provider)}/${encodeURIComponent(channel.id)}`
+        : `/iptv/${encodeURIComponent(channel.provider)}/${encodeURIComponent(channel.id)}`;
+      navigate(route);
     } else {
       // Navigate to regular channel player
       navigate(`/channel/${country}/${channel.id}`);

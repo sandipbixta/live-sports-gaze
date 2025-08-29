@@ -22,6 +22,7 @@ import IPTVChannelPlayer from "./pages/IPTVChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
+import XtreamChannelPlayer from "./pages/XtreamChannelPlayer";
 import NotFound from "./pages/NotFound";
 
 // Optimized query client configuration
@@ -88,6 +89,11 @@ const App: React.FC = () => {
               <Route path="/iptv/:provider/:channelId" element={
                 <SEOPageTracker contentType="channels">
                   <IPTVChannelPlayer />
+                </SEOPageTracker>
+              } />
+              <Route path="/xtream/:provider/:channelId" element={
+                <SEOPageTracker contentType="channels">
+                  <XtreamChannelPlayer />
                 </SEOPageTracker>
               } />
               <Route path="/news" element={
