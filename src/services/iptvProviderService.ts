@@ -3,14 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 export interface IPTVProvider {
   id: string;
   name: string;
-  base_url: string;
-  username: string;
-  password: string;
-  playlist_type: string;
-  output_format: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  // Note: Credentials (base_url, username, password, etc.) are not accessible from frontend
+  // They are only available to backend edge functions for security
 }
 
 export interface IPTVChannel {

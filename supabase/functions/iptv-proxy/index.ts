@@ -43,10 +43,10 @@ Deno.serve(async (req) => {
     console.log(`IPTV Proxy request: action=${action}, provider=${providerId}`);
 
     if (action === 'providers') {
-      // Get all active IPTV providers
+      // Get all active IPTV providers - only return basic info, no credentials
       const { data: providers, error } = await supabase
         .from('iptv_providers')
-        .select('*')
+        .select('id, name, is_active')
         .eq('is_active', true);
 
       if (error) {
