@@ -143,6 +143,7 @@ const ChannelPlayer = () => {
             <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
+                { type: 'hls' as PlayerType, name: 'HLS Player', desc: 'For .ts/.m3u8 streams (best for IPTV)' },
                 { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working option (recommended)' },
                 { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Shows provider controls' },
                 { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls (limited function)' },

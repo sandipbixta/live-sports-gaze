@@ -6,8 +6,9 @@ import IframeVideoPlayer from './IframeVideoPlayer';
 import VideoPlayerSelector from './VideoPlayerSelector';
 import CustomChannelPlayer from './CustomChannelPlayer';
 import ExtractedVideoPlayer from './ExtractedVideoPlayer';
+import HLSVideoPlayer from './HLSVideoPlayer';
 
-export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted';
+export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted' | 'hls';
 
 interface ChannelPlayerSelectorProps {
   stream: Stream | null;
@@ -68,8 +69,23 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
   // Check if it's a direct stream (streamUrl exists)
   const isDirectStream = !!stream.streamUrl;
   const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
+  
+  // Check if it's HLS stream (.ts or .m3u8)
+  const isHLSStream = isDirectStream && (sourceUrl.includes('.ts') || sourceUrl.includes('.m3u8'));
 
   switch (playerType) {
+    case 'hls':
+      return (
+        <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
+          <HLSVideoPlayer
+            src={sourceUrl}
+            title={title}
+            onLoad={handleLoad}
+            onError={handleError}
+          />
+        </div>
+      );
+    
     case 'extracted':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
@@ -129,6 +145,20 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     
     case 'simple':
     default:
+      // For HLS streams, use HLS player by default
+      if (isHLSStream) {
+        return (
+          <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
+            <HLSVideoPlayer
+              src={sourceUrl}
+              title={title}
+              onLoad={handleLoad}
+              onError={handleError}
+            />
+          </div>
+        );
+      }
+      
       return (
         <SimpleVideoPlayer
           stream={stream}
