@@ -72,21 +72,16 @@ serve(async (req) => {
       throw new Error('Provider ID is required');
     }
 
-    // Get provider details
-    const { data: provider, error: providerError } = await supabase
-      .from('iptv_providers')
-      .select('*')
-      .eq('id', providerId)
-      .eq('playlist_type', 'xtream_codes')
-      .single();
+    // Get credentials from environment secrets
+    const base_url = Deno.env.get('XTREAM_API_URL');
+    const username = Deno.env.get('XTREAM_USERNAME');
+    const password = Deno.env.get('XTREAM_PASSWORD');
 
-    if (providerError || !provider) {
-      console.error('❌ Provider not found:', providerError);
-      throw new Error('Provider not found');
+    if (!base_url || !username || !password) {
+      console.error('❌ Missing Xtream credentials in environment');
+      throw new Error('Xtream credentials not configured');
     }
-
-    const { base_url, username, password } = provider;
-    console.log(`📡 Using provider: ${provider.name} at ${base_url}`);
+    console.log(`📡 Using Xtream credentials at ${base_url}`);
 
     switch (action) {
       case 'categories': {
