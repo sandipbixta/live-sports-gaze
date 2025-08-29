@@ -70,8 +70,9 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
   const isDirectStream = !!stream.streamUrl;
   const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
   
-  // Check if it's HLS stream (.ts or .m3u8)
-  const isHLSStream = isDirectStream && (sourceUrl.includes('.ts') || sourceUrl.includes('.m3u8'));
+  // Check if it's M3U8 playlist (not .ts streams)
+  const isM3U8Playlist = isDirectStream && sourceUrl.includes('.m3u8');
+  const isTSStream = isDirectStream && sourceUrl.includes('.ts');
 
   switch (playerType) {
     case 'hls':
@@ -145,8 +146,8 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     
     case 'simple':
     default:
-      // For HLS streams, use HLS player by default
-      if (isHLSStream) {
+      // For M3U8 playlists, use HLS player
+      if (isM3U8Playlist) {
         return (
           <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
             <HLSVideoPlayer
@@ -154,6 +155,20 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
               title={title}
               onLoad={handleLoad}
               onError={handleError}
+            />
+          </div>
+        );
+      }
+      
+      // For .ts streams, use HTML5 video player
+      if (isTSStream) {
+        return (
+          <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
+            <Html5VideoPlayer
+              src={sourceUrl}
+              onLoad={handleLoad}
+              onError={handleError}
+              videoRef={videoRef}
             />
           </div>
         );
