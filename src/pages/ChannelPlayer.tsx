@@ -84,8 +84,10 @@ const ChannelPlayer = () => {
     streamNo: 1,
     language: 'English',
     hd: true,
-    embedUrl: channel.embedUrl,
-    source: 'TV Channel'
+    embedUrl: channel.embedUrl || channel.streamUrl,
+    streamUrl: channel.streamUrl,
+    source: 'TV Channel',
+    isDirectStream: !!channel.streamUrl
   };
 
   return (

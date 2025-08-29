@@ -65,12 +65,16 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
     : stream.embedUrl || '';
 
+  // Check if it's a direct stream (streamUrl exists)
+  const isDirectStream = !!stream.streamUrl;
+  const sourceUrl = isDirectStream ? stream.streamUrl : embedUrl;
+
   switch (playerType) {
     case 'extracted':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
           <ExtractedVideoPlayer
-            embedUrl={embedUrl}
+            embedUrl={isDirectStream ? sourceUrl : embedUrl}
             title={title}
             onError={handleError}
           />
@@ -81,7 +85,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
           <CustomChannelPlayer
-            embedUrl={embedUrl}
+            embedUrl={isDirectStream ? sourceUrl : embedUrl}
             title={title}
             onError={handleError}
           />
@@ -92,7 +96,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
           <Html5VideoPlayer
-            src={embedUrl}
+            src={sourceUrl}
             onLoad={handleLoad}
             onError={handleError}
             videoRef={videoRef}
@@ -104,7 +108,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
       return (
         <div className={`relative ${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'} aspect-video`}>
           <IframeVideoPlayer
-            src={embedUrl}
+            src={isDirectStream ? sourceUrl : embedUrl}
             onLoad={handleLoad}
             onError={handleError}
             title={title}
@@ -115,10 +119,11 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     case 'basic':
       return (
         <VideoPlayerSelector
-          src={embedUrl}
+          src={sourceUrl}
           onLoad={handleLoad}
           onError={handleError}
           title={title}
+          isDirectStream={isDirectStream}
         />
       );
     

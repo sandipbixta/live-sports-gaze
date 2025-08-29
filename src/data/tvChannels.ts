@@ -2,13 +2,92 @@ interface Channel {
   id: string;
   title: string;
   country: string;
-  embedUrl: string;
-  category: 'sports' | 'news' | 'entertainment';
+  embedUrl?: string;
+  streamUrl?: string;
+  category: 'sports' | 'news' | 'entertainment' | 'cricket' | 'football' | 'rugby' | 'golf';
   logo?: string;
+  tvgId?: string;
+  groupTitle?: string;
 }
 
-// Updated comprehensive channel list with all new channels
+import { parseM3U } from '../utils/m3uParser';
+
+// M3U8 content from supabase/m3u8 file
+const m3u8Content = `#EXTM3U
+#EXTINF:-1 tvg-id="starsports1hd.in" tvg-name="IN: STAR SPORTS 1 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: STAR SPORTS 1 (4K).
+https://starshare.fun:443/live/702038389/085848393/98864.ts
+#EXTINF:-1 tvg-id="starsports2hd.in" tvg-name="IN: STAR SPORTS 2 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: STAR SPORTS 2 (4K).
+https://starshare.fun:443/live/702038389/085848393/98865.ts
+#EXTINF:-1 tvg-id="starsports1hdhindi.in" tvg-name="IN: STAR SPORTS 1 HINDI (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: STAR SPORTS 1 HINDI (4K).
+https://starshare.fun:443/live/702038389/085848393/98866.ts
+#EXTINF:-1 tvg-id="starsportsselect1hd.in" tvg-name="IN: STAR SPORTS SELECT 1 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: STAR SPORTS SELECT 1 (4K).
+https://starshare.fun:443/live/702038389/085848393/98867.ts
+#EXTINF:-1 tvg-id="starsportsselecthd2.in" tvg-name="IN: START SPORTS SELECT 2 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: START SPORTS SELECT 2 (4K).
+https://starshare.fun:443/live/702038389/085848393/98868.ts
+#EXTINF:-1 tvg-id="sonyten1hd.in" tvg-name="IN: TEN 1 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: TEN 1 (4K).
+https://starshare.fun:443/live/702038389/085848393/98861.ts
+#EXTINF:-1 tvg-id="sonyten2hd.in" tvg-name="IN: TEN 2 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: TEN 2 (4K).
+https://starshare.fun:443/live/702038389/085848393/98862.ts
+#EXTINF:-1 tvg-id="sonyten3hd.in" tvg-name="IN: TEN 3 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: TEN 3 (4K).
+https://starshare.fun:443/live/702038389/085848393/98863.ts
+#EXTINF:-1 tvg-id="sonysixhd.in" tvg-name="IN: SONY TEN 5 (4K)." tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title=" SPORTS | INDIA",IN: SONY TEN 5 (4K).
+https://starshare.fun:443/live/702038389/085848393/98870.ts
+#EXTINF:-1 tvg-id="foxsports501hd.au" tvg-name="CRI: FOX CRICKET 501" tvg-logo="https://i.ibb.co/KhcPH6m/download-46.png" group-title="CRICKET",CRI: FOX CRICKET 501
+https://starshare.fun:443/live/702038389/085848393/1856.ts
+#EXTINF:-1 tvg-id="supersportcricket.za" tvg-name="CRI: SUPER SPORTS CRICKET" tvg-logo="https://www.lyngsat.com/logo/tv/ss/supersport-cricket-za.png" group-title="CRICKET",CRI: SUPER SPORTS CRICKET
+https://starshare.fun:443/live/702038389/085848393/158442.ts
+#EXTINF:-1 tvg-id="skysportscricket.uk" tvg-name="CRI: SKY SPORTS CRICKET" tvg-logo="https://h.top4top.io/p_247357nqz1.png" group-title="CRICKET",CRI: SKY SPORTS CRICKET
+https://starshare.fun:443/live/702038389/085848393/12.ts
+#EXTINF:-1 tvg-id="skysportscricket.uk" tvg-name="CRI: SKY SPORTS CRICKET (4K)" tvg-logo="https://i.ibb.co/p4knk5y/images-4.png" group-title="CRICKET",CRI: SKY SPORTS CRICKET (4K)
+https://starshare.fun:443/live/702038389/085848393/114479.ts
+#EXTINF:-1 tvg-id="" tvg-name="TNT SPORT 1" tvg-logo="http://starapk1.com/logo/rugby.png" group-title="SPORTS | RUGBY",TNT SPORT 1
+https://starshare.fun:443/live/702038389/085848393/23564.ts
+#EXTINF:-1 tvg-id="" tvg-name="TNT SPORT 2." tvg-logo="http://starapk1.com/logo/rugby.png" group-title="SPORTS | RUGBY",TNT SPORT 2.
+https://starshare.fun:443/live/702038389/085848393/23565.ts
+#EXTINF:-1 tvg-id="btsport3.uk" tvg-name="CRI: TNT Sports 3 FHD" tvg-logo="http://stariptv.fun/logos/btsport3hd.png" group-title="CRICKET",CRI: TNT Sports 3 FHD
+https://starshare.fun:443/live/702038389/085848393/148090.ts
+#EXTINF:-1 tvg-id="" tvg-name="CRI: PTV SPORTS" tvg-logo="https://upload.wikimedia.org/wikipedia/en/e/e4/PTV_Sports.png" group-title="CRICKET",CRI: PTV SPORTS
+https://starshare.fun:443/live/702038389/085848393/89.ts
+#EXTINF:-1 tvg-id="" tvg-name="CRI: A Sports ARY" tvg-logo="https://i.ibb.co/R7Knx3z/unnamed.png" group-title="CRICKET",CRI: A Sports ARY
+https://starshare.fun:443/live/702038389/085848393/43444.ts
+#EXTINF:-1 tvg-id="" tvg-name="USA: Fox Sport 1 HD (FS1)" tvg-logo="" group-title="USA",USA: Fox Sport 1 HD (FS1)
+https://starshare.fun:443/live/702038389/085848393/54.ts
+#EXTINF:-1 tvg-id="" tvg-name="USA: Fox Sport 2 HD (FS2)" tvg-logo="" group-title="USA",USA: Fox Sport 2 HD (FS2)
+https://starshare.fun:443/live/702038389/085848393/55.ts
+#EXTINF:-1 tvg-id="" tvg-name="USA: NBC GOLF HD" tvg-logo="https://i.ibb.co/QKzqNG8/golf-wallpaper-preview.png" group-title="SPORTS | GOLF",USA: NBC GOLF HD
+https://starshare.fun:443/live/702038389/085848393/56.ts
+#EXTINF:-1 tvg-id="" tvg-name="UK: Fight Network" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Fight_network_logo.svg/1200px-Fight_network_logo.svg.png" group-title="SPORTS | SPORTS",UK: Fight Network
+https://starshare.fun:443/live/702038389/085848393/149.ts
+#EXTINF:-1 tvg-id="" tvg-name="PT: SPORT TV1 HD" tvg-logo="http://hellosky.live:8080/images/37a141fd1959d8404d85eddaf9db6b8b.png" group-title="SPORTS | SPORTS",PT: SPORT TV1 HD
+https://starshare.fun:443/live/702038389/085848393/314.ts
+#EXTINF:-1 tvg-id="supersportlaliga.za" tvg-name="SUPERSPORTS LALIGA HD" tvg-logo="http://starapk1.com/logo/football.png" group-title="FOOTBALL",SUPERSPORTS LALIGA HD
+https://starshare.fun:443/live/702038389/085848393/515.ts
+#EXTINF:-1 tvg-id="supersportcricket.za" tvg-name="DSTV: SuperSport Cricket HD" tvg-logo="https://03mcdecdnimagerepository.blob.core.windows.net/epguideimage/channel/12H.png" group-title="SPORTS | DSTV SUPER",DSTV: SuperSport Cricket HD
+https://starshare.fun:443/live/702038389/085848393/516.ts
+#EXTINF:-1 tvg-id="supersportpsl.za" tvg-name="SUPERSPORTS PSL HD" tvg-logo="http://starapk1.com/logo/football.png" group-title="FOOTBALL",SUPERSPORTS PSL HD
+https://starshare.fun:443/live/702038389/085848393/517.ts
+#EXTINF:-1 tvg-id="supersportpremierleague.za" tvg-name="SUPERSPORTS PREMIER LEAGUE HD" tvg-logo="http://starapk1.com/logo/football.png" group-title="FOOTBALL",SUPERSPORTS PREMIER LEAGUE HD
+https://starshare.fun:443/live/702038389/085848393/518.ts
+#EXTINF:-1 tvg-id="supersportfootball.za" tvg-name="SUPERSPORTS FOOTBALL HD" tvg-logo="http://starapk1.com/logo/football.png" group-title="FOOTBALL",SUPERSPORTS FOOTBALL HD
+https://starshare.fun:443/live/702038389/085848393/523.ts`;
+
+// Parse M3U8 channels
+const m3u8Channels = parseM3U(m3u8Content).map(channel => ({
+  id: channel.id,
+  title: channel.title,
+  country: channel.country,
+  streamUrl: channel.streamUrl,
+  category: channel.category as Channel['category'],
+  logo: channel.logo,
+  tvgId: channel.tvgId,
+  groupTitle: channel.groupTitle
+}));
+
+// Updated comprehensive channel list combining existing embed channels with new M3U8 channels
 export const tvChannels: Channel[] = [
+  // M3U8 Channels from supabase/m3u8 file
+  ...m3u8Channels,
+  
   // UK Channels
   { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-news-uk.png?raw=true" },
   { id: "sky-sports-main-event", title: "Sky Sports Main Event", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsMainEvent[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-main-event-icon-uk.png?raw=true" },

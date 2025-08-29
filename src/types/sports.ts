@@ -36,6 +36,8 @@ export interface Stream {
   streamNo: number;
   language: string;
   hd: boolean;
-  embedUrl: string;
+  embedUrl?: string;
+  streamUrl?: string;
   source: string;
+  isDirectStream?: boolean;
 }
