@@ -18,6 +18,7 @@ import Schedule from "./pages/Schedule";
 import Live from "./pages/Live";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
+import IPTVChannelPlayer from "./pages/IPTVChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
@@ -82,6 +83,11 @@ const App: React.FC = () => {
               <Route path="/channel/:country/:channelId" element={
                 <SEOPageTracker contentType="channels">
                   <ChannelPlayer />
+                </SEOPageTracker>
+              } />
+              <Route path="/iptv/:provider/:channelId" element={
+                <SEOPageTracker contentType="channels">
+                  <IPTVChannelPlayer />
                 </SEOPageTracker>
               } />
               <Route path="/news" element={

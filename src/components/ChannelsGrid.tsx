@@ -39,7 +39,13 @@ const ChannelsGrid = () => {
   }, []);
 
   const handleSelectChannel = (channel: any, country: string) => {
-    navigate(`/channel/${country}/${channel.id}`);
+    if (showIptvChannels && channel.provider) {
+      // Navigate to IPTV player route
+      navigate(`/iptv/${encodeURIComponent(channel.provider)}/${encodeURIComponent(channel.id)}`);
+    } else {
+      // Navigate to regular channel player
+      navigate(`/channel/${country}/${channel.id}`);
+    }
   };
 
   const handleSelectCountry = (country: string) => {
