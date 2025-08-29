@@ -83,8 +83,14 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Fetch M3U playlist from IPTV provider
-      const playlistUrl = `${provider.base_url}?username=${provider.username}&password=${provider.password}&type=${provider.playlist_type}&output=${provider.output_format}`;
+      // Handle direct M3U URLs (like IPTV-org)
+      let playlistUrl: string;
+      if (provider.playlist_type === 'direct') {
+        playlistUrl = provider.base_url;
+      } else {
+        // Build URL for providers that need parameters
+        playlistUrl = `${provider.base_url}?username=${provider.username}&password=${provider.password}&type=${provider.playlist_type}&output=${provider.output_format}`;
+      }
       
       console.log(`Fetching playlist from: ${provider.base_url}`);
       
@@ -151,19 +157,12 @@ function parseM3U(content: string, providerName: string): M3UChannel[] {
       
       // Add completed channel
       if (currentChannel.id && currentChannel.name && currentChannel.url) {
-        // Pre-filter for sports to reduce memory usage during parsing
-        const name = currentChannel.name.toLowerCase();
-        const group = (currentChannel.group || '').toLowerCase();
-        const sportsKeywords = ['sport', 'football', 'soccer', 'basketball', 'baseball', 'cricket', 'tennis', 'golf', 'hockey', 'rugby', 'boxing', 'mma', 'ufc', 'espn', 'fox sports', 'sky sports', 'bein', 'eurosport', 'nfl', 'nba', 'mlb', 'nhl'];
-        
-        if (sportsKeywords.some(keyword => name.includes(keyword) || group.includes(keyword))) {
-          channels.push(currentChannel as M3UChannel);
-        }
+        channels.push(currentChannel as M3UChannel);
         processedCount++;
         
-        // Log progress every 1000 channels to monitor memory usage
-        if (processedCount % 1000 === 0) {
-          console.log(`Processed ${processedCount} channels, found ${channels.length} sports channels so far`);
+        // Log progress every 100 channels
+        if (processedCount % 100 === 0) {
+          console.log(`Processed ${processedCount} channels, found ${channels.length} channels so far`);
         }
       }
       
@@ -173,25 +172,8 @@ function parseM3U(content: string, providerName: string): M3UChannel[] {
     lineIndex++;
   }
 
-  // Filter for sports channels only
-  const sportsKeywords = [
-    'sport', 'football', 'soccer', 'basketball', 'baseball', 'cricket', 
-    'tennis', 'golf', 'hockey', 'rugby', 'boxing', 'mma', 'ufc', 'wwe',
-    'espn', 'fox sports', 'sky sports', 'bein', 'eurosport', 'tsn',
-    'nfl', 'nba', 'mlb', 'nhl', 'fifa', 'uefa', 'premier league',
-    'champions league', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
-    'f1', 'formula', 'racing', 'motor', 'olympics', 'athletic',
-    'match', 'live', 'game', 'stadium', 'arena'
-  ];
-
-  return channels.filter(channel => {
-    const name = channel.name.toLowerCase();
-    const group = channel.group.toLowerCase();
-    
-    return sportsKeywords.some(keyword => 
-      name.includes(keyword) || group.includes(keyword)
-    );
-  });
+  // Return all channels since IPTV-org sports playlist is already filtered
+  return channels;
 }
 
 function parseExtinf(line: string, index: number, providerName: string): Partial<M3UChannel> {
