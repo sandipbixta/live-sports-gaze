@@ -17,7 +17,7 @@ const ChannelPlayer = () => {
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);
-  const [playerType, setPlayerType] = useState<PlayerType>('simple');
+  const [playerType, setPlayerType] = useState<PlayerType>('iptv');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
@@ -140,27 +140,50 @@ const ChannelPlayer = () => {
           <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
             <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[
-                { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working option (recommended)' },
-                { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Shows provider controls' },
-                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls (limited function)' },
-                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe fallback' },
-                { type: 'extracted' as PlayerType, name: 'Stream Extractor', desc: 'Advanced (may not work with protected sites)' },
-                { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'For direct video streams only' }
-              ].map((player) => (
-                <button
-                  key={player.type}
-                  onClick={() => setPlayerType(player.type)}
-                  className={`p-3 rounded-lg border text-left transition-all ${
-                    playerType === player.type
-                      ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
-                      : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
-                  }`}
-                >
-                  <div className="font-medium text-sm">{player.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">{player.desc}</div>
-                </button>
-              ))}
+              <button
+                onClick={() => setPlayerType('iptv')}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                  playerType === 'iptv'
+                    ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                    : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                }`}
+              >
+                <div className="font-medium text-sm">IPTV Player</div>
+                <div className="text-xs text-gray-400 mt-1">Optimized for IPTV streams (recommended)</div>
+              </button>
+              <button
+                onClick={() => setPlayerType('simple')}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                  playerType === 'simple'
+                    ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                    : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                }`}
+              >
+                <div className="font-medium text-sm">Smart Player</div>
+                <div className="text-xs text-gray-400 mt-1">Best working option</div>
+              </button>
+              <button
+                onClick={() => setPlayerType('iframe')}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                  playerType === 'iframe'
+                    ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                    : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                }`}
+              >
+                <div className="font-medium text-sm">Direct Embed</div>
+                <div className="text-xs text-gray-400 mt-1">Shows provider controls</div>
+              </button>
+              <button
+                onClick={() => setPlayerType('custom')}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                  playerType === 'custom'
+                    ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                    : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                }`}
+              >
+                <div className="font-medium text-sm">Custom Overlay</div>
+                <div className="text-xs text-gray-400 mt-1">Visual controls</div>
+              </button>
             </div>
           </div>
         </div>
