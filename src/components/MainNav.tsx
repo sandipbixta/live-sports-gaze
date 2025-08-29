@@ -21,9 +21,9 @@ const MainNav = () => {
 
   const menuItems = [
     { title: "Home", icon: Home, path: "/" },
+    { title: "IPTV Channels", icon: Tv2, path: "/channels" },
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
-    { title: "Live", icon: Tv2, path: "/live" },
-    { title: "Channels", icon: Radio, path: "/channels" },
+    { title: "Live Sports", icon: Radio, path: "/live" },
     { title: "News", icon: Mail, path: "/news" }
   ];
 

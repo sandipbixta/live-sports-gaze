@@ -51,7 +51,7 @@ const App: React.FC = () => {
               <Sonner />
             <Routes>
               <Route path="/" element={
-                <SEOPageTracker pageTitle="DamiTV - Free Live Football Streaming" contentType="home">
+                <SEOPageTracker pageTitle="DamiTV - Free Live Sports IPTV Channels" contentType="home">
                   <Index />
                 </SEOPageTracker>
               } />
