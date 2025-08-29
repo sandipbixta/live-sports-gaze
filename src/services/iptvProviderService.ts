@@ -23,27 +23,40 @@ class IPTVProviderService {
   private cache: Map<string, any> = new Map();
   private cacheExpiry = 30 * 60 * 1000; // 30 minutes
 
+  // Clear cache - useful for debugging and refreshing data
+  clearCache() {
+    console.log('🧹 Clearing IPTV cache');
+    this.cache.clear();
+  }
+
   private async fetchWithCache<T>(endpoint: string): Promise<T> {
     const cacheKey = endpoint;
     const cached = this.cache.get(cacheKey);
     
+    // Force cache refresh for debugging
+    console.log(`🔍 IPTV Cache: ${cacheKey}`, cached ? 'HIT' : 'MISS');
+    
     if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+      console.log('📦 Using cached IPTV data');
       return cached.data;
     }
 
     try {
+      console.log(`🌐 Fetching fresh IPTV data: ${this.baseUrl}?${endpoint}`);
       const response = await fetch(`${this.baseUrl}?${endpoint}`);
       if (!response.ok) {
-        throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
+        throw new Error(`Failed to fetch ${endpoint}: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log(`✅ IPTV data received:`, data);
       this.cache.set(cacheKey, { data, timestamp: Date.now() });
       return data;
     } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
+      console.error(`❌ Error fetching ${endpoint}:`, error);
       // Return cached data if available, even if expired
       if (cached) {
+        console.log('📦 Returning expired cached data due to error');
         return cached.data;
       }
       throw error;
@@ -60,24 +73,29 @@ class IPTVProviderService {
 
   async getAllChannels(): Promise<Record<string, IPTVChannel[]>> {
     try {
+      console.log('🚀 Loading all IPTV channels...');
       const providers = await this.getProviders();
+      console.log('📡 Found providers:', providers);
       const channelsByProvider: Record<string, IPTVChannel[]> = {};
 
       await Promise.all(
         providers.map(async (provider) => {
           try {
+            console.log(`📺 Loading channels for: ${provider.name}`);
             const channels = await this.getChannelsForProvider(provider.id);
             channelsByProvider[provider.name] = channels;
+            console.log(`✅ Loaded ${channels.length} channels for ${provider.name}`);
           } catch (error) {
-            console.error(`Error fetching channels for ${provider.name}:`, error);
+            console.error(`❌ Error fetching channels for ${provider.name}:`, error);
             channelsByProvider[provider.name] = [];
           }
         })
       );
 
+      console.log('🎯 All channels loaded:', channelsByProvider);
       return channelsByProvider;
     } catch (error) {
-      console.error('Error fetching all channels:', error);
+      console.error('💥 Error fetching all channels:', error);
       return {};
     }
   }

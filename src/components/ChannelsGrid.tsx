@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
 import { getChannelsByCountry, getAllChannelSources } from '@/data/tvChannels';
+import { iptvProviderService } from '@/services/iptvProviderService';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -25,6 +26,10 @@ const ChannelsGrid = () => {
     const loadIptvChannels = async () => {
       try {
         setIsLoadingIptv(true);
+        // Clear cache first to ensure fresh data
+        iptvProviderService.clearCache();
+        console.log('🔄 Refreshing IPTV channels...');
+        
         const channels = await getAllChannelSources();
         setIptvChannels(channels);
         console.log('IPTV channels loaded:', channels);
