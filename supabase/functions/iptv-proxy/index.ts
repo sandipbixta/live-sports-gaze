@@ -135,6 +135,9 @@ function parseM3U(content: string, providerName: string): M3UChannel[] {
   
   let currentChannel: Partial<M3UChannel> = {};
   let lineIndex = 0;
+  let processedCount = 0;
+
+  console.log(`Starting to parse M3U with ${lines.length} lines`);
 
   for (const line of lines) {
     const trimmedLine = line.trim();
@@ -148,7 +151,20 @@ function parseM3U(content: string, providerName: string): M3UChannel[] {
       
       // Add completed channel
       if (currentChannel.id && currentChannel.name && currentChannel.url) {
-        channels.push(currentChannel as M3UChannel);
+        // Pre-filter for sports to reduce memory usage during parsing
+        const name = currentChannel.name.toLowerCase();
+        const group = (currentChannel.group || '').toLowerCase();
+        const sportsKeywords = ['sport', 'football', 'soccer', 'basketball', 'baseball', 'cricket', 'tennis', 'golf', 'hockey', 'rugby', 'boxing', 'mma', 'ufc', 'espn', 'fox sports', 'sky sports', 'bein', 'eurosport', 'nfl', 'nba', 'mlb', 'nhl'];
+        
+        if (sportsKeywords.some(keyword => name.includes(keyword) || group.includes(keyword))) {
+          channels.push(currentChannel as M3UChannel);
+        }
+        processedCount++;
+        
+        // Log progress every 1000 channels to monitor memory usage
+        if (processedCount % 1000 === 0) {
+          console.log(`Processed ${processedCount} channels, found ${channels.length} sports channels so far`);
+        }
       }
       
       currentChannel = {};
@@ -157,24 +173,23 @@ function parseM3U(content: string, providerName: string): M3UChannel[] {
     lineIndex++;
   }
 
-  // Filter for sports and general channels
+  // Filter for sports channels only
+  const sportsKeywords = [
+    'sport', 'football', 'soccer', 'basketball', 'baseball', 'cricket', 
+    'tennis', 'golf', 'hockey', 'rugby', 'boxing', 'mma', 'ufc', 'wwe',
+    'espn', 'fox sports', 'sky sports', 'bein', 'eurosport', 'tsn',
+    'nfl', 'nba', 'mlb', 'nhl', 'fifa', 'uefa', 'premier league',
+    'champions league', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
+    'f1', 'formula', 'racing', 'motor', 'olympics', 'athletic',
+    'match', 'live', 'game', 'stadium', 'arena'
+  ];
+
   return channels.filter(channel => {
     const name = channel.name.toLowerCase();
     const group = channel.group.toLowerCase();
     
-    return (
-      group.includes('sport') ||
-      group.includes('general') ||
-      group.includes('news') ||
-      name.includes('sport') ||
-      name.includes('football') ||
-      name.includes('soccer') ||
-      name.includes('basketball') ||
-      name.includes('tennis') ||
-      name.includes('espn') ||
-      name.includes('sky sports') ||
-      name.includes('bein') ||
-      name.includes('eurosport')
+    return sportsKeywords.some(keyword => 
+      name.includes(keyword) || group.includes(keyword)
     );
   });
 }
