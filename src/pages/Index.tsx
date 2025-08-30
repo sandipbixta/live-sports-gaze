@@ -227,14 +227,6 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Popular by Viewers - Shows matches with actual live viewers */}
-        <div className="mb-8">
-          <PopularByViewers 
-            matches={liveMatches} 
-            preventNavigation={false}
-          />
-        </div>
-
         {/* Telegram Banner */}
         <div className="mb-6">
           <TelegramBanner />
@@ -316,11 +308,11 @@ const Index = () => {
                         sportId={selectedSport}
                         isLoading={loadingMatches}
                         trendingSection={
-                          popularMatches.length > 0 && !searchTerm.trim() ? (
+                          liveMatches.length > 0 && !searchTerm.trim() ? (
                             <>
-                              <PopularMatches 
-                                popularMatches={popularMatches} 
-                                selectedSport={selectedSport}
+                              <PopularByViewers 
+                                matches={liveMatches} 
+                                preventNavigation={false}
                               />
                               <Separator className="my-8 bg-[#343a4d]" />
                             </>
