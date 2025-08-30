@@ -72,7 +72,7 @@ const Match = () => {
         
         // Trending matches (using trending logic)
         const trending = otherMatches
-          .filter(m => isTrendingMatch(m))
+          .filter(m => isTrendingMatch(m.title).isTrending)
           .slice(0, 6);
 
         setPopularMatches(popular);
