@@ -2,11 +2,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches } from '../api/sportsApi';
+import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
+import PopularByViewers from '../components/PopularByViewers';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
@@ -34,6 +35,7 @@ const Index = () => {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
+  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLiveSports, setShowLiveSports] = useState(false);
   
@@ -72,10 +74,11 @@ const Index = () => {
     });
   }, [matches, searchTerm]);
 
-  // Load sports immediately on mount with optimization
+  // Load sports and live matches immediately on mount
   useEffect(() => {
-    const loadSports = async () => {
+    const loadInitialData = async () => {
       try {
+        // Load sports
         let sportsData = await fetchSports();
         console.log('📊 Sports data loaded:', sportsData);
         
@@ -90,6 +93,16 @@ const Index = () => {
         
         setSports(sportsData);
         console.log('✅ Sports state updated');
+
+        // Load live matches for PopularByViewers
+        try {
+          console.log('🔴 Loading live matches for Popular by Viewers...');
+          const liveMatchesData = await fetchLiveMatches();
+          setLiveMatches(liveMatchesData);
+          console.log(`✅ Loaded ${liveMatchesData.length} live matches`);
+        } catch (error) {
+          console.error('Error loading live matches:', error);
+        }
         
       } catch (error) {
         console.error('Sports loading error:', error);
@@ -105,7 +118,7 @@ const Index = () => {
           // Retry after a short delay on mobile
           setTimeout(() => {
             if (sports.length === 0) {
-              loadSports();
+              loadInitialData();
             }
           }, 2000);
         }
@@ -114,7 +127,7 @@ const Index = () => {
       }
     };
 
-    loadSports();
+    loadInitialData();
   }, []);
 
   // Separate useEffect for handling sport auto-selection to avoid dependency issues
@@ -213,6 +226,14 @@ const Index = () => {
         {/* This section now omitted, per your request */}
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
+
+        {/* Popular by Viewers - Shows matches with actual live viewers */}
+        <div className="mb-8">
+          <PopularByViewers 
+            matches={liveMatches} 
+            preventNavigation={false}
+          />
+        </div>
 
         {/* Telegram Banner */}
         <div className="mb-6">
