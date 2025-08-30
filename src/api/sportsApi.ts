@@ -396,10 +396,10 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 };
 
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
-  // Only allow specific sources
-  const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo'];
+  // Allow all available sources as per API documentation
+  const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
   if (!allowedSources.includes(source.toLowerCase())) {
-    throw new Error(`Source "${source}" is not allowed. Only Alpha, Bravo, Charlie, Delta, and Echo sources are supported.`);
+    throw new Error(`Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
   }
 
   const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
@@ -504,6 +504,40 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     console.error(`❌ Error fetching stream ${source}/${id}:`, error);
     throw error;
   }
+};
+
+// Enhanced function to fetch ALL streams from ALL available sources for a match
+export const fetchAllStreams = async (match: Match): Promise<Record<string, Stream[]>> => {
+  if (!match.sources || match.sources.length === 0) {
+    throw new Error('No sources available for this match');
+  }
+
+  const allStreams: Record<string, Stream[]> = {};
+  const fetchPromises = match.sources.map(async (source) => {
+    const sourceKey = `${source.source}/${source.id}`;
+    
+    try {
+      console.log(`🔄 Fetching streams from ${source.source} for match: ${match.title}`);
+      const streamData = await fetchStream(source.source, source.id);
+      
+      if (Array.isArray(streamData)) {
+        allStreams[sourceKey] = streamData;
+      } else if (streamData) {
+        allStreams[sourceKey] = [streamData];
+      }
+      
+      console.log(`✅ Successfully fetched ${allStreams[sourceKey]?.length || 0} streams from ${source.source}`);
+    } catch (error) {
+      console.warn(`⚠️ Failed to fetch streams from ${source.source}:`, error);
+      // Continue with other sources even if one fails
+    }
+  });
+
+  // Wait for all sources to complete (with failures handled gracefully)
+  await Promise.allSettled(fetchPromises);
+
+  console.log(`🎯 Total streams fetched from ${Object.keys(allStreams).length} sources for match: ${match.title}`);
+  return allStreams;
 };
 
 // Helper function to check if URL is valid

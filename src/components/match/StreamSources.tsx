@@ -11,15 +11,17 @@ interface StreamSourcesProps {
   activeSource: string | null;
   onSourceChange: (source: string, id: string, streamNo?: number) => void;
   streamId: string;
+  allStreams?: Record<string, Stream[]>; // Pre-loaded streams from all sources
 }
 
 const StreamSources = ({ 
   sources, 
   activeSource, 
   onSourceChange, 
-  streamId 
+  streamId,
+  allStreams = {} 
 }: StreamSourcesProps) => {
-  const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
+  const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isIOS = typeof navigator !== 'undefined' && ((/iPhone|iPad|iPod/i.test(navigator.userAgent)) || ((navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
@@ -29,20 +31,30 @@ const StreamSources = ({
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
   const visibleSources = sources.filter(s => !isAdminSourceName(s.source));
 
-  // Fetch all available streams for each source
+  // Use pre-loaded streams if available, otherwise fetch individually
+  const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
+
+  // Fetch streams only if not already provided
   useEffect(() => {
-    const fetchAllStreams = async () => {
+    const fetchMissingStreams = async () => {
+      if (Object.keys(allStreams).length > 0) {
+        console.log('✅ Using pre-loaded streams from all sources');
+        return; // Use pre-loaded streams
+      }
+
       if (!visibleSources || visibleSources.length === 0) return;
 
+      console.log('🔄 Fetching individual streams (fallback mode)');
+      
       for (const source of visibleSources) {
         const sourceKey = `${source.source}/${source.id}`;
         
-        if (allStreams[sourceKey]) continue; // Already fetched
+        if (localStreams[sourceKey]) continue; // Already fetched
         
         setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
         
         try {
-          console.log(`Fetching all streams for: ${source.source}/${source.id}`);
+          console.log(`Fetching streams for: ${source.source}/${source.id}`);
           const streamData = await fetchStream(source.source, source.id);
           
           let streams: Stream[] = [];
@@ -73,13 +85,13 @@ const StreamSources = ({
           
           console.log(`Found ${streams.length} valid streams for ${sourceKey}:`, streams);
           
-          setAllStreams(prev => ({
+          setLocalStreams(prev => ({
             ...prev,
             [sourceKey]: streams
           }));
         } catch (error) {
           console.error(`Failed to fetch streams for ${sourceKey}:`, error);
-          setAllStreams(prev => ({
+          setLocalStreams(prev => ({
             ...prev,
             [sourceKey]: []
           }));
@@ -89,7 +101,7 @@ const StreamSources = ({
       }
     };
 
-    fetchAllStreams();
+    fetchMissingStreams();
   }, [sources]);
 
   if (!visibleSources || visibleSources.length === 0) {
@@ -130,7 +142,7 @@ const StreamSources = ({
         Object.entries(groupedSources).forEach(([groupName, groupSources]) => {
           groupSources.forEach((source) => {
             const sourceKey = `${source.source}/${source.id}`;
-            const streams = allStreams[sourceKey] || [];
+            const streams = effectiveStreams[sourceKey] || [];
             
             streams.forEach((stream, index) => {
               allAvailableStreams.push({
@@ -206,7 +218,7 @@ const StreamSources = ({
                                    sourceInfo.source.charAt(0).toUpperCase() + sourceInfo.source.slice(1);
                     
                     // If multiple streams from same source, add number
-                    const streamsFromSameSource = allStreams[sourceKey] || [];
+                    const streamsFromSameSource = effectiveStreams[sourceKey] || [];
                     if (streamsFromSameSource.length > 1) {
                       return `${baseName} ${stream.streamNo || (index + 1)}`;
                     }

@@ -38,4 +38,5 @@ export interface Stream {
   hd: boolean;
   embedUrl: string;
   source: string;
+  timestamp?: number;  // Optional timestamp for freshness tracking
 }

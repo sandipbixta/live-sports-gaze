@@ -22,6 +22,7 @@ interface StreamTabProps {
   handleSourceChange: (source: string, id: string, streamNo?: number) => void;
   popularMatches: MatchType[];
   sportId: string;
+  allStreams?: Record<string, Stream[]>; // Add allStreams prop
 }
 
 const StreamTab = ({ 
@@ -30,8 +31,9 @@ const StreamTab = ({
   loadingStream, 
   activeSource, 
   handleSourceChange, 
-  popularMatches,
-  sportId 
+  popularMatches, 
+  sportId,
+  allStreams 
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
@@ -161,6 +163,7 @@ const StreamTab = ({
         activeSource={activeSource}
         onSourceChange={handleSourceChange}
         streamId={streamId}
+        allStreams={allStreams}
       />
       
       {!loadingStream && (

@@ -1,9 +1,9 @@
-
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Match as MatchType, Stream } from '@/types/sports';
-import { fetchMatch, fetchStream, fetchMatches } from '@/api/sportsApi';
+import { Match as MatchType } from '@/types/sports';
+import { fetchMatch, fetchMatches } from '@/api/sportsApi';
+import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
@@ -23,168 +23,68 @@ const Match = () => {
   const { toast } = useToast();
   const { sportId, matchId } = useParams();
   const [match, setMatch] = useState<MatchType | null>(null);
-  const [stream, setStream] = useState<Stream | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingStream, setLoadingStream] = useState(false);
   
-  const [activeSource, setActiveSource] = useState<string | null>(null);
   const [popularMatches, setPopularMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
-  const [retryCounter, setRetryCounter] = useState(0);
-  
-  // Memoized stream fetching function
-  const fetchStreamData = useCallback(async (source: string, id: string, streamNo?: number) => {
-    setLoadingStream(true);
-    try {
-      console.log(`Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
-      const streamData = await fetchStream(source, id, streamNo);
-      
-      if (Array.isArray(streamData)) {
-        // If array, pick the requested streamNo or the first available stream
-        const selectedStream = streamNo !== undefined
-          ? streamData.find(s => s.streamNo === streamNo) || streamData[0]
-          : streamData.find(s => s.hd) || streamData[0];
-        
-        console.log('Selected stream from array:', selectedStream);
-        setStream(selectedStream || null);
-      } else if (streamData && streamData.embedUrl) {
-        console.log('Single stream received:', streamData);
-        setStream(streamData);
-      } else {
-        console.log('No valid stream data received');
-        setStream(null);
-      }
-    } catch (error) {
-      console.error('Error fetching stream:', error);
-      toast({
-        title: "Stream Error",
-        description: "Failed to load this stream. Try another source.",
-        variant: "destructive",
-      });
-      setStream(null);
-    } finally {
-      setLoadingStream(false);
-    }
-  }, [toast]);
-  
-  useEffect(() => {
-    const loadMatch = async () => {
-      if (!sportId || !matchId) return;
-      
-      setIsLoading(true);
-      try {
-        console.log(`Loading match: sportId=${sportId}, matchId=${matchId}`);
-        const matchData = await fetchMatch(sportId, matchId);
-        console.log('Match data loaded:', matchData);
-        
-        // Enhance match with team logos for better sharing
-        const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
-        console.log('Enhanced match with logos:', enhancedMatch);
-        setMatch(enhancedMatch);
-        
-        // Auto-load stream if available - improved reliability
-        if (matchData?.sources?.length > 0) {
-          console.log('🎯 Auto-loading first stream source for match:', matchData.title);
-          
-          // Find the best source (prefer non-admin sources)
-          const preferredSource = matchData.sources.find(s => 
-            !s.source?.toLowerCase().includes('admin')
-          ) || matchData.sources[0];
-          
-          const { source, id } = preferredSource;
-          const sourceKey = `${source}/${id}`;
-          setActiveSource(sourceKey);
-          
-          console.log('🎬 Fetching stream from source:', sourceKey);
-          
-          // Add small delay to ensure UI is ready
-          setTimeout(async () => {
-            try {
-              await fetchStreamData(source, id);
-              console.log('✅ Auto-stream load completed');
-            } catch (error) {
-              console.error('❌ Auto-stream load failed:', error);
-              // Try the next available source if the first one fails
-              if (matchData.sources.length > 1) {
-                const nextSource = matchData.sources[1];
-                console.log('🔄 Trying next source:', nextSource.source, nextSource.id);
-                setActiveSource(`${nextSource.source}/${nextSource.id}`);
-                await fetchStreamData(nextSource.source, nextSource.id);
-              }
-            }
-          }, 200);
-        }
-        
-        // Load popular matches (limited to 3)
-        if (matchData?.related?.length > 0) {
-          setPopularMatches(matchData.related.slice(0, 3));
-        }
 
-        // Load all matches for recommended and trending sections
+  // Use enhanced stream player hook for comprehensive stream management
+  const {
+    currentStream: stream,
+    streamLoading: loadingStream,
+    activeSource,
+    allStreams,
+    handleSourceChange,
+    handleMatchSelect
+  } = useStreamPlayer();
+
+  // Load match data and streams
+  useEffect(() => {
+    const loadMatchData = async () => {
+      if (!sportId || !matchId) return;
+
+      try {
+        setIsLoading(true);
+        console.log(`Loading match: ${sportId}/${matchId}`);
+        
+        const matchData = await fetchMatch(sportId, matchId);
+        const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
+        setMatch(enhancedMatch);
+
+        // Use the enhanced stream player to load all streams
+        await handleMatchSelect(enhancedMatch);
+
+        // Load related matches
         const allMatches = await fetchMatches(sportId);
+        const otherMatches = allMatches.filter(m => m.id !== matchId);
         
-        // Filter popular matches by viewers (exclude current match)
-        const popularByViewers = allMatches.filter(match => {
-          // Basic filters
-          if (match.title.toLowerCase().includes('sky sports news') || 
-              match.id.includes('sky-sports-news') ||
-              match.id === matchId) {
-            return false;
-          }
-          
-          // Time-based filters
-          const now = Date.now();
-          const matchStartTime = match.date;
-          const timeSinceStart = now - matchStartTime;
-          
-          // Don't show matches that haven't started yet
-          if (matchStartTime > now) return false;
-          
-          // Don't show matches older than 24 hours
-          if (timeSinceStart > 24 * 60 * 60 * 1000) return false;
-          
-          // Hide football matches after 2.5 hours (150 minutes)
-          const isFootball = match.category?.toLowerCase() === 'football' || 
-                            match.sportId?.toLowerCase() === 'football';
-          if (isFootball && timeSinceStart > 150 * 60 * 1000) {
-            return false;
-          }
-          
-          return true;
-        })
-        .sort((a, b) => {
-          // Sort by popular flag first, then by number of sources (more sources = more popular)
-          const aScore = (a.popular ? 100 : 0) + (a.sources?.length || 0);
-          const bScore = (b.popular ? 100 : 0) + (b.sources?.length || 0);
-          return bScore - aScore;
-        })
-        .slice(0, 6); // Show top 6 popular matches by viewers
+        // Popular matches (matches with high popularity score)
+        const popular = otherMatches
+          .filter(m => m.popular || (m as any).viewers > 10)
+          .sort((a, b) => ((b as any).viewers || 0) - ((a as any).viewers || 0))
+          .slice(0, 8);
         
-        setRecommendedMatches(popularByViewers);
+        // Recommended matches (similar category)
+        const recommended = otherMatches
+          .filter(m => m.category === matchData.category && m.id !== matchId)
+          .slice(0, 6);
         
-        // Filter and sort by trending score
-        const trending = allMatches
-          .filter(match => 
-            !match.title.toLowerCase().includes('sky sports news') && 
-            !match.id.includes('sky-sports-news') &&
-            match.id !== matchId // Don't show current match
-          )
-          .map(match => ({
-            ...match,
-            trendingData: isTrendingMatch(match.title)
-          }))
-          .filter(match => match.trendingData.score >= 5)
-          .sort((a, b) => b.trendingData.score - a.trendingData.score)
-          .slice(0, 6); // Show top 6 trending matches
-        
+        // Trending matches (using trending logic)
+        const trending = otherMatches
+          .filter(m => isTrendingMatch(m))
+          .slice(0, 6);
+
+        setPopularMatches(popular);
+        setRecommendedMatches(recommended);
         setTrendingMatches(trending);
         
       } catch (error) {
-        console.error('Error in loadMatch:', error);
+        console.error('Error loading match:', error);
+        setMatch(null);
         toast({
-          title: "Error",
-          description: "Failed to load match data.",
+          title: "Error loading match",
+          description: "Failed to load match details. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -192,19 +92,8 @@ const Match = () => {
       }
     };
 
-    loadMatch();
-  }, [sportId, matchId, toast, fetchStreamData]);
-
-  const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
-    console.log(`Source change requested: ${source}/${id}/${streamNo || 'default'}`);
-    const sourceKey = streamNo !== undefined 
-      ? `${source}/${id}/${streamNo}` 
-      : `${source}/${id}`;
-    
-    setActiveSource(sourceKey);
-    setRetryCounter(prev => prev + 1);
-    await fetchStreamData(source, id, streamNo);
-  };
+    loadMatchData();
+  }, [sportId, matchId, toast, handleMatchSelect]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -226,11 +115,9 @@ const Match = () => {
       const baseUrl = match.poster.startsWith('http') 
         ? match.poster 
         : `https://streamed.pk${match.poster}.webp`;
-      // Add cache busting parameter for fresh social media sharing
-      const cacheBuster = `?v=${Date.now()}`;
-      return baseUrl + cacheBuster;
+      return baseUrl + `?v=${Date.now()}`;
     }
-    return 'https://i.imgur.com/m4nV9S8.png'; // Fallback to DamiTV logo
+    return 'https://i.imgur.com/m4nV9S8.png';
   };
 
   const matchPosterUrl = getMatchPosterUrl();
@@ -240,7 +127,7 @@ const Match = () => {
       <SEOMetaTags
         title={`${matchTitle} - Live Stream | DamiTV`}
         description={matchDescription}
-        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, live football streaming, watch ${homeTeam} vs ${awayTeam}`}
+        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, live football streaming`}
         canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
         ogImage={matchPosterUrl}
         matchInfo={{
@@ -274,17 +161,14 @@ const Match = () => {
       />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
-        {/* Telegram Banner */}
         <div className="mb-4">
           <TelegramBanner />
         </div>
 
-        {/* Banner Advertisement - mobile responsive */}
         <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
-        {/* Match Title - Centered above video player */}
         <div className="w-full flex justify-center mb-4">
           <h1 className="text-2xl md:text-3xl font-bold text-white text-center max-w-4xl px-4">{match.title}</h1>
         </div>
@@ -297,16 +181,14 @@ const Match = () => {
           handleSourceChange={handleSourceChange}
           popularMatches={popularMatches}
           sportId={sportId || ''}
+          allStreams={allStreams}
         />
 
-        {/* Recommended Live Matches Section */}
+        {/* Popular matches section */}
         {recommendedMatches.length > 0 && (
           <div className="mt-8 sm:mt-12">
             <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
               🔥 Popular by Viewers
-              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
-                {recommendedMatches.length} matches
-              </span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
               {recommendedMatches.map((recommendedMatch) => (
@@ -319,32 +201,6 @@ const Match = () => {
             </div>
           </div>
         )}
-
-        {/* Trending Matches Section */}
-        {trendingMatches.length > 0 && (
-          <div className="mt-8 sm:mt-12">
-            <h2 className="text-2xl font-bold mb-6 text-white flex items-center gap-2">
-              🔥 Trending Matches
-              <span className="text-sm bg-[#242836] border border-[#343a4d] rounded-lg px-2 py-1 text-white">
-                {trendingMatches.length} matches
-              </span>
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
-              {trendingMatches.map((trendingMatch) => (
-                <MatchCard 
-                  key={trendingMatch.id}
-                  match={trendingMatch}
-                  sportId={sportId || ''}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Video Advertisement - After trending matches */}
-        <div className="mt-8">
-          <Advertisement type="video" className="w-full" />
-        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
