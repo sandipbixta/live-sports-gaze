@@ -76,7 +76,37 @@ const ExtractedVideoPlayer: React.FC<ExtractedVideoPlayerProps> = ({
         
         hlsRef.current = new Hls({
           enableWorker: true,
-          lowLatencyMode: true,
+          lowLatencyMode: false, // Disable for smoother buffering
+          // Optimized buffering for smooth playback
+          maxBufferLength: 45,
+          maxMaxBufferLength: 90,
+          maxBufferSize: 120 * 1000 * 1000, // 120MB
+          maxBufferHole: 1.0,
+          highBufferWatchdogPeriod: 3,
+          nudgeOffset: 0.2,
+          nudgeMaxRetry: 15,
+          maxLoadingDelay: 6,
+          maxFragLookUpTolerance: 0.5,
+          liveSyncDurationCount: 5,
+          liveMaxLatencyDurationCount: 15,
+          enableSoftwareAES: true,
+          startFragPrefetch: true,
+          testBandwidth: true,
+          backBufferLength: 20,
+          capLevelToPlayerSize: false,
+          abrEwmaDefaultEstimate: 2000000,
+          abrEwmaFastLive: 5.0,
+          abrEwmaSlowLive: 15.0,
+          fragLoadingTimeOut: 30000,
+          manifestLoadingTimeOut: 15000,
+          levelLoadingTimeOut: 15000,
+          startLevel: -1,
+          autoStartLoad: true,
+          progressive: false,
+          fragLoadingMaxRetry: 6,
+          fragLoadingMaxRetryTimeout: 64000,
+          manifestLoadingMaxRetry: 6,
+          levelLoadingMaxRetry: 6
         });
         
         hlsRef.current.loadSource(stream.url);
@@ -85,8 +115,29 @@ const ExtractedVideoPlayer: React.FC<ExtractedVideoPlayerProps> = ({
         hlsRef.current.on(Hls.Events.ERROR, (event, data) => {
           console.error('HLS Error:', data);
           if (data.fatal) {
-            setError(true);
-            onError?.();
+            switch(data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.log('Network error, attempting recovery...');
+                hlsRef.current?.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.log('Media error, attempting recovery...');
+                hlsRef.current?.recoverMediaError();
+                break;
+              default:
+                console.log('Fatal error, destroying HLS instance');
+                setError(true);
+                onError?.();
+                break;
+            }
+          }
+        });
+
+        // Optimize for smooth playback
+        hlsRef.current.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log('HLS manifest parsed, optimizing for smooth playback');
+          if (hlsRef.current && hlsRef.current.levels.length > 1) {
+            hlsRef.current.currentLevel = -1; // Auto quality
           }
         });
       }
@@ -221,9 +272,19 @@ const ExtractedVideoPlayer: React.FC<ExtractedVideoPlayerProps> = ({
         onLoadStart={handleLoadStart}
         onCanPlay={handleCanPlay}
         onError={handleError}
+        onLoadedData={() => console.log('Extracted video data loaded')}
+        onProgress={() => console.log('Extracted video buffering progress')}
         playsInline
         autoPlay
         muted={isMuted}
+        preload="auto"
+        crossOrigin="anonymous"
+        style={{ 
+          backgroundColor: 'black',
+          // Force hardware acceleration
+          transform: 'translateZ(0)',
+          willChange: 'transform'
+        }}
       />
 
       {/* Loading overlay */}

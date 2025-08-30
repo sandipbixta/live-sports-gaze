@@ -88,29 +88,38 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        maxBufferLength: 30, // Increased buffer for smoother playback
-        maxMaxBufferLength: 60, // Increased max buffer
-        maxBufferSize: 60 * 1000 * 1000, // 60MB max buffer size
-        maxBufferHole: 0.5, // More tolerance for buffer holes
-        highBufferWatchdogPeriod: 2, // Less frequent buffer checks
-        nudgeOffset: 0.1, // Larger nudge for stability
-        nudgeMaxRetry: 10, // More retry attempts
-        maxLoadingDelay: 4, // More time for loading
-        maxFragLookUpTolerance: 0.25, // More tolerance
-        liveSyncDurationCount: 3, // More live sync segments
-        liveMaxLatencyDurationCount: 10, // Higher max latency for stability
+        // Aggressive buffering for smooth playback
+        maxBufferLength: 45, // Larger buffer for ultra-smooth playback
+        maxMaxBufferLength: 90, // Much larger max buffer
+        maxBufferSize: 120 * 1000 * 1000, // 120MB max buffer size
+        maxBufferHole: 1.0, // More tolerance for buffer holes
+        highBufferWatchdogPeriod: 3, // Less frequent buffer checks
+        nudgeOffset: 0.2, // Larger nudge for stability
+        nudgeMaxRetry: 15, // More retry attempts
+        maxLoadingDelay: 6, // More time for loading
+        maxFragLookUpTolerance: 0.5, // More tolerance
+        liveSyncDurationCount: 5, // More live sync segments
+        liveMaxLatencyDurationCount: 15, // Higher max latency for stability
         enableSoftwareAES: true,
         startFragPrefetch: true,
         testBandwidth: true,
-        // Optimized buffering for stability
-        backBufferLength: 10, // Keep more back buffer
+        // Ultra-optimized buffering for stability
+        backBufferLength: 20, // Keep much more back buffer
         capLevelToPlayerSize: false, // Don't restrict quality
-        abrEwmaDefaultEstimate: 1000000, // Higher bandwidth estimate
-        abrEwmaFastLive: 3.0, // Smoother adaptation for live
-        abrEwmaSlowLive: 9.0, // More stable adaptation
-        fragLoadingTimeOut: 20000, // 20s timeout for fragments
-        manifestLoadingTimeOut: 10000, // 10s timeout for manifest
-        levelLoadingTimeOut: 10000 // 10s timeout for levels
+        abrEwmaDefaultEstimate: 2000000, // Higher bandwidth estimate
+        abrEwmaFastLive: 5.0, // Smoother adaptation for live
+        abrEwmaSlowLive: 15.0, // More stable adaptation
+        fragLoadingTimeOut: 30000, // 30s timeout for fragments
+        manifestLoadingTimeOut: 15000, // 15s timeout for manifest
+        levelLoadingTimeOut: 15000, // 15s timeout for levels
+        // Additional optimizations
+        startLevel: -1, // Auto start level
+        autoStartLoad: true, // Auto start loading
+        progressive: false, // Better for live streams
+        fragLoadingMaxRetry: 6, // More fragment retry attempts
+        fragLoadingMaxRetryTimeout: 64000, // Longer retry timeout
+        manifestLoadingMaxRetry: 6, // More manifest retry attempts
+        levelLoadingMaxRetry: 6 // More level retry attempts
       });
       
       hls.loadSource(src);
@@ -220,6 +229,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           onCanPlay={() => console.log('Video can play')}
           onPlaying={() => console.log('Video playing')}
           onWaiting={() => console.log('Video buffering...')}
+          onLoadedData={() => console.log('Video data loaded')}
+          onProgress={() => console.log('Video buffering progress')}
+          style={{ 
+            backgroundColor: 'black',
+            // Force hardware acceleration
+            transform: 'translateZ(0)',
+            willChange: 'transform'
+          }}
         />
       ) : (
         <StreamIframe
