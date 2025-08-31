@@ -89,13 +89,17 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-        {/* Simple direct iframe - no buffering issues */}
+        {/* Ultra simple iframe - no buffering */}
         <iframe
           src={stream.embedUrl}
-          className="w-full h-full border-none"
+          className="w-full h-full"
           allowFullScreen
-          allow="autoplay; encrypted-media; fullscreen"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
           title="Live Stream"
+          frameBorder="0"
+          scrolling="no"
+          loading="eager"
+          style={{ border: 'none', background: 'black' }}
         />
 
         {/* Theater mode and fullscreen buttons */}
