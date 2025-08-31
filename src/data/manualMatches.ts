@@ -32,7 +32,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true, // Make this visible for testing
+    visible: false, // Make this visible for testing
     image: "https://i.imgur.com/YOTRw5M.jpeg",
     seo: {
       keywords: "veplay test stream, test match live, veplay streaming",
