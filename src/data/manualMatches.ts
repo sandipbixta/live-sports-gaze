@@ -11,6 +11,30 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
+    id: "veplay-test-match",
+    title: "Test Match - Veplay Stream",
+    date: getTomorrowDate(), // Auto-updates to tomorrow
+    teams: {
+      home: "Team A",
+      away: "Team B"
+    },
+    links: [
+      {
+        id: "veplay-stream",
+        name: "Veplay HD",
+        url: "https://veplay.top/stream/f22cc6f8-aa39-48f3-a5fd-b2c82f2533c2",
+        quality: "HD"
+      }
+    ],
+    visible: true, // Make this visible for testing
+    image: "https://i.imgur.com/YOTRw5M.jpeg",
+    seo: {
+      keywords: "veplay test stream, test match live, veplay streaming",
+      description: "Watch test match live stream with Veplay streaming technology.",
+      category: "Football"
+    }
+  },
+  {
     id: "",
     title: "Brighton and Hove Albion vs. Manchester City",
     date: getTomorrowDate(), // Auto-updates to tomorrow
