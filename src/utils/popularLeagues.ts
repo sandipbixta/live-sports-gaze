@@ -100,6 +100,8 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     // Additional popular teams
     { name: 'real betis', weight: 5, seoTerms: ['betis', 'real betis stream'] },
     { name: 'sevilla', weight: 6, seoTerms: ['sevilla fc', 'sevilla stream'] },
+    { name: 'rayo vallecano', weight: 6, seoTerms: ['rayo', 'vallecano', 'rayo stream'] },
+    { name: 'rayo', weight: 6, seoTerms: ['rayo vallecano', 'vallecano', 'rayo stream'] },
     { name: 'aston villa', weight: 6, seoTerms: ['avfc', 'villa', 'aston villa stream'] },
     { name: 'west ham', weight: 6, seoTerms: ['whufc', 'hammers', 'west ham stream'] },
     { name: 'everton', weight: 6, seoTerms: ['efc', 'toffees', 'everton stream'] },
