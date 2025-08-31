@@ -200,7 +200,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
         ];
         
-        const topLeagueFootballMatches = allFootballMatches
+        const topLeagueFootballMatches = filterCleanMatches(allFootballMatches)
           .filter(match => {
             const title = match.title.toLowerCase();
             const now = Date.now();
