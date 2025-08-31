@@ -273,7 +273,16 @@ const Index = () => {
             </React.Suspense>
             
             <Separator className="my-8 bg-[#343a4d]" />
-            
+
+            {/* Popular by Viewers - Shows matches with actual live viewers */}
+            {liveMatches.length > 0 && (
+              <div className="mb-8">
+                <PopularByViewers 
+                  matches={liveMatches} 
+                  preventNavigation={false}
+                />
+              </div>
+            )}
             
             <div className="mb-8">
               {selectedSport && (
@@ -304,17 +313,6 @@ const Index = () => {
                         matches={filteredMatches}
                         sportId={selectedSport}
                         isLoading={loadingMatches}
-                        trendingSection={
-                           liveMatches.length > 0 && !searchTerm.trim() ? (
-                             <>
-                               <PopularByViewers 
-                                 matches={liveMatches} 
-                                 preventNavigation={false}
-                               />
-                               <Separator className="my-8 bg-[#343a4d]" />
-                             </>
-                           ) : null
-                        }
                       />
                     </>
                   )}
