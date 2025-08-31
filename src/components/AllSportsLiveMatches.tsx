@@ -216,18 +216,19 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               return false;
             }
             
-            // Must contain at least one top league keyword
+            // Must contain at least one top league keyword OR a top team
             const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
+            const hasTopTeam = isTrendingMatch(title).score >= 8; // Top teams have high scores
             
             // Additional check: if it contains "vs" or "-", it should be a proper match format
             const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
             
             // Debug logging
-            if (hasTopLeagueKeyword && hasProperFormat) {
-              console.log('🏆 Top League Football match found:', title);
+            if ((hasTopLeagueKeyword || hasTopTeam) && hasProperFormat) {
+              console.log('🏆 Top League Football match found:', title, 'Score:', isTrendingMatch(title).score);
             }
             
-            return hasTopLeagueKeyword && hasProperFormat;
+            return (hasTopLeagueKeyword || hasTopTeam) && hasProperFormat;
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;
