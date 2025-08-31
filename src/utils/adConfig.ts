@@ -45,8 +45,8 @@ export const adConfig = {
 // Helper to determine if ads should be shown
 export const shouldShowAds = () => {
   // You can add logic here based on user preferences or other factors
-  // For now, we'll always return true
-  return true;
+  // Temporarily disabled - return false to disable all ads
+  return false;
 };
 
 // Helper to check if ad cooldown has passed
