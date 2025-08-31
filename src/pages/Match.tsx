@@ -160,6 +160,16 @@ const Match = () => {
           <TelegramBanner />
         </div>
 
+        {/* Buffering Help Banner */}
+        <div className="mb-6 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-center justify-center">
+            <span className="text-lg">⚠️</span>
+            <p className="text-sm md:text-base text-foreground font-medium">
+              If the video does not play or buffers please check another stream link
+            </p>
+          </div>
+        </div>
+
         {/* <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div> */}
