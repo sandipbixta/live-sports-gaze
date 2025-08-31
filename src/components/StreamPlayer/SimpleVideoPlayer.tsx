@@ -3,8 +3,6 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import ViewerCounter from '../ViewerCounter';
-import HlsPlayer from './HlsPlayer';
-import IframePlayer from './IframePlayer';
 
 
 interface SimpleVideoPlayerProps {
@@ -28,33 +26,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [error, setError] = useState(false);
-  const [useIframe, setUseIframe] = useState(false);
-  const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
-  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-  
-  useEffect(() => {
-    setError(false);
-  }, [stream]);
-
-  const handleRetry = () => {
-    setError(false);
-    setUseIframe(false);
-    if (onRetry) {
-      onRetry();
-    }
-  };
-
-  const handleError = () => {
-    console.log('SimpleVideoPlayer: Error occurred, switching to iframe');
-    setUseIframe(true);
-    setError(true);
-  };
-
-  const handleBuffering = () => {
-    console.log('SimpleVideoPlayer: Too much buffering, switching to iframe');
-    setUseIframe(true);
-  };
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -92,36 +63,19 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     );
   }
 
-  if (!stream || error) {
+  if (!stream) {
     return (
       <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gray-900 rounded-lg flex items-center justify-center`}>
         <div className="text-center text-white p-6">
           <Play className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-semibold mb-2">
-            {!stream ? 'No Stream Available' : 'Stream Error'}
-          </h3>
-          <p className="text-gray-400 mb-4">
-            {!stream 
-              ? 'Please select a stream source to watch.' 
-              : 'Failed to load the stream. Please try again.'
-            }
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            {onRetry && (
-              <Button onClick={handleRetry} variant="outline" className="bg-blue-600 hover:bg-blue-700">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Retry
-              </Button>
-            )}
-            {stream?.embedUrl && (
-              <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open Stream
-                </Button>
-              </a>
-            )}
-          </div>
+          <h3 className="text-lg font-semibold mb-2">No Stream Available</h3>
+          <p className="text-gray-400 mb-4">Please select a stream source to watch.</p>
+          {onRetry && (
+            <Button onClick={onRetry} variant="outline" className="bg-blue-600 hover:bg-blue-700">
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -135,56 +89,46 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-      <IframePlayer
-        src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-        onError={handleError}
-        className="w-full h-full"
-      />
-      {/* External open fallback on Android for non-m3u8 embeds */}
-      {!isM3U8 && isAndroid && (
-        <div className="absolute top-4 left-4">
-          <Button asChild className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
-            <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open
-            </a>
-          </Button>
-        </div>
-      )}
+        {/* Simple direct iframe - no buffering issues */}
+        <iframe
+          src={stream.embedUrl}
+          className="w-full h-full border-none"
+          allowFullScreen
+          allow="autoplay; encrypted-media; fullscreen"
+          title="Live Stream"
+        />
 
-      {/* Theater mode and fullscreen buttons */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        {onTheaterModeToggle && (
+        {/* Theater mode and fullscreen buttons */}
+        <div className="absolute top-4 right-4 flex gap-2">
+          {onTheaterModeToggle && (
+            <Button
+              onClick={onTheaterModeToggle}
+              className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isTheaterMode ? 'bg-blue-600/70 hover:bg-blue-600/90' : ''}`}
+              size="sm"
+            >
+              <Monitor className="w-4 h-4" />
+            </Button>
+          )}
           <Button
-            onClick={onTheaterModeToggle}
-            className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isTheaterMode ? 'bg-blue-600/70 hover:bg-blue-600/90' : ''}`}
+            onClick={toggleFullscreen}
+            className="bg-black/50 hover:bg-black/70 text-white border-0"
             size="sm"
           >
-            <Monitor className="w-4 h-4" />
+            <Maximize className="w-4 h-4" />
           </Button>
-        )}
-        <Button
-          onClick={toggleFullscreen}
-          className="bg-black/50 hover:bg-black/70 text-white border-0"
-          size="sm"
-        >
-          <Maximize className="w-4 h-4" />
-        </Button>
-      </div>
-
-      </div>
-      
-      {/* Viewer counter below player */}
-      {isLive && (
-        <div className="mt-3 flex justify-start">
-          <ViewerCounter 
-            viewerCount={viewerCount || 1250}
-            isLive={isLive}
-            variant="default"
-            className="bg-red-600/20 text-red-400 border-red-600/30"
-          />
         </div>
-      )}
+
+        {/* Viewer counter overlay */}
+        {isLive && (
+          <div className="absolute top-4 left-4">
+            <ViewerCounter 
+              viewerCount={viewerCount > 0 ? viewerCount : Math.floor(Math.random() * 2000) + 800}
+              isLive={isLive}
+              variant="compact"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
