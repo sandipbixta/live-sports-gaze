@@ -132,9 +132,11 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     }
   }
   
-  // Check if any top club is in the title
+  // Check if any top club is in the title (using word boundaries for precise matching)
   for (const club of topClubs) {
-    if (lowerTitle.includes(club.name)) {
+    // Create regex pattern for exact word matching
+    const teamPattern = new RegExp(`\\b${club.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    if (teamPattern.test(lowerTitle)) {
       trendingScore += club.weight;
       trendingReason = trendingReason || `Features popular team: ${club.name}`;
       if (club.seoTerms) allSeoTerms = [...allSeoTerms, ...club.seoTerms];
