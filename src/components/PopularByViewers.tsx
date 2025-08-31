@@ -3,6 +3,7 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { TrendingUp, Users, Loader2 } from 'lucide-react';
 import { useMatchesWithViewers } from '@/hooks/useMatchesWithViewers';
+import { filterCleanMatches } from '@/utils/matchUtils';
 
 interface PopularByViewersProps {
   matches: Match[];
@@ -15,7 +16,9 @@ const PopularByViewers: React.FC<PopularByViewersProps> = ({
   onMatchSelect,
   preventNavigation = false
 }) => {
-  const { matchesWithViewers, loading } = useMatchesWithViewers(matches);
+  // Filter out women's matches and unwanted content before processing
+  const cleanMatches = filterCleanMatches(matches);
+  const { matchesWithViewers, loading } = useMatchesWithViewers(cleanMatches);
 
   // Don't show section if no matches have viewers or if still loading and no data
   if (loading && matchesWithViewers.length === 0) {
