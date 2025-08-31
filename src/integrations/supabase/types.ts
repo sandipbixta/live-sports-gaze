@@ -79,38 +79,23 @@ export type Database = {
       }
     }
     Views: {
-      iptv_providers_public: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          is_active: boolean | null
-          name: string | null
-          output_format: string | null
-          playlist_type: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          output_format?: string | null
-          playlist_type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          is_active?: boolean | null
-          name?: string | null
-          output_format?: string | null
-          playlist_type?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       cleanup_inactive_viewers: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      get_public_iptv_providers: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          output_format: string
+          playlist_type: string
+        }[]
       }
       get_viewer_count: {
         Args: { match_id_param: string }
