@@ -86,72 +86,60 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
       hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-        // Aggressive buffering for smooth playback
-        maxBufferLength: 45, // Larger buffer for ultra-smooth playback
-        maxMaxBufferLength: 90, // Much larger max buffer
-        maxBufferSize: 120 * 1000 * 1000, // 120MB max buffer size
-        maxBufferHole: 1.0, // More tolerance for buffer holes
-        highBufferWatchdogPeriod: 3, // Less frequent buffer checks
-        nudgeOffset: 0.2, // Larger nudge for stability
-        nudgeMaxRetry: 15, // More retry attempts
-        maxLoadingDelay: 6, // More time for loading
-        maxFragLookUpTolerance: 0.5, // More tolerance
-        liveSyncDurationCount: 5, // More live sync segments
-        liveMaxLatencyDurationCount: 15, // Higher max latency for stability
-        enableSoftwareAES: true,
-        startFragPrefetch: true,
-        testBandwidth: true,
-        // Ultra-optimized buffering for stability
-        backBufferLength: 20, // Keep much more back buffer
-        capLevelToPlayerSize: false, // Don't restrict quality
-        abrEwmaDefaultEstimate: 2000000, // Higher bandwidth estimate
-        abrEwmaFastLive: 5.0, // Smoother adaptation for live
-        abrEwmaSlowLive: 15.0, // More stable adaptation
-        fragLoadingTimeOut: 30000, // 30s timeout for fragments
-        manifestLoadingTimeOut: 15000, // 15s timeout for manifest
-        levelLoadingTimeOut: 15000, // 15s timeout for levels
-        // Additional optimizations
-        startLevel: -1, // Auto start level
-        autoStartLoad: true, // Auto start loading
-        progressive: false, // Better for live streams
-        fragLoadingMaxRetry: 6, // More fragment retry attempts
-        fragLoadingMaxRetryTimeout: 64000, // Longer retry timeout
-        manifestLoadingMaxRetry: 6, // More manifest retry attempts
-        levelLoadingMaxRetry: 6 // More level retry attempts
+        // Optimized settings for minimal buffering - proven by major streaming sites
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000, // 60MB - prevents memory issues
+        maxBufferHole: 0.5,
+        lowLatencyMode: true,
+        backBufferLength: 90,
+        // Fast startup
+        startLevel: -1,
+        autoStartLoad: true,
+        // Aggressive fragment loading
+        fragLoadingTimeOut: 20000,
+        manifestLoadingTimeOut: 10000,
+        levelLoadingTimeOut: 10000,
+        // Fewer retries for faster fallback
+        fragLoadingMaxRetry: 3,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingMaxRetry: 3,
+        // Bandwidth detection
+        abrEwmaDefaultEstimate: 1000000,
+        abrBandWidthFactor: 0.95,
+        abrBandWidthUpFactor: 0.7,
+        // Live stream optimization
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 10
       });
       
       hls.loadSource(src);
       hls.attachMedia(videoRef.current);
       
-      // Enhanced error handling with recovery
+      // Fast error recovery
       hls.on(Hls.Events.ERROR, (_event, data) => {
-        console.error('HLS error', data);
         if (data.fatal) {
           switch(data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error, attempting recovery...');
               hls?.startLoad();
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error, attempting recovery...');
               hls?.recoverMediaError();
               break;
             default:
-              console.log('Fatal error, destroying HLS instance');
               setError(true);
               break;
           }
         }
       });
 
-      // Quality level management for better performance
+      // Auto quality with bandwidth awareness
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed, levels:', hls?.levels?.length);
-        // Start with auto quality selection
         if (hls && hls.levels.length > 1) {
-          hls.currentLevel = -1; // Auto quality
+          // Start with mid-quality for faster startup
+          const midLevel = Math.floor(hls.levels.length / 2);
+          hls.startLevel = midLevel;
+          hls.currentLevel = -1; // Then switch to auto
         }
       });
     }
@@ -225,12 +213,12 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           preload="auto"
           crossOrigin="anonymous"
           onError={() => setError(true)}
-          onLoadStart={() => console.log('Video load started')}
-          onCanPlay={() => console.log('Video can play')}
-          onPlaying={() => console.log('Video playing')}
-          onWaiting={() => console.log('Video buffering...')}
-          onLoadedData={() => console.log('Video data loaded')}
-          onProgress={() => console.log('Video buffering progress')}
+          onCanPlay={() => {
+            // Preload next segments for smoother playback
+            if (videoRef.current) {
+              videoRef.current.play().catch(() => {});
+            }
+          }}
           style={{ 
             backgroundColor: 'black',
             // Force hardware acceleration

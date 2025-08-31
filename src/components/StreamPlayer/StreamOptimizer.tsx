@@ -33,16 +33,26 @@ const StreamOptimizer: React.FC<StreamOptimizerProps> = ({ stream }) => {
         document.head.appendChild(preconnectLink);
       }
 
+      // Add resource hints for better loading
+      const resourceHint = document.createElement('link');
+      resourceHint.rel = 'prefetch';
+      resourceHint.href = stream.embedUrl;
+      resourceHint.as = 'fetch';
+      resourceHint.crossOrigin = 'anonymous';
+      document.head.appendChild(resourceHint);
+
       // Cleanup function to remove the links when component unmounts
       return () => {
         const prefetchToRemove = document.querySelector(`link[rel="dns-prefetch"][href="//${domain}"]`);
         const preconnectToRemove = document.querySelector(`link[rel="preconnect"][href="${url.origin}"]`);
+        const resourceToRemove = document.querySelector(`link[rel="prefetch"][href="${stream.embedUrl}"]`);
         
         if (prefetchToRemove) document.head.removeChild(prefetchToRemove);
         if (preconnectToRemove) document.head.removeChild(preconnectToRemove);
+        if (resourceToRemove) document.head.removeChild(resourceToRemove);
       };
     } catch (error) {
-      console.warn('Failed to optimize stream loading:', error);
+      // Silently fail for invalid URLs
     }
   }, [stream]);
 
