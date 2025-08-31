@@ -12,7 +12,7 @@ const getTomorrowDate = () => {
 export const manualMatches: ManualMatch[] = [
   {
     id: "",
-    title: "FC Barcelons vs Vissel kobe",
+    title: "Brighton and Hove Albion vs. Manchester City",
     date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
@@ -20,9 +20,9 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "Nevena-3",
-        name: "Nevena3",
-        url: "https://topembed.pw/channel/exvisseona",
+        id: "peacok",
+        name: "peacock",
+        url: "ttps://veplay.top/stream/fbc2e949-1dc9-4fcc-b450-9f6e22f6d1d9",
         quality: "HD"
       },     
       {
@@ -50,8 +50,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
-    image: "",
+    visible: true,
+    image: "https://i.imgur.com/YOTRw5M.jpeg",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
       description: "Watch Fifa club world cup live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",
