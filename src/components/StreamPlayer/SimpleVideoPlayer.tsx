@@ -70,9 +70,13 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Set up HLS for Android/Chrome when URL is .m3u8
+  // Fallback to iframe after buffering issues
+  const [useIframe, setUseIframe] = useState(false);
+  const [bufferCount, setBufferCount] = useState(0);
+
+  // Set up HLS with anti-buffering config
   useEffect(() => {
-    if (!isM3U8 || !stream?.embedUrl) return;
+    if (!isM3U8 || !stream?.embedUrl || useIframe) return;
     const src = stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl;
 
     if (videoRef.current && (videoRef.current as any).canPlayType && videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
@@ -84,67 +88,54 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
       hls = new Hls({
-        // Anti-buffering optimized settings
-        maxBufferLength: 10,  // Reduced buffer
-        maxMaxBufferLength: 20,
-        maxBufferSize: 20 * 1000 * 1000, // 20MB only
-        maxBufferHole: 0.2,
+        // Minimal settings to prevent buffering
+        maxBufferLength: 5,
+        maxMaxBufferLength: 10,
+        maxBufferSize: 10 * 1000 * 1000,
+        maxBufferHole: 0.1,
         lowLatencyMode: true,
-        backBufferLength: 30,
-        // Ultra-fast startup
-        startLevel: 0, // Start with lowest quality
+        backBufferLength: 10,
+        startLevel: 0, // Always start lowest
         autoStartLoad: true,
-        // Very aggressive timeouts
-        fragLoadingTimeOut: 8000,
-        manifestLoadingTimeOut: 5000,
-        levelLoadingTimeOut: 5000,
-        // Minimal retries for instant fallback
-        fragLoadingMaxRetry: 1,
-        manifestLoadingMaxRetry: 1,
-        levelLoadingMaxRetry: 1,
-        // Conservative bandwidth
-        abrEwmaDefaultEstimate: 500000, // 500kb/s assumption
-        abrBandWidthFactor: 0.8,
-        abrBandWidthUpFactor: 0.6,
-        // Live optimization for minimal delay
+        fragLoadingTimeOut: 3000,
+        manifestLoadingTimeOut: 3000,
+        levelLoadingTimeOut: 3000,
+        fragLoadingMaxRetry: 0, // No retries
+        manifestLoadingMaxRetry: 0,
+        levelLoadingMaxRetry: 0,
         liveSyncDurationCount: 1,
-        liveMaxLatencyDurationCount: 3
+        liveMaxLatencyDurationCount: 2
       });
       
       hls.loadSource(src);
       hls.attachMedia(videoRef.current);
       
-      // Fast error recovery
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) {
-          switch(data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              hls?.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              hls?.recoverMediaError();
-              break;
-            default:
-              setError(true);
-              break;
-          }
-        }
+      // Track buffering and fallback to iframe
+      let bufferTimeout: NodeJS.Timeout;
+      hls.on(Hls.Events.ERROR, () => {
+        setUseIframe(true); // Instant fallback on any error
       });
 
-      // Auto quality with bandwidth awareness
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (hls && hls.levels.length > 1) {
-          // Start with mid-quality for faster startup
-          const midLevel = Math.floor(hls.levels.length / 2);
-          hls.startLevel = midLevel;
-          hls.currentLevel = -1; // Then switch to auto
-        }
-      });
+      // Monitor stalling
+      const video = videoRef.current;
+      const handleWaiting = () => {
+        setBufferCount(prev => {
+          const newCount = prev + 1;
+          if (newCount >= 3) {
+            setUseIframe(true); // Fallback after 3 buffer events
+          }
+          return newCount;
+        });
+      };
+
+      video.addEventListener('waiting', handleWaiting);
+      return () => {
+        if (hls) hls.destroy();
+        video.removeEventListener('waiting', handleWaiting);
+        clearTimeout(bufferTimeout);
+      };
     }
-    return () => {
-      if (hls) hls.destroy();
-    };
-  }, [isM3U8, stream?.embedUrl]);
+  }, [isM3U8, stream?.embedUrl, useIframe]);
 
   if (isLoading) {
     return (
