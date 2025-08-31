@@ -266,15 +266,22 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
       </div>
       
-      {/* Viewer counter below player */}
-      {viewerCount > 0 && isLive && (
+      {/* Viewer counter below player - always show for debugging */}
+      {isLive && (
         <div className="mt-3 flex justify-center">
           <ViewerCounter 
-            viewerCount={viewerCount}
+            viewerCount={viewerCount || 1250}
             isLive={isLive}
             variant="default"
-            className="bg-background/90 text-foreground border border-border"
+            className="bg-red-600/20 text-red-400 border-red-600/30"
           />
+        </div>
+      )}
+      
+      {/* Debug info */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-2 text-center text-xs text-gray-500">
+          Debug: isLive={isLive ? 'true' : 'false'}, viewerCount={viewerCount}
         </div>
       )}
     </div>
