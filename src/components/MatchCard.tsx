@@ -7,8 +7,6 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
-import ViewerCounter from './ViewerCounter';
-import { generateFakeViewerCount } from '@/utils/fakeViewers';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 
 interface MatchCardProps {
@@ -18,7 +16,6 @@ interface MatchCardProps {
   onClick?: () => void;
   preventNavigation?: boolean;
   isPriority?: boolean;
-  showViewers?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -27,11 +24,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   sportId,
   onClick,
   preventNavigation,
-  isPriority,
-  showViewers = false,
+  isPriority
 }) => {
   const isLive = isMatchLive(match);
-  const fakeViewerCount = isLive ? generateFakeViewerCount(match.id, isLive) : 0;
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -377,18 +372,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
         {/* Status indicator */}
         <div className="text-xs">
-          {isLive ? (
-            <div className="flex items-center gap-2">
-              <span className="text-destructive font-medium">Live now</span>
-              {showViewers && fakeViewerCount > 0 && (
-                <ViewerCounter 
-                  viewerCount={fakeViewerCount}
-                  isLive={isLive}
-                  variant="compact"
-                />
-              )}
-            </div>
-          ) : match.date ? (
+              {isLive ? (
+                <span className="text-destructive font-medium">Live now</span>
+              ) : match.date ? (
             <span className="text-muted-foreground">
               {match.date > Date.now() ? 'Upcoming' : 'Ended'}
             </span>

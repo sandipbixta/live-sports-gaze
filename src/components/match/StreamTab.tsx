@@ -7,7 +7,6 @@ import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
-import { generateFakeViewerCount } from '@/utils/fakeViewers';
 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -45,8 +44,6 @@ const StreamTab = ({
     const threeHoursInMs = 3 * 60 * 60 * 1000;
     return matchTime <= now && (now - matchTime) < threeHoursInMs;
   };
-  
-  const fakeViewerCount = isMatchLive() ? generateFakeViewerCount(match.id, true) : 0;
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -112,8 +109,6 @@ const StreamTab = ({
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
-        isLive={isMatchLive()}
-        viewerCount={fakeViewerCount}
       />
       
       <StreamSources

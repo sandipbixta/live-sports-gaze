@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
-import ViewerCounter from '../ViewerCounter';
 
 
 interface SimpleVideoPlayerProps {
@@ -11,8 +10,6 @@ interface SimpleVideoPlayerProps {
   onRetry?: () => void;
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
-  isLive?: boolean;
-  viewerCount?: number;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -20,9 +17,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   isLoading = false,
   onRetry,
   isTheaterMode = false,
-  onTheaterModeToggle,
-  isLive = false,
-  viewerCount = 0
+  onTheaterModeToggle
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -128,17 +123,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
             <Maximize className="w-4 h-4" />
           </Button>
         </div>
-
-        {/* Viewer counter overlay */}
-        {isLive && (
-          <div className="absolute top-4 left-4">
-            <ViewerCounter 
-              viewerCount={viewerCount > 0 ? viewerCount : Math.floor(Math.random() * 2000) + 800}
-              isLive={isLive}
-              variant="compact"
-            />
-          </div>
-        )}
       </div>
     </div>
   );

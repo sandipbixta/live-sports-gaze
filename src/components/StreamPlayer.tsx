@@ -12,8 +12,6 @@ interface StreamPlayerProps {
   title?: string;
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
-  isLive?: boolean;
-  viewerCount?: number;
 }
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ 
@@ -24,9 +22,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   isTvChannel = false,
   title,
   isTheaterMode = false,
-  onTheaterModeToggle,
-  isLive = false,
-  viewerCount = 0
+  onTheaterModeToggle
 }) => {
   return (
     <>
@@ -37,8 +33,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         onRetry={onRetry}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={onTheaterModeToggle}
-        isLive={isLive}
-        viewerCount={viewerCount}
       />
     </>
   );

@@ -7,7 +7,6 @@ import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
-import { generateFakeViewerCount } from '@/utils/fakeViewers';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -37,7 +36,6 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
 
   // Generate fake viewer count for live match
   const isLive = featuredMatch ? isMatchLive(featuredMatch) : false;
-  const fakeViewerCount = isLive && featuredMatch ? generateFakeViewerCount(featuredMatch.id, isLive) : 0;
 
   // Show loading only for initial load
   if (loading && !featuredMatch) {
@@ -97,8 +95,6 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
         stream={currentStream} 
         isLoading={streamLoading}
         onRetry={onStreamRetry}
-        isLive={isLive}
-        viewerCount={fakeViewerCount}
       />
       
       {/* Stream Sources - only show if match has sources */}
