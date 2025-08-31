@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "peacok",
         name: "peacock",
-        url: "https://veplay.top/stream/fbc2e949-1dc9-4fcc-b450-9f6e22f6d1d9",
+        url: "https://topembed.pw/channel/SkySport8[NewZealand]",
         quality: "HD"
       },     
       {
