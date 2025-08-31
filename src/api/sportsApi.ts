@@ -418,19 +418,18 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 
     let response: Response | null = null;
 
-    if (isMobile) {
-      try {
-        console.log('📡 Trying streamed.su for stream (mobile first)...');
-        response = await fetch(suUrl, {
-          signal: controller.signal,
-          headers: {
-'Accept': 'application/json'
-          },
-          cache: 'no-store',
-        });
-      } catch (e) {
-        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
-      }
+    // Try streamed.su first for all users (better streams), then fallback to streamed.pk
+    try {
+      console.log('📡 Trying streamed.su for stream (priority for better quality)...');
+      response = await fetch(suUrl, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json'
+        },
+        cache: 'no-store',
+      });
+    } catch (e) {
+      console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
     }
 
     if (!response || !response.ok) {

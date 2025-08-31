@@ -218,7 +218,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             
             // Must contain at least one top league keyword OR a top team
             const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
-            const hasTopTeam = isTrendingMatch(title).score >= 8; // Top teams have high scores
+            const hasTopTeam = isTrendingMatch(title).score >= 10; // Only very top teams
             
             // Additional check: if it contains "vs" or "-", it should be a proper match format
             const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
