@@ -89,7 +89,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-        {/* Ultra simple iframe - no buffering */}
+        {/* Ultra simple iframe - desktop optimized */}
         <iframe
           src={stream.embedUrl}
           className="w-full h-full"
@@ -99,7 +99,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           frameBorder="0"
           scrolling="no"
           loading="eager"
-          style={{ border: 'none', background: 'black' }}
+          style={{ 
+            border: 'none', 
+            background: 'black',
+            // Desktop optimization - disable hardware acceleration that can cause issues
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            perspective: '1000px'
+          }}
         />
 
         {/* Theater mode and fullscreen buttons */}
