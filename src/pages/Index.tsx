@@ -229,16 +229,6 @@ const Index = () => {
           <TelegramBanner />
         </div>
 
-        {/* Buffering Help Message */}
-        <div className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-4">
-          <div className="flex items-center gap-2 text-center justify-center">
-            <span className="text-lg">⚡</span>
-            <p className="text-sm md:text-base text-foreground font-medium">
-              If the stream is buffering, please click on other stream links in the video player page
-            </p>
-          </div>
-        </div>
-
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-foreground">Featured Sports</h1>
