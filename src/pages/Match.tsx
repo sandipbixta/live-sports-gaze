@@ -11,7 +11,6 @@ import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
-import PopularByViewers from '@/components/PopularByViewers';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -56,10 +55,10 @@ const Match = () => {
         // Use the enhanced stream player to load all streams
         await handleMatchSelect(enhancedMatch);
 
-        // Load all matches for the "Popular by Viewers" section
+        // Load all matches for related content
         const allMatches = await fetchMatches(sportId);
         const otherMatches = allMatches.filter(m => m.id !== matchId);
-        setAllMatches(allMatches); // Store all matches for PopularByViewers component
+        setAllMatches(allMatches);
         
         // Recommended matches (similar category)
         const recommended = otherMatches
@@ -184,18 +183,10 @@ const Match = () => {
           loadingStream={loadingStream}
           activeSource={activeSource}
           handleSourceChange={handleSourceChange}
-          popularMatches={[]} // Remove from StreamTab since we're using PopularByViewers component
+          popularMatches={[]}
           sportId={sportId || ''}
           allStreams={allStreams}
         />
-
-        {/* Popular by Viewers - Shows matches with actual live viewers */}
-        <div className="mt-6">
-          <PopularByViewers 
-            matches={allMatches} 
-            preventNavigation={false}
-          />
-        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">

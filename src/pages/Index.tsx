@@ -7,7 +7,6 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
-import PopularByViewers from '../components/PopularByViewers';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
@@ -93,16 +92,6 @@ const Index = () => {
         
         setSports(sportsData);
         console.log('✅ Sports state updated');
-
-        // Load live matches for PopularByViewers
-        try {
-          console.log('🔴 Loading live matches for Popular by Viewers...');
-          const liveMatchesData = await fetchLiveMatches();
-          setLiveMatches(liveMatchesData);
-          console.log(`✅ Loaded ${liveMatchesData.length} live matches`);
-        } catch (error) {
-          console.error('Error loading live matches:', error);
-        }
         
       } catch (error) {
         console.error('Sports loading error:', error);
@@ -274,16 +263,7 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
 
-            {/* Popular by Viewers - Shows matches with actual live viewers */}
-            {liveMatches.length > 0 && (
-              <div className="mb-8">
-                <PopularByViewers 
-                  matches={liveMatches} 
-                  preventNavigation={false}
-                />
-              </div>
-            )}
-            
+            {/* All Sports Live Matches */}
             <div className="mb-8">
               {selectedSport && (
                 <>
