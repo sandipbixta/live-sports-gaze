@@ -54,7 +54,7 @@ const Index = () => {
       return [];
     }
     
-    const activeMatches = filterActiveMatches(matches);
+    const activeMatches = filterActiveMatches(filterCleanMatches(matches));
     return activeMatches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
