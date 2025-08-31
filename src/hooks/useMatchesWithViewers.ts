@@ -2,13 +2,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Match } from '@/types/sports';
 
-interface MatchWithViewers {
+interface MatchWithViewers extends Match {
+  viewerCount?: number;
+}
+
+interface MatchWithViewersData {
   matchId: string;
   viewerCount: number;
 }
 
 export const useMatchesWithViewers = (matches: Match[]) => {
-  const [matchesWithViewers, setMatchesWithViewers] = useState<Match[]>([]);
+  const [matchesWithViewers, setMatchesWithViewers] = useState<MatchWithViewers[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,23 +53,25 @@ export const useMatchesWithViewers = (matches: Match[]) => {
         }, {});
 
         // Get viewer counts for each unique match
-        const matchViewerCounts: MatchWithViewers[] = Object.entries(viewerCounts)
+        const matchViewerCounts: MatchWithViewersData[] = Object.entries(viewerCounts)
           .map(([matchId, count]) => ({
             matchId,
             viewerCount: count as number
           }))
           .filter(mvc => mvc.viewerCount > 0);
 
-        // Filter and sort matches by viewer count
-        const filteredMatches = matches
+        // Filter and sort matches by viewer count - only include matches with viewers > 0
+        const filteredMatches: MatchWithViewers[] = matches
           .filter(match => matchViewerCounts.some(mvc => mvc.matchId === match.id))
           .map(match => {
             const viewerData = matchViewerCounts.find(mvc => mvc.matchId === match.id);
+            const viewerCount = viewerData?.viewerCount || 0;
             return {
               ...match,
-              viewerCount: viewerData?.viewerCount || 0
+              viewerCount
             };
           })
+          .filter(match => match.viewerCount > 0) // Only include matches with actual viewers
           .sort((a, b) => (b.viewerCount || 0) - (a.viewerCount || 0));
 
         console.log(`👥 Found ${filteredMatches.length} matches with viewers`);
