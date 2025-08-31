@@ -305,15 +305,15 @@ const Index = () => {
                         sportId={selectedSport}
                         isLoading={loadingMatches}
                         trendingSection={
-                          liveMatches.length > 0 && !searchTerm.trim() ? (
-                            <>
-                              <PopularByViewers 
-                                matches={liveMatches} 
-                                preventNavigation={false}
-                              />
-                              <Separator className="my-8 bg-[#343a4d]" />
-                            </>
-                          ) : null
+                           liveMatches.length > 0 && !searchTerm.trim() ? (
+                             <>
+                               <PopularByViewers 
+                                 matches={liveMatches} 
+                                 preventNavigation={false}
+                               />
+                               <Separator className="my-8 bg-[#343a4d]" />
+                             </>
+                           ) : null
                         }
                       />
                     </>
