@@ -84,31 +84,31 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
       hls = new Hls({
-        // Optimized settings for minimal buffering - proven by major streaming sites
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        maxBufferSize: 60 * 1000 * 1000, // 60MB - prevents memory issues
-        maxBufferHole: 0.5,
+        // Anti-buffering optimized settings
+        maxBufferLength: 10,  // Reduced buffer
+        maxMaxBufferLength: 20,
+        maxBufferSize: 20 * 1000 * 1000, // 20MB only
+        maxBufferHole: 0.2,
         lowLatencyMode: true,
-        backBufferLength: 90,
-        // Fast startup
-        startLevel: -1,
+        backBufferLength: 30,
+        // Ultra-fast startup
+        startLevel: 0, // Start with lowest quality
         autoStartLoad: true,
-        // Aggressive fragment loading
-        fragLoadingTimeOut: 20000,
-        manifestLoadingTimeOut: 10000,
-        levelLoadingTimeOut: 10000,
-        // Fewer retries for faster fallback
-        fragLoadingMaxRetry: 3,
-        manifestLoadingMaxRetry: 3,
-        levelLoadingMaxRetry: 3,
-        // Bandwidth detection
-        abrEwmaDefaultEstimate: 1000000,
-        abrBandWidthFactor: 0.95,
-        abrBandWidthUpFactor: 0.7,
-        // Live stream optimization
-        liveSyncDurationCount: 3,
-        liveMaxLatencyDurationCount: 10
+        // Very aggressive timeouts
+        fragLoadingTimeOut: 8000,
+        manifestLoadingTimeOut: 5000,
+        levelLoadingTimeOut: 5000,
+        // Minimal retries for instant fallback
+        fragLoadingMaxRetry: 1,
+        manifestLoadingMaxRetry: 1,
+        levelLoadingMaxRetry: 1,
+        // Conservative bandwidth
+        abrEwmaDefaultEstimate: 500000, // 500kb/s assumption
+        abrBandWidthFactor: 0.8,
+        abrBandWidthUpFactor: 0.6,
+        // Live optimization for minimal delay
+        liveSyncDurationCount: 1,
+        liveMaxLatencyDurationCount: 3
       });
       
       hls.loadSource(src);
