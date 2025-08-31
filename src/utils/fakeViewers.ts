@@ -38,11 +38,18 @@ export const generateFakeViewerCount = (matchId: string, isLive: boolean = false
     }
   }
   
-  // Add some randomness for "live" fluctuation
-  const minute = new Date().getMinutes();
-  const fluctuation = 1 + (pseudoRandom(seed, minute) - 0.5) * 0.2; // ±10% fluctuation
+  // Add some randomness for "live" fluctuation - changes every 10-15 seconds
+  const now = Date.now();
+  const fluctuationInterval = 12000; // 12 seconds
+  const currentCycle = Math.floor(now / fluctuationInterval);
+  const cycleFluctuation = 1 + (pseudoRandom(seed, currentCycle) - 0.5) * 0.15; // ±7.5% major changes
   
-  const finalCount = Math.floor(baseViewers * timeMultiplier * popularityBonus * fluctuation);
+  // Add micro-fluctuations every few seconds (people joining/leaving)
+  const microInterval = 4000; // 4 seconds  
+  const microCycle = Math.floor(now / microInterval);
+  const microFluctuation = 1 + (pseudoRandom(seed, microCycle * 3) - 0.5) * 0.05; // ±2.5% micro changes
+  
+  const finalCount = Math.floor(baseViewers * timeMultiplier * popularityBonus * cycleFluctuation * microFluctuation);
   
   // Ensure minimum of 50 viewers for live matches
   return Math.max(50, Math.min(15000, finalCount)); // Cap at 15k to keep realistic
