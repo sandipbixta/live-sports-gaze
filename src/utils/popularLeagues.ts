@@ -34,15 +34,15 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   const topClubs = [
     // Premier League
     { name: 'manchester united', weight: 10, seoTerms: ['man utd', 'man united', 'manchester united stream'] },
-    { name: 'liverpool', weight: 10, seoTerms: ['lfc', 'liverpool fc', 'liverpool stream'] },
+    { name: 'liverpool fc', weight: 10, seoTerms: ['lfc', 'liverpool', 'liverpool stream'] },
     { name: 'manchester city', weight: 9, seoTerms: ['man city', 'mcfc', 'manchester city stream'] },
-    { name: 'chelsea', weight: 9, seoTerms: ['cfc', 'chelsea fc', 'chelsea stream'] },
-    { name: 'arsenal', weight: 9, seoTerms: ['afc', 'arsenal fc', 'arsenal stream', 'gunners'] },
+    { name: 'chelsea fc', weight: 9, seoTerms: ['cfc', 'chelsea', 'chelsea stream'] },
+    { name: 'arsenal fc', weight: 9, seoTerms: ['afc', 'arsenal', 'arsenal stream', 'gunners'] },
     { name: 'tottenham', weight: 8, seoTerms: ['thfc', 'spurs', 'tottenham stream'] },
     { name: 'newcastle', weight: 7, seoTerms: ['nufc', 'newcastle united', 'newcastle stream'] },
     
     // La Liga
-    { name: 'barcelona', weight: 10, seoTerms: ['barca', 'fcb', 'barcelona stream', 'fc barcelona'] },
+    { name: 'fc barcelona', weight: 10, seoTerms: ['barca', 'fcb', 'barcelona stream', 'barcelona'] },
     { name: 'real madrid', weight: 10, seoTerms: ['madrid', 'rm', 'real madrid stream', 'los blancos'] },
     { name: 'atletico madrid', weight: 8, seoTerms: ['atleti', 'atletico', 'atletico madrid stream'] },
     
