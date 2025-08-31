@@ -7,6 +7,7 @@ import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
+import { generateFakeViewerCount } from '@/utils/fakeViewers';
 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,16 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  
+  // Generate fake viewer count for live match
+  const isMatchLive = (): boolean => {
+    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+    const now = new Date().getTime();
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
+    return matchTime <= now && (now - matchTime) < threeHoursInMs;
+  };
+  
+  const fakeViewerCount = isMatchLive() ? generateFakeViewerCount(match.id, true) : 0;
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -83,20 +94,6 @@ const StreamTab = ({
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
-  
-  const isMatchLive = (): boolean => {
-    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
-    const now = new Date().getTime();
-    const threeHoursInMs = 3 * 60 * 60 * 1000;
-    const oneHourInMs = 60 * 60 * 1000;
-    
-    return (
-      match.sources && 
-      match.sources.length > 0 && 
-      matchTime - now < oneHourInMs &&
-      now - matchTime < threeHoursInMs
-    );
-  };
 
   const sortedPopularMatches = [...popularMatches].sort((a, b) => {
     const aTrending = isTrendingMatch(a.title);
@@ -116,6 +113,7 @@ const StreamTab = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         isLive={isMatchLive()}
+        viewerCount={fakeViewerCount}
       />
       
       <StreamSources

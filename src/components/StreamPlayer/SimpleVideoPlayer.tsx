@@ -4,6 +4,7 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
+import ViewerCounter from '../ViewerCounter';
 
 
 interface SimpleVideoPlayerProps {
@@ -13,6 +14,7 @@ interface SimpleVideoPlayerProps {
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
   isLive?: boolean;
+  viewerCount?: number;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -21,7 +23,8 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   onRetry,
   isTheaterMode = false,
   onTheaterModeToggle,
-  isLive = false
+  isLive = false,
+  viewerCount = 0
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -263,6 +266,17 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
       </div>
       
+      {/* Viewer counter below player */}
+      {viewerCount > 0 && isLive && (
+        <div className="mt-3 flex justify-center">
+          <ViewerCounter 
+            viewerCount={viewerCount}
+            isLive={isLive}
+            variant="default"
+            className="bg-background/90 text-foreground border border-border"
+          />
+        </div>
+      )}
     </div>
   );
 };

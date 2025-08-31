@@ -245,11 +245,12 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {topLeagueFootballMatches.map((match) => (
-                  <MatchCard
-                    key={`top-football-${match.id}`}
-                    match={match}
-                    sportId={match.sportId || match.category}
-                  />
+                <MatchCard
+                  key={`top-football-${match.id}`}
+                  match={match}
+                  sportId={match.sportId || match.category}
+                  showViewers={true}
+                />
                 ))}
               </div>
             </div>
@@ -283,6 +284,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
                     key={`popular-${match.sportId || 'unknown'}-${match.id}`}
                     match={match}
                     sportId={match.sportId || match.category}
+                    showViewers={true}
                   />
                 ))}
               </div>
@@ -310,6 +312,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
                 key={`${match.sportId || sportId}-${match.id}`}
                 match={match}
                 sportId={match.sportId || sportId}
+                showViewers={true}
               />
             ))}
           </div>

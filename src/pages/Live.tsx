@@ -241,6 +241,7 @@ const Live = () => {
                         sportId={match.sportId || match.category}
                         onClick={() => handleMatchSelect(match)}
                         preventNavigation={true}
+                        showViewers={true}
                       />
                     ))}
                   </div>
