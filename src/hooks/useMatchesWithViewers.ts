@@ -24,8 +24,6 @@ export const useMatchesWithViewers = (matches: Match[]) => {
       }
 
       try {
-        console.log('🔍 Fetching matches with viewers...');
-        
         // Query to get active viewers (active in last 5 minutes) with count
         const { data: viewerCounts, error: viewersError } = await supabase
           .from('match_viewers')
@@ -40,7 +38,6 @@ export const useMatchesWithViewers = (matches: Match[]) => {
         }
 
         if (!viewerCounts || viewerCounts.length === 0) {
-          console.log('📊 No active viewers found');
           setMatchesWithViewers([]);
           setLoading(false);
           return;
@@ -60,8 +57,6 @@ export const useMatchesWithViewers = (matches: Match[]) => {
           }))
           .filter(mvc => mvc.viewerCount > 0);
 
-        console.log('🔍 Actual viewer counts from DB:', matchViewerCounts);
-
         // Filter and sort matches by viewer count - only include matches with viewers > 0
         const filteredMatches: MatchWithViewers[] = matches
           .filter(match => matchViewerCounts.some(mvc => mvc.matchId === match.id))
@@ -76,7 +71,6 @@ export const useMatchesWithViewers = (matches: Match[]) => {
           .filter(match => match.viewerCount > 0) // Only include matches with actual viewers
           .sort((a, b) => (b.viewerCount || 0) - (a.viewerCount || 0));
 
-        console.log(`👥 Found ${filteredMatches.length} matches with viewers`);
         setMatchesWithViewers(filteredMatches);
       } catch (error) {
         console.error('Error in fetchMatchesWithViewers:', error);

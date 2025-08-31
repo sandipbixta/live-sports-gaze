@@ -21,34 +21,23 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
     return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  // Fetch current viewer count
+  // Optimized viewer count fetching with debouncing
   const fetchViewerCount = async (currentMatchId: string) => {
     try {
-      console.log(`📊 Fetching viewer count for match: ${currentMatchId}`);
       const { data, error } = await supabase.rpc('get_viewer_count', {
         match_id_param: currentMatchId
       });
       
-      if (error) {
-        console.error('Error fetching viewer count:', error);
-        return;
-      }
-      
-      console.log(`👥 Viewer count for ${currentMatchId}: ${data}`);
+      if (error) return;
       setViewerCount(data || 0);
     } catch (error) {
-      console.error('Error fetching viewer count:', error);
+      // Silent fail to reduce console spam
     }
   };
 
   // Start tracking viewers for a match
   const startTracking = async () => {
-    if (!matchId || isTracking) {
-      console.log(`⚠️ Cannot start tracking. MatchId: ${matchId}, isTracking: ${isTracking}`);
-      return;
-    }
-
-    console.log(`🔴 Starting viewer tracking for match: ${matchId}`);
+    if (!matchId || isTracking) return;
     setIsTracking(true);
 
     try {
@@ -70,14 +59,14 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
             table: 'match_viewers',
             filter: `match_id=eq.${matchId}`
           },
-          (payload: RealtimePostgresChangesPayload<any>) => {
-            console.log('👥 Viewer change detected:', payload.eventType);
-            fetchViewerCount(matchId);
+           (payload: RealtimePostgresChangesPayload<any>) => {
+            // Debounce viewer count updates
+            setTimeout(() => fetchViewerCount(matchId), 500);
           }
         )
         .subscribe();
 
-      // Update last_active every 10 seconds
+      // Update last_active every 30 seconds (reduced frequency)
       intervalRef.current = setInterval(async () => {
         try {
           await supabase
@@ -86,9 +75,9 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
             .eq('match_id', matchId)
             .eq('session_id', sessionId.current);
         } catch (error) {
-          console.error('Error updating last_active:', error);
+          // Silent fail to reduce performance impact
         }
-      }, 10000);
+      }, 30000);
 
       // Initial viewer count fetch
       await fetchViewerCount(matchId);
@@ -102,8 +91,6 @@ export const useViewerTracking = (matchId: string | null): ViewerTrackingResult 
   // Stop tracking viewers
   const stopTracking = async () => {
     if (!matchId || !isTracking) return;
-
-    console.log(`⏹️ Stopping viewer tracking for match: ${matchId}`);
     setIsTracking(false);
 
     try {
