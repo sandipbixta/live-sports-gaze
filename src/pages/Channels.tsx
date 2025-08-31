@@ -4,7 +4,7 @@ import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import ChannelsGrid from '../components/ChannelsGrid';
-import Advertisement from '../components/Advertisement';
+// import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -150,19 +150,7 @@ const Channels = () => {
         <ChannelsGrid />
         
         {/* Native Bar Advertisement - after channels grid */}
-        <div className="my-6">
-          <Advertisement type="native-bar" className="w-full" />
-        </div>
-        
-        {/* Direct Link Advertisement - re-enabled */}
-        <div className="my-6 sm:my-8">
-          <Advertisement type="direct-link" className="w-full" />
-        </div>
-        
-        {/* AutoTag Advertisement - adblock bypass */}
-        <div className="my-4">
-          <Advertisement type="autotag" className="w-full" />
-        </div>
+        {/* All advertisements disabled */}
         
         {/* Cross-promotion for News section */}
         <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
@@ -183,14 +171,7 @@ const Channels = () => {
         </div>
         
         {/* Video Advertisement - moved to bottom */}
-        <div className="mt-6">
-          <Advertisement type="video" className="w-full" />
-        </div>
-        
-        {/* Sidebar Advertisement - at the bottom */}
-        <div className="mt-6">
-          <Advertisement type="sidebar" className="w-full" />
-        </div>
+        {/* All advertisements disabled */}
         
         {/* Hidden SEO content for competitor targeting */}
         <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />

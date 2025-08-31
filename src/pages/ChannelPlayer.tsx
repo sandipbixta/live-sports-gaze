@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
-import Advertisement from '@/components/Advertisement';
-import RectangleAd from '@/components/RectangleAd';
+// import Advertisement from '@/components/Advertisement';
+// import RectangleAd from '@/components/RectangleAd';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -278,9 +278,9 @@ const ChannelPlayer = () => {
       </div>
 
       {/* Video Advertisement - moved below channel list */}
-      <div className="px-4 mb-4">
+      {/* <div className="px-4 mb-4">
         <Advertisement type="video" className="w-full" />
-      </div>
+      </div> */}
     </div>
   );
 };

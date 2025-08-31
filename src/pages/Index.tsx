@@ -205,9 +205,6 @@ const Index = () => {
       
       <main className="py-4">
         {/* Banner Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
 
         {/* Hero/Intro: Remove "Watch Live Football Streams" headline and football-specific text */}
         {/* You may wish to add a more generic intro or simply skip it */}
