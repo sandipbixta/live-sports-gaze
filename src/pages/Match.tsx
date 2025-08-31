@@ -190,10 +190,12 @@ const Match = () => {
         />
 
         {/* Popular by Viewers - Shows matches with actual live viewers */}
-        <PopularByViewers 
-          matches={allMatches} 
-          preventNavigation={false}
-        />
+        <div className="mt-6">
+          <PopularByViewers 
+            matches={allMatches} 
+            preventNavigation={false}
+          />
+        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
