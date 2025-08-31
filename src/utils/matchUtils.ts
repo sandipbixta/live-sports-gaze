@@ -68,6 +68,24 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
       const homeTeam = match.teams?.home?.name?.toLowerCase() || '';
       const awayTeam = match.teams?.away?.name?.toLowerCase() || '';
       
+      // Filter out women's football matches
+      const womensKeywords = [
+        'women', 'womens', "women's", 'female', 'ladies', 'feminino', 'femenino',
+        'femminile', 'frauen', 'dames', 'women fc', 'women cf', 'wfc', 'wcf',
+        'w.f.c', 'w.c.f', 'ladies fc', 'ladies cf'
+      ];
+      
+      const isWomensMatch = womensKeywords.some(keyword => 
+        title.includes(keyword) || 
+        homeTeam.includes(keyword) || 
+        awayTeam.includes(keyword) ||
+        id.includes(keyword.replace(/\s+/g, '-'))
+      );
+      
+      if (isWomensMatch) {
+        return false;
+      }
+      
       const unwantedFootballRegions = [
         'china', 'chinese', 'csl', 'super league china',
         'korea', 'korean', 'k league', 'k-league', 'south korea',
