@@ -304,22 +304,23 @@ const Index = () => {
                         matches={filteredMatches}
                         sportId={selectedSport}
                         isLoading={loadingMatches}
+                        trendingSection={
+                           liveMatches.length > 0 && !searchTerm.trim() ? (
+                             <>
+                               <PopularByViewers 
+                                 matches={liveMatches} 
+                                 preventNavigation={false}
+                               />
+                               <Separator className="my-8 bg-[#343a4d]" />
+                             </>
+                           ) : null
+                        }
                       />
                     </>
                   )}
                 </>
               )}
             </div>
-            
-            {/* Popular by Viewers - Shows matches with actual live viewers */}
-            {liveMatches.length > 0 && (
-              <div className="mb-8">
-                <PopularByViewers 
-                  matches={liveMatches} 
-                  preventNavigation={false}
-                />
-              </div>
-            )}
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div className="lg:col-span-2">
