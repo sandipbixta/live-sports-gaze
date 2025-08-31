@@ -23,14 +23,16 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   
   if (isVeplayUrl) {
     console.log('🌐 Detected veplay.top URL, applying special configuration');
-    // Enhanced iframe configuration for veplay.top with all necessary permissions
+    // Enhanced iframe configuration for veplay.top with laptop-specific optimizations
+    const optimizedSrc = `${src}${src.includes('?') ? '&' : '?'}buffer=aggressive&preload=metadata&quality=auto`;
+    
     return (
       <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative">
         <iframe
           id="player"
           marginHeight={0}
           marginWidth={0}
-          src={src}
+          src={optimizedSrc}
           scrolling="no"
           allowFullScreen={true}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen; microphone; camera; geolocation; gyroscope; accelerometer; payment; usb"
@@ -39,6 +41,7 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
           frameBorder="0"
           referrerPolicy="no-referrer-when-downgrade"
           sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-top-navigation allow-presentation"
+          loading="eager"
           style={{ 
             position: 'absolute', 
             border: 'none', 
@@ -46,11 +49,12 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0
+            bottom: 0,
+            willChange: 'transform'
           }}
           title={title}
           onLoad={() => {
-            console.log('✅ Veplay iframe loaded successfully');
+            console.log('✅ Veplay iframe loaded successfully with optimizations');
             onLoad?.();
           }}
           onError={() => {
