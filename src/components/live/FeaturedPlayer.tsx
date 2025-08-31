@@ -7,8 +7,6 @@ import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
-import { useViewerTracking } from '../../hooks/useViewerTracking';
-import ViewerCounter from '../ViewerCounter';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -35,31 +33,6 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
-
-  // Track viewers for the featured match
-  const isLive = featuredMatch ? isMatchLive(featuredMatch) : false;
-  const { viewerCount, startTracking, stopTracking, isTracking } = useViewerTracking(featuredMatch?.id || null);
-
-  // Auto-start tracking when component mounts and match is available
-  React.useEffect(() => {
-    console.log('FeaturedPlayer viewer tracking effect:', { 
-      featuredMatchId: featuredMatch?.id, 
-      isTracking,
-      isLive
-    });
-    
-    if (featuredMatch?.id && !isTracking) {
-      console.log('🎬 FeaturedPlayer: Starting viewer tracking');
-      startTracking();
-    }
-    
-    return () => {
-      if (isTracking) {
-        console.log('🎬 FeaturedPlayer: Stopping viewer tracking');
-        stopTracking();
-      }
-    };
-  }, [featuredMatch?.id, isTracking, startTracking, stopTracking]);
 
   // Show loading only for initial load, not when we have matches
   if (loading && !featuredMatch) {
@@ -119,20 +92,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
         stream={currentStream} 
         isLoading={streamLoading}
         onRetry={onStreamRetry}
-        viewerCount={viewerCount}
-        isLive={isLive}
-        showViewerCounter={false}
       />
-      
-      {/* Viewer counter below video player */}
-      <div className="mt-3 flex justify-start">
-        <ViewerCounter 
-          viewerCount={viewerCount}
-          isLive={isLive}
-          variant="default"
-          className="bg-[#242836] text-white border border-[#343a4d]"
-        />
-      </div>
       
       {/* Stream Sources - only show if match has sources */}
       {featuredMatch.sources && featuredMatch.sources.length > 0 && (
