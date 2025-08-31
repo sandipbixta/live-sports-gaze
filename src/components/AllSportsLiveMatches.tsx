@@ -216,19 +216,25 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               return false;
             }
             
-            // Must contain at least one top league keyword OR a top team
+            // Debug logging with detailed info
+            const trendingResult = isTrendingMatch(title);
             const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
-            const hasTopTeam = isTrendingMatch(title).score >= 10; // Only very top teams
+            const hasTopTeam = trendingResult.score >= 10; // Only very top teams
             
             // Additional check: if it contains "vs" or "-", it should be a proper match format
             const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
             
-            // Debug logging
             if ((hasTopLeagueKeyword || hasTopTeam) && hasProperFormat) {
-              console.log('🏆 Top League Football match found:', title, 'Score:', isTrendingMatch(title).score);
+              console.log('🏆 Top League Football match found:', title);
+              console.log('   - Score:', trendingResult.score);
+              console.log('   - Has league keyword:', hasTopLeagueKeyword);
+              console.log('   - Has top team:', hasTopTeam);
+              console.log('   - Reason:', trendingResult.reason);
             }
             
-            return (hasTopLeagueKeyword || hasTopTeam) && hasProperFormat;
+            // Only include if it has BOTH a proper format AND a top team (score >= 10)
+            // Remove league keyword matching to be more strict
+            return hasTopTeam && hasProperFormat;
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;
