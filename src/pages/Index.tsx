@@ -224,6 +224,17 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
+        {/* Popular by Viewers - Shows live matches with viewer counts */}
+        {liveMatches.length > 0 && (
+          <>
+            <PopularByViewers 
+              matches={liveMatches} 
+              preventNavigation={false}
+            />
+            <Separator className="my-8 bg-[#343a4d]" />
+          </>
+        )}
+
         {/* Telegram Banner */}
         <div className="mb-6">
           <TelegramBanner />
