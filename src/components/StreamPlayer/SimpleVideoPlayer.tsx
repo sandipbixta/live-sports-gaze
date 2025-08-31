@@ -29,17 +29,31 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
+  const [useIframe, setUseIframe] = useState(false);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  
   useEffect(() => {
     setError(false);
   }, [stream]);
 
   const handleRetry = () => {
     setError(false);
+    setUseIframe(false);
     if (onRetry) {
       onRetry();
     }
+  };
+
+  const handleError = () => {
+    console.log('SimpleVideoPlayer: Error occurred, switching to iframe');
+    setUseIframe(true);
+    setError(true);
+  };
+
+  const handleBuffering = () => {
+    console.log('SimpleVideoPlayer: Too much buffering, switching to iframe');
+    setUseIframe(true);
   };
 
   const toggleFullscreen = () => {
@@ -66,8 +80,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
-
-  const handleError = () => setError(true);
 
   if (isLoading) {
     return (
@@ -123,19 +135,11 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-      {isM3U8 ? (
-        <HlsPlayer
-          src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-          onError={handleError}
-          className="w-full h-full object-contain"
-        />
-      ) : (
-        <IframePlayer
-          src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-          onError={handleError}
-          className="w-full h-full"
-        />
-      )}
+      <IframePlayer
+        src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
+        onError={handleError}
+        className="w-full h-full"
+      />
       {/* External open fallback on Android for non-m3u8 embeds */}
       {!isM3U8 && isAndroid && (
         <div className="absolute top-4 left-4">
