@@ -19,24 +19,41 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   // Check if it's a veplay.top URL and apply specific configuration
   const isVeplayUrl = src.includes('veplay.top');
   
+  if (isVeplayUrl) {
+    // Exact iframe configuration for veplay.top as requested by user
+    return (
+      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative">
+        <iframe
+          id="player"
+          marginHeight={0}
+          marginWidth={0}
+          src={src}
+          scrolling="no"
+          allowFullScreen={true}
+          allow="encrypted-media; picture-in-picture;"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          style={{ position: 'absolute', border: 'none', background: 'black' }}
+          title={title}
+        />
+      </div>
+    );
+  }
+  
+  // Default iframe for other URLs
   return (
     <div className="w-full max-w-4xl mx-auto aspect-video bg-black rounded-lg overflow-hidden">
       <iframe
-        id="player"
         src={src}
         width="100%"
         height="100%"
         allowFullScreen
-        allow={isVeplayUrl ? "encrypted-media; picture-in-picture;" : "autoplay; encrypted-media; fullscreen; picture-in-picture"}
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
         title={title}
-        marginHeight={0}
-        marginWidth={0}
-        scrolling="no"
-        frameBorder="0"
         style={{ 
           border: 'none',
-          background: 'black',
-          position: isVeplayUrl ? 'absolute' : 'static'
+          background: 'black'
         }}
         onLoad={onLoad}
         onError={onError}
