@@ -17,20 +17,12 @@ const PopularByViewers: React.FC<PopularByViewersProps> = ({
 }) => {
   const { matchesWithViewers, loading } = useMatchesWithViewers(matches);
 
-  // Don't show section if no matches have viewers
-  if (loading) {
-    return (
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-bold text-foreground">🔥 Popular by Viewers</h2>
-          <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" />
-        </div>
-        <div className="text-center text-muted-foreground py-4">Loading matches with viewers...</div>
-      </div>
-    );
+  // Don't show section if no matches have viewers or if still loading and no data
+  if (loading && matchesWithViewers.length === 0) {
+    return null; // Don't show loading state to avoid flickering
   }
 
+  // Only show if we have matches with actual viewers
   if (matchesWithViewers.length === 0) {
     return null;
   }
