@@ -24,6 +24,12 @@ export const manualMatches: ManualMatch[] = [
         name: "Veplay HD",
         url: "https://veplay.top/stream/f22cc6f8-aa39-48f3-a5fd-b2c82f2533c2",
         quality: "HD"
+      },
+      {
+        id: "test-stream",
+        name: "Test Stream (working)",
+        url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1",
+        quality: "HD"
       }
     ],
     visible: true, // Make this visible for testing

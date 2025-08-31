@@ -16,11 +16,14 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   onError,
   title = "Live Stream"
 }) => {
+  console.log('🎥 Loading stream URL:', src);
+  
   // Check if it's a veplay.top URL and apply specific configuration
   const isVeplayUrl = src.includes('veplay.top');
   
   if (isVeplayUrl) {
-    // Exact iframe configuration for veplay.top as requested by user
+    console.log('🌐 Detected veplay.top URL, applying special configuration');
+    // Enhanced iframe configuration for veplay.top with all necessary permissions
     return (
       <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative">
         <iframe
@@ -30,12 +33,30 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
           src={src}
           scrolling="no"
           allowFullScreen={true}
-          allow="encrypted-media; picture-in-picture;"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen; microphone; camera; geolocation; gyroscope; accelerometer; payment; usb"
           width="100%"
           height="100%"
           frameBorder="0"
-          style={{ position: 'absolute', border: 'none', background: 'black' }}
+          referrerPolicy="no-referrer-when-downgrade"
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-top-navigation allow-presentation"
+          style={{ 
+            position: 'absolute', 
+            border: 'none', 
+            background: 'black',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
+          }}
           title={title}
+          onLoad={() => {
+            console.log('✅ Veplay iframe loaded successfully');
+            onLoad?.();
+          }}
+          onError={() => {
+            console.error('❌ Veplay iframe failed to load');
+            onError?.();
+          }}
         />
       </div>
     );
