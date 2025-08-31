@@ -26,8 +26,8 @@ export const useMatchesWithViewers = (matches: Match[]) => {
       try {
         console.log('🔍 Fetching matches with viewers...');
         
-        // Query to get active viewers (active in last 5 minutes)
-        const { data: activeViewers, error: viewersError } = await supabase
+        // Query to get active viewers (active in last 5 minutes) with count
+        const { data: viewerCounts, error: viewersError } = await supabase
           .from('match_viewers')
           .select('match_id')
           .gte('last_active', new Date(Date.now() - 5 * 60 * 1000).toISOString());
@@ -39,26 +39,28 @@ export const useMatchesWithViewers = (matches: Match[]) => {
           return;
         }
 
-        if (!activeViewers || activeViewers.length === 0) {
+        if (!viewerCounts || viewerCounts.length === 0) {
           console.log('📊 No active viewers found');
           setMatchesWithViewers([]);
           setLoading(false);
           return;
         }
 
-        // Count viewers per match
-        const viewerCounts = activeViewers.reduce((acc: Record<string, number>, viewer) => {
+        // Count viewers per match from the database results
+        const viewerCountsByMatch = viewerCounts.reduce((acc: Record<string, number>, viewer) => {
           acc[viewer.match_id] = (acc[viewer.match_id] || 0) + 1;
           return acc;
         }, {});
 
-        // Get viewer counts for each unique match
-        const matchViewerCounts: MatchWithViewersData[] = Object.entries(viewerCounts)
+        // Only include matches that actually have viewers in the database
+        const matchViewerCounts: MatchWithViewersData[] = Object.entries(viewerCountsByMatch)
           .map(([matchId, count]) => ({
             matchId,
             viewerCount: count as number
           }))
           .filter(mvc => mvc.viewerCount > 0);
+
+        console.log('🔍 Actual viewer counts from DB:', matchViewerCounts);
 
         // Filter and sort matches by viewer count - only include matches with viewers > 0
         const filteredMatches: MatchWithViewers[] = matches
