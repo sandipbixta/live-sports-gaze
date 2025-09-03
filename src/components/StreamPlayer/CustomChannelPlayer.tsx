@@ -79,24 +79,46 @@ const CustomChannelPlayer: React.FC<CustomChannelPlayerProps> = ({
     navigate('/');
   };
 
+  // Optimize URL for better streaming performance
+  const optimizedUrl = React.useMemo(() => {
+    if (!embedUrl) return '';
+    
+    try {
+      const url = new URL(embedUrl);
+      // Add buffering optimizations for better laptop performance
+      url.searchParams.set('buffer', 'aggressive');
+      url.searchParams.set('preload', 'metadata');
+      url.searchParams.set('quality', 'auto');
+      return url.toString();
+    } catch {
+      // Fallback for invalid URLs
+      const separator = embedUrl.includes('?') ? '&' : '?';
+      return `${embedUrl}${separator}buffer=aggressive&preload=metadata&quality=auto`;
+    }
+  }, [embedUrl]);
+
   return (
     <div 
       className="relative w-full max-w-5xl mx-auto aspect-video bg-background rounded-lg overflow-hidden group"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setShowControls(true)}
     >
-      {/* Custom styled iframe */}
+      {/* Optimized iframe for better streaming */}
       <iframe
         ref={iframeRef}
-        src={embedUrl}
+        src={optimizedUrl}
         width="100%"
         height="100%"
         allowFullScreen
         title={title}
-        allow="autoplay; fullscreen; picture-in-picture"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen; microphone; camera; geolocation; gyroscope; accelerometer; payment; usb"
+        referrerPolicy="no-referrer-when-downgrade"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-top-navigation allow-presentation"
+        loading="eager"
         style={{ 
           border: 'none',
-          background: 'hsl(var(--background))'
+          background: 'hsl(var(--background))',
+          willChange: 'transform'
         }}
         onLoad={handleLoad}
         onError={handleError}

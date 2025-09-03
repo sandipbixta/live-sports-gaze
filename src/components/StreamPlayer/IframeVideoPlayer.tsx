@@ -134,17 +134,20 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
 
       <iframe 
         ref={iframeRef}
+        src={src ? `${src}${src.includes('?') ? '&' : '?'}buffer=aggressive&preload=metadata&quality=auto` : ''}
         className="w-full h-full absolute inset-0"
         allowFullScreen
         title={title || "Live Stream"}
         onLoad={handleIframeLoad}
         onError={handleIframeError}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        referrerPolicy="no-referrer"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen; microphone; camera; geolocation; gyroscope; accelerometer; payment; usb"
+        referrerPolicy="no-referrer-when-downgrade"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-pointer-lock allow-top-navigation allow-presentation"
         loading="eager"
         style={{ 
           border: 'none',
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          willChange: 'transform'
         }}
       />
 
