@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { channelLogoService } from '../services/channelLogoService';
 import { tvChannels } from '../data/tvChannels';
 import ChannelCard from './ChannelCard';
 import { ArrowRight } from 'lucide-react';
@@ -65,7 +64,7 @@ const FeaturedChannels = () => {
                 <ChannelCard
                   title={channel.title}
                   embedUrl={channel.embedUrl}
-                  logo={channel.logo || channelLogoService.getChannelLogoWithFallback(channel.title, channel.id)}
+                  logo={channel.logo}
                 />
               </Link>
             </CarouselItem>

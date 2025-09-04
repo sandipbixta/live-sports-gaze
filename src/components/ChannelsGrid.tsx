@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
 import { getChannelsByCountry } from '@/data/tvChannels';
-import { channelLogoService } from '@/services/channelLogoService';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -89,16 +88,18 @@ const ChannelsGrid = () => {
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform">
-                    <img
-                      src={channel.logo || channelLogoService.getChannelLogoWithFallback(channel.title, channel.id)}
-                      alt={channel.title}
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                    <div className="hidden w-full h-full flex items-center justify-center text-xs font-bold text-white">
+                    {channel.logo ? (
+                      <img
+                        src={channel.logo}
+                        alt={channel.title}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
                       {getInitials(channel.title)}
                     </div>
                   </div>
