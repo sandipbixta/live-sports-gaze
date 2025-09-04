@@ -7,7 +7,9 @@ interface Channel {
   logo?: string;
 }
 
-// Updated comprehensive channel list with all new channels from topembed.pw
+console.log('tvChannels module loading...');
+
+// Updated comprehensive channel list with all new channels from topembed.pw - updated
 export const tvChannels: Channel[] = [
   // UK Channels
   { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews[UK]", category: "sports" },
