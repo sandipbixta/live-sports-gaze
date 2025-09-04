@@ -77,9 +77,18 @@ const Index = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Load sports
+        // Load sports and live matches
         let sportsData = await fetchSports();
         console.log('📊 Sports data loaded:', sportsData);
+        
+        // Also load live matches for trending section
+        const liveMatchesData = await fetchLiveMatches();
+        console.log('🔴 Live matches loaded:', liveMatchesData.length);
+        
+        // Filter and consolidate live matches
+        const cleanLiveMatches = filterCleanMatches(liveMatchesData);
+        const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
+        setLiveMatches(consolidatedLiveMatches);
         
         // Sort with football first for better UX
         sportsData = sportsData.sort((a, b) => {
@@ -308,7 +317,7 @@ const Index = () => {
               </div>
               <div>
                 <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                  <TrendingTopics />
+                  <TrendingTopics matches={liveMatches} />
                 </React.Suspense>
               </div>
             </div>
