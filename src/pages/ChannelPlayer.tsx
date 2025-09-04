@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
 import { getChannelsByCountry } from '@/data/tvChannels';
+import { channelLogoService } from '@/services/channelLogoService';
 import { ArrowLeft, Share, Star, ChevronRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -183,22 +184,20 @@ const ChannelPlayer = () => {
           <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
             <div className="flex items-start gap-4">
               {/* Channel Logo */}
-              <div className="w-16 h-16 rounded-xl bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
-                {channel.logo ? (
+                <div className="w-16 h-16 rounded-xl bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
                   <img 
-                    src={channel.logo} 
+                    src={channel.logo || channelLogoService.getChannelLogoWithFallback(channel.title, channel.id)} 
                     alt={channel.title}
-                    className="w-12 h-12 object-contain"
+                    className="w-full h-full object-contain rounded"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                ) : null}
-                <div className={`w-full h-full flex items-center justify-center text-lg font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
-                  {channel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                  <div className="hidden w-full h-full flex items-center justify-center text-lg font-bold text-white">
+                    {channel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                  </div>
                 </div>
-              </div>
               
               {/* Channel Details */}
               <div className="flex-1 min-w-0">
@@ -246,18 +245,16 @@ const ChannelPlayer = () => {
                     onClick={() => handleChannelSwitch(otherChannel.id)}
                   >
                     <div className="w-10 h-10 rounded-lg bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {otherChannel.logo ? (
-                        <img 
-                          src={otherChannel.logo} 
-                          alt={otherChannel.title}
-                          className="w-8 h-8 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${otherChannel.logo ? 'hidden' : ''}`}>
+                      <img 
+                        src={otherChannel.logo || channelLogoService.getChannelLogoWithFallback(otherChannel.title, otherChannel.id)} 
+                        alt={otherChannel.title}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="hidden w-full h-full flex items-center justify-center text-xs font-bold text-white">
                         {otherChannel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
                       </div>
                     </div>

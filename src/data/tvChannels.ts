@@ -1,5 +1,3 @@
-import { channelLogoService } from '../services/channelLogoService';
-
 interface Channel {
   id: string;
   title: string;
@@ -10,7 +8,7 @@ interface Channel {
 }
 
 // Updated comprehensive channel list with all new channels from topembed.pw
-const channelsData: Omit<Channel, 'logo'>[] = [
+export const tvChannels: Channel[] = [
   // UK Channels
   { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews[UK]", category: "sports" },
   { id: "sky-sports-main-event", title: "Sky Sports Main Event", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsMainEvent[UK]", category: "sports" },
@@ -552,12 +550,6 @@ const channelsData: Omit<Channel, 'logo'>[] = [
   { id: "lecot", title: "Lecot", country: "International", embedUrl: "https://topembed.pw/channel/lecot", category: "sports" },
   { id: "exusdarers", title: "Exusdarers", country: "International", embedUrl: "https://topembed.pw/channel/exusdarers", category: "sports" },
 ];
-
-// Export channels with logos populated
-export const tvChannels: Channel[] = channelsData.map(channel => ({
-  ...channel,
-  logo: channelLogoService.getChannelLogoWithFallback(channel.title, channel.id)
-}));
 
 // Group channels by country
 export const getChannelsByCountry = (): Record<string, Channel[]> => {
