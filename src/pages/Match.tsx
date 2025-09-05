@@ -11,6 +11,7 @@ import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
+import matchCardTemplate from '@/assets/match-card-template.jpg';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -112,9 +113,8 @@ const Match = () => {
       return baseUrl + `?v=${Date.now()}`;
     }
     
-    // Create a dynamic match card image using placeholders
-    const encodedTitle = encodeURIComponent(matchTitle);
-    return `https://via.placeholder.com/1200x630/1a1a2e/ffffff?text=${encodedTitle}`;
+    // Use our professional match card template for social sharing
+    return `https://damitv.pro${matchCardTemplate}`;
   };
 
   const matchPosterUrl = getMatchPosterUrl();
