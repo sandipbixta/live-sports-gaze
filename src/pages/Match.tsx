@@ -111,7 +111,11 @@ const Match = () => {
         : `https://streamed.pk${match.poster}.webp`;
       return baseUrl + `?v=${Date.now()}`;
     }
-    return 'https://i.imgur.com/m4nV9S8.png';
+    
+    // Create a dynamic social sharing image URL with match info
+    const socialImageUrl = `https://og-image-generator.vercel.app/**${encodeURIComponent(matchTitle)}**.png?theme=dark&md=1&fontSize=100px&images=https%3A%2F%2Flogo.clearbit.com%2Fdamitv.pro&widths=250&heights=250`;
+    
+    return socialImageUrl;
   };
 
   const matchPosterUrl = getMatchPosterUrl();

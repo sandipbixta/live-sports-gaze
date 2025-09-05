@@ -150,19 +150,39 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
       <meta property="og:image:alt" content={title} />
       <meta property="og:url" content={canonicalUrl || window.location.href} />
-      <meta property="og:type" content="website" />
+      <meta property="og:type" content={matchInfo ? "article" : "website"} />
       <meta property="og:site_name" content="DamiTV - Free Live Sports Streaming" />
       <meta property="og:locale" content="en_US" />
       <meta property="fb:app_id" content="your-facebook-app-id" />
-      <meta property="article:author" content="DamiTV" />
-      <meta property="article:publisher" content="https://www.facebook.com/damitv" />
-      <meta property="article:section" content="Sports" />
-      <meta property="article:tag" content="live sports, streaming, football, soccer" />
+      
+      {/* Enhanced properties for match pages */}
+      {matchInfo && (
+        <>
+          <meta property="article:author" content="DamiTV" />
+          <meta property="article:publisher" content="https://www.facebook.com/damitv" />
+          <meta property="article:section" content="Sports" />
+          <meta property="article:tag" content={`${matchInfo.homeTeam}, ${matchInfo.awayTeam}, live stream, ${matchInfo.league}`} />
+          <meta property="article:published_time" content={matchInfo.date?.toISOString()} />
+          <meta property="og:video:tag" content="live stream" />
+          <meta property="og:video:tag" content="sports" />
+          <meta property="og:video:tag" content="football" />
+        </>
+      )}
+      
+      {!matchInfo && (
+        <>
+          <meta property="article:author" content="DamiTV" />
+          <meta property="article:publisher" content="https://www.facebook.com/damitv" />
+          <meta property="article:section" content="Sports" />
+          <meta property="article:tag" content="live sports, streaming, football, soccer" />
+        </>
+      )}
       
       {/* Twitter Cards Enhanced */}
       <meta name="twitter:card" content="summary_large_image" />
