@@ -144,7 +144,7 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <meta name="referrer" content="no-referrer-when-downgrade" />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={canonicalUrl || typeof window !== 'undefined' ? window.location.href : ''} />
+      <link rel="canonical" href={canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '')} />
       
       {/* Open Graph Enhanced */}
       <meta property="og:title" content={title} />
@@ -155,7 +155,7 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
       <meta property="og:image:alt" content={title} />
-      <meta property="og:url" content={canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '')} />
+      <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content={matchInfo ? "article" : "website"} />
       <meta property="og:site_name" content="DamiTV - Free Live Sports Streaming" />
       <meta property="og:locale" content="en_US" />

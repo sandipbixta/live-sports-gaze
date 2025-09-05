@@ -112,8 +112,9 @@ const Match = () => {
       return baseUrl + `?v=${Date.now()}`;
     }
     
-    // Use a reliable sports image from Unsplash as fallback
-    return `https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=630&fit=crop&auto=format&q=80`;
+    // Create a dynamic match card image using placeholders
+    const encodedTitle = encodeURIComponent(matchTitle);
+    return `https://via.placeholder.com/1200x630/1a1a2e/ffffff?text=${encodedTitle}`;
   };
 
   const matchPosterUrl = getMatchPosterUrl();
