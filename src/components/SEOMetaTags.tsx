@@ -155,7 +155,7 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
       <meta property="og:image:alt" content={title} />
-      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:url" content={canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '')} />
       <meta property="og:type" content={matchInfo ? "article" : "website"} />
       <meta property="og:site_name" content="DamiTV - Free Live Sports Streaming" />
       <meta property="og:locale" content="en_US" />
