@@ -112,10 +112,8 @@ const Match = () => {
       return baseUrl + `?v=${Date.now()}`;
     }
     
-    // Create a dynamic social sharing image URL with match info
-    const socialImageUrl = `https://og-image-generator.vercel.app/**${encodeURIComponent(matchTitle)}**.png?theme=dark&md=1&fontSize=100px&images=https%3A%2F%2Flogo.clearbit.com%2Fdamitv.pro&widths=250&heights=250`;
-    
-    return socialImageUrl;
+    // Use a reliable sports image from Unsplash as fallback
+    return `https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=630&fit=crop&auto=format&q=80`;
   };
 
   const matchPosterUrl = getMatchPosterUrl();
