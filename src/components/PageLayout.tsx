@@ -10,6 +10,7 @@ import ThemeToggle from './ThemeToggle';
 import BannerAd from './BannerAd';
 import SocialBarAd from './SocialBarAd';
 import ContainerAd from './ContainerAd';
+import AdultAd from './AdultAd';
 
 
 interface PageLayoutProps {
@@ -179,6 +180,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </div>
         </div>
       </footer>
+      
+      {/* Adult Ad Button - Fixed position */}
+      <AdultAd />
       
       <MobileBottomNav />
       <ScrollToTop />
