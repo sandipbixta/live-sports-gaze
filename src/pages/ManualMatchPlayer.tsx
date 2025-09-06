@@ -7,6 +7,7 @@ import { ManualMatchLink } from '@/types/manualMatch';
 import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 // import Advertisement from '@/components/Advertisement';
+import AdultBannerAd from '@/components/AdultBannerAd';
 
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
@@ -243,6 +244,9 @@ const ManualMatchPlayer = () => {
                 )}
               </div>
             </div>
+            
+            {/* Adult Banner Ad */}
+            <AdultBannerAd />
           </div>
 
           <div className="lg:col-span-1">

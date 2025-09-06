@@ -12,6 +12,7 @@ import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
+import AdultBannerAd from '@/components/AdultBannerAd';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -190,6 +191,9 @@ const Match = () => {
           sportId={sportId || ''}
           allStreams={allStreams}
         />
+        
+        {/* Adult Banner Ad */}
+        <AdultBannerAd />
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">

@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 // import Advertisement from '@/components/Advertisement';
 // import RectangleAd from '@/components/RectangleAd';
+import AdultBannerAd from '@/components/AdultBannerAd';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -176,6 +177,9 @@ const ChannelPlayer = () => {
           title={channel.title}
         />
       </div>
+
+      {/* Adult Banner Ad */}
+      <AdultBannerAd />
 
       <div className="flex flex-col lg:flex-row gap-4 p-4">
         {/* Channel Info */}
