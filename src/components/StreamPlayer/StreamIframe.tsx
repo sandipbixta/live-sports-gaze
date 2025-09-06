@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { Play, ExternalLink } from 'lucide-react';
-import { Button } from '../ui/button';
+import { ExternalLink } from 'lucide-react';
 
 interface StreamIframeProps {
   src: string;
@@ -16,8 +15,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [loaded, setLoaded] = useState(false);
   const [hadError, setHadError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [showPlayButton, setShowPlayButton] = useState(true);
-  const [userStarted, setUserStarted] = useState(false);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
   // Handle iframe clicks on mobile to prevent automatic opening
@@ -33,8 +30,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     setLoaded(false);
     setHadError(false);
     setTimedOut(false);
-    setShowPlayButton(true);
-    setUserStarted(false);
     const t = window.setTimeout(() => {
       setTimedOut(true);
     }, 8000);
@@ -44,18 +39,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const handleLoad = () => {
     setLoaded(true);
     onLoad?.();
-    // Hide play button after a short delay once loaded
-    setTimeout(() => {
-      if (userStarted) {
-        setShowPlayButton(false);
-      }
-    }, 1500);
-  };
-
-  const handlePlayClick = () => {
-    setUserStarted(true);
-    setShowPlayButton(false);
-    console.log('🎬 User clicked play button for iframe stream');
   };
 
   const handleError = () => {
@@ -77,7 +60,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         title="Live Sports Stream - DAMITV"
         onLoad={handleLoad}
         onError={handleError}
-        onClick={handleIframeClick}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
         referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
@@ -85,33 +67,13 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         scrolling="no"
         style={{ 
           border: 'none',
-          pointerEvents: isMobile ? 'auto' : 'auto',
+          pointerEvents: 'auto',
           minWidth: '100%',
           minHeight: '100%',
           willChange: 'transform',
-          isolation: 'isolate',
-          ...(isMobile && {
-            touchAction: 'manipulation',
-            WebkitOverflowScrolling: 'touch',
-            WebkitTouchCallout: 'none',
-            WebkitUserSelect: 'none',
-            userSelect: 'none'
-          })
+          isolation: 'isolate'
         }}
       />
-
-      {/* Play Button Overlay */}
-      {showPlayButton && !hadError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
-          <Button
-            onClick={handlePlayClick}
-            className="bg-white/20 hover:bg-white/30 text-white border-2 border-white/30 hover:border-white/50 rounded-full p-6 backdrop-blur-sm transition-all duration-300 group"
-            size="lg"
-          >
-            <Play className="w-8 h-8 ml-1 group-hover:scale-110 transition-transform" fill="currentColor" />
-          </Button>
-        </div>
-      )}
 
       {showOpenOverlay && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4 z-30">
