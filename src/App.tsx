@@ -20,6 +20,7 @@ import Live from "./pages/Live";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
+import AutomatedPostingPage from "./pages/AutomatedPosting";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
@@ -89,6 +90,11 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
+                </SEOPageTracker>
+              } />
+              <Route path="/automated-posting" element={
+                <SEOPageTracker pageTitle="Automated Social Media Posting" contentType="news">
+                  <AutomatedPostingPage />
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />
