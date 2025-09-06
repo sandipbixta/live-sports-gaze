@@ -1,23 +1,23 @@
 
-import React, { useEffect, useRef, useState } from "react";
-import { getBannerAdConfig } from "@/utils/adConfig";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React, { useEffect, useRef } from "react";
 
 const BannerAd: React.FC = () => {
-  const [closed, setClosed] = useState(false);
   const adRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (closed) return;
     const adContainer = adRef.current;
     if (!adContainer) return;
 
     // Clean previous ad content if any
     adContainer.innerHTML = "";
 
-    // Get appropriate ad config based on device
-    const adConfig = getBannerAdConfig(isMobile);
+    // Use the working rectangle ad config
+    const adConfig = {
+      key: '7c589340b2a1155dcea92f44cc468438',
+      scriptSrc: '//uncertainbill.com/7c589340b2a1155dcea92f44cc468438/invoke.js',
+      width: 300,
+      height: 250
+    };
 
     // 1. Set the inline ad options script
     const optionsScript = document.createElement("script");
@@ -41,24 +41,24 @@ const BannerAd: React.FC = () => {
     adContainer.appendChild(optionsScript);
     adContainer.appendChild(invokeScript);
 
+    console.log('Banner Ad: Loading with key:', adConfig.key);
+
     return () => {
-      // Clean up any injected ads when component unmounts or closes
+      // Clean up any injected ads when component unmounts
       adContainer.innerHTML = "";
     };
-  }, [closed, isMobile]);
-
-  const adConfig = getBannerAdConfig(isMobile);
+  }, []);
 
   return (
-    <div className="w-full bg-card border-b border-border shadow-sm flex items-center justify-center px-2 py-2 mb-4">
-      <div className="flex items-center justify-center w-full max-w-full mx-auto relative" style={{ minHeight: adConfig.height }}>
+    <div className="w-full bg-card border-b border-border shadow-sm flex items-center justify-center px-2 py-4 mb-4">
+      <div className="flex items-center justify-center w-full max-w-full mx-auto relative" style={{ minHeight: 250 }}>
         {/* The ad will inject the iframe here */}
         <div
           ref={adRef}
           id="banner-ad"
-          className="flex justify-center items-center w-full max-w-4xl"
+          className="flex justify-center items-center w-full max-w-lg"
           style={{
-            minHeight: adConfig.height,
+            minHeight: 250,
             width: "100%",
             overflow: "hidden",
           }}
@@ -83,15 +83,15 @@ const BannerAd: React.FC = () => {
             width: 100% !important;
             min-width: 0 !important;
             max-width: 100vw !important;
-            height: ${adConfig.height}px !important;
-            min-height: ${adConfig.height}px !important;
+            height: 250px !important;
+            min-height: 250px !important;
           }
         }
         
         @media (min-width: 769px) {
           #banner-ad iframe {
-            width: ${adConfig.width}px !important;
-            height: ${adConfig.height}px !important;
+            width: 300px !important;
+            height: 250px !important;
           }
         }
       `}</style>
