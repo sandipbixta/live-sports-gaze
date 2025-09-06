@@ -96,7 +96,7 @@ class TeamLogoService {
     
     // First priority: Use official Streamed API badge if available
     if (teamBadge) {
-      return `https://streamed.pk/api/images/badge/${teamBadge}.webp`;
+      return `https://streamed.su/api/images/badge/${teamBadge}.webp`;
     }
     
     const normalized = this.normalizeTeamName(teamName);

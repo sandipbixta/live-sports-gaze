@@ -6,13 +6,13 @@ import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
-import BannerAd from '@/components/BannerAd';
-import RectangleAd from '@/components/RectangleAd';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
+import ViewerCounter from '@/components/ViewerCounter';
 
 interface StreamTabProps {
   match: MatchType;
@@ -39,13 +39,8 @@ const StreamTab = ({
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   
-  // Generate fake viewer count for live match
-  const isMatchLive = (): boolean => {
-    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
-    const now = new Date().getTime();
-    const threeHoursInMs = 3 * 60 * 60 * 1000;
-    return matchTime <= now && (now - matchTime) < threeHoursInMs;
-  };
+  // Real-time viewer tracking
+  const { viewerCount, isTracking, startTracking, stopTracking } = useViewerTracking(match?.id || null);
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -93,6 +88,20 @@ const StreamTab = ({
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
+  
+  const isMatchLive = (): boolean => {
+    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+    const now = new Date().getTime();
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
+    const oneHourInMs = 60 * 60 * 1000;
+    
+    return (
+      match.sources && 
+      match.sources.length > 0 && 
+      matchTime - now < oneHourInMs &&
+      now - matchTime < threeHoursInMs
+    );
+  };
 
   const sortedPopularMatches = [...popularMatches].sort((a, b) => {
     const aTrending = isTrendingMatch(a.title);
@@ -100,9 +109,31 @@ const StreamTab = ({
     return bTrending.score - aTrending.score;
   });
 
+  // Start/stop viewer tracking based on stream availability
+  useEffect(() => {
+    console.log('StreamTab viewer tracking effect:', { 
+      stream: !!stream, 
+      match: !!match, 
+      matchId: match?.id,
+      loadingStream, 
+      isTracking 
+    });
+    
+    if (stream && match && !loadingStream) {
+      console.log('🎬 StreamTab: Starting viewer tracking');
+      startTracking();
+    } else {
+      console.log('🎬 StreamTab: Stopping viewer tracking');
+      stopTracking();
+    }
+    
+    return () => {
+      stopTracking();
+    };
+  }, [stream, match, loadingStream]);
+
   return (
     <div>
-      
       <StreamPlayer
         stream={stream}
         isLoading={loadingStream}
@@ -112,7 +143,20 @@ const StreamTab = ({
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
+        viewerCount={viewerCount}
+        isLive={isMatchLive()}
+        showViewerCounter={false}
       />
+      
+      {/* Viewer counter below video player */}
+      <div className="mt-3 flex justify-start">
+        <ViewerCounter 
+          viewerCount={viewerCount}
+          isLive={isMatchLive()}
+          variant="default"
+          className="bg-card text-card-foreground border border-border"
+        />
+      </div>
       
       <StreamSources
         sources={match.sources}
@@ -121,9 +165,6 @@ const StreamTab = ({
         streamId={streamId}
         allStreams={allStreams}
       />
-      
-      {/* Rectangle ad below the stream sources */}
-      <RectangleAd />
       
       {!loadingStream && (
         <div className="flex items-center justify-center gap-4 mt-4">

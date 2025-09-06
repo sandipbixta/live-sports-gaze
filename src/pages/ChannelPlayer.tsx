@@ -8,9 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
-// import Advertisement from '@/components/Advertisement';
-// import RectangleAd from '@/components/RectangleAd';
-import AdultBannerAd from '@/components/AdultBannerAd';
+import Advertisement from '@/components/Advertisement';
+import RectangleAd from '@/components/RectangleAd';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -178,9 +177,6 @@ const ChannelPlayer = () => {
         />
       </div>
 
-      {/* Adult Banner Ad */}
-      <AdultBannerAd />
-
       <div className="flex flex-col lg:flex-row gap-4 p-4">
         {/* Channel Info */}
         <div className="flex-1">
@@ -282,9 +278,9 @@ const ChannelPlayer = () => {
       </div>
 
       {/* Video Advertisement - moved below channel list */}
-      {/* <div className="px-4 mb-4">
+      <div className="px-4 mb-4">
         <Advertisement type="video" className="w-full" />
-      </div> */}
+      </div>
     </div>
   );
 };

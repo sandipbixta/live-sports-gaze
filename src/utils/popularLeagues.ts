@@ -34,60 +34,57 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
   const topClubs = [
     // Premier League
     { name: 'manchester united', weight: 10, seoTerms: ['man utd', 'man united', 'manchester united stream'] },
-    { name: 'liverpool fc', weight: 10, seoTerms: ['lfc', 'liverpool', 'liverpool stream'] },
     { name: 'liverpool', weight: 10, seoTerms: ['lfc', 'liverpool fc', 'liverpool stream'] },
     { name: 'manchester city', weight: 9, seoTerms: ['man city', 'mcfc', 'manchester city stream'] },
-    { name: 'chelsea fc', weight: 9, seoTerms: ['cfc', 'chelsea', 'chelsea stream'] },
     { name: 'chelsea', weight: 9, seoTerms: ['cfc', 'chelsea fc', 'chelsea stream'] },
-    { name: 'arsenal fc', weight: 9, seoTerms: ['afc', 'arsenal', 'arsenal stream', 'gunners'] },
     { name: 'arsenal', weight: 9, seoTerms: ['afc', 'arsenal fc', 'arsenal stream', 'gunners'] },
-    { name: 'tottenham hotspur', weight: 8, seoTerms: ['thfc', 'spurs', 'tottenham stream', 'tottenham'] },
-    { name: 'tottenham', weight: 8, seoTerms: ['thfc', 'spurs', 'tottenham hotspur', 'tottenham stream'] },
-    { name: 'newcastle united', weight: 7, seoTerms: ['nufc', 'newcastle', 'newcastle stream'] },
+    { name: 'tottenham', weight: 8, seoTerms: ['thfc', 'spurs', 'tottenham stream'] },
     { name: 'newcastle', weight: 7, seoTerms: ['nufc', 'newcastle united', 'newcastle stream'] },
     
     // La Liga
-    { name: 'fc barcelona', weight: 10, seoTerms: ['barca', 'fcb', 'barcelona stream', 'barcelona'] },
     { name: 'barcelona', weight: 10, seoTerms: ['barca', 'fcb', 'barcelona stream', 'fc barcelona'] },
-    { name: 'real madrid cf', weight: 10, seoTerms: ['madrid', 'rm', 'real madrid stream', 'los blancos', 'real madrid'] },
-    { name: 'real madrid', weight: 10, seoTerms: ['madrid', 'rm', 'real madrid stream', 'los blancos', 'real madrid cf'] },
+    { name: 'real madrid', weight: 10, seoTerms: ['madrid', 'rm', 'real madrid stream', 'los blancos'] },
     { name: 'atletico madrid', weight: 8, seoTerms: ['atleti', 'atletico', 'atletico madrid stream'] },
     
     // Serie A
-    { name: 'juventus fc', weight: 8, seoTerms: ['juve', 'old lady', 'juventus stream', 'juventus'] },
+    { name: 'juventus', weight: 8, seoTerms: ['juve', 'old lady', 'juventus stream'] },
     { name: 'ac milan', weight: 8, seoTerms: ['milan', 'acm', 'ac milan stream', 'rossoneri'] },
     { name: 'inter milan', weight: 8, seoTerms: ['inter', 'inter stream', 'nerazzurri'] },
-    { name: 'ssc napoli', weight: 7, seoTerms: ['napoli', 'napoli stream', 'partenopei'] },
-    { name: 'as roma', weight: 7, seoTerms: ['roma', 'roma stream', 'giallorossi'] },
+    { name: 'napoli', weight: 7, seoTerms: ['ssc napoli', 'napoli stream', 'partenopei'] },
+    { name: 'roma', weight: 7, seoTerms: ['as roma', 'roma stream', 'giallorossi'] },
     
     // Bundesliga
-    { name: 'fc bayern munich', weight: 9, seoTerms: ['bayern', 'fcb', 'bayern stream', 'fc bayern', 'bayern munich'] },
-    { name: 'borussia dortmund', weight: 8, seoTerms: ['bvb', 'dortmund', 'dortmund stream'] },
+    { name: 'bayern munich', weight: 9, seoTerms: ['bayern', 'fcb', 'bayern stream', 'fc bayern'] },
+    { name: 'dortmund', weight: 8, seoTerms: ['bvb', 'borussia dortmund', 'dortmund stream'] },
     { name: 'rb leipzig', weight: 6, seoTerms: ['leipzig', 'rbl', 'leipzig stream'] },
     
     // Ligue 1
+    { name: 'psg', weight: 9, seoTerms: ['paris saint-germain', 'paris', 'psg stream'] },
     { name: 'paris saint-germain', weight: 9, seoTerms: ['psg', 'paris', 'psg stream'] },
-    { name: 'olympique marseille', weight: 6, seoTerms: ['om', 'marseille', 'marseille stream'] },
-    { name: 'olympique lyonnais', weight: 6, seoTerms: ['ol', 'lyon', 'lyon stream'] },
+    { name: 'marseille', weight: 6, seoTerms: ['om', 'olympique marseille', 'marseille stream'] },
+    { name: 'lyon', weight: 6, seoTerms: ['ol', 'olympique lyonnais', 'lyon stream'] },
     
     // MLS and other CWC participants
-    { name: 'inter miami cf', weight: 9, seoTerms: ['inter miami', 'miami', 'inter miami stream', 'messi team'] },
-    { name: 'seattle sounders fc', weight: 7, seoTerms: ['sounders', 'seattle', 'mls champions', 'seattle sounders'] },
+    { name: 'inter miami', weight: 9, seoTerms: ['inter miami cf', 'miami', 'inter miami stream', 'messi team'] },
+    { name: 'miami', weight: 8, seoTerms: ['inter miami', 'inter miami cf', 'miami stream'] },
+    { name: 'seattle sounders', weight: 7, seoTerms: ['sounders', 'seattle', 'mls champions'] },
+    { name: 'sounders', weight: 7, seoTerms: ['seattle sounders', 'seattle', 'mls'] },
     
     // South American clubs (CWC participants)
-    { name: 'cr flamengo', weight: 8, seoTerms: ['flamengo', 'mengao', 'flamengo stream'] },
-    { name: 'se palmeiras', weight: 8, seoTerms: ['palmeiras', 'verdao', 'palmeiras stream'] },
-    { name: 'ca boca juniors', weight: 8, seoTerms: ['boca', 'xeneize', 'boca stream', 'boca juniors'] },
-    { name: 'ca river plate', weight: 8, seoTerms: ['river', 'millonarios', 'river stream', 'river plate'] },
+    { name: 'flamengo', weight: 8, seoTerms: ['cr flamengo', 'mengao', 'flamengo stream'] },
+    { name: 'palmeiras', weight: 8, seoTerms: ['se palmeiras', 'verdao', 'palmeiras stream'] },
+    { name: 'boca juniors', weight: 8, seoTerms: ['boca', 'xeneize', 'boca stream'] },
+    { name: 'river plate', weight: 8, seoTerms: ['river', 'millonarios', 'river stream'] },
     
     // African clubs (CWC participants)
-    { name: 'al ahly sc', weight: 8, seoTerms: ['ahly', 'al ahly', 'al ahly stream', 'egyptian club'] },
-    { name: 'wydad casablanca', weight: 7, seoTerms: ['wydad', 'wydad ac', 'moroccan club'] },
+    { name: 'al ahly', weight: 8, seoTerms: ['ahly', 'al ahly sc', 'al ahly stream', 'egyptian club'] },
+    { name: 'ahly', weight: 8, seoTerms: ['al ahly', 'al ahly sc', 'ahly stream'] },
+    { name: 'wydad', weight: 7, seoTerms: ['wydad casablanca', 'wydad ac', 'moroccan club'] },
     
     // Asian clubs (CWC participants)
-    { name: 'urawa red diamonds', weight: 7, seoTerms: ['urawa reds', 'reds', 'japanese club', 'urawa'] },
-    { name: 'al hilal sfc', weight: 8, seoTerms: ['hilal', 'saudi club', 'al hilal stream', 'al hilal'] },
-    { name: 'ulsan hyundai fc', weight: 7, seoTerms: ['ulsan', 'korean club', 'hyundai', 'ulsan hyundai'] },
+    { name: 'urawa reds', weight: 7, seoTerms: ['urawa red diamonds', 'reds', 'japanese club'] },
+    { name: 'al hilal', weight: 8, seoTerms: ['hilal', 'saudi club', 'al hilal stream'] },
+    { name: 'ulsan hyundai', weight: 7, seoTerms: ['ulsan', 'korean club', 'hyundai'] },
     
     // National Teams (for Nations League and international matches)
     { name: 'spain', weight: 9, seoTerms: ['spain national team', 'la roja', 'spain stream'] },
@@ -101,12 +98,12 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     { name: 'argentina', weight: 9, seoTerms: ['argentina national team', 'albiceleste', 'argentina stream'] },
     
     // Additional popular teams
-    { name: 'real betis balompie', weight: 5, seoTerms: ['betis', 'real betis', 'real betis stream'] },
-    { name: 'sevilla fc', weight: 6, seoTerms: ['sevilla', 'sevilla stream'] },
-    { name: 'aston villa fc', weight: 6, seoTerms: ['avfc', 'villa', 'aston villa stream', 'aston villa'] },
-    { name: 'west ham united', weight: 6, seoTerms: ['whufc', 'hammers', 'west ham stream', 'west ham'] },
-    { name: 'everton fc', weight: 6, seoTerms: ['efc', 'toffees', 'everton stream', 'everton'] },
-    { name: 'leeds united', weight: 6, seoTerms: ['lufc', 'leeds', 'leeds stream'] }
+    { name: 'real betis', weight: 5, seoTerms: ['betis', 'real betis stream'] },
+    { name: 'sevilla', weight: 6, seoTerms: ['sevilla fc', 'sevilla stream'] },
+    { name: 'aston villa', weight: 6, seoTerms: ['avfc', 'villa', 'aston villa stream'] },
+    { name: 'west ham', weight: 6, seoTerms: ['whufc', 'hammers', 'west ham stream'] },
+    { name: 'everton', weight: 6, seoTerms: ['efc', 'toffees', 'everton stream'] },
+    { name: 'leeds', weight: 6, seoTerms: ['lufc', 'leeds united', 'leeds stream'] }
   ];
   
   // Popular players that drive match trends
@@ -139,11 +136,9 @@ export const isTrendingMatch = (title: string): { isTrending: boolean; score: nu
     }
   }
   
-  // Check if any top club is in the title (using word boundaries for precise matching)
+  // Check if any top club is in the title
   for (const club of topClubs) {
-    // Create regex pattern for exact word matching
-    const teamPattern = new RegExp(`\\b${club.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-    if (teamPattern.test(lowerTitle)) {
+    if (lowerTitle.includes(club.name)) {
       trendingScore += club.weight;
       trendingReason = trendingReason || `Features popular team: ${club.name}`;
       if (club.seoTerms) allSeoTerms = [...allSeoTerms, ...club.seoTerms];

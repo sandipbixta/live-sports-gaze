@@ -9,7 +9,6 @@ import { HelmetProvider } from "react-helmet-async";
 import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import SEOPageTracker from "./components/SEOPageTracker";
-import ScrollToTopOnRouteChange from "./components/ScrollToTopOnRouteChange";
 import MonetizationTracker from "./components/MonetizationTracker";
 
 // Import pages directly instead of lazy loading to avoid module import errors
@@ -20,7 +19,6 @@ import Live from "./pages/Live";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
-import AutomatedPostingPage from "./pages/AutomatedPosting";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
@@ -46,7 +44,6 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <BrowserRouter>
-          <ScrollToTopOnRouteChange />
           <MonetizationTracker>
             <TooltipProvider>
               <Toaster />
@@ -90,11 +87,6 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
-                </SEOPageTracker>
-              } />
-              <Route path="/automated-posting" element={
-                <SEOPageTracker pageTitle="Automated Social Media Posting" contentType="news">
-                  <AutomatedPostingPage />
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />

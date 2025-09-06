@@ -11,38 +11,8 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "veplay-test-match",
-    title: "Test Match - Veplay Stream",
-    date: getTomorrowDate(), // Auto-updates to tomorrow
-    teams: {
-      home: "Team A",
-      away: "Team B"
-    },
-    links: [
-      {
-        id: "veplay-stream",
-        name: "Veplay HD",
-        url: "https://veplay.top/stream/f22cc6f8-aa39-48f3-a5fd-b2c82f2533c2",
-        quality: "HD"
-      },
-      {
-        id: "test-stream",
-        name: "Test Stream (working)",
-        url: "https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1",
-        quality: "HD"
-      }
-    ],
-    visible: false, // Make this visible for testing
-    image: "https://i.imgur.com/YOTRw5M.jpeg",
-    seo: {
-      keywords: "veplay test stream, test match live, veplay streaming",
-      description: "Watch test match live stream with Veplay streaming technology.",
-      category: "Football"
-    }
-  },
-  {
     id: "",
-    title: "Brighton and Hove Albion vs. Manchester City",
+    title: "FC Barcelons vs Vissel kobe",
     date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
@@ -50,9 +20,9 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "peacok",
-        name: "peacock",
-        url: "https://topembed.pw/channel/SkySport8[NewZealand]",
+        id: "Nevena-3",
+        name: "Nevena3",
+        url: "https://topembed.pw/channel/exvisseona",
         quality: "HD"
       },     
       {
@@ -81,7 +51,7 @@ export const manualMatches: ManualMatch[] = [
       },     
     ],
     visible: false,
-    image: "https://i.imgur.com/YOTRw5M.jpeg",
+    image: "",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
       description: "Watch Fifa club world cup live stream online for free. Stream this exciting football match with high-quality video on DamiTV.",

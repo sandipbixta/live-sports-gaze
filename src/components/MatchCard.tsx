@@ -7,7 +7,9 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
+import ViewerCounter from './ViewerCounter';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MatchCardProps {
   match: Match;
@@ -16,6 +18,7 @@ interface MatchCardProps {
   onClick?: () => void;
   preventNavigation?: boolean;
   isPriority?: boolean;
+  showViewers?: boolean;
 }
 
 const MatchCard: React.FC<MatchCardProps> = ({
@@ -24,9 +27,31 @@ const MatchCard: React.FC<MatchCardProps> = ({
   sportId,
   onClick,
   preventNavigation,
-  isPriority
+  isPriority,
+  showViewers = false,
 }) => {
-  const isLive = isMatchLive(match);
+  const [viewerCount, setViewerCount] = useState(0);
+  
+  // Fetch viewer count when component mounts or match changes
+  useEffect(() => {
+    const fetchViewerCount = async () => {
+      if (match.id && showViewers) {
+        try {
+          const { data, error } = await supabase.rpc('get_viewer_count', {
+            match_id_param: match.id
+          });
+          
+          if (!error && data !== null) {
+            setViewerCount(data);
+          }
+        } catch (error) {
+          console.error('Error fetching viewer count for match:', match.id, error);
+        }
+      }
+    };
+
+    fetchViewerCount();
+  }, [match.id, showViewers]);
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -58,6 +83,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
+  const isLive = isMatchLive(match);
 
   // Generate thumbnail background with priority: poster > badges > default logo
   const generateThumbnail = () => {
@@ -372,9 +398,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
         {/* Status indicator */}
         <div className="text-xs">
-              {isLive ? (
-                <span className="text-destructive font-medium">Live now</span>
-              ) : match.date ? (
+          {isLive ? (
+            <div className="flex items-center gap-2">
+              <span className="text-destructive font-medium">Live now</span>
+              {showViewers && (
+                <ViewerCounter 
+                  viewerCount={viewerCount}
+                  isLive={isLive}
+                  variant="compact"
+                />
+              )}
+            </div>
+          ) : match.date ? (
             <span className="text-muted-foreground">
               {match.date > Date.now() ? 'Upcoming' : 'Ended'}
             </span>

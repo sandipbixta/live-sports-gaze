@@ -14,42 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
-      iptv_providers: {
+      match_viewers: {
         Row: {
-          base_url: string
-          created_at: string
           id: string
-          is_active: boolean | null
-          name: string
-          output_format: string | null
-          password: string
-          playlist_type: string | null
-          updated_at: string
-          username: string
+          joined_at: string
+          last_active: string
+          match_id: string
+          session_id: string
         }
         Insert: {
-          base_url: string
-          created_at?: string
           id?: string
-          is_active?: boolean | null
-          name: string
-          output_format?: string | null
-          password: string
-          playlist_type?: string | null
-          updated_at?: string
-          username: string
+          joined_at?: string
+          last_active?: string
+          match_id: string
+          session_id: string
         }
         Update: {
-          base_url?: string
-          created_at?: string
           id?: string
-          is_active?: boolean | null
-          name?: string
-          output_format?: string | null
-          password?: string
-          playlist_type?: string | null
-          updated_at?: string
-          username?: string
+          joined_at?: string
+          last_active?: string
+          match_id?: string
+          session_id?: string
         }
         Relationships: []
       }
@@ -58,16 +43,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_public_iptv_providers: {
+      cleanup_inactive_viewers: {
         Args: Record<PropertyKey, never>
-        Returns: {
-          created_at: string
-          id: string
-          is_active: boolean
-          name: string
-          output_format: string
-          playlist_type: string
-        }[]
+        Returns: undefined
+      }
+      get_viewer_count: {
+        Args: { match_id_param: string }
+        Returns: number
       }
     }
     Enums: {

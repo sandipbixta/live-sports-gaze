@@ -31,30 +31,22 @@ export const adConfig = {
   },
   directLink: {
     url: 'https://uncertainbill.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-    cooldownMinutes: 5, // Back to 5 minutes
+    cooldownMinutes: 5,
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
     scriptSrc: '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
-    cooldownMinutes: 30, // Increased from 5 to 30 minutes
+    cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
-    delaySeconds: 10 // Increased delay from 3 to 10 seconds
-  },
-  adult: {
-    key: 'aef1978a837e09b2a4db7546aaaf55e4',
-    scriptSrc: '//uncertainbill.com/aef1978a837e09b2a4db7546aaaf55e4/invoke.js',
-    width: 320,
-    height: 50,
-    format: 'iframe',
-    cooldownMinutes: 15,
-    sessionKey: 'adultAdTriggered'
+    delaySeconds: 3
   }
 };
 
 // Helper to determine if ads should be shown
 export const shouldShowAds = () => {
-  // Ads disabled for a few days as requested
-  return false;
+  // You can add logic here based on user preferences or other factors
+  // For now, we'll always return true
+  return true;
 };
 
 // Helper to check if ad cooldown has passed

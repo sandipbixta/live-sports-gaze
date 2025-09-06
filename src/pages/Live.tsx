@@ -28,7 +28,6 @@ const Live = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>("all");
   const [activeSportFilter, setActiveSportFilter] = useState<string>("all");
-  const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   
   // Custom hooks for data management
   const { 
@@ -52,19 +51,24 @@ const Live = () => {
     fetchStreamData
   } = useStreamPlayer();
 
-  // Handle match selection and show player
-  const handleMatchSelectWithPlayer = (match: Match) => {
-    handleMatchSelect(match);
-    setIsPlayerVisible(true);
-    
-    // Scroll to player section
-    setTimeout(() => {
-      const playerElement = document.getElementById('stream-player');
-      if (playerElement) {
-        playerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Set featured match when data loads
+  useEffect(() => {
+    if (!loading && !featuredMatch && allMatches.length > 0) {
+      const liveWithSources = liveMatches.filter(match => match.sources && match.sources.length > 0);
+      const firstLiveMatch = liveWithSources.length > 0 ? liveWithSources[0] : null;
+      const firstMatch = allMatches.length > 0 ? allMatches[0] : null;
+      const matchToFeature = firstLiveMatch || firstMatch;
+      
+      if (matchToFeature) {
+        setFeaturedMatch(matchToFeature);
+        
+        // Fetch the stream for the featured match if it has sources
+        if (matchToFeature.sources && matchToFeature.sources.length > 0) {
+          fetchStreamData(matchToFeature.sources[0]);
+        }
       }
-    }, 100);
-  };
+    }
+  }, [loading, featuredMatch, allMatches, liveMatches, setFeaturedMatch, fetchStreamData]);
 
   // Update filtered matches when search query or filters change
   useEffect(() => {
@@ -148,20 +152,18 @@ const Live = () => {
           onRefresh={handleRetryLoading}
         />
         
-        {isPlayerVisible && (
-          <div id="stream-player">
-            <FeaturedPlayer
-              loading={loading}
-              featuredMatch={featuredMatch}
-              currentStream={currentStream}
-              streamLoading={streamLoading}
-              activeSource={activeSource}
-              onSourceChange={handleSourceChange}
-              onStreamRetry={handleStreamRetry}
-              onRetryLoading={handleRetryLoading}
-            />
-          </div>
-        )}
+        <div id="stream-player">
+          <FeaturedPlayer
+            loading={loading}
+            featuredMatch={featuredMatch}
+            currentStream={currentStream}
+            streamLoading={streamLoading}
+            activeSource={activeSource}
+            onSourceChange={handleSourceChange}
+            onStreamRetry={handleStreamRetry}
+            onRetryLoading={handleRetryLoading}
+          />
+        </div>
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
@@ -212,6 +214,43 @@ const Live = () => {
         </div>
         
         <TabsContent value="all" className="mt-0">
+          {/* Popular by Viewers Section */}
+          {(() => {
+            const popularMatches = liveMatches
+              .filter(match => match.popular || (match.sources && match.sources.length >= 2))
+              .sort((a, b) => {
+                // Sort by popular flag first, then by number of sources
+                if (a.popular && !b.popular) return -1;
+                if (!a.popular && b.popular) return 1;
+                return (b.sources?.length || 0) - (a.sources?.length || 0);
+              })
+              .slice(0, 6);
+            
+            if (popularMatches.length > 0) {
+              return (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="text-xl">🔥</div>
+                    <h2 className="text-xl font-bold text-foreground">Popular by Viewers</h2>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                    {popularMatches.map((match) => (
+                      <MatchCard
+                        key={match.id}
+                        match={match}
+                        sportId={match.sportId || match.category}
+                        onClick={() => handleMatchSelect(match)}
+                        preventNavigation={true}
+                        showViewers={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          })()}
+          
           {/* Live Matches Categorized by Sport */}
           {(() => {
             const liveMatchesFiltered = liveMatches.filter(match => filteredMatches.some(fm => fm.id === match.id));
@@ -238,7 +277,7 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Live`}
                       isLive={true}
-                      onMatchSelect={handleMatchSelectWithPlayer}
+                      onMatchSelect={handleMatchSelect}
                       preventNavigation={true}
                     />
                   ))}
@@ -274,7 +313,7 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Upcoming`}
                       isLive={false}
-                      onMatchSelect={handleMatchSelectWithPlayer}
+                      onMatchSelect={handleMatchSelect}
                       preventNavigation={true}
                     />
                   ))}
@@ -292,7 +331,7 @@ const Live = () => {
               sports={sports}
               activeSportFilter={activeSportFilter}
               searchQuery={searchQuery}
-              onMatchSelect={handleMatchSelectWithPlayer}
+              onMatchSelect={handleMatchSelect}
               onSearchClear={() => setSearchQuery('')}
               onRetryLoading={handleRetryLoading}
             />
@@ -305,7 +344,7 @@ const Live = () => {
           sports={sports}
           activeSportFilter={activeSportFilter}
           searchQuery={searchQuery}
-          onMatchSelect={handleMatchSelectWithPlayer}
+          onMatchSelect={handleMatchSelect}
           onSearchClear={() => setSearchQuery('')}
           onRetryLoading={handleRetryLoading}
         />
@@ -316,7 +355,7 @@ const Live = () => {
           sports={sports}
           activeSportFilter={activeSportFilter}
           searchQuery={searchQuery}
-          onMatchSelect={handleMatchSelectWithPlayer}
+          onMatchSelect={handleMatchSelect}
           onSearchClear={() => setSearchQuery('')}
           onRetryLoading={handleRetryLoading}
         />

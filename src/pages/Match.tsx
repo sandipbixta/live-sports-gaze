@@ -6,13 +6,12 @@ import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
-import BannerAd from '@/components/BannerAd';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
-import AdultBannerAd from '@/components/AdultBannerAd';
+import PopularByViewers from '@/components/PopularByViewers';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -57,10 +56,10 @@ const Match = () => {
         // Use the enhanced stream player to load all streams
         await handleMatchSelect(enhancedMatch);
 
-        // Load all matches for related content
+        // Load all matches for the "Popular by Viewers" section
         const allMatches = await fetchMatches(sportId);
         const otherMatches = allMatches.filter(m => m.id !== matchId);
-        setAllMatches(allMatches);
+        setAllMatches(allMatches); // Store all matches for PopularByViewers component
         
         // Recommended matches (similar category)
         const recommended = otherMatches
@@ -113,9 +112,7 @@ const Match = () => {
         : `https://streamed.pk${match.poster}.webp`;
       return baseUrl + `?v=${Date.now()}`;
     }
-    
-    // Use our professional match card template for social sharing
-    return `https://damitv.pro/match-card.jpg?v=${Date.now()}`;
+    return 'https://i.imgur.com/m4nV9S8.png';
   };
 
   const matchPosterUrl = getMatchPosterUrl();
@@ -158,24 +155,14 @@ const Match = () => {
         }
       />
       
-      {/* Banner ad below the header */}
-      <BannerAd />
-      
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
           <TelegramBanner />
         </div>
 
-        {/* Buffering Help Banner */}
-        <div className="mb-6 bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg p-4">
-          <div className="flex items-center gap-2 text-center justify-center">
-            <span className="text-lg">⚠️</span>
-            <p className="text-sm md:text-base text-foreground font-medium">
-              If the video does not play or buffers please check another stream link
-            </p>
-          </div>
+        <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
-
         
         <div className="w-full flex justify-center mb-4">
           <h1 className="text-2xl md:text-3xl font-bold text-white text-center max-w-4xl px-4">{match.title}</h1>
@@ -187,13 +174,16 @@ const Match = () => {
           loadingStream={loadingStream}
           activeSource={activeSource}
           handleSourceChange={handleSourceChange}
-          popularMatches={[]}
+          popularMatches={[]} // Remove from StreamTab since we're using PopularByViewers component
           sportId={sportId || ''}
           allStreams={allStreams}
         />
-        
-        {/* Adult Banner Ad */}
-        <AdultBannerAd />
+
+        {/* Popular by Viewers - Shows matches with actual live viewers */}
+        <PopularByViewers 
+          matches={allMatches} 
+          preventNavigation={false}
+        />
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">

@@ -7,6 +7,7 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
+import PopularByViewers from '../components/PopularByViewers';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
@@ -53,7 +54,7 @@ const Index = () => {
       return [];
     }
     
-    const activeMatches = filterActiveMatches(filterCleanMatches(matches));
+    const activeMatches = filterActiveMatches(matches);
     return activeMatches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
@@ -77,18 +78,9 @@ const Index = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Load sports and live matches
+        // Load sports
         let sportsData = await fetchSports();
         console.log('📊 Sports data loaded:', sportsData);
-        
-        // Also load live matches for trending section
-        const liveMatchesData = await fetchLiveMatches();
-        console.log('🔴 Live matches loaded:', liveMatchesData.length);
-        
-        // Filter and consolidate live matches
-        const cleanLiveMatches = filterCleanMatches(liveMatchesData);
-        const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
-        setLiveMatches(consolidatedLiveMatches);
         
         // Sort with football first for better UX
         sportsData = sportsData.sort((a, b) => {
@@ -101,6 +93,16 @@ const Index = () => {
         
         setSports(sportsData);
         console.log('✅ Sports state updated');
+
+        // Load live matches for PopularByViewers
+        try {
+          console.log('🔴 Loading live matches for Popular by Viewers...');
+          const liveMatchesData = await fetchLiveMatches();
+          setLiveMatches(liveMatchesData);
+          console.log(`✅ Loaded ${liveMatchesData.length} live matches`);
+        } catch (error) {
+          console.error('Error loading live matches:', error);
+        }
         
       } catch (error) {
         console.error('Sports loading error:', error);
@@ -203,6 +205,9 @@ const Index = () => {
       
       <main className="py-4">
         {/* Banner Advertisement removed */}
+        {/* <div className="mb-4 sm:mb-6">
+          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
+        </div> */}
 
         {/* Hero/Intro: Remove "Watch Live Football Streams" headline and football-specific text */}
         {/* You may wish to add a more generic intro or simply skip it */}
@@ -271,8 +276,8 @@ const Index = () => {
             </React.Suspense>
             
             <Separator className="my-8 bg-[#343a4d]" />
-
-            {/* All Sports Live Matches */}
+            
+            
             <div className="mb-8">
               {selectedSport && (
                 <>
@@ -302,6 +307,17 @@ const Index = () => {
                         matches={filteredMatches}
                         sportId={selectedSport}
                         isLoading={loadingMatches}
+                        trendingSection={
+                          liveMatches.length > 0 && !searchTerm.trim() ? (
+                            <>
+                              <PopularByViewers 
+                                matches={liveMatches} 
+                                preventNavigation={false}
+                              />
+                              <Separator className="my-8 bg-[#343a4d]" />
+                            </>
+                          ) : null
+                        }
                       />
                     </>
                   )}
@@ -317,7 +333,7 @@ const Index = () => {
               </div>
               <div>
                 <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                  <TrendingTopics matches={liveMatches} />
+                  <TrendingTopics />
                 </React.Suspense>
               </div>
             </div>

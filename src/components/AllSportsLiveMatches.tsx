@@ -200,7 +200,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
         ];
         
-        const topLeagueFootballMatches = filterCleanMatches(allFootballMatches)
+        const topLeagueFootballMatches = allFootballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
             const now = Date.now();
@@ -216,25 +216,18 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               return false;
             }
             
-            // Debug logging with detailed info
-            const trendingResult = isTrendingMatch(title);
+            // Must contain at least one top league keyword
             const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
-            const hasTopTeam = trendingResult.score >= 10; // Only very top teams
             
             // Additional check: if it contains "vs" or "-", it should be a proper match format
             const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
             
-            if ((hasTopLeagueKeyword || hasTopTeam) && hasProperFormat) {
+            // Debug logging
+            if (hasTopLeagueKeyword && hasProperFormat) {
               console.log('🏆 Top League Football match found:', title);
-              console.log('   - Score:', trendingResult.score);
-              console.log('   - Has league keyword:', hasTopLeagueKeyword);
-              console.log('   - Has top team:', hasTopTeam);
-              console.log('   - Reason:', trendingResult.reason);
             }
             
-            // Only include if it has BOTH a proper format AND a top team (score >= 10)
-            // Remove league keyword matching to be more strict
-            return hasTopTeam && hasProperFormat;
+            return hasTopLeagueKeyword && hasProperFormat;
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;
@@ -252,11 +245,47 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {topLeagueFootballMatches.map((match) => (
-                <MatchCard
-                  key={`top-football-${match.id}`}
-                  match={match}
-                  sportId={match.sportId || match.category}
-                />
+                  <MatchCard
+                    key={`top-football-${match.id}`}
+                    match={match}
+                    sportId={match.sportId || match.category}
+                    showViewers={true}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
+      {/* Popular by Viewers Section */}
+      {(() => {
+        const popularMatches = filteredMatches
+          .filter(match => match.popular || (match.sources && match.sources.length >= 2))
+          .sort((a, b) => {
+            // Sort by popular flag first, then by number of sources
+            if (a.popular && !b.popular) return -1;
+            if (!a.popular && b.popular) return 1;
+            return (b.sources?.length || 0) - (a.sources?.length || 0);
+          })
+          .slice(0, 6);
+        
+        if (popularMatches.length > 0) {
+          return (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="text-xl">🔥</div>
+                <h3 className="text-xl font-bold text-white">Popular by Viewers</h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                {popularMatches.map((match) => (
+                  <MatchCard
+                    key={`popular-${match.sportId || 'unknown'}-${match.id}`}
+                    match={match}
+                    sportId={match.sportId || match.category}
+                    showViewers={true}
+                  />
                 ))}
               </div>
             </div>
@@ -283,6 +312,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
                 key={`${match.sportId || sportId}-${match.id}`}
                 match={match}
                 sportId={match.sportId || sportId}
+                showViewers={true}
               />
             ))}
           </div>
