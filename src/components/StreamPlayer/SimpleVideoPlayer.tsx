@@ -155,7 +155,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   if (isLoading) {
     return (
-      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-black rounded-lg flex items-center justify-center`}>
+      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-black rounded-2xl flex items-center justify-center`}>
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p>Loading stream...</p>
@@ -166,7 +166,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   if (!stream || error) {
     return (
-      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gray-900 rounded-lg flex items-center justify-center`}>
+      <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gray-900 rounded-2xl flex items-center justify-center`}>
         <div className="text-center text-white p-6">
           <Play className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <h3 className="text-lg font-semibold mb-2">
@@ -203,14 +203,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl mx-auto'}`}>
       <div 
         ref={containerRef}
-        className={`relative bg-black rounded-lg overflow-hidden ${
+        className={`relative bg-black rounded-2xl overflow-hidden ${
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
       {isM3U8 ? (
         <video
           ref={videoRef}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain rounded-2xl"
           controls
           autoPlay
           muted={false}
