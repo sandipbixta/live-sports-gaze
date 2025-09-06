@@ -81,6 +81,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         
         {/* Container Ad - placed after main content */}
         <ContainerAd />
+        
+        {/* Bottom Ad */}
+        <FixedBottomAd />
       </main>
       
       {/* Social Bar Ad - floating social bar */}
@@ -187,9 +190,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       <MobileBottomNav />
       <ScrollToTop />
-      
-      {/* Fixed Bottom Ad */}
-      <FixedBottomAd />
     </div>
   );
 };

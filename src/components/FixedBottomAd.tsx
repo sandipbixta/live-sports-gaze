@@ -7,11 +7,11 @@ const FixedBottomAd: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white flex justify-center py-2 shadow-lg border-t border-gray-200">
+    <div className="w-full flex justify-center py-4">
       <iframe
         style={{ backgroundColor: "white" }}
-        width="900"
-        height="250"
+        width="320"
+        height="100"
         scrolling="no"
         frameBorder="0"
         allowTransparency={true}
