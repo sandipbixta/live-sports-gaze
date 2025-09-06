@@ -6,6 +6,7 @@ const BannerAd: React.FC = () => {
   const adRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [adLoaded, setAdLoaded] = useState(false);
+  const [adError, setAdError] = useState(false);
 
   useEffect(() => {
     const adContainer = adRef.current;
@@ -14,6 +15,7 @@ const BannerAd: React.FC = () => {
     // Clean previous ad content if any
     adContainer.innerHTML = "";
     setAdLoaded(false);
+    setAdError(false);
 
     // Use the exact script configuration you provided
     const adConfig = {
@@ -58,6 +60,7 @@ const BannerAd: React.FC = () => {
 
     invokeScript.onerror = () => {
       console.error('Banner Ad: Failed to load script');
+      setAdError(true);
     };
 
     adContainer.appendChild(optionsScript);
@@ -69,8 +72,14 @@ const BannerAd: React.FC = () => {
       // Clean up any injected ads when component unmounts
       adContainer.innerHTML = "";
       setAdLoaded(false);
+      setAdError(false);
     };
   }, [isMobile]);
+
+  // Don't render anything if ad failed to load
+  if (adError) {
+    return null;
+  }
 
   const adConfig = {
     height: 90,
