@@ -39,6 +39,20 @@ export const adConfig = {
     cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3
+  },
+  adult: {
+    mobile: {
+      key: 'aef1978a837e09b2a4db7546aaaf55e4',
+      scriptSrc: '//uncertainbill.com/aef1978a837e09b2a4db7546aaaf55e4/invoke.js',
+      width: 320,
+      height: 50
+    },
+    sidebar: {
+      key: 'a15877b546566779d012a746c76b88da',
+      scriptSrc: '//uncertainbill.com/a15877b546566779d012a746c76b88da/invoke.js',
+      width: 160,
+      height: 300
+    }
   }
 };
 

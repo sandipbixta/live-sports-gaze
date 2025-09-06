@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 import Advertisement from '@/components/Advertisement';
 import RectangleAd from '@/components/RectangleAd';
+import AdultBannerAd from '@/components/AdultBannerAd';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -277,6 +278,11 @@ const ChannelPlayer = () => {
         </div>
       </div>
 
+      {/* Adult Banner Ad - below video player */}
+      <div className="px-4 mb-4 flex justify-center">
+        <AdultBannerAd type="mobile" />
+      </div>
+      
       {/* Video Advertisement - moved below channel list */}
       <div className="px-4 mb-4">
         <Advertisement type="video" className="w-full" />

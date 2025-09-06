@@ -6,6 +6,7 @@ import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
+import AdultBannerAd from '@/components/AdultBannerAd';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
@@ -178,6 +179,11 @@ const Match = () => {
           sportId={sportId || ''}
           allStreams={allStreams}
         />
+
+        {/* Adult Banner Ad - below video player */}
+        <div className="mb-4 flex justify-center">
+          <AdultBannerAd type="mobile" />
+        </div>
 
         {/* Popular by Viewers - Shows matches with actual live viewers */}
         <PopularByViewers 
