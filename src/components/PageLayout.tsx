@@ -11,6 +11,7 @@ import BannerAd from './BannerAd';
 import SocialBarAd from './SocialBarAd';
 import ContainerAd from './ContainerAd';
 import AdultAd from './AdultAd';
+import FixedBottomAd from './FixedBottomAd';
 
 
 interface PageLayoutProps {
@@ -186,6 +187,9 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       
       <MobileBottomNav />
       <ScrollToTop />
+      
+      {/* Fixed Bottom Ad */}
+      <FixedBottomAd />
     </div>
   );
 };
