@@ -116,9 +116,6 @@ const StreamTab = ({
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
       />
       
-      {/* Rectangle ad below the video player */}
-      <RectangleAd />
-      
       <StreamSources
         sources={match.sources}
         activeSource={activeSource}
@@ -126,6 +123,9 @@ const StreamTab = ({
         streamId={streamId}
         allStreams={allStreams}
       />
+      
+      {/* Rectangle ad below the stream sources */}
+      <RectangleAd />
       
       {!loadingStream && (
         <div className="flex items-center justify-center gap-4 mt-4">
