@@ -31,14 +31,14 @@ export const adConfig = {
   },
   directLink: {
     url: 'https://uncertainbill.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-    cooldownMinutes: 5,
+    cooldownMinutes: 30, // Increased from 5 to 30 minutes
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
     scriptSrc: '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
-    cooldownMinutes: 5,
+    cooldownMinutes: 30, // Increased from 5 to 30 minutes
     sessionKey: 'popunderAdTriggered',
-    delaySeconds: 3
+    delaySeconds: 10 // Increased delay from 3 to 10 seconds
   }
 };
 

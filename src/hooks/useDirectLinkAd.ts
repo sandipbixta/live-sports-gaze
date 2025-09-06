@@ -11,8 +11,8 @@ export const useDirectLinkAd = () => {
     }
 
     const handleGlobalClick = () => {
-      // Check if short cooldown period has passed (to prevent spam)
-      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, 0.5)) { // 30 seconds cooldown
+      // Check if cooldown period has passed (30 minutes)
+      if (!isAdCooldownPassed(adConfig.directLink.sessionKey, adConfig.directLink.cooldownMinutes)) {
         return;
       }
 
