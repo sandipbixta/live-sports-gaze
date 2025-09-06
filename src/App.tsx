@@ -9,6 +9,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import SEOPageTracker from "./components/SEOPageTracker";
+import ScrollToTopOnRouteChange from "./components/ScrollToTopOnRouteChange";
 import MonetizationTracker from "./components/MonetizationTracker";
 
 // Import pages directly instead of lazy loading to avoid module import errors
@@ -44,6 +45,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <BrowserRouter>
+          <ScrollToTopOnRouteChange />
           <MonetizationTracker>
             <TooltipProvider>
               <Toaster />
