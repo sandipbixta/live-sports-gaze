@@ -5,8 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
-import RectangleAd from '@/components/RectangleAd';
-import BannerAd from '@/components/BannerAd';
+import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 import { useToast } from '@/hooks/use-toast';
@@ -101,9 +100,6 @@ const StreamTab = ({
 
   return (
     <div>
-      {/* Banner Ad at the top of video player */}
-      <BannerAd />
-      
       <StreamPlayer
         stream={stream}
         isLoading={loadingStream}
@@ -114,11 +110,6 @@ const StreamTab = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
       />
-      
-      {/* Rectangle Ad below video player */}
-      <div className="my-6">
-        <RectangleAd />
-      </div>
       
       <StreamSources
         sources={match.sources}
