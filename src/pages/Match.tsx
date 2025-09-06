@@ -6,13 +6,11 @@ import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
-import AdultBannerAd from '@/components/AdultBannerAd';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
-import PopularByViewers from '@/components/PopularByViewers';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -57,10 +55,10 @@ const Match = () => {
         // Use the enhanced stream player to load all streams
         await handleMatchSelect(enhancedMatch);
 
-        // Load all matches for the "Popular by Viewers" section
+        // Load all matches for recommended sections
         const allMatches = await fetchMatches(sportId);
         const otherMatches = allMatches.filter(m => m.id !== matchId);
-        setAllMatches(allMatches); // Store all matches for PopularByViewers component
+        setAllMatches(allMatches);
         
         // Recommended matches (similar category)
         const recommended = otherMatches
@@ -175,20 +173,9 @@ const Match = () => {
           loadingStream={loadingStream}
           activeSource={activeSource}
           handleSourceChange={handleSourceChange}
-          popularMatches={[]} // Remove from StreamTab since we're using PopularByViewers component
+          popularMatches={[]}
           sportId={sportId || ''}
           allStreams={allStreams}
-        />
-
-        {/* Adult Banner Ad - below video player */}
-        <div className="mb-4 flex justify-center">
-          <AdultBannerAd type="mobile" />
-        </div>
-
-        {/* Popular by Viewers - Shows matches with actual live viewers */}
-        <PopularByViewers 
-          matches={allMatches} 
-          preventNavigation={false}
         />
       </div>
       

@@ -11,8 +11,6 @@ import { Match as MatchType, Stream } from '@/types/sports';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
-import { useViewerTracking } from '@/hooks/useViewerTracking';
-import ViewerCounter from '@/components/ViewerCounter';
 
 interface StreamTabProps {
   match: MatchType;
@@ -38,9 +36,6 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
-  
-  // Real-time viewer tracking
-  const { viewerCount, isTracking, startTracking, stopTracking } = useViewerTracking(match?.id || null);
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -109,29 +104,6 @@ const StreamTab = ({
     return bTrending.score - aTrending.score;
   });
 
-  // Start/stop viewer tracking based on stream availability
-  useEffect(() => {
-    console.log('StreamTab viewer tracking effect:', { 
-      stream: !!stream, 
-      match: !!match, 
-      matchId: match?.id,
-      loadingStream, 
-      isTracking 
-    });
-    
-    if (stream && match && !loadingStream) {
-      console.log('🎬 StreamTab: Starting viewer tracking');
-      startTracking();
-    } else {
-      console.log('🎬 StreamTab: Stopping viewer tracking');
-      stopTracking();
-    }
-    
-    return () => {
-      stopTracking();
-    };
-  }, [stream, match, loadingStream]);
-
   return (
     <div>
       <StreamPlayer
@@ -143,20 +115,7 @@ const StreamTab = ({
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
-        viewerCount={viewerCount}
-        isLive={isMatchLive()}
-        showViewerCounter={false}
       />
-      
-      {/* Viewer counter below video player */}
-      <div className="mt-3 flex justify-start">
-        <ViewerCounter 
-          viewerCount={viewerCount}
-          isLive={isMatchLive()}
-          variant="default"
-          className="bg-card text-card-foreground border border-border"
-        />
-      </div>
       
       <StreamSources
         sources={match.sources}

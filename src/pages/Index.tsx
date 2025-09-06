@@ -7,7 +7,6 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
-import PopularByViewers from '../components/PopularByViewers';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
@@ -94,9 +93,9 @@ const Index = () => {
         setSports(sportsData);
         console.log('✅ Sports state updated');
 
-        // Load live matches for PopularByViewers
+        // Load live matches for featured sections
         try {
-          console.log('🔴 Loading live matches for Popular by Viewers...');
+          console.log('🔴 Loading live matches...');
           const liveMatchesData = await fetchLiveMatches();
           setLiveMatches(liveMatchesData);
           console.log(`✅ Loaded ${liveMatchesData.length} live matches`);
@@ -307,17 +306,6 @@ const Index = () => {
                         matches={filteredMatches}
                         sportId={selectedSport}
                         isLoading={loadingMatches}
-                        trendingSection={
-                          liveMatches.length > 0 && !searchTerm.trim() ? (
-                            <>
-                              <PopularByViewers 
-                                matches={liveMatches} 
-                                preventNavigation={false}
-                              />
-                              <Separator className="my-8 bg-[#343a4d]" />
-                            </>
-                          ) : null
-                        }
                       />
                     </>
                   )}
