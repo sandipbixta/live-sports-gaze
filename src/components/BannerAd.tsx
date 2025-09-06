@@ -50,7 +50,7 @@ const BannerAd: React.FC = () => {
   const adConfig = getBannerAdConfig(isMobile);
 
   return (
-    <div className="w-full bg-card border-b border-border shadow-sm flex items-center justify-center px-2 py-2 fixed top-0 left-0 right-0 z-50">
+    <div className="w-full bg-card border-b border-border shadow-sm flex items-center justify-center px-2 py-2 mb-4">
       <div className="flex items-center justify-center w-full max-w-full mx-auto relative" style={{ minHeight: adConfig.height }}>
         {/* The ad will inject the iframe here */}
         <div
@@ -67,10 +67,6 @@ const BannerAd: React.FC = () => {
       
       {/* Enhanced responsive CSS */}
       <style>{`
-        body {
-          padding-top: ${adConfig.height + 16}px !important;
-        }
-        
         #banner-ad {
           background: transparent;
           border-radius: 8px;

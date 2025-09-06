@@ -120,11 +120,7 @@ const Match = () => {
   const matchPosterUrl = getMatchPosterUrl();
 
   return (
-    <>
-      {/* Banner ad at the very top */}
-      <BannerAd />
-      
-      <div className="min-h-screen bg-sports-dark text-sports-light">
+    <div className="min-h-screen bg-sports-dark text-sports-light">
       <SEOMetaTags
         title={`${matchTitle} - Live Stream | DamiTV`}
         description={matchDescription}
@@ -160,6 +156,9 @@ const Match = () => {
           />
         }
       />
+      
+      {/* Banner ad below the header */}
+      <BannerAd />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
@@ -198,8 +197,7 @@ const Match = () => {
           <p>© 2025 DamiTV - All rights reserved</p>
         </div>
       </footer>
-      </div>
-    </>
+    </div>
   );
 };
 
