@@ -102,8 +102,6 @@ const StreamTab = ({
 
   return (
     <div>
-      {/* Banner ad at the top */}
-      <BannerAd />
       
       <StreamPlayer
         stream={stream}

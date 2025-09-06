@@ -6,6 +6,7 @@ import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
+import BannerAd from '@/components/BannerAd';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
@@ -119,7 +120,11 @@ const Match = () => {
   const matchPosterUrl = getMatchPosterUrl();
 
   return (
-    <div className="min-h-screen bg-sports-dark text-sports-light">
+    <>
+      {/* Banner ad at the very top */}
+      <BannerAd />
+      
+      <div className="min-h-screen bg-sports-dark text-sports-light">
       <SEOMetaTags
         title={`${matchTitle} - Live Stream | DamiTV`}
         description={matchDescription}
@@ -193,7 +198,8 @@ const Match = () => {
           <p>© 2025 DamiTV - All rights reserved</p>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 };
 
