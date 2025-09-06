@@ -50,22 +50,41 @@ const BannerAd: React.FC = () => {
   const adConfig = getBannerAdConfig(isMobile);
 
   return (
-    <div className="w-full bg-background shadow-md flex items-center justify-center px-2 py-2 z-30 relative">
+    <div className="w-full bg-card border-b border-border shadow-sm flex items-center justify-center px-2 py-2 relative z-50 sticky top-0">
       <div className="flex items-center justify-center w-full max-w-full mx-auto relative" style={{ minHeight: adConfig.height }}>
         {/* The ad will inject the iframe here */}
         <div
           ref={adRef}
           id="banner-ad"
-          className="flex justify-center items-center w-full max-w-3xl"
+          className="flex justify-center items-center w-full max-w-4xl"
           style={{
             minHeight: adConfig.height,
             width: "100%",
             overflow: "hidden",
           }}
         />
+        
+        {/* Fallback content while ad loads */}
+        {!closed && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/20 text-muted-foreground text-sm">
+            Advertisement Loading...
+          </div>
+        )}
       </div>
-      {/* Responsive CSS for smaller screens */}
+      
+      {/* Enhanced responsive CSS */}
       <style>{`
+        #banner-ad {
+          background: transparent;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        
+        #banner-ad iframe {
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
         @media (max-width: 768px) {
           #banner-ad iframe {
             width: 100% !important;
@@ -73,6 +92,13 @@ const BannerAd: React.FC = () => {
             max-width: 100vw !important;
             height: ${adConfig.height}px !important;
             min-height: ${adConfig.height}px !important;
+          }
+        }
+        
+        @media (min-width: 769px) {
+          #banner-ad iframe {
+            width: ${adConfig.width}px !important;
+            height: ${adConfig.height}px !important;
           }
         }
       `}</style>
