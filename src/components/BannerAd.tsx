@@ -88,14 +88,14 @@ const BannerAd: React.FC = () => {
 
   return (
     <div className="w-full bg-transparent flex items-center justify-center px-2 py-2 mb-4">
-      <div className="flex items-center justify-center w-full max-w-full mx-auto relative bg-white rounded-lg" style={{ minHeight: adConfig.height }}>
+      <div className="flex items-center justify-center w-full max-w-full mx-auto relative bg-white rounded-lg" style={{ height: adConfig.height }}>
         {/* The ad will inject the iframe here */}
         <div
           ref={adRef}
           id="banner-ad"
           className="flex justify-center items-center w-full"
           style={{
-            minHeight: adConfig.height,
+            height: adConfig.height,
             width: "100%",
             overflow: "hidden",
             background: "white",
@@ -104,10 +104,10 @@ const BannerAd: React.FC = () => {
         
         {/* Loading indicator */}
         {!adLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-600 text-sm rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-600 text-xs rounded-lg">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-              Loading advertisement...
+              <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              Loading ad...
             </div>
           </div>
         )}
@@ -133,7 +133,6 @@ const BannerAd: React.FC = () => {
             min-width: 0 !important;
             max-width: 100vw !important;
             height: ${adConfig.height}px !important;
-            min-height: ${adConfig.height}px !important;
           }
         }
         
