@@ -5,7 +5,7 @@ import { Match as MatchType } from '@/types/sports';
 import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { Helmet } from 'react-helmet-async';
-// import Advertisement from '@/components/Advertisement';
+import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
@@ -171,9 +171,9 @@ const Match = () => {
           </div>
         </div>
 
-        {/* <div className="mb-4 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
+        </div>
         
         <div className="w-full flex justify-center mb-4">
           <h1 className="text-2xl md:text-3xl font-bold text-white text-center max-w-4xl px-4">{match.title}</h1>

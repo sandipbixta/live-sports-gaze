@@ -6,8 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-// import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
-// import { usePopunderAd } from "./hooks/usePopunderAd";
+import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
+import { usePopunderAd } from "./hooks/usePopunderAd";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
 
@@ -37,8 +37,8 @@ const queryClient = new QueryClient({
 
 const App: React.FC = () => {
   // Initialize ad hooks
-  // useDirectLinkAd();
-  // usePopunderAd();
+  useDirectLinkAd();
+  usePopunderAd();
 
   return (
     <QueryClientProvider client={queryClient}>
