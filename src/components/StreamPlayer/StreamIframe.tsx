@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { Play, ExternalLink } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface StreamIframeProps {
   src: string;
@@ -14,6 +16,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [loaded, setLoaded] = useState(false);
   const [hadError, setHadError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const [showPlayButton, setShowPlayButton] = useState(true);
+  const [userStarted, setUserStarted] = useState(false);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
   // Handle iframe clicks on mobile to prevent automatic opening
@@ -29,6 +33,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     setLoaded(false);
     setHadError(false);
     setTimedOut(false);
+    setShowPlayButton(true);
+    setUserStarted(false);
     const t = window.setTimeout(() => {
       setTimedOut(true);
     }, 8000);
@@ -38,6 +44,18 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const handleLoad = () => {
     setLoaded(true);
     onLoad?.();
+    // Hide play button after a short delay once loaded
+    setTimeout(() => {
+      if (userStarted) {
+        setShowPlayButton(false);
+      }
+    }, 1500);
+  };
+
+  const handlePlayClick = () => {
+    setUserStarted(true);
+    setShowPlayButton(false);
+    console.log('🎬 User clicked play button for iframe stream');
   };
 
   const handleError = () => {
@@ -82,17 +100,34 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         }}
       />
 
-      {showOpenOverlay && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4">
-          <a
-            href={src}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center rounded-md px-4 py-2 text-white bg-white/10 hover:bg-white/20"
-            aria-label="Open stream in a new tab"
+      {/* Play Button Overlay */}
+      {showPlayButton && !hadError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+          <Button
+            onClick={handlePlayClick}
+            className="bg-white/20 hover:bg-white/30 text-white border-2 border-white/30 hover:border-white/50 rounded-full p-6 backdrop-blur-sm transition-all duration-300 group"
+            size="lg"
           >
-            Open stream in new tab
-          </a>
+            <Play className="w-8 h-8 ml-1 group-hover:scale-110 transition-transform" fill="currentColor" />
+          </Button>
+        </div>
+      )}
+
+      {showOpenOverlay && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4 z-30">
+          <div className="text-center space-y-4">
+            <p className="text-white mb-4">Stream failed to load</p>
+            <a
+              href={src}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-md px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              aria-label="Open stream in a new tab"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Open stream in new tab
+            </a>
+          </div>
         </div>
       )}
     </div>
