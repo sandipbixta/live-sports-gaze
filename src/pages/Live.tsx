@@ -28,6 +28,7 @@ const Live = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>("all");
   const [activeSportFilter, setActiveSportFilter] = useState<string>("all");
+  const [userSelectedMatch, setUserSelectedMatch] = useState<boolean>(false);
   
   // Custom hooks for data management
   const { 
@@ -51,24 +52,11 @@ const Live = () => {
     fetchStreamData
   } = useStreamPlayer();
 
-  // Set featured match when data loads
-  useEffect(() => {
-    if (!loading && !featuredMatch && allMatches.length > 0) {
-      const liveWithSources = liveMatches.filter(match => match.sources && match.sources.length > 0);
-      const firstLiveMatch = liveWithSources.length > 0 ? liveWithSources[0] : null;
-      const firstMatch = allMatches.length > 0 ? allMatches[0] : null;
-      const matchToFeature = firstLiveMatch || firstMatch;
-      
-      if (matchToFeature) {
-        setFeaturedMatch(matchToFeature);
-        
-        // Fetch the stream for the featured match if it has sources
-        if (matchToFeature.sources && matchToFeature.sources.length > 0) {
-          fetchStreamData(matchToFeature.sources[0]);
-        }
-      }
-    }
-  }, [loading, featuredMatch, allMatches, liveMatches, setFeaturedMatch, fetchStreamData]);
+  // Handle user match selection
+  const handleUserMatchSelect = (match: Match) => {
+    setUserSelectedMatch(true);
+    handleMatchSelect(match);
+  };
 
   // Update filtered matches when search query or filters change
   useEffect(() => {
@@ -152,18 +140,20 @@ const Live = () => {
           onRefresh={handleRetryLoading}
         />
         
-        <div id="stream-player">
-          <FeaturedPlayer
-            loading={loading}
-            featuredMatch={featuredMatch}
-            currentStream={currentStream}
-            streamLoading={streamLoading}
-            activeSource={activeSource}
-            onSourceChange={handleSourceChange}
-            onStreamRetry={handleStreamRetry}
-            onRetryLoading={handleRetryLoading}
-          />
-        </div>
+        {userSelectedMatch && featuredMatch && (
+          <div id="stream-player">
+            <FeaturedPlayer
+              loading={loading}
+              featuredMatch={featuredMatch}
+              currentStream={currentStream}
+              streamLoading={streamLoading}
+              activeSource={activeSource}
+              onSourceChange={handleSourceChange}
+              onStreamRetry={handleStreamRetry}
+              onRetryLoading={handleRetryLoading}
+            />
+          </div>
+        )}
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
@@ -239,7 +229,7 @@ const Live = () => {
                         key={match.id}
                         match={match}
                         sportId={match.sportId || match.category}
-                        onClick={() => handleMatchSelect(match)}
+                        onClick={() => handleUserMatchSelect(match)}
                         preventNavigation={true}
                       />
                     ))}
@@ -276,7 +266,7 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Live`}
                       isLive={true}
-                      onMatchSelect={handleMatchSelect}
+                      onMatchSelect={handleUserMatchSelect}
                       preventNavigation={true}
                     />
                   ))}
@@ -312,7 +302,7 @@ const Live = () => {
                       sportId={sport.id}
                       title={`${sport.name} - Upcoming`}
                       isLive={false}
-                      onMatchSelect={handleMatchSelect}
+                      onMatchSelect={handleUserMatchSelect}
                       preventNavigation={true}
                     />
                   ))}
@@ -330,7 +320,7 @@ const Live = () => {
               sports={sports}
               activeSportFilter={activeSportFilter}
               searchQuery={searchQuery}
-              onMatchSelect={handleMatchSelect}
+              onMatchSelect={handleUserMatchSelect}
               onSearchClear={() => setSearchQuery('')}
               onRetryLoading={handleRetryLoading}
             />
@@ -343,7 +333,7 @@ const Live = () => {
           sports={sports}
           activeSportFilter={activeSportFilter}
           searchQuery={searchQuery}
-          onMatchSelect={handleMatchSelect}
+          onMatchSelect={handleUserMatchSelect}
           onSearchClear={() => setSearchQuery('')}
           onRetryLoading={handleRetryLoading}
         />
@@ -354,7 +344,7 @@ const Live = () => {
           sports={sports}
           activeSportFilter={activeSportFilter}
           searchQuery={searchQuery}
-          onMatchSelect={handleMatchSelect}
+          onMatchSelect={handleUserMatchSelect}
           onSearchClear={() => setSearchQuery('')}
           onRetryLoading={handleRetryLoading}
         />
