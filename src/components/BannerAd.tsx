@@ -1,6 +1,5 @@
 
 import React, { useEffect, useRef, useState } from "react";
-import { getBannerAdConfig } from "@/utils/adConfig";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const BannerAd: React.FC = () => {
@@ -16,8 +15,13 @@ const BannerAd: React.FC = () => {
     adContainer.innerHTML = "";
     setAdLoaded(false);
 
-    // Get the proper banner ad config (same as home page)
-    const adConfig = getBannerAdConfig(isMobile);
+    // Use the exact script configuration you provided
+    const adConfig = {
+      key: '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
+      height: 90,
+      width: 728,
+      scriptSrc: '//uncertainbill.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js'
+    };
 
     // 1. Set the inline ad options script
     const optionsScript = document.createElement("script");
@@ -68,7 +72,10 @@ const BannerAd: React.FC = () => {
     };
   }, [isMobile]);
 
-  const adConfig = getBannerAdConfig(isMobile);
+  const adConfig = {
+    height: 90,
+    width: 728
+  };
 
   return (
     <div className="w-full bg-transparent flex items-center justify-center px-2 py-2 mb-4">
