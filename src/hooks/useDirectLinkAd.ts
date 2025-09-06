@@ -3,7 +3,7 @@ import { adConfig, shouldShowAds, isAdCooldownPassed, markAdTriggered } from '@/
 
 export const useDirectLinkAd = () => {
   const clickCountRef = useRef(0);
-  const requiredClicks = 2; // Require 2 clicks before triggering
+  const requiredClicks = 5; // Require 5 clicks before triggering
 
   useEffect(() => {
     if (!shouldShowAds()) {
