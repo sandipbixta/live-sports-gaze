@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { shouldShowAds } from "@/utils/adConfig";
+import { shouldShowAds, adConfig, isAdCooldownPassed, markAdTriggered } from "@/utils/adConfig";
 
 const AdultAd: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -7,33 +7,45 @@ const AdultAd: React.FC = () => {
   const handleAdultAdClick = () => {
     if (!shouldShowAds() || isLoading) return;
 
+    // Check cooldown period
+    if (!isAdCooldownPassed(adConfig.adult.sessionKey, adConfig.adult.cooldownMinutes)) {
+      console.log('18+ Ad: Still in cooldown period');
+      return;
+    }
+
     setIsLoading(true);
+    console.log('18+ Ad: Button clicked, loading adult ad...');
 
     try {
+      // Mark ad as triggered
+      markAdTriggered(adConfig.adult.sessionKey);
+
       // Create the ad options script
       const optionsScript = document.createElement("script");
       optionsScript.type = "text/javascript";
       optionsScript.innerHTML = `
         atOptions = {
-          'key' : '7c589340b2a1155dcea92f44cc468438',
-          'format' : 'iframe',
-          'height' : 250,
-          'width' : 300,
+          'key' : '${adConfig.adult.key}',
+          'format' : '${adConfig.adult.format}',
+          'height' : ${adConfig.adult.height},
+          'width' : ${adConfig.adult.width},
           'params' : {}
         };
       `;
       
-      console.log('18+ Ad: Loading adult ad script...');
+      console.log('18+ Ad: Loading adult ad script with new config...');
 
       // Create the main ad script
       const invokeScript = document.createElement("script");
       invokeScript.type = "text/javascript";
-      invokeScript.src = "//uncertainbill.com/7c589340b2a1155dcea92f44cc468438/invoke.js";
+      invokeScript.src = adConfig.adult.scriptSrc;
       invokeScript.async = true;
 
       // Add scripts to head
       document.head.appendChild(optionsScript);
       document.head.appendChild(invokeScript);
+
+      console.log('18+ Ad: Scripts loaded successfully');
 
       // Clean up after some time
       setTimeout(() => {

@@ -39,6 +39,15 @@ export const adConfig = {
     cooldownMinutes: 30, // Increased from 5 to 30 minutes
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 10 // Increased delay from 3 to 10 seconds
+  },
+  adult: {
+    key: 'aef1978a837e09b2a4db7546aaaf55e4',
+    scriptSrc: '//uncertainbill.com/aef1978a837e09b2a4db7546aaaf55e4/invoke.js',
+    width: 320,
+    height: 50,
+    format: 'iframe',
+    cooldownMinutes: 15,
+    sessionKey: 'adultAdTriggered'
   }
 };
 
