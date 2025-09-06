@@ -128,8 +128,7 @@ const Match = () => {
           homeTeam,
           awayTeam,
           league: match.category || 'Football',
-          date: match.date ? new Date(match.date).toISOString() : new Date().toISOString(),
-          time: match.date ? new Date(match.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+          date: match.date ? new Date(match.date) : new Date(),
         }}
         breadcrumbs={[
           { name: 'Home', url: 'https://damitv.pro/' },

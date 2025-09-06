@@ -30,12 +30,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const [showExternal, setShowExternal] = useState(false);
   useEffect(() => {
-    console.log('🎮 SimpleVideoPlayer received new stream:', {
-      streamExists: !!stream,
-      embedUrl: stream?.embedUrl,
-      streamId: stream?.id,
-      isM3U8: stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '')
-    });
     setError(false);
   }, [stream]);
 

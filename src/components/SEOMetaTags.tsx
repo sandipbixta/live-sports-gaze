@@ -12,11 +12,10 @@ interface SEOMetaTagsProps {
   breadcrumbs?: Array<{name: string; url: string}>;
   includeCompetitorKeywords?: boolean;
   matchInfo?: {
-    homeTeam: string;
-    awayTeam: string;
-    league: string;
-    date: string;
-    time: string;
+    homeTeam?: string;
+    awayTeam?: string;
+    league?: string;
+    date?: Date;
     venue?: string;
   };
 }
@@ -70,7 +69,7 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
         "@type": "SportsEvent",
         "name": `${homeTeam} vs ${awayTeam}`,
         "description": `Watch ${homeTeam} vs ${awayTeam} live stream online for free on DamiTV`,
-        "startDate": date,
+        "startDate": date.toISOString(),
         "competitor": [
           {
             "@type": "SportsTeam",
