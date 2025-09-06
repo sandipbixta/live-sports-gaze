@@ -31,7 +31,7 @@ export const adConfig = {
   },
   directLink: {
     url: 'https://uncertainbill.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-    cooldownMinutes: 30, // Increased from 5 to 30 minutes
+    cooldownMinutes: 5, // Back to 5 minutes
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
