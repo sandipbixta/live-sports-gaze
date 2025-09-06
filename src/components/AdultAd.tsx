@@ -15,18 +15,20 @@ const AdultAd: React.FC = () => {
       optionsScript.type = "text/javascript";
       optionsScript.innerHTML = `
         atOptions = {
-          'key' : 'aef1978a837e09b2a4db7546aaaf55e4',
+          'key' : '7c589340b2a1155dcea92f44cc468438',
           'format' : 'iframe',
-          'height' : 50,
-          'width' : 320,
+          'height' : 250,
+          'width' : 300,
           'params' : {}
         };
       `;
+      
+      console.log('18+ Ad: Loading adult ad script...');
 
       // Create the main ad script
       const invokeScript = document.createElement("script");
       invokeScript.type = "text/javascript";
-      invokeScript.src = "//uncertainbill.com/aef1978a837e09b2a4db7546aaaf55e4/invoke.js";
+      invokeScript.src = "//uncertainbill.com/7c589340b2a1155dcea92f44cc468438/invoke.js";
       invokeScript.async = true;
 
       // Add scripts to head
