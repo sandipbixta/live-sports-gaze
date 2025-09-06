@@ -20,6 +20,28 @@ const AdultAd: React.FC = () => {
       // Mark ad as triggered
       markAdTriggered(adConfig.adult.sessionKey);
 
+      // Create a container for the ad
+      let adContainer = document.getElementById('adult-ad-container');
+      if (!adContainer) {
+        adContainer = document.createElement('div');
+        adContainer.id = 'adult-ad-container';
+        adContainer.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 9999;
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+          max-width: 90vw;
+          max-height: 90vh;
+          overflow: auto;
+        `;
+        document.body.appendChild(adContainer);
+      }
+
       // Create the ad options script
       const optionsScript = document.createElement("script");
       optionsScript.type = "text/javascript";
@@ -41,11 +63,63 @@ const AdultAd: React.FC = () => {
       invokeScript.src = adConfig.adult.scriptSrc;
       invokeScript.async = true;
 
+      // Add error handling
+      invokeScript.onerror = () => {
+        console.error('18+ Ad: Failed to load ad script');
+        if (adContainer) {
+          adContainer.innerHTML = '<p style="color: red;">Ad failed to load. Please check your ad blocker settings.</p>';
+        }
+        setIsLoading(false);
+      };
+
+      invokeScript.onload = () => {
+        console.log('18+ Ad: Script loaded successfully');
+        // Try to find and move the ad to our container
+        setTimeout(() => {
+          const adElements = document.querySelectorAll('[id*="' + adConfig.adult.key + '"]');
+          if (adElements.length > 0 && adContainer) {
+            adElements.forEach(el => {
+              if (el.parentNode !== adContainer) {
+                adContainer.appendChild(el);
+              }
+            });
+          } else {
+            // Fallback: show a message that ad should be loading
+            if (adContainer) {
+              adContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                  <p>🔞 Adult content ad is loading...</p>
+                  <p style="font-size: 12px; color: #666;">If you don't see the ad, please disable your ad blocker.</p>
+                  <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 10px; padding: 5px 10px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer;">Close</button>
+                </div>
+              `;
+            }
+          }
+        }, 1000);
+      };
+
+      // Add backdrop
+      const backdrop = document.createElement('div');
+      backdrop.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+      `;
+      backdrop.onclick = () => {
+        backdrop.remove();
+        if (adContainer) adContainer.remove();
+      };
+      document.body.appendChild(backdrop);
+
       // Add scripts to head
       document.head.appendChild(optionsScript);
       document.head.appendChild(invokeScript);
 
-      console.log('18+ Ad: Scripts loaded successfully');
+      console.log('18+ Ad: Scripts added to page');
 
       // Clean up after some time
       setTimeout(() => {
@@ -56,7 +130,7 @@ const AdultAd: React.FC = () => {
           invokeScript.parentNode.removeChild(invokeScript);
         }
         setIsLoading(false);
-      }, 5000);
+      }, 30000); // 30 seconds
 
     } catch (error) {
       console.warn('Error loading adult ad:', error);
