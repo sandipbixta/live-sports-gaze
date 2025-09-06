@@ -17,9 +17,11 @@ export const useStreamPlayer = () => {
     
     try {
       console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
+      console.log(`📋 Match sources available:`, match.sources);
       
       const streamsData = await fetchAllStreams(match);
       setAllStreams(streamsData);
+      console.log(`📦 Raw streams data received:`, streamsData);
       
       // Auto-select the first available HD stream or fallback to first stream
       const firstSource = Object.keys(streamsData)[0];
@@ -28,13 +30,24 @@ export const useStreamPlayer = () => {
         const hdStream = streams.find(s => s.hd) || streams[0];
         
         if (hdStream) {
+          console.log(`🎥 Selected stream details:`, {
+            source: firstSource,
+            embedUrl: hdStream.embedUrl,
+            isHD: hdStream.hd,
+            hasEmbedUrl: !!hdStream.embedUrl
+          });
+          
           setCurrentStream({
             ...hdStream,
             timestamp: Date.now()
           });
           setActiveSource(firstSource);
           console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${firstSource}`);
+        } else {
+          console.warn('⚠️ No valid stream found in first source');
         }
+      } else {
+        console.warn('⚠️ No streams found or first source is empty');
       }
       
       console.log(`🎬 Total streams loaded: ${Object.values(streamsData).flat().length} from ${Object.keys(streamsData).length} sources`);
