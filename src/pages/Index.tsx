@@ -196,33 +196,50 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>{generateCompetitorTitle('DamiTV - Free Sports Streaming & TV Online', 'home')}</title>
-        <meta name="description" content={generateCompetitorDescription('', 'home')} />
-        <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative, daddylivehd alternative, crackstreams alternative" />
-        <link rel="canonical" href="https://damitv.pro/" />
+        <title>DamiTV - Free Live Sports Streaming Online | Watch Football & More</title>
+        <meta name="description" content="Watch free live sports streaming online at DamiTV. Access football, basketball, tennis matches and TV channels without registration. HD quality streams." />
+        <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative" />
+        <link rel="canonical" href="https://www.damitv.pro/" />
       </Helmet>
       
       <main className="py-4">
-        {/* Banner Advertisement removed */}
-        {/* <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
-        </div> */}
-
-        {/* Hero/Intro: Remove "Watch Live Football Streams" headline and football-specific text */}
-        {/* You may wish to add a more generic intro or simply skip it */}
-        {/* Example generic intro below (feel free to adapt): */}
-        {/* <section className="mb-6 sm:mb-8">
+        {/* Hero Section */}
+        <section className="mb-6 sm:mb-8">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 sm:p-8 md:p-10 relative overflow-hidden">
             <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
             <div className="relative">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Sports & TV Channels Live Online</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Free Live Sports Streaming Online</h1>
               <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl">
-                Stream a wide variety of sports and TV events for free. No registration required.
+                Watch live sports streaming for free at DamiTV. Access football, basketball, tennis matches and hundreds of TV channels without registration. HD quality streams available on all devices.
               </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/live">
+                  <Button variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
+                    <Tv className="mr-2 h-4 w-4" /> Watch Live Sports
+                  </Button>
+                </Link>
+                <Link to="/channels">
+                  <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+                    <Calendar className="mr-2 h-4 w-4" /> Browse Channels
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </section> */}
-        {/* This section now omitted, per your request */}
+        </section>
+
+        {/* Introduction Content */}
+        <section className="mb-8">
+          <div className="prose prose-invert max-w-none">
+            <h2 className="text-xl font-semibold text-foreground mb-4">About DamiTV Sports Streaming</h2>
+            <p className="text-muted-foreground mb-4">
+              DamiTV offers the best free live sports streaming experience online. Our platform provides access to live football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world. Watch your favorite teams and athletes compete in real-time without any subscription fees or registration requirements.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV has you covered with high-quality streaming that works on desktop, mobile, and tablet devices.
+            </p>
+          </div>
+        </section>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
@@ -233,7 +250,7 @@ const Index = () => {
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold text-foreground">Featured Sports</h1>
+            <h2 className="text-2xl font-bold text-foreground">Featured Sports</h2>
             <div className="flex gap-2">
               <Button 
                 variant="outline" 
@@ -253,7 +270,7 @@ const Index = () => {
           
           {showLiveSports ? (
             <div className="mb-8">
-              <h2 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h2>
+              <h3 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h3>
               <LiveSportsWidget />
             </div>
           ) : (
@@ -283,9 +300,9 @@ const Index = () => {
                   {selectedSport === 'all' ? (
                     <div>
                       <div className="mb-4">
-                        <h2 className="text-xl font-bold text-foreground">
+                        <h3 className="text-xl font-bold text-foreground">
                           Live Matches - All Sports
-                        </h2>
+                        </h3>
                         <p className="text-gray-400 text-sm">
                           Currently live matches from all sports categories
                         </p>
@@ -295,9 +312,9 @@ const Index = () => {
                   ) : (
                     <>
                       <div className="mb-4">
-                        <h2 className="text-xl font-bold text-foreground">
+                        <h3 className="text-xl font-bold text-foreground">
                           {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                        </h2>
+                        </h3>
                         <p className="text-gray-400 text-sm">
                           {filteredMatches.length} matches available
                         </p>
