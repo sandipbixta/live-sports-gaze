@@ -517,8 +517,12 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 // Enhanced function to fetch ALL streams from ALL available sources for a match
 export const fetchAllStreams = async (match: Match): Promise<Record<string, Stream[]>> => {
   if (!match.sources || match.sources.length === 0) {
+    console.log('❌ No sources available for match:', match.title);
     throw new Error('No sources available for this match');
   }
+
+  console.log(`🎯 Starting to fetch streams from ${match.sources.length} sources for match: ${match.title}`);
+  console.log('📋 Available sources:', match.sources.map(s => `${s.source}/${s.id}`));
 
   const allStreams: Record<string, Stream[]> = {};
   const fetchPromises = match.sources.map(async (source) => {
@@ -530,13 +534,16 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       
       if (Array.isArray(streamData)) {
         allStreams[sourceKey] = streamData;
+        console.log(`✅ Array result: ${streamData.length} streams from ${source.source}`);
       } else if (streamData) {
         allStreams[sourceKey] = [streamData];
+        console.log(`✅ Single result: 1 stream from ${source.source}`);
+      } else {
+        console.log(`⚠️ No stream data returned from ${source.source}`);
       }
       
-      console.log(`✅ Successfully fetched ${allStreams[sourceKey]?.length || 0} streams from ${source.source}`);
     } catch (error) {
-      console.warn(`⚠️ Failed to fetch streams from ${source.source}:`, error);
+      console.warn(`❌ Failed to fetch streams from ${source.source}:`, error);
       // Continue with other sources even if one fails
     }
   });
@@ -544,7 +551,10 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
   // Wait for all sources to complete (with failures handled gracefully)
   await Promise.allSettled(fetchPromises);
 
-  console.log(`🎯 Total streams fetched from ${Object.keys(allStreams).length} sources for match: ${match.title}`);
+  const totalStreams = Object.values(allStreams).flat().length;
+  console.log(`🎯 Final result: ${totalStreams} streams from ${Object.keys(allStreams).length} sources for match: ${match.title}`);
+  console.log('📊 Stream breakdown:', Object.entries(allStreams).map(([key, streams]) => `${key}: ${streams.length} streams`));
+  
   return allStreams;
 };
 

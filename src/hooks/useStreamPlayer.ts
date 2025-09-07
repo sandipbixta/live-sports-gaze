@@ -16,9 +16,12 @@ export const useStreamPlayer = () => {
     setStreamLoading(true);
     
     try {
-      console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
+      console.log(`🎯 Starting comprehensive stream fetch for match: ${match.title}`);
+      console.log('📋 Match sources:', match.sources);
       
       const streamsData = await fetchAllStreams(match);
+      console.log('📊 Received streams data:', streamsData);
+      
       setAllStreams(streamsData);
       
       // Auto-select the first available HD stream or fallback to first stream
@@ -35,9 +38,12 @@ export const useStreamPlayer = () => {
           setActiveSource(firstSource);
           console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${firstSource}`);
         }
+      } else {
+        console.log('⚠️ No streams available from any source');
       }
       
-      console.log(`🎬 Total streams loaded: ${Object.values(streamsData).flat().length} from ${Object.keys(streamsData).length} sources`);
+      const totalStreams = Object.values(streamsData).flat().length;
+      console.log(`🎬 Stream loading complete: ${totalStreams} streams from ${Object.keys(streamsData).length} sources`);
       
     } catch (error) {
       console.error('❌ Error fetching all streams:', error);
