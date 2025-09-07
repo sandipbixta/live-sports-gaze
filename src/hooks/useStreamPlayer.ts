@@ -53,7 +53,7 @@ export const useStreamPlayer = () => {
     }
   }, [toast]);
 
-  // Enhanced stream fetching with better reload handling
+  // Enhanced stream fetching with isolated error handling
   const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
     setStreamLoading(true);
     const sourceKey = streamNo 
@@ -64,11 +64,11 @@ export const useStreamPlayer = () => {
     try {
       console.log(`🎯 Fetching fresh stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
-      // Always fetch fresh data, no cache for streams
+      // Create isolated request with unique timeout
       const streamData = await Promise.race([
         fetchStream(source.source, source.id, streamNo),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Stream timeout')), 8000) // 8 seconds timeout
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Stream timeout')), 10000)
         )
       ]) as Stream | Stream[];
       
@@ -81,7 +81,6 @@ export const useStreamPlayer = () => {
           : streamData.find(s => s.hd) || streamData[0];
         
         if (selectedStream) {
-          // Add timestamp to ensure freshness
           const freshStream: Stream = {
             ...selectedStream,
             embedUrl: selectedStream.embedUrl,
@@ -89,15 +88,16 @@ export const useStreamPlayer = () => {
           };
           setCurrentStream(freshStream);
         } else {
-          setCurrentStream(null);
+          throw new Error('No valid stream found in response');
         }
       } else if (streamData) {
-        // Add timestamp to ensure freshness
         const freshStream: Stream = {
           ...streamData,
           timestamp: Date.now()
         };
         setCurrentStream(freshStream);
+      } else {
+        throw new Error('Invalid stream data received');
       }
       
       // Smooth scroll to player
@@ -107,22 +107,17 @@ export const useStreamPlayer = () => {
           playerElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }, 200);
+      
     } catch (error) {
-      console.error('❌ Stream load error:', error);
+      console.error(`❌ Stream load error for ${sourceKey}:`, error);
       setCurrentStream(null);
       
-      // Show more helpful error message
+      // Show error message without auto-retry to prevent cascading failures
       toast({
-        title: "Stream Loading Issue",
-        description: "Stream failed to load. Trying to refresh automatically...",
-        variant: "default",
+        title: "Stream Unavailable",
+        description: `Failed to load stream from ${source.source}. Try another source.`,
+        variant: "destructive",
       });
-      
-      // Auto-retry once after a short delay
-      setTimeout(() => {
-        console.log('🔄 Auto-retrying stream load...');
-        fetchStreamData(source, streamNo);
-      }, 2000);
     } finally {
       setStreamLoading(false);
     }
@@ -150,26 +145,36 @@ export const useStreamPlayer = () => {
 
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
-    setCurrentStream(null); // Clear current stream first
+    
+    // Clear current stream and reset state
+    setCurrentStream(null);
+    setStreamLoading(true);
     
     if (featuredMatch) {
-      // Force fresh load with delay
-      setTimeout(() => {
-        fetchStreamData({ source, id }, streamNo);
-      }, 100);
+      // Immediate fresh load without delay to prevent interference
+      await fetchStreamData({ source, id }, streamNo);
     }
   };
 
-  const handleStreamRetry = () => {
-    console.log('🔄 Retrying stream...');
-    setCurrentStream(null); // Clear current stream first
+  const handleStreamRetry = async () => {
+    console.log('🔄 Retrying current stream...');
     
-    if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
-      // Force fresh load with delay
-      setTimeout(() => {
+    // Clear current stream and reset state
+    setCurrentStream(null);
+    setStreamLoading(true);
+    
+    if (activeSource && featuredMatch?.sources) {
+      // Parse the active source to retry the same stream
+      const [source, id, streamNo] = activeSource.split('/');
+      const sourceObj = featuredMatch.sources.find(s => s.source === source && s.id === id);
+      
+      if (sourceObj) {
+        await fetchStreamData(sourceObj, streamNo ? parseInt(streamNo) : undefined);
+      } else {
+        // Fallback to first available source
         const firstNonAdmin = featuredMatch.sources.find(s => !s.source?.toLowerCase().includes('admin'));
-        fetchStreamData(firstNonAdmin || featuredMatch.sources[0]);
-      }, 100);
+        await fetchStreamData(firstNonAdmin || featuredMatch.sources[0]);
+      }
     }
   };
 

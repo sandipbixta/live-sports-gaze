@@ -402,56 +402,63 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     throw new Error(`Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
   }
 
-  const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
-  const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  // Skip cache for stream requests to prevent stale data
+  const requestId = `${source}-${id}-${streamNo || 'all'}-${Date.now()}`;
+  console.log(`📡 Fresh stream request [${requestId}]: source=${source}, id=${id}, streamNo=${streamNo}`);
 
   try {
-    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
-    
+    // Create unique abort controller for this request
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => {
+      console.log(`⏰ Request timeout [${requestId}]`);
+      controller.abort();
+    }, 12000);
 
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
     const pkUrl = `${API_BASE}/stream/${source}/${id}`;
 
     let response: Response | null = null;
+    let usedEndpoint = '';
 
     if (isMobile) {
       try {
-        console.log('📡 Trying streamed.su for stream (mobile first)...');
+        console.log(`📡 Trying streamed.su [${requestId}]...`);
         response = await fetch(suUrl, {
           signal: controller.signal,
           headers: {
-'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
           },
           cache: 'no-store',
         });
+        usedEndpoint = 'streamed.su';
       } catch (e) {
-        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
+        console.warn(`⚠️ streamed.su failed [${requestId}], trying streamed.pk:`, e);
       }
     }
 
     if (!response || !response.ok) {
-      console.log('↩️ Falling back to streamed.pk for stream...');
+      console.log(`↩️ Using streamed.pk [${requestId}]...`);
       response = await fetch(pkUrl, {
         signal: controller.signal,
         headers: {
-'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
         },
         cache: 'no-store',
       });
+      usedEndpoint = 'streamed.pk';
     }
     
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(`HTTP ${response.status} from ${usedEndpoint}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
+    console.log(`📺 Stream response [${requestId}] from ${usedEndpoint}:`, { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
 
     // Normalize helper for embed URLs
     const normalize = (url: string) => {
@@ -475,33 +482,34 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
       if (streamNo !== undefined) {
         const specificStream = validStreams.find(stream => stream.streamNo === streamNo);
         if (specificStream) {
-          setCachedData(cacheKey, specificStream);
-          console.log(`✅ Found specific stream ${streamNo} for ${source}/${id}`);
+          console.log(`✅ Found specific stream ${streamNo} for ${source}/${id} [${requestId}]`);
           return specificStream;
         }
         // If specific stream not found, return the first valid stream
         const firstStream = validStreams[0];
-        setCachedData(cacheKey, firstStream);
-        console.log(`⚠️ Stream ${streamNo} not found, returning first available stream`);
+        console.log(`⚠️ Stream ${streamNo} not found, returning first available stream [${requestId}]`);
         return firstStream;
       }
       
-      setCachedData(cacheKey, validStreams);
-      console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id}`);
+      console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id} [${requestId}]`);
       return validStreams;
     } else if (data && typeof data === 'object' && data.embedUrl) {
       const single = { ...data, embedUrl: normalize(data.embedUrl) };
       if (isValidStreamUrl(single.embedUrl)) {
-        setCachedData(cacheKey, single);
-        console.log(`✅ Fetched single stream for ${source}/${id}`);
+        console.log(`✅ Fetched single stream for ${source}/${id} [${requestId}]`);
         return single;
       }
     }
     
     throw new Error('No valid streams found in API response');
     
-  } catch (error) {
-    console.error(`❌ Error fetching stream ${source}/${id}:`, error);
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.log(`⏰ Stream request aborted [${requestId}]`);
+      throw new Error('Request timeout - stream server may be overloaded');
+    }
+    
+    console.error(`❌ Stream fetch failed [${requestId}]:`, error);
     throw error;
   }
 };
