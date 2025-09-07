@@ -54,6 +54,20 @@ const Live = () => {
 
   // Handle user match selection
   const handleUserMatchSelect = (match: Match) => {
+    console.log('🎯 User selected match:', match.title);
+    console.log('📋 Match sources:', match.sources);
+    console.log('🔗 Match ID:', match.id);
+    
+    if (!match.sources || match.sources.length === 0) {
+      console.log('⚠️ No sources available for this match');
+      toast({
+        title: "No streams available",
+        description: "This match doesn't have any stream sources yet.",
+        variant: "default"
+      });
+      return;
+    }
+    
     setUserSelectedMatch(true);
     handleMatchSelect(match);
   };

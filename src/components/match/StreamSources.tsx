@@ -34,6 +34,13 @@ const StreamSources = ({
   // Use pre-loaded streams if available, otherwise fetch individually
   const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
 
+  console.log('🔍 StreamSources Debug Info:');
+  console.log('📊 All streams prop:', allStreams);
+  console.log('📊 Local streams state:', localStreams);
+  console.log('📊 Effective streams:', effectiveStreams);
+  console.log('📋 Visible sources:', visibleSources);
+  console.log('🔢 Number of visible sources:', visibleSources.length);
+
   // Fetch streams only if not already provided
   useEffect(() => {
     const fetchMissingStreams = async () => {

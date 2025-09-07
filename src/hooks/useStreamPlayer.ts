@@ -131,7 +131,17 @@ export const useStreamPlayer = () => {
 
   // Match selection with comprehensive stream loading
   const handleMatchSelect = useCallback(async (match: Match) => {
-    console.log(`🎯 Selected match: ${match.title}`);
+    console.log(`🎯 Match selection started: ${match.title}`);
+    console.log('📋 Available sources:', match.sources);
+    console.log('🔢 Number of sources:', match.sources?.length || 0);
+    
+    if (!match.sources || match.sources.length === 0) {
+      console.log('❌ No sources available for match:', match.title);
+      setFeaturedMatch(match);
+      setStreamLoading(false);
+      return;
+    }
+    
     setFeaturedMatch(match);
     
     // Fetch all streams for this match from all sources
