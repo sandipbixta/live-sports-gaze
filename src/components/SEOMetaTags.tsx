@@ -37,13 +37,18 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
     
     if (matchInfo) {
       const { homeTeam, awayTeam, league } = matchInfo;
+      const matchTitle = homeTeam && awayTeam ? `${homeTeam} vs ${awayTeam}` : '';
       const matchKeywords = [
         homeTeam && `${homeTeam} live stream`,
         awayTeam && `${awayTeam} online`,
-        homeTeam && awayTeam && `${homeTeam} vs ${awayTeam}`,
+        matchTitle && `${matchTitle}`,
+        matchTitle && `${matchTitle} on damitv.pro`,
+        matchTitle && `${matchTitle} live streaming damitv.pro`,
         league && `${league} streaming`,
         'live football stream',
-        'watch football online free'
+        'watch football online free',
+        'damitv.pro live sports',
+        'free sports streaming damitv'
       ].filter(Boolean).join(', ');
       
       baseKeywords = `${baseKeywords}, ${matchKeywords}`;
@@ -132,6 +137,11 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       <title>{title}</title>
       <meta name="description" content={description} />
       <meta name="keywords" content={generateKeywords()} />
+      
+      {/* Match subtitle for SEO */}
+      {matchInfo && matchInfo.homeTeam && matchInfo.awayTeam && (
+        <meta name="subtitle" content={`${matchInfo.homeTeam} vs ${matchInfo.awayTeam} on damitv.pro`} />
+      )}
       
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}

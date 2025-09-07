@@ -156,6 +156,10 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
           <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
             {match.title}
           </span>
+          {/* Subtitle */}
+          <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-400 mt-0.5">
+            {match.title} on damitv.pro
+          </span>
         </div>
         {/* Enhanced date and time display below the card */}
         <div className="flex items-center gap-2 text-gray-400 text-[11px] xs:text-xs sm:text-sm text-left">

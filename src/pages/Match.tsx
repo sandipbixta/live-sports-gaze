@@ -120,8 +120,8 @@ const Match = () => {
     <div className="min-h-screen bg-sports-dark text-sports-light">
       <SEOMetaTags
         title={`${matchTitle} - Live Stream | DamiTV`}
-        description={matchDescription}
-        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, live football streaming`}
+        description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
+        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
         canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
         ogImage={matchPosterUrl}
         matchInfo={{
@@ -133,7 +133,7 @@ const Match = () => {
         breadcrumbs={[
           { name: 'Home', url: 'https://damitv.pro/' },
           { name: 'Live Matches', url: 'https://damitv.pro/live' },
-          { name: matchTitle, url: `https://damitv.pro/match/${sportId}/${matchId}` }
+          { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/match/${sportId}/${matchId}` }
         ]}
       />
 
@@ -164,7 +164,10 @@ const Match = () => {
         </div>
         
         <div className="w-full flex justify-center mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-white text-center max-w-4xl px-4">{match.title}</h1>
+          <div className="text-center max-w-4xl px-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{match.title}</h1>
+            <p className="text-sm md:text-base text-gray-400">{matchTitle} on damitv.pro</p>
+          </div>
         </div>
         
         <StreamTab

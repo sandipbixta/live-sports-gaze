@@ -351,6 +351,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
         <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
           {home && away ? `${home} vs ${away}` : match.title}
         </h3>
+        
+        {/* Subtitle */}
+        <p className="text-xs text-muted-foreground/80 line-clamp-1">
+          {home && away ? `${home} vs ${away}` : match.title} on damitv.pro
+        </p>
 
         {/* Metadata */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

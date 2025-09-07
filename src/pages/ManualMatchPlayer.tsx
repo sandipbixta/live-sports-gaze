@@ -74,9 +74,9 @@ const ManualMatchPlayer = () => {
   
   const seoTitle = `${match.title} Live Stream Free | ${formattedDate} | DamiTV`;
   const seoDescription = match.seo?.description || 
-    `Watch ${match.title} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available.`;
+    `Watch ${match.title} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available. ${match.title} on damitv.pro`;
   const seoKeywords = match.seo?.keywords || 
-    `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}`;
+    `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, ${match.title} on damitv.pro, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}`;
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -170,7 +170,7 @@ const ManualMatchPlayer = () => {
               <h1 className="text-xl font-bold text-white">
                 {match.title}
               </h1>
-              <p className="text-sm text-gray-400">{match.title}</p>
+              <p className="text-sm text-gray-400">{match.title} on damitv.pro</p>
               {selectedLink && (
                 <p className="text-xs text-[#9b87f5]">
                   {selectedLink.name} {selectedLink.quality && `(${selectedLink.quality})`}
