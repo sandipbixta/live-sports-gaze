@@ -97,8 +97,10 @@ const Index = () => {
         try {
           console.log('🔴 Loading live matches...');
           const liveMatchesData = await fetchLiveMatches();
-          setLiveMatches(liveMatchesData);
-          console.log(`✅ Loaded ${liveMatchesData.length} live matches`);
+          // Filter out ended matches from live matches
+          const activeLiveMatches = filterActiveMatches(liveMatchesData);
+          setLiveMatches(activeLiveMatches);
+          console.log(`✅ Loaded ${activeLiveMatches.length} active live matches`);
         } catch (error) {
           console.error('Error loading live matches:', error);
         }
@@ -167,9 +169,9 @@ const Index = () => {
         const rawMatchesData = await fetchMatches(sportId);
         console.log('📥 Raw matches data:', rawMatchesData.length);
         
-        // Filter and consolidate matches to remove duplicates and combine stream sources
-        const cleanMatches = filterCleanMatches(rawMatchesData);
-        console.log('🧹 Clean matches:', cleanMatches.length);
+        // Filter and consolidate matches to remove duplicates, ended matches, and combine stream sources
+        const cleanMatches = filterActiveMatches(filterCleanMatches(rawMatchesData));
+        console.log('🧹 Clean active matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         console.log('🔗 Consolidated matches:', consolidatedMatches.length);
         

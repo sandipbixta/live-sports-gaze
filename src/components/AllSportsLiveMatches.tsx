@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
 import { isTrendingMatch } from '../utils/popularLeagues';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
@@ -31,13 +31,13 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         
         setSports(sportsData);
         
-        // Filter and consolidate live matches
-        const cleanLiveMatches = filterCleanMatches(liveMatchesData);
+        // Filter and consolidate live matches (remove ended matches)
+        const cleanLiveMatches = filterActiveMatches(filterCleanMatches(liveMatchesData));
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
         setLiveMatches(consolidatedLiveMatches);
         
-        // Filter and consolidate all matches (for top league section)
-        const cleanAllMatches = filterCleanMatches(allMatchesData);
+        // Filter and consolidate all matches (for top league section, remove ended matches)
+        const cleanAllMatches = filterActiveMatches(filterCleanMatches(allMatchesData));
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         setAllMatches(consolidatedAllMatches);
         
@@ -63,10 +63,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     loadLiveMatches();
   }, [toast]);
 
-  // Filter matches by search term and time restrictions
+  // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredMatches = React.useMemo(() => {
-    const now = Date.now();
-    
     let matches = liveMatches;
     
     // Apply search filter if provided
@@ -79,18 +77,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       });
     }
     
-    // Apply time-based filtering for football matches
-    return matches.filter(match => {
-      const timeSinceStart = now - match.date;
-      
-      // Hide football matches after 2.5 hours (150 minutes)
-      const isFootball = (match.sportId || match.category || '').toLowerCase() === 'football';
-      if (isFootball && timeSinceStart > 150 * 60 * 1000) {
-        return false;
-      }
-      
-      return true;
-    });
+    return matches;
   }, [liveMatches, searchTerm]);
 
   // Group matches by sport
@@ -203,13 +190,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         const topLeagueFootballMatches = allFootballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
-            const now = Date.now();
-            const timeSinceStart = now - match.date;
-            
-            // Hide football matches after 2.5 hours (150 minutes)
-            if (timeSinceStart > 150 * 60 * 1000) {
-              return false;
-            }
             
             // Exclude lower league and non-professional matches
             if (excludeKeywords.some(keyword => title.includes(keyword))) {
