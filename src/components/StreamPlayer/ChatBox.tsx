@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ChatBox: React.FC = () => {
   useEffect(() => {
-    // Create and append the Chatango script
+    // Create and append the Chatango script with new embed code
     const script = document.createElement('script');
     script.id = 'cid0020000418580169573';
     script.setAttribute('data-cfasync', 'false');
@@ -47,10 +48,12 @@ const ChatBox: React.FC = () => {
   }, []);
 
   return (
-    <div 
-      id="chatbox-container" 
-      className="w-[200px] h-[300px] bg-background border border-border rounded-lg overflow-hidden shadow-lg"
-    />
+    <ScrollArea className="w-[200px] h-[300px] bg-background border border-border rounded-lg shadow-lg">
+      <div 
+        id="chatbox-container" 
+        className="w-full h-full"
+      />
+    </ScrollArea>
   );
 };
 
