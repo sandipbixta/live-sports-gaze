@@ -6,6 +6,7 @@ import IframeVideoPlayer from './IframeVideoPlayer';
 import VideoPlayerSelector from './VideoPlayerSelector';
 import CustomChannelPlayer from './CustomChannelPlayer';
 import ExtractedVideoPlayer from './ExtractedVideoPlayer';
+import ChatBox from './ChatBox';
 
 export type PlayerType = 'simple' | 'html5' | 'iframe' | 'basic' | 'custom' | 'extracted';
 
@@ -69,22 +70,36 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
     case 'extracted':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
-          <ExtractedVideoPlayer
-            embedUrl={embedUrl}
-            title={title}
-            onError={handleError}
-          />
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <ExtractedVideoPlayer
+                embedUrl={embedUrl}
+                title={title}
+                onError={handleError}
+              />
+            </div>
+            <div className="hidden lg:block">
+              <ChatBox />
+            </div>
+          </div>
         </div>
       );
     
     case 'custom':
       return (
         <div className={`${isTheaterMode ? 'w-full max-w-none' : 'w-full max-w-5xl mx-auto'}`}>
-          <CustomChannelPlayer
-            embedUrl={embedUrl}
-            title={title}
-            onError={handleError}
-          />
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <CustomChannelPlayer
+                embedUrl={embedUrl}
+                title={title}
+                onError={handleError}
+              />
+            </div>
+            <div className="hidden lg:block">
+              <ChatBox />
+            </div>
+          </div>
         </div>
       );
     
