@@ -8,6 +8,7 @@ import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 import Advertisement from '@/components/Advertisement';
 import AdultBannerAd from '@/components/AdultBannerAd';
+import ChatBox from '@/components/StreamPlayer/ChatBox';
 
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
@@ -227,21 +228,28 @@ const ManualMatchPlayer = () => {
                 <Advertisement type="video" className="w-full" />
               </div>
               
-              <div className="relative aspect-video bg-black" data-player-container>
-                {selectedLink ? (
-                  <VideoPlayerSelector
-                    src={selectedLink.url}
-                    onLoad={handleVideoLoad}
-                    onError={handleVideoError}
-                    videoRef={videoRef}
-                    title={`${match.title} Stream`}
-                    isManualChannel={true}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-white">
-                    <p>No stream available</p>
-                  </div>
-                )}
+              <div className="relative aspect-video bg-black flex gap-4" data-player-container>
+                <div className="flex-1">
+                  {selectedLink ? (
+                    <VideoPlayerSelector
+                      src={selectedLink.url}
+                      onLoad={handleVideoLoad}
+                      onError={handleVideoError}
+                      videoRef={videoRef}
+                      title={`${match.title} Stream`}
+                      isManualChannel={true}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-white aspect-video">
+                      <p>No stream available</p>
+                    </div>
+                  )}
+                </div>
+                
+                {/* ChatBox positioned on the right */}
+                <div className="hidden lg:block">
+                  <ChatBox />
+                </div>
               </div>
             </div>
           </div>

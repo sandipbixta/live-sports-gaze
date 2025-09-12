@@ -2,7 +2,6 @@
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.pk/api';
-const STREAMS_API_BASE = 'https://api.allorigins.win/raw?url=https://streamsapi.com/api/streams';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -24,8 +23,8 @@ const setCachedData = (key: string, data: any) => {
 
 // Helper function to filter and reorder sports list
 const filterAndReorderSports = (sports: Sport[]): Sport[] => {
-  // Filter out unwanted sports: golf, hockey, billiards, darts, football (football will come from streams API)
-  const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football'];
+  // Filter out unwanted sports: golf, hockey, billiards, darts
+  const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
   const filteredSports = sports.filter(sport => 
     !excludedSports.includes(sport.id.toLowerCase())
   );
@@ -39,34 +38,6 @@ const filterAndReorderSports = (sports: Sport[]): Sport[] => {
   
   // Add tennis at the end
   return [...sportsWithoutTennis, tennisSport];
-};
-
-// New function to fetch football data from streams API
-const fetchFootballFromStreamsAPI = async (): Promise<Sport[]> => {
-  try {
-    const response = await fetch(STREAMS_API_BASE, {
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const data = await response.json();
-    
-    if (data.success && data.streams) {
-      // Look for football/soccer category in streams
-      const footballCategory = data.streams.find((stream: any) => 
-        stream.category.toLowerCase().includes('football') || 
-        stream.category.toLowerCase().includes('soccer')
-      );
-      
-      if (footballCategory) {
-        return [{ id: 'football', name: 'Football' }];
-      }
-    }
-    return [];
-  } catch (error) {
-    console.error('❌ Error fetching football from streams API:', error);
-    return [];
-  }
 };
 
 export const fetchSports = async (): Promise<Sport[]> => {
@@ -98,16 +69,11 @@ export const fetchSports = async (): Promise<Sport[]> => {
       throw new Error('Invalid sports data format');
     }
     
-    // Filter and reorder sports (excluding football)
+    // Filter and reorder sports
     const reorderedData = filterAndReorderSports(data);
-    
-    // Add football from streams API
-    const footballSports = await fetchFootballFromStreamsAPI();
-    const finalData = [...footballSports, ...reorderedData];
-    
-    setCachedData(cacheKey, finalData);
-    console.log(`✅ Fetched ${finalData.length} sports (${footballSports.length} from streams API, ${reorderedData.length} from streamed.pk)`);
-    return finalData;
+    setCachedData(cacheKey, reorderedData);
+    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
+    return reorderedData;
   } catch (error) {
     console.error('❌ Error fetching sports from streamed.pk:', error);
     
@@ -124,11 +90,9 @@ export const fetchSports = async (): Promise<Sport[]> => {
           const retryData = await retryResponse.json();
           if (Array.isArray(retryData)) {
             const reorderedRetryData = filterAndReorderSports(retryData);
-            const footballSports = await fetchFootballFromStreamsAPI();
-            const finalRetryData = [...footballSports, ...reorderedRetryData];
-            setCachedData(cacheKey, finalRetryData);
-            console.log(`✅ Mobile retry successful: ${finalRetryData.length} sports`);
-            return finalRetryData;
+            setCachedData(cacheKey, reorderedRetryData);
+            console.log(`✅ Mobile retry successful: ${reorderedRetryData.length} sports`);
+            return reorderedRetryData;
           }
         }
       } catch (retryError) {
@@ -140,87 +104,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
   }
 };
 
-// Function to fetch football matches from streams API
-const fetchFootballMatchesFromStreamsAPI = async (): Promise<Match[]> => {
-  try {
-    const response = await fetch(STREAMS_API_BASE, {
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const data = await response.json();
-    
-    if (!data.success || !data.streams) {
-      throw new Error('Invalid streams data format');
-    }
-    
-    const footballMatches: Match[] = [];
-    
-    // Find football/soccer categories and extract matches
-    data.streams.forEach((category: any) => {
-      if (category.category.toLowerCase().includes('football') || 
-          category.category.toLowerCase().includes('soccer')) {
-        
-        category.streams.forEach((stream: any) => {
-          footballMatches.push({
-            id: stream.id.toString(),
-            title: stream.name,
-            category: 'football',
-            date: stream.starts_at * 1000, // Convert to milliseconds
-            poster: stream.poster,
-            popular: stream.always_live === 1,
-            teams: parseTeamsFromTitle(stream.name),
-            sources: [{
-              source: 'streams-api',
-              id: stream.uri_name || stream.id.toString()
-            }],
-            sportId: 'football'
-          });
-        });
-      }
-    });
-    
-    console.log(`✅ Fetched ${footballMatches.length} football matches from streams API`);
-    return footballMatches;
-  } catch (error) {
-    console.error('❌ Error fetching football matches from streams API:', error);
-    return [];
-  }
-};
-
-// Helper function to parse teams from match title
-const parseTeamsFromTitle = (title: string) => {
-  const patterns = [
-    / vs /i,
-    / v /i,
-    / at /i,
-    / @ /i
-  ];
-  
-  for (const pattern of patterns) {
-    const parts = title.split(pattern);
-    if (parts.length === 2) {
-      return {
-        home: { name: parts[0].trim() },
-        away: { name: parts[1].trim() }
-      };
-    }
-  }
-  
-  return undefined;
-};
-
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const cacheKey = `matches-${sportId}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
-
-  // If requesting football, get from streams API
-  if (sportId.toLowerCase() === 'football') {
-    const footballMatches = await fetchFootballMatchesFromStreamsAPI();
-    setCachedData(cacheKey, footballMatches);
-    return footballMatches;
-  }
 
   // Detect mobile and adjust timeout
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -263,14 +150,9 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       const matchCategory = (match.category || match.sportId || '').toLowerCase();
       const requestedSport = sportId.toLowerCase();
       
-      // If requesting 'all', include everything except football (handled by streams API)
+      // If requesting 'all', include everything
       if (requestedSport === 'all') {
-        return matchCategory !== 'football';
-      }
-      
-      // Skip football matches from this API (handled by streams API)
-      if (matchCategory === 'football' || matchCategory === 'soccer') {
-        return false;
+        return true;
       }
       
       // Exact match first
@@ -279,8 +161,9 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       }
       
       // Create comprehensive sport mapping to handle API inconsistencies
-      // Excluded: golf, hockey, billiards, football (handled separately)
+      // Excluded: golf, hockey, billiards
       const sportMapping: { [key: string]: string[] } = {
+        'football': ['football', 'soccer'],
         'basketball': ['basketball', 'basket'],
         'tennis': ['tennis'],
         'baseball': ['baseball'],
@@ -402,12 +285,6 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    // Fetch football matches from streams API  
-    const footballMatches = await fetchFootballMatchesFromStreamsAPI();
-    const currentTime = Date.now();
-    const liveFootballMatches = footballMatches.filter(match => 
-      match.date <= currentTime && match.date > currentTime - (3 * 60 * 60 * 1000) // Within last 3 hours
-    );
     const response = await fetch(`${API_BASE}/matches/live`, {
       headers: {
 'Accept': 'application/json'
@@ -430,7 +307,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     // Filter out excluded sports: golf, hockey, billiards, darts
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football']; // Exclude football from streamed.pk
+      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
       return !excludedSports.includes(sportCategory);
     });
     
@@ -449,8 +326,6 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    // Fetch football matches from streams API
-    const footballMatches = await fetchFootballMatchesFromStreamsAPI();
     const response = await fetch(`${API_BASE}/matches/all`, {
       headers: {
 'Accept': 'application/json'
@@ -473,16 +348,13 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     // Filter out excluded sports: golf, hockey, billiards, darts
     .filter(match => {
       const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football']; // Exclude football from streamed.pk
+      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
       return !excludedSports.includes(sportCategory);
     });
     
-    // Combine football matches from streams API with other matches from streamed.pk
-    const allMatches = [...footballMatches, ...validMatches];
-    
-    setCachedData(cacheKey, allMatches);
-    console.log(`✅ Fetched ${allMatches.length} matches (${footballMatches.length} football from streams API, ${validMatches.length} others from streamed.pk)`);
-    return allMatches;
+    setCachedData(cacheKey, validMatches);
+    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
+    return validMatches;
   } catch (error) {
     console.error('❌ Error fetching all matches from streamed.pk:', error);
     throw error;
@@ -523,49 +395,7 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   }
 };
 
-// Function to fetch stream from streams API for football
-const fetchStreamFromStreamsAPI = async (id: string): Promise<Stream> => {
-  try {
-    const response = await fetch(STREAMS_API_BASE, {
-      headers: { 'Accept': 'application/json' }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const data = await response.json();
-    
-    if (!data.success || !data.streams) {
-      throw new Error('Invalid streams data format');
-    }
-    
-    // Find the specific stream by ID
-    for (const category of data.streams) {
-      const stream = category.streams.find((s: any) => s.uri_name === id || s.id.toString() === id);
-      if (stream && stream.iframe) {
-        return {
-          id: stream.id.toString(),
-          streamNo: 1,
-          language: 'en',
-          hd: true,
-          embedUrl: stream.iframe,
-          source: 'streams-api',
-          timestamp: Date.now()
-        };
-      }
-    }
-    
-    throw new Error(`Stream ${id} not found in streams API`);
-  } catch (error) {
-    console.error('❌ Error fetching stream from streams API:', error);
-    throw error;
-  }
-};
-
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
-  // Handle streams API source
-  if (source === 'streams-api') {
-    return await fetchStreamFromStreamsAPI(id);
-  }
-
   // Allow all available sources as per API documentation
   const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
   if (!allowedSources.includes(source.toLowerCase())) {

@@ -4,6 +4,7 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
+import ChatBox from './ChatBox';
 
 
 interface SimpleVideoPlayerProps {
@@ -201,12 +202,13 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   return (
     <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl mx-auto'}`}>
-      <div 
-        ref={containerRef}
-        className={`relative bg-black rounded-2xl overflow-hidden ${
-          isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
-        }`}
-      >
+      <div className="flex gap-4">
+        <div 
+          ref={containerRef}
+          className={`relative bg-black rounded-2xl overflow-hidden flex-1 ${
+            isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
+          }`}
+        >
       {isM3U8 ? (
         <video
           ref={videoRef}
@@ -271,8 +273,15 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </Button>
       </div>
 
+        </div>
+        
+        {/* ChatBox positioned on the right */}
+        {!isFullscreen && (
+          <div className="hidden lg:block">
+            <ChatBox />
+          </div>
+        )}
       </div>
-      
     </div>
   );
 };
