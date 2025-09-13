@@ -27,6 +27,7 @@ import TelegramBanner from '../components/TelegramBanner';
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
+const TopFootballLeagues = React.lazy(() => import('../components/TopFootballLeagues'));
 
 const Index = () => {
   const { toast } = useToast();
@@ -250,7 +251,10 @@ const Index = () => {
         
         {!showLiveSports && (
           <>
-            
+            {/* Top Football Leagues Section */}
+            <React.Suspense fallback={<div className="h-48 bg-muted rounded-lg animate-pulse mb-8" />}>
+              <TopFootballLeagues />
+            </React.Suspense>
             
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
