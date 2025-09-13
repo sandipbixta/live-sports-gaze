@@ -2,15 +2,48 @@
 import { Sport, Match, Stream } from '../types/sports';
 
 const API_BASE = 'https://streamed.pk/api';
+const PPV_API_BASE = 'https://ppv.to/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const PPV_CACHE_DURATION = 1 * 60 * 1000; // 1 minute for ppv.to as recommended
+
+// PPV.to API Response Types
+interface PPVStream {
+  id: number;
+  name: string;
+  tag: string;
+  poster: string;
+  uri_name: string;
+  starts_at: number;
+  ends_at: number;
+  always_live: number;
+  category_name: string;
+  iframe?: string;
+  allowpaststreams: number;
+}
+
+interface PPVCategory {
+  category: string;
+  id: number;
+  always_live: number;
+  streams: PPVStream[];
+}
+
+interface PPVResponse {
+  success: boolean;
+  timestamp: number;
+  READ_ME: string;
+  performance: number;
+  streams: PPVCategory[];
+}
 
 // Helper function to get cached data
-const getCachedData = (key: string) => {
+const getCachedData = (key: string, customDuration?: number) => {
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+  const duration = customDuration || CACHE_DURATION;
+  if (cached && Date.now() - cached.timestamp < duration) {
     return cached.data;
   }
   return null;
@@ -21,10 +54,103 @@ const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
+// PPV.to API functions
+const fetchPPVStreams = async (): Promise<PPVResponse> => {
+  const cacheKey = 'ppv-streams';
+  const cached = getCachedData(cacheKey, PPV_CACHE_DURATION);
+  if (cached) return cached;
+
+  try {
+    console.log('📡 Fetching streams from ppv.to API...');
+    const response = await fetch(`${PPV_API_BASE}/streams`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) throw new Error(`PPV.to API HTTP ${response.status}: ${response.statusText}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error('PPV.to API returned unsuccessful response');
+    }
+
+    setCachedData(cacheKey, data);
+    console.log(`✅ Fetched PPV.to streams: ${data.streams?.length || 0} categories`);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching from ppv.to API:', error);
+    throw error;
+  }
+};
+
+const transformPPVMatch = (ppvStream: PPVStream): Match => {
+  // Convert PPV stream to our Match format
+  return {
+    id: `ppv-${ppvStream.id}`,
+    title: ppvStream.name,
+    category: 'football',
+    date: ppvStream.starts_at * 1000, // Convert Unix timestamp to milliseconds
+    poster: ppvStream.poster,
+    popular: false,
+    teams: undefined, // PPV.to doesn't provide team structure
+    sources: [{
+      source: 'ppv',
+      id: ppvStream.uri_name
+    }],
+    sportId: 'football',
+    // Store PPV-specific data for later use
+    ppvData: {
+      iframe: ppvStream.iframe,
+      endsAt: ppvStream.ends_at * 1000,
+      alwaysLive: ppvStream.always_live === 1,
+      tag: ppvStream.tag,
+      allowPastStreams: ppvStream.allowpaststreams === 1
+    }
+  } as Match & { ppvData: any };
+};
+
+const transformPPVStream = (ppvMatch: Match & { ppvData: any }): Stream => {
+  // Convert PPV match to our Stream format
+  return {
+    id: ppvMatch.id,
+    streamNo: 1,
+    language: 'English',
+    hd: true,
+    embedUrl: ppvMatch.ppvData?.iframe || '',
+    source: 'ppv',
+    timestamp: Date.now()
+  };
+};
+
+const fetchFootballFromPPV = async (): Promise<Match[]> => {
+  try {
+    const ppvData = await fetchPPVStreams();
+    const footballCategory = ppvData.streams.find(cat => 
+      cat.category.toLowerCase() === 'football'
+    );
+
+    if (!footballCategory) {
+      console.warn('⚠️ No football category found in PPV.to streams');
+      return [];
+    }
+
+    const footballMatches = footballCategory.streams
+      .filter(stream => stream.iframe) // Only include streams with iframe available
+      .map(transformPPVMatch);
+
+    console.log(`✅ Transformed ${footballMatches.length} football matches from PPV.to`);
+    return footballMatches;
+  } catch (error) {
+    console.error('❌ Error fetching football from PPV.to:', error);
+    return []; // Return empty array instead of throwing to maintain other sports functionality
+  }
+};
+
 // Helper function to filter and reorder sports list
 const filterAndReorderSports = (sports: Sport[]): Sport[] => {
-  // Filter out unwanted sports: golf, hockey, billiards, darts
-  const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
+  // Filter out unwanted sports: golf, hockey, billiards, darts, and football (will be added from PPV.to)
+  const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football'];
   const filteredSports = sports.filter(sport => 
     !excludedSports.includes(sport.id.toLowerCase())
   );
@@ -69,11 +195,16 @@ export const fetchSports = async (): Promise<Sport[]> => {
       throw new Error('Invalid sports data format');
     }
     
-    // Filter and reorder sports
+    // Filter and reorder sports (excludes football)
     const reorderedData = filterAndReorderSports(data);
-    setCachedData(cacheKey, reorderedData);
-    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
-    return reorderedData;
+    
+    // Add football from PPV.to
+    const footballSport: Sport = { id: 'football', name: 'Football' };
+    const finalSports = [footballSport, ...reorderedData];
+    
+    setCachedData(cacheKey, finalSports);
+    console.log(`✅ Fetched ${finalSports.length} sports (football from PPV.to, others from streamed.pk)`);
+    return finalSports;
   } catch (error) {
     console.error('❌ Error fetching sports from streamed.pk:', error);
     
@@ -105,6 +236,17 @@ export const fetchSports = async (): Promise<Sport[]> => {
 };
 
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
+  // If requesting football, fetch from PPV.to
+  if (sportId.toLowerCase() === 'football') {
+    const cacheKey = `matches-football-ppv`;
+    const cached = getCachedData(cacheKey, PPV_CACHE_DURATION);
+    if (cached) return cached;
+    
+    const footballMatches = await fetchFootballFromPPV();
+    setCachedData(cacheKey, footballMatches);
+    return footballMatches;
+  }
+
   const cacheKey = `matches-${sportId}`;
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
@@ -285,35 +427,57 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${API_BASE}/matches/live`, {
-      headers: {
+    // Fetch live matches from both APIs
+    const [streamedMatches, footballMatches] = await Promise.allSettled([
+      // Streamed.pk live matches (excluding football)
+      fetch(`${API_BASE}/matches/live`, {
+        headers: {
 'Accept': 'application/json'
+        }
+      }).then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return response.json();
+      }),
+      // PPV.to football matches
+      fetchFootballFromPPV()
+    ]);
+
+    let allMatches: Match[] = [];
+
+    // Process streamed.pk matches
+    if (streamedMatches.status === 'fulfilled') {
+      const matches = streamedMatches.value;
+      if (Array.isArray(matches)) {
+        const validMatches = matches.filter(match => 
+          match && match.id && match.title && match.date && Array.isArray(match.sources)
+        ).map(match => ({
+          ...match,
+          sportId: match.category
+        }))
+        // Filter out excluded sports: golf, hockey, billiards, darts, football
+        .filter(match => {
+          const sportCategory = (match.sportId || match.category || '').toLowerCase();
+          const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football'];
+          return !excludedSports.includes(sportCategory);
+        });
+        allMatches = [...allMatches, ...validMatches];
       }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const matches = await response.json();
-    
-    if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
+    }
+
+    // Process PPV.to football matches (filter for live ones)
+    if (footballMatches.status === 'fulfilled') {
+      const footballLiveMatches = footballMatches.value.filter(match => {
+        const now = Date.now();
+        const matchTime = match.date;
+        const matchEnd = (match as any).ppvData?.endsAt || matchTime + (3 * 60 * 60 * 1000); // Default 3 hours if no end time
+        return matchTime <= now && now <= matchEnd;
+      });
+      allMatches = [...allMatches, ...footballLiveMatches];
     }
     
-    const validMatches = matches.filter(match => 
-      match && match.id && match.title && match.date && Array.isArray(match.sources)
-    ).map(match => ({
-      ...match,
-      sportId: match.category
-    }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
-    .filter(match => {
-      const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
-      return !excludedSports.includes(sportCategory);
-    });
-    
-    setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
-    return validMatches;
+    setCachedData(cacheKey, allMatches);
+    console.log(`✅ Fetched ${allMatches.length} live matches (combined from both APIs)`);
+    return allMatches;
   } catch (error) {
     console.error('❌ Error fetching live matches from streamed.pk:', error);
     throw error;
@@ -326,35 +490,51 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${API_BASE}/matches/all`, {
-      headers: {
+    // Fetch all matches from both APIs
+    const [streamedMatches, footballMatches] = await Promise.allSettled([
+      // Streamed.pk all matches (excluding football)
+      fetch(`${API_BASE}/matches/all`, {
+        headers: {
 'Accept': 'application/json'
+        }
+      }).then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return response.json();
+      }),
+      // PPV.to football matches
+      fetchFootballFromPPV()
+    ]);
+
+    let allMatches: Match[] = [];
+
+    // Process streamed.pk matches
+    if (streamedMatches.status === 'fulfilled') {
+      const matches = streamedMatches.value;
+      if (Array.isArray(matches)) {
+        const validMatches = matches.filter(match => 
+          match && match.id && match.title && match.date && Array.isArray(match.sources)
+        ).map(match => ({
+          ...match,
+          sportId: match.category
+        }))
+        // Filter out excluded sports: golf, hockey, billiards, darts, football
+        .filter(match => {
+          const sportCategory = (match.sportId || match.category || '').toLowerCase();
+          const excludedSports = ['golf', 'hockey', 'billiards', 'darts', 'football'];
+          return !excludedSports.includes(sportCategory);
+        });
+        allMatches = [...allMatches, ...validMatches];
       }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const matches = await response.json();
-    
-    if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
+    }
+
+    // Process PPV.to football matches
+    if (footballMatches.status === 'fulfilled') {
+      allMatches = [...allMatches, ...footballMatches.value];
     }
     
-    const validMatches = matches.filter(match => 
-      match && match.id && match.title && match.date && Array.isArray(match.sources)
-    ).map(match => ({
-      ...match,
-      sportId: match.category
-    }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
-    .filter(match => {
-      const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
-      return !excludedSports.includes(sportCategory);
-    });
-    
-    setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
-    return validMatches;
+    setCachedData(cacheKey, allMatches);
+    console.log(`✅ Fetched ${allMatches.length} matches (combined from both APIs)`);
+    return allMatches;
   } catch (error) {
     console.error('❌ Error fetching all matches from streamed.pk:', error);
     throw error;
@@ -367,8 +547,11 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   if (cached) return cached;
 
   try {
+    // Determine cache key based on sport
+    const matchesCacheKey = sportId.toLowerCase() === 'football' ? 'matches-football-ppv' : `matches-${sportId}`;
+    
     // First try to get from cached matches
-    const cachedMatches = getCachedData(`matches-${sportId}`);
+    const cachedMatches = getCachedData(matchesCacheKey, sportId.toLowerCase() === 'football' ? PPV_CACHE_DURATION : CACHE_DURATION);
     if (cachedMatches) {
       const match = cachedMatches.find((m: Match) => m.id === matchId);
       if (match) {
@@ -396,7 +579,34 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 };
 
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
-  // Allow all available sources as per API documentation
+  // Handle PPV.to streams differently
+  if (source === 'ppv') {
+    const cacheKey = `stream-ppv-${id}`;
+    const cached = getCachedData(cacheKey, PPV_CACHE_DURATION);
+    if (cached) return cached;
+
+    try {
+      // Find the PPV match by uri_name
+      const footballMatches = await fetchFootballFromPPV();
+      const ppvMatch = footballMatches.find(match => 
+        match.sources.some(s => s.id === id)
+      ) as Match & { ppvData: any };
+
+      if (!ppvMatch || !ppvMatch.ppvData?.iframe) {
+        throw new Error(`PPV stream not found or iframe not available for ${id}`);
+      }
+
+      const stream = transformPPVStream(ppvMatch);
+      setCachedData(cacheKey, stream);
+      console.log(`✅ Found PPV.to stream for ${id}`);
+      return stream;
+    } catch (error) {
+      console.error(`❌ Error fetching PPV.to stream for ${id}:`, error);
+      throw error;
+    }
+  }
+
+  // Allow all available sources as per API documentation for streamed.pk
   const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
   if (!allowedSources.includes(source.toLowerCase())) {
     throw new Error(`Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
