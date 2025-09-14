@@ -43,12 +43,13 @@ const filterAndReorderSports = (sports: Sport[]): Sport[] => {
 
 // Transform SSSS API streams to our format
 const transformSSSSStreamToMatch = (stream: any): Match => {
+  const category = stream.category || stream.sport || 'other';
   return {
     id: stream.id?.toString() || '',
-    title: stream.name || 'Unknown Stream',
-    category: stream.category || 'other',
+    title: stream.name || stream.title || 'Unknown Stream',
+    category: category,
     date: Date.now(), // SSSS streams appear to be live
-    poster: stream.poster || '',
+    poster: stream.poster || stream.image || '',
     popular: false,
     sources: [{
       source: 'ssss',
@@ -64,26 +65,69 @@ export const fetchSports = async (): Promise<Sport[]> => {
   if (cached) return cached;
 
   try {
+    console.log('📡 Fetching from SSSS API...');
     const response = await fetch(`${SSSS_API_BASE}/stream/list?language=en&access-token=${SSSS_ACCESS_TOKEN}`, {
       headers: {
-        'Accept': 'application/json'
-      }
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      mode: 'cors'
     });
     
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    console.log('📡 SSSS API Response status:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
     const data = await response.json();
     
-    if (!Array.isArray(data)) {
-      throw new Error('Invalid SSSS API data format');
+    console.log('📡 SSSS API Response:', data);
+    console.log('📡 SSSS API Response type:', typeof data);
+    console.log('📡 SSSS API Response is array:', Array.isArray(data));
+    
+    // Handle different response formats
+    let streams = [];
+    if (Array.isArray(data)) {
+      streams = data;
+    } else if (data && typeof data === 'object') {
+      // If it's an object, check for common array properties
+      if (data.streams && Array.isArray(data.streams)) {
+        streams = data.streams;
+      } else if (data.data && Array.isArray(data.data)) {
+        streams = data.data;
+      } else if (data.results && Array.isArray(data.results)) {
+        streams = data.results;
+      } else {
+        // If it's an object with properties, try to extract values
+        const values = Object.values(data);
+        console.log('📡 Object values:', values);
+        if (values.length > 0 && Array.isArray(values[0])) {
+          streams = values[0];
+        } else {
+          console.log('📡 Unexpected SSSS API structure:', Object.keys(data));
+          // Return fallback sports instead of throwing
+          return getFallbackSports();
+        }
+      }
+    } else {
+      console.log('📡 Invalid SSSS API data format - returning fallback');
+      return getFallbackSports();
+    }
+    
+    if (!Array.isArray(streams) || streams.length === 0) {
+      console.warn('⚠️ No streams found in SSSS API response - returning fallback');
+      return getFallbackSports();
     }
     
     // Extract unique categories/sports from streams
     const sportsMap = new Map<string, Sport>();
     
-    data.forEach((stream: any) => {
-      if (stream.category && stream.name) {
-        const sportId = stream.category.toLowerCase().replace(/\s+/g, '-');
-        const sportName = stream.category;
+    streams.forEach((stream: any) => {
+      if (stream && (stream.category || stream.sport)) {
+        const category = stream.category || stream.sport;
+        const sportId = category.toLowerCase().replace(/\s+/g, '-');
+        const sportName = category;
         
         if (!sportsMap.has(sportId)) {
           sportsMap.set(sportId, {
@@ -95,14 +139,37 @@ export const fetchSports = async (): Promise<Sport[]> => {
     });
     
     const sports = Array.from(sportsMap.values());
+    if (sports.length === 0) {
+      console.warn('⚠️ No sports extracted from streams - returning fallback');
+      return getFallbackSports();
+    }
+    
     const reorderedData = filterAndReorderSports(sports);
     setCachedData(cacheKey, reorderedData);
     console.log(`✅ Fetched ${reorderedData.length} sports from SSSS API`);
     return reorderedData;
   } catch (error) {
     console.error('❌ Error fetching sports from SSSS API:', error);
-    throw error;
+    console.log('📡 Returning fallback sports data');
+    return getFallbackSports();
   }
+};
+
+// Fallback sports data in case API fails
+const getFallbackSports = (): Sport[] => {
+  return [
+    { id: 'football', name: 'Football' },
+    { id: 'basketball', name: 'Basketball' },
+    { id: 'american-football', name: 'American Football' },
+    { id: 'hockey', name: 'Hockey' },
+    { id: 'baseball', name: 'Baseball' },
+    { id: 'motor-sports', name: 'Motor Sports' },
+    { id: 'fight', name: 'Fight (UFC, Boxing)' },
+    { id: 'tennis', name: 'Tennis' },
+    { id: 'rugby', name: 'Rugby' },
+    { id: 'cricket', name: 'Cricket' },
+    { id: 'other', name: 'Other' }
+  ];
 };
 
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
@@ -120,13 +187,37 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    if (!Array.isArray(data)) {
-      throw new Error('Invalid SSSS API data format');
+    console.log('📡 SSSS API Matches Response:', data);
+    
+    // Handle different response formats
+    let streams = [];
+    if (Array.isArray(data)) {
+      streams = data;
+    } else if (data && typeof data === 'object') {
+      // Check for common array properties
+      if (data.streams && Array.isArray(data.streams)) {
+        streams = data.streams;
+      } else if (data.data && Array.isArray(data.data)) {
+        streams = data.data;
+      } else if (data.results && Array.isArray(data.results)) {
+        streams = data.results;
+      } else {
+        // Try to extract array values
+        const values = Object.values(data);
+        if (values.length > 0 && Array.isArray(values[0])) {
+          streams = values[0];
+        }
+      }
+    }
+    
+    if (!Array.isArray(streams)) {
+      console.warn('⚠️ No valid streams array found in SSSS API response');
+      return [];
     }
     
     // Transform streams to matches and filter by sport
-    const allMatches = data
-      .filter((stream: any) => stream && stream.id && stream.name && stream.category)
+    const allMatches = streams
+      .filter((stream: any) => stream && stream.id && stream.name)
       .map(transformSSSSStreamToMatch);
     
     // Filter by requested sport
@@ -155,19 +246,42 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     const response = await fetch(`${SSSS_API_BASE}/stream/list?language=en&access-token=${SSSS_ACCESS_TOKEN}`, {
       headers: {
         'Accept': 'application/json'
-      }
+      },
+      mode: 'cors'
     });
     
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    if (!Array.isArray(data)) {
-      throw new Error('Invalid SSSS API data format');
+    console.log('📡 SSSS API Live Response:', data);
+    
+    // Handle different response formats
+    let streams = [];
+    if (Array.isArray(data)) {
+      streams = data;
+    } else if (data && typeof data === 'object') {
+      if (data.streams && Array.isArray(data.streams)) {
+        streams = data.streams;
+      } else if (data.data && Array.isArray(data.data)) {
+        streams = data.data;
+      } else if (data.results && Array.isArray(data.results)) {
+        streams = data.results;
+      } else {
+        const values = Object.values(data);
+        if (values.length > 0 && Array.isArray(values[0])) {
+          streams = values[0];
+        }
+      }
+    }
+    
+    if (!Array.isArray(streams)) {
+      console.warn('⚠️ No valid streams found in SSSS API live response');
+      return [];
     }
     
     // All SSSS streams are considered live
-    const liveMatches = data
-      .filter((stream: any) => stream && stream.id && stream.name && stream.category)
+    const liveMatches = streams
+      .filter((stream: any) => stream && stream.id && stream.name)
       .map(transformSSSSStreamToMatch);
     
     setCachedData(cacheKey, liveMatches);
@@ -175,7 +289,8 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     return liveMatches;
   } catch (error) {
     console.error('❌ Error fetching live matches from SSSS API:', error);
-    throw error;
+    // Return empty array instead of throwing to prevent app crash
+    return [];
   }
 };
 
