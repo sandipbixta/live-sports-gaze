@@ -13,7 +13,6 @@ export interface Team {
 export interface Source {
   source: string;
   id: string;
-  embedUrl?: string; // For direct embed URLs from SSSS API
 }
 
 export interface Match {

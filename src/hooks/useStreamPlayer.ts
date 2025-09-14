@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source } from '../types/sports';
-import { fetchStream } from '../api/sportsApi';
+import { fetchStream, fetchAllStreams } from '../api/sportsApi';
 
 export const useStreamPlayer = () => {
   const { toast } = useToast();
@@ -11,50 +11,39 @@ export const useStreamPlayer = () => {
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
 
-  // Simplified function to fetch streams for SSSS API
+  // Enhanced function to fetch ALL streams from ALL sources
   const fetchAllMatchStreams = useCallback(async (match: Match) => {
     setStreamLoading(true);
     
     try {
-      console.log(`🎯 Fetching streams for match: ${match.title}`);
+      console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
       
-      if (!match.sources || match.sources.length === 0) {
-        throw new Error('No sources available for this match');
-      }
+      const streamsData = await fetchAllStreams(match);
+      setAllStreams(streamsData);
       
-      // For SSSS API, we directly use the first available source
-      const firstSource = match.sources[0];
-      const streamData = await fetchStream(firstSource.source, firstSource.id);
-      
-      // Handle the response
-      let selectedStream: Stream | null = null;
-      
-      if (Array.isArray(streamData)) {
-        selectedStream = streamData.find(s => s.hd) || streamData[0];
-      } else if (streamData) {
-        selectedStream = streamData;
-      }
-      
-      if (selectedStream) {
-        setCurrentStream({
-          ...selectedStream,
-          timestamp: Date.now()
-        });
-        setActiveSource(`${firstSource.source}/${firstSource.id}`);
-        console.log(`✅ Stream loaded successfully`);
+      // Auto-select the first available HD stream or fallback to first stream
+      const firstSource = Object.keys(streamsData)[0];
+      if (firstSource && streamsData[firstSource].length > 0) {
+        const streams = streamsData[firstSource];
+        const hdStream = streams.find(s => s.hd) || streams[0];
         
-        // Create a simple streams record for compatibility
-        const streamsData = {
-          [`${firstSource.source}/${firstSource.id}`]: Array.isArray(streamData) ? streamData : [streamData]
-        };
-        setAllStreams(streamsData);
+        if (hdStream) {
+          setCurrentStream({
+            ...hdStream,
+            timestamp: Date.now()
+          });
+          setActiveSource(firstSource);
+          console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${firstSource}`);
+        }
       }
+      
+      console.log(`🎬 Total streams loaded: ${Object.values(streamsData).flat().length} from ${Object.keys(streamsData).length} sources`);
       
     } catch (error) {
-      console.error('❌ Error fetching streams:', error);
+      console.error('❌ Error fetching all streams:', error);
       toast({
         title: "Stream Loading Failed", 
-        description: "Unable to load stream for this match. Please try again.",
+        description: "Unable to load streams for this match. Please try again.",
         variant: "destructive"
       });
       setAllStreams({});
