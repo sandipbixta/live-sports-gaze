@@ -1,10 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
-import StreamIframe from './StreamIframe';
-
 
 interface SimpleVideoPlayerProps {
   stream: Stream | null;
@@ -22,19 +19,19 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   onTheaterModeToggle
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
-  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-  const [showExternal, setShowExternal] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
   useEffect(() => {
     setError(false);
+    setIframeLoaded(false);
   }, [stream]);
 
   const handleRetry = () => {
     setError(false);
+    setIframeLoaded(false);
     if (onRetry) {
       onRetry();
     }
@@ -65,93 +62,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // Set up HLS for Android/Chrome when URL is .m3u8
-  useEffect(() => {
-    if (!isM3U8 || !stream?.embedUrl) return;
-    const src = stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl;
+  const handleIframeLoad = () => {
+    setIframeLoaded(true);
+    setError(false);
+  };
 
-    if (videoRef.current && (videoRef.current as any).canPlayType && videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
-      // Native HLS support (Safari)
-      videoRef.current.src = src;
-      return;
-    }
-
-    let hls: Hls | null = null;
-    if (Hls.isSupported() && videoRef.current) {
-      hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-        // Aggressive buffering for smooth playback
-        maxBufferLength: 45, // Larger buffer for ultra-smooth playback
-        maxMaxBufferLength: 90, // Much larger max buffer
-        maxBufferSize: 120 * 1000 * 1000, // 120MB max buffer size
-        maxBufferHole: 1.0, // More tolerance for buffer holes
-        highBufferWatchdogPeriod: 3, // Less frequent buffer checks
-        nudgeOffset: 0.2, // Larger nudge for stability
-        nudgeMaxRetry: 15, // More retry attempts
-        maxLoadingDelay: 6, // More time for loading
-        maxFragLookUpTolerance: 0.5, // More tolerance
-        liveSyncDurationCount: 5, // More live sync segments
-        liveMaxLatencyDurationCount: 15, // Higher max latency for stability
-        enableSoftwareAES: true,
-        startFragPrefetch: true,
-        testBandwidth: true,
-        // Ultra-optimized buffering for stability
-        backBufferLength: 20, // Keep much more back buffer
-        capLevelToPlayerSize: false, // Don't restrict quality
-        abrEwmaDefaultEstimate: 2000000, // Higher bandwidth estimate
-        abrEwmaFastLive: 5.0, // Smoother adaptation for live
-        abrEwmaSlowLive: 15.0, // More stable adaptation
-        fragLoadingTimeOut: 30000, // 30s timeout for fragments
-        manifestLoadingTimeOut: 15000, // 15s timeout for manifest
-        levelLoadingTimeOut: 15000, // 15s timeout for levels
-        // Additional optimizations
-        startLevel: -1, // Auto start level
-        autoStartLoad: true, // Auto start loading
-        progressive: false, // Better for live streams
-        fragLoadingMaxRetry: 6, // More fragment retry attempts
-        fragLoadingMaxRetryTimeout: 64000, // Longer retry timeout
-        manifestLoadingMaxRetry: 6, // More manifest retry attempts
-        levelLoadingMaxRetry: 6 // More level retry attempts
-      });
-      
-      hls.loadSource(src);
-      hls.attachMedia(videoRef.current);
-      
-      // Enhanced error handling with recovery
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        console.error('HLS error', data);
-        if (data.fatal) {
-          switch(data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error, attempting recovery...');
-              hls?.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error, attempting recovery...');
-              hls?.recoverMediaError();
-              break;
-            default:
-              console.log('Fatal error, destroying HLS instance');
-              setError(true);
-              break;
-          }
-        }
-      });
-
-      // Quality level management for better performance
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed, levels:', hls?.levels?.length);
-        // Start with auto quality selection
-        if (hls && hls.levels.length > 1) {
-          hls.currentLevel = -1; // Auto quality
-        }
-      });
-    }
-    return () => {
-      if (hls) hls.destroy();
-    };
-  }, [isM3U8, stream?.embedUrl]);
+  const handleIframeError = () => {
+    setError(true);
+  };
 
   if (isLoading) {
     return (
@@ -199,6 +117,11 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     );
   }
 
+  // Ensure HTTPS for embedUrl
+  const embedUrl = stream.embedUrl.startsWith('http://') 
+    ? stream.embedUrl.replace(/^http:\/\//i, 'https://') 
+    : stream.embedUrl;
+
   return (
     <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl mx-auto'}`}>
       <div 
@@ -207,72 +130,68 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-      {isM3U8 ? (
-        <video
-          ref={videoRef}
-          className="w-full h-full object-contain rounded-2xl"
-          controls
-          autoPlay
-          muted={false}
-          playsInline
-          preload="auto"
-          crossOrigin="anonymous"
-          onError={() => setError(true)}
-          onLoadStart={() => console.log('Video load started')}
-          onCanPlay={() => console.log('Video can play')}
-          onPlaying={() => console.log('Video playing')}
-          onWaiting={() => console.log('Video buffering...')}
-          onLoadedData={() => console.log('Video data loaded')}
-          onProgress={() => console.log('Video buffering progress')}
+        {/* Simple iframe approach - just like the HTML example */}
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          className="w-full h-full"
+          width="100%"
+          height="100%"
+          allowFullScreen
+          title="Live Sports Stream"
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
+          referrerPolicy="no-referrer-when-downgrade"
+          loading="eager"
+          frameBorder="0"
           style={{ 
-            backgroundColor: 'black',
-            // Force hardware acceleration
-            transform: 'translateZ(0)',
-            willChange: 'transform'
+            border: 'none',
+            minWidth: '100%',
+            minHeight: '100%'
           }}
         />
-      ) : (
-        <StreamIframe
-          videoRef={iframeRef}
-          src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
-          onLoad={() => setError(false)}
-          onError={() => setError(true)}
-        />
-      )}
-      {/* External open fallback on Android for non-m3u8 embeds */}
-      {!isM3U8 && isAndroid && (
+
+        {/* Loading overlay while iframe loads */}
+        {!iframeLoaded && !error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+            <div className="text-center text-white">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <p className="text-sm">Loading stream...</p>
+            </div>
+          </div>
+        )}
+
+        {/* External link button for mobile */}
         <div className="absolute top-4 left-4">
           <Button asChild className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
-            <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
+            <a href={embedUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="w-4 h-4 mr-2" />
               Open
             </a>
           </Button>
         </div>
-      )}
 
-      {/* Theater mode and fullscreen buttons */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        {onTheaterModeToggle && (
+        {/* Theater mode and fullscreen buttons */}
+        <div className="absolute top-4 right-4 flex gap-2">
+          {onTheaterModeToggle && (
+            <Button
+              onClick={onTheaterModeToggle}
+              className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isTheaterMode ? 'bg-blue-600/70 hover:bg-blue-600/90' : ''}`}
+              size="sm"
+            >
+              <Monitor className="w-4 h-4" />
+            </Button>
+          )}
           <Button
-            onClick={onTheaterModeToggle}
-            className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isTheaterMode ? 'bg-blue-600/70 hover:bg-blue-600/90' : ''}`}
+            onClick={toggleFullscreen}
+            className="bg-black/50 hover:bg-black/70 text-white border-0"
             size="sm"
           >
-            <Monitor className="w-4 h-4" />
+            <Maximize className="w-4 h-4" />
           </Button>
-        )}
-        <Button
-          onClick={toggleFullscreen}
-          className="bg-black/50 hover:bg-black/70 text-white border-0"
-          size="sm"
-        >
-          <Maximize className="w-4 h-4" />
-        </Button>
+        </div>
       </div>
-
-      </div>
-      
     </div>
   );
 };
