@@ -13,6 +13,7 @@ export interface Team {
 export interface Source {
   source: string;
   id: string;
+  embedUrl?: string;  // Add embedUrl as optional property
 }
 
 export interface Match {

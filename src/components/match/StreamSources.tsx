@@ -57,31 +57,18 @@ const StreamSources = ({
           console.log(`Fetching streams for: ${source.source}/${source.id}`);
           const streamData = await fetchStream(source.source, source.id);
           
-          let streams: Stream[] = [];
-          
-          if (Array.isArray(streamData)) {
-            // API returned multiple streams
-            streams = streamData
-              .map((s: any) => {
-                const url = s?.embedUrl || '';
-                const normalized = url.startsWith('//') ? 'https:' + url : url.replace(/^http:\/\//i, 'https://');
-                return normalized &&
-                  !normalized.includes('youtube.com') &&
-                  !normalized.includes('demo')
-                  ? { ...s, embedUrl: normalized }
-                  : null;
-              })
-              .filter(Boolean) as Stream[];
-          } else if (streamData && typeof streamData === 'object' && streamData.embedUrl) {
-            // API returned single stream
-            const url = streamData.embedUrl;
-            const normalized = url.startsWith('//') ? 'https:' + url : url.replace(/^http:\/\//i, 'https://');
-            if (normalized && 
+          // Since fetchStream now always returns Stream[], we can simplify this
+          const streams = streamData
+            .map((s: any) => {
+              const url = s?.embedUrl || '';
+              const normalized = url.startsWith('//') ? 'https:' + url : url.replace(/^http:\/\//i, 'https://');
+              return normalized &&
                 !normalized.includes('youtube.com') &&
-                !normalized.includes('demo')) {
-              streams = [{ ...streamData, embedUrl: normalized } as Stream];
-            }
-          }
+                !normalized.includes('demo')
+                ? { ...s, embedUrl: normalized }
+                : null;
+            })
+            .filter(Boolean) as Stream[];
           
           console.log(`Found ${streams.length} valid streams for ${sourceKey}:`, streams);
           
