@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
+import { Play, RotateCcw, Maximize, Monitor } from 'lucide-react';
 
 interface SimpleVideoPlayerProps {
   stream: Stream | null;
@@ -103,14 +103,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
                 Retry
               </Button>
             )}
-            {stream?.embedUrl && (
-              <a href={stream.embedUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Open Stream
-                </Button>
-              </a>
-            )}
           </div>
         </div>
       </div>
@@ -130,7 +122,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
-        {/* Simple iframe approach - just like the HTML example */}
+        {/* Simple iframe approach */}
         <iframe
           ref={iframeRef}
           src={embedUrl}
@@ -161,16 +153,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
             </div>
           </div>
         )}
-
-        {/* External link button for mobile */}
-        <div className="absolute top-4 left-4">
-          <Button asChild className="bg-black/50 hover:bg-black/70 text-white border-0" size="sm">
-            <a href={embedUrl} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open
-            </a>
-          </Button>
-        </div>
 
         {/* Theater mode and fullscreen buttons */}
         <div className="absolute top-4 right-4 flex gap-2">
