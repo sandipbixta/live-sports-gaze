@@ -72,3 +72,6 @@ export const StreamSources: React.FC<StreamSourcesProps> = ({
     );
   })}
 </div>
+    </div>
+  );
+};
