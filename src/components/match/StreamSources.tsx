@@ -141,8 +141,11 @@ const StreamSources = ({
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const isActive = activeSource === streamKey;
           
-          // Simple naming like HTML code
-          const streamName = `Stream ${index + 1}`;
+          // Use API-provided names like the HTML code
+          const streamName = stream.name || 
+                            (stream.language && stream.language !== 'Original' ? stream.language : null) ||
+                            (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
+                            `Stream ${stream.streamNo || index + 1}`;
           
           return (
             <Button
