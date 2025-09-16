@@ -6,8 +6,8 @@ interface Stream {
   id: string;
   source: string;
   streamNo?: number;
-  name?: string;      // Channel name from API
-  language?: string;  // Language from API (English, Spanish, etc.)
+  name?: string;
+  language?: string;
   hd?: boolean;
 }
 
@@ -22,29 +22,20 @@ export const StreamSources: React.FC<StreamSourcesProps> = ({
   activeSource,
   onSourceChange,
 }) => {
-  // Format streams in a consistent structure
+  // Format all streams in a consistent structure
   const allAvailableStreams = streams.map((stream, index) => ({
     stream,
     sourceKey: `${stream.source}/${stream.id}`,
     index,
   }));
 
-  // No streams available
-  if (!allAvailableStreams || allAvailableStreams.length === 0) {
-    return (
-      <div className="mt-6 text-center py-8">
-        <p className="text-gray-400">No streams available for this match.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
 
-      {/* Stream buttons aligned slightly right with video */}
+      {/* Stream buttons aligned with video */}
       <div className="flex flex-wrap gap-3 ml-4">
-        {allAvailableStreams.map(({ stream, index }) => {
+        {allAvailableStreams.slice(0, 3).map(({ stream, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const baseKey = `${stream.source}/${stream.id}`;
           const isActive = activeSource === streamKey || activeSource === baseKey;
