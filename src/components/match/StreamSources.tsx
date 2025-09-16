@@ -97,7 +97,7 @@ const StreamSources = ({
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 ml-16"> {/* Move everything to the right */}
       <h3 className="text-lg font-semibold text-white mb-8">Stream Links</h3>
       
       <div className="flex flex-wrap gap-3">
@@ -115,10 +115,10 @@ const StreamSources = ({
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`min-w-[120px] ${
+              className={`min-w-[120px] rounded-xl ${
                 isActive 
-                  ? 'bg-gray-700 text-white'     // <-- Active button gray now
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600' // <-- Normal button gray
+                  ? 'bg-gray-700 text-white'     
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600' 
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
