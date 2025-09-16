@@ -33,15 +33,22 @@ export const StreamSources: React.FC<StreamSourcesProps> = ({
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
 
-      {/* Stream buttons aligned with video */}
+      {/* Stream buttons aligned with iframe */}
       <div className="flex flex-wrap gap-3 ml-4">
-        {allAvailableStreams.slice(0, 3).map(({ stream, index }) => {
+        {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const baseKey = `${stream.source}/${stream.id}`;
           const isActive = activeSource === streamKey || activeSource === baseKey;
 
-          // Use API-provided names only
-          const streamName = stream.name || stream.language || "Unknown Stream";
+          const streamName =
+            stream.name ||
+            (stream.language && stream.language !== "Original"
+              ? stream.language
+              : null) ||
+            (stream.source && stream.source !== "intel"
+              ? stream.source.toUpperCase()
+              : null) ||
+            `Stream ${stream.streamNo || index + 1}`;
 
           return (
             <Button
