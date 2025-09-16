@@ -2,7 +2,7 @@
 import React from 'react';
 import { Match, Stream } from '../../types/sports';
 import StreamPlayer from '../StreamPlayer';
-import { StreamSources } from '../match/StreamSources';
+import StreamSources from '../match/StreamSources';
 import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
@@ -101,9 +101,10 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
       {featuredMatch.sources && featuredMatch.sources.length > 0 && (
         <div className="mt-3">
           <StreamSources
-            streams={featuredMatch.sources}
+            sources={featuredMatch.sources}
             activeSource={activeSource}
             onSourceChange={onSourceChange}
+            streamId={featuredMatch.id}
           />
         </div>
       )}
