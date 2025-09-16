@@ -33,24 +33,6 @@ export const StreamSources: React.FC<StreamSourcesProps> = ({
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
 
-      {/* Show main stream line clickable */}
-      {allAvailableStreams.length > 0 && (
-        <div
-          className="mb-3 text-sm text-blue-400 underline cursor-pointer hover:text-blue-300"
-          onClick={() =>
-            onSourceChange(
-              allAvailableStreams[0].stream.source,
-              allAvailableStreams[0].stream.id,
-              allAvailableStreams[0].stream.streamNo || allAvailableStreams[0].index
-            )
-          }
-        >
-          Main Stream:{" "}
-          {allAvailableStreams[0].stream.name ||
-            `Stream ${allAvailableStreams[0].index + 1}`}
-        </div>
-      )}
-
       {/* Stream buttons */}
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
