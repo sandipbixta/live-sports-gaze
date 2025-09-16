@@ -23,9 +23,16 @@ const StreamSources = ({
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
 
-  // Hide admin sources entirely from the UI
+  // Hide admin sources entirely from the UI, but always show the active source
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
-  const visibleSources = sources.filter(s => !isAdminSourceName(s.source));
+  const visibleSources = sources.filter(s => {
+    // Always show the active source, even if it's admin
+    if (activeSource && activeSource.includes(s.source) && activeSource.includes(s.id)) {
+      return true;
+    }
+    // Otherwise filter out admin sources
+    return !isAdminSourceName(s.source);
+  });
 
   // Use pre-loaded streams if available, otherwise fetch individually
   const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
