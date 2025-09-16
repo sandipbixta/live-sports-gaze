@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
@@ -23,16 +22,12 @@ const StreamSources = ({
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
 
-  // Hide admin sources entirely from the UI, but always show the active source
+  // Mark admin sources but don’t hide them
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
-  const visibleSources = sources.filter(s => {
-    // Always show the active source, even if it's admin
-    if (activeSource && activeSource.includes(s.source) && activeSource.includes(s.id)) {
-      return true;
-    }
-    // Otherwise filter out admin sources
-    return !isAdminSourceName(s.source);
-  });
+  const visibleSources = sources.map(s => ({
+    ...s,
+    isAdmin: isAdminSourceName(s.source),
+  }));
 
   // Use pre-loaded streams if available, otherwise fetch individually
   const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
@@ -149,18 +144,22 @@ const StreamSources = ({
           const isActive = activeSource === streamKey;
           
           // Use API-provided names like the HTML code
-          const streamName = stream.name || 
-                            (stream.language && stream.language !== 'Original' ? stream.language : null) ||
-                            (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
-                            `Stream ${stream.streamNo || index + 1}`;
+          let streamName = stream.name || 
+                          (stream.language && stream.language !== 'Original' ? stream.language : null) ||
+                          (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
+                          `Stream ${stream.streamNo || index + 1}`;
+
+          if (stream.source?.toLowerCase().includes('admin')) {
+            streamName = `Admin - ${streamName}`;
+          }
           
           return (
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`min-w-[120px] ${
+              className={`rounded-full px-5 py-2 min-w-[120px] ${
                 isActive 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  ? 'bg-gray-600 hover:bg-gray-700 text-white' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
