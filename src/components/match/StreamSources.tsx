@@ -1,91 +1,167 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
 
-interface Stream {
-  id: string;
-  source: string;
-  streamNo?: number;
-  name?: string;
-  language?: string;
-  hd?: boolean;
-}
+import { Button } from '@/components/ui/button';
+import { Source, Stream } from '@/types/sports';
+import { useState, useEffect } from 'react';
+import { fetchStream } from '@/api/sportsApi';
+import { Loader, Play } from 'lucide-react';
 
 interface StreamSourcesProps {
-  streams: Stream[];
+  sources: Source[];
   activeSource: string | null;
   onSourceChange: (source: string, id: string, streamNo?: number) => void;
+  streamId: string;
+  allStreams?: Record<string, Stream[]>;
 }
 
-export const StreamSources: React.FC<StreamSourcesProps> = ({
-  streams,
-  activeSource,
-  onSourceChange,
-}) => {
-  // Format all streams in a consistent structure
-  const allAvailableStreams = streams.map((stream, index) => ({
-    stream,
-    sourceKey: `${stream.source}/${stream.id}`,
-    index,
-  }));
+const StreamSources = ({ 
+  sources, 
+  activeSource, 
+  onSourceChange, 
+  streamId,
+  allStreams = {} 
+}: StreamSourcesProps) => {
+  const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
+  const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
 
+  // Hide admin sources entirely from the UI
+  const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
+  const visibleSources = sources.filter(s => !isAdminSourceName(s.source));
+
+  // Use pre-loaded streams if available, otherwise fetch individually
+  const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
+
+  // Fetch streams only if not already provided
+  useEffect(() => {
+    const fetchMissingStreams = async () => {
+      if (Object.keys(allStreams).length > 0) {
+        console.log('✅ Using pre-loaded streams from all sources');
+        return;
+      }
+
+      if (!visibleSources || visibleSources.length === 0) return;
+
+      console.log('🔄 Fetching individual streams (fallback mode)');
+      
+      for (const source of visibleSources) {
+        const sourceKey = `${source.source}/${source.id}`;
+        
+        if (localStreams[sourceKey]) continue;
+        
+        setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
+        
+        try {
+          console.log(`Fetching streams for: ${source.source}/${source.id}`);
+          const streamData = await fetchStream(source.source, source.id);
+          
+          const streams = streamData
+            .map((s: any) => {
+              const url = s?.embedUrl || '';
+              const normalized = url.startsWith('//') ? 'https:' + url : url.replace(/^http:\/\//i, 'https://');
+              return normalized &&
+                !normalized.includes('youtube.com') &&
+                !normalized.includes('demo')
+                ? { ...s, embedUrl: normalized }
+                : null;
+            })
+            .filter(Boolean) as Stream[];
+          
+          console.log(`Found ${streams.length} valid streams for ${sourceKey}:`, streams);
+          
+          setLocalStreams(prev => ({
+            ...prev,
+            [sourceKey]: streams
+          }));
+        } catch (error) {
+          console.error(`Failed to fetch streams for ${sourceKey}:`, error);
+          setLocalStreams(prev => ({
+            ...prev,
+            [sourceKey]: []
+          }));
+        } finally {
+          setLoadingStreams(prev => ({ ...prev, [sourceKey]: false }));
+        }
+      }
+    };
+
+    fetchMissingStreams();
+  }, [sources]);
+
+  if (!visibleSources || visibleSources.length === 0) {
+    return null;
+  }
+
+  // Collect all available streams from all sources
+  const allAvailableStreams: Array<{
+    stream: any;
+    sourceKey: string;
+    index: number;
+  }> = [];
+  
+  visibleSources.forEach((source) => {
+    const sourceKey = `${source.source}/${source.id}`;
+    const streams = effectiveStreams[sourceKey] || [];
+    
+    streams.forEach((stream, index) => {
+      allAvailableStreams.push({
+        stream,
+        sourceKey,
+        index
+      });
+    });
+  });
+
+  const isAnyLoading = Object.values(loadingStreams).some(Boolean);
+
+  // Show loading state
+  if (isAnyLoading && allAvailableStreams.length === 0) {
+    return (
+      <div className="mt-6 flex items-center gap-2 text-gray-400 justify-center py-8">
+        <Loader className="h-4 w-4 animate-spin" />
+        <span className="text-sm">Loading streams...</span>
+      </div>
+    );
+  }
+
+  // Show no streams message
+  if (allAvailableStreams.length === 0) {
+    return (
+      <div className="mt-6 text-center py-8">
+        <p className="text-gray-400">No streams available for this match.</p>
+      </div>
+    );
+  }
+
+  // Simple layout: show stream buttons like HTML code
   return (
     <div className="mt-6">
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
-
-      {/* Show main stream line clickable */}
-      {allAvailableStreams.length > 0 && (
-        <div
-          className="mb-3 text-sm text-blue-400 underline cursor-pointer hover:text-blue-300"
-          onClick={() =>
-            onSourceChange(
-              allAvailableStreams[0].stream.source,
-              allAvailableStreams[0].stream.id,
-              allAvailableStreams[0].stream.streamNo || allAvailableStreams[0].index
-            )
-          }
-        >
-          Main Stream:{" "}
-          {allAvailableStreams[0].stream.name ||
-            `Stream ${allAvailableStreams[0].index + 1}`}
-        </div>
-      )}
-
-      {/* Stream buttons */}
+      
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const baseKey = `${stream.source}/${stream.id}`;
           const isActive = activeSource === streamKey || activeSource === baseKey;
-
-          const streamName =
-            stream.name ||
-            (stream.language && stream.language !== "Original"
-              ? stream.language
-              : null) ||
-            (stream.source && stream.source !== "intel"
-              ? stream.source.toUpperCase()
-              : null) ||
-            `Stream ${stream.streamNo || index + 1}`;
-
+          
+          // Use API-provided names like the HTML code
+          const streamName = stream.name || 
+                            (stream.language && stream.language !== 'Original' ? stream.language : null) ||
+                            (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
+                            `Stream ${stream.streamNo || index + 1}`;
+          
           return (
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
               className={`min-w-[120px] ${
-                isActive
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600"
+                isActive 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
-              onClick={() =>
-                onSourceChange(stream.source, stream.id, stream.streamNo || index)
-              }
+              onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
               <Play className="w-4 h-4 mr-2" />
               {streamName}
-              {stream.hd && (
-                <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>
-              )}
+              {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
             </Button>
           );
         })}
@@ -93,3 +169,5 @@ export const StreamSources: React.FC<StreamSourcesProps> = ({
     </div>
   );
 };
+
+export default StreamSources;

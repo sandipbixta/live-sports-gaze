@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
-import { StreamSources } from './StreamSources';
+import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
 import { Match as MatchType, Stream } from '@/types/sports';
@@ -118,9 +118,11 @@ const StreamTab = ({
       />
       
       <StreamSources
-        streams={match.sources}
+        sources={match.sources}
         activeSource={activeSource}
         onSourceChange={handleSourceChange}
+        streamId={streamId}
+        allStreams={allStreams}
       />
       
       {!loadingStream && (
