@@ -139,7 +139,8 @@ const StreamSources = ({
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
-          const isActive = activeSource === streamKey;
+          const baseKey = `${stream.source}/${stream.id}`;
+          const isActive = activeSource === streamKey || activeSource === baseKey;
           
           // Use API-provided names like the HTML code
           const streamName = stream.name || 
