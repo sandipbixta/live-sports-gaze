@@ -32,9 +32,9 @@ const StreamSources = ({
   // Use pre-loaded streams if available, otherwise fetch individually
   const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
 
-  // Fetch streams only if not already provided
+  // Fetch streams from ALL sources concurrently
   useEffect(() => {
-    const fetchMissingStreams = async () => {
+    const fetchAllStreams = async () => {
       if (Object.keys(allStreams).length > 0) {
         console.log('✅ Using pre-loaded streams from all sources');
         return;
@@ -42,17 +42,18 @@ const StreamSources = ({
 
       if (!visibleSources || visibleSources.length === 0) return;
 
-      console.log('🔄 Fetching individual streams (fallback mode)');
+      console.log('🔄 Fetching streams from ALL sources concurrently');
       
-      for (const source of visibleSources) {
+      // Fetch from all sources concurrently for better performance
+      const fetchPromises = visibleSources.map(async (source) => {
         const sourceKey = `${source.source}/${source.id}`;
         
-        if (localStreams[sourceKey]) continue;
+        if (localStreams[sourceKey]) return;
         
         setLoadingStreams(prev => ({ ...prev, [sourceKey]: true }));
         
         try {
-          console.log(`Fetching streams for: ${source.source}/${source.id}`);
+          console.log(`🎯 Fetching streams for: ${source.source}/${source.id}`);
           const streamData = await fetchStream(source.source, source.id);
           
           const streams = streamData
@@ -67,14 +68,14 @@ const StreamSources = ({
             })
             .filter(Boolean) as Stream[];
           
-          console.log(`Found ${streams.length} valid streams for ${sourceKey}:`, streams);
+          console.log(`✅ Found ${streams.length} streams for ${sourceKey}:`, streams);
           
           setLocalStreams(prev => ({
             ...prev,
             [sourceKey]: streams
           }));
         } catch (error) {
-          console.error(`Failed to fetch streams for ${sourceKey}:`, error);
+          console.error(`❌ Failed to fetch streams for ${sourceKey}:`, error);
           setLocalStreams(prev => ({
             ...prev,
             [sourceKey]: []
@@ -82,10 +83,14 @@ const StreamSources = ({
         } finally {
           setLoadingStreams(prev => ({ ...prev, [sourceKey]: false }));
         }
-      }
+      });
+
+      // Wait for all sources to complete
+      await Promise.all(fetchPromises);
+      console.log('🎉 Finished fetching streams from all sources');
     };
 
-    fetchMissingStreams();
+    fetchAllStreams();
   }, [sources]);
 
   if (!visibleSources || visibleSources.length === 0) {
@@ -139,7 +144,7 @@ const StreamSources = ({
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
       
       <div className="flex flex-wrap gap-3">
-        {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
+        {allAvailableStreams.map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const isActive = activeSource === streamKey;
           
@@ -150,7 +155,7 @@ const StreamSources = ({
                           `Stream ${stream.streamNo || index + 1}`;
 
           if (stream.source?.toLowerCase().includes('admin')) {
-            streamName = `Admin - ${streamName}`;
+            streamName = `🔴 ${streamName}`;
           }
           
           return (
@@ -158,15 +163,19 @@ const StreamSources = ({
               key={streamKey}
               variant={isActive ? "default" : "outline"}
               className={`rounded-full px-5 py-2 min-w-[120px] ${
-                isActive 
-                  ? 'bg-gray-600 hover:bg-gray-700 text-white' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
+                stream.source?.toLowerCase().includes('admin')
+                  ? isActive 
+                    ? 'bg-red-600 hover:bg-red-700 text-white' 
+                    : 'bg-red-800 hover:bg-red-700 text-red-100 border-red-600'
+                  : isActive 
+                    ? 'bg-gray-600 hover:bg-gray-700 text-white' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
               <Play className="w-4 h-4 mr-2" />
               {streamName}
-              {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
+              {stream.hd && <span className="ml-2 text-xs bg-green-600 px-1 rounded">HD</span>}
             </Button>
           );
         })}

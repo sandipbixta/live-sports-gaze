@@ -63,14 +63,19 @@ export const useStreamPlayer = () => {
     }
   }, [toast]);
 
-  // Simplified match selection like HTML code
+  // Simplified match selection - now loads ALL streams from ALL sources
   const handleMatchSelect = useCallback(async (match: Match) => {
     console.log(`🎯 Selected match: ${match.title}`);
     setFeaturedMatch(match);
     
-    // Just use the first source like HTML code does
+    // Load streams from ALL sources instead of just the first one
     if (match.sources && match.sources.length > 0) {
-      const firstSource = match.sources[0];
+      console.log(`🔄 Loading streams from ${match.sources.length} sources:`, match.sources.map(s => s.source));
+      
+      // Try to use first available stream (preferably non-admin first)
+      const nonAdminSource = match.sources.find(s => !s.source?.toLowerCase().includes('admin'));
+      const firstSource = nonAdminSource || match.sources[0];
+      
       await fetchStreamData(firstSource);
     }
     
