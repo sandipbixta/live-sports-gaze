@@ -70,6 +70,12 @@ export const useStreamPlayer = () => {
     try {
       console.log(`🎯 Fetching fresh stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
+      // Check if this is a placeholder admin stream - if so, force fresh fetch
+      const isAdminPlaceholder = allStreams[sourceKey]?.[0]?.embedUrl?.includes('admin-placeholder');
+      if (isAdminPlaceholder) {
+        console.log(`🔄 Detected admin placeholder, fetching live stream...`);
+      }
+      
       // Always fetch fresh data, no cache for streams
       const streamData = await Promise.race([
         fetchStream(source.source, source.id, streamNo),
