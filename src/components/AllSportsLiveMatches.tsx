@@ -165,10 +165,16 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     <div className="space-y-8">
       {/* Top League Football Matches - Live and Scheduled */}
       {(() => {
-        // Get both live and scheduled football matches from allMatches
-        const allFootballMatches = allMatches.filter(match => 
-          (match.sportId || match.category || '').toLowerCase() === 'football'
-        );
+        // Combine both live and all matches to ensure live top league matches don't disappear
+        const combinedMatches = [
+          ...liveMatches.filter(match => (match.sportId || match.category || '').toLowerCase() === 'football'),
+          ...allMatches.filter(match => (match.sportId || match.category || '').toLowerCase() === 'football')
+        ];
+        
+        // Remove duplicates by consolidating matches
+        const allFootballMatches = consolidateMatches(combinedMatches);
+        
+        console.log(`🔍 Searching for top league matches from ${allFootballMatches.length} total football matches`);
         
         // More specific filtering for actual top league matches
         const topLeagueKeywords = [
