@@ -58,8 +58,8 @@ export const adConfig = {
 
 // Ad pause configuration
 export const adPauseConfig = {
-  // Pause until December 22, 2024 (5 days from now)
-  pauseUntil: new Date('2024-12-22T23:59:59').getTime(),
+  // Pause until September 22, 2025 (5 days from now)
+  pauseUntil: new Date('2025-09-22T23:59:59').getTime(),
   reason: 'Temporary pause for 5 days'
 };
 
