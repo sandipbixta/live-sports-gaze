@@ -27,9 +27,16 @@ const StreamSources = ({
   const isIOS = typeof navigator !== 'undefined' && ((/iPhone|iPad|iPod/i.test(navigator.userAgent)) || ((navigator as any).platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
   const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>('all');
 
-  // Hide admin sources entirely from the UI
+  // Show admin sources and prioritize them first
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
-  const visibleSources = sources.filter(s => !isAdminSourceName(s.source));
+  const sortedSources = sources.sort((a, b) => {
+    const aIsAdmin = isAdminSourceName(a.source);
+    const bIsAdmin = isAdminSourceName(b.source);
+    if (aIsAdmin && !bIsAdmin) return -1; // Admin sources first
+    if (!aIsAdmin && bIsAdmin) return 1;
+    return 0;
+  });
+  const visibleSources = sortedSources;
 
   // Use pre-loaded streams if available, otherwise fetch individually
   const effectiveStreams = Object.keys(allStreams).length > 0 ? allStreams : localStreams;
@@ -181,15 +188,24 @@ const StreamSources = ({
             </div>
           );
         }
+
+        // Sort streams to put admin sources first
+        const sortedAvailableStreams = filteredAvailableStreams.sort((a, b) => {
+          const aIsAdmin = isAdminSourceName(a.groupName);
+          const bIsAdmin = isAdminSourceName(b.groupName);
+          if (aIsAdmin && !bIsAdmin) return -1; // Admin streams first
+          if (!aIsAdmin && bIsAdmin) return 1;
+          return 0;
+        });
         
         return (
           <div className="space-y-4">
             <p className="text-sm text-gray-400">
-              {filteredAvailableStreams.length} stream{filteredAvailableStreams.length > 1 ? 's' : ''} available
+              {sortedAvailableStreams.length} stream{sortedAvailableStreams.length > 1 ? 's' : ''} available
             </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-              {filteredAvailableStreams.map(({ stream, sourceKey, index, groupName }) => {
+              {sortedAvailableStreams.map(({ stream, sourceKey, index, groupName }) => {
                 const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
                 const isActive = activeSource === streamKey;
                 
@@ -202,6 +218,7 @@ const StreamSources = ({
                   if (sourceInfo.source) {
                     // Convert known source identifiers to readable names
                     const sourceDisplayNames: Record<string, string> = {
+                      'admin': 'Main Stream',
                       'alpha': 'Server Alpha',
                       'bravo': 'Server Bravo', 
                       'charlie': 'Server Charlie',
