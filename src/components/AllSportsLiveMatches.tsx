@@ -279,13 +279,20 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {matches.map((match) => (
-              <MatchCard
-                key={`${match.sportId || sportId}-${match.id}`}
-                match={match}
-                sportId={match.sportId || sportId}
-              />
-            ))}
+            {matches
+              .sort((a, b) => {
+                // Sort by trending score (popular matches first)
+                const scoreA = isTrendingMatch(a.title).score;
+                const scoreB = isTrendingMatch(b.title).score;
+                return scoreB - scoreA;
+              })
+              .map((match) => (
+                <MatchCard
+                  key={`${match.sportId || sportId}-${match.id}`}
+                  match={match}
+                  sportId={match.sportId || sportId}
+                />
+              ))}
           </div>
         </div>
       ))}
