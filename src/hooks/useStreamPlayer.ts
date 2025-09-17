@@ -21,10 +21,16 @@ export const useStreamPlayer = () => {
       const streamsData = await fetchAllStreams(match);
       setAllStreams(streamsData);
       
-      // Auto-select the first available HD stream or fallback to first stream
-      const firstSource = Object.keys(streamsData)[0];
-      if (firstSource && streamsData[firstSource].length > 0) {
-        const streams = streamsData[firstSource];
+      // Auto-select admin stream first, then HD stream, then fallback to first available
+      const isAdminSource = (sourceKey: string) => sourceKey?.toLowerCase().includes('admin');
+      const sourceKeys = Object.keys(streamsData);
+      
+      // Prioritize admin sources first
+      const adminSource = sourceKeys.find(isAdminSource);
+      const preferredSource = adminSource || sourceKeys[0];
+      
+      if (preferredSource && streamsData[preferredSource].length > 0) {
+        const streams = streamsData[preferredSource];
         const hdStream = streams.find(s => s.hd) || streams[0];
         
         if (hdStream) {
@@ -32,8 +38,8 @@ export const useStreamPlayer = () => {
             ...hdStream,
             timestamp: Date.now()
           });
-          setActiveSource(firstSource);
-          console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${firstSource}`);
+          setActiveSource(preferredSource);
+          console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${preferredSource} ${isAdminSource(preferredSource) ? '(ADMIN - Main Stream)' : ''}`);
         }
       }
       
@@ -165,10 +171,10 @@ export const useStreamPlayer = () => {
     setCurrentStream(null); // Clear current stream first
     
     if (featuredMatch?.sources && featuredMatch.sources.length > 0) {
-      // Force fresh load with delay
+      // Force fresh load with delay - prioritize admin sources for retry too
       setTimeout(() => {
-        const firstNonAdmin = featuredMatch.sources.find(s => !s.source?.toLowerCase().includes('admin'));
-        fetchStreamData(firstNonAdmin || featuredMatch.sources[0]);
+        const adminSource = featuredMatch.sources.find(s => s.source?.toLowerCase().includes('admin'));
+        fetchStreamData(adminSource || featuredMatch.sources[0]);
       }, 100);
     }
   };
