@@ -21,7 +21,6 @@ import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
-import Share from "./pages/Share";
 import NotFound from "./pages/NotFound";
 
 // Optimized query client configuration
@@ -91,11 +90,6 @@ const App: React.FC = () => {
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />
-              <Route path="/share/:type/:id" element={
-                <SEOPageTracker pageTitle="Shared Content - DamiTV" contentType="home">
-                  <Share />
-                </SEOPageTracker>
-              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

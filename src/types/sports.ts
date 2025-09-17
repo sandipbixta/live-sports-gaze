@@ -13,6 +13,7 @@ export interface Team {
 export interface Source {
   source: string;
   id: string;
+  embedUrl?: string;  // Add embedUrl as optional property
 }
 
 export interface Match {
@@ -39,5 +40,4 @@ export interface Stream {
   embedUrl: string;
   source: string;
   timestamp?: number;  // Optional timestamp for freshness tracking
-  isPlaceholder?: boolean;  // Flag to indicate this needs fetching when clicked
 }
