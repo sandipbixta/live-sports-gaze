@@ -30,16 +30,34 @@ export const useStreamPlayer = () => {
       const preferredSource = adminSource || sourceKeys[0];
       
       if (preferredSource && streamsData[preferredSource].length > 0) {
-        const streams = streamsData[preferredSource];
-        const hdStream = streams.find(s => s.hd) || streams[0];
-        
-        if (hdStream) {
-          setCurrentStream({
-            ...hdStream,
-            timestamp: Date.now()
-          });
-          setActiveSource(preferredSource);
-          console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${preferredSource} ${isAdminSource(preferredSource) ? '(ADMIN - Main Stream)' : ''}`);
+        const streams = streamsData[preferredSource].filter(s => !s.isPlaceholder); // Skip placeholders for auto-selection
+        if (streams.length > 0) {
+          const hdStream = streams.find(s => s.hd) || streams[0];
+          
+          if (hdStream) {
+            setCurrentStream({
+              ...hdStream,
+              timestamp: Date.now()
+            });
+            setActiveSource(preferredSource);
+            console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${preferredSource} ${isAdminSource(preferredSource) ? '(ADMIN - Main Stream)' : ''}`);
+          }
+        } else if (isAdminSource(preferredSource)) {
+          // If admin source only has placeholders, try next available source
+          const nextSource = sourceKeys.find(key => key !== preferredSource && streamsData[key].some(s => !s.isPlaceholder));
+          if (nextSource) {
+            const nextStreams = streamsData[nextSource].filter(s => !s.isPlaceholder);
+            const hdStream = nextStreams.find(s => s.hd) || nextStreams[0];
+            
+            if (hdStream) {
+              setCurrentStream({
+                ...hdStream,
+                timestamp: Date.now()
+              });
+              setActiveSource(nextSource);
+              console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${nextSource} (admin not live yet)`);
+            }
+          }
         }
       }
       
@@ -158,6 +176,66 @@ export const useStreamPlayer = () => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
     setCurrentStream(null); // Clear current stream first
     
+    const sourceKey = `${source}/${id}`;
+    const existingStreams = allStreams[sourceKey] || [];
+    
+    // Check if this is a placeholder stream that needs fetching
+    const targetStream = existingStreams.find(s => (s.streamNo || 0) === (streamNo || 0));
+    
+    if (targetStream?.isPlaceholder) {
+      console.log(`🔄 Detected placeholder stream, fetching fresh data for: ${source}/${id}`);
+      
+      // Set loading state and active source
+      setStreamLoading(true);
+      setActiveSource(`${source}/${id}/${streamNo || 0}`);
+      
+      try {
+        // Fetch fresh stream data
+        const freshStreamData = await fetchStream(source, id);
+        let freshStreams: Stream[] = [];
+        
+        if (Array.isArray(freshStreamData)) {
+          freshStreams = freshStreamData;
+        } else if (freshStreamData) {
+          freshStreams = [freshStreamData];
+        }
+        
+        if (freshStreams.length > 0) {
+          // Update allStreams with fresh data
+          setAllStreams(prev => ({
+            ...prev,
+            [sourceKey]: freshStreams
+          }));
+          
+          // Select the requested stream or first available
+          const selectedStream = freshStreams.find(s => (s.streamNo || 0) === (streamNo || 0)) || freshStreams[0];
+          setCurrentStream({
+            ...selectedStream,
+            timestamp: Date.now()
+          });
+          
+          console.log(`✅ Successfully fetched live stream from ${source}`);
+          toast({
+            title: "Stream loaded",
+            description: "Live stream is now available",
+          });
+        } else {
+          throw new Error('No streams available yet');
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch live stream:', error);
+        toast({
+          title: "Stream not ready",
+          description: "This stream is not available yet. Please try again when the match is live.",
+          variant: "destructive",
+        });
+      } finally {
+        setStreamLoading(false);
+      }
+      return;
+    }
+    
+    // Handle regular stream selection
     if (featuredMatch) {
       // Force fresh load with delay
       setTimeout(() => {

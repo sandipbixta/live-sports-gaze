@@ -39,4 +39,5 @@ export interface Stream {
   embedUrl: string;
   source: string;
   timestamp?: number;  // Optional timestamp for freshness tracking
+  isPlaceholder?: boolean;  // Flag to indicate this needs fetching when clicked
 }
