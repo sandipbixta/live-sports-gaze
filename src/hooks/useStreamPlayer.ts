@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source } from '../types/sports';
-import { fetchStream } from '../api/sportsApi';
+import { fetchStream, fetchAllStreams } from '../api/sportsApi';
 
 export const useStreamPlayer = () => {
   const { toast } = useToast();
@@ -9,30 +9,95 @@ export const useStreamPlayer = () => {
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [streamLoading, setStreamLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
 
-  // Remove the complex fetchAllMatchStreams since we're simplifying
-  // Remove allStreams state since we're just using one stream like HTML
-
-  // Simplified stream fetching like HTML code
-  const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
+  // Enhanced function to fetch ALL streams from ALL sources
+  const fetchAllMatchStreams = useCallback(async (match: Match) => {
     setStreamLoading(true);
-    setActiveSource(`${source.source}/${source.id}`);
     
     try {
-      console.log(`🎯 Fetching stream: ${source.source}/${source.id}`);
+      console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
       
-      const streams = await fetchStream(source.source, source.id);
+      const streamsData = await fetchAllStreams(match);
+      setAllStreams(streamsData);
       
-      if (streams && streams.length > 0) {
-        // Like HTML: just take the first stream
-        const firstStream = streams[0];
-        setCurrentStream({
-          ...firstStream,
+      // Auto-select the first available HD stream or fallback to first stream
+      const firstSource = Object.keys(streamsData)[0];
+      if (firstSource && streamsData[firstSource].length > 0) {
+        const streams = streamsData[firstSource];
+        const hdStream = streams.find(s => s.hd) || streams[0];
+        
+        if (hdStream) {
+          setCurrentStream({
+            ...hdStream,
+            timestamp: Date.now()
+          });
+          setActiveSource(firstSource);
+          console.log(`✅ Auto-selected ${hdStream.hd ? 'HD' : 'SD'} stream from ${firstSource}`);
+        }
+      }
+      
+      console.log(`🎬 Total streams loaded: ${Object.values(streamsData).flat().length} from ${Object.keys(streamsData).length} sources`);
+      
+    } catch (error) {
+      console.error('❌ Error fetching all streams:', error);
+      toast({
+        title: "Stream Loading Failed", 
+        description: "Unable to load streams for this match. Please try again.",
+        variant: "destructive"
+      });
+      setAllStreams({});
+      setCurrentStream(null);
+    } finally {
+      setStreamLoading(false);
+    }
+  }, [toast]);
+
+  // Enhanced stream fetching with better reload handling
+  const fetchStreamData = useCallback(async (source: Source, streamNo?: number) => {
+    setStreamLoading(true);
+    const sourceKey = streamNo 
+      ? `${source.source}/${source.id}/${streamNo}` 
+      : `${source.source}/${source.id}`;
+    setActiveSource(sourceKey);
+    
+    try {
+      console.log(`🎯 Fetching fresh stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
+      
+      // Always fetch fresh data, no cache for streams
+      const streamData = await Promise.race([
+        fetchStream(source.source, source.id, streamNo),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Stream timeout')), 8000) // 8 seconds timeout
+        )
+      ]) as Stream | Stream[];
+      
+      console.log('✅ Fresh stream data received successfully');
+      
+      // Handle response
+      if (Array.isArray(streamData)) {
+        const selectedStream = streamNo 
+          ? streamData.find(s => s.streamNo === streamNo)
+          : streamData.find(s => s.hd) || streamData[0];
+        
+        if (selectedStream) {
+          // Add timestamp to ensure freshness
+          const freshStream: Stream = {
+            ...selectedStream,
+            embedUrl: selectedStream.embedUrl,
+            timestamp: Date.now()
+          };
+          setCurrentStream(freshStream);
+        } else {
+          setCurrentStream(null);
+        }
+      } else if (streamData) {
+        // Add timestamp to ensure freshness
+        const freshStream: Stream = {
+          ...streamData,
           timestamp: Date.now()
-        });
-        console.log(`✅ Using first stream with embedUrl: ${firstStream.embedUrl}`);
-      } else {
-        setCurrentStream(null);
+        };
+        setCurrentStream(freshStream);
       }
       
       // Smooth scroll to player
@@ -63,16 +128,13 @@ export const useStreamPlayer = () => {
     }
   }, [toast]);
 
-  // Simplified match selection like HTML code
+  // Match selection with comprehensive stream loading
   const handleMatchSelect = useCallback(async (match: Match) => {
     console.log(`🎯 Selected match: ${match.title}`);
     setFeaturedMatch(match);
     
-    // Just use the first source like HTML code does
-    if (match.sources && match.sources.length > 0) {
-      const firstSource = match.sources[0];
-      await fetchStreamData(firstSource);
-    }
+    // Fetch all streams for this match from all sources
+    await fetchAllMatchStreams(match);
     
     // Smooth scroll to player
     setTimeout(() => {
@@ -84,7 +146,7 @@ export const useStreamPlayer = () => {
         });
       }
     }, 100);
-  }, [fetchStreamData]);
+  }, [fetchAllMatchStreams]);
 
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
@@ -117,12 +179,12 @@ export const useStreamPlayer = () => {
     currentStream,
     streamLoading,
     activeSource,
-    allStreams: {} as Record<string, Stream[]>, // Simplified - no longer used
+    allStreams,
     handleMatchSelect,
     handleSourceChange,
     handleStreamRetry,
     setFeaturedMatch,
     fetchStreamData,
-    // Remove fetchAllMatchStreams since we simplified
+    fetchAllMatchStreams
   };
 };
