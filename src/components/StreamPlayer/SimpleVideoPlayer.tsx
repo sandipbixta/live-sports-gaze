@@ -212,7 +212,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           ref={videoRef}
           className="w-full h-full object-contain rounded-2xl"
           controls
-          autoPlay
           muted={false}
           playsInline
           preload="auto"
