@@ -29,6 +29,10 @@ export const useStreamPlayer = () => {
       const adminSource = sourceKeys.find(isAdminSource);
       const preferredSource = adminSource || sourceKeys[0];
       
+      console.log(`🔍 Available sources: ${sourceKeys.join(', ')}`);
+      console.log(`🎯 Admin source found: ${adminSource || 'NONE'}`);
+      console.log(`🎯 Selected preferred source: ${preferredSource}`);
+      
       if (preferredSource && streamsData[preferredSource].length > 0) {
         const streams = streamsData[preferredSource].filter(s => !s.isPlaceholder); // Skip placeholders for auto-selection
         if (streams.length > 0) {

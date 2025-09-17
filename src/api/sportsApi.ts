@@ -407,7 +407,8 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
   if (cached) return cached;
 
   try {
-    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
+      console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
+      console.log(`🔍 Is Admin Source? ${source.toLowerCase().includes('admin') ? 'YES' : 'NO'}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -452,6 +453,7 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
     
     const data = await response.json();
     console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
+    console.log('📺 Raw stream data:', data);
 
     // Normalize helper for embed URLs
     const normalize = (url: string) => {
@@ -548,6 +550,18 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
           hd: false,
           streamNo: 1,
           isPlaceholder: true // Flag to indicate this needs fetching
+        }];
+      } else {
+        // For non-admin sources, also keep them but mark differently
+        console.log(`📋 Keeping source ${source.source} in results for retry`);
+        allStreams[sourceKey] = [{
+          id: source.id,
+          source: source.source,
+          embedUrl: '', 
+          language: 'en',
+          hd: false,
+          streamNo: 1,
+          isPlaceholder: true
         }];
       }
     }

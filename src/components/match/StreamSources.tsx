@@ -28,7 +28,11 @@ const StreamSources = ({
   const [filterMode, setFilterMode] = useState<'all' | 'ios' | 'android'>('all');
 
   // Show admin sources and prioritize them first
-  const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
+  const isAdminSourceName = (name: string) => {
+    const isAdmin = name?.toLowerCase().includes('admin');
+    console.log(`🔍 Checking source name "${name}" - Is Admin: ${isAdmin ? 'YES' : 'NO'}`);
+    return isAdmin;
+  };
   const sortedSources = sources.sort((a, b) => {
     const aIsAdmin = isAdminSourceName(a.source);
     const bIsAdmin = isAdminSourceName(b.source);
@@ -62,6 +66,7 @@ const StreamSources = ({
         
         try {
           console.log(`Fetching streams for: ${source.source}/${source.id}`);
+          console.log(`🔍 Is this an admin source? ${isAdminSourceName(source.source) ? 'YES' : 'NO'}`);
           const streamData = await fetchStream(source.source, source.id);
           
           let streams: Stream[] = [];
@@ -217,19 +222,19 @@ const StreamSources = ({
                   // 1. First priority: Use the source name from the match sources array
                   if (sourceInfo.source) {
                     // Convert known source identifiers to readable names
-                    const sourceDisplayNames: Record<string, string> = {
-                      'admin': 'Main Stream',
-                      'alpha': 'Server Alpha',
-                      'bravo': 'Server Bravo', 
-                      'charlie': 'Server Charlie',
-                      'delta': 'Server Delta',
-                      'echo': 'Server Echo',
-                      'foxtrot': 'Server Foxtrot',
-                      'golf': 'Server Golf',
-                      'stream1': 'Stream 1',
-                      'stream2': 'Stream 2',
-                      'stream3': 'Stream 3'
-                    };
+                     const sourceDisplayNames: Record<string, string> = {
+                       'admin': '🔴 Main Stream (Admin)',
+                       'alpha': 'Server Alpha',
+                       'bravo': 'Server Bravo', 
+                       'charlie': 'Server Charlie',
+                       'delta': 'Server Delta',
+                       'echo': 'Server Echo',
+                       'foxtrot': 'Server Foxtrot',
+                       'golf': 'Server Golf',
+                       'stream1': 'Stream 1',
+                       'stream2': 'Stream 2',
+                       'stream3': 'Stream 3'
+                     };
                     
                     const baseName = sourceDisplayNames[sourceInfo.source.toLowerCase()] || 
                                    sourceInfo.source.charAt(0).toUpperCase() + sourceInfo.source.slice(1);
@@ -308,7 +313,9 @@ const StreamSources = ({
                     className={`cursor-pointer p-2 text-left transition-all hover:scale-105 w-full min-h-[60px] ${
                       isActive 
                         ? 'bg-[#ff5a36] border-[#ff5a36] text-white' 
-                        : 'bg-[#242836] border-[#343a4d] text-gray-300 hover:bg-[#343a4d]'
+                        : isAdminSourceName(groupName)
+                          ? 'bg-gradient-to-r from-red-600 to-red-700 border-red-500 text-white hover:from-red-500 hover:to-red-600'
+                          : 'bg-[#242836] border-[#343a4d] text-gray-300 hover:bg-[#343a4d]'
                     }`}
                     onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
                   >
@@ -317,6 +324,7 @@ const StreamSources = ({
                         <Play size={10} />
                         <span className="font-medium text-xs leading-tight line-clamp-2">
                           {displayName}
+                          {stream.isPlaceholder && <span className="text-yellow-300"> (Loading...)</span>}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-xs">
