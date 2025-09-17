@@ -397,8 +397,14 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
 
 export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
   // Allow all available sources as per API documentation
-  const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
+  const allowedSources = ['admin', 'alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
+  
+  console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
+  console.log(`🔍 Is Admin Source? ${source.toLowerCase().includes('admin') ? 'YES' : 'NO'}`);
+  console.log(`🔍 Source allowed? ${allowedSources.includes(source.toLowerCase()) ? 'YES' : 'NO'}`);
+  
   if (!allowedSources.includes(source.toLowerCase())) {
+    console.error(`❌ Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
     throw new Error(`Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
   }
 
@@ -510,19 +516,27 @@ export const fetchStream = async (source: string, id: string, streamNo?: number)
 
 // Enhanced function to fetch ALL streams from ALL available sources for a match
 export const fetchAllStreams = async (match: Match): Promise<Record<string, Stream[]>> => {
-  if (!match.sources || match.sources.length === 0) {
-    throw new Error('No sources available for this match');
-  }
+  console.log(`🎯 Starting to fetch ALL streams for match: ${match.title}`);
+  
+  // Define ALL possible sources that could have streams
+  const allPossibleSources = ['admin', 'alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
+  
+  // Use match sources if available, otherwise try all possible sources
+  const sourcesToTry = match.sources && match.sources.length > 0 
+    ? match.sources 
+    : allPossibleSources.map(source => ({ source, id: match.id }));
+
+  console.log(`🔍 Sources to fetch from:`, sourcesToTry.map(s => s.source).join(', '));
 
   const allStreams: Record<string, Stream[]> = {};
   
-  // First, initialize all sources (especially admin) so they always appear in results
-  match.sources.forEach(source => {
+  // Initialize all sources so they always appear in results
+  sourcesToTry.forEach(source => {
     const sourceKey = `${source.source}/${source.id}`;
     allStreams[sourceKey] = []; // Initialize empty array for all sources
   });
   
-  const fetchPromises = match.sources.map(async (source) => {
+  const fetchPromises = sourcesToTry.map(async (source) => {
     const sourceKey = `${source.source}/${source.id}`;
     
     try {
@@ -531,46 +545,36 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       
       if (Array.isArray(streamData)) {
         allStreams[sourceKey] = streamData;
+        console.log(`✅ Successfully fetched ${streamData.length} streams from ${source.source}`);
       } else if (streamData) {
         allStreams[sourceKey] = [streamData];
+        console.log(`✅ Successfully fetched 1 stream from ${source.source}`);
+      } else {
+        console.log(`⚠️ No stream data returned from ${source.source}`);
       }
       
-      console.log(`✅ Successfully fetched ${allStreams[sourceKey]?.length || 0} streams from ${source.source}`);
     } catch (error) {
       console.warn(`⚠️ Failed to fetch streams from ${source.source}:`, error);
-      // Keep the source in results with empty array so button still shows
-      // This is especially important for admin streams that may not be live yet
-      if (source.source.toLowerCase().includes('admin')) {
-        console.log(`📋 Keeping admin source ${source.source} in results for later retry`);
-        allStreams[sourceKey] = [{
-          id: source.id,
-          source: source.source,
-          embedUrl: '', // Will be fetched when user clicks
-          language: 'en',
-          hd: false,
-          streamNo: 1,
-          isPlaceholder: true // Flag to indicate this needs fetching
-        }];
-      } else {
-        // For non-admin sources, also keep them but mark differently
-        console.log(`📋 Keeping source ${source.source} in results for retry`);
-        allStreams[sourceKey] = [{
-          id: source.id,
-          source: source.source,
-          embedUrl: '', 
-          language: 'en',
-          hd: false,
-          streamNo: 1,
-          isPlaceholder: true
-        }];
-      }
+      // Keep ALL sources in results, even if they fail
+      console.log(`📋 Keeping source ${source.source} in results for later retry`);
+      allStreams[sourceKey] = [{
+        id: source.id,
+        source: source.source,
+        embedUrl: '', 
+        language: 'en',
+        hd: false,
+        streamNo: 1,
+        isPlaceholder: true
+      }];
     }
   });
 
   // Wait for all sources to complete (with failures handled gracefully)
   await Promise.allSettled(fetchPromises);
 
-  console.log(`🎯 Total sources available: ${Object.keys(allStreams).length} for match: ${match.title}`);
+  console.log(`🎯 Total sources processed: ${Object.keys(allStreams).length} for match: ${match.title}`);
+  console.log(`📊 Sources with streams:`, Object.entries(allStreams).map(([key, streams]) => `${key}: ${streams.length}`).join(', '));
+  
   return allStreams;
 };
 
