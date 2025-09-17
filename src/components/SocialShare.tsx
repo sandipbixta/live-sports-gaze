@@ -26,10 +26,44 @@ const SocialShare: React.FC<SocialShareProps> = ({
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
+  // Generate share URL based on current path
+  const generateShareUrl = () => {
+    const currentPath = window.location.pathname;
+    const baseUrl = window.location.origin;
+    
+    // Extract content type and ID from current URL
+    if (currentPath.includes('/match/')) {
+      const parts = currentPath.split('/');
+      if (parts.length >= 4) {
+        const sportId = parts[2];
+        const matchId = parts[3];
+        return `${baseUrl}/share/match/${sportId}-${matchId}`;
+      }
+    } else if (currentPath.includes('/manual-match/')) {
+      const parts = currentPath.split('/');
+      if (parts.length >= 3) {
+        const matchId = parts[2];
+        return `${baseUrl}/share/manual-match/${matchId}`;
+      }
+    } else if (currentPath.includes('/channel/')) {
+      const parts = currentPath.split('/');
+      if (parts.length >= 4) {
+        const country = parts[2];
+        const channelId = parts[3];
+        return `${baseUrl}/share/channel/${country}-${channelId}`;
+      }
+    }
+    
+    // Fallback to current URL if no special share format is needed
+    return url;
+  };
+
+  const shareUrl = generateShareUrl();
+
   const shareData = {
     title,
     text: description,
-    url
+    url: shareUrl
   };
 
   const handleNativeShare = async () => {
@@ -48,7 +82,7 @@ const SocialShare: React.FC<SocialShareProps> = ({
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       toast({
         title: "Link copied!",
@@ -65,22 +99,22 @@ const SocialShare: React.FC<SocialShareProps> = ({
   };
 
   const shareToTwitter = () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}&hashtags=DamiTV,LiveSports,Football`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareUrl)}&hashtags=DamiTV,LiveSports,Football`;
     window.open(twitterUrl, '_blank', 'width=600,height=400');
   };
 
   const shareToFacebook = () => {
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(title)}`;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(title)}`;
     window.open(facebookUrl, '_blank', 'width=600,height=400');
   };
 
   const shareToWhatsApp = () => {
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${description} ${url}`)}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${title} - ${description} ${shareUrl}`)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const shareToTelegram = () => {
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`;
     window.open(telegramUrl, '_blank');
   };
 

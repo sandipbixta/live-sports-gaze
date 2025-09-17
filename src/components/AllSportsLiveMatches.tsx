@@ -165,26 +165,36 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     <div className="space-y-8">
       {/* Top League Football Matches - Live and Scheduled */}
       {(() => {
-        // Get both live and scheduled football matches from allMatches
-        const allFootballMatches = allMatches.filter(match => 
-          (match.sportId || match.category || '').toLowerCase() === 'football'
-        );
+        // Combine both live and all matches to ensure live top league matches don't disappear
+        const combinedMatches = [
+          ...liveMatches.filter(match => (match.sportId || match.category || '').toLowerCase() === 'football'),
+          ...allMatches.filter(match => (match.sportId || match.category || '').toLowerCase() === 'football')
+        ];
+        
+        // Remove duplicates by consolidating matches
+        const allFootballMatches = consolidateMatches(combinedMatches);
+        
+        console.log(`🔍 Searching for top league matches from ${allFootballMatches.length} total football matches`);
         
         // More specific filtering for actual top league matches
         const topLeagueKeywords = [
           'premier league', 'epl', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
-          'champions league', 'ucl', 'europa league', 'conference league',
+          'champions league', 'ucl', 'uefa champions league', 'champions', 'league',
+          'europa league', 'uel', 'conference league', 'uecl', 'uefa', 'european',
           'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
-          'fc barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
-          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid', 'ajax', 'psv'
+          'fc barcelona', 'barcelona', 'real madrid', 'madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
+          'bayern munich', 'bayern', 'borussia dortmund', 'dortmund', 'psg', 'paris saint-germain',
+          'atletico madrid', 'ajax', 'psv', 'porto', 'benfica', 'sporting'
         ];
         
         // More comprehensive exclusion for non-top league matches
         const excludeKeywords = [
           'barcelona sc', 'barcelona sporting', 'guayaquil', 'u23', 'u21', 'u19', 'u18',
-          'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 'amateur',
-          'league two', 'league one', 'conference', 'non-league', 'women', 'female',
-          'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
+          'youth', 'reserve', 'academy', 'segunda division', 'segunda b', 'tercera division', 'amateur',
+          'league two', 'league one', 'national league', 'non-league', 'women', 'female', 'womens',
+          'women\'s', 'ladies', 'w-league', 'wsl', 'nwsl', 'women championship', 'women premier league',
+          'copa del rey', 'fa cup', 'carabao cup', 'friendly', 'amistoso', 'preseason', 'pre-season',
+          'training', 'practice', 'testimonial'
         ];
         
         const topLeagueFootballMatches = allFootballMatches
@@ -199,15 +209,32 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             // Must contain at least one top league keyword
             const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
             
-            // Additional check: if it contains "vs" or "-", it should be a proper match format
-            const hasProperFormat = title.includes(' vs ') || title.includes(' - ');
+            if (!hasTopLeagueKeyword) {
+              return false;
+            }
+            
+            // For Champions League and other premium competitions, be more lenient with format
+            const isPremiumCompetition = title.includes('champions league') || 
+                                       title.includes('ucl') || 
+                                       title.includes('europa league') || 
+                                       title.includes('conference league') ||
+                                       title.includes('uefa');
+            
+            // For premium competitions, any format is acceptable
+            if (isPremiumCompetition) {
+              console.log('🏆 Premium Competition match found:', match.title);
+              return true;
+            }
+            
+            // For regular leagues, require proper match format (vs or -)
+            const hasProperFormat = title.includes(' vs ') || title.includes(' - ') || title.includes(' v ');
             
             // Debug logging
             if (hasTopLeagueKeyword && hasProperFormat) {
-              console.log('🏆 Top League Football match found:', title);
+              console.log('🏆 Top League Football match found:', match.title);
             }
             
-            return hasTopLeagueKeyword && hasProperFormat;
+            return hasProperFormat;
           })
           .sort((a, b) => {
             const scoreA = isTrendingMatch(a.title).score;
@@ -252,13 +279,20 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {matches.map((match) => (
-              <MatchCard
-                key={`${match.sportId || sportId}-${match.id}`}
-                match={match}
-                sportId={match.sportId || sportId}
-              />
-            ))}
+            {matches
+              .sort((a, b) => {
+                // Sort by trending score (popular matches first)
+                const scoreA = isTrendingMatch(a.title).score;
+                const scoreB = isTrendingMatch(b.title).score;
+                return scoreB - scoreA;
+              })
+              .map((match) => (
+                <MatchCard
+                  key={`${match.sportId || sportId}-${match.id}`}
+                  match={match}
+                  sportId={match.sportId || sportId}
+                />
+              ))}
           </div>
         </div>
       ))}
