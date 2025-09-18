@@ -132,6 +132,7 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
         src={src}
         className="w-full h-full object-contain"
         controls={false}
+        autoPlay
         playsInline
         preload="auto"
         onLoadedData={handleLoadedData}

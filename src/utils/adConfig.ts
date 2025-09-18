@@ -56,23 +56,10 @@ export const adConfig = {
   }
 };
 
-// Ad pause configuration
-export const adPauseConfig = {
-  // Pause until September 22, 2025 (5 days from now)
-  pauseUntil: new Date('2025-09-22T23:59:59').getTime(),
-  reason: 'Temporary pause for 5 days'
-};
-
 // Helper to determine if ads should be shown
 export const shouldShowAds = () => {
-  // Check if ads are currently paused
-  const now = Date.now();
-  if (now < adPauseConfig.pauseUntil) {
-    console.log(`Ads paused until ${new Date(adPauseConfig.pauseUntil).toLocaleDateString()}: ${adPauseConfig.reason}`);
-    return false;
-  }
-  
-  // You can add other logic here based on user preferences or other factors
+  // You can add logic here based on user preferences or other factors
+  // For now, we'll always return true
   return true;
 };
 
