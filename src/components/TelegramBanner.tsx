@@ -25,7 +25,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       >
         <div className="flex items-center justify-center gap-2 w-full">
           <Zap className="h-5 w-5" />
-          <span className="font-medium">MiraFootball - Zero Buffer, Clean HD Streams</span>
+          <span className="font-medium">Checkout Our New Website - MiraFootball - Zero Buffer, Clean HD Streams</span>
           <ExternalLink className="h-4 w-4 opacity-80" />
         </div>
       </Button>
