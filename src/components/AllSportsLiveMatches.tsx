@@ -184,6 +184,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'barcelona sc', 'barcelona sporting', 'guayaquil', 'u23', 'u21', 'u19', 'u18',
           'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 'amateur',
           'league two', 'league one', 'conference', 'non-league', 'women', 'female',
+          'womens', "women's", 'ladies', 'feminino', 'femenino', 'damen', 'feminine',
           'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
         ];
         
