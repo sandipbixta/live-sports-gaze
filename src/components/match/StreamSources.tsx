@@ -140,7 +140,7 @@ const StreamSources = ({
       <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
       
       <div className="flex flex-wrap gap-3">
-        {allAvailableStreams.slice(0, 3).map(({ stream, sourceKey, index }) => {
+        {allAvailableStreams.map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const isActive = activeSource === streamKey;
           
