@@ -235,7 +235,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             const scoreB = isTrendingMatch(b.title).score;
             return scoreB - scoreA;
           })
-          .slice(0, 6);
+          .slice(0, 12);
         
         if (topLeagueFootballMatches.length > 0) {
           return (
