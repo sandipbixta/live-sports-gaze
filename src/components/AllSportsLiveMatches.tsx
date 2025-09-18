@@ -188,13 +188,31 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
         ];
         
+        console.log('🔍 Total football matches before filtering:', allFootballMatches.length);
+        allFootballMatches.forEach(match => {
+          if (match.title.toLowerCase().includes('barcelona') || match.title.toLowerCase().includes('champions')) {
+            console.log('📋 Barcelona/Champions match found:', match.title);
+          }
+        });
+        
         const topLeagueFootballMatches = allFootballMatches
           .filter(match => {
             const title = match.title.toLowerCase();
             
-            // Exclude women's matches (including patterns like "team w vs team w")
-            if (title.includes(' w vs ') || title.includes(' w ') || 
-                excludeKeywords.some(keyword => title.includes(keyword))) {
+            // More specific exclusion - avoid false positives for Barcelona
+            const isWomensMatch = title.includes(' w vs ') || title.includes(' w ') || 
+              ['women', 'female', 'womens', "women's", 'ladies', 'feminino', 'femenino', 'damen', 'feminine'].some(keyword => title.includes(keyword));
+            
+            const isLowerLeague = ['u23', 'u21', 'u19', 'u18', 'youth', 'reserve', 'academy', 
+              'segunda', 'segunda b', 'tercera', 'amateur', 'league two', 'league one', 
+              'conference', 'non-league'].some(keyword => title.includes(keyword));
+              
+            const isNonTopClub = ['barcelona sc', 'barcelona sporting', 'guayaquil'].some(keyword => title.includes(keyword));
+            
+            const isFriendly = ['copa', 'friendly', 'amistoso', 'preseason', 'pre-season'].some(keyword => title.includes(keyword));
+            
+            if (isWomensMatch || isLowerLeague || isNonTopClub || isFriendly) {
+              console.log('❌ Excluding match:', title, {isWomensMatch, isLowerLeague, isNonTopClub, isFriendly});
               return false;
             }
             
@@ -207,7 +225,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             
             // Debug logging
             if (hasTopLeagueKeyword) {
-              console.log('🏆 Top League Football match found:', title, 'hasFormat:', hasProperFormat);
+              console.log('✅ Top League Football match found:', title, 'hasFormat:', hasProperFormat, 'trending score:', isTrendingMatch(title).score);
             }
             
             return hasTopLeagueKeyword && hasProperFormat;
