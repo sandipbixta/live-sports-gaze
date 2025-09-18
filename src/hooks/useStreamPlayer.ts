@@ -47,11 +47,6 @@ export const useStreamPlayer = () => {
       
     } catch (error) {
       console.error('❌ Error fetching all streams:', error);
-      toast({
-        title: "Stream Loading Failed", 
-        description: "Unable to load streams for this match. Please try again.",
-        variant: "destructive"
-      });
       setAllStreams({});
       setCurrentStream(null);
     } finally {
@@ -116,13 +111,6 @@ export const useStreamPlayer = () => {
     } catch (error) {
       console.error('❌ Stream load error:', error);
       setCurrentStream(null);
-      
-      // Show more helpful error message
-      toast({
-        title: "Stream Loading Issue",
-        description: "Stream failed to load. Trying to refresh automatically...",
-        variant: "default",
-      });
       
       // Auto-retry once after a short delay
       setTimeout(() => {
