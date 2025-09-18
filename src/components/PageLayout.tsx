@@ -166,6 +166,52 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             </div>
           </div>
           
+          {/* Streaming Alternatives Section for SEO */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+              <h6 className="text-xs font-semibold text-black dark:text-white mb-2">Popular Streaming Alternatives</h6>
+              <div className="flex flex-wrap gap-2 text-[10px]">
+                <span className="text-gray-600 dark:text-gray-400">streamed.su</span>
+                <span className="text-gray-600 dark:text-gray-400">totalsportek</span>
+                <span className="text-gray-600 dark:text-gray-400">daddylivehd</span>
+                <span className="text-gray-600 dark:text-gray-400">freestreams-live1</span>
+                <span className="text-gray-600 dark:text-gray-400">hesgoal</span>
+                <span className="text-gray-600 dark:text-gray-400">vipleague</span>
+                <span className="text-gray-600 dark:text-gray-400">buffstreams</span>
+                <span className="text-gray-600 dark:text-gray-400">crackstreams</span>
+                <span className="text-gray-600 dark:text-gray-400">ppv</span>
+                <span className="text-gray-600 dark:text-gray-400">sportsurge</span>
+                <span className="text-gray-600 dark:text-gray-400">streameast</span>
+                <span className="text-gray-600 dark:text-gray-400">markkystreams</span>
+                <span className="text-gray-600 dark:text-gray-400">sportsbay</span>
+                <span className="text-gray-600 dark:text-gray-400">reddit soccer streams</span>
+                <span className="text-gray-600 dark:text-gray-400">rojadirecta</span>
+                <span className="text-gray-600 dark:text-gray-400">firstrow sports</span>
+              </div>
+            </div>
+            
+            <div>
+              <h6 className="text-xs font-semibold text-black dark:text-white mb-2">Stream Categories</h6>
+              <div className="flex flex-wrap gap-2 text-[10px]">
+                <span className="text-gray-600 dark:text-gray-400">football streams</span>
+                <span className="text-gray-600 dark:text-gray-400">soccer streams</span>
+                <span className="text-gray-600 dark:text-gray-400">nfl streams</span>
+                <span className="text-gray-600 dark:text-gray-400">nba streams</span>
+                <span className="text-gray-600 dark:text-gray-400">boxing streams</span>
+                <span className="text-gray-600 dark:text-gray-400">ufc streams</span>
+                <span className="text-gray-600 dark:text-gray-400">tennis streams</span>
+                <span className="text-gray-600 dark:text-gray-400">baseball streams</span>
+                <span className="text-gray-600 dark:text-gray-400">hockey streams</span>
+                <span className="text-gray-600 dark:text-gray-400">f1 streams</span>
+                <span className="text-gray-600 dark:text-gray-400">champions league streams</span>
+                <span className="text-gray-600 dark:text-gray-400">premier league streams</span>
+                <span className="text-gray-600 dark:text-gray-400">la liga streams</span>
+                <span className="text-gray-600 dark:text-gray-400">serie a streams</span>
+                <span className="text-gray-600 dark:text-gray-400">bundesliga streams</span>
+              </div>
+            </div>
+          </div>
+          
           {/* Disclaimer Section */}
           <div className="border-t border-black dark:border-white mt-4 pt-4">
             <h6 className="text-xs font-semibold text-black dark:text-white mb-1">Disclaimer:</h6>
