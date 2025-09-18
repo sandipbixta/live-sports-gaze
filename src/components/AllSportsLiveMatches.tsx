@@ -192,8 +192,9 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           .filter(match => {
             const title = match.title.toLowerCase();
             
-            // Exclude lower league and non-professional matches
-            if (excludeKeywords.some(keyword => title.includes(keyword))) {
+            // Exclude women's matches (including patterns like "team w vs team w")
+            if (title.includes(' w vs ') || title.includes(' w ') || 
+                excludeKeywords.some(keyword => title.includes(keyword))) {
               return false;
             }
             
