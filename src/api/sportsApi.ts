@@ -395,7 +395,93 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   }
 };
 
-export const fetchStream = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
+// Simple direct stream fetching like the HTML example
+export const fetchSimpleStream = async (source: string, id: string): Promise<Stream[]> => {
+  const cacheKey = `simple-stream-${source}-${id}`;
+  
+  try {
+    // Check cache first
+    const cached = getCachedData(cacheKey);
+    if (cached) return cached;
+
+    console.log(`🎬 Fetching streams for ${source}/${id}`);
+    
+    // Direct API call like the HTML example
+    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+      signal: AbortSignal.timeout(15000)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Stream API error: ${response.status}`);
+    }
+
+    const streams = await response.json();
+    
+    if (!Array.isArray(streams)) {
+      console.warn('Invalid stream response format');
+      return [];
+    }
+
+    // Process and validate streams
+    const validStreams: Stream[] = streams
+      .map((stream: any, index: number) => ({
+        id: stream.id || `stream-${index}`,
+        streamNo: stream.streamNo || index + 1,
+        language: stream.language || 'EN',
+        hd: stream.hd || false,
+        embedUrl: stream.embedUrl || stream.url,
+        source: source,
+        timestamp: Date.now()
+      }))
+      .filter(stream => stream.embedUrl && isValidStreamUrl(stream.embedUrl));
+
+    // Cache the results
+    setCachedData(cacheKey, validStreams);
+
+    console.log(`✅ Found ${validStreams.length} valid streams`);
+    return validStreams;
+
+  } catch (error) {
+    console.error(`❌ Error fetching streams for ${source}/${id}:`, error);
+    return [];
+  }
+};
+
+// Simple function to fetch all streams for a match (like HTML example)
+export const fetchAllMatchStreams = async (match: Match): Promise<Stream[]> => {
+  if (!match.sources || match.sources.length === 0) {
+    return [];
+  }
+
+  const allStreams: Stream[] = [];
+
+  // Fetch streams from all sources concurrently
+  const streamPromises = match.sources.map(async (source) => {
+    try {
+      return await fetchSimpleStream(source.source, source.id);
+    } catch (error) {
+      console.error(`Failed to fetch streams from ${source.source}/${source.id}:`, error);
+      return [];
+    }
+  });
+
+  const streamResults = await Promise.all(streamPromises);
+  
+  // Flatten and combine all streams
+  streamResults.forEach(streams => {
+    allStreams.push(...streams);
+  });
+
+  console.log(`🎬 Total streams found for match: ${allStreams.length}`);
+  return allStreams;
+};
+
+// Legacy complex stream function (replaced by simpler approach above)
+// Keeping for backward compatibility, but not used anymore
+export const fetchStream_legacy = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
   // Allow all available sources as per API documentation
   const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
   if (!allowedSources.includes(source.toLowerCase())) {
@@ -562,3 +648,6 @@ function isValidStreamUrl(url: string): boolean {
   const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com', 'localhost'];
   return !invalidDomains.some(domain => url.toLowerCase().includes(domain));
 }
+
+// Export alias for backward compatibility
+export const fetchStream = fetchSimpleStream;
