@@ -212,6 +212,13 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             </div>
           </div>
           
+          {/* Hidden SEO Content - Invisible to users but indexable by Google */}
+          <div className="sr-only" aria-hidden="true">
+            <h6>Alternative streaming platforms and websites</h6>
+            <p>streamed.su alternative, totalsportek alternative, daddylivehd alternative, freestreams-live1 alternative, hesgoal alternative, vipleague alternative, buffstreams alternative, crackstreams alternative, ppv streams alternative, sportsurge alternative, streameast alternative, markkystreams alternative, sportsbay alternative, reddit soccer streams alternative, rojadirecta alternative, firstrow sports alternative, stream2watch alternative, atdhe alternative, myp2p alternative, vipbox alternative, wiziwig alternative, cricfree alternative, bosscast alternative, fromhot alternative, strikeout alternative, batmanstream alternative, nflbite alternative, nbastreams alternative, mmastreams alternative, boxingstreams alternative, motogp streams alternative, formula1 streams alternative</p>
+            <p>Free sports streaming like streamed su, totalspotek, daddy live hd, free streams live, hes goal, vip league, buff streams, crack streams alternative website. Watch live football, soccer, NFL, NBA, UFC, boxing matches online free streaming.</p>
+          </div>
+          
           {/* Disclaimer Section */}
           <div className="border-t border-black dark:border-white mt-4 pt-4">
             <h6 className="text-xs font-semibold text-black dark:text-white mb-1">Disclaimer:</h6>
