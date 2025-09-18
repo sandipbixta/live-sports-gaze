@@ -79,14 +79,15 @@ const StreamSources = ({
                   : null;
               })
               .filter(Boolean) as Stream[];
-          } else if (streamData && typeof streamData === 'object' && streamData.embedUrl) {
-            // API returned single stream
-            const url = streamData.embedUrl;
+          } else if (streamData && typeof streamData === 'object' && 'embedUrl' in streamData) {
+            // API returned single stream - fix TypeScript type check
+            const singleStream = streamData as Stream;
+            const url = singleStream.embedUrl;
             const normalized = url.startsWith('//') ? 'https:' + url : url.replace(/^http:\/\//i, 'https://');
             if (normalized && 
                 !normalized.includes('youtube.com') &&
                 !normalized.includes('demo')) {
-              streams = [{ ...streamData, embedUrl: normalized } as Stream];
+              streams = [{ ...singleStream, embedUrl: normalized }];
             }
           }
           
