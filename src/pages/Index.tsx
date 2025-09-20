@@ -272,7 +272,7 @@ const Index = () => {
                           Currently live matches from all sports categories
                         </p>
                       </div>
-                      <AllSportsLiveMatches searchTerm={searchTerm} />
+                      <AllSportsLiveMatches searchTerm={searchTerm} limitFootballMatches={true} />
                     </div>
                   ) : (
                     <>
