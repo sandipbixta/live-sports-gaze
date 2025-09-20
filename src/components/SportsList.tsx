@@ -47,7 +47,8 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
           All Sports
         </Button>
         
-        {sports.map((sport) => (
+        {/* Insert Football 2 after regular Football */}
+        {sports.filter(sport => sport.name.toLowerCase() === 'football').map((sport) => (
           <Button
             key={sport.id}
             onClick={() => onSelectSport(sport.id)}
@@ -58,7 +59,45 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
             }`}
             variant={selectedSport === sport.id ? "default" : "outline"}
           >
-            {sport.name}
+            ⚽ {sport.name}
+          </Button>
+        ))}
+        
+        {/* Football 2 (Streamed API) */}
+        <Button
+          onClick={() => onSelectSport('football2')}
+          className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 ${
+            selectedSport === 'football2'
+              ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
+              : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+          }`}
+          variant={selectedSport === 'football2' ? "default" : "outline"}
+        >
+          ⚽ Football 2
+        </Button>
+        
+        {/* Other sports excluding football */}
+        {sports.filter(sport => sport.name.toLowerCase() !== 'football').map((sport) => (
+          <Button
+            key={sport.id}
+            onClick={() => onSelectSport(sport.id)}
+            className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 ${
+              selectedSport === sport.id
+                ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
+                : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+            }`}
+            variant={selectedSport === sport.id ? "default" : "outline"}
+          >
+            {sport.name === 'basketball' ? '🏀' : 
+             sport.name === 'tennis' ? '🎾' : 
+             sport.name === 'baseball' ? '⚾' : 
+             sport.name === 'mma' ? '🥊' : 
+             sport.name === 'boxing' ? '🥊' : 
+             sport.name === 'american-football' ? '🏈' : 
+             sport.name === 'afl' ? '🏈' : 
+             sport.name === 'rugby' ? '🏉' : 
+             sport.name === 'cricket' ? '🏏' : 
+             sport.name === 'motorsport' ? '🏎️' : '📺'} {sport.name}
           </Button>
         ))}
       </div>
@@ -78,7 +117,8 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
           All Sports
         </Button>
         
-        {sports.map((sport) => (
+        {/* Insert Football 2 after regular Football */}
+        {sports.filter(sport => sport.name.toLowerCase() === 'football').map((sport) => (
           <Button
             key={sport.id}
             onClick={() => onSelectSport(sport.id)}
@@ -89,7 +129,45 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
             }`}
             variant={selectedSport === sport.id ? "default" : "outline"}
           >
-            {sport.name}
+            ⚽ {sport.name}
+          </Button>
+        ))}
+        
+        {/* Football 2 (Streamed API) */}
+        <Button
+          onClick={() => onSelectSport('football2')}
+          className={`px-3 py-1.5 rounded-lg transition-all text-sm truncate ${
+            selectedSport === 'football2'
+              ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
+              : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+          }`}
+          variant={selectedSport === 'football2' ? "default" : "outline"}
+        >
+          ⚽ Football 2
+        </Button>
+        
+        {/* Other sports excluding football */}
+        {sports.filter(sport => sport.name.toLowerCase() !== 'football').map((sport) => (
+          <Button
+            key={sport.id}
+            onClick={() => onSelectSport(sport.id)}
+            className={`px-3 py-1.5 rounded-lg transition-all text-sm truncate ${
+              selectedSport === sport.id
+                ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
+                : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+            }`}
+            variant={selectedSport === sport.id ? "default" : "outline"}
+          >
+            {sport.name === 'basketball' ? '🏀' : 
+             sport.name === 'tennis' ? '🎾' : 
+             sport.name === 'baseball' ? '⚾' : 
+             sport.name === 'mma' ? '🥊' : 
+             sport.name === 'boxing' ? '🥊' : 
+             sport.name === 'american-football' ? '🏈' : 
+             sport.name === 'afl' ? '🏈' : 
+             sport.name === 'rugby' ? '🏉' : 
+             sport.name === 'cricket' ? '🏏' : 
+             sport.name === 'motorsport' ? '🏎️' : '📺'} {sport.name}
           </Button>
         ))}
       </div>

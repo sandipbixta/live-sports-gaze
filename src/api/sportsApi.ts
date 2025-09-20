@@ -41,6 +41,48 @@ const filterAndReorderSports = (sports: Sport[]): Sport[] => {
   return [...sportsWithoutTennis, tennisSport];
 };
 
+// Function to fetch football matches from Streamed API
+export const fetchFootballFromStreamed = async (): Promise<Match[]> => {
+  const cacheKey = 'football-streamed';
+  const cached = getCachedData(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(`${API_BASE}/matches/football`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await response.json();
+    
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid football data format');
+    }
+    
+    // Convert to our match format
+    const matches: Match[] = data.map((match: any) => ({
+      id: match.id || `streamed-${Date.now()}-${Math.random()}`,
+      title: match.title || 'Unknown Match',
+      category: 'football',
+      date: match.date || Date.now(),
+      poster: match.poster,
+      popular: false,
+      teams: match.teams,
+      sources: match.sources || [],
+      sportId: 'football2'
+    }));
+    
+    setCachedData(cacheKey, matches);
+    console.log(`✅ Fetched ${matches.length} football matches from Streamed API`);
+    return matches;
+  } catch (error) {
+    console.error('❌ Error fetching football from Streamed API:', error);
+    return [];
+  }
+};
+
 export const fetchSports = async (): Promise<Sport[]> => {
   const cacheKey = 'sports';
   const cached = getCachedData(cacheKey);
