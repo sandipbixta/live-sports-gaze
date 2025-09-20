@@ -240,24 +240,22 @@ const Index = () => {
               <LiveSportsWidget />
             </div>
           ) : (
-            <SportsList 
-              sports={sports}
-              onSelectSport={handleSelectSport}
-              selectedSport={selectedSport}
-              isLoading={loadingSports}
-            />
+            <div className="space-y-4">
+              <FeaturedSports />
+              
+              <SportsList 
+                sports={sports}
+                onSelectSport={handleSelectSport}
+                selectedSport={selectedSport}
+                isLoading={loadingSports}
+              />
+            </div>
           )}
         </div>
         
         {!showLiveSports && (
           <>
             
-            
-            <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-              <FeaturedSports />
-            </React.Suspense>
-            
-            <Separator className="my-8 bg-[#343a4d]" />
             
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />
