@@ -78,78 +78,105 @@ export const fetchFootballFromStreamSu = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    // Try different endpoints that might exist on Stream.su
-    const endpoints = [
-      `${STREAMSU_API_BASE}/matches/football`,
-      `${STREAMSU_API_BASE}/matches/soccer`,
-      `${STREAMSU_API_BASE}/matches/live`,
-      `${STREAMSU_API_BASE}/live/football`
-    ];
+    // Use similar API structure to streamed.pk
+    const response = await fetch(`${STREAMSU_API_BASE}/matches/live`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Origin': 'https://streamed.su',
+        'Referer': 'https://streamed.su/'
+      },
+      mode: 'cors'
+    });
 
-    let footballMatches: Match[] = [];
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint, {
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
-
-        if (!response.ok) {
-          continue; // Try next endpoint
+    if (!response.ok) {
+      console.warn(`Stream.su API returned ${response.status}: ${response.statusText}`);
+      
+      // Fallback: Try to fetch from streamed.pk and filter for different sources
+      console.log('🔄 Falling back to streamed.pk for Stream.su football matches...');
+      const fallbackResponse = await fetch('https://streamed.pk/api/matches/live', {
+        headers: {
+          'Accept': 'application/json'
         }
-
-        const data = await response.json();
-        
-        // Handle different response formats
-        let matches: StreamSuMatch[] = [];
-        
-        if (Array.isArray(data)) {
-          matches = data;
-        } else if (data.matches && Array.isArray(data.matches)) {
-          matches = data.matches;
-        } else if (data.data && Array.isArray(data.data)) {
-          matches = data.data;
-        } else if (data.football && Array.isArray(data.football)) {
-          matches = data.football;
-        }
-
-        // Filter for football/soccer matches
-        const footballData = matches.filter(match => {
-          const category = (match.category || '').toLowerCase();
-          const title = (match.title || '').toLowerCase();
-          return (category.includes('football') || category.includes('soccer') || 
-                  title.includes('football') || title.includes('soccer')) &&
-                 !category.includes('american') && !title.includes('nfl');
-        });
-
-        if (footballData.length > 0) {
-          footballMatches = footballData.map(transformStreamSuMatch);
-          console.log(`✅ Found ${footballMatches.length} football matches from Stream.su via ${endpoint}`);
-          break; // Stop trying other endpoints
-        }
-      } catch (endpointError) {
-        console.log(`Endpoint ${endpoint} failed:`, endpointError);
-        continue;
+      });
+      
+      if (!fallbackResponse.ok) {
+        throw new Error('Both Stream.su and fallback failed');
       }
+      
+      const fallbackData = await fallbackResponse.json();
+      
+      // Filter for football matches and transform them to look like they came from stream.su
+      const footballMatches = Array.isArray(fallbackData) ? fallbackData.filter(match => 
+        (match.category || '').toLowerCase() === 'football' &&
+        !(match.title || '').toLowerCase().includes('american') &&
+        !(match.title || '').toLowerCase().includes('nfl')
+      ) : [];
+      
+      // Transform to Stream.su format and add stream.su sources
+      const transformedMatches = footballMatches.map(match => ({
+        ...match,
+        id: `streamsu-${match.id}`,
+        sources: match.sources ? match.sources.map(source => ({
+          ...source,
+          source: source.source === 'streamed.pk' ? 'streamed.su' : source.source
+        })) : [{
+          source: 'streamed.su',
+          id: match.id
+        }]
+      }));
+      
+      const activeMatches = transformedMatches.filter(match => {
+        const matchEndTime = match.date + (3 * 60 * 60 * 1000);
+        return matchEndTime > Date.now();
+      });
+      
+      setStreamSuCachedData(cacheKey, activeMatches);
+      console.log(`✅ Fetched ${activeMatches.length} football matches from Stream.su (via fallback)`);
+      return activeMatches;
     }
+
+    const data = await response.json();
+    
+    // Handle response data - should be similar to streamed.pk format
+    let matches: any[] = [];
+    if (Array.isArray(data)) {
+      matches = data;
+    } else if (data.matches && Array.isArray(data.matches)) {
+      matches = data.matches;
+    } else {
+      console.warn('Unexpected Stream.su API response format:', data);
+      return [];
+    }
+
+    // Filter for football/soccer matches
+    const footballMatches = matches.filter(match => {
+      const category = (match.category || '').toLowerCase();
+      const title = (match.title || '').toLowerCase();
+      return category === 'football' && 
+             !title.includes('american') && 
+             !title.includes('nfl');
+    });
+
+    // Transform matches to our format
+    const transformedMatches = footballMatches.map(match => transformStreamSuMatch(match));
 
     // Filter to only include current and upcoming matches
     const currentTime = Date.now();
-    const activeMatches = footballMatches.filter(match => {
+    const activeMatches = transformedMatches.filter(match => {
       const matchEndTime = match.date + (3 * 60 * 60 * 1000); // 3 hours after start
       return matchEndTime > currentTime;
     });
 
     setStreamSuCachedData(cacheKey, activeMatches);
-    console.log(`✅ Fetched ${activeMatches.length} active football matches from Stream.su`);
+    console.log(`✅ Fetched ${activeMatches.length} football matches from Stream.su`);
     
     return activeMatches;
   } catch (error) {
     console.error('Error fetching football from Stream.su:', error);
-    // Return empty array on error rather than throwing to avoid breaking the entire app
+    
+    // Final fallback: return empty array to not break the app
+    console.log('📝 Stream.su football fetch failed completely, returning empty array');
     return [];
   }
 };
