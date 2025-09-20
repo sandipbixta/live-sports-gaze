@@ -65,7 +65,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
         
         {/* Football 2 (Streamed API) */}
         <Button
-          onClick={() => onSelectSport('football2')}
+          onClick={() => window.location.href = '/football2'}
           className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 ${
             selectedSport === 'football2'
               ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
@@ -135,7 +135,7 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
         
         {/* Football 2 (Streamed API) */}
         <Button
-          onClick={() => onSelectSport('football2')}
+          onClick={() => window.location.href = '/football2'}
           className={`px-3 py-1.5 rounded-lg transition-all text-sm truncate ${
             selectedSport === 'football2'
               ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'

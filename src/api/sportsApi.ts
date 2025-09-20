@@ -153,6 +153,12 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     console.log('🏈 Fetching football matches from PPV.to instead of streamed.pk');
     return await fetchFootballFromPPV();
   }
+  
+  // Use Streamed API for football2 matches
+  if (sportId.toLowerCase() === 'football2') {
+    console.log('⚽ Fetching Football 2 matches from Streamed API');
+    return await fetchFootballFromStreamed();
+  }
 
   const cacheKey = `matches-${sportId}`;
   const cached = getCachedData(cacheKey);
