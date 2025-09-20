@@ -7,7 +7,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { Home, CalendarDays, Tv2, Radio, Mail } from "lucide-react";
+import { Home, CalendarDays, Tv2, Radio, Newspaper } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import Clock from "./Clock";
@@ -22,9 +22,10 @@ const MainNav = () => {
   const menuItems = [
     { title: "Home", icon: Home, path: "/" },
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
-    { title: "Live", icon: Tv2, path: "/live" },
+    { title: "Football 1", icon: Tv2, path: "/football1" },
+    { title: "Football 2", icon: Tv2, path: "/football2" },
     { title: "Channels", icon: Radio, path: "/channels" },
-    { title: "News", icon: Mail, path: "/news" }
+    { title: "News", icon: Newspaper, path: "/news" }
   ];
 
   const handleNavigate = (path: string) => {
