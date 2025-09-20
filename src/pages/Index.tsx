@@ -9,7 +9,6 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
-import FeaturedSports from '../components/FeaturedSports';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
 import PromotionBoxes from '../components/PromotionBoxes';
