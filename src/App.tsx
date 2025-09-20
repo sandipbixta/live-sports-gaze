@@ -16,8 +16,6 @@ import Index from "./pages/Index";
 import Match from "./pages/Match";
 import Schedule from "./pages/Schedule";
 import Live from "./pages/Live";
-import Football1 from "./pages/Football1";
-import Football2 from "./pages/Football2";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
@@ -74,16 +72,6 @@ const App: React.FC = () => {
               <Route path="/live" element={
                 <SEOPageTracker pageTitle="Live Sports Streaming Now" contentType="live">
                   <Live />
-                </SEOPageTracker>
-              } />
-              <Route path="/football1" element={
-                <SEOPageTracker pageTitle="Football 1 - PPV.to Live Football Matches" contentType="live">
-                  <Football1 />
-                </SEOPageTracker>
-              } />
-              <Route path="/football2" element={
-                <SEOPageTracker pageTitle="Football 2 - Stream.su Live Football Matches" contentType="live">
-                  <Football2 />
                 </SEOPageTracker>
               } />
               <Route path="/channels" element={

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
-import { Match, Sport } from '../types/sports';
+import { Match } from '../types/sports';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -11,8 +11,6 @@ import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
-import { fetchSports } from '../api/sportsApi';
-import SportsList from '../components/SportsList';
 
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useStreamPlayer } from '../hooks/useStreamPlayer';
@@ -31,15 +29,13 @@ const Live = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [activeSportFilter, setActiveSportFilter] = useState<string>("all");
   const [userSelectedMatch, setUserSelectedMatch] = useState<boolean>(false);
-  const [sports, setSports] = useState<Sport[]>([]);
-  const [loadingSports, setLoadingSports] = useState(true);
   
   // Custom hooks for data management
   const { 
     allMatches, 
     liveMatches, 
     upcomingMatches, 
-    sports: liveSports, 
+    sports, 
     loading, 
     handleRetryLoading 
   } = useLiveMatches();
@@ -55,26 +51,6 @@ const Live = () => {
     setFeaturedMatch,
     fetchStreamData
   } = useStreamPlayer();
-
-  // Fetch sports for navigation
-  useEffect(() => {
-    const loadSports = async () => {
-      try {
-        const sportsData = await fetchSports();
-        setSports(sportsData);
-      } catch (error) {
-        console.error('Error loading sports:', error);
-      } finally {
-        setLoadingSports(false);
-      }
-    };
-    loadSports();
-  }, []);
-
-  // Handle sport selection from navigation
-  const handleSelectSport = (sportId: string) => {
-    setActiveSportFilter(sportId);
-  };
 
   // Handle user match selection
   const handleUserMatchSelect = (match: Match) => {
@@ -181,16 +157,6 @@ const Live = () => {
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
-      
-      {/* Sports Navigation */}
-      <div className="mb-8">
-        <SportsList 
-          sports={sports}
-          onSelectSport={handleSelectSport}
-          selectedSport={activeSportFilter}
-          isLoading={loadingSports}
-        />
-      </div>
       
       <SportFilterPills
         allMatches={allMatches}

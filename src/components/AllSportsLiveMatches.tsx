@@ -277,10 +277,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
               <span className="text-sm text-gray-400">
                 {displayMatches.length} live match{displayMatches.length !== 1 ? 'es' : ''}
                 {limitFootballMatches && sportId.toLowerCase() === 'football' && matches.length > 12 && 
-                  ` (showing first 12 of ${matches.length} from PPV.to)`
-                }
-                {limitFootballMatches && sportId.toLowerCase() === 'football' && matches.length <= 12 && 
-                  ` (PPV.to)`
+                  ` (showing first 12 of ${matches.length})`
                 }
               </span>
             </div>
