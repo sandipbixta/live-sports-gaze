@@ -9,6 +9,7 @@ import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
 import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
+import FeaturedSports from '../components/FeaturedSports';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
 import PromotionBoxes from '../components/PromotionBoxes';
@@ -251,6 +252,12 @@ const Index = () => {
         {!showLiveSports && (
           <>
             
+            
+            <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+              <FeaturedSports />
+            </React.Suspense>
+            
+            <Separator className="my-8 bg-[#343a4d]" />
             
             <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
               <FeaturedChannels />

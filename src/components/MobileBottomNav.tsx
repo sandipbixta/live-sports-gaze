@@ -11,8 +11,8 @@ const MobileBottomNav = () => {
   const navItems = [
     { title: "Home", icon: Home, path: "/" },
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
-    { title: "Football 1", icon: Tv2, path: "/football1" },
-    { title: "Football 2", icon: Tv2, path: "/football2" }
+    { title: "Live", icon: Tv2, path: "/live" },
+    { title: "Channels", icon: Radio, path: "/channels" }
   ];
 
   return (
