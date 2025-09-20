@@ -105,15 +105,18 @@ export const fetchFootballFromPPV = async (): Promise<Match[]> => {
       throw new Error('Invalid PPV API response format');
     }
 
-    // Find football category and extract matches
+    // Find football/soccer category and extract matches (exclude American football)
     const footballMatches: Match[] = [];
     
     for (const category of data.streams) {
-      // Look for football/soccer categories
+      // Look for football/soccer categories but exclude American football
       const categoryName = category.category.toLowerCase();
-      if (categoryName.includes('football') || categoryName.includes('soccer')) {
+      if ((categoryName.includes('football') || categoryName.includes('soccer')) && 
+          !categoryName.includes('american') && 
+          !categoryName.includes('nfl')) {
         const matches = category.streams.map(transformPPVStreamToMatch);
         footballMatches.push(...matches);
+        console.log(`📋 Found ${matches.length} soccer matches in category: ${category.category}`);
       }
     }
 
