@@ -262,10 +262,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       
       {/* Sports Sections */}
       {sortedSports.map(([sportId, matches]) => {
-        // For football, only show popular matches since we already have "Top League Football" section
-        const displayMatches = sportId === 'football' 
-          ? matches.filter(match => match.popular)
-          : matches;
+        // For football, show all matches since we're now getting them from PPV.to
+        const displayMatches = matches;
         
         // Don't show the section if no matches after filtering
         if (displayMatches.length === 0) return null;
@@ -274,7 +272,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           <div key={sportId} className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-white">
-                {getSportName(sportId)}
+                {getSportName(sportId)} {sportId === 'football' && '(PPV.to)'}
               </h3>
               <span className="text-sm text-gray-400">
                 {displayMatches.length} live match{displayMatches.length !== 1 ? 'es' : ''}
