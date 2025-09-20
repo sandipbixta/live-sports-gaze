@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../hooks/use-toast';
-import { Match } from '../types/sports';
+import { Match, Sport } from '../types/sports';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
@@ -10,11 +10,13 @@ import { generateCompetitorTitle, generateCompetitorDescription } from '../utils
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { fetchFootballFromPPV } from '../services/ppvService';
+import { fetchSports } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
 import MatchSection from '../components/MatchSection';
 import LoadingGrid from '../components/LoadingGrid';
 import EmptyState from '../components/EmptyState';
 import TelegramBanner from '../components/TelegramBanner';
+import SportsList from '../components/SportsList';
 import { useStreamPlayer } from '../hooks/useStreamPlayer';
 import FeaturedPlayer from '../components/live/FeaturedPlayer';
 
@@ -24,6 +26,8 @@ const Football1 = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [userSelectedMatch, setUserSelectedMatch] = useState<boolean>(false);
+  const [sports, setSports] = useState<Sport[]>([]);
+  const [loadingSports, setLoadingSports] = useState(true);
   
   const {
     featuredMatch,
@@ -36,6 +40,21 @@ const Football1 = () => {
     setFeaturedMatch,
     fetchStreamData
   } = useStreamPlayer();
+
+  // Fetch sports for navigation
+  useEffect(() => {
+    const loadSports = async () => {
+      try {
+        const sportsData = await fetchSports();
+        setSports(sportsData);
+      } catch (error) {
+        console.error('Error loading sports:', error);
+      } finally {
+        setLoadingSports(false);
+      }
+    };
+    loadSports();
+  }, []);
 
   // Fetch PPV football matches
   useEffect(() => {
@@ -60,6 +79,17 @@ const Football1 = () => {
 
     loadMatches();
   }, [toast]);
+
+  // Handle sport selection from navigation (redirects to home page with sport selected)
+  const handleSelectSport = (sportId: string) => {
+    if (sportId === 'football1') return; // Already on this page
+    if (sportId === 'football2') {
+      window.location.href = '/football2';
+      return;
+    }
+    // For other sports, redirect to home page with sport selected
+    window.location.href = `/?sport=${sportId}`;
+  };
 
   // Filter matches based on search query
   const filteredMatches = matches.filter(match => {
@@ -113,7 +143,7 @@ const Football1 = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-              Football 1 - PPV.to Matches
+              Football 1
             </h1>
             <p className="text-gray-300">
               {loading ? 'Loading...' : `${filteredMatches.length} football matches available`}
@@ -149,6 +179,16 @@ const Football1 = () => {
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
+      
+      {/* Sports Navigation */}
+      <div className="mb-8">
+        <SportsList 
+          sports={sports}
+          onSelectSport={handleSelectSport}
+          selectedSport="football1"
+          isLoading={loadingSports}
+        />
+      </div>
       
       {loading ? (
         <LoadingGrid />
