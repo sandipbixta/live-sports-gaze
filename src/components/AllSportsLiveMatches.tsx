@@ -261,28 +261,38 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
       
       {/* Sports Sections */}
-      {sortedSports.map(([sportId, matches]) => (
-        <div key={sportId} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">
-              {getSportName(sportId)}
-            </h3>
-            <span className="text-sm text-gray-400">
-              {matches.length} live match{matches.length !== 1 ? 'es' : ''}
-            </span>
+      {sortedSports.map(([sportId, matches]) => {
+        // For football, only show popular matches since we already have "Top League Football" section
+        const displayMatches = sportId === 'football' 
+          ? matches.filter(match => match.popular)
+          : matches;
+        
+        // Don't show the section if no matches after filtering
+        if (displayMatches.length === 0) return null;
+        
+        return (
+          <div key={sportId} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-white">
+                {getSportName(sportId)}
+              </h3>
+              <span className="text-sm text-gray-400">
+                {displayMatches.length} live match{displayMatches.length !== 1 ? 'es' : ''}
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+              {displayMatches.map((match) => (
+                <MatchCard
+                  key={`${match.sportId || sportId}-${match.id}`}
+                  match={match}
+                  sportId={match.sportId || sportId}
+                />
+              ))}
+            </div>
           </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {matches.map((match) => (
-              <MatchCard
-                key={`${match.sportId || sportId}-${match.id}`}
-                match={match}
-                sportId={match.sportId || sportId}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
