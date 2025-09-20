@@ -91,14 +91,14 @@ const Football2 = () => {
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
         <title>Football 2 - Free Live Football Streaming | DamiTV</title>
-        <meta name="description" content="Watch free live Football 2 matches streaming online at DamiTV. HD quality football streams from Streamed API without registration." />
-        <meta name="keywords" content="football 2 streaming, live football matches, free football streams, football 2 online, streamed api football" />
+        <meta name="description" content="Watch free live Football 2 matches streaming online at DamiTV. HD quality football streams without registration." />
+        <meta name="keywords" content="football 2 streaming, live football matches, free football streams, football 2 online" />
         <link rel="canonical" href="https://www.damitv.pro/football2" />
       </Helmet>
       
       <SEOMetaTags 
         title="Football 2 - Free Live Football Streaming"
-        description="Watch free live Football 2 matches streaming online at DamiTV. HD quality football streams from Streamed API without registration."
+        description="Watch free live Football 2 matches streaming online at DamiTV. HD quality football streams without registration."
       />
 
       <main className="py-4">
@@ -125,10 +125,10 @@ const Football2 = () => {
         <div className="mb-8">
           <div className="mb-4">
             <h1 className="text-3xl font-bold text-foreground">
-              ⚽ Football 2 (Streamed API)
+              ⚽ Football 2
             </h1>
             <p className="text-gray-400 text-sm mt-2">
-              {filteredMatches.length} football matches available from Streamed API
+              {filteredMatches.length} football matches available
             </p>
           </div>
           
@@ -144,8 +144,8 @@ const Football2 = () => {
           <div className="prose prose-invert max-w-none">
             <h2 className="text-xl font-semibold text-foreground mb-4">About Football 2 Streaming</h2>
             <p className="text-muted-foreground mb-4">
-              Football 2 on DamiTV provides access to live football matches through the Streamed API. 
-              Watch high-quality football streams from various leagues and tournaments around the world. 
+              Football 2 on DamiTV provides access to live football matches with high-quality streams. 
+              Watch football from various leagues and tournaments around the world. 
               Our Football 2 section offers an alternative source for football streaming with different 
               match coverage and streaming options.
             </p>
