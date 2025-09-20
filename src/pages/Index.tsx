@@ -240,16 +240,12 @@ const Index = () => {
               <LiveSportsWidget />
             </div>
           ) : (
-            <div className="space-y-4">
-              <FeaturedSports />
-              
-              <SportsList 
-                sports={sports}
-                onSelectSport={handleSelectSport}
-                selectedSport={selectedSport}
-                isLoading={loadingSports}
-              />
-            </div>
+            <SportsList 
+              sports={sports}
+              onSelectSport={handleSelectSport}
+              selectedSport={selectedSport}
+              isLoading={loadingSports}
+            />
           )}
         </div>
         

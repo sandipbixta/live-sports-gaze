@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Sport } from '../types/sports';
 import { Button } from './ui/button';
+import { Tv2, Zap } from 'lucide-react';
 
 interface SportsListProps {
   sports: Sport[];
@@ -11,12 +13,18 @@ interface SportsListProps {
 }
 
 const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selectedSport, isLoading }) => {
+  // Featured sports that link to other pages
+  const featuredSports = [
+    { id: 'football1', name: 'Football 1', path: '/football1', icon: Tv2 },
+    { id: 'football2', name: 'Football 2', path: '/football2', icon: Zap }
+  ];
+
   if (isLoading) {
     return (
       <div>
         {/* Mobile: horizontal scroll */}
         <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none lg:hidden">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="w-32 h-8 bg-[#242836] animate-pulse rounded-lg flex-shrink-0"></div>
           ))}
         </div>
@@ -34,6 +42,22 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
     <div>
       {/* Mobile: horizontal scroll */}
       <div className="flex overflow-x-auto pb-3 space-x-3 scrollbar-none lg:hidden">
+        {/* Featured Sports */}
+        {featuredSports.map((sport) => {
+          const IconComponent = sport.icon;
+          return (
+            <Link key={sport.id} to={sport.path}>
+              <Button
+                className="px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 bg-[#242836] text-white hover:bg-[#343a4d] flex items-center gap-2"
+                variant="outline"
+              >
+                <IconComponent className="h-4 w-4" />
+                {sport.name}
+              </Button>
+            </Link>
+          );
+        })}
+        
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
@@ -65,6 +89,22 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
 
       {/* Desktop: grid */}
       <div className="hidden lg:grid lg:grid-cols-10 gap-2">
+        {/* Featured Sports */}
+        {featuredSports.map((sport) => {
+          const IconComponent = sport.icon;
+          return (
+            <Link key={sport.id} to={sport.path}>
+              <Button
+                className="px-3 py-1.5 rounded-lg transition-all text-sm truncate bg-[#242836] text-white hover:bg-[#343a4d] flex items-center gap-2"
+                variant="outline"
+              >
+                <IconComponent className="h-4 w-4" />
+                <span className="truncate">{sport.name}</span>
+              </Button>
+            </Link>
+          );
+        })}
+        
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
