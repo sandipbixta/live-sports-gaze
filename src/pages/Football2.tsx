@@ -9,7 +9,7 @@ import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
-import { fetchFootballFromStreamSu } from '../services/streamSuService';
+import { fetchFootballFromStreamedPk } from '../services/streamSuService';
 import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
 import MatchSection from '../components/MatchSection';
 import LoadingGrid from '../components/LoadingGrid';
@@ -37,17 +37,17 @@ const Football2 = () => {
     fetchStreamData
   } = useStreamPlayer();
 
-  // Fetch Stream.su football matches
+  // Fetch Streamed.pk football matches
   useEffect(() => {
     const loadMatches = async () => {
       setLoading(true);
       try {
-        const streamSuMatches = await fetchFootballFromStreamSu();
-        const cleanMatches = filterActiveMatches(filterCleanMatches(streamSuMatches));
+        const streamedPkMatches = await fetchFootballFromStreamedPk();
+        const cleanMatches = filterActiveMatches(filterCleanMatches(streamedPkMatches));
         const consolidatedMatches = consolidateMatches(cleanMatches);
         setMatches(consolidatedMatches);
       } catch (error) {
-        console.error('Error loading Stream.su football matches:', error);
+        console.error('Error loading Streamed.pk football matches:', error);
         toast({
           title: "Error",
           description: "Failed to load football matches. Please try again.",
@@ -98,9 +98,9 @@ const Football2 = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>{generateCompetitorTitle('Football 2 - Stream.su Live Football Matches | Free Streaming', 'live')}</title>
-        <meta name="description" content={generateCompetitorDescription('Watch live football matches from Stream.su - Free streaming alternative to StreamEast', 'live')} />
-        <meta name="keywords" content="stream.su football, live football streaming, soccer matches, watch football online, free football streams, streameast alternative" />
+        <title>{generateCompetitorTitle('Football 2 - Streamed.pk Live Football Matches | Free Streaming', 'live')}</title>
+        <meta name="description" content={generateCompetitorDescription('Watch live football matches from Streamed.pk - Free streaming alternative to StreamEast', 'live')} />
+        <meta name="keywords" content="streamed.pk football, live football streaming, soccer matches, watch football online, free football streams, streameast alternative" />
         <link rel="canonical" href="https://damitv.pro/football2" />
       </Helmet>
       
@@ -113,7 +113,7 @@ const Football2 = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-              Football 2 - Stream.su Matches
+              Football 2 - Streamed.pk Matches
             </h1>
             <p className="text-gray-300">
               {loading ? 'Loading...' : `${filteredMatches.length} football matches available`}
