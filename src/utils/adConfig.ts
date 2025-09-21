@@ -34,6 +34,12 @@ export const adConfig = {
     cooldownMinutes: 5,
     sessionKey: 'directLinkAdTriggered'
   },
+  popunder: {
+    scriptSrc: '//assumptiveslumber.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
+    cooldownMinutes: 5,
+    sessionKey: 'popunderAdTriggered',
+    delaySeconds: 3
+  },
   adult: {
     mobile: {
       key: 'aef1978a837e09b2a4db7546aaaf55e4',
