@@ -12,23 +12,6 @@ export const usePopunderAd = () => {
       return;
     }
 
-    // Set up anti-adblock globals before loading the script
-    if (typeof window !== 'undefined') {
-      // Common anti-adblock global variables
-      (window as any).adBlockEnabled = false;
-      (window as any).canRunAds = true;
-      (window as any).adsBlocked = false;
-      
-      // Add console intercept to catch and log anti-adblock errors
-      const originalConsoleError = console.error;
-      console.error = (...args) => {
-        if (args[0]?.includes?.('anti') || args[0]?.includes?.('block') || args[0]?.includes?.('command not found')) {
-          console.warn('Anti-adblock related error captured:', args);
-        }
-        originalConsoleError.apply(console, args);
-      };
-    }
-
     // Delay the popunder execution
     const timer = setTimeout(() => {
       try {
@@ -39,14 +22,13 @@ export const usePopunderAd = () => {
         script.async = true;
         
         // Add error handling
-        script.onerror = (error) => {
-          console.warn('Popunder ad script failed to load:', error);
+        script.onerror = () => {
+          console.warn('Popunder ad script failed to load');
         };
         
         script.onload = () => {
           // Mark as triggered after successful load
           markAdTriggered(adConfig.popunder.sessionKey);
-          console.log('Popunder ad script loaded successfully');
         };
         
         // Append to head
