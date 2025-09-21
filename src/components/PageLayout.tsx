@@ -8,7 +8,7 @@ import SearchBar from './SearchBar';
 import Clock from './Clock';
 import ThemeToggle from './ThemeToggle';
 import BannerAd from './BannerAd';
-import SocialBarAd from './SocialBarAd';
+
 import ContainerAd from './ContainerAd';
 
 
@@ -81,8 +81,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         <ContainerAd />
       </main>
       
-      {/* Social Bar Ad - floating social bar */}
-      <SocialBarAd />
       
       <footer className="bg-white dark:bg-black text-black dark:text-white py-6 mt-10 pb-20 md:pb-6 border-t border-black dark:border-white">
         <div className="container mx-auto px-2">
