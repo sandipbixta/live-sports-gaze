@@ -1,9 +1,6 @@
 
 // Ad configuration utility
 export const adConfig = {
-  socialBar: {
-    scriptSrc: '//uncertainbill.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js'
-  },
   banner: {
     large: {
       key: '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
