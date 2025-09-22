@@ -22,7 +22,6 @@ import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
-import Football2 from "./pages/Football2";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -88,11 +87,6 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
-                </SEOPageTracker>
-              } />
-              <Route path="/football2" element={
-                <SEOPageTracker pageTitle="Football 2 - Free Live Football Streaming" contentType="live">
-                  <Football2 />
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />

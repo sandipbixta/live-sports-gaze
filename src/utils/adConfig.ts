@@ -1,6 +1,9 @@
 
 // Ad configuration utility
 export const adConfig = {
+  socialBar: {
+    scriptSrc: '//uncertainbill.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js'
+  },
   banner: {
     large: {
       key: '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
@@ -27,12 +30,12 @@ export const adConfig = {
     containerId: 'container-a873bc1d3d203f2f13c32a99592441b8'
   },
   directLink: {
-    url: 'https://dementedjudged.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
+    url: 'https://assumptiveslumber.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
     cooldownMinutes: 5,
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
-    scriptSrc: '//dementedjudged.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
+    scriptSrc: '//assumptiveslumber.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
     cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches, fetchLiveMatches, fetchFootballFromStreamed } from '../api/sportsApi';
+import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
@@ -166,18 +166,10 @@ const Index = () => {
         console.log('📁 Using cached matches:', allMatches[sportId].length);
         setMatches(allMatches[sportId]);
       } else {
-        let rawMatchesData;
+        const rawMatchesData = await fetchMatches(sportId);
+        console.log('📥 Raw matches data:', rawMatchesData.length);
         
-        // Handle Football 2 (Streamed API) differently
-        if (sportId === 'football2') {
-          rawMatchesData = await fetchFootballFromStreamed();
-          console.log('📥 Football 2 (Streamed) matches data:', rawMatchesData.length);
-        } else {
-          rawMatchesData = await fetchMatches(sportId);
-          console.log('📥 Raw matches data:', rawMatchesData.length);
-        }
-        
-        // Filter and consolidate matches to remove duplicates, ended matches, and combine stream sources  
+        // Filter and consolidate matches to remove duplicates, ended matches, and combine stream sources
         const cleanMatches = filterActiveMatches(filterCleanMatches(rawMatchesData));
         console.log('🧹 Clean active matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
@@ -280,13 +272,13 @@ const Index = () => {
                           Currently live matches from all sports categories
                         </p>
                       </div>
-                      <AllSportsLiveMatches searchTerm={searchTerm} limitFootballMatches={true} />
+                      <AllSportsLiveMatches searchTerm={searchTerm} />
                     </div>
                   ) : (
                     <>
                       <div className="mb-4">
                         <h3 className="text-xl font-bold text-foreground">
-                          {selectedSport === 'football2' ? 'Football 2 (Streamed)' : sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
                         </h3>
                         <p className="text-gray-400 text-sm">
                           {filteredMatches.length} matches available
