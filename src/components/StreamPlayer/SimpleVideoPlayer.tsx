@@ -4,6 +4,8 @@ import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
+import StreamQualitySelector from '../StreamQualitySelector';
+import { getConnectionInfo, getOptimizedHLSConfig } from '../../utils/connectionOptimizer';
 
 
 interface SimpleVideoPlayerProps {
@@ -26,6 +28,9 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [error, setError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const [currentQuality, setCurrentQuality] = useState(-1);
+  const [availableQualities, setAvailableQualities] = useState<Array<{ width: number; height: number; bitrate: number }>>([]);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const [showExternal, setShowExternal] = useState(false);
@@ -78,80 +83,145 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
+      // Get optimized configuration based on connection
+      const connectionInfo = getConnectionInfo();
+      const optimizedConfig = getOptimizedHLSConfig(connectionInfo);
+      
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
-        // Aggressive buffering for smooth playback
-        maxBufferLength: 45, // Larger buffer for ultra-smooth playback
-        maxMaxBufferLength: 90, // Much larger max buffer
-        maxBufferSize: 120 * 1000 * 1000, // 120MB max buffer size
-        maxBufferHole: 1.0, // More tolerance for buffer holes
-        highBufferWatchdogPeriod: 3, // Less frequent buffer checks
-        nudgeOffset: 0.2, // Larger nudge for stability
-        nudgeMaxRetry: 15, // More retry attempts
-        maxLoadingDelay: 6, // More time for loading
-        maxFragLookUpTolerance: 0.5, // More tolerance
-        liveSyncDurationCount: 5, // More live sync segments
-        liveMaxLatencyDurationCount: 15, // Higher max latency for stability
+        
+        // Use optimized buffering settings
+        ...optimizedConfig,
+        maxBufferHole: 0.5, // Reduced tolerance for better seeking
+        highBufferWatchdogPeriod: 2, // More frequent buffer checks for responsiveness
+        nudgeOffset: 0.1, // Smaller nudge for precision
+        nudgeMaxRetry: 8, // Reasonable retry attempts
+        maxLoadingDelay: 4, // Faster loading response
+        maxFragLookUpTolerance: 0.2, // Tighter tolerance
+        
+        // Live stream optimizations
+        liveSyncDurationCount: 3, // Reduced for lower latency
+        liveMaxLatencyDurationCount: 10, // Balanced latency management
+        
+        // Quality and performance
         enableSoftwareAES: true,
         startFragPrefetch: true,
         testBandwidth: true,
-        // Ultra-optimized buffering for stability
-        backBufferLength: 20, // Keep much more back buffer
-        capLevelToPlayerSize: false, // Don't restrict quality
-        abrEwmaDefaultEstimate: 2000000, // Higher bandwidth estimate
-        abrEwmaFastLive: 5.0, // Smoother adaptation for live
-        abrEwmaSlowLive: 15.0, // More stable adaptation
-        fragLoadingTimeOut: 30000, // 30s timeout for fragments
-        manifestLoadingTimeOut: 15000, // 15s timeout for manifest
-        levelLoadingTimeOut: 15000, // 15s timeout for levels
-        // Additional optimizations
+        backBufferLength: 10, // Reasonable back buffer
+        capLevelToPlayerSize: true, // Optimize quality for viewport
+        
+        // Adaptive bitrate settings based on connection
+        abrEwmaDefaultEstimate: connectionInfo.downlink * 1000000 * 0.8, // 80% of reported bandwidth
+        abrEwmaFastLive: connectionInfo.effectiveType === '4g' ? 3.0 : 2.0,
+        abrEwmaSlowLive: connectionInfo.effectiveType === '4g' ? 9.0 : 6.0,
+        abrBandWidthFactor: 0.95, // Conservative bandwidth usage
+        abrBandWidthUpFactor: 0.7, // Careful quality upgrades
+        
+        // Retry settings
         startLevel: -1, // Auto start level
-        autoStartLoad: true, // Auto start loading
-        progressive: false, // Better for live streams
-        fragLoadingMaxRetry: 6, // More fragment retry attempts
-        fragLoadingMaxRetryTimeout: 64000, // Longer retry timeout
-        manifestLoadingMaxRetry: 6, // More manifest retry attempts
-        levelLoadingMaxRetry: 6 // More level retry attempts
+        autoStartLoad: true,
+        progressive: false,
+        fragLoadingMaxRetry: 4, // Reasonable retry attempts
+        fragLoadingMaxRetryTimeout: 32000, // Reasonable retry timeout
+        manifestLoadingMaxRetry: 4,
+        levelLoadingMaxRetry: 4
       });
+      
+      // Store reference for quality control
+      hlsRef.current = hls;
       
       hls.loadSource(src);
       hls.attachMedia(videoRef.current);
       
-      // Enhanced error handling with recovery
+      // Enhanced error handling with smart recovery
       hls.on(Hls.Events.ERROR, (_event, data) => {
-        console.error('HLS error', data);
+        console.error('HLS error:', data.type, data.details, data.reason);
+        
         if (data.fatal) {
           switch(data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('Network error, attempting recovery...');
-              hls?.startLoad();
+              console.log('🔄 Network error - attempting recovery...');
+              setTimeout(() => hls?.startLoad(), 1000); // Brief delay before retry
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error, attempting recovery...');
+              console.log('🔄 Media error - attempting recovery...');
               hls?.recoverMediaError();
               break;
             default:
-              console.log('Fatal error, destroying HLS instance');
+              console.log('💥 Fatal error - destroying HLS instance');
               setError(true);
               break;
+          }
+        } else {
+          // Handle non-fatal errors
+          if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+            console.log('⚠️ Buffer stalled - attempting recovery...');
+            hls?.startLoad();
           }
         }
       });
 
-      // Quality level management for better performance
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed, levels:', hls?.levels?.length);
-        // Start with auto quality selection
+      // Smart quality management
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        console.log(`📺 HLS manifest parsed: ${data.levels.length} quality levels available`);
+        
+        // Store available qualities for the selector
+        const qualities = data.levels.map(level => ({
+          width: level.width,
+          height: level.height,
+          bitrate: level.bitrate
+        }));
+        setAvailableQualities(qualities);
+        
+        // Start with appropriate quality based on connection
         if (hls && hls.levels.length > 1) {
-          hls.currentLevel = -1; // Auto quality
+          // Auto quality selection
+          hls.currentLevel = -1;
+          setCurrentQuality(-1);
+          
+          // Log available qualities for debugging
+          hls.levels.forEach((level, index) => {
+            console.log(`Level ${index}: ${level.width}x${level.height} @ ${Math.round(level.bitrate/1000)}kbps`);
+          });
+        }
+      });
+
+      // Monitor buffer health
+      hls.on(Hls.Events.BUFFER_CREATED, () => {
+        console.log('✅ HLS buffers created successfully');
+      });
+
+      // Track quality changes
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        const level = hls.levels[data.level];
+        setCurrentQuality(data.level === -1 ? -1 : data.level + 1); // Adjust for display
+        console.log(`🎯 Quality switched to: ${level.width}x${level.height} @ ${Math.round(level.bitrate/1000)}kbps`);
+      });
+
+      // Monitor loading progress
+      hls.on(Hls.Events.FRAG_LOADED, (_event, data) => {
+        if (data.frag.type === 'main') {
+          console.log(`📦 Fragment loaded: ${data.frag.sn} (${Math.round(data.frag.duration * 1000)}ms)`);
         }
       });
     }
     return () => {
-      if (hls) hls.destroy();
+      if (hls) {
+        hls.destroy();
+        hlsRef.current = null;
+      }
     };
   }, [isM3U8, stream?.embedUrl]);
+
+  // Handle quality change from selector
+  const handleQualityChange = (level: number) => {
+    if (hlsRef.current) {
+      hlsRef.current.currentLevel = level === -1 ? -1 : level - 1; // Adjust for HLS indexing
+      setCurrentQuality(level);
+      console.log(`🎮 Manual quality change to: ${level === -1 ? 'Auto' : `Level ${level}`}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -251,8 +321,17 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </div>
       )}
 
-      {/* Theater mode and fullscreen buttons */}
+      {/* Theater mode, quality selector and fullscreen buttons */}
       <div className="absolute top-4 right-4 flex gap-2">
+        {/* Quality Selector - only show for HLS streams */}
+        {isM3U8 && availableQualities.length > 0 && (
+          <StreamQualitySelector
+            currentLevel={currentQuality}
+            availableLevels={availableQualities}
+            onQualityChange={handleQualityChange}
+          />
+        )}
+        
         {onTheaterModeToggle && (
           <Button
             onClick={onTheaterModeToggle}
