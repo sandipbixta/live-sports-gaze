@@ -86,11 +86,59 @@ export const getRecommendedQuality = (connectionInfo: ConnectionInfo): StreamQua
   return qualities;
 };
 
-// Get optimized HLS config based on connection
-export const getOptimizedHLSConfig = (connectionInfo: ConnectionInfo) => {
+// Detect if user is casting (AirPlay, Chromecast, etc.)
+export const detectCasting = (): boolean => {
+  // Check for AirPlay
+  if ('webkitDisplayingFullscreen' in HTMLVideoElement.prototype) {
+    return true;
+  }
+  
+  // Check for Remote Playback API (Chromecast)
+  if ('remote' in HTMLVideoElement.prototype) {
+    return true;
+  }
+  
+  // Check user agent for casting indicators
+  const userAgent = navigator.userAgent.toLowerCase();
+  if (userAgent.includes('airplay') || userAgent.includes('chromecast')) {
+    return true;
+  }
+  
+  return false;
+};
+
+// Get optimized HLS config based on connection and casting status
+export const getOptimizedHLSConfig = (connectionInfo: ConnectionInfo, isCasting: boolean = false) => {
   const { effectiveType, downlink, rtt, saveData } = connectionInfo;
   
-  // Base configuration
+  // Casting-optimized configuration - much larger buffers for stability
+  if (isCasting) {
+    return {
+      maxBufferLength: 60, // 60 seconds for casting stability
+      maxMaxBufferLength: 120, // 2 minutes max buffer
+      maxBufferSize: 100 * 1000 * 1000, // 100MB for casting
+      fragLoadingTimeOut: 45000, // Longer timeout for casting
+      manifestLoadingTimeOut: 20000,
+      levelLoadingTimeOut: 20000,
+      maxBufferHole: 2.0, // More tolerant of buffer holes
+      highBufferWatchdogPeriod: 5, // Less frequent checks
+      nudgeOffset: 0.5, // More tolerant nudging
+      nudgeMaxRetry: 12, // More retry attempts
+      maxLoadingDelay: 8, // More patient loading
+      maxFragLookUpTolerance: 1.0, // Very tolerant lookup
+      liveSyncDurationCount: 5, // More stable sync
+      liveMaxLatencyDurationCount: 15, // Higher latency tolerance
+      backBufferLength: 30, // Keep more back buffer
+      abrBandWidthFactor: 0.6, // Very conservative bandwidth usage
+      abrBandWidthUpFactor: 0.4, // Very slow quality upgrades
+      fragLoadingMaxRetry: 8, // More retry attempts
+      fragLoadingMaxRetryTimeout: 60000, // Longer retry timeout
+      manifestLoadingMaxRetry: 6,
+      levelLoadingMaxRetry: 6
+    };
+  }
+  
+  // Base configuration for direct playback
   let config = {
     maxBufferLength: 15,
     maxMaxBufferLength: 30,
