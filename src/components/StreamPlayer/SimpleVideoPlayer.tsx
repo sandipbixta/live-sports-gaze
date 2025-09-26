@@ -2,10 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
 import { Stream } from '../../types/sports';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink, Monitor, Cast } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
-import { getConnectionInfo, getOptimizedHLSConfig, detectCasting } from '../../utils/connectionOptimizer';
 
 
 interface SimpleVideoPlayerProps {
@@ -31,31 +30,12 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const hlsRef = useRef<Hls | null>(null);
   const [currentQuality, setCurrentQuality] = useState(-1);
   const [availableQualities, setAvailableQualities] = useState<Array<{ width: number; height: number; bitrate: number }>>([]);
-  const [isCastingMode, setIsCastingMode] = useState(false);
-  const [castingDetected, setCastingDetected] = useState(false);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-  const [showExternal, setShowExternal] = useState(false);
+
   useEffect(() => {
     setError(false);
-    // Auto-detect casting on stream change
-    const detected = detectCasting();
-    setCastingDetected(detected);
-    if (detected && !isCastingMode) {
-      setIsCastingMode(true);
-    }
   }, [stream]);
-
-  // Monitor for casting changes
-  useEffect(() => {
-    const checkCasting = () => {
-      const detected = detectCasting();
-      setCastingDetected(detected);
-    };
-    
-    const interval = setInterval(checkCasting, 2000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleRetry = () => {
     setError(false);
@@ -102,30 +82,38 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
-      // Get optimized configuration based on connection and casting mode
-      const connectionInfo = getConnectionInfo();
-      const optimizedConfig = getOptimizedHLSConfig(connectionInfo, isCastingMode || castingDetected);
-      
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         
-        // Use optimized buffering settings (includes casting optimization)
-        ...optimizedConfig,
+        // Simple, reliable buffer settings
+        maxBufferLength: 30,           // 30s buffer
+        maxMaxBufferLength: 60,        // Max 60s buffer
+        maxBufferSize: 60 * 1000 * 1000, // 60MB
+        maxBufferHole: 0.5,           // 500ms buffer hole tolerance
+        
+        // Fragment loading settings
+        fragLoadingTimeOut: 20000,     // 20s timeout
+        fragLoadingMaxRetry: 6,        // More retries
+        fragLoadingRetryDelay: 1000,   // 1s retry delay
+        
+        // Level loading settings
+        levelLoadingTimeOut: 10000,
+        levelLoadingMaxRetry: 6,
+        levelLoadingRetryDelay: 1000,
         
         // Quality and performance
         enableSoftwareAES: true,
         startFragPrefetch: true,
-        testBandwidth: true,
-        capLevelToPlayerSize: !isCastingMode && !castingDetected, // Don't limit quality when casting
+        testBandwidth: false,          // Disable bandwidth testing
+        capLevelToPlayerSize: false,   // Don't limit quality
         
-        // Adaptive bitrate settings based on connection and casting
-        abrEwmaDefaultEstimate: connectionInfo.downlink * 1000000 * (isCastingMode || castingDetected ? 0.6 : 0.8),
-        abrEwmaFastLive: (isCastingMode || castingDetected) ? 5.0 : (connectionInfo.effectiveType === '4g' ? 3.0 : 2.0),
-        abrEwmaSlowLive: (isCastingMode || castingDetected) ? 15.0 : (connectionInfo.effectiveType === '4g' ? 9.0 : 6.0),
+        // Simple ABR settings
+        abrEwmaDefaultEstimate: 500000, // 500kbps default
+        abrEwmaFastLive: 3.0,
+        abrEwmaSlowLive: 9.0,
         
-        // Start with lower quality for casting to avoid initial buffering
-        startLevel: (isCastingMode || castingDetected) ? 1 : -1,
+        startLevel: -1,  // Auto quality
         autoStartLoad: true,
         progressive: false
       });
@@ -176,19 +164,11 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         }));
         setAvailableQualities(qualities);
         
-        // Start with appropriate quality based on connection and casting
+        // Start with appropriate quality based on connection
         if (hls && hls.levels.length > 1) {
-          if (isCastingMode || castingDetected) {
-            // Start with a safe quality for casting (720p or lower)
-            const safeLevel = hls.levels.findIndex(level => level.height <= 720);
-            hls.currentLevel = safeLevel !== -1 ? safeLevel : 1;
-            setCurrentQuality(safeLevel !== -1 ? safeLevel + 1 : 2);
-            console.log(`🎯 Casting mode: Starting with safe quality level ${safeLevel !== -1 ? safeLevel : 1}`);
-          } else {
-            // Auto quality selection for direct playback
-            hls.currentLevel = -1;
-            setCurrentQuality(-1);
-          }
+          // Auto quality selection
+          hls.currentLevel = -1;
+          setCurrentQuality(-1);
           
           // Log available qualities for debugging
           hls.levels.forEach((level, index) => {
@@ -331,7 +311,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         </div>
       )}
 
-      {/* Theater mode, quality selector, casting toggle and fullscreen buttons */}
+      {/* Theater mode, quality selector and fullscreen buttons */}
       <div className="absolute top-4 right-4 flex gap-2">
         {/* Quality Selector - only show for HLS streams */}
         {isM3U8 && availableQualities.length > 0 && (
@@ -340,18 +320,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
             availableLevels={availableQualities}
             onQualityChange={handleQualityChange}
           />
-        )}
-        
-        {/* Casting Mode Toggle */}
-        {isM3U8 && (
-          <Button
-            onClick={() => setIsCastingMode(!isCastingMode)}
-            className={`bg-black/50 hover:bg-black/70 text-white border-0 ${isCastingMode || castingDetected ? 'bg-orange-600/70 hover:bg-orange-600/90' : ''}`}
-            size="sm"
-            title={isCastingMode || castingDetected ? 'Casting Mode ON' : 'Enable Casting Mode'}
-          >
-            <Cast className="w-4 h-4" />
-          </Button>
         )}
         
         {onTheaterModeToggle && (
