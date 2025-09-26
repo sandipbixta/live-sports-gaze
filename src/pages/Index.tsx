@@ -198,13 +198,47 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>DamiTV - Free Live Sports Streaming Online | Watch Football & More</title>
-        <meta name="description" content="Watch free live sports streaming online at DamiTV. Access football, basketball, tennis matches and TV channels without registration. HD quality streams." />
+        <title>DamiTV - Free Live Sports Streaming | Football & Sports TV</title>
+        <meta name="description" content="Watch free live sports streaming at DamiTV. Access football, basketball, tennis matches and TV channels. No registration required." />
         <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative" />
         <link rel="canonical" href="https://www.damitv.pro/" />
       </Helmet>
       
       <main className="py-4">
+        {/* SEO Critical Content - Always visible to crawlers */}
+        <header className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-4">Free Live Sports Streaming Online - DamiTV</h1>
+          <div className="prose prose-invert max-w-none">
+            <p className="text-lg text-muted-foreground mb-4">
+              Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration. Our platform provides high-quality streaming that works on all devices including desktop, mobile, and tablet.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Popular Sports Available</h2>
+                <ul className="text-muted-foreground space-y-1">
+                  <li>• Live Football Streaming (Premier League, Champions League, La Liga)</li>
+                  <li>• Basketball Games (NBA, EuroLeague)</li>
+                  <li>• Tennis Tournaments (ATP, WTA, Grand Slams)</li>
+                  <li>• Boxing and MMA Events</li>
+                  <li>• Motor Sports (Formula 1, MotoGP)</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Why Choose DamiTV?</h2>
+                <ul className="text-muted-foreground space-y-1">
+                  <li>• No registration or subscription required</li>
+                  <li>• HD quality streaming on all devices</li>
+                  <li>• Multiple streaming sources for reliability</li>
+                  <li>• Live chat and match discussions</li>
+                  <li>• Regular updates and new channels</li>
+                </ul>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              Our sports streaming service provides access to major leagues and tournaments including English Premier League, UEFA Champions League, Spanish La Liga, Italian Serie A, German Bundesliga, French Ligue 1, NBA Basketball, ATP Tennis, and many more. Whether you're looking for live matches, highlights, or sports news, DamiTV offers comprehensive coverage of international sports events.
+            </p>
+          </div>
+        </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
@@ -215,7 +249,7 @@ const Index = () => {
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Featured Sports</h2>
+            <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
             <div className="flex gap-2">
               <Button 
                 variant="outline" 
@@ -235,7 +269,7 @@ const Index = () => {
           
           {showLiveSports ? (
             <div className="mb-8">
-              <h3 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h3>
+              <h4 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h4>
               <LiveSportsWidget />
             </div>
           ) : (
@@ -265,9 +299,9 @@ const Index = () => {
                   {selectedSport === 'all' ? (
                     <div>
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-foreground">
+                        <h4 className="text-xl font-bold text-foreground">
                           Live Matches - All Sports
-                        </h3>
+                        </h4>
                         <p className="text-gray-400 text-sm">
                           Currently live matches from all sports categories
                         </p>
@@ -277,9 +311,9 @@ const Index = () => {
                   ) : (
                     <>
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-foreground">
+                        <h4 className="text-xl font-bold text-foreground">
                           {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                        </h3>
+                        </h4>
                         <p className="text-gray-400 text-sm">
                           {filteredMatches.length} matches available
                         </p>
@@ -313,14 +347,14 @@ const Index = () => {
             {/* Hidden SEO content for competitor targeting */}
             <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
             
-            {/* Hero Section */}
+            {/* Call to Action Section */}
             <section className="mb-6 sm:mb-8 mt-8">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 sm:p-8 md:p-10 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
                 <div className="relative">
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Free Live Sports Streaming Online</h1>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Start Watching Sports Now</h2>
                   <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl">
-                    Watch live sports streaming for free at DamiTV. Access football, basketball, tennis matches and hundreds of TV channels without registration. HD quality streams available on all devices.
+                    Join thousands of sports fans who trust DamiTV for free live streaming. Access all major leagues and tournaments with crystal clear HD quality on any device.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link to="/live">
@@ -338,16 +372,29 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Introduction Content */}
+            {/* Detailed Content Section */}
             <section className="mb-8">
               <div className="prose prose-invert max-w-none">
-                <h2 className="text-xl font-semibold text-foreground mb-4">About DamiTV Sports Streaming</h2>
-                <p className="text-muted-foreground mb-4">
-                  DamiTV offers the best free live sports streaming experience online. Our platform provides access to live football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world. Watch your favorite teams and athletes compete in real-time without any subscription fees or registration requirements.
-                </p>
-                <p className="text-muted-foreground mb-4">
-                  Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV has you covered with high-quality streaming that works on desktop, mobile, and tablet devices.
-                </p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">How DamiTV Works</h2>
+                    <p className="text-muted-foreground mb-4">
+                      DamiTV provides free access to live sports streaming through our user-friendly platform. Simply browse our sports categories, select your preferred match or channel, and start watching instantly. No downloads, no registration, and no hidden fees.
+                    </p>
+                    <p className="text-muted-foreground mb-4">
+                      Our streaming technology ensures reliable connections with multiple backup sources for each event. If one stream experiences issues, our system automatically switches to an alternative source to maintain uninterrupted viewing.
+                    </p>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Sports Coverage</h2>
+                    <p className="text-muted-foreground mb-4">
+                      We cover major sports leagues worldwide including Premier League football, Champions League, NBA basketball, ATP tennis, Formula 1 racing, and boxing events. Our coverage spans European football leagues, American sports, and international tournaments.
+                    </p>
+                    <p className="text-muted-foreground mb-4">
+                      Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV provides comprehensive sports entertainment.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
           </>
