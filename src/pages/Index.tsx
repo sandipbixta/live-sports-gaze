@@ -205,39 +205,12 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* SEO Critical Content - Always visible to crawlers */}
+        {/* Essential SEO Header - Compact */}
         <header className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Free Live Sports Streaming Online - DamiTV</h1>
-          <div className="prose prose-invert max-w-none">
-            <p className="text-lg text-muted-foreground mb-4">
-              Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration. Our platform provides high-quality streaming that works on all devices including desktop, mobile, and tablet.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground mb-3">Popular Sports Available</h2>
-                <ul className="text-muted-foreground space-y-1">
-                  <li>• Live Football Streaming (Premier League, Champions League, La Liga)</li>
-                  <li>• Basketball Games (NBA, EuroLeague)</li>
-                  <li>• Tennis Tournaments (ATP, WTA, Grand Slams)</li>
-                  <li>• Boxing and MMA Events</li>
-                  <li>• Motor Sports (Formula 1, MotoGP)</li>
-                </ul>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-foreground mb-3">Why Choose DamiTV?</h2>
-                <ul className="text-muted-foreground space-y-1">
-                  <li>• No registration or subscription required</li>
-                  <li>• HD quality streaming on all devices</li>
-                  <li>• Multiple streaming sources for reliability</li>
-                  <li>• Live chat and match discussions</li>
-                  <li>• Regular updates and new channels</li>
-                </ul>
-              </div>
-            </div>
-            <p className="text-muted-foreground">
-              Our sports streaming service provides access to major leagues and tournaments including English Premier League, UEFA Champions League, Spanish La Liga, Italian Serie A, German Bundesliga, French Ligue 1, NBA Basketball, ATP Tennis, and many more. Whether you're looking for live matches, highlights, or sports news, DamiTV offers comprehensive coverage of international sports events.
-            </p>
-          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-3">Free Live Sports Streaming Online - DamiTV</h1>
+          <p className="text-lg text-muted-foreground max-w-4xl">
+            Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
+          </p>
         </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
@@ -372,25 +345,47 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Detailed Content Section */}
+            {/* SEO Content Section - Compact and organized */}
             <section className="mb-8">
               <div className="prose prose-invert max-w-none">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground mb-3">Popular Sports Available</h2>
+                    <ul className="text-muted-foreground space-y-1 text-sm">
+                      <li>• Live Football Streaming (Premier League, Champions League, La Liga)</li>
+                      <li>• Basketball Games (NBA, EuroLeague)</li>
+                      <li>• Tennis Tournaments (ATP, WTA, Grand Slams)</li>
+                      <li>• Boxing and MMA Events</li>
+                      <li>• Motor Sports (Formula 1, MotoGP)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground mb-3">Why Choose DamiTV?</h2>
+                    <ul className="text-muted-foreground space-y-1 text-sm">
+                      <li>• No registration or subscription required</li>
+                      <li>• HD quality streaming on all devices</li>
+                      <li>• Multiple streaming sources for reliability</li>
+                      <li>• Live chat and match discussions</li>
+                      <li>• Regular updates and new channels</li>
+                    </ul>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground mb-4">How DamiTV Works</h2>
-                    <p className="text-muted-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">How DamiTV Works</h3>
+                    <p className="text-muted-foreground mb-3 text-sm">
                       DamiTV provides free access to live sports streaming through our user-friendly platform. Simply browse our sports categories, select your preferred match or channel, and start watching instantly. No downloads, no registration, and no hidden fees.
                     </p>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-muted-foreground text-sm">
                       Our streaming technology ensures reliable connections with multiple backup sources for each event. If one stream experiences issues, our system automatically switches to an alternative source to maintain uninterrupted viewing.
                     </p>
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-foreground mb-4">Sports Coverage</h2>
-                    <p className="text-muted-foreground mb-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-3">Comprehensive Sports Coverage</h3>
+                    <p className="text-muted-foreground mb-3 text-sm">
                       We cover major sports leagues worldwide including Premier League football, Champions League, NBA basketball, ATP tennis, Formula 1 racing, and boxing events. Our coverage spans European football leagues, American sports, and international tournaments.
                     </p>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-muted-foreground text-sm">
                       Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV provides comprehensive sports entertainment.
                     </p>
                   </div>
