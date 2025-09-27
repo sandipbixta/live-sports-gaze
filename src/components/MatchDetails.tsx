@@ -182,8 +182,8 @@ const MatchDetails: React.FC<MatchDetailsProps> = ({
       {/* Keywords for SEO */}
       <div className="text-xs text-muted-foreground/70 border-t border-border pt-2">
         <p>
-          Keywords: live stream, {matchTeams ? `${getTeamName(matchTeams.home)}, ${getTeamName(matchTeams.away)}, ` : ''}
-          {matchCategory}, free streaming, HD quality, online watch, sports streaming, live match
+          Keywords: #live #stream {matchTeams ? `#${getTeamName(matchTeams.home).replace(/\s+/g, '')} #${getTeamName(matchTeams.away).replace(/\s+/g, '')} ` : ''}
+          #{matchCategory} #free #streaming #HD #quality #online #watch #sports #streaming #live #match
         </p>
       </div>
     </div>

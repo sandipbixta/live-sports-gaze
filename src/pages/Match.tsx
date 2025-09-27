@@ -48,12 +48,26 @@ const Match = () => {
         setIsLoading(true);
         console.log(`Loading match: ${sportId}/${matchId}`);
         
+        // Fetch the specific match
         const matchData = await fetchMatch(sportId, matchId);
         const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
         setMatch(enhancedMatch);
 
         // Use the enhanced stream player to load all streams
         await handleMatchSelect(enhancedMatch);
+
+        // Auto-scroll to video player after data loads
+        setTimeout(() => {
+          const streamElement = document.querySelector('[data-stream-container]') || 
+                              document.querySelector('#stream-player') ||
+                              document.querySelector('.stream-player');
+          if (streamElement) {
+            streamElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }
+        }, 500);
 
         // Load all matches for recommended sections
         const allMatches = await fetchMatches(sportId);
@@ -170,16 +184,18 @@ const Match = () => {
           </div>
         </div>
         
-        <StreamTab
-          match={match}
-          stream={stream}
-          loadingStream={loadingStream}
-          activeSource={activeSource}
-          handleSourceChange={handleSourceChange}
-          popularMatches={[]}
-          sportId={sportId || ''}
-          allStreams={allStreams}
-        />
+        <div id="stream-container" data-stream-container>
+          <StreamTab
+            match={match}
+            stream={stream}
+            loadingStream={loadingStream}
+            activeSource={activeSource}
+            handleSourceChange={handleSourceChange}
+            popularMatches={[]}
+            sportId={sportId || ''}
+            allStreams={allStreams}
+          />
+        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
