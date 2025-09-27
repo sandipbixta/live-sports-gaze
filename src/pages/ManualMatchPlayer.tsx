@@ -6,6 +6,7 @@ import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
 import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
+import MatchDetails from '@/components/MatchDetails';
 import Advertisement from '@/components/Advertisement';
 import AdultBannerAd from '@/components/AdultBannerAd';
 
@@ -242,6 +243,15 @@ const ManualMatchPlayer = () => {
                     <p>No stream available</p>
                   </div>
                 )}
+              </div>
+              
+              {/* Match Details Below Player */}
+              <div className="p-4">
+                <MatchDetails 
+                  match={match}
+                  isLive={true}
+                  showCompact={false}
+                />
               </div>
             </div>
           </div>

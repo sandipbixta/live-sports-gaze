@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 import Advertisement from '@/components/Advertisement';
 import RectangleAd from '@/components/RectangleAd';
+import MatchDetails from '@/components/MatchDetails';
 import AdultBannerAd from '@/components/AdultBannerAd';
 
 const ChannelPlayer = () => {
@@ -181,7 +182,21 @@ const ChannelPlayer = () => {
       <div className="flex flex-col lg:flex-row gap-4 p-4">
         {/* Channel Info */}
         <div className="flex-1">
-          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+          {/* Match Details or Channel Info */}
+          <MatchDetails 
+            match={{
+              id: channel.id,
+              title: channel.title,
+              category: 'Live TV',
+              date: Date.now(),
+              popular: true,
+              sources: [{ source: 'TV Channel', id: channel.id }]
+            } as any}
+            isLive={true}
+            showCompact={false}
+          />
+          
+          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d] mt-4">
             <div className="flex items-start gap-4">
               {/* Channel Logo */}
               <div className="w-16 h-16 rounded-xl bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">

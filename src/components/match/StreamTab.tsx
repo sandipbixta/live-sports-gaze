@@ -115,6 +115,8 @@ const StreamTab = ({
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
+        match={match}
+        showMatchDetails={true}
       />
       
       <StreamSources

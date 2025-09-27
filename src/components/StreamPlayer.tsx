@@ -1,7 +1,10 @@
 import React from 'react';
 import { Stream } from '../types/sports';
+import { Match } from '../types/sports';
+import { ManualMatch } from '../types/manualMatch';
 import SimpleVideoPlayer from './StreamPlayer/SimpleVideoPlayer';
 import StreamOptimizer from './StreamPlayer/StreamOptimizer';
+import MatchDetails from './MatchDetails';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -12,6 +15,8 @@ interface StreamPlayerProps {
   title?: string;
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
+  match?: Match | ManualMatch | null;
+  showMatchDetails?: boolean;
 }
 
 const StreamPlayer: React.FC<StreamPlayerProps> = ({ 
@@ -22,8 +27,16 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   isTvChannel = false,
   title,
   isTheaterMode = false,
-  onTheaterModeToggle
+  onTheaterModeToggle,
+  match = null,
+  showMatchDetails = true
 }) => {
+  // Determine if match is live based on stream availability and match time
+  const isLive = stream && match && (
+    Date.now() - (typeof match.date === 'number' ? match.date : new Date(match.date).getTime()) > -30 * 60 * 1000 && // Started within last 30 minutes
+    Date.now() - (typeof match.date === 'number' ? match.date : new Date(match.date).getTime()) < 3 * 60 * 60 * 1000   // Less than 3 hours old
+  );
+
   return (
     <>
       <StreamOptimizer stream={stream} />
@@ -34,6 +47,17 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={onTheaterModeToggle}
       />
+      
+      {/* Match Details Below Player */}
+      {showMatchDetails && match && !isTheaterMode && (
+        <div className="mt-4 px-4">
+          <MatchDetails 
+            match={match}
+            isLive={!!isLive}
+            showCompact={false}
+          />
+        </div>
+      )}
     </>
   );
 };
