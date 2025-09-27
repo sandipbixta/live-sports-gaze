@@ -6,6 +6,7 @@ import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
+import MatchDetails from '@/components/MatchDetails';
 import { Match as MatchType, Stream } from '@/types/sports';
 
 import { useToast } from '@/hooks/use-toast';
@@ -116,7 +117,7 @@ const StreamTab = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         match={match}
-        showMatchDetails={true}
+        showMatchDetails={false}
       />
       
       <StreamSources
@@ -126,6 +127,17 @@ const StreamTab = ({
         streamId={streamId}
         allStreams={allStreams}
       />
+      
+      {/* Match Details Below Stream Links */}
+      {!isTheaterMode && (
+        <div className="mt-4 px-4">
+          <MatchDetails 
+            match={match}
+            isLive={isMatchLive()}
+            showCompact={false}
+          />
+        </div>
+      )}
       
       {!loadingStream && (
         <div className="flex items-center justify-center gap-4 mt-4">
