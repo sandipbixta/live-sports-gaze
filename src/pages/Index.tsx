@@ -198,95 +198,27 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>DamiTV - Free Live Sports Streaming | Football TV</title>
-        <meta name="description" content="Watch free live sports streaming at DamiTV. Football, basketball, tennis matches and TV channels. No registration required." />
+        <title>DamiTV - Free Live Sports Streaming | Football & Sports TV</title>
+        <meta name="description" content="Watch free live sports streaming at DamiTV. Access football, basketball, tennis matches and TV channels. No registration required." />
         <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative" />
         <link rel="canonical" href="https://www.damitv.pro/" />
       </Helmet>
       
       <main className="py-4">
-        {/* SEO Content - Always Visible */}
+        {/* Essential SEO Header - Compact */}
         <header className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-3">Free Live Sports Streaming Online - DamiTV</h1>
-          <p className="text-lg text-muted-foreground max-w-4xl mb-4">
+          <p className="text-lg text-muted-foreground max-w-4xl">
             Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
           </p>
-          
-          {/* Static SEO Content - Always Rendered */}
-          <div className="prose prose-invert max-w-none mb-6">
-            <p className="text-muted-foreground mb-3">
-              DamiTV provides comprehensive <strong>live sports streaming</strong> coverage including Premier League football, Champions League matches, NBA basketball, tennis tournaments, and boxing events. Our platform offers multiple streaming sources with HD quality for reliable viewing experience across all devices.
-            </p>
-            <p className="text-muted-foreground mb-4">
-              Navigate through our extensive collection: browse <Link to="/live" className="text-blue-400 hover:underline font-medium">live matches</Link>, explore <Link to="/channels" className="text-blue-400 hover:underline font-medium">TV channels</Link>, check the <Link to="/schedule" className="text-blue-400 hover:underline font-medium">sports schedule</Link>, or read the latest <Link to="/news" className="text-blue-400 hover:underline font-medium">sports news</Link>. All content is free and requires no registration.
-            </p>
-          </div>
         </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
-
-        {/* Static SEO Navigation - Always Visible */}
-        <section className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h2 className="text-lg font-bold text-foreground mb-2">Popular Sports</h2>
-              <div className="space-y-2 text-sm">
-                <Link to="/live?sport=football" className="block text-blue-400 hover:underline">⚽ Live Football Streaming</Link>
-                <Link to="/live?sport=basketball" className="block text-blue-400 hover:underline">🏀 NBA Basketball Games</Link>
-                <Link to="/live?sport=tennis" className="block text-blue-400 hover:underline">🎾 Tennis Tournaments</Link>
-                <Link to="/live?sport=boxing" className="block text-blue-400 hover:underline">🥊 Boxing & MMA Events</Link>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h2 className="text-lg font-bold text-foreground mb-2">Popular Leagues</h2>
-              <div className="space-y-2 text-sm">
-                <Link to="/live?league=premier-league" className="block text-blue-400 hover:underline">🏆 Premier League</Link>
-                <Link to="/live?league=champions-league" className="block text-blue-400 hover:underline">⭐ Champions League</Link>
-                <Link to="/live?league=la-liga" className="block text-blue-400 hover:underline">🇪🇸 La Liga</Link>
-                <Link to="/live?league=serie-a" className="block text-blue-400 hover:underline">🇮🇹 Serie A</Link>
-              </div>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <h2 className="text-lg font-bold text-foreground mb-2">Quick Access</h2>
-              <div className="space-y-2 text-sm">
-                <Link to="/channels" className="block text-blue-400 hover:underline">📺 Sports TV Channels</Link>
-                <Link to="/schedule" className="block text-blue-400 hover:underline">📅 Today's Schedule</Link>
-                <Link to="/news" className="block text-blue-400 hover:underline">📰 Sports News</Link>
-                <Link to="/live" className="block text-blue-400 hover:underline">🔴 All Live Streams</Link>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Telegram Banner */}
         <div className="mb-6">
           <TelegramBanner />
         </div>
-
-        {/* Static SEO Content Section - Always Visible */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Why Choose DamiTV for Live Sports Streaming?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Free HD Sports Streaming</h3>
-              <p className="text-muted-foreground text-sm mb-3">
-                Experience high-definition live sports streaming completely free. Watch Premier League football, Champions League matches, NBA basketball, tennis Grand Slams, and boxing events without any subscription fees or registration requirements.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Our advanced streaming technology provides multiple backup sources for each event, ensuring uninterrupted viewing even during peak traffic periods. Compatible with all devices including smartphones, tablets, and smart TVs.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Comprehensive Sports Coverage</h3>
-              <p className="text-muted-foreground text-sm mb-3">
-                Access over 100+ sports channels and thousands of live matches across all major leagues worldwide. From European football leagues like Premier League, La Liga, Serie A, to American sports including NFL, NBA, MLB, and international tournaments.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Stay updated with live scores, match highlights, team statistics, and expert analysis. Our platform covers both popular and niche sports to cater to all sports enthusiasts globally.
-              </p>
-            </div>
-          </div>
-        </section>
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
