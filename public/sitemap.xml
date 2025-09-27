@@ -1,4 +1,3 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
@@ -7,78 +6,532 @@
   <!-- Home Page - Highest Priority -->
   <url>
     <loc>https://damitv.pro/</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   
-  <!-- Live Sports Section - High Priority -->
+  <!-- Main Navigation Pages - High Priority -->
   <url>
     <loc>https://damitv.pro/live</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
-  <!-- Schedule - Updated Daily -->
   <url>
     <loc>https://damitv.pro/schedule</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
-  <!-- Channels Page -->
   <url>
     <loc>https://damitv.pro/channels</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
-  <!-- News Section -->
   <url>
     <loc>https://damitv.pro/news</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.8</priority>
   </url>
   
-  <!-- Legal Page -->
+  <!-- Legal Pages -->
   <url>
     <loc>https://damitv.pro/dmca</loc>
-    <lastmod>2025-06-18</lastmod>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- Manual Match Pages - High Priority for SEO -->
   <url>
-    <loc>https://damitv.pro/manual-match/MANCHESTER-CIRT-VS-WYDAD</loc>
-    <lastmod>2025-06-18</lastmod>
+    <loc>https://damitv.pro/manual-match/fc-barcelons-vs-vissel-kobe</loc>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://damitv.pro/manual-match/REAL-MADRID-VS-AL-HILAL</loc>
-    <lastmod>2025-06-18</lastmod>
+    <loc>https://damitv.pro/manual-match/uefa-women-euro-2025</loc>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://damitv.pro/manual-match/PACHUCA-VS-SALZBURG</loc>
-    <lastmod>2025-06-18</lastmod>
+    <loc>https://damitv.pro/manual-match/los-angeles-fc-vs-esperance-tunis</loc>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://damitv.pro/manual-match/AL-AIN-VS-JUVENTUS</loc>
-    <lastmod>2025-06-18</lastmod>
+    <loc>https://damitv.pro/manual-match/bayern-munich-vs-boca-juniors</loc>
+    <lastmod>2024-09-27</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- UK Sports Channels - High Priority -->
+  <url>
+    <loc>https://damitv.pro/channel/sky-sports-news</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
   
+  <url>
+    <loc>https://damitv.pro/channel/sky-sports-main-event</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/sky-sports-premier-league</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/sky-sports-football</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/sky-sports-f1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/tnt-sports-1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/tnt-sports-2</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/premier-sports-1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- US Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/espn-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/fox-sports1-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/nfl-network-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/nba-tv-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/mlb-network-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Spanish Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/movistar-laliga</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/movistar-champions-league</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/espn-deportes-spain</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- German Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/sky-sport-bundesliga-1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/dazn-1-germany</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- French Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/canal-plus-sport-france</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/rmc-sport-1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Italian Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/sky-sport-uno-italy</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/dazn-serie-a-italy</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Canadian Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/tsn1-canada</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/sportsnet-ontario</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Brazilian Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/sportv-brazil</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/espn-brazil</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Arabic Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/bein-sports-1-arabic</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/bein-sports-2-arabic</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Turkish Sports Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/bein-sports-1-turkey</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/s-sport-turkey</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Popular Entertainment Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/bbc-one-uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/itv-1-uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/channel-4-uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- News Channels -->
+  <url>
+    <loc>https://damitv.pro/channel/bbc-news-24-uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/sky-news-uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channel/cnn-usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Sport Category Pages -->
+  <url>
+    <loc>https://damitv.pro/sport/football</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/basketball</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/tennis</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/boxing</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/mma</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/formula1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/cricket</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/sport/golf</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Country-specific Channel Pages -->
+  <url>
+    <loc>https://damitv.pro/channels/uk</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/usa</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/spain</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/germany</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/france</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/italy</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/canada</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/channels/brazil</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- League-specific Pages -->
+  <url>
+    <loc>https://damitv.pro/league/premier-league</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/champions-league</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/la-liga</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/bundesliga</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/serie-a</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/ligue-1</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/nba</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/league/nfl</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Additional SEO Pages -->
+  <url>
+    <loc>https://damitv.pro/watch/live-football-streaming</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/watch/free-sports-tv</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://damitv.pro/streaming/hd-sports-online</loc>
+    <lastmod>2024-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
 </urlset>
