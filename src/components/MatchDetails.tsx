@@ -84,108 +84,108 @@ const MatchDetails: React.FC<MatchDetailsProps> = ({
     );
   }
 
+  // Generate SEO-friendly text content
+  const generateMatchDescription = () => {
+    const homeTeam = getTeamName(matchTeams?.home);
+    const awayTeam = getTeamName(matchTeams?.away);
+    const category = matchCategory || 'sports';
+    const dateStr = formatDate(matchDate);
+    const timeStr = formatTime(matchDate);
+    
+    if (matchTeams && homeTeam && awayTeam) {
+      return `Watch ${homeTeam} vs ${awayTeam} live stream online for free. This exciting ${category} match is scheduled for ${dateStr} at ${timeStr}. Get access to high-quality live streaming of ${homeTeam} against ${awayTeam} with multiple stream sources available. Don't miss this thrilling ${category} encounter between two competitive teams. Stream ${homeTeam} vs ${awayTeam} live online with HD quality on our platform.`;
+    } else {
+      return `Watch ${matchTitle} live stream online for free. This ${category} match is scheduled for ${dateStr} at ${timeStr}. Get access to high-quality live streaming with multiple sources available. Don't miss this exciting ${category} event. Stream live online with HD quality on our platform.`;
+    }
+  };
+
+  const generateAdditionalInfo = () => {
+    const homeTeam = getTeamName(matchTeams?.home);
+    const awayTeam = getTeamName(matchTeams?.away);
+    const category = matchCategory || 'sports';
+    
+    if (matchTeams && homeTeam && awayTeam) {
+      return `${homeTeam} and ${awayTeam} are set to face off in what promises to be an exciting ${category} match. Fans can watch this live stream for free with high-definition quality. Our platform provides multiple streaming sources to ensure you never miss the action. Both teams will be looking to secure a victory in this important ${category} fixture. The match features live commentary and real-time updates for the best viewing experience.`;
+    } else {
+      return `This ${category} event promises to deliver exciting action for fans worldwide. Watch the live stream for free with high-definition quality and multiple streaming sources available. Our platform ensures you get the best viewing experience with reliable streams and real-time updates. Don't miss out on this thrilling ${category} competition.`;
+    }
+  };
+
   return (
-    <div className={`bg-card rounded-xl p-4 border border-border ${className}`}>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h2 className="text-lg font-bold text-foreground mb-1">{matchTitle}</h2>
-          {matchCategory && (
-            <div className="flex items-center gap-1 mb-2">
-              <Trophy className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground capitalize">{matchCategory}</span>
-            </div>
-          )}
-        </div>
-        
-        {isLive && (
-          <Badge variant="destructive" className="animate-pulse">
-            • LIVE NOW
-          </Badge>
+    <div className={`prose prose-sm max-w-none text-foreground space-y-4 ${className}`}>
+      {/* Main Title */}
+      <div className="border-b border-border pb-3">
+        <h2 className="text-lg font-bold text-foreground mb-2">
+          {matchTitle} {isLive && <span className="text-red-500">• LIVE NOW</span>}
+        </h2>
+        {matchCategory && (
+          <p className="text-sm text-muted-foreground capitalize">
+            {matchCategory} Match • {formatDate(matchDate)} at {formatTime(matchDate)}
+          </p>
         )}
       </div>
 
-      {/* Teams Section */}
+      {/* Match Description */}
+      <div className="text-sm text-muted-foreground leading-relaxed">
+        <p>{generateMatchDescription()}</p>
+      </div>
+
+      {/* Teams Information */}
       {matchTeams && (
-        <div className="mb-4">
-          <div className="flex items-center justify-center gap-6 py-4 bg-muted/30 rounded-lg">
-            <div className="text-center flex-1">
-              <div className="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
-                {getTeamLogo(matchTeams.home) ? (
-                  <img 
-                    src={getTeamLogo(matchTeams.home)} 
-                    alt={getTeamName(matchTeams.home)}
-                    className="w-8 h-8 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <span className="text-sm font-bold text-primary">
-                    {getTeamInitial(matchTeams.home)}
-                  </span>
-                )}
-              </div>
-              <p className="font-semibold text-sm text-foreground">
-                {getTeamName(matchTeams.home)}
-              </p>
-              <p className="text-xs text-muted-foreground">Home</p>
+        <div className="bg-muted/30 rounded-lg p-4">
+          <h3 className="font-semibold text-foreground mb-2">Match Details</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="font-medium text-foreground">Home Team</p>
+              <p className="text-muted-foreground">{getTeamName(matchTeams.home)}</p>
             </div>
-            
-            <div className="text-center">
-              <div className="text-xl font-bold text-muted-foreground">VS</div>
-            </div>
-            
-            <div className="text-center flex-1">
-              <div className="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
-                {getTeamLogo(matchTeams.away) ? (
-                  <img 
-                    src={getTeamLogo(matchTeams.away)} 
-                    alt={getTeamName(matchTeams.away)}
-                    className="w-8 h-8 object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <span className="text-sm font-bold text-primary">
-                    {getTeamInitial(matchTeams.away)}
-                  </span>
-                )}
-              </div>
-              <p className="font-semibold text-sm text-foreground">
-                {getTeamName(matchTeams.away)}
-              </p>
-              <p className="text-xs text-muted-foreground">Away</p>
+            <div>
+              <p className="font-medium text-foreground">Away Team</p>
+              <p className="text-muted-foreground">{getTeamName(matchTeams.away)}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Match Info */}
-      <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <p className="text-xs text-muted-foreground">Date</p>
-            <p className="text-sm font-medium text-foreground">{formatDate(matchDate)}</p>
-          </div>
+      {/* Additional SEO Content */}
+      <div className="text-sm text-muted-foreground leading-relaxed">
+        <p>{generateAdditionalInfo()}</p>
+      </div>
+
+      {/* Match Metadata */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+        <div className="bg-muted/20 rounded p-2">
+          <p className="font-medium text-foreground">Date</p>
+          <p className="text-muted-foreground">{formatDate(matchDate)}</p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <p className="text-xs text-muted-foreground">Time</p>
-            <p className="text-sm font-medium text-foreground">{formatTime(matchDate)}</p>
-          </div>
+        <div className="bg-muted/20 rounded p-2">
+          <p className="font-medium text-foreground">Time</p>
+          <p className="text-muted-foreground">{formatTime(matchDate)}</p>
+        </div>
+        <div className="bg-muted/20 rounded p-2">
+          <p className="font-medium text-foreground">Status</p>
+          <p className="text-muted-foreground">{isLive ? 'Live Now' : 'Scheduled'}</p>
+        </div>
+        <div className="bg-muted/20 rounded p-2">
+          <p className="font-medium text-foreground">Sport</p>
+          <p className="text-muted-foreground capitalize">{matchCategory || 'Sports'}</p>
         </div>
       </div>
 
       {/* Additional info for manual matches */}
       {isManualMatch && match.seo?.description && (
-        <div className="mt-4 pt-4 border-t border-border">
+        <div className="border-t border-border pt-4">
           <p className="text-sm text-muted-foreground">{match.seo.description}</p>
         </div>
       )}
+
+      {/* Keywords for SEO */}
+      <div className="text-xs text-muted-foreground/70 border-t border-border pt-2">
+        <p>
+          Keywords: live stream, {matchTeams ? `${getTeamName(matchTeams.home)}, ${getTeamName(matchTeams.away)}, ` : ''}
+          {matchCategory}, free streaming, HD quality, online watch, sports streaming, live match
+        </p>
+      </div>
     </div>
   );
 };
