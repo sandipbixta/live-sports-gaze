@@ -53,17 +53,22 @@ export const useLiveMatches = () => {
         const cleanMatches = filterCleanMatches(priorityMatches);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         
-        const live = consolidatedMatches.filter(match => {
-          const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
-          const now = new Date().getTime();
-          const sixHoursInMs = 6 * 60 * 60 * 1000;
-          const oneHourInMs = 60 * 60 * 1000;
-          
-          return match.sources && 
-                 match.sources.length > 0 && 
-                 matchTime - now < oneHourInMs && 
-                 now - matchTime < sixHoursInMs;
-        });
+      const live = consolidatedMatches.filter(match => {
+        const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+        const now = new Date().getTime();
+        const sixHoursInMs = 6 * 60 * 60 * 1000;
+        const oneHourInMs = 60 * 60 * 1000;
+        
+        return match.sources && 
+               match.sources.length > 0 && 
+               matchTime - now < oneHourInMs && 
+               now - matchTime < sixHoursInMs;
+      }).sort((a, b) => {
+        // Sort live matches by start time - most recent live matches first
+        const aTime = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
+        const bTime = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
+        return bTime - aTime; // Descending order (newest first)
+      });
         
         const upcoming = consolidatedMatches.filter(match => 
           !live.some(liveMatch => liveMatch.id === match.id)
@@ -115,6 +120,11 @@ export const useLiveMatches = () => {
                match.sources.length > 0 && 
                matchTime - now < oneHourInMs && 
                now - matchTime < sixHoursInMs;
+      }).sort((a, b) => {
+        // Sort live matches by start time - most recent live matches first
+        const aTime = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
+        const bTime = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
+        return bTime - aTime; // Descending order (newest first)
       });
       
       const upcoming = consolidatedMatches.filter(match => 
