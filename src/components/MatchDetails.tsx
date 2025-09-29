@@ -182,9 +182,16 @@ const MatchDetails: React.FC<MatchDetailsProps> = ({
       {/* Keywords for SEO */}
       <div className="text-xs text-muted-foreground/70 border-t border-border pt-2">
         <p>
-          Keywords: #live #stream {matchTeams ? 
-            `#${getTeamName(matchTeams.home).replace(/\s+/g, '').toLowerCase()} #${getTeamName(matchTeams.away).replace(/\s+/g, '').toLowerCase()} #${getTeamName(matchTeams.home).replace(/\s+/g, '').toLowerCase()}vs${getTeamName(matchTeams.away).replace(/\s+/g, '').toLowerCase()} watch${getTeamName(matchTeams.home).replace(/\s+/g, '').toLowerCase()}vs${getTeamName(matchTeams.away).replace(/\s+/g, '').toLowerCase()} ` : ''
-          }#{matchCategory} #free #streaming #HD #quality #online #watch #sports #streaming #live #match
+          Keywords: #live #stream {(() => {
+            const homeTeam = getTeamName(matchTeams?.home);
+            const awayTeam = getTeamName(matchTeams?.away);
+            if (homeTeam && awayTeam) {
+              const homeClean = homeTeam.replace(/\s+/g, '').toLowerCase();
+              const awayClean = awayTeam.replace(/\s+/g, '').toLowerCase();
+              return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+            }
+            return '';
+          })()} #{matchCategory || 'sports'} #free #streaming #HD #quality #online #watch #sports #streaming #live #match
         </p>
       </div>
     </div>
