@@ -76,8 +76,14 @@ const ManualMatchPlayer = () => {
   const seoTitle = `${match.title} Live Stream Free | ${formattedDate} | DamiTV`;
   const seoDescription = match.seo?.description || 
     `Watch ${match.title} live stream online for free on ${formattedDate} at ${formattedTime}. High-quality ${match.seo?.category || 'sports'} streaming on DamiTV with multiple sources available. ${match.title} on damitv.pro`;
+  
+  // Generate team-specific hashtags
+  const teamAClean = homeTeam?.replace(/\s+/g, '').toLowerCase() || '';
+  const teamBClean = awayTeam?.replace(/\s+/g, '').toLowerCase() || '';
+  const matchHashtag = teamAClean && teamBClean ? `${teamAClean}vs${teamBClean}` : '';
+  
   const seoKeywords = match.seo?.keywords || 
-    `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, ${match.title} on damitv.pro, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}`;
+    `${match.title} live stream, ${match.title} watch online, ${match.title} free stream, ${match.title} on damitv.pro, live ${match.seo?.category || 'sports'} streaming, ${match.title} ${formattedDate}, #${teamAClean}, #${teamBClean}, #${matchHashtag}, watch${matchHashtag}, ${homeTeam} live stream, ${awayTeam} online`;
 
   const structuredData = {
     "@context": "https://schema.org",
