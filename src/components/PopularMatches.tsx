@@ -4,7 +4,8 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -18,6 +19,8 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   excludeMatchIds = []
 }) => {
   const isMobile = useIsMobile();
+  const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
   
   // Filter out advertisement matches, excluded IDs, and ended matches, then consolidate duplicates properly
   const cleanMatches = filterActiveMatches(filterCleanMatches(
@@ -26,15 +29,55 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = consolidateMatches(cleanMatches);
+
+  // Enrich matches with viewer counts and sort
+  React.useEffect(() => {
+    const enrichMatches = async () => {
+      if (consolidatedMatches.length === 0) {
+        setEnrichedMatches([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const matchesWithViewers = await enrichMatchesWithViewerCounts(consolidatedMatches);
+        
+        // Sort by viewer count first, then by trending score
+        const sortedMatches = matchesWithViewers.sort((a, b) => {
+          const aViewers = a.viewerCount || 0;
+          const bViewers = b.viewerCount || 0;
+          
+          if (aViewers !== bViewers) {
+            return bViewers - aViewers; // Higher viewers first
+          }
+          
+          // If viewer counts are equal, sort by trending score
+          const aTrending = isTrendingMatch(a.title);
+          const bTrending = isTrendingMatch(b.title);
+          return bTrending.score - aTrending.score;
+        });
+        
+        setEnrichedMatches(sortedMatches);
+      } catch (error) {
+        console.error('Error enriching popular matches:', error);
+        // Fallback to trending score sorting
+        const trendingSorted = consolidatedMatches.sort((a, b) => {
+          const aTrending = isTrendingMatch(a.title);
+          const bTrending = isTrendingMatch(b.title);
+          return bTrending.score - aTrending.score;
+        });
+        setEnrichedMatches(trendingSorted);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    enrichMatches();
+  }, [consolidatedMatches]);
+
+  const filteredMatches = enrichedMatches;
   
-  // Sort by trending score (higher score first)
-  const filteredMatches = consolidatedMatches.sort((a, b) => {
-    const aTrending = isTrendingMatch(a.title);
-    const bTrending = isTrendingMatch(b.title);
-    return bTrending.score - aTrending.score;
-  });
-  
-  if (filteredMatches.length === 0) {
+  if (isLoading || filteredMatches.length === 0) {
     return null;
   }
 

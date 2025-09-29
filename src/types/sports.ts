@@ -29,6 +29,7 @@ export interface Match {
   sources: Source[];
   related?: Match[];       // Related matches
   sportId?: string;        // Added for compatibility - maps to category
+  viewerCount?: number;    // Number of current viewers
 }
 
 export interface Stream {

@@ -168,3 +168,26 @@ export const isMatchEnded = (match: Match): boolean => {
 export const filterActiveMatches = (matches: Match[]): Match[] => {
   return matches.filter(match => !isMatchEnded(match));
 };
+
+export const sortMatchesByViewers = (matches: Match[]): Match[] => {
+  return [...matches].sort((a, b) => {
+    // Sort by viewer count (highest first), then by live status, then by date
+    const aViewers = a.viewerCount || 0;
+    const bViewers = b.viewerCount || 0;
+    
+    if (aViewers !== bViewers) {
+      return bViewers - aViewers; // Higher viewers first
+    }
+    
+    // If viewer counts are equal, prioritize live matches
+    const aIsLive = isMatchLive(a);
+    const bIsLive = isMatchLive(b);
+    
+    if (aIsLive !== bIsLive) {
+      return bIsLive ? 1 : -1; // Live matches first
+    }
+    
+    // Finally sort by date (earliest first)
+    return a.date - b.date;
+  });
+};

@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Match } from '../types/sports';
-import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
 import EmptyState from './EmptyState';
@@ -21,9 +22,38 @@ const MatchesList: React.FC<MatchesListProps> = ({
   onMatchesDisplayed,
   trendingSection
 }) => {
+  const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
+  const [isEnriching, setIsEnriching] = React.useState(false);
+
   // Filter out advertisement matches and ended matches, then consolidate duplicates
   const cleanMatches = filterActiveMatches(filterCleanMatches(matches));
-  const filteredMatches = consolidateMatches(cleanMatches);
+  const consolidatedMatches = consolidateMatches(cleanMatches);
+
+  // Enrich matches with viewer counts and sort by viewers
+  React.useEffect(() => {
+    const enrichMatches = async () => {
+      if (consolidatedMatches.length === 0) {
+        setEnrichedMatches([]);
+        return;
+      }
+
+      setIsEnriching(true);
+      try {
+        const matchesWithViewers = await enrichMatchesWithViewerCounts(consolidatedMatches);
+        const sortedMatches = sortMatchesByViewers(matchesWithViewers);
+        setEnrichedMatches(sortedMatches);
+      } catch (error) {
+        console.error('Error enriching matches with viewer counts:', error);
+        setEnrichedMatches(consolidatedMatches);
+      } finally {
+        setIsEnriching(false);
+      }
+    };
+
+    enrichMatches();
+  }, [consolidatedMatches]);
+
+  const filteredMatches = enrichedMatches;
   
   // Report displayed match IDs to parent component
   React.useEffect(() => {
@@ -37,7 +67,7 @@ const MatchesList: React.FC<MatchesListProps> = ({
   const liveMatches = filteredMatches.filter(match => isMatchLive(match));
   const upcomingMatches = filteredMatches.filter(match => !isMatchLive(match));
 
-  if (isLoading) {
+  if (isLoading || isEnriching) {
     return <LoadingGrid />;
   }
 
