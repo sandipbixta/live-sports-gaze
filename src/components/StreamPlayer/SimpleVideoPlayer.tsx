@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
+import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange } from '../../utils/connectionOptimizer';
 
 
 interface SimpleVideoPlayerProps {
@@ -30,12 +31,24 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const hlsRef = useRef<Hls | null>(null);
   const [currentQuality, setCurrentQuality] = useState(-1);
   const [availableQualities, setAvailableQualities] = useState<Array<{ width: number; height: number; bitrate: number }>>([]);
+  const [connectionInfo, setConnectionInfo] = useState(() => getConnectionInfo());
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+  const isCasting = detectCasting();
 
   useEffect(() => {
     setError(false);
   }, [stream]);
+
+  // Monitor connection changes and update buffering strategy
+  useEffect(() => {
+    const cleanup = onConnectionChange((newConnectionInfo) => {
+      setConnectionInfo(newConnectionInfo);
+      console.log('🌐 Connection changed:', newConnectionInfo.effectiveType, `${newConnectionInfo.downlink}Mbps`);
+    });
+    
+    return cleanup;
+  }, []);
 
   const handleRetry = () => {
     setError(false);
@@ -82,34 +95,31 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
+      // Get optimized HLS configuration based on network conditions
+      const optimizedConfig = getOptimizedHLSConfig(connectionInfo, isCasting);
+      
+      console.log(`🔧 Initializing HLS with optimized config for ${connectionInfo.effectiveType} connection (${connectionInfo.downlink}Mbps)`);
+      console.log(`📊 Buffer settings: ${optimizedConfig.maxBufferLength}s buffer, ${optimizedConfig.maxBufferSize / 1000000}MB max`);
+      
       hls = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         
-        // Simple, reliable buffer settings
-        maxBufferLength: 30,           // 30s buffer
-        maxMaxBufferLength: 60,        // Max 60s buffer
-        maxBufferSize: 60 * 1000 * 1000, // 60MB
-        maxBufferHole: 0.5,           // 500ms buffer hole tolerance
+        // Connection-optimized configuration
+        ...optimizedConfig,
         
-        // Fragment loading settings
-        fragLoadingTimeOut: 20000,     // 20s timeout
-        fragLoadingMaxRetry: 6,        // More retries
-        fragLoadingRetryDelay: 1000,   // 1s retry delay
-        
-        // Level loading settings
-        levelLoadingTimeOut: 10000,
-        levelLoadingMaxRetry: 6,
+        // Fragment loading settings with adaptive timeouts
+        fragLoadingRetryDelay: 1000,
         levelLoadingRetryDelay: 1000,
         
         // Quality and performance
         enableSoftwareAES: true,
         startFragPrefetch: true,
-        testBandwidth: false,          // Disable bandwidth testing
-        capLevelToPlayerSize: false,   // Don't limit quality
+        testBandwidth: false,
+        capLevelToPlayerSize: false,
         
-        // Simple ABR settings
-        abrEwmaDefaultEstimate: 500000, // 500kbps default
+        // Smart ABR settings based on connection
+        abrEwmaDefaultEstimate: connectionInfo.effectiveType === '4g' ? 1000000 : 500000,
         abrEwmaFastLive: 3.0,
         abrEwmaSlowLive: 9.0,
         

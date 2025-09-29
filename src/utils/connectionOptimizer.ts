@@ -111,9 +111,35 @@ export const detectCasting = (): boolean => {
 export const getOptimizedHLSConfig = (connectionInfo: ConnectionInfo, isCasting: boolean = false) => {
   const { effectiveType, downlink, rtt, saveData } = connectionInfo;
   
+  // Base configuration with all properties
+  let config = {
+    maxBufferLength: 15,
+    maxMaxBufferLength: 30,
+    maxBufferSize: 30 * 1000 * 1000,
+    maxBufferHole: 0.5,
+    fragLoadingTimeOut: 20000,
+    manifestLoadingTimeOut: 10000,
+    levelLoadingTimeOut: 10000,
+    fragLoadingMaxRetry: 6,
+    levelLoadingMaxRetry: 6,
+    abrBandWidthFactor: 0.95,
+    abrBandWidthUpFactor: 0.7,
+    nudgeOffset: 0.1,
+    nudgeMaxRetry: 3,
+    maxLoadingDelay: 4,
+    maxFragLookUpTolerance: 0.25,
+    liveSyncDurationCount: 3,
+    liveMaxLatencyDurationCount: 10,
+    backBufferLength: 10,
+    highBufferWatchdogPeriod: 2,
+    fragLoadingMaxRetryTimeout: 30000,
+    manifestLoadingMaxRetry: 6
+  };
+  
   // Casting-optimized configuration - much larger buffers for stability
   if (isCasting) {
     return {
+      ...config,
       maxBufferLength: 60, // 60 seconds for casting stability
       maxMaxBufferLength: 120, // 2 minutes max buffer
       maxBufferSize: 100 * 1000 * 1000, // 100MB for casting
@@ -138,47 +164,43 @@ export const getOptimizedHLSConfig = (connectionInfo: ConnectionInfo, isCasting:
     };
   }
   
-  // Base configuration for direct playback
-  let config = {
-    maxBufferLength: 15,
-    maxMaxBufferLength: 30,
-    maxBufferSize: 30 * 1000 * 1000,
-    fragLoadingTimeOut: 20000,
-    manifestLoadingTimeOut: 10000,
-    levelLoadingTimeOut: 10000
-  };
-  
   // Adjust based on connection quality
   if (effectiveType === 'slow-2g' || effectiveType === '2g' || saveData) {
     // Very conservative settings for slow connections
-    config = {
+    return {
       ...config,
       maxBufferLength: 5, // Very small buffer
       maxMaxBufferLength: 10,
       maxBufferSize: 10 * 1000 * 1000, // 10MB
       fragLoadingTimeOut: 30000, // Longer timeout for slow connections
       manifestLoadingTimeOut: 15000,
-      levelLoadingTimeOut: 15000
+      levelLoadingTimeOut: 15000,
+      abrBandWidthFactor: 0.8, // More conservative
+      abrBandWidthUpFactor: 0.5 // Slower upgrades
     };
   } else if (effectiveType === '3g' || downlink < 2) {
     // Conservative settings for 3G/slow connections
-    config = {
+    return {
       ...config,
       maxBufferLength: 8,
       maxMaxBufferLength: 15,
       maxBufferSize: 15 * 1000 * 1000, // 15MB
       fragLoadingTimeOut: 25000,
       manifestLoadingTimeOut: 12000,
-      levelLoadingTimeOut: 12000
+      levelLoadingTimeOut: 12000,
+      abrBandWidthFactor: 0.9,
+      abrBandWidthUpFactor: 0.6
     };
   } else if (rtt > 200) {
     // High latency connection adjustments
-    config = {
+    return {
       ...config,
       maxBufferLength: 20, // Larger buffer for high latency
       fragLoadingTimeOut: 30000,
       manifestLoadingTimeOut: 15000,
-      levelLoadingTimeOut: 15000
+      levelLoadingTimeOut: 15000,
+      maxBufferHole: 1.0, // More tolerant of holes
+      backBufferLength: 15 // Keep more back buffer
     };
   }
   
