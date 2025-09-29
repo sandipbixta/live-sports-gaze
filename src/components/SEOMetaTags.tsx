@@ -38,12 +38,23 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
     if (matchInfo) {
       const { homeTeam, awayTeam, league } = matchInfo;
       const matchTitle = homeTeam && awayTeam ? `${homeTeam} vs ${awayTeam}` : '';
+      
+      // Generate team-specific hashtags
+      const teamAClean = homeTeam?.replace(/\s+/g, '').toLowerCase() || '';
+      const teamBClean = awayTeam?.replace(/\s+/g, '').toLowerCase() || '';
+      const matchHashtag = teamAClean && teamBClean ? `${teamAClean}vs${teamBClean}` : '';
+      
       const matchKeywords = [
         homeTeam && `${homeTeam} live stream`,
         awayTeam && `${awayTeam} online`,
         matchTitle && `${matchTitle}`,
         matchTitle && `${matchTitle} on damitv.pro`,
         matchTitle && `${matchTitle} live streaming damitv.pro`,
+        // Team hashtags
+        teamAClean && `#${teamAClean}`,
+        teamBClean && `#${teamBClean}`,
+        matchHashtag && `#${matchHashtag}`,
+        matchHashtag && `watch${matchHashtag}`,
         league && `${league} streaming`,
         'live football stream',
         'watch football online free',
