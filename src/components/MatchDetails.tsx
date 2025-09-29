@@ -193,13 +193,18 @@ const MatchDetails: React.FC<MatchDetailsProps> = ({
                 return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
               }
             }
-            // If no team data, try to extract from title
-            if (matchTitle && matchTitle.includes(' vs ')) {
-              const parts = matchTitle.split(' vs ');
-              if (parts.length === 2) {
-                const homeClean = parts[0].trim().replace(/\s+/g, '').toLowerCase();
-                const awayClean = parts[1].trim().replace(/\s+/g, '').toLowerCase();
-                return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+            // If no team data, try to extract from title with multiple separators
+            if (matchTitle) {
+              const separators = [' vs ', ' - ', ' v ', ' VS ', ' V '];
+              for (const separator of separators) {
+                if (matchTitle.includes(separator)) {
+                  const parts = matchTitle.split(separator);
+                  if (parts.length === 2) {
+                    const homeClean = parts[0].trim().replace(/\s+/g, '').toLowerCase();
+                    const awayClean = parts[1].trim().replace(/\s+/g, '').toLowerCase();
+                    return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+                  }
+                }
               }
             }
             return '';
