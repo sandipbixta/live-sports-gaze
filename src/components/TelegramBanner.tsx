@@ -24,7 +24,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       {/* MiraFootball Promotion */}
       <Button
         onClick={handleMiraFootballClick}
-        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-green-500/20"
+        className="w-full bg-sports-primary hover:bg-sports-accent text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         variant="default"
       >
         <div className="flex items-center justify-center gap-2 w-full">
@@ -37,7 +37,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       {/* GoalKick Promotion */}
       <Button
         onClick={handleGoalKickClick}
-        className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-orange-500/20"
+        className="w-full bg-sports-secondary hover:bg-sports-accent text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         variant="default"
       >
         <div className="flex items-center justify-center gap-2 w-full">
@@ -50,7 +50,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       {/* Telegram Banner */}
       <Button
         onClick={handleTelegramClick}
-        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20"
+        className="w-full bg-primary hover:bg-accent text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         variant="default"
       >
         <div className="flex items-center justify-center gap-2 w-full">
