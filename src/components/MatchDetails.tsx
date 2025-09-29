@@ -183,12 +183,24 @@ const MatchDetails: React.FC<MatchDetailsProps> = ({
       <div className="text-xs text-muted-foreground/70 border-t border-border pt-2">
         <p>
           Keywords: #live #stream {(() => {
-            const homeTeam = getTeamName(matchTeams?.home);
-            const awayTeam = getTeamName(matchTeams?.away);
-            if (homeTeam && awayTeam) {
-              const homeClean = homeTeam.replace(/\s+/g, '').toLowerCase();
-              const awayClean = awayTeam.replace(/\s+/g, '').toLowerCase();
-              return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+            // For debugging - show what we have
+            if (matchTeams) {
+              const homeTeam = getTeamName(matchTeams?.home);
+              const awayTeam = getTeamName(matchTeams?.away);
+              if (homeTeam && awayTeam) {
+                const homeClean = homeTeam.replace(/\s+/g, '').toLowerCase();
+                const awayClean = awayTeam.replace(/\s+/g, '').toLowerCase();
+                return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+              }
+            }
+            // If no team data, try to extract from title
+            if (matchTitle && matchTitle.includes(' vs ')) {
+              const parts = matchTitle.split(' vs ');
+              if (parts.length === 2) {
+                const homeClean = parts[0].trim().replace(/\s+/g, '').toLowerCase();
+                const awayClean = parts[1].trim().replace(/\s+/g, '').toLowerCase();
+                return `#${homeClean} #${awayClean} #${homeClean}vs${awayClean} watch${homeClean}vs${awayClean} `;
+              }
             }
             return '';
           })()} #{matchCategory || 'sports'} #free #streaming #HD #quality #online #watch #sports #streaming #live #match
