@@ -36,8 +36,17 @@ export const getBackdropUrl = (path: string | null, size: 'w780' | 'w1280' | 'or
 };
 
 const fetchTMDB = async (endpoint: string) => {
-  const response = await fetch(`${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}`);
-  if (!response.ok) throw new Error('Failed to fetch from TMDB');
+  const url = `${TMDB_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${TMDB_API_KEY}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    console.error('TMDB API Error:', response.status, response.statusText);
+    throw new Error('Failed to fetch from TMDB');
+  }
   return response.json();
 };
 
@@ -67,7 +76,7 @@ export const getTopRatedTVShows = async () => {
 };
 
 export const searchContent = async (query: string) => {
-  const data = await fetchTMDB(`/search/multi&query=${encodeURIComponent(query)}`);
+  const data = await fetchTMDB(`/search/multi?query=${encodeURIComponent(query)}`);
   return data.results.filter((item: any) => item.media_type === 'movie' || item.media_type === 'tv') as Movie[];
 };
 
