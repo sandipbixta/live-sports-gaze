@@ -20,8 +20,6 @@ import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
-import Netflix from "./pages/Netflix";
-import NetflixPlayer from "./pages/NetflixPlayer";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 
@@ -89,16 +87,6 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
-                </SEOPageTracker>
-              } />
-              <Route path="/netflix" element={
-                <SEOPageTracker pageTitle="Netflix - Movies & TV Shows" contentType="home">
-                  <Netflix />
-                </SEOPageTracker>
-              } />
-              <Route path="/netflix/play/:mediaType/:id" element={
-                <SEOPageTracker contentType="match">
-                  <NetflixPlayer />
                 </SEOPageTracker>
               } />
               <Route path="/dmca" element={<DMCANotice />} />
