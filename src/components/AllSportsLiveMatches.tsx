@@ -170,22 +170,40 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           (match.sportId || match.category || '').toLowerCase() === 'football'
         );
         
-        // More specific filtering for actual top league matches
-        const topLeagueKeywords = [
-          'premier league', 'epl', 'la liga', 'serie a', 'bundesliga', 'ligue 1',
-          'champions league', 'ucl', 'europa league', 'conference league',
-          'manchester united', 'liverpool', 'manchester city', 'chelsea', 'arsenal', 'tottenham',
-          'fc barcelona', 'real madrid', 'juventus', 'ac milan', 'inter milan', 'napoli',
-          'bayern munich', 'borussia dortmund', 'psg', 'atletico madrid', 'ajax', 'psv'
+        // European competitions - HIGHEST PRIORITY
+        const europeanCompetitions = [
+          'champions league', 'uefa champions', 'ucl', 'europa league', 'uefa europa', 
+          'uel', 'conference league', 'uecl', 'europa conference'
         ];
         
-        // More comprehensive exclusion for non-top league matches
+        // Top clubs from major leagues
+        const topClubs = [
+          // Premier League
+          'manchester united', 'man united', 'liverpool', 'manchester city', 'man city', 
+          'chelsea', 'arsenal', 'tottenham', 'spurs', 'newcastle', 'aston villa',
+          // La Liga
+          'barcelona', 'real madrid', 'atletico madrid', 'atletico', 'sevilla', 'villarreal',
+          'real sociedad', 'athletic bilbao', 'valencia', 'real betis',
+          // Serie A
+          'juventus', 'inter milan', 'inter', 'ac milan', 'milan', 'napoli', 'roma', 
+          'lazio', 'atalanta', 'fiorentina',
+          // Bundesliga
+          'bayern munich', 'bayern', 'borussia dortmund', 'dortmund', 'rb leipzig', 
+          'bayer leverkusen', 'leverkusen', 'eintracht frankfurt',
+          // Ligue 1
+          'psg', 'paris saint-germain', 'marseille', 'lyon', 'monaco', 'lille',
+          // Other top clubs
+          'ajax', 'psv', 'feyenoord', 'benfica', 'porto', 'sporting', 'celtic', 'rangers'
+        ];
+        
+        // Exclude non-top matches
         const excludeKeywords = [
-          'barcelona sc', 'barcelona sporting', 'guayaquil', 'u23', 'u21', 'u19', 'u18',
-          'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 'amateur',
-          'league two', 'league one', 'conference', 'non-league', 'women', 'female',
+          'barcelona sc', 'guayaquil', 'u23', 'u21', 'u19', 'u18', 'u20', 'u17',
+          'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 
+          'league two', 'league one', 'non-league', 'women', 'female',
           'womens', "women's", 'ladies', 'feminino', 'femenino', 'damen', 'feminine',
-          'copa', 'friendly', 'amistoso', 'preseason', 'pre-season'
+          'friendly', 'amistoso', 'preseason', 'pre-season', 'national league',
+          'vanarama', 'isthmian', 'southern league', 'northern premier'
         ];
         
         console.log('🔍 Total football matches before filtering:', allFootballMatches.length);
@@ -199,43 +217,53 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           .filter(match => {
             const title = match.title.toLowerCase();
             
-            // More specific exclusion - avoid false positives for Barcelona
-            const isWomensMatch = title.includes(' w vs ') || title.includes(' w ') || 
-              ['women', 'female', 'womens', "women's", 'ladies', 'feminino', 'femenino', 'damen', 'feminine'].some(keyword => title.includes(keyword));
-            
-            const isLowerLeague = ['u23', 'u21', 'u19', 'u18', 'youth', 'reserve', 'academy', 
-              'segunda', 'segunda b', 'tercera', 'amateur', 'league two', 'league one', 
-              'conference', 'non-league'].some(keyword => title.includes(keyword));
-              
-            const isNonTopClub = ['barcelona sc', 'barcelona sporting', 'guayaquil'].some(keyword => title.includes(keyword));
-            
-            const isFriendly = ['copa', 'friendly', 'amistoso', 'preseason', 'pre-season'].some(keyword => title.includes(keyword));
-            
-            if (isWomensMatch || isLowerLeague || isNonTopClub || isFriendly) {
-              console.log('❌ Excluding match:', title, {isWomensMatch, isLowerLeague, isNonTopClub, isFriendly});
+            // First check exclusions
+            const shouldExclude = excludeKeywords.some(keyword => title.includes(keyword));
+            if (shouldExclude) {
               return false;
             }
             
-            // Must contain at least one top league keyword
-            const hasTopLeagueKeyword = topLeagueKeywords.some(keyword => title.includes(keyword));
-            
-            // More flexible format check - allow more match formats
-            const hasProperFormat = title.includes(' vs ') || title.includes(' - ') || 
-              title.includes(' v ') || title.includes(':') || match.popular;
-            
-            // Debug logging
-            if (hasTopLeagueKeyword) {
-              console.log('✅ Top League Football match found:', title, 'hasFormat:', hasProperFormat, 'trending score:', isTrendingMatch(title).score);
+            // PRIORITY 1: European competitions (Champions League, Europa League, etc.)
+            const isEuropeanCompetition = europeanCompetitions.some(keyword => title.includes(keyword));
+            if (isEuropeanCompetition) {
+              console.log('⭐ European Competition match:', title);
+              return true;
             }
             
-            return hasTopLeagueKeyword && hasProperFormat;
+            // PRIORITY 2: Top clubs playing each other
+            const matchingClubs = topClubs.filter(club => title.includes(club));
+            if (matchingClubs.length >= 2) {
+              console.log('🔥 Top club match:', title, 'Clubs:', matchingClubs);
+              return true;
+            }
+            
+            // PRIORITY 3: Popular/trending matches with top clubs
+            if (match.popular && matchingClubs.length >= 1) {
+              console.log('📈 Popular top club match:', title);
+              return true;
+            }
+            
+            return false;
           })
           .sort((a, b) => {
+            const titleA = a.title.toLowerCase();
+            const titleB = b.title.toLowerCase();
+            
+            // European competitions first
+            const isEuroA = europeanCompetitions.some(k => titleA.includes(k));
+            const isEuroB = europeanCompetitions.some(k => titleB.includes(k));
+            if (isEuroA && !isEuroB) return -1;
+            if (!isEuroA && isEuroB) return 1;
+            
+            // Then by trending score
             const scoreA = isTrendingMatch(a.title).score;
             const scoreB = isTrendingMatch(b.title).score;
-            return scoreB - scoreA;
+            if (scoreB !== scoreA) return scoreB - scoreA;
+            
+            // Then by date (upcoming first)
+            return (a.date || 0) - (b.date || 0);
           })
-          .slice(0, 12);
+          .slice(0, 16);
         
         if (topLeagueFootballMatches.length > 0) {
           return (
