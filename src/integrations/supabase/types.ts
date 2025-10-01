@@ -14,27 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      match_viewers: {
+      iptv_providers: {
         Row: {
+          base_url: string
+          created_at: string
           id: string
-          joined_at: string
-          last_active: string
-          match_id: string
-          session_id: string
+          is_active: boolean | null
+          name: string
+          output_format: string | null
+          password: string
+          playlist_type: string | null
+          updated_at: string
+          username: string
         }
         Insert: {
+          base_url: string
+          created_at?: string
           id?: string
-          joined_at?: string
-          last_active?: string
-          match_id: string
-          session_id: string
+          is_active?: boolean | null
+          name: string
+          output_format?: string | null
+          password: string
+          playlist_type?: string | null
+          updated_at?: string
+          username: string
         }
         Update: {
+          base_url?: string
+          created_at?: string
           id?: string
-          joined_at?: string
-          last_active?: string
+          is_active?: boolean | null
+          name?: string
+          output_format?: string | null
+          password?: string
+          playlist_type?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      match_viewers: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          match_id: string
+          viewer_count: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          match_id: string
+          viewer_count?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
           match_id?: string
-          session_id?: string
+          viewer_count?: number
         }
         Relationships: []
       }
@@ -43,11 +82,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_inactive_viewers: {
+      decrement_viewer_count: {
+        Args: { match_id_param: string }
+        Returns: number
+      }
+      get_public_iptv_providers: {
         Args: Record<PropertyKey, never>
-        Returns: undefined
+        Returns: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          output_format: string
+          playlist_type: string
+        }[]
       }
       get_viewer_count: {
+        Args: { match_id_param: string }
+        Returns: number
+      }
+      increment_viewer_count: {
         Args: { match_id_param: string }
         Returns: number
       }

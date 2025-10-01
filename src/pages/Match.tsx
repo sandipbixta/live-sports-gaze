@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType } from '@/types/sports';
 import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
@@ -28,6 +29,9 @@ const Match = () => {
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
   const [trendingMatches, setTrendingMatches] = useState<MatchType[]>([]);
+
+  // Track viewer count for this match
+  useViewerTracking(matchId);
 
   // Use enhanced stream player hook for comprehensive stream management
   const {

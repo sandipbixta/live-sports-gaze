@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
 import { getChannelsByCountry } from '@/data/tvChannels';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { ArrowLeft, Share, Star, ChevronRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +17,10 @@ import AdultBannerAd from '@/components/AdultBannerAd';
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
   const navigate = useNavigate();
+  
+  // Track viewer count for this channel
+  useViewerTracking(channelId);
+  
   const [channel, setChannel] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [otherChannels, setOtherChannels] = useState<any[]>([]);

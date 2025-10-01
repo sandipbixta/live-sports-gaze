@@ -4,6 +4,7 @@ import { ArrowLeft, Maximize2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 import MatchDetails from '@/components/MatchDetails';
@@ -13,6 +14,9 @@ import AdultBannerAd from '@/components/AdultBannerAd';
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  
+  // Track viewer count for this match
+  useViewerTracking(matchId);
   
   const match = manualMatches.find(m => m.id === matchId);
   const [selectedLink, setSelectedLink] = useState<ManualMatchLink | null>(
