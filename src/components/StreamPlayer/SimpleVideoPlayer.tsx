@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
-import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange } from '../../utils/connectionOptimizer';
+import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange, detectGeographicLatency } from '../../utils/connectionOptimizer';
 
 
 interface SimpleVideoPlayerProps {
@@ -32,6 +32,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [currentQuality, setCurrentQuality] = useState(-1);
   const [availableQualities, setAvailableQualities] = useState<Array<{ width: number; height: number; bitrate: number }>>([]);
   const [connectionInfo, setConnectionInfo] = useState(() => getConnectionInfo());
+  const [measuredLatency, setMeasuredLatency] = useState<number | null>(null);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isCasting = detectCasting();
@@ -39,6 +40,17 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   useEffect(() => {
     setError(false);
   }, [stream]);
+
+  // Detect geographic latency on mount
+  useEffect(() => {
+    detectGeographicLatency().then((latency: number) => {
+      setMeasuredLatency(latency);
+      console.log('🌍 Measured geographic latency:', latency + 'ms');
+      if (latency > 300) {
+        console.log('🌐 High latency detected - optimizing for international viewers');
+      }
+    });
+  }, []);
 
   // Monitor connection changes and update buffering strategy
   useEffect(() => {
@@ -95,8 +107,12 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
     let hls: Hls | null = null;
     if (Hls.isSupported() && videoRef.current) {
+      // Use measured latency if available, otherwise use connection RTT
+      const effectiveLatency = measuredLatency || connectionInfo.rtt;
+      const adjustedConnectionInfo = { ...connectionInfo, rtt: effectiveLatency };
+      
       // Get optimized HLS configuration based on network conditions
-      const optimizedConfig = getOptimizedHLSConfig(connectionInfo, isCasting);
+      const optimizedConfig = getOptimizedHLSConfig(adjustedConnectionInfo, isCasting);
       
       console.log(`🔧 Initializing HLS with optimized config for ${connectionInfo.effectiveType} connection (${connectionInfo.downlink}Mbps)`);
       console.log(`📊 Buffer settings: ${optimizedConfig.maxBufferLength}s buffer, ${optimizedConfig.maxBufferSize / 1000000}MB max`);

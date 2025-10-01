@@ -191,16 +191,41 @@ export const getOptimizedHLSConfig = (connectionInfo: ConnectionInfo, isCasting:
       abrBandWidthFactor: 0.9,
       abrBandWidthUpFactor: 0.6
     };
+  } else if (rtt > 300) {
+    // Very high latency (international/European viewers from Australia)
+    return {
+      ...config,
+      maxBufferLength: 45, // Much larger buffer for international viewers
+      maxMaxBufferLength: 90, // 90 seconds max buffer
+      maxBufferSize: 60 * 1000 * 1000, // 60MB buffer
+      fragLoadingTimeOut: 60000, // 60 seconds timeout
+      manifestLoadingTimeOut: 30000, // 30 seconds manifest timeout
+      levelLoadingTimeOut: 30000,
+      maxBufferHole: 2.0, // Very tolerant of buffer holes
+      backBufferLength: 20, // Keep substantial back buffer
+      fragLoadingMaxRetry: 10, // More retry attempts
+      fragLoadingMaxRetryTimeout: 90000, // 90 seconds retry timeout
+      abrBandWidthFactor: 0.7, // Conservative bandwidth usage
+      abrBandWidthUpFactor: 0.4, // Slow quality upgrades
+      nudgeMaxRetry: 8, // More nudge retries
+      maxLoadingDelay: 8, // More patient loading
+      liveSyncDurationCount: 4, // More stable sync
+      liveMaxLatencyDurationCount: 12, // Higher latency tolerance
+      highBufferWatchdogPeriod: 4 // Less frequent checks
+    };
   } else if (rtt > 200) {
     // High latency connection adjustments
     return {
       ...config,
-      maxBufferLength: 20, // Larger buffer for high latency
-      fragLoadingTimeOut: 30000,
-      manifestLoadingTimeOut: 15000,
-      levelLoadingTimeOut: 15000,
-      maxBufferHole: 1.0, // More tolerant of holes
-      backBufferLength: 15 // Keep more back buffer
+      maxBufferLength: 25, // Larger buffer for high latency
+      maxMaxBufferLength: 45,
+      fragLoadingTimeOut: 40000,
+      manifestLoadingTimeOut: 20000,
+      levelLoadingTimeOut: 20000,
+      maxBufferHole: 1.5, // More tolerant of holes
+      backBufferLength: 18, // Keep more back buffer
+      fragLoadingMaxRetry: 8,
+      fragLoadingMaxRetryTimeout: 50000
     };
   }
   
@@ -227,6 +252,22 @@ export const onConnectionChange = (callback: (info: ConnectionInfo) => void) => 
   
   // Return no-op cleanup if connection API not available
   return () => {};
+};
+
+// Detect geographic latency by measuring connection to a known endpoint
+export const detectGeographicLatency = async (): Promise<number> => {
+  try {
+    const start = performance.now();
+    await fetch('https://www.cloudflare.com/cdn-cgi/trace', { 
+      method: 'HEAD',
+      cache: 'no-cache'
+    });
+    const end = performance.now();
+    return Math.round(end - start);
+  } catch (error) {
+    console.warn('Geographic latency detection failed, using default');
+    return 100; // Default to moderate latency
+  }
 };
 
 // Estimate if current connection can handle a bitrate
