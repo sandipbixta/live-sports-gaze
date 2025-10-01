@@ -26,8 +26,11 @@ const MatchesList: React.FC<MatchesListProps> = ({
   const [isEnriching, setIsEnriching] = React.useState(false);
 
   // Filter out advertisement matches and ended matches, then consolidate duplicates
-  const cleanMatches = filterActiveMatches(filterCleanMatches(matches));
-  const consolidatedMatches = consolidateMatches(cleanMatches);
+  // Use useMemo to prevent infinite loop - only recalculate when matches change
+  const consolidatedMatches = React.useMemo(() => {
+    const cleanMatches = filterActiveMatches(filterCleanMatches(matches));
+    return consolidateMatches(cleanMatches);
+  }, [matches]);
 
   // Enrich matches with viewer counts and sort by viewers
   React.useEffect(() => {
