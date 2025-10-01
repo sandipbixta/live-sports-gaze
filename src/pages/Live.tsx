@@ -71,7 +71,11 @@ const Live = () => {
     
     // Then filter by sport if not "all"
     if (activeSportFilter !== "all") {
-      matchesToFilter = matchesToFilter.filter(match => match.sportId === activeSportFilter);
+      matchesToFilter = matchesToFilter.filter(match => {
+        const matchSport = match.sportId || match.category || '';
+        return matchSport === activeSportFilter;
+      });
+      console.log(`🎯 Filtered to ${matchesToFilter.length} matches for sport: ${activeSportFilter}`);
     }
     
     // Then filter by search query
@@ -86,6 +90,8 @@ const Live = () => {
       );
       setFilteredMatches(filtered);
     }
+    
+    console.log(`📊 Total filtered matches: ${matchesToFilter.length} (tab: ${activeTab}, sport: ${activeSportFilter})`);
   }, [searchQuery, activeTab, activeSportFilter, allMatches, liveMatches, upcomingMatches]);
 
   // Handle search form submit
