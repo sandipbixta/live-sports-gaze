@@ -317,9 +317,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
         <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">
           {generateThumbnail()}
           
-          {/* Time badge - top right */}
-          <div className="absolute top-1 right-1 sm:top-2 sm:right-2">
-            <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm">
+          {/* Time badge - bottom left (smaller) */}
+          <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2">
+            <Badge className="bg-background/80 text-foreground px-1 py-0.5 text-[9px] font-normal backdrop-blur-sm">
+              <Clock className="w-2.5 h-2.5 mr-0.5" />
               {match.date ? formatTime(match.date) : 'TBD'}
             </Badge>
           </div>
