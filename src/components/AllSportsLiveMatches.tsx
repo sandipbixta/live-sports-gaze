@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches } from '../utils/matchUtils';
-import { isTrendingMatch } from '../utils/popularLeagues';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
+import { Eye } from 'lucide-react';
 
 interface AllSportsLiveMatchesProps {
   searchTerm?: string;
@@ -16,6 +17,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mostViewedMatches, setMostViewedMatches] = useState<Match[]>([]);
 
   useEffect(() => {
     const loadLiveMatches = async () => {
@@ -47,6 +49,11 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           acc[sport] = (acc[sport] || 0) + 1;
           return acc;
         }, {} as Record<string, number>));
+        
+        // Enrich all matches with viewer counts and get top viewed
+        const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
+        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
+        setMostViewedMatches(sortedByViewers.slice(0, 16));
         
       } catch (error) {
         console.error('Error loading matches:', error);
@@ -163,131 +170,26 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
-      {/* Top League Football Matches - Live and Scheduled */}
-      {(() => {
-        // Get both live and scheduled football matches from allMatches
-        const allFootballMatches = allMatches.filter(match => 
-          (match.sportId || match.category || '').toLowerCase() === 'football'
-        );
-        
-        // European competitions - HIGHEST PRIORITY
-        const europeanCompetitions = [
-          'champions league', 'uefa champions', 'ucl', 'europa league', 'uefa europa', 
-          'uel', 'conference league', 'uecl', 'europa conference'
-        ];
-        
-        // Top clubs from major leagues
-        const topClubs = [
-          // Premier League
-          'manchester united', 'man united', 'liverpool', 'manchester city', 'man city', 
-          'chelsea', 'arsenal', 'tottenham', 'spurs', 'newcastle', 'aston villa',
-          // La Liga
-          'barcelona', 'real madrid', 'atletico madrid', 'atletico', 'sevilla', 'villarreal',
-          'real sociedad', 'athletic bilbao', 'valencia', 'real betis',
-          // Serie A
-          'juventus', 'inter milan', 'inter', 'ac milan', 'milan', 'napoli', 'roma', 
-          'lazio', 'atalanta', 'fiorentina',
-          // Bundesliga
-          'bayern munich', 'bayern', 'borussia dortmund', 'dortmund', 'rb leipzig', 
-          'bayer leverkusen', 'leverkusen', 'eintracht frankfurt',
-          // Ligue 1
-          'psg', 'paris saint-germain', 'marseille', 'lyon', 'monaco', 'lille',
-          // Other top clubs
-          'ajax', 'psv', 'feyenoord', 'benfica', 'porto', 'sporting', 'celtic', 'rangers'
-        ];
-        
-        // Exclude non-top matches
-        const excludeKeywords = [
-          'barcelona sc', 'guayaquil', 'u23', 'u21', 'u19', 'u18', 'u20', 'u17',
-          'youth', 'reserve', 'academy', 'segunda', 'segunda b', 'tercera', 
-          'league two', 'league one', 'non-league', 'women', 'female',
-          'womens', "women's", 'ladies', 'feminino', 'femenino', 'damen', 'feminine',
-          'friendly', 'amistoso', 'preseason', 'pre-season', 'national league',
-          'vanarama', 'isthmian', 'southern league', 'northern premier'
-        ];
-        
-        console.log('🔍 Total football matches before filtering:', allFootballMatches.length);
-        allFootballMatches.forEach(match => {
-          if (match.title.toLowerCase().includes('barcelona') || match.title.toLowerCase().includes('champions')) {
-            console.log('📋 Barcelona/Champions match found:', match.title);
-          }
-        });
-        
-        const topLeagueFootballMatches = allFootballMatches
-          .filter(match => {
-            const title = match.title.toLowerCase();
-            
-            // First check exclusions
-            const shouldExclude = excludeKeywords.some(keyword => title.includes(keyword));
-            if (shouldExclude) {
-              return false;
-            }
-            
-            // PRIORITY 1: European competitions (Champions League, Europa League, etc.)
-            const isEuropeanCompetition = europeanCompetitions.some(keyword => title.includes(keyword));
-            if (isEuropeanCompetition) {
-              console.log('⭐ European Competition match:', title);
-              return true;
-            }
-            
-            // PRIORITY 2: Top clubs playing each other
-            const matchingClubs = topClubs.filter(club => title.includes(club));
-            if (matchingClubs.length >= 2) {
-              console.log('🔥 Top club match:', title, 'Clubs:', matchingClubs);
-              return true;
-            }
-            
-            // PRIORITY 3: Popular/trending matches with top clubs
-            if (match.popular && matchingClubs.length >= 1) {
-              console.log('📈 Popular top club match:', title);
-              return true;
-            }
-            
-            return false;
-          })
-          .sort((a, b) => {
-            const titleA = a.title.toLowerCase();
-            const titleB = b.title.toLowerCase();
-            
-            // European competitions first
-            const isEuroA = europeanCompetitions.some(k => titleA.includes(k));
-            const isEuroB = europeanCompetitions.some(k => titleB.includes(k));
-            if (isEuroA && !isEuroB) return -1;
-            if (!isEuroA && isEuroB) return 1;
-            
-            // Then by trending score
-            const scoreA = isTrendingMatch(a.title).score;
-            const scoreB = isTrendingMatch(b.title).score;
-            if (scoreB !== scoreA) return scoreB - scoreA;
-            
-            // Then by date (upcoming first)
-            return (a.date || 0) - (b.date || 0);
-          })
-          .slice(0, 16);
-        
-        if (topLeagueFootballMatches.length > 0) {
-          return (
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="text-xl">⚽</div>
-                <h3 className="text-xl font-bold text-white">Top League Football</h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                {topLeagueFootballMatches.map((match) => (
-                  <MatchCard
-                    key={`top-football-${match.id}`}
-                    match={match}
-                    sportId={match.sportId || match.category}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        }
-        return null;
-      })()}
+      {/* Most Viewed Matches - Across All Sports */}
+      {mostViewedMatches.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Eye className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-bold text-white">Most Viewed Matches</h3>
+            <span className="text-sm text-gray-400">Live across all sports</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {mostViewedMatches.map((match) => (
+              <MatchCard
+                key={`most-viewed-${match.id}`}
+                match={match}
+                sportId={match.sportId || match.category}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-      
       {/* Sports Sections */}
       {sortedSports.map(([sportId, matches]) => (
         <div key={sportId} className="space-y-4">
