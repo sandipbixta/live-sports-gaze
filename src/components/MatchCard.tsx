@@ -8,6 +8,7 @@ import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
+import { ViewerCount } from './ViewerCount';
 
 interface MatchCardProps {
   match: Match;
@@ -372,6 +373,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <Users className="w-3 h-3" />
                 {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
               </div>
+            </>
+          )}
+          
+          {isLive && (
+            <>
+              <span>•</span>
+              <ViewerCount matchId={match.id} />
             </>
           )}
         </div>
