@@ -42,7 +42,7 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
   }
 
   return (
-    <div className="flex items-center gap-2 text-white">
+    <div className="flex items-center gap-2 text-foreground">
       <Users className="w-4 h-4" />
       <span className="font-semibold">{viewerCount.toLocaleString()}</span>
       <span className="text-sm">viewers</span>
