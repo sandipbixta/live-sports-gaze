@@ -36,6 +36,11 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
     };
   }, [matchId]);
 
+  // Don't show if 0 viewers
+  if (viewerCount === 0) {
+    return null;
+  }
+
   return (
     <div className="flex items-center gap-2 text-foreground">
       <Users className="w-4 h-4" />

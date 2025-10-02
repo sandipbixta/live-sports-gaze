@@ -7,6 +7,7 @@ import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
+import { ViewerCount } from '../ViewerCount';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -72,7 +73,10 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
   return (
     <div className="mb-6">
       <div className="w-full max-w-5xl mx-auto flex justify-between items-center mb-3">
-        <h2 className="text-xl font-bold text-white truncate pr-4">{featuredMatch.title}</h2>
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <h2 className="text-xl font-bold text-white truncate">{featuredMatch.title}</h2>
+          {isLive && <ViewerCount matchId={featuredMatch.id} />}
+        </div>
         {streamLoading ? (
           <div className="text-xs text-[#9b87f5] flex items-center gap-1 flex-shrink-0">
             <span className="inline-block h-1.5 w-1.5 bg-[#9b87f5] rounded-full animate-pulse"></span>
