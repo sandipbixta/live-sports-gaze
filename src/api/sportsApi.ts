@@ -1,7 +1,8 @@
 
 import { Sport, Match, Stream } from '../types/sports';
+import { streamedFetch } from '../streamedApi';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = '/api/streamed/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -198,7 +199,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
+    console.error(`❌ Error fetching matches for sport ${sportId} via VPS proxy:`, error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -312,10 +313,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} live matches via VPS proxy`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching live matches from streamed.pk:', error);
+    console.error('❌ Error fetching live matches via VPS proxy:', error);
     throw error;
   }
 };
@@ -353,10 +354,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} matches via VPS proxy`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching all matches from streamed.pk:', error);
+    console.error('❌ Error fetching all matches via VPS proxy:', error);
     throw error;
   }
 };
