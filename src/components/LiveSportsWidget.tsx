@@ -5,6 +5,7 @@ import { Sport, Match } from '../types/sports';
 import { Play, Clock, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../utils/matchUtils';
+import { getStreamedImageUrl } from '../streamedApi';
 
 const LiveSportsWidget = () => {
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
@@ -88,9 +89,9 @@ const LiveSportsWidget = () => {
         const isLive = isMatchLive(match);
         const sportName = sports.find(s => s.id === match.sportId)?.name || 'Sports';
         const homeBadge = match.teams?.home?.logo || 
-          (match.teams?.home?.badge ? `https://streamed.su/api/images/badge/${match.teams.home.badge}.webp` : '');
+          (match.teams?.home?.badge ? getStreamedImageUrl(`api/images/badge/${match.teams.home.badge}.webp`) : '');
         const awayBadge = match.teams?.away?.logo || 
-          (match.teams?.away?.badge ? `https://streamed.su/api/images/badge/${match.teams.away.badge}.webp` : '');
+          (match.teams?.away?.badge ? getStreamedImageUrl(`api/images/badge/${match.teams.away.badge}.webp`) : '');
         
         return (
           <Link

@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { getStreamedImageUrl } from '../../streamedApi';
 
 interface TeamDisplayProps {
   name: string;
@@ -11,7 +12,7 @@ interface TeamDisplayProps {
 
 const TeamDisplay: React.FC<TeamDisplayProps> = ({ name, badge, logo, isHome = false, size = 'medium' }) => {
   // Prioritize logo over badge, then fall back to badge URL format
-  const imageUrl = logo || (badge ? `https://streamed.su/api/images/badge/${badge}.webp` : '');
+  const imageUrl = logo || (badge ? getStreamedImageUrl(`api/images/badge/${badge}.webp`) : '');
   
   const getSizeClasses = () => {
     switch (size) {

@@ -494,50 +494,20 @@ export const fetchStream_legacy = async (source: string, id: string, streamNo?: 
   if (cached) return cached;
 
   try {
-    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
+    console.log(`📡 Fetching stream via proxy: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
-    const pkUrl = `${API_BASE}/stream/${source}/${id}`;
-
-    let response: Response | null = null;
-
-    if (isMobile) {
-      try {
-        console.log('📡 Trying streamed.su for stream (mobile first)...');
-        response = await fetch(suUrl, {
-          signal: controller.signal,
-          headers: {
-'Accept': 'application/json'
-          },
-          cache: 'no-store',
-        });
-      } catch (e) {
-        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
-      }
-    }
-
-    if (!response || !response.ok) {
-      console.log('↩️ Falling back to streamed.pk for stream...');
-      response = await fetch(pkUrl, {
-        signal: controller.signal,
-        headers: {
-'Accept': 'application/json'
-        },
-        cache: 'no-store',
-      });
-    }
+    // Use proxy for all requests
+    const data = await streamedFetch<any>(`api/stream/${source}/${id}`);
     
     clearTimeout(timeoutId);
     
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!data) {
+      console.error('Stream fetch failed via proxy');
+      return null;
     }
-    
-    const data = await response.json();
     console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
 
     // Normalize helper for embed URLs
