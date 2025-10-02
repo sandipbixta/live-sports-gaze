@@ -47,7 +47,7 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
 
     // Set up real-time subscription only if enabled
     if (enableRealtime) {
-      const channelName = `match_viewers_${matchId}_${Date.now()}`;
+      const channelName = `viewer_sessions_${matchId}_${Date.now()}`;
       
       const channel = supabase
         .channel(channelName)
@@ -56,12 +56,13 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
           {
             event: '*',
             schema: 'public',
-            table: 'match_viewers',
+            table: 'viewer_sessions',
             filter: `match_id=eq.${matchId}`
           },
-          (payload: any) => {
-            if (mounted && payload.new?.viewer_count !== undefined) {
-              setViewerCount(payload.new.viewer_count);
+          () => {
+            // When any session changes, re-fetch the count
+            if (mounted) {
+              fetchViewerCount();
             }
           }
         )

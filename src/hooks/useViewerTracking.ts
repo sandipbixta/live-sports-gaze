@@ -1,71 +1,67 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// Generate a unique session ID for this browser tab
+const generateSessionId = () => {
+  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
 /**
- * Hook to track viewer count for a match
- * Increments count when component mounts, decrements when it unmounts
+ * Hook to track viewer count for a match using heartbeat system
+ * Sends periodic heartbeats while viewing, automatically expires after 30 seconds of inactivity
  */
 export const useViewerTracking = (matchId: string | undefined) => {
+  const sessionIdRef = useRef(generateSessionId());
+  
   useEffect(() => {
     if (!matchId) return;
 
     let isActive = true;
+    let heartbeatInterval: NodeJS.Timeout;
 
-    // Increment viewer count when user starts watching
-    const incrementViewer = async () => {
-      try {
-        const { data, error } = await supabase.rpc('increment_viewer_count', {
-          match_id_param: matchId
-        });
-        
-        if (error) {
-          console.error('Error incrementing viewer count:', error);
-        } else {
-          console.log(`Viewer count for ${matchId}:`, data);
-        }
-      } catch (error) {
-        console.error('Error incrementing viewer count:', error);
-      }
-    };
-
-    // Decrement viewer count when user stops watching
-    const decrementViewer = async () => {
+    // Send heartbeat to indicate viewer is active
+    const sendHeartbeat = async () => {
       if (!isActive) return;
       
       try {
-        const { data, error } = await supabase.rpc('decrement_viewer_count', {
-          match_id_param: matchId
+        const { error } = await supabase.rpc('heartbeat_viewer', {
+          match_id_param: matchId,
+          session_id_param: sessionIdRef.current
         });
         
         if (error) {
-          console.error('Error decrementing viewer count:', error);
-        } else {
-          console.log(`Viewer left ${matchId}, new count:`, data);
+          console.error('Error sending viewer heartbeat:', error);
         }
       } catch (error) {
-        console.error('Error decrementing viewer count:', error);
+        console.error('Error sending viewer heartbeat:', error);
       }
     };
 
-    // Track viewer when component mounts
-    incrementViewer();
+    // Send initial heartbeat immediately
+    sendHeartbeat();
+
+    // Send heartbeat every 10 seconds
+    heartbeatInterval = setInterval(sendHeartbeat, 10000);
 
     // Handle page visibility changes
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        decrementViewer();
+        // Stop sending heartbeats when tab is hidden
+        clearInterval(heartbeatInterval);
       } else {
-        incrementViewer();
+        // Resume heartbeats when tab becomes visible
+        sendHeartbeat();
+        heartbeatInterval = setInterval(sendHeartbeat, 10000);
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup: decrement viewer count when component unmounts
+    // Cleanup: stop heartbeats when component unmounts
     return () => {
       isActive = false;
+      clearInterval(heartbeatInterval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      decrementViewer();
     };
   }, [matchId]);
 };

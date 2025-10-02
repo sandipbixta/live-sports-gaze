@@ -53,27 +53,27 @@ export type Database = {
         }
         Relationships: []
       }
-      match_viewers: {
+      viewer_sessions: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
-          last_updated: string | null
+          last_heartbeat: string
           match_id: string
-          viewer_count: number
+          session_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          last_updated?: string | null
+          last_heartbeat?: string
           match_id: string
-          viewer_count?: number
+          session_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
-          last_updated?: string | null
+          last_heartbeat?: string
           match_id?: string
-          viewer_count?: number
+          session_id?: string
         }
         Relationships: []
       }
@@ -82,9 +82,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      decrement_viewer_count: {
-        Args: { match_id_param: string }
-        Returns: number
+      cleanup_stale_viewer_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       get_public_iptv_providers: {
         Args: Record<PropertyKey, never>
@@ -101,9 +101,9 @@ export type Database = {
         Args: { match_id_param: string }
         Returns: number
       }
-      increment_viewer_count: {
-        Args: { match_id_param: string }
-        Returns: number
+      heartbeat_viewer: {
+        Args: { match_id_param: string; session_id_param: string }
+        Returns: undefined
       }
     }
     Enums: {
