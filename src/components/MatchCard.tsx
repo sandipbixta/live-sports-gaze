@@ -375,13 +375,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
               </div>
             </>
           )}
-          
-          {isLive && (
-            <>
-              <span>•</span>
-              <ViewerCount matchId={match.id} />
-            </>
-          )}
         </div>
 
         {/* Status indicator */}
