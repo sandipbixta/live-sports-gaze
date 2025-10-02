@@ -62,6 +62,18 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
     const title = match.title?.toLowerCase() || '';
     const id = match.id?.toLowerCase() || '';
     
+    // Debug logging for India vs West Indies match
+    if (title.includes('india') && title.includes('west')) {
+      console.log('🔍 Found India vs West Indies match:', {
+        title: match.title,
+        id: match.id,
+        date: match.date,
+        sources: match.sources?.length || 0,
+        category: match.category,
+        sportId: match.sportId
+      });
+    }
+    
     // Filter out unwanted football leagues/countries for football matches
     const isFootball = match.category === 'football' || match.sportId === 'football';
     if (isFootball) {
@@ -133,11 +145,26 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
       match.title.includes('???') ||
       match.title.includes('***');
     
-    return !hasUnwantedContent && 
-           hasValidTitle && 
-           hasValidDate && 
-           hasMinimumSources &&
-           !isSuspiciousTitle;
+    const isValid = !hasUnwantedContent && 
+                    hasValidTitle && 
+                    hasValidDate && 
+                    hasMinimumSources &&
+                    !isSuspiciousTitle;
+    
+    // Debug logging for India vs West Indies match
+    if (title.includes('india') && title.includes('west')) {
+      console.log('🔍 India vs West Indies filtering:', {
+        isValid,
+        hasUnwantedContent,
+        hasValidTitle,
+        hasValidDate,
+        hasMinimumSources,
+        isSuspiciousTitle,
+        title: match.title
+      });
+    }
+    
+    return isValid;
   });
 };
 
