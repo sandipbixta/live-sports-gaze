@@ -382,7 +382,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {isLive ? (
             <>
               <span className="text-destructive font-medium">Live now</span>
-              <ViewerCount matchId={match.id} />
+              <ViewerCount matchId={match.id} enableRealtime={true} />
             </>
           ) : match.date ? (
             <span className="text-muted-foreground">
