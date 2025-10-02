@@ -48,10 +48,9 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
   }, [matchId]);
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-red-600/90 text-white rounded-lg w-fit">
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/90 text-white rounded-lg w-fit">
       <Users className="w-4 h-4" />
       <span className="font-semibold">{viewerCount.toLocaleString()}</span>
-      <span className="text-sm opacity-90">watching now</span>
     </div>
   );
 };
