@@ -1,9 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-// Generate a unique session ID for this browser tab
-const generateSessionId = () => {
-  return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+// Generate a unique session ID for this browser (persisted across page reloads)
+const getOrCreateSessionId = () => {
+  const storageKey = 'viewer_session_id';
+  let sessionId = sessionStorage.getItem(storageKey);
+  
+  if (!sessionId) {
+    sessionId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem(storageKey, sessionId);
+  }
+  
+  return sessionId;
 };
 
 /**
@@ -11,7 +19,7 @@ const generateSessionId = () => {
  * Sends periodic heartbeats while viewing, automatically expires after 30 seconds of inactivity
  */
 export const useViewerTracking = (matchId: string | undefined) => {
-  const sessionIdRef = useRef(generateSessionId());
+  const sessionIdRef = useRef(getOrCreateSessionId());
   
   useEffect(() => {
     if (!matchId) return;
