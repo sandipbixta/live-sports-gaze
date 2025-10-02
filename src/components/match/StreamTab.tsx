@@ -8,6 +8,7 @@ import MatchCard from '@/components/MatchCard';
 import Advertisement from '@/components/Advertisement';
 import MatchDetails from '@/components/MatchDetails';
 import { Match as MatchType, Stream } from '@/types/sports';
+import { ViewerCount } from '@/components/ViewerCount';
 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -126,6 +127,7 @@ const StreamTab = ({
         onSourceChange={handleSourceChange}
         streamId={streamId}
         allStreams={allStreams}
+        viewerCount={<ViewerCount matchId={match.id} />}
       />
       
       {/* Match Details Below Stream Links */}

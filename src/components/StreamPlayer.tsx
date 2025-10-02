@@ -53,13 +53,6 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         onTheaterModeToggle={onTheaterModeToggle}
       />
       
-      {/* Viewer Count Below Player */}
-      {match && !isTheaterMode && (
-        <div className="mt-3 px-2">
-          <ViewerCount matchId={match.id} />
-        </div>
-      )}
-      
       {/* Match Details Below Player */}
       {showMatchDetails && match && !isTheaterMode && (
         <div className="mt-4 px-4">

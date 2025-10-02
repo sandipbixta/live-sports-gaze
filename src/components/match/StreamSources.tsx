@@ -11,6 +11,7 @@ interface StreamSourcesProps {
   onSourceChange: (source: string, id: string, streamNo?: number) => void;
   streamId: string;
   allStreams?: Record<string, Stream[]>;
+  viewerCount?: React.ReactNode;
 }
 
 const StreamSources = ({ 
@@ -18,7 +19,8 @@ const StreamSources = ({
   activeSource, 
   onSourceChange, 
   streamId,
-  allStreams = {} 
+  allStreams = {},
+  viewerCount
 }: StreamSourcesProps) => {
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
@@ -134,10 +136,16 @@ const StreamSources = ({
     );
   }
 
-  // Simple layout: show stream buttons like HTML code
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-semibold text-white mb-4">Stream Links</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+        {viewerCount !== undefined && (
+          <div className="flex items-center gap-2 text-foreground">
+            {viewerCount}
+          </div>
+        )}
+      </div>
       
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.map(({ stream, sourceKey, index }) => {

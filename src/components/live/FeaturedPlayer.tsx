@@ -7,6 +7,7 @@ import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
+import { ViewerCount } from '../ViewerCount';
 
 interface FeaturedPlayerProps {
   loading: boolean;
@@ -106,6 +107,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
             activeSource={activeSource}
             onSourceChange={onSourceChange}
             streamId={featuredMatch.id}
+            viewerCount={isLive ? <ViewerCount matchId={featuredMatch.id} /> : undefined}
           />
         </div>
       )}
