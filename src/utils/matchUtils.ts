@@ -171,25 +171,35 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
 export const isMatchLive = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
-  const fourHoursInMs = 4 * 60 * 60 * 1000;
-  const fiveMinutesBeforeMs = 5 * 60 * 1000; // Changed from 1 hour to 5 minutes
+  const fiveMinutesBeforeMs = 5 * 60 * 1000;
+  
+  // Cricket matches (especially test matches) can last up to 5 days
+  const isCricket = match.category === 'cricket' || match.sportId === 'cricket';
+  const liveWindowMs = isCricket 
+    ? 7 * 24 * 60 * 60 * 1000  // 7 days for cricket (test matches last 5 days)
+    : 4 * 60 * 60 * 1000;       // 4 hours for other sports
   
   // Match is live if:
   // 1. It has sources available
-  // 2. Current time is between 5 minutes before match time and 4 hours after match time
+  // 2. Current time is between 5 minutes before match time and live window after match time
   return match.sources && 
          match.sources.length > 0 && 
          now >= matchTime - fiveMinutesBeforeMs && 
-         now <= matchTime + fourHoursInMs;
+         now <= matchTime + liveWindowMs;
 };
 
 export const isMatchEnded = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
-  const fourHoursInMs = 4 * 60 * 60 * 1000;
   
-  // Match is ended if it's more than 4 hours past match time and not live
-  return now - matchTime > fourHoursInMs && !isMatchLive(match);
+  // Cricket matches can last up to 5 days, other sports typically 4 hours
+  const isCricket = match.category === 'cricket' || match.sportId === 'cricket';
+  const endedThresholdMs = isCricket 
+    ? 7 * 24 * 60 * 60 * 1000  // 7 days for cricket
+    : 4 * 60 * 60 * 1000;       // 4 hours for other sports
+  
+  // Match is ended if it's past the threshold and not live
+  return now - matchTime > endedThresholdMs && !isMatchLive(match);
 };
 
 export const filterActiveMatches = (matches: Match[]): Match[] => {
