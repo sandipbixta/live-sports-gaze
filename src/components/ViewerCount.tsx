@@ -27,6 +27,7 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
     if (!matchId) return;
 
     let mounted = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     // Fetch viewer count
     const fetchViewerCount = async () => {
@@ -47,9 +48,10 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
 
     // Set up real-time subscription only if enabled
     if (enableRealtime) {
-      const channelName = `viewer_sessions_${matchId}_${Date.now()}`;
+      // Use a simple, stable channel name per match
+      const channelName = `viewer_sessions:${matchId}`;
       
-      const channel = supabase
+      channel = supabase
         .channel(channelName)
         .on(
           'postgres_changes',
@@ -67,17 +69,13 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
           }
         )
         .subscribe();
-
-      return () => {
-        mounted = false;
-        channel.unsubscribe().then(() => {
-          supabase.removeChannel(channel);
-        });
-      };
     }
 
     return () => {
       mounted = false;
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [matchId, enableRealtime]);
 
