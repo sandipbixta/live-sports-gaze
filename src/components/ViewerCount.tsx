@@ -10,22 +10,29 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
   const [viewerCount, setViewerCount] = useState<number>(0);
 
   useEffect(() => {
+    if (!matchId) return;
+
+    let mounted = true;
+
     // Fetch initial viewer count
     const fetchViewerCount = async () => {
       const { data, error } = await supabase.rpc('get_viewer_count', {
         match_id_param: matchId
       });
       
-      if (!error && data !== null) {
+      if (!error && data !== null && mounted) {
         setViewerCount(data);
       }
     };
 
     fetchViewerCount();
 
+    // Create unique channel name with timestamp to avoid conflicts
+    const channelName = `match_viewers_${matchId}_${Date.now()}`;
+    
     // Subscribe to real-time updates
     const channel = supabase
-      .channel(`match_viewers_${matchId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -35,7 +42,7 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
           filter: `match_id=eq.${matchId}`
         },
         (payload: any) => {
-          if (payload.new?.viewer_count !== undefined) {
+          if (mounted && payload.new?.viewer_count !== undefined) {
             setViewerCount(payload.new.viewer_count);
           }
         }
@@ -43,7 +50,10 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      mounted = false;
+      channel.unsubscribe().then(() => {
+        supabase.removeChannel(channel);
+      });
     };
   }, [matchId]);
 
