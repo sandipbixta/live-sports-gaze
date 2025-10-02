@@ -139,7 +139,7 @@ const StreamSources = ({
   return (
     <div className="mt-3">
       {viewerCount !== undefined && (
-        <div className="flex justify-end mb-3">
+        <div className="flex justify-end mb-3 pr-2">
           {viewerCount}
         </div>
       )}
