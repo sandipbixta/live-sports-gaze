@@ -5,6 +5,8 @@ import { ManualMatch } from '../types/manualMatch';
 import SimpleVideoPlayer from './StreamPlayer/SimpleVideoPlayer';
 import StreamOptimizer from './StreamPlayer/StreamOptimizer';
 import MatchDetails from './MatchDetails';
+import { ViewerCount } from './ViewerCount';
+import { useViewerTracking } from '@/hooks/useViewerTracking';
 
 interface StreamPlayerProps {
   stream: Stream | null;
@@ -31,6 +33,9 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   match = null,
   showMatchDetails = true
 }) => {
+  // Track viewer for this match
+  useViewerTracking(match?.id);
+
   // Determine if match is live based on stream availability and match time
   const isLive = stream && match && (
     Date.now() - (typeof match.date === 'number' ? match.date : new Date(match.date).getTime()) > -30 * 60 * 1000 && // Started within last 30 minutes
@@ -47,6 +52,13 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={onTheaterModeToggle}
       />
+      
+      {/* Viewer Count Below Player */}
+      {match && !isTheaterMode && (
+        <div className="mt-4 px-4">
+          <ViewerCount matchId={match.id} />
+        </div>
+      )}
       
       {/* Match Details Below Player */}
       {showMatchDetails && match && !isTheaterMode && (
