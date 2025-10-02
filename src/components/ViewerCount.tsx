@@ -14,46 +14,25 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
 
     let mounted = true;
 
-    // Fetch initial viewer count
+    // Fetch viewer count once (no real-time subscription for match cards)
     const fetchViewerCount = async () => {
-      const { data, error } = await supabase.rpc('get_viewer_count', {
-        match_id_param: matchId
-      });
-      
-      if (!error && data !== null && mounted) {
-        setViewerCount(data);
+      try {
+        const { data, error } = await supabase.rpc('get_viewer_count', {
+          match_id_param: matchId
+        });
+        
+        if (!error && data !== null && mounted) {
+          setViewerCount(data);
+        }
+      } catch (error) {
+        console.error('Error fetching viewer count:', error);
       }
     };
 
     fetchViewerCount();
 
-    // Create unique channel name with timestamp to avoid conflicts
-    const channelName = `match_viewers_${matchId}_${Date.now()}`;
-    
-    // Subscribe to real-time updates
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'match_viewers',
-          filter: `match_id=eq.${matchId}`
-        },
-        (payload: any) => {
-          if (mounted && payload.new?.viewer_count !== undefined) {
-            setViewerCount(payload.new.viewer_count);
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       mounted = false;
-      channel.unsubscribe().then(() => {
-        supabase.removeChannel(channel);
-      });
     };
   }, [matchId]);
 
