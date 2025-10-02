@@ -10,6 +10,8 @@ import { useDirectLinkAd } from "./hooks/useDirectLinkAd";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
+import { AdBlockerWarning } from "./components/AdBlockerWarning";
+import { useAdBlockerDetection } from "./hooks/useAdBlockerDetection";
 
 // Import pages directly instead of lazy loading to avoid module import errors
 import Index from "./pages/Index";
@@ -39,6 +41,14 @@ const App: React.FC = () => {
   // Initialize ad hooks
   useDirectLinkAd();
   usePopunderAd();
+
+  // Detect ad blocker
+  const { isAdBlockerDetected, isChecking } = useAdBlockerDetection();
+
+  // Show ad blocker warning if detected
+  if (isAdBlockerDetected && !isChecking) {
+    return <AdBlockerWarning />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
