@@ -328,10 +328,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
           {/* Live status badge - bottom right */}
           {isLive && (
-            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
+            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 flex items-center gap-1.5">
               <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
                 LIVE
               </Badge>
+              <div className="sm:hidden">
+                <ViewerCount matchId={match.id} />
+              </div>
             </div>
           )}
 
@@ -378,8 +381,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {isLive && (
             <>
-              <span>•</span>
-              <ViewerCount matchId={match.id} />
+              <span className="hidden sm:inline">•</span>
+              <div className="hidden sm:block">
+                <ViewerCount matchId={match.id} />
+              </div>
             </>
           )}
         </div>
