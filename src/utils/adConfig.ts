@@ -27,12 +27,12 @@ export const adConfig = {
     containerId: 'container-a873bc1d3d203f2f13c32a99592441b8'
   },
   directLink: {
-    url: 'https://assumptiveslumber.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
+    url: 'https://temperweekly.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
     cooldownMinutes: 5,
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
-    scriptSrc: '//assumptiveslumber.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
+    scriptSrc: '//temperweekly.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
     cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3
