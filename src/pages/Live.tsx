@@ -11,6 +11,7 @@ import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
+import MatchDetails from '../components/MatchDetails';
 
 import { useLiveMatches } from '../hooks/useLiveMatches';
 import { useStreamPlayer } from '../hooks/useStreamPlayer';
@@ -329,6 +330,17 @@ const Live = () => {
           <Button className="mt-4 bg-[#9b87f5] hover:bg-[#8a75e8]">Browse Channels</Button>
         </div>
       </Link>
+      
+      {/* Match Details - Show at bottom if a match is selected */}
+      {featuredMatch && (
+        <div className="mt-8">
+          <MatchDetails 
+            match={featuredMatch}
+            isLive={featuredMatch.date ? Date.now() - featuredMatch.date > -30 * 60 * 1000 && Date.now() - featuredMatch.date < 3 * 60 * 60 * 1000 : false}
+            showCompact={false}
+          />
+        </div>
+      )}
       
       {/* Hidden SEO content for competitor targeting */}
       <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
