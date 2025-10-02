@@ -97,6 +97,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
         isLoading={streamLoading}
         onRetry={onStreamRetry}
         match={featuredMatch}
+        showMatchDetails={false}
       />
       
       {/* Stream Sources - only show if match has sources */}
