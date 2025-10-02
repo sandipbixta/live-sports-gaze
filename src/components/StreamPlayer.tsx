@@ -45,20 +45,22 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
   return (
     <>
       <StreamOptimizer stream={stream} />
-      <SimpleVideoPlayer 
-        stream={stream}
-        isLoading={isLoading}
-        onRetry={onRetry}
-        isTheaterMode={isTheaterMode}
-        onTheaterModeToggle={onTheaterModeToggle}
-      />
-      
-      {/* Viewer Count Below Player */}
-      {match && !isTheaterMode && (
-        <div className="mt-4 px-4">
-          <ViewerCount matchId={match.id} />
-        </div>
-      )}
+      <div className="relative">
+        <SimpleVideoPlayer 
+          stream={stream}
+          isLoading={isLoading}
+          onRetry={onRetry}
+          isTheaterMode={isTheaterMode}
+          onTheaterModeToggle={onTheaterModeToggle}
+        />
+        
+        {/* Viewer Count Overlay - Bottom Right */}
+        {match && !isTheaterMode && (
+          <div className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg">
+            <ViewerCount matchId={match.id} />
+          </div>
+        )}
+      </div>
       
       {/* Match Details Below Player */}
       {showMatchDetails && match && !isTheaterMode && (
