@@ -4,9 +4,10 @@ import { Users } from 'lucide-react';
 
 interface ViewerCountProps {
   matchId: string;
+  enableRealtime?: boolean;
 }
 
-export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
+export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtime = false }) => {
   const [viewerCount, setViewerCount] = useState<number>(0);
 
   useEffect(() => {
@@ -14,7 +15,7 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
 
     let mounted = true;
 
-    // Fetch viewer count once (no real-time subscription for match cards)
+    // Fetch viewer count
     const fetchViewerCount = async () => {
       try {
         const { data, error } = await supabase.rpc('get_viewer_count', {
@@ -31,10 +32,40 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId }) => {
 
     fetchViewerCount();
 
+    // Set up real-time subscription only if enabled
+    if (enableRealtime) {
+      const channelName = `match_viewers_${matchId}_${Date.now()}`;
+      
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'match_viewers',
+            filter: `match_id=eq.${matchId}`
+          },
+          (payload: any) => {
+            if (mounted && payload.new?.viewer_count !== undefined) {
+              setViewerCount(payload.new.viewer_count);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        mounted = false;
+        channel.unsubscribe().then(() => {
+          supabase.removeChannel(channel);
+        });
+      };
+    }
+
     return () => {
       mounted = false;
     };
-  }, [matchId]);
+  }, [matchId, enableRealtime]);
 
   // Don't show if 0 viewers
   if (viewerCount === 0) {

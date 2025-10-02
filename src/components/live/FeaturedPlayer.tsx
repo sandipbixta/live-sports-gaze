@@ -108,7 +108,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
             activeSource={activeSource}
             onSourceChange={onSourceChange}
             streamId={featuredMatch.id}
-            viewerCount={isLive ? <ViewerCount matchId={featuredMatch.id} /> : undefined}
+            viewerCount={isLive ? <ViewerCount matchId={featuredMatch.id} enableRealtime={true} /> : undefined}
           />
         </div>
       )}

@@ -127,7 +127,7 @@ const StreamTab = ({
         onSourceChange={handleSourceChange}
         streamId={streamId}
         allStreams={allStreams}
-        viewerCount={<ViewerCount matchId={match.id} />}
+        viewerCount={<ViewerCount matchId={match.id} enableRealtime={true} />}
       />
       
       {!loadingStream && (
