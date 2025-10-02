@@ -130,17 +130,6 @@ const StreamTab = ({
         viewerCount={<ViewerCount matchId={match.id} />}
       />
       
-      {/* Match Details Below Stream Links */}
-      {!isTheaterMode && (
-        <div className="mt-4 px-4">
-          <MatchDetails 
-            match={match}
-            isLive={isMatchLive()}
-            showCompact={false}
-          />
-        </div>
-      )}
-      
       {!loadingStream && (
         <div className="flex items-center justify-center gap-4 mt-4">
           <div className="flex items-center gap-3">
@@ -189,6 +178,17 @@ const StreamTab = ({
               />
             ))}
           </div>
+        </div>
+      )}
+      
+      {/* Match Details at Bottom */}
+      {!isTheaterMode && (
+        <div className="mt-8 px-4">
+          <MatchDetails 
+            match={match}
+            isLive={isMatchLive()}
+            showCompact={false}
+          />
         </div>
       )}
       
