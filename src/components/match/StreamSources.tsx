@@ -137,7 +137,7 @@ const StreamSources = ({
   }
 
   return (
-    <div className="mt-6">
+    <div className="mt-3">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
         {viewerCount !== undefined && (

@@ -5,10 +5,23 @@ import { Users } from 'lucide-react';
 interface ViewerCountProps {
   matchId: string;
   enableRealtime?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtime = false }) => {
+export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtime = false, size = 'sm' }) => {
   const [viewerCount, setViewerCount] = useState<number>(0);
+
+  const sizeClasses = {
+    sm: 'text-xs gap-1',
+    md: 'text-sm gap-2',
+    lg: 'text-base gap-2'
+  };
+
+  const iconSizes = {
+    sm: 'w-3 h-3',
+    md: 'w-4 h-4',
+    lg: 'w-5 h-5'
+  };
 
   useEffect(() => {
     if (!matchId) return;
@@ -73,8 +86,8 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
   }
 
   return (
-    <div className="flex items-center gap-1 text-xs text-foreground">
-      <Users className="w-3 h-3" />
+    <div className={`flex items-center ${sizeClasses[size]} text-foreground`}>
+      <Users className={iconSizes[size]} />
       <span className="font-semibold">{viewerCount.toLocaleString()}</span>
       <span className="hidden sm:inline">viewers</span>
     </div>
