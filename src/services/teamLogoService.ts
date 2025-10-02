@@ -1,5 +1,4 @@
 // Service to provide team and country logos for matches
-import { getStreamedImageUrl } from '../streamedApi';
 
 interface TeamLogoMapping {
   [key: string]: string;
@@ -97,7 +96,7 @@ class TeamLogoService {
     
     // First priority: Use official Streamed API badge if available
     if (teamBadge) {
-      return getStreamedImageUrl(`api/images/badge/${teamBadge}.webp`);
+      return `https://streamed.su/api/images/badge/${teamBadge}.webp`;
     }
     
     const normalized = this.normalizeTeamName(teamName);

@@ -20,10 +20,10 @@ const PerformanceOptimizer: React.FC = () => {
         document.head.appendChild(link);
       });
 
-      // Preload critical API endpoints (via VPS proxy)
+      // Preload critical API endpoints
       const criticalEndpoints = [
-        '/api/streamed/api/sports',
-        '/api/streamed/api/matches/live'
+        'https://streamed.pk/api/sports',
+        'https://streamed.pk/api/matches/live'
       ];
 
       criticalEndpoints.forEach(url => {
