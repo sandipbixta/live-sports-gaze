@@ -1,7 +1,7 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = 'https://damitv.pro/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
