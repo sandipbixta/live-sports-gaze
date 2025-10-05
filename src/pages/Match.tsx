@@ -12,7 +12,6 @@ import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
-import { getStreamedImageUrl } from '@/streamedApi';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -127,7 +126,7 @@ const Match = () => {
     if (match.poster && match.poster.trim() !== '') {
       const baseUrl = match.poster.startsWith('http') 
         ? match.poster 
-        : getStreamedImageUrl(`${match.poster}.webp`);
+        : `https://streamed.pk${match.poster}.webp`;
       return baseUrl + `?v=${Date.now()}`;
     }
     return 'https://i.imgur.com/m4nV9S8.png';

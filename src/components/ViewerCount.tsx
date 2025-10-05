@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Users } from 'lucide-react';
 
@@ -10,7 +10,6 @@ interface ViewerCountProps {
 
 export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtime = false, size = 'sm' }) => {
   const [viewerCount, setViewerCount] = useState<number>(0);
-  const componentIdRef = useRef(`${Math.random().toString(36).substr(2, 9)}`);
 
   const sizeClasses = {
     sm: 'text-xs gap-1',
@@ -28,7 +27,6 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
     if (!matchId) return;
 
     let mounted = true;
-    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     // Fetch viewer count
     const fetchViewerCount = async () => {
@@ -49,10 +47,9 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
 
     // Set up real-time subscription only if enabled
     if (enableRealtime) {
-      // Use a unique channel name per component instance to avoid conflicts
-      const channelName = `viewer_sessions:${matchId}:${componentIdRef.current}`;
+      const channelName = `viewer_sessions_${matchId}_${Date.now()}`;
       
-      channel = supabase
+      const channel = supabase
         .channel(channelName)
         .on(
           'postgres_changes',
@@ -70,13 +67,17 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
           }
         )
         .subscribe();
+
+      return () => {
+        mounted = false;
+        channel.unsubscribe().then(() => {
+          supabase.removeChannel(channel);
+        });
+      };
     }
 
     return () => {
       mounted = false;
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
     };
   }, [matchId, enableRealtime]);
 
