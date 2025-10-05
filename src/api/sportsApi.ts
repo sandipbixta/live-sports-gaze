@@ -1,7 +1,7 @@
 
 import { Sport, Match, Stream } from '../types/sports';
 
-const API_BASE = 'http://damitv.pro:3000/api';
+const API_BASE = 'https://damitv.pro/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -285,9 +285,9 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${API_BASE}/all-live-matches`, {
+    const response = await fetch(`${API_BASE}/matches/live`, {
       headers: {
-        'Accept': 'application/json'
+'Accept': 'application/json'
       }
     });
     
