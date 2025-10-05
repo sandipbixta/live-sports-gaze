@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
+import { getStreamedImageUrl } from '../streamedApi';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 import { ViewerCount } from './ViewerCount';
 
@@ -45,7 +46,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   // Get team badges with fallbacks
   const getTeamBadge = (team: any) => {
     if (team?.badge) {
-      return `https://streamed.pk/api/images/badge/${team.badge}.webp`;
+      return getStreamedImageUrl(`api/images/badge/${team.badge}.webp`);
     }
     // Try to get logo from team logo service
     const logoFromService = teamLogoService.getTeamLogo(team?.name || '', team?.badge);
@@ -66,7 +67,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     if (match.poster && match.poster.trim() !== '') {
       const posterUrl = match.poster.startsWith('http') 
         ? match.poster 
-        : `https://streamed.pk${match.poster}.webp`;
+        : getStreamedImageUrl(`${match.poster}.webp`);
       
       return (
         <div className="w-full h-full relative">

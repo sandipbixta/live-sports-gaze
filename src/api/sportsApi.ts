@@ -1,7 +1,8 @@
 
 import { Sport, Match, Stream } from '../types/sports';
+import { streamedFetch } from '../streamedApi';
 
-const API_BASE = 'https://damitv.pro/api';
+const API_BASE = '/api/streamed/api';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -72,10 +73,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
     // Filter and reorder sports
     const reorderedData = filterAndReorderSports(data);
     setCachedData(cacheKey, reorderedData);
-    console.log(`✅ Fetched ${reorderedData.length} sports from API`);
+    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
     return reorderedData;
   } catch (error) {
-    console.error('❌ Error fetching sports:', error);
+    console.error('❌ Error fetching sports from streamed.pk:', error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -198,7 +199,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches for sport ${sportId}:`, error);
+    console.error(`❌ Error fetching matches for sport ${sportId} via VPS proxy:`, error);
     
     // On mobile, try one more time with a simpler request
     if (isMobile && !error.message.includes('retry')) {
@@ -312,10 +313,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from API`);
+    console.log(`✅ Fetched ${validMatches.length} live matches via VPS proxy`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching live matches:', error);
+    console.error('❌ Error fetching live matches via VPS proxy:', error);
     throw error;
   }
 };
@@ -353,10 +354,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     });
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from API`);
+    console.log(`✅ Fetched ${validMatches.length} matches via VPS proxy`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching all matches:', error);
+    console.error('❌ Error fetching all matches via VPS proxy:', error);
     throw error;
   }
 };
@@ -493,18 +494,42 @@ export const fetchStream_legacy = async (source: string, id: string, streamNo?: 
   if (cached) return cached;
 
   try {
-    console.log(`📡 Fetching stream: source=${source}, id=${id}, streamNo=${streamNo}`);
+    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json'
-      },
-      cache: 'no-store',
-    });
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
+    const pkUrl = `${API_BASE}/stream/${source}/${id}`;
+
+    let response: Response | null = null;
+
+    if (isMobile) {
+      try {
+        console.log('📡 Trying streamed.su for stream (mobile first)...');
+        response = await fetch(suUrl, {
+          signal: controller.signal,
+          headers: {
+'Accept': 'application/json'
+          },
+          cache: 'no-store',
+        });
+      } catch (e) {
+        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
+      }
+    }
+
+    if (!response || !response.ok) {
+      console.log('↩️ Falling back to streamed.pk for stream...');
+      response = await fetch(pkUrl, {
+        signal: controller.signal,
+        headers: {
+'Accept': 'application/json'
+        },
+        cache: 'no-store',
+      });
+    }
     
     clearTimeout(timeoutId);
     
