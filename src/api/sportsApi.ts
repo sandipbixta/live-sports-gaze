@@ -285,7 +285,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${API_BASE}/football-streams`, {
+    const response = await fetch(`${API_BASE}/all-live-matches`, {
       headers: {
         'Accept': 'application/json'
       }
