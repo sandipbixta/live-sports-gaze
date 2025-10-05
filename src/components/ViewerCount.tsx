@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Users } from 'lucide-react';
 
@@ -10,6 +10,7 @@ interface ViewerCountProps {
 
 export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtime = false, size = 'sm' }) => {
   const [viewerCount, setViewerCount] = useState<number>(0);
+  const componentIdRef = useRef(`${Math.random().toString(36).substr(2, 9)}`);
 
   const sizeClasses = {
     sm: 'text-xs gap-1',
@@ -48,8 +49,8 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
 
     // Set up real-time subscription only if enabled
     if (enableRealtime) {
-      // Use a simple, stable channel name per match
-      const channelName = `viewer_sessions:${matchId}`;
+      // Use a unique channel name per component instance to avoid conflicts
+      const channelName = `viewer_sessions:${matchId}:${componentIdRef.current}`;
       
       channel = supabase
         .channel(channelName)
