@@ -5,7 +5,7 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatche
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
-import { Eye } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 interface AllSportsLiveMatchesProps {
   searchTerm?: string;
@@ -179,8 +179,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       {mostViewedMatches.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Eye className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-bold text-white">Most Viewed Matches</h3>
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-bold text-white">Popular by Viewer</h3>
             <span className="text-sm text-gray-400">Live across all sports</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
