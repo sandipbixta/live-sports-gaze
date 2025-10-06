@@ -7,7 +7,6 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
-import LiveSportsWidget from '../components/LiveSportsWidget';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
@@ -36,7 +35,6 @@ const Index = () => {
   const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showLiveSports, setShowLiveSports] = useState(false);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
@@ -224,14 +222,6 @@ const Index = () => {
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                className="text-foreground border-border hover:bg-muted bg-background"
-                onClick={() => setShowLiveSports(!showLiveSports)}
-              >
-                <Tv className="mr-2 h-4 w-4" /> 
-                {showLiveSports ? 'Hide Live Sports' : 'Live Sports'}
-              </Button>
               <Link to="/schedule">
                 <Button variant="outline" className="text-foreground border-border hover:bg-muted bg-background">
                   <Calendar className="mr-2 h-4 w-4" /> View Schedule
@@ -240,28 +230,17 @@ const Index = () => {
             </div>
           </div>
           
-          {showLiveSports ? (
-            <div className="mb-8">
-              <h4 className="text-xl font-bold text-foreground mb-4">Live Sports Streams</h4>
-              <LiveSportsWidget />
-            </div>
-          ) : (
-            <SportsList 
-              sports={sports}
-              onSelectSport={handleSelectSport}
-              selectedSport={selectedSport}
-              isLoading={loadingSports}
-            />
-          )}
+          <SportsList 
+            sports={sports}
+            onSelectSport={handleSelectSport}
+            selectedSport={selectedSport}
+            isLoading={loadingSports}
+          />
         </div>
         
-        {!showLiveSports && (
-          <>
-            
-            
-            <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
-              <FeaturedChannels />
-            </React.Suspense>
+        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+          <FeaturedChannels />
+        </React.Suspense>
             
             <Separator className="my-8 bg-[#343a4d]" />
             
@@ -389,11 +368,9 @@ const Index = () => {
                       Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV provides comprehensive sports entertainment.
                     </p>
                   </div>
-                </div>
-              </div>
-            </section>
-          </>
-        )}
+            </div>
+          </div>
+        </section>
       </main>
     </PageLayout>
   );
