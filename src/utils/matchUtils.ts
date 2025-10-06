@@ -57,21 +57,29 @@ export const consolidateMatches = (matches: Match[]): Match[] => {
   return Array.from(matchMap.values());
 };
 
+// Filter matches that have stream sources available
+export const filterMatchesWithSources = (matches: Match[]): Match[] => {
+  return matches.filter(match => {
+    // Must have sources array with at least one source
+    const hasSources = match.sources && Array.isArray(match.sources) && match.sources.length > 0;
+    
+    if (!hasSources) {
+      console.log('🚫 Filtered out match without sources:', match.title);
+    }
+    
+    return hasSources;
+  });
+};
+
 export const filterCleanMatches = (matches: Match[]): Match[] => {
   return matches.filter(match => {
     const title = match.title?.toLowerCase() || '';
     const id = match.id?.toLowerCase() || '';
     
-    // Debug logging for India vs West Indies match
-    if (title.includes('india') && title.includes('west')) {
-      console.log('🔍 Found India vs West Indies match:', {
-        title: match.title,
-        id: match.id,
-        date: match.date,
-        sources: match.sources?.length || 0,
-        category: match.category,
-        sportId: match.sportId
-      });
+    // CRITICAL: Must have stream sources
+    const hasSources = match.sources && Array.isArray(match.sources) && match.sources.length > 0;
+    if (!hasSources) {
+      return false;
     }
     
     // Filter out unwanted football leagues/countries for football matches
@@ -135,7 +143,6 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
     // Minimum quality requirements
     const hasValidTitle = match.title && match.title.length > 3;
     const hasValidDate = match.date;
-    const hasMinimumSources = match.sources && match.sources.length > 0;
     
     // Filter out matches with suspicious titles (too short, all caps, weird characters)
     const isSuspiciousTitle = !match.title || 
@@ -145,26 +152,10 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
       match.title.includes('???') ||
       match.title.includes('***');
     
-    const isValid = !hasUnwantedContent && 
-                    hasValidTitle && 
-                    hasValidDate && 
-                    hasMinimumSources &&
-                    !isSuspiciousTitle;
-    
-    // Debug logging for India vs West Indies match
-    if (title.includes('india') && title.includes('west')) {
-      console.log('🔍 India vs West Indies filtering:', {
-        isValid,
-        hasUnwantedContent,
-        hasValidTitle,
-        hasValidDate,
-        hasMinimumSources,
-        isSuspiciousTitle,
-        title: match.title
-      });
-    }
-    
-    return isValid;
+    return !hasUnwantedContent && 
+           hasValidTitle && 
+           hasValidDate && 
+           !isSuspiciousTitle;
   });
 };
 

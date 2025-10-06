@@ -25,10 +25,14 @@ const MatchesList: React.FC<MatchesListProps> = ({
   const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
   const [isEnriching, setIsEnriching] = React.useState(false);
 
-  // Filter out advertisement matches and ended matches, then consolidate duplicates
+  // Filter out matches without sources, advertisements, and ended matches, then consolidate duplicates
   // Use useMemo to prevent infinite loop - only recalculate when matches change
   const consolidatedMatches = React.useMemo(() => {
-    const cleanMatches = filterActiveMatches(filterCleanMatches(matches));
+    // First filter: only matches with stream sources
+    const matchesWithSources = matches.filter(m => m.sources && m.sources.length > 0);
+    // Second filter: clean and active matches
+    const cleanMatches = filterActiveMatches(filterCleanMatches(matchesWithSources));
+    // Third: consolidate duplicates
     return consolidateMatches(cleanMatches);
   }, [matches]);
 
