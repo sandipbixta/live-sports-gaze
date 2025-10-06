@@ -4,6 +4,7 @@ import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
 import { Loader, Play } from 'lucide-react';
+import ConnectionIndicator from '@/components/ConnectionIndicator';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -138,13 +139,16 @@ const StreamSources = ({
 
   return (
     <div className="mt-3">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-        {viewerCount !== undefined && (
-          <div className="flex items-center">
-            {viewerCount}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          <ConnectionIndicator showDetails={true} />
+          {viewerCount !== undefined && (
+            <div className="flex items-center">
+              {viewerCount}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="flex flex-wrap gap-3">
