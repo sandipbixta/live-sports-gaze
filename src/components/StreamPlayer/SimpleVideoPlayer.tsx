@@ -5,6 +5,8 @@ import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
+import ConnectionIndicator from '../ConnectionIndicator';
+import BufferIndicator from '../BufferIndicator';
 import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange, detectGeographicLatency } from '../../utils/connectionOptimizer';
 
 
@@ -37,6 +39,9 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [availableQualities, setAvailableQualities] = useState<Array<{ width: number; height: number; bitrate: number }>>([]);
   const [connectionInfo, setConnectionInfo] = useState(() => getConnectionInfo());
   const [measuredLatency, setMeasuredLatency] = useState<number | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [autoDowngradeAttempted, setAutoDowngradeAttempted] = useState(false);
+  const bufferStallCountRef = useRef(0);
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isCasting = detectCasting();
@@ -46,6 +51,8 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     if (stream?.embedUrl && stream.embedUrl !== lastStreamUrl) {
       setError(false);
       setErrorCount(0);
+      setAutoDowngradeAttempted(false);
+      bufferStallCountRef.current = 0;
       setLastStreamUrl(stream.embedUrl);
       console.log('🎬 New stream loaded, resetting error state');
     }
@@ -231,9 +238,37 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         }
       });
 
-      // Monitor buffer health
+      // Monitor buffer health and auto-adjust quality on stalls
       hls.on(Hls.Events.BUFFER_CREATED, () => {
         console.log('✅ HLS buffers created successfully');
+      });
+
+      // Detect buffering/waiting states
+      hls.on(Hls.Events.BUFFER_APPENDING, () => {
+        setIsBuffering(false);
+      });
+
+      hls.on(Hls.Events.BUFFER_CODECS, () => {
+        setIsBuffering(false);
+      });
+
+      // Monitor buffer stalls through error event
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.details === Hls.ErrorDetails.BUFFER_STALLED_ERROR) {
+          bufferStallCountRef.current++;
+          console.warn(`⚠️ Buffer stall detected (count: ${bufferStallCountRef.current})`);
+          
+          if (bufferStallCountRef.current >= 3 && !autoDowngradeAttempted && hls.currentLevel > 0) {
+            console.log('📉 Auto-downgrading quality due to persistent buffering');
+            const newLevel = Math.max(0, hls.currentLevel - 1);
+            hls.currentLevel = newLevel;
+            setCurrentQuality(newLevel);
+            setAutoDowngradeAttempted(true);
+            
+            // Reset counter after downgrade
+            bufferStallCountRef.current = 0;
+          }
+        }
       });
 
       // Track quality changes
@@ -333,10 +368,22 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           crossOrigin="anonymous"
           onError={handleError}
           onLoadStart={() => console.log('Video load started')}
-          onCanPlay={() => console.log('Video can play')}
-          onPlaying={() => console.log('Video playing')}
-          onWaiting={() => console.log('Video buffering...')}
-          onLoadedData={() => console.log('Video data loaded')}
+          onCanPlay={() => {
+            console.log('Video can play');
+            setIsBuffering(false);
+          }}
+          onPlaying={() => {
+            console.log('Video playing');
+            setIsBuffering(false);
+          }}
+          onWaiting={() => {
+            console.log('Video buffering...');
+            setIsBuffering(true);
+          }}
+          onLoadedData={() => {
+            console.log('Video data loaded');
+            setIsBuffering(false);
+          }}
           onProgress={() => console.log('Video buffering progress')}
           style={{ 
             backgroundColor: 'black',
@@ -393,6 +440,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           <Maximize className="w-4 h-4" />
         </Button>
       </div>
+
+      {/* Connection Indicator - bottom left */}
+      <div className="absolute bottom-4 left-4">
+        <ConnectionIndicator />
+      </div>
+
+      {/* Buffer Indicator - center overlay */}
+      <BufferIndicator isBuffering={isBuffering} />
 
       </div>
       
