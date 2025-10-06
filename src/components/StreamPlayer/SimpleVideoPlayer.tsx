@@ -5,7 +5,6 @@ import { Button } from '../ui/button';
 import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
-import ConnectionIndicator from '../ConnectionIndicator';
 import BufferIndicator from '../BufferIndicator';
 import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange, detectGeographicLatency } from '../../utils/connectionOptimizer';
 
@@ -439,11 +438,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         >
           <Maximize className="w-4 h-4" />
         </Button>
-      </div>
-
-      {/* Connection Indicator - bottom left */}
-      <div className="absolute bottom-4 left-4">
-        <ConnectionIndicator />
       </div>
 
       {/* Buffer Indicator - center overlay */}
