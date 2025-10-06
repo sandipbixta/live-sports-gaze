@@ -340,7 +340,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
               <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm flex items-center gap-1">
                 <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span className="hidden xs:inline">{match.sources.length}</span>
+                <span className="hidden xs:inline">{match.sources.length}+ sources</span>
               </Badge>
             </div>
           )}
@@ -371,7 +371,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <span>•</span>
               <div className="flex items-center gap-1">
                 <Users className="w-3 h-3" />
-                {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
+                {match.sources.length}+ sources
               </div>
             </>
           )}
