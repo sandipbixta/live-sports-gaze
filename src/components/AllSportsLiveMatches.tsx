@@ -54,10 +54,11 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           return acc;
         }, {} as Record<string, number>));
         
-        // Enrich all matches with viewer counts and get top viewed
+        // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
         const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        setMostViewedMatches(sortedByViewers.slice(0, 12));
+        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+        setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
       } catch (error) {
         console.error('Error loading matches:', error);
