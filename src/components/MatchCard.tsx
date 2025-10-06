@@ -312,96 +312,84 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer hover-lift">
-      {/* Thumbnail Section with modern card styling */}
-      <div className="relative mb-3 card-modern overflow-hidden">
-        <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-2xl bg-gradient-dark">
+    <div className="group cursor-pointer">
+      {/* Thumbnail Section */}
+      <div className="relative mb-3">
+        <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">
           {generateThumbnail()}
           
-          {/* Time badge - bottom left with glass effect */}
-          <div className="absolute bottom-2 left-2">
-            <Badge className="glass text-foreground px-2 py-1 text-xs font-medium border-0">
-              <Clock className="w-3 h-3 mr-1" />
+          {/* Time badge - bottom left (smaller) */}
+          <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2">
+            <Badge className="bg-background/80 text-foreground px-1 py-0.5 text-[9px] font-normal backdrop-blur-sm">
+              <Clock className="w-2.5 h-2.5 mr-0.5" />
               {match.date ? formatTime(match.date) : 'TBD'}
             </Badge>
           </div>
 
-          {/* Live status badge - bottom right with glow */}
+          {/* Live status badge - bottom right */}
           {isLive && (
-            <div className="absolute bottom-2 right-2">
-              <Badge className="bg-gradient-to-r from-destructive to-destructive/80 text-white px-3 py-1.5 text-xs font-bold animate-glow-pulse border-0">
-                🔴 LIVE
+            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
+              <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
+                LIVE
               </Badge>
             </div>
           )}
 
-          {/* Stream count overlay with gradient */}
+          {/* Stream count overlay */}
           {hasStream && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-gradient-to-r from-primary to-primary-glow text-white px-2.5 py-1 text-xs font-semibold backdrop-blur-sm flex items-center gap-1.5 border-0">
-                <Play className="w-3 h-3" fill="currentColor" />
-                <span>{match.sources.length}</span>
-              </Badge>
-            </div>
-          )}
-          
-          {/* Priority badge for trending matches */}
-          {isPriority && (
-            <div className="absolute top-2 right-2">
-              <Badge className="bg-gradient-secondary text-white px-2 py-1 text-xs font-semibold border-0">
-                ⭐ Trending
+            <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
+              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm flex items-center gap-1">
+                <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                <span className="hidden xs:inline">{match.sources.length}</span>
               </Badge>
             </div>
           )}
         </AspectRatio>
       </div>
 
-      {/* Content Section with improved spacing */}
-      <div className="space-y-2.5 px-1">
-        {/* Title with gradient on hover */}
-        <h3 className="font-display font-semibold text-base line-clamp-2 text-foreground group-hover:gradient-text transition-all duration-300">
+      {/* Content Section */}
+      <div className="space-y-2">
+        {/* Title */}
+        <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
           {home && away ? `${home} vs ${away}` : match.title}
         </h3>
         
         {/* Subtitle */}
-        <p className="text-xs text-muted-foreground/70 line-clamp-1 font-medium">
+        <p className="text-xs text-muted-foreground/80 line-clamp-1">
           {home && away ? `${home} vs ${away}` : match.title} on damitv.pro
         </p>
 
-        {/* Metadata with icons */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-primary" />
+        {/* Metadata */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
             {match.date ? formatFullDate(match.date) : 'Date TBD'}
           </div>
           
           {hasStream && (
             <>
-              <span className="text-border">•</span>
-              <div className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-accent" />
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
                 {match.sources.length} stream{match.sources.length > 1 ? 's' : ''}
               </div>
             </>
           )}
         </div>
 
-        {/* Status indicator with better styling */}
-        <div className="text-xs flex items-center gap-2.5 pt-1">
+        {/* Status indicator */}
+        <div className="text-xs flex items-center gap-2">
           {isLive ? (
             <>
-              <span className="text-destructive font-semibold flex items-center gap-1">
-                <span className="w-2 h-2 bg-destructive rounded-full animate-pulse"></span>
-                Live now
-              </span>
+              <span className="text-destructive font-medium">Live now</span>
               <ViewerCount matchId={match.id} enableRealtime={true} />
             </>
           ) : match.date ? (
-            <span className="text-muted-foreground font-medium">
-              {match.date > Date.now() ? '📅 Upcoming' : '🏁 Ended'}
+            <span className="text-muted-foreground">
+              {match.date > Date.now() ? 'Upcoming' : 'Ended'}
             </span>
           ) : (
-            <span className="text-muted-foreground font-medium">📋 Scheduled</span>
+            <span className="text-muted-foreground">Scheduled</span>
           )}
         </div>
       </div>
