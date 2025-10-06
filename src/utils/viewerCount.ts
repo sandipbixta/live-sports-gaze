@@ -1,34 +1,52 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Match } from '../types/sports';
 
+// Cache for viewer counts to reduce API calls
+const viewerCountCache = new Map<string, { count: number; timestamp: number }>();
+const CACHE_DURATION = 5000; // 5 seconds cache
+
 export const fetchMatchViewerCounts = async (matchIds: string[]): Promise<Map<string, number>> => {
   const viewerCounts = new Map<string, number>();
+  const now = Date.now();
+  const idsToFetch: string[] = [];
   
-  try {
-    // Fetch viewer counts for all matches at once
-    const { data, error } = await supabase
-      .rpc('get_viewer_count', { match_id_param: 'batch' });
-    
-    if (error) {
-      console.error('Error fetching viewer counts:', error);
-      return viewerCounts;
+  // Check cache first
+  matchIds.forEach(matchId => {
+    const cached = viewerCountCache.get(matchId);
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+      viewerCounts.set(matchId, cached.count);
+    } else {
+      idsToFetch.push(matchId);
     }
+  });
 
-    // For now, use a simplified approach - get individual counts
-    const promises = matchIds.map(async (matchId) => {
-      try {
-        const { data: count, error: countError } = await supabase
-          .rpc('get_viewer_count', { match_id_param: matchId });
-        
-        if (!countError && count !== null) {
-          viewerCounts.set(matchId, count);
+  // Only fetch uncached IDs
+  if (idsToFetch.length === 0) {
+    return viewerCounts;
+  }
+
+  try {
+    // Batch requests in groups of 10 to avoid overwhelming the server
+    const batchSize = 10;
+    for (let i = 0; i < idsToFetch.length; i += batchSize) {
+      const batch = idsToFetch.slice(i, i + batchSize);
+      
+      const promises = batch.map(async (matchId) => {
+        try {
+          const { data: count, error: countError } = await supabase
+            .rpc('get_viewer_count', { match_id_param: matchId });
+          
+          if (!countError && count !== null) {
+            viewerCounts.set(matchId, count);
+            viewerCountCache.set(matchId, { count, timestamp: now });
+          }
+        } catch (err) {
+          console.error(`Error fetching viewer count for match ${matchId}:`, err);
         }
-      } catch (err) {
-        console.error(`Error fetching viewer count for match ${matchId}:`, err);
-      }
-    });
+      });
 
-    await Promise.all(promises);
+      await Promise.all(promises);
+    }
   } catch (error) {
     console.error('Error in fetchMatchViewerCounts:', error);
   }
