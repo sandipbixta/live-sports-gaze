@@ -96,41 +96,41 @@ const PlayerControls: React.FC<PlayerControlsProps> = ({
   return (
     <>
       {/* Back button */}
-      <div className="absolute top-2 left-2 z-30">
+      <div className="absolute top-3 left-3 z-30">
         <Button
           variant="ghost"
           size="sm"
-          className="bg-black/50 hover:bg-black/70 rounded-full h-10 w-10 p-0 touch-manipulation"
+          className="bg-gradient-to-br from-primary/90 to-primary/70 hover:from-primary hover:to-primary/90 backdrop-blur-sm rounded-xl h-11 w-11 p-0 touch-manipulation transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
           onClick={onGoBack}
         >
-          <ArrowLeft className="h-5 w-5 text-white" />
+          <ArrowLeft className="h-5 w-5 text-white drop-shadow" />
         </Button>
       </div>
       
       {/* Controls overlay */}
       <div className={cn(
-        "absolute top-2 right-2 sm:top-4 sm:right-4 transition-opacity flex gap-2",
+        "absolute top-3 right-3 sm:top-4 sm:right-4 transition-all duration-200 flex gap-2.5",
         isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
       )}>
         <button 
           onClick={handleFullscreen}
-          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors touch-manipulation"
+          className="bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-md border border-border/50 hover:border-primary/50 text-white p-2 sm:p-2.5 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl touch-manipulation group/btn"
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
           aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
           {isFullscreen ? 
-            <Minimize className="h-4 w-4 sm:h-5 sm:w-5" /> : 
-            <Maximize className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Minimize className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover/btn:rotate-90 duration-300" /> : 
+            <Maximize className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover/btn:scale-110 duration-300" />
           }
         </button>
         
         <button 
           onClick={onOpenInNewTab}
-          className="bg-black/50 hover:bg-black/70 text-white p-1.5 sm:p-2 rounded-full transition-colors touch-manipulation"
+          className="bg-gradient-to-br from-background/90 to-background/70 backdrop-blur-md border border-border/50 hover:border-primary/50 text-white p-2 sm:p-2.5 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl touch-manipulation group/btn"
           title="Open stream in new tab"
           aria-label="Open stream in new tab"
         >
-          <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5" />
+          <ExternalLink className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 duration-300" />
         </button>
       </div>
     </>
