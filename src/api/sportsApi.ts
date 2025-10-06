@@ -133,7 +133,7 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       throw new Error('Invalid matches data format');
     }
     
-    // Transform API matches to our format and filter by actual sport category
+    // Simple transform - no filtering
     const validMatches = matches.filter(match => 
       match && 
       match.id && 
@@ -142,57 +142,9 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
       Array.isArray(match.sources)
     ).map(match => ({
       ...match,
-      sportId: match.category || sportId, // Map category to sportId for compatibility
+      sportId: match.category || sportId,
       category: match.category || sportId
-    }))
-    // Filter matches to only include ones that actually belong to the requested sport
-    .filter(match => {
-      const matchCategory = (match.category || match.sportId || '').toLowerCase();
-      const requestedSport = sportId.toLowerCase();
-      
-      // If requesting 'all', include everything
-      if (requestedSport === 'all') {
-        return true;
-      }
-      
-      // Exact match first
-      if (matchCategory === requestedSport) {
-        return true;
-      }
-      
-      // Create comprehensive sport mapping to handle API inconsistencies
-      // Excluded: golf, hockey, billiards
-      const sportMapping: { [key: string]: string[] } = {
-        'football': ['football', 'soccer'],
-        'basketball': ['basketball', 'basket'],
-        'tennis': ['tennis'],
-        'baseball': ['baseball'],
-        'american-football': ['american-football', 'nfl', 'american football'],
-        'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
-        'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
-        'rugby': ['rugby'],
-        'cricket': ['cricket'],
-        'afl': ['afl', 'australian football'],
-        'other': ['other']
-      };
-      
-      const allowedCategories = sportMapping[requestedSport] || [requestedSport];
-      
-      // Check if the match category contains any of the allowed terms
-      const isMatch = allowedCategories.some(cat => {
-        const categoryLower = cat.toLowerCase();
-        return matchCategory.includes(categoryLower) || categoryLower.includes(matchCategory);
-      });
-      
-      // Debug logging for problematic sports
-      if (['football', 'basketball', 'baseball', 'billiards', 'cricket', 'fight', 'golf', 'hockey', 'afl', 'american-football'].includes(requestedSport)) {
-        if (!isMatch) {
-          console.log(`🚫 Filtered out: "${match.title}" (category: "${matchCategory}") for sport: "${requestedSport}"`);
-        }
-      }
-      
-      return isMatch;
-    });
+    }));
     
     setCachedData(cacheKey, validMatches);
     console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
@@ -303,13 +255,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     ).map(match => ({
       ...match,
       sportId: match.category
-    }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
-    .filter(match => {
-      const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
-      return !excludedSports.includes(sportCategory);
-    });
+    }));
     
     setCachedData(cacheKey, validMatches);
     console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
@@ -344,13 +290,7 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     ).map(match => ({
       ...match,
       sportId: match.category
-    }))
-    // Filter out excluded sports: golf, hockey, billiards, darts
-    .filter(match => {
-      const sportCategory = (match.sportId || match.category || '').toLowerCase();
-      const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
-      return !excludedSports.includes(sportCategory);
-    });
+    }));
     
     setCachedData(cacheKey, validMatches);
     console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
@@ -425,7 +365,7 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
       return [];
     }
 
-    // Process and validate streams
+    // Process streams - no filtering
     const validStreams: Stream[] = streams
       .map((stream: any, index: number) => ({
         id: stream.id || `stream-${index}`,
@@ -436,7 +376,7 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
         source: source,
         timestamp: Date.now()
       }))
-      .filter(stream => stream.embedUrl && isValidStreamUrl(stream.embedUrl));
+      .filter(stream => stream.embedUrl); // Only check if URL exists
 
     // Cache the results
     setCachedData(cacheKey, validStreams);
@@ -640,13 +580,9 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
   return allStreams;
 };
 
-// Helper function to check if URL is valid
+// Simple URL check - no blocking
 function isValidStreamUrl(url: string): boolean {
-  if (!url || typeof url !== 'string') return false;
-  const startsOk = url.startsWith('http') || url.startsWith('//');
-  if (!startsOk) return false;
-  const invalidDomains = ['youtube.com', 'youtu.be', 'demo', 'example.com', 'localhost'];
-  return !invalidDomains.some(domain => url.toLowerCase().includes(domain));
+  return !!(url && typeof url === 'string');
 }
 
 // Export alias for backward compatibility

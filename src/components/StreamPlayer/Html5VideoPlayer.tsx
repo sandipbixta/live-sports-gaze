@@ -134,7 +134,7 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
         controls={false}
         autoPlay
         playsInline
-        preload="metadata"
+        preload="auto"
         crossOrigin="anonymous"
         onLoadedData={handleLoadedData}
         onError={handleError}
@@ -146,9 +146,6 @@ const Html5VideoPlayer: React.FC<Html5VideoPlayerProps> = ({ src, onLoad, onErro
             setIsMuted(videoRef.current.muted);
           }
         }}
-        onWaiting={() => console.log('⏳ Video buffering...')}
-        onCanPlay={() => console.log('✅ Video can play')}
-        onStalled={() => console.log('⚠️ Video stalled')}
       />
 
       {/* Always Visible DAMITV Home Button - Top Center */}
