@@ -22,9 +22,11 @@ const PopularGames: React.FC<PopularGamesProps> = ({
   const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   
-  // Filter out advertisement matches and excluded IDs, then consolidate duplicates properly
+  // Filter out matches without sources, advertisements, and excluded IDs, then consolidate
   const cleanMatches = filterCleanMatches(
-    popularMatches.filter(match => !excludeMatchIds.includes(match.id))
+    popularMatches
+      .filter(match => match.sources && match.sources.length > 0) // CRITICAL: Must have sources
+      .filter(match => !excludeMatchIds.includes(match.id))
   );
   
   // Consolidate matches (merges duplicate matches with their stream sources)

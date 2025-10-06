@@ -28,12 +28,14 @@ const MatchesList: React.FC<MatchesListProps> = ({
   // Filter out matches without sources, advertisements, and ended matches, then consolidate duplicates
   // Use useMemo to prevent infinite loop - only recalculate when matches change
   const consolidatedMatches = React.useMemo(() => {
-    // First filter: only matches with stream sources
+    // CRITICAL: First filter - MUST have stream sources
     const matchesWithSources = matches.filter(m => m.sources && m.sources.length > 0);
     // Second filter: clean and active matches
     const cleanMatches = filterActiveMatches(filterCleanMatches(matchesWithSources));
     // Third: consolidate duplicates
-    return consolidateMatches(cleanMatches);
+    const consolidated = consolidateMatches(cleanMatches);
+    console.log(`📊 MatchesList: ${matches.length} → ${matchesWithSources.length} (with sources) → ${consolidated.length} (final)`);
+    return consolidated;
   }, [matches]);
 
   // Enrich matches with viewer counts and sort by viewers

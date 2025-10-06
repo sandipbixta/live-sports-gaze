@@ -33,13 +33,17 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         
         setSports(sportsData);
         
-        // Filter and consolidate live matches (remove ended matches)
-        const cleanLiveMatches = filterActiveMatches(filterCleanMatches(liveMatchesData));
+        // Filter and consolidate live matches (remove matches without sources and ended matches)
+        const cleanLiveMatches = filterActiveMatches(filterCleanMatches(
+          liveMatchesData.filter(m => m.sources && m.sources.length > 0)
+        ));
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
         setLiveMatches(consolidatedLiveMatches);
         
-        // Filter and consolidate all matches (for top league section, remove ended matches)
-        const cleanAllMatches = filterActiveMatches(filterCleanMatches(allMatchesData));
+        // Filter and consolidate all matches (must have sources, remove ended matches)
+        const cleanAllMatches = filterActiveMatches(filterCleanMatches(
+          allMatchesData.filter(m => m.sources && m.sources.length > 0)
+        ));
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         setAllMatches(consolidatedAllMatches);
         

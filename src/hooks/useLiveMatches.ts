@@ -50,7 +50,9 @@ export const useLiveMatches = () => {
       
       // Process and display priority matches immediately
       if (priorityMatches.length > 0) {
-        const cleanMatches = filterCleanMatches(priorityMatches);
+        // CRITICAL: Filter matches that have stream sources
+        const matchesWithSources = priorityMatches.filter(m => m.sources && m.sources.length > 0);
+        const cleanMatches = filterCleanMatches(matchesWithSources);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         
       const live = consolidatedMatches.filter(match => {
@@ -104,8 +106,9 @@ export const useLiveMatches = () => {
       
       console.log('All matches before filtering:', allFetchedMatches.length);
       
-      // Final processing with all matches
-      const cleanMatches = filterCleanMatches(allFetchedMatches);
+      // Final processing with all matches - CRITICAL: Filter for sources first
+      const matchesWithSources = allFetchedMatches.filter(m => m.sources && m.sources.length > 0);
+      const cleanMatches = filterCleanMatches(matchesWithSources);
       const consolidatedMatches = consolidateMatches(cleanMatches);
       
       console.log('Matches after consolidation:', consolidatedMatches.length);
