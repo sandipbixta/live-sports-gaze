@@ -1,4 +1,5 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import url('./components/ui/animations.css');
 @tailwind base;
 @tailwind components;
@@ -6,38 +7,62 @@
 
 @layer base {
   :root {
-    /* Dark mode colors (default) */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 220 19% 16%;
+    /* Modern Dark Theme Colors */
+    --background: 220 26% 6%;          /* Deep navy */
+    --foreground: 210 40% 98%;         /* Crisp white */
+    --card: 220 22% 10%;               /* Rich dark card */
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 22% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 220 14% 24%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
     
-    /* Sports-specific colors */
-    --sports-primary: 16 100% 60%;     /* #ff5a36 in HSL */
-    --sports-secondary: 200 69% 24%;   /* #0c4a6e in HSL */
-    --sports-accent: 16 100% 60%;      /* #ff5a36 in HSL */
-    --sports-dark: 220 39% 11%;        /* #111827 in HSL */
-    --sports-light: 210 40% 95%;       /* #f1f5f9 in HSL */
+    /* Vibrant Primary Colors */
+    --primary: 16 100% 60%;            /* Energetic orange */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 16 100% 70%;       /* Lighter orange for glow */
+    
+    /* Secondary & Accent */
+    --secondary: 271 91% 65%;          /* Electric purple */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 189 94% 43%;             /* Bright cyan */
+    --accent-foreground: 0 0% 100%;
+    
+    /* Muted & Subtle */
+    --muted: 220 16% 22%;
+    --muted-foreground: 215 16% 65%;
+    
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    
+    /* UI Elements */
+    --border: 220 16% 22%;
+    --input: 220 22% 14%;
+    --ring: 16 100% 60%;
+    
+    /* Charts */
+    --chart-1: 16 100% 60%;
+    --chart-2: 271 91% 65%;
+    --chart-3: 189 94% 43%;
+    --chart-4: 142 76% 36%;
+    --chart-5: 38 92% 50%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(16 100% 60%), hsl(271 91% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(189 94% 43%), hsl(271 91% 65%));
+    --gradient-accent: linear-gradient(135deg, hsl(271 91% 65%), hsl(16 100% 60%));
+    --gradient-dark: linear-gradient(180deg, hsl(220 26% 6%), hsl(220 26% 8%));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsla(16, 100%, 60%, 0.3);
+    --shadow-elevation: 0 10px 40px -10px hsla(220, 26%, 0%, 0.5);
+    --shadow-card: 0 4px 20px hsla(220, 26%, 0%, 0.3);
+    
+    /* Spacing for modern design */
+    --radius: 0.75rem;
   }
 
   .light {
@@ -75,7 +100,99 @@
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    background: linear-gradient(180deg, hsl(220 26% 6%) 0%, hsl(220 26% 8%) 100%);
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary-glow));
+  }
+}
+
+@layer components {
+  /* Modern Card Styles */
+  .card-modern {
+    @apply bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl shadow-lg;
+    box-shadow: var(--shadow-card);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card-modern:hover {
+    @apply border-primary/30;
+    box-shadow: var(--shadow-elevation);
+    transform: translateY(-2px);
+  }
+  
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Glow Effect */
+  .glow-effect {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  /* Glass Effect */
+  .glass {
+    @apply bg-card/30 backdrop-blur-xl border border-border/20;
+  }
+  
+  /* Animated Gradient Background */
+  .gradient-bg {
+    background: var(--gradient-primary);
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Smooth hover scale */
+  .hover-lift {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1;
+    box-shadow: var(--shadow-elevation);
+  }
+  
+  /* Button gradient */
+  .btn-gradient {
+    background: var(--gradient-primary);
+    @apply text-white font-semibold shadow-lg transition-all duration-300;
+  }
+  
+  .btn-gradient:hover {
+    @apply shadow-xl scale-105;
+    box-shadow: var(--shadow-glow);
   }
 }
