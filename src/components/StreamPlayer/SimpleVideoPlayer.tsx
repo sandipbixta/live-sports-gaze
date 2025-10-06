@@ -14,6 +14,7 @@ interface SimpleVideoPlayerProps {
   onRetry?: () => void;
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
+  onAutoFallback?: () => void;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -21,11 +22,14 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   isLoading = false,
   onRetry,
   isTheaterMode = false,
-  onTheaterModeToggle
+  onTheaterModeToggle,
+  onAutoFallback
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
+  const [lastStreamUrl, setLastStreamUrl] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -37,9 +41,15 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isCasting = detectCasting();
 
+  // Reset error state and track stream changes
   useEffect(() => {
-    setError(false);
-  }, [stream]);
+    if (stream?.embedUrl && stream.embedUrl !== lastStreamUrl) {
+      setError(false);
+      setErrorCount(0);
+      setLastStreamUrl(stream.embedUrl);
+      console.log('🎬 New stream loaded, resetting error state');
+    }
+  }, [stream?.embedUrl, lastStreamUrl]);
 
   // Detect geographic latency on mount
   useEffect(() => {
@@ -64,8 +74,26 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
   const handleRetry = () => {
     setError(false);
+    setErrorCount(0);
     if (onRetry) {
       onRetry();
+    }
+  };
+
+  // Auto-fallback on error
+  const handleError = () => {
+    const newErrorCount = errorCount + 1;
+    setErrorCount(newErrorCount);
+    setError(true);
+    
+    console.log(`❌ Stream error detected (count: ${newErrorCount})`);
+    
+    // Trigger auto-fallback after first error
+    if (newErrorCount === 1 && onAutoFallback) {
+      console.log('🔄 Triggering auto-fallback to next source...');
+      setTimeout(() => {
+        onAutoFallback();
+      }, 1500); // Wait 1.5s before trying next source
     }
   };
 
@@ -166,7 +194,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
               break;
             default:
               console.log('💥 Fatal error - destroying HLS instance');
-              setError(true);
+              handleError();
               break;
           }
         } else {
@@ -303,7 +331,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           playsInline
           preload="auto"
           crossOrigin="anonymous"
-          onError={() => setError(true)}
+          onError={handleError}
           onLoadStart={() => console.log('Video load started')}
           onCanPlay={() => console.log('Video can play')}
           onPlaying={() => console.log('Video playing')}
@@ -322,7 +350,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           videoRef={iframeRef}
           src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
           onLoad={() => setError(false)}
-          onError={() => setError(true)}
+          onError={handleError}
         />
       )}
       {/* External open fallback on Android for non-m3u8 embeds */}

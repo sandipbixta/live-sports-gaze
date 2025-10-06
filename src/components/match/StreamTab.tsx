@@ -13,6 +13,7 @@ import { ViewerCount } from '@/components/ViewerCount';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
+import { useAutoFallback } from '@/hooks/useAutoFallback';
 
 interface StreamTabProps {
   match: MatchType;
@@ -33,11 +34,18 @@ const StreamTab = ({
   handleSourceChange, 
   popularMatches, 
   sportId,
-  allStreams 
+  allStreams = {}
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  
+  // Auto-fallback hook
+  const { tryNextSource, isAutoRetrying, attemptedSourcesCount, totalSourcesCount } = useAutoFallback({
+    allStreams,
+    onSourceChange: handleSourceChange,
+    currentStream: stream
+  });
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -80,6 +88,24 @@ const StreamTab = ({
       }
     }
   };
+  
+  // Auto-fallback handler
+  const handleAutoFallback = () => {
+    const hasNextSource = tryNextSource();
+    
+    if (hasNextSource) {
+      toast({
+        title: "Switching source automatically",
+        description: `Trying alternative source (${attemptedSourcesCount}/${totalSourcesCount})`,
+      });
+    } else {
+      toast({
+        title: "All sources attempted",
+        description: "No more stream sources available. Please try again later.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const formatMatchTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -110,14 +136,16 @@ const StreamTab = ({
     <div>
       <StreamPlayer
         stream={stream}
-        isLoading={loadingStream}
+        isLoading={loadingStream || isAutoRetrying}
         onRetry={handleRetry}
+        onAutoFallback={handleAutoFallback}
         title={match.title}
         isManualChannel={false}
         isTvChannel={false}
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         match={match}
+        allStreams={allStreams}
         showMatchDetails={false}
       />
       
