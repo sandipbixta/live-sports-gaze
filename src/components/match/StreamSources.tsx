@@ -4,7 +4,7 @@ import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
 import { Loader, Play } from 'lucide-react';
-import ConnectionIndicator from '@/components/ConnectionIndicator';
+import { getConnectionInfo } from '@/utils/connectionOptimizer';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -25,6 +25,50 @@ const StreamSources = ({
 }: StreamSourcesProps) => {
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
+  const [connectionQuality, setConnectionQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('good');
+
+  // Monitor connection quality
+  useEffect(() => {
+    const updateConnectionQuality = () => {
+      const info = getConnectionInfo();
+      const effectiveType = info.effectiveType || '4g';
+      const downlink = info.downlink || 10;
+      const rtt = info.rtt || 50;
+
+      if (effectiveType === 'slow-2g' || effectiveType === '2g' || downlink < 1) {
+        setConnectionQuality('poor');
+      } else if (effectiveType === '3g' || (downlink >= 1 && downlink < 5)) {
+        setConnectionQuality('fair');
+      } else if (effectiveType === '4g' || (downlink >= 5 && downlink < 10)) {
+        setConnectionQuality('good');
+      } else {
+        setConnectionQuality('excellent');
+      }
+    };
+
+    updateConnectionQuality();
+    
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connection) {
+      connection.addEventListener('change', updateConnectionQuality);
+      return () => connection.removeEventListener('change', updateConnectionQuality);
+    }
+  }, []);
+
+  const getConnectionDotColor = () => {
+    switch (connectionQuality) {
+      case 'poor':
+        return 'bg-red-500';
+      case 'fair':
+        return 'bg-yellow-500';
+      case 'good':
+        return 'bg-green-500';
+      case 'excellent':
+        return 'bg-green-400';
+      default:
+        return 'bg-green-500';
+    }
+  };
 
   // Mark admin sources but don't hide them
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
@@ -141,14 +185,11 @@ const StreamSources = ({
     <div className="mt-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-        <div className="flex items-center gap-3">
-          <ConnectionIndicator showDetails={true} />
-          {viewerCount !== undefined && (
-            <div className="flex items-center">
-              {viewerCount}
-            </div>
-          )}
-        </div>
+        {viewerCount !== undefined && (
+          <div className="flex items-center">
+            {viewerCount}
+          </div>
+        )}
       </div>
       
       <div className="flex flex-wrap gap-3">
@@ -177,6 +218,7 @@ const StreamSources = ({
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
+              <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} mr-2 animate-pulse`} />
               <Play className="w-4 h-4 mr-2" />
               {streamName}
               {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
