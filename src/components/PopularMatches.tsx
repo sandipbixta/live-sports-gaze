@@ -90,7 +90,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   return (
     <div className="mb-6">
       <h2 className="text-xl font-bold mb-3 text-white">Trending Matches</h2>
-      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'} gap-3 md:gap-4`}>
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 5).map((match, index) => (
           <MatchCard 
             key={`popular-${match.id}-${index}`}
