@@ -75,27 +75,27 @@ export const HeroCarousel = () => {
             <div className="relative min-h-[350px] flex items-center">
               {/* Background Image - Right Side */}
               <div
-                className="absolute inset-0 bg-cover bg-right"
+                className="absolute inset-0 bg-cover bg-[75%_center]"
                 style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
-              {/* Gradient Overlay - Stronger on left, transparent on right */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+              {/* Gradient Overlay - Less aggressive, fades earlier */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/60 via-40% to-transparent to-70%" />
               
               {/* Content - Left Side */}
-              <div className="relative z-10 p-8 max-w-xl">
+              <div className="relative z-10 p-8 max-w-md">
                 <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
                   LIVE NOW
                 </div>
-                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight group-hover:text-primary transition-colors">
+                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl leading-tight group-hover:text-primary transition-colors">
                   {match.title}
                 </h2>
-                <p className="text-lg md:text-xl text-gray-200 drop-shadow-lg">
+                <p className="text-base md:text-lg text-gray-200 drop-shadow-lg">
                   {match.category && (
                     <span className="uppercase font-semibold">{match.category}</span>
                   )}
                   {match.teams?.home?.name && match.teams?.away?.name && (
-                    <span className="block mt-2 text-base">
+                    <span className="block mt-2 text-sm">
                       {match.teams.home.name} vs {match.teams.away.name}
                     </span>
                   )}
