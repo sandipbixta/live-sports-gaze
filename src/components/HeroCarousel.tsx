@@ -6,6 +6,8 @@ import { Play } from 'lucide-react';
 import { Match } from '@/types/sports';
 import { fetchLiveMatches } from '@/api/sportsApi';
 
+const POSTER_BASE_URL = 'https://streamed.pk';
+
 export const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { 
@@ -18,20 +20,24 @@ export const HeroCarousel = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [matchesWithPosters, setMatchesWithPosters] = useState<Match[]>([]);
   
+  // Helper to convert relative poster URL to absolute
+  const getAbsolutePosterUrl = (posterPath: string) => {
+    if (!posterPath) return '';
+    if (posterPath.startsWith('http')) return posterPath;
+    return `${POSTER_BASE_URL}${posterPath}`;
+  };
+  
   // Fetch live matches with posters
   useEffect(() => {
     const loadMatches = async () => {
       try {
         const liveMatches = await fetchLiveMatches();
-        console.log('📸 All live matches:', liveMatches.length);
-        console.log('📸 Sample match:', liveMatches[0]);
         
         const withPosters = liveMatches.filter(
           match => match.poster && match.poster.trim() !== ''
         );
-        console.log('📸 Matches with posters:', withPosters.length);
-        console.log('📸 Poster URLs:', withPosters.map(m => ({ title: m.title, poster: m.poster })));
         
+        console.log(`🎨 Loaded ${withPosters.length} matches with poster images`);
         setMatchesWithPosters(withPosters.slice(0, 10)); // Limit to first 10 for performance
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
@@ -70,7 +76,7 @@ export const HeroCarousel = () => {
               {/* Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${match.poster})` }}
+                style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
               {/* Gradient Overlay */}
