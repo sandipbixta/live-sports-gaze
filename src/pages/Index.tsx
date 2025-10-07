@@ -205,12 +205,12 @@ const Index = () => {
       
       <main className="py-4">
         {/* Essential SEO Header - Compact */}
-        <header className="mb-6 relative rounded-xl overflow-hidden">
+        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[300px] flex items-center">
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroBackground})` }}
           />
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 p-8">
             <h1 className="text-3xl font-bold text-white mb-3">Free Live Sports Streaming Online - DamiTV</h1>
             <p className="text-lg text-gray-100 max-w-4xl">
