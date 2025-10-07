@@ -156,16 +156,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
     `;
 
     const getBackgroundImages = () => {
-      const bgImages = [
-        "https://i.imgur.com/1xsz109.jpg",
-        "https://i.imgur.com/sVc77ht.jpg", 
-        "https://i.imgur.com/1Tw0JRU.jpg",
-        "https://i.imgur.com/MtYQroI.jpg",
-        "https://i.imgur.com/EsEKzFs.jpg",
-        "https://i.imgur.com/XT3MN8i.jpg"
+      const gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
       ];
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % bgImages.length;
-      return `<div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30" style="background-image: url(${bgImages[bgIndex]})"></div><div class="absolute inset-0 bg-black/20"></div>`;
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
+      return `<div class="absolute inset-0 opacity-80" style="background: ${gradients[bgIndex]}"></div>`;
     };
 
     const badgeHTML = (badgeUrl: string, altText: string) => `
@@ -184,19 +184,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
     `;
 
     const defaultImageHTML = () => {
-      const bgImages = [
-        "https://i.imgur.com/1xsz109.jpg",
-        "https://i.imgur.com/sVc77ht.jpg", 
-        "https://i.imgur.com/1Tw0JRU.jpg",
-        "https://i.imgur.com/MtYQroI.jpg",
-        "https://i.imgur.com/EsEKzFs.jpg",
-        "https://i.imgur.com/XT3MN8i.jpg"
+      const gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
       ];
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % bgImages.length;
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
       return `
         <div class="w-full h-full relative overflow-hidden">
-          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url(${bgImages[bgIndex]})"></div>
-          <div class="absolute inset-0 bg-black/40"></div>
+          <div class="absolute inset-0" style="background: ${gradients[bgIndex]}"></div>
           <div class="absolute inset-0 flex items-center justify-center z-10">
             <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
           </div>
@@ -204,32 +203,29 @@ const MatchCard: React.FC<MatchCardProps> = ({
       `;
     };
 
-    // Priority 2: Use team badges with background images if available
+    // Priority 2: Use team badges with gradient backgrounds if available
     if (homeBadge || awayBadge) {
-      // Background images array
-      const badgeBackgroundImages = [
-        "https://i.imgur.com/1xsz109.jpg",
-        "https://i.imgur.com/sVc77ht.jpg", 
-        "https://i.imgur.com/1Tw0JRU.jpg",
-        "https://i.imgur.com/MtYQroI.jpg",
-        "https://i.imgur.com/EsEKzFs.jpg",
-        "https://i.imgur.com/XT3MN8i.jpg"
+      // Gradient backgrounds array
+      const gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
       ];
       
-      // Select background based on match id for consistency
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % badgeBackgroundImages.length;
-      const selectedBg = badgeBackgroundImages[bgIndex];
+      // Select gradient based on match id for consistency
+      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
+      const selectedGradient = gradients[bgIndex];
 
       return (
         <div className="w-full h-full relative overflow-hidden">
-          {/* Background Image */}
+          {/* Background Gradient */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-            style={{ backgroundImage: `url(${selectedBg})` }}
+            className="absolute inset-0 opacity-80"
+            style={{ background: selectedGradient }}
           />
-          
-          {/* Dark overlay for better contrast - reduced opacity */}
-          <div className="absolute inset-0 bg-black/20" />
           
           {/* Background team badges with blur */}
           {homeBadge && (
@@ -321,28 +317,26 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use default image with DAMITV text for matches without logos/badges or posters
-    const defaultBackgroundImages = [
-      "https://i.imgur.com/1xsz109.jpg",
-      "https://i.imgur.com/sVc77ht.jpg", 
-      "https://i.imgur.com/1Tw0JRU.jpg",
-      "https://i.imgur.com/MtYQroI.jpg",
-      "https://i.imgur.com/EsEKzFs.jpg",
-      "https://i.imgur.com/XT3MN8i.jpg"
+    // Priority 3: Use gradient background with DAMITV text for matches without logos/badges or posters
+    const gradients = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
     ];
     
-    const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % defaultBackgroundImages.length;
-    const selectedBg = defaultBackgroundImages[bgIndex];
+    const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
+    const selectedGradient = gradients[bgIndex];
 
     return (
       <div className="w-full h-full relative overflow-hidden">
-        {/* Background Image */}
+        {/* Background Gradient */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${selectedBg})` }}
+          className="absolute inset-0"
+          style={{ background: selectedGradient }}
         />
-        {/* Dark overlay for better contrast */}
-        <div className="absolute inset-0 bg-black/40" />
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
