@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import { manualMatches } from '@/data/manualMatches';
 import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
+import { Match } from '@/types/sports';
+import { fetchLiveMatches } from '@/api/sportsApi';
 
 export const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -15,11 +16,24 @@ export const HeroCarousel = () => {
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [matchesWithPosters, setMatchesWithPosters] = useState<Match[]>([]);
   
-  // Get matches with images
-  const matchesWithImages = manualMatches.filter(
-    match => match.image && match.image.trim() !== ''
-  );
+  // Fetch live matches with posters
+  useEffect(() => {
+    const loadMatches = async () => {
+      try {
+        const liveMatches = await fetchLiveMatches();
+        const withPosters = liveMatches.filter(
+          match => match.poster && match.poster.trim() !== ''
+        );
+        setMatchesWithPosters(withPosters);
+      } catch (error) {
+        console.error('Error loading matches for carousel:', error);
+      }
+    };
+    
+    loadMatches();
+  }, []);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -36,12 +50,12 @@ export const HeroCarousel = () => {
     };
   }, [emblaApi]);
 
-  if (matchesWithImages.length === 0) return null;
+  if (matchesWithPosters.length === 0) return null;
 
   return (
     <div className="relative mb-6 rounded-xl overflow-hidden" ref={emblaRef}>
       <div className="flex">
-        {matchesWithImages.map((match) => (
+        {matchesWithPosters.map((match) => (
           <div
             key={match.id}
             className="relative flex-[0_0_100%] min-w-0"
@@ -50,7 +64,7 @@ export const HeroCarousel = () => {
               {/* Background Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${match.image})` }}
+                style={{ backgroundImage: `url(${match.poster})` }}
               />
               
               {/* Gradient Overlay */}
@@ -64,10 +78,13 @@ export const HeroCarousel = () => {
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
                   {match.title}
                 </h2>
-                <p className="text-base md:text-lg text-gray-100 drop-shadow-md mb-4">
-                  {match.seo.description}
+                <p className="text-base md:text-lg text-gray-100 drop-shadow-md mb-4 line-clamp-2">
+                  {match.category && `${match.category.toUpperCase()} - `}
+                  {match.teams?.home?.name && match.teams?.away?.name 
+                    ? `${match.teams.home.name} vs ${match.teams.away.name}`
+                    : 'Watch this exciting live match now'}
                 </p>
-                <Link to={`/manual-match/${match.id}`}>
+                <Link to={`/match/${match.category}/${match.id}`}>
                   <button className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
                     <Play className="h-5 w-5" />
                     Watch Now
@@ -80,9 +97,9 @@ export const HeroCarousel = () => {
       </div>
 
       {/* Dots Navigation */}
-      {matchesWithImages.length > 1 && (
+      {matchesWithPosters.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-          {matchesWithImages.map((_, index) => (
+          {matchesWithPosters.map((_, index) => (
             <button
               key={index}
               className={`w-2 h-2 rounded-full transition-all ${
