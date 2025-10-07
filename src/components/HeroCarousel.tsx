@@ -73,14 +73,14 @@ export const HeroCarousel = () => {
             className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
           >
             <div className="relative min-h-[350px] flex items-center overflow-hidden bg-black">
-              {/* Background Poster - Positioned Right, Smaller Scale */}
+              {/* Background Poster - Positioned Right, Bigger */}
               <div
-                className="absolute right-0 top-0 bottom-0 w-[55%] bg-cover bg-center transform scale-95"
+                className="absolute right-0 top-0 bottom-0 w-[65%] bg-cover bg-center"
                 style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
-              {/* Smooth Gradient Overlay - Connects title to image */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/85 via-45% to-transparent to-75%" />
+              {/* Gradient Overlay - Fades poster on left, connects to shadow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/90 via-35% via-black/40 via-55% to-transparent to-70%" />
               
               {/* Content - Overlays on Left */}
               <div className="relative z-10 p-8 max-w-lg">
