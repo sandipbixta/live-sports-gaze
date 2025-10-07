@@ -79,8 +79,8 @@ export const HeroCarousel = () => {
                 style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
-              {/* Gradient Overlay - Fades poster on left, connects to shadow */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/90 via-35% via-black/40 via-55% to-transparent to-70%" />
+              {/* Lighter Gradient Overlay - Less fade on poster */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/70 via-30% to-transparent to-50%" />
               
               {/* Content - Overlays on Left */}
               <div className="relative z-10 p-8 max-w-lg">
