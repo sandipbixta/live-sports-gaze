@@ -56,6 +56,7 @@ const StreamPlayer: React.FC<StreamPlayerProps> = ({
         isTheaterMode={isTheaterMode}
         onTheaterModeToggle={onTheaterModeToggle}
         onAutoFallback={onAutoFallback}
+        match={match}
       />
       
       {/* Match Details Below Player */}

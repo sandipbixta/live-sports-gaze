@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Hls from 'hls.js';
-import { Stream } from '../../types/sports';
+import { Stream, Match } from '../../types/sports';
+import { ManualMatch } from '../../types/manualMatch';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink, Monitor } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink, Monitor, Clock } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
 import BufferIndicator from '../BufferIndicator';
@@ -16,6 +17,7 @@ interface SimpleVideoPlayerProps {
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
   onAutoFallback?: () => void;
+  match?: Match | ManualMatch | null;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -24,7 +26,8 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   onRetry,
   isTheaterMode = false,
   onTheaterModeToggle,
-  onAutoFallback
+  onAutoFallback,
+  match = null
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -41,9 +44,55 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const [isBuffering, setIsBuffering] = useState(false);
   const [autoDowngradeAttempted, setAutoDowngradeAttempted] = useState(false);
   const bufferStallCountRef = useRef(0);
+  const [countdown, setCountdown] = useState<string>('');
   const isM3U8 = !!stream?.embedUrl && /\.m3u8(\?|$)/i.test(stream.embedUrl || '');
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
   const isCasting = detectCasting();
+
+  // Calculate countdown for upcoming matches
+  useEffect(() => {
+    if (!match || !match.date) {
+      setCountdown('');
+      return;
+    }
+
+    const matchDate = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+
+    if (matchDate <= Date.now()) {
+      setCountdown('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const timeUntilMatch = matchDate - now;
+
+      if (timeUntilMatch <= 0) {
+        setCountdown('');
+        return;
+      }
+
+      const days = Math.floor(timeUntilMatch / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeUntilMatch % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
+
+      if (days > 0) {
+        setCountdown(`${days}d ${hours}h ${minutes}m`);
+      } else if (hours > 0) {
+        setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setCountdown(`${minutes}m ${seconds}s`);
+      } else {
+        setCountdown(`${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [match]);
 
   // Reset error state and track stream changes
   useEffect(() => {
@@ -313,6 +362,39 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   }
 
   if (!stream || error) {
+    // Show countdown timer if match hasn't started yet
+    if (!stream && countdown && match) {
+      return (
+        <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gradient-to-br from-gray-900 to-black rounded-2xl flex items-center justify-center relative overflow-hidden`}>
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+          </div>
+          
+          <div className="text-center text-white p-6 z-10">
+            <Clock className="w-20 h-20 mx-auto mb-6 text-primary animate-pulse" />
+            <h3 className="text-2xl font-bold mb-3">Match Starting Soon</h3>
+            <p className="text-gray-400 mb-6">Stream will be available when the match begins</p>
+            
+            {/* Countdown Display */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-4 inline-block">
+              <div className="text-5xl font-black text-white mb-2 font-mono tracking-wider">
+                {countdown}
+              </div>
+              <div className="text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+            </div>
+            
+            {match.title && (
+              <p className="text-lg text-white/80 mt-4 font-semibold">
+                {match.title}
+              </p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gray-900 rounded-2xl flex items-center justify-center`}>
         <div className="text-center text-white p-6">
