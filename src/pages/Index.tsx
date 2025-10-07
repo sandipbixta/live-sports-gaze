@@ -21,6 +21,7 @@ import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
+import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
 
 // Lazy load heavy components
@@ -209,21 +210,15 @@ const Index = () => {
           <TelegramBanner />
         </div>
 
-        {/* Essential SEO Header - Compact */}
-        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[350px] flex items-center">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroBackground})` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
-          <div className="relative z-10 p-8 max-w-2xl">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
-              Free Live Sports Streaming Online - DamiTV
-            </h1>
-            <p className="text-base md:text-lg text-gray-100 drop-shadow-md">
-              Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
-            </p>
-          </div>
+        {/* Hero Carousel with Match Posters */}
+        <HeroCarousel />
+
+        {/* Essential SEO Header - Hidden but kept for SEO */}
+        <header className="sr-only">
+          <h1>Free Live Sports Streaming Online - DamiTV</h1>
+          <p>
+            Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
+          </p>
         </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
