@@ -4,6 +4,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
 import { fetchLiveMatches } from '@/api/sportsApi';
+import coverPhoto from '@/assets/damitv-cover.jpeg';
 
 const POSTER_BASE_URL = 'https://streamed.pk';
 
@@ -18,6 +19,15 @@ export const HeroCarousel = () => {
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [matchesWithPosters, setMatchesWithPosters] = useState<Match[]>([]);
+  
+  // Static cover photo slide
+  const coverSlide = {
+    id: 'damitv-cover',
+    title: 'DamiTV - Your Home for Live Sports',
+    category: 'Featured',
+    poster: coverPhoto,
+    isCover: true
+  };
   
   // Helper to convert relative poster URL to absolute
   const getAbsolutePosterUrl = (posterPath: string) => {
@@ -62,55 +72,73 @@ export const HeroCarousel = () => {
     };
   }, [emblaApi]);
 
-  if (matchesWithPosters.length === 0) return null;
+  // Combine cover slide with match slides
+  const allSlides = [coverSlide as any, ...matchesWithPosters];
+
+  if (allSlides.length === 0) return null;
 
   return (
     <div className="relative mb-6 rounded-xl overflow-hidden" ref={emblaRef}>
       <div className="flex">
-        {matchesWithPosters.map((match) => (
-          <Link
-            key={match.id}
-            to={`/match/${match.category}/${match.id}`}
-            className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
-          >
-            <div className="relative min-h-[350px] flex items-center overflow-hidden">
-              {/* Background Poster - Full Width */}
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
-              />
-              
-              {/* Subtle Gradient - Just enough for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
-              
-              {/* Content - Left Side */}
-              <div className="relative z-10 p-8 max-w-xl">
-                <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
-                  LIVE NOW
-                </div>
-                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
-                  {match.title}
-                </h2>
-                <p className="text-base md:text-lg text-white drop-shadow-xl">
-                  {match.category && (
-                    <span className="uppercase font-semibold">{match.category}</span>
-                  )}
-                  {match.teams?.home?.name && match.teams?.away?.name && (
-                    <span className="block mt-2 text-sm opacity-95">
-                      {match.teams.home.name} vs {match.teams.away.name}
-                    </span>
-                  )}
-                </p>
+        {allSlides.map((slide) => {
+          const isCover = (slide as any).isCover;
+          const posterUrl = isCover ? slide.poster : getAbsolutePosterUrl(slide.poster || '');
+          
+          return isCover ? (
+            // Cover photo slide - not clickable
+            <div
+              key={slide.id}
+              className="relative flex-[0_0_100%] min-w-0"
+            >
+              <div className="relative min-h-[350px] flex items-center overflow-hidden">
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${posterUrl})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
               </div>
             </div>
-          </Link>
-        ))}
+          ) : (
+            // Match slides - clickable
+            <Link
+              key={slide.id}
+              to={`/match/${slide.category}/${slide.id}`}
+              className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
+            >
+              <div className="relative min-h-[350px] flex items-center overflow-hidden">
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${posterUrl})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
+                <div className="relative z-10 p-8 max-w-xl">
+                  <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
+                    LIVE NOW
+                  </div>
+                  <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
+                    {slide.title}
+                  </h2>
+                  <p className="text-base md:text-lg text-white drop-shadow-xl">
+                    {slide.category && (
+                      <span className="uppercase font-semibold">{slide.category}</span>
+                    )}
+                    {slide.teams?.home?.name && slide.teams?.away?.name && (
+                      <span className="block mt-2 text-sm opacity-95">
+                        {slide.teams.home.name} vs {slide.teams.away.name}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Dots Navigation */}
-      {matchesWithPosters.length > 1 && (
+      {allSlides.length > 1 && (
         <div className="absolute bottom-4 left-8 flex gap-2 z-20">
-          {matchesWithPosters.map((_, index) => (
+          {allSlides.map((_, index) => (
             <button
               key={index}
               className={`h-1 rounded-full transition-all ${
