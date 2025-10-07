@@ -96,6 +96,16 @@ export const HeroCarousel = () => {
                   style={{ backgroundImage: `url(${posterUrl})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
+                
+                {/* SEO-optimized header text */}
+                <div className="relative z-10 p-8 max-w-2xl">
+                  <h2 className="text-xl md:text-2xl font-semibold text-white/90 mb-2 drop-shadow-lg">
+                    Watch Live Sports Streaming Free - Champions League, Premier League, La Liga & More
+                  </h2>
+                  <p className="text-sm md:text-base text-white/80 drop-shadow-md">
+                    Free HD sports streaming for football, basketball, tennis and all major leagues worldwide
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
