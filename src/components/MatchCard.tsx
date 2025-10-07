@@ -144,9 +144,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     };
 
     const badgeLayoutHTML = () => `
-      <div class="w-full h-full relative overflow-hidden">
-        ${getBackgroundImages()}
-        <div class="absolute inset-0 bg-black/40"></div>
+      <div class="w-full h-full relative overflow-hidden bg-black">
         <div class="flex items-center gap-4 z-10 relative h-full justify-center">
           ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
           <span class="text-white font-bold text-lg drop-shadow-sm">VS</span>
@@ -154,19 +152,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
         </div>
       </div>
     `;
-
-    const getBackgroundImages = () => {
-      const gradients = [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
-      ];
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
-      return `<div class="absolute inset-0 opacity-80" style="background: ${gradients[bgIndex]}"></div>`;
-    };
 
     const badgeHTML = (badgeUrl: string, altText: string) => `
       <div class="flex flex-col items-center">
@@ -184,18 +169,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
     `;
 
     const defaultImageHTML = () => {
-      const gradients = [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
-      ];
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
       return `
-        <div class="w-full h-full relative overflow-hidden">
-          <div class="absolute inset-0" style="background: ${gradients[bgIndex]}"></div>
+        <div class="w-full h-full relative overflow-hidden bg-black">
           <div class="absolute inset-0 flex items-center justify-center z-10">
             <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
           </div>
@@ -203,53 +178,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
       `;
     };
 
-    // Priority 2: Use team badges with gradient backgrounds if available
+    // Priority 2: Use team badges with plain black background if available
     if (homeBadge || awayBadge) {
-      // Gradient backgrounds array
-      const gradients = [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
-      ];
-      
-      // Select gradient based on match id for consistency
-      const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
-      const selectedGradient = gradients[bgIndex];
-
       return (
-        <div className="w-full h-full relative overflow-hidden">
-          {/* Background Gradient */}
-          <div 
-            className="absolute inset-0 opacity-80"
-            style={{ background: selectedGradient }}
-          />
-          
-          {/* Background team badges with blur */}
-          {homeBadge && (
-            <img
-              src={homeBadge}
-              alt={home || 'Home Team'}
-              className="absolute left-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
-              onError={(e) => {
-                console.log('Home badge failed to load:', homeBadge);
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          )}
-          {awayBadge && (
-            <img
-              src={awayBadge}
-              alt={away || 'Away Team'}
-              className="absolute right-1/4 top-1/2 -translate-y-1/2 w-24 h-24 opacity-15 blur-lg"
-              onError={(e) => {
-                console.log('Away badge failed to load:', awayBadge);
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          )}
+        <div className="w-full h-full relative overflow-hidden bg-black">
           
           {/* Teams display with enhanced badges */}
           <div className="flex items-center gap-4 z-10 relative h-full justify-center">
@@ -317,26 +249,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use gradient background with DAMITV text for matches without logos/badges or posters
-    const gradients = [
-      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
-    ];
-    
-    const bgIndex = match.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % gradients.length;
-    const selectedGradient = gradients[bgIndex];
-
+    // Priority 3: Use plain black background with DAMITV text for matches without logos/badges or posters
     return (
-      <div className="w-full h-full relative overflow-hidden">
-        {/* Background Gradient */}
-        <div 
-          className="absolute inset-0"
-          style={{ background: selectedGradient }}
-        />
+      <div className="w-full h-full relative overflow-hidden bg-black">
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
