@@ -72,34 +72,36 @@ export const HeroCarousel = () => {
             to={`/match/${match.category}/${match.id}`}
             className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
           >
-            <div className="relative min-h-[350px] flex items-center">
-              {/* Background Image - Right Side */}
-              <div
-                className="absolute inset-0 bg-cover bg-[75%_center]"
-                style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
-              />
-              
-              {/* Gradient Overlay - Less aggressive, fades earlier */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/60 via-40% to-transparent to-70%" />
-              
-              {/* Content - Left Side */}
-              <div className="relative z-10 p-8 max-w-md">
-                <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
-                  LIVE NOW
+            <div className="relative min-h-[350px] flex items-stretch bg-black">
+              {/* Left Side - Black Shadow with Content */}
+              <div className="relative z-10 flex-1 flex items-center p-8 bg-gradient-to-r from-black via-black to-black/95 max-w-xl">
+                <div>
+                  <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
+                    LIVE NOW
+                  </div>
+                  <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors">
+                    {match.title}
+                  </h2>
+                  <p className="text-base md:text-lg text-gray-300">
+                    {match.category && (
+                      <span className="uppercase font-semibold">{match.category}</span>
+                    )}
+                    {match.teams?.home?.name && match.teams?.away?.name && (
+                      <span className="block mt-2 text-sm">
+                        {match.teams.home.name} vs {match.teams.away.name}
+                      </span>
+                    )}
+                  </p>
                 </div>
-                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl leading-tight group-hover:text-primary transition-colors">
-                  {match.title}
-                </h2>
-                <p className="text-base md:text-lg text-gray-200 drop-shadow-lg">
-                  {match.category && (
-                    <span className="uppercase font-semibold">{match.category}</span>
-                  )}
-                  {match.teams?.home?.name && match.teams?.away?.name && (
-                    <span className="block mt-2 text-sm">
-                      {match.teams.home.name} vs {match.teams.away.name}
-                    </span>
-                  )}
-                </p>
+              </div>
+              
+              {/* Right Side - Poster Image */}
+              <div className="relative w-[45%] flex-shrink-0">
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/20" />
               </div>
             </div>
           </Link>
