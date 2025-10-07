@@ -402,9 +402,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasStream && (
             <div className="pt-1">
               {isLive || isMatchStarting ? (
-                <div className="bg-white text-black font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-primary hover:text-white transition-colors">
-                  Watch Now
-                </div>
+            <div className="bg-sports-primary text-white font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
+              Watch Now
+            </div>
               ) : countdown ? (
                 <div className="bg-gray-800 text-white border border-gray-700 font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
                   <Clock className="w-3.5 h-3.5" />
