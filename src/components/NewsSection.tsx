@@ -13,7 +13,6 @@ interface NewsItem {
   link: string;
   pubDate: string;
   category?: string;
-  imageUrl?: string;
 }
 
 const NewsSection = () => {
@@ -87,31 +86,6 @@ const NewsSection = () => {
               return;
             }
             
-            // Find image in media:content or enclosure tags or within description
-            let imageUrl = '';
-            const mediaContent = item.querySelector('media\\:content, content');
-            const enclosure = item.querySelector('enclosure');
-            
-            if (mediaContent && mediaContent.getAttribute('url')) {
-              imageUrl = mediaContent.getAttribute('url') || '';
-            } else if (enclosure && enclosure.getAttribute('url') && enclosure.getAttribute('type')?.startsWith('image/')) {
-              imageUrl = enclosure.getAttribute('url') || '';
-            } else {
-              // Try to extract image from description
-              const tempDiv = document.createElement('div');
-              tempDiv.innerHTML = description;
-              const img = tempDiv.querySelector('img');
-              if (img && img.src) {
-                imageUrl = img.src;
-              }
-            }
-            
-            // Set default placeholder image if none found
-            if (!imageUrl) {
-              imageUrl = 'https://loremflickr.com/480/240/' + 
-                (title.toLowerCase().includes('soccer') || title.toLowerCase().includes('football') ? 'soccer' : 'sports');
-            }
-            
             // Categorize the news item
             let category = "other";
             const lowerTitle = title.toLowerCase();
@@ -144,8 +118,7 @@ const NewsSection = () => {
               description,
               link,
               pubDate,
-              category,
-              imageUrl
+              category
             });
           });
         } catch (err) {
