@@ -10,6 +10,9 @@ interface TeamDisplayProps {
 }
 
 const TeamDisplay: React.FC<TeamDisplayProps> = ({ name, badge, logo, isHome = false, size = 'medium' }) => {
+  // Prioritize logo over badge, then fall back to badge URL format
+  const imageUrl = logo || (badge ? `https://streamed.su/api/images/badge/${badge}.webp` : '');
+  
   const getSizeClasses = () => {
     switch (size) {
       case 'small':
@@ -37,8 +40,23 @@ const TeamDisplay: React.FC<TeamDisplayProps> = ({ name, badge, logo, isHome = f
 
   return (
     <div className="flex flex-col items-center text-center">
+      {imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt={name} 
+          className={`${classes.container} mb-1 sm:mb-2 md:mb-3 object-contain rounded-lg bg-white p-1`}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+            const fallbackDiv = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+            if (fallbackDiv) {
+              fallbackDiv.style.display = 'flex';
+            }
+          }}
+        />
+      ) : null}
       <div 
-        className={`${classes.container} bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2 md:mb-3`}
+        className={`${classes.container} bg-[#343a4d] rounded-full flex items-center justify-center mb-1 sm:mb-2 md:mb-3 ${imageUrl ? 'hidden' : ''}`}
+        style={{ display: imageUrl ? 'none' : 'flex' }}
       >
         <span className={`${classes.fallback} font-bold text-white`}>{name.charAt(0)}</span>
       </div>
