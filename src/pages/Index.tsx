@@ -211,7 +211,7 @@ const Index = () => {
             style={{ backgroundImage: `url(${heroBackground})` }}
           />
           <div className="absolute inset-0 bg-black/40" />
-          <div className="relative z-10 p-4">
+          <div className="relative z-10 p-4 mt-12">
             <h1 className="text-xl font-bold text-white mb-1">Free Live Sports Streaming Online - DamiTV</h1>
             <p className="text-sm text-gray-100 max-w-3xl">
               Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
