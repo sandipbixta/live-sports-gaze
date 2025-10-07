@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
-import { Play } from 'lucide-react';
 import { Match } from '@/types/sports';
 import { fetchLiveMatches } from '@/api/sportsApi';
 
@@ -14,7 +13,7 @@ export const HeroCarousel = () => {
       loop: true,
       duration: 30
     },
-    [Autoplay({ delay: 4000, stopOnInteraction: false })]
+    [Autoplay({ delay: 6000, stopOnInteraction: false })]
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -68,58 +67,60 @@ export const HeroCarousel = () => {
     <div className="relative mb-6 rounded-xl overflow-hidden" ref={emblaRef}>
       <div className="flex">
         {matchesWithPosters.map((match) => (
-          <div
+          <Link
             key={match.id}
-            className="relative flex-[0_0_100%] min-w-0"
+            to={`/match/${match.category}/${match.id}`}
+            className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
           >
             <div className="relative min-h-[350px] flex items-center">
-              {/* Background Image */}
+              {/* Background Image - Right Side */}
               <div
-                className="absolute inset-0 bg-cover bg-center"
+                className="absolute inset-0 bg-cover bg-right"
                 style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />
+              {/* Gradient Overlay - Stronger on left, transparent on right */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
               
-              {/* Content */}
-              <div className="relative z-10 p-8 max-w-2xl">
-                <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full mb-3">
-                  LIVE
+              {/* Content - Left Side */}
+              <div className="relative z-10 p-8 max-w-xl">
+                <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
+                  LIVE NOW
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight group-hover:text-primary transition-colors">
                   {match.title}
                 </h2>
-                <p className="text-base md:text-lg text-gray-100 drop-shadow-md mb-4 line-clamp-2">
-                  {match.category && `${match.category.toUpperCase()} - `}
-                  {match.teams?.home?.name && match.teams?.away?.name 
-                    ? `${match.teams.home.name} vs ${match.teams.away.name}`
-                    : 'Watch this exciting live match now'}
+                <p className="text-lg md:text-xl text-gray-200 drop-shadow-lg">
+                  {match.category && (
+                    <span className="uppercase font-semibold">{match.category}</span>
+                  )}
+                  {match.teams?.home?.name && match.teams?.away?.name && (
+                    <span className="block mt-2 text-base">
+                      {match.teams.home.name} vs {match.teams.away.name}
+                    </span>
+                  )}
                 </p>
-                <Link to={`/match/${match.category}/${match.id}`}>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
-                    <Play className="h-5 w-5" />
-                    Watch Now
-                  </button>
-                </Link>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
       {/* Dots Navigation */}
       {matchesWithPosters.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-4 left-8 flex gap-2 z-20">
           {matchesWithPosters.map((_, index) => (
             <button
               key={index}
-              className={`w-2 h-2 rounded-full transition-all ${
+              className={`h-1 rounded-full transition-all ${
                 index === selectedIndex
                   ? 'bg-white w-8'
-                  : 'bg-white/50 hover:bg-white/75'
+                  : 'bg-white/50 hover:bg-white/75 w-8'
               }`}
-              onClick={() => emblaApi?.scrollTo(index)}
+              onClick={(e) => {
+                e.preventDefault();
+                emblaApi?.scrollTo(index);
+              }}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
