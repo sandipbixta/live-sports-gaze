@@ -23,10 +23,16 @@ export const HeroCarousel = () => {
     const loadMatches = async () => {
       try {
         const liveMatches = await fetchLiveMatches();
+        console.log('📸 All live matches:', liveMatches.length);
+        console.log('📸 Sample match:', liveMatches[0]);
+        
         const withPosters = liveMatches.filter(
           match => match.poster && match.poster.trim() !== ''
         );
-        setMatchesWithPosters(withPosters);
+        console.log('📸 Matches with posters:', withPosters.length);
+        console.log('📸 Poster URLs:', withPosters.map(m => ({ title: m.title, poster: m.poster })));
+        
+        setMatchesWithPosters(withPosters.slice(0, 10)); // Limit to first 10 for performance
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }
