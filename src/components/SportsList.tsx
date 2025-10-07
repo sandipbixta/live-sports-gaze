@@ -37,10 +37,10 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
-          className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 ${
+          className={`px-4 py-1.5 rounded-full transition-all whitespace-nowrap text-sm flex-shrink-0 backdrop-blur-md shadow-lg ${
             selectedSport === 'all'
-              ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
-              : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+              ? 'bg-primary/30 text-white border border-primary/50 hover:bg-primary/40 shadow-primary/30'
+              : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
           }`}
           variant={selectedSport === 'all' ? "default" : "outline"}
         >
@@ -51,10 +51,10 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
           <Button
             key={sport.id}
             onClick={() => onSelectSport(sport.id)}
-            className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap text-sm flex-shrink-0 ${
+            className={`px-4 py-1.5 rounded-full transition-all whitespace-nowrap text-sm flex-shrink-0 backdrop-blur-md shadow-lg ${
               selectedSport === sport.id
-                ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
-                : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+                ? 'bg-primary/30 text-white border border-primary/50 hover:bg-primary/40 shadow-primary/30'
+                : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
             }`}
             variant={selectedSport === sport.id ? "default" : "outline"}
           >
@@ -68,10 +68,10 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
         {/* All Sports button */}
         <Button
           onClick={() => onSelectSport('all')}
-          className={`px-3 py-1.5 rounded-lg transition-all text-sm truncate ${
+          className={`px-4 py-1.5 rounded-full transition-all text-sm truncate backdrop-blur-md shadow-lg ${
             selectedSport === 'all'
-              ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
-              : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+              ? 'bg-primary/30 text-white border border-primary/50 hover:bg-primary/40 shadow-primary/30'
+              : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
           }`}
           variant={selectedSport === 'all' ? "default" : "outline"}
         >
@@ -82,10 +82,10 @@ const SportsList: React.FC<SportsListProps> = ({ sports, onSelectSport, selected
           <Button
             key={sport.id}
             onClick={() => onSelectSport(sport.id)}
-            className={`px-3 py-1.5 rounded-lg transition-all text-sm truncate ${
+            className={`px-4 py-1.5 rounded-full transition-all text-sm truncate backdrop-blur-md shadow-lg ${
               selectedSport === sport.id
-                ? 'bg-[#ff5a36] text-white shadow-lg shadow-[#ff5a36]/20'
-                : 'bg-[#242836] text-white hover:bg-[#343a4d]'
+                ? 'bg-primary/30 text-white border border-primary/50 hover:bg-primary/40 shadow-primary/30'
+                : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
             }`}
             variant={selectedSport === sport.id ? "default" : "outline"}
           >
