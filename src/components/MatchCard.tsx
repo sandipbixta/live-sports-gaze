@@ -313,73 +313,63 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-xl bg-card border border-border transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
-        {/* Image Section */}
-        <div className="relative aspect-[16/9] overflow-hidden">
-          {generateThumbnail()}
-          
-          {/* Gradient Overlay for Better Text Contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          
-          {/* Top Badges */}
-          <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2 z-10">
-            {isLive && (
-              <Badge className="bg-red-600 text-white px-2.5 py-1 text-xs font-bold border-0 shadow-lg">
-                ● LIVE
-              </Badge>
+      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-[#1a1f2e] to-[#0f1219] border border-white/5 transition-all duration-300 hover:border-white/20 hover:scale-[1.02]">
+        {/* Compact Header */}
+        <div className="p-3 border-b border-white/5">
+          <div className="flex items-center justify-between gap-2">
+            {isLive ? (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-red-500">
+                <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                LIVE NOW
+              </span>
+            ) : (
+              <span className="text-xs text-white/40 font-medium">
+                {match.date && match.date > Date.now() ? 'UPCOMING' : 'ENDED'}
+              </span>
             )}
-            {hasStream && (
-              <Badge className="bg-background/90 backdrop-blur-sm text-foreground px-2.5 py-1 text-xs font-medium border border-border/50 ml-auto">
-                <Play className="w-3 h-3 mr-1" />
-                {match.sources.length}
-              </Badge>
-            )}
-          </div>
-
-          {/* Bottom Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-            <h3 className="font-bold text-lg sm:text-xl text-white mb-2 line-clamp-2 drop-shadow-lg">
-              {home && away ? `${home} vs ${away}` : match.title}
-            </h3>
             
-            <div className="flex items-center gap-3 text-xs text-white/90">
-              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
-                <Clock className="w-3 h-3" />
-                <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
-              </div>
-              
-              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
-                <Calendar className="w-3 h-3" />
-                <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
-              </div>
-
-              {isLive && (
-                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
-                  <Users className="w-3 h-3 text-green-400" />
-                  <ViewerCount matchId={match.id} enableRealtime={true} />
-                </div>
-              )}
-            </div>
+            {hasStream && (
+              <span className="text-xs text-white/60 flex items-center gap-1">
+                <Play className="w-3 h-3" />
+                {match.sources.length} streams
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Content Section Below Image */}
+        {/* Image with Minimal Overlay */}
+        <div className="relative aspect-[16/9] overflow-hidden bg-black/20">
+          {generateThumbnail()}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        </div>
+
+        {/* Match Info */}
         <div className="p-4 space-y-3">
-          <p className="text-sm text-muted-foreground line-clamp-1">
-            Free live sports streaming on DAMITV
-          </p>
+          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug">
+            {home && away ? `${home} vs ${away}` : match.title}
+          </h3>
+          
+          <div className="flex items-center gap-3 text-xs text-white/50">
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {match.date ? formatTime(match.date) : 'TBD'}
+            </span>
+            <span>•</span>
+            <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
+            
+            {isLive && (
+              <>
+                <span>•</span>
+                <ViewerCount matchId={match.id} enableRealtime={true} />
+              </>
+            )}
+          </div>
 
           {hasStream && (
-            <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-all duration-200 group/btn">
-              <Play className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
-              <span>Watch Now</span>
+            <button className="w-full bg-white text-black font-semibold text-sm py-2.5 rounded-md hover:bg-white/90 transition-colors flex items-center justify-center gap-2">
+              <Play className="w-4 h-4" fill="currentColor" />
+              Watch Free
             </button>
-          )}
-
-          {!isLive && match.date && match.date > Date.now() && (
-            <div className="text-xs text-muted-foreground text-center py-1">
-              Upcoming Match
-            </div>
           )}
         </div>
       </div>
