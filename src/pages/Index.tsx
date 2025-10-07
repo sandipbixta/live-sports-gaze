@@ -210,7 +210,7 @@ const Index = () => {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroBackground})` }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
           <div className="relative z-10 p-8 max-w-4xl text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
               Free Live Sports Streaming Online - DamiTV
