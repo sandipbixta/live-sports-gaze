@@ -204,19 +204,9 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
-        {/* Quick Navigation Links */}
-        <div className="mb-4 flex flex-wrap gap-3 justify-center">
-          <Link to="/live" className="text-primary hover:text-primary/80 font-medium underline">
-            Live Sports Matches
-          </Link>
-          <span className="text-muted-foreground">•</span>
-          <Link to="/channels" className="text-primary hover:text-primary/80 font-medium underline">
-            TV Channels Collection
-          </Link>
-          <span className="text-muted-foreground">•</span>
-          <Link to="/schedule" className="text-primary hover:text-primary/80 font-medium underline">
-            Sports Schedule
-          </Link>
+        {/* Promotion Links */}
+        <div className="mb-4">
+          <TelegramBanner />
         </div>
 
         {/* Essential SEO Header - Compact */}
@@ -237,11 +227,6 @@ const Index = () => {
         </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
-
-        {/* Telegram Banner */}
-        <div className="mb-6">
-          <TelegramBanner />
-        </div>
 
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
