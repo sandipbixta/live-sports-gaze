@@ -313,64 +313,60 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 border border-white/10 transition-all duration-300 hover:border-primary/50 hover:-translate-y-1 hover:shadow-2xl">
-        {/* Image with Gradient Overlay */}
-        <div className="relative aspect-video overflow-hidden">
+      <div className="relative overflow-hidden rounded-lg border-2 border-white/5 bg-black transition-all duration-300 hover:border-primary">
+        {/* Image Section */}
+        <div className="relative aspect-video overflow-hidden bg-gray-900">
           {generateThumbnail()}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80" />
           
-          {/* Top Row - Live Badge */}
-          {isLive && (
-            <div className="absolute top-4 left-4 z-10">
-              <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                LIVE NOW
-              </div>
-            </div>
-          )}
-          
-          {/* Top Row - Stream Count */}
-          {hasStream && (
-            <div className="absolute top-4 right-4 z-10">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                {match.sources.length} streams
-              </div>
-            </div>
-          )}
-          
-          {/* Bottom Content on Image */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-            <h3 className="font-bold text-white text-base sm:text-lg mb-2 line-clamp-2 drop-shadow-lg">
-              {home && away ? `${home} vs ${away}` : match.title}
-            </h3>
+          {/* Simple Status Indicators */}
+          <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
+            {isLive ? (
+              <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 tracking-wider">
+                ● Live
+              </span>
+            ) : (
+              <span className="bg-gray-800/90 text-white/60 text-[10px] font-bold uppercase px-2 py-1">
+                {match.date && match.date > Date.now() ? 'Upcoming' : 'Ended'}
+              </span>
+            )}
             
-            <div className="flex items-center gap-2 text-xs text-white/80">
-              <div className="bg-white/10 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {match.date ? formatTime(match.date) : 'TBD'}
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm px-2 py-1 rounded-md">
-                {match.date ? formatDateShort(match.date) : 'TBD'}
-              </div>
-              {isLive && (
-                <div className="bg-white/10 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  <ViewerCount matchId={match.id} enableRealtime={true} />
-                </div>
-              )}
-            </div>
+            {hasStream && (
+              <span className="bg-black/80 text-white text-[10px] font-bold px-2 py-1">
+                {match.sources.length} HD
+              </span>
+            )}
           </div>
         </div>
-        
-        {/* Bottom CTA Section */}
-        {hasStream && (
-          <div className="p-4 bg-gradient-to-r from-gray-900 to-black">
-            <button className="w-full bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-sm py-3 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/50">
-              <Play className="w-4 h-4" fill="currentColor" />
-              Watch Free Now
-            </button>
+
+        {/* Info Section */}
+        <div className="p-3 space-y-2">
+          {/* Title */}
+          <h3 className="font-bold text-white text-sm line-clamp-2 min-h-[2.5rem]">
+            {home && away ? `${home} vs ${away}` : match.title}
+          </h3>
+          
+          {/* Meta Info */}
+          <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+            <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
+            <span className="w-1 h-1 bg-gray-600 rounded-full" />
+            <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
+            {isLive && (
+              <>
+                <span className="w-1 h-1 bg-gray-600 rounded-full" />
+                <ViewerCount matchId={match.id} enableRealtime={true} />
+              </>
+            )}
           </div>
-        )}
+          
+          {/* Action */}
+          {hasStream && (
+            <div className="pt-1">
+              <div className="bg-white text-black font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-primary hover:text-white transition-colors">
+                Watch Now
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
