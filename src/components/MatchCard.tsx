@@ -312,112 +312,76 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer relative overflow-hidden rounded-2xl">
-      {/* Hero Card Container with Perspective Effect */}
-      <div className="relative h-64 sm:h-80 overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        {/* Background with Tilt Effect */}
-        <div 
-          className="absolute inset-0 transform transition-transform duration-500 group-hover:scale-105"
-          style={{ 
-            transformStyle: 'preserve-3d',
-            perspective: '1000px'
-          }}
-        >
-          <div 
-            className="absolute inset-0 transform transition-all duration-500 group-hover:rotate-y-2"
-            style={{ 
-              transform: 'rotateY(-3deg) rotateX(2deg)',
-              transformStyle: 'preserve-3d'
-            }}
-          >
-            {generateThumbnail()}
-          </div>
-        </div>
-
-        {/* Dramatic Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40" />
-        
-        {/* Golden Accent Gradient (DAZN-style) */}
-        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-yellow-500/20 via-orange-500/10 to-transparent opacity-60" />
-
-        {/* Content Container */}
-        <div className="relative h-full flex flex-col justify-between p-4 sm:p-6 z-10">
+    <div className="group cursor-pointer">
+      <div className="relative overflow-hidden rounded-xl bg-card border border-border transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20">
+        {/* Image Section */}
+        <div className="relative aspect-[16/9] overflow-hidden">
+          {generateThumbnail()}
+          
+          {/* Gradient Overlay for Better Text Contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          
           {/* Top Badges */}
-          <div className="flex items-start justify-between">
-            {/* Live Status Badge */}
+          <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2 z-10">
             {isLive && (
-              <Badge className="bg-red-600 text-white px-3 py-1.5 text-sm font-bold animate-pulse shadow-lg shadow-red-500/50">
-                ● LIVE NOW
+              <Badge className="bg-red-600 text-white px-2.5 py-1 text-xs font-bold border-0 shadow-lg">
+                ● LIVE
               </Badge>
             )}
-            
-            {/* Stream Sources Count */}
             {hasStream && (
-              <Badge className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 text-xs font-semibold shadow-lg">
-                <Play className="w-3.5 h-3.5 mr-1.5 inline" />
-                {match.sources.length}+ Sources
+              <Badge className="bg-background/90 backdrop-blur-sm text-foreground px-2.5 py-1 text-xs font-medium border border-border/50 ml-auto">
+                <Play className="w-3 h-3 mr-1" />
+                {match.sources.length}
               </Badge>
             )}
           </div>
 
-          {/* Bottom Content */}
-          <div className="space-y-3">
-            {/* Match Title - Bold & Dramatic */}
-            <h3 className="font-bold text-xl sm:text-2xl lg:text-3xl text-white leading-tight drop-shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:text-yellow-300">
-              {home && away ? (
-                <span className="block">
-                  <span className="text-yellow-400">{home}</span>
-                  <span className="text-white/60 mx-2">vs</span>
-                  <span className="text-yellow-400">{away}</span>
-                </span>
-              ) : (
-                match.title
-              )}
+          {/* Bottom Info Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+            <h3 className="font-bold text-lg sm:text-xl text-white mb-2 line-clamp-2 drop-shadow-lg">
+              {home && away ? `${home} vs ${away}` : match.title}
             </h3>
-
-            {/* Subtitle with Icon */}
-            <p className="text-sm sm:text-base text-white/80 font-medium drop-shadow-lg">
-              Watch live on <span className="text-yellow-300 font-bold">DAMITV</span>
-            </p>
-
-            {/* Metadata Row */}
-            <div className="flex items-center gap-4 text-xs sm:text-sm text-white/70">
-              <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
-                <Clock className="w-3.5 h-3.5" />
-                <span className="font-medium">
-                  {match.date ? formatTime(match.date) : 'TBD'}
-                </span>
+            
+            <div className="flex items-center gap-3 text-xs text-white/90">
+              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
+                <Clock className="w-3 h-3" />
+                <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
               </div>
               
-              <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
-                <Calendar className="w-3.5 h-3.5" />
-                <span className="font-medium">
-                  {match.date ? formatDateShort(match.date) : 'TBD'}
-                </span>
+              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
+                <Calendar className="w-3 h-3" />
+                <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
               </div>
 
               {isLive && (
-                <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
-                  <Users className="w-3.5 h-3.5 text-green-400" />
+                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-2 py-1 rounded">
+                  <Users className="w-3 h-3 text-green-400" />
                   <ViewerCount matchId={match.id} enableRealtime={true} />
                 </div>
               )}
             </div>
-
-            {/* CTA Button */}
-            {hasStream && (
-              <button className="inline-flex items-center gap-2 bg-white text-black font-bold px-6 py-3 rounded-lg hover:bg-yellow-300 hover:scale-105 transition-all duration-300 shadow-xl shadow-white/20 group/btn">
-                <Play className="w-4 h-4 group-hover/btn:animate-pulse" />
-                <span>Watch for free</span>
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Decorative Corner Accent */}
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl" />
+        {/* Content Section Below Image */}
+        <div className="p-4 space-y-3">
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            Free live sports streaming on DAMITV
+          </p>
+
+          {hasStream && (
+            <button className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-all duration-200 group/btn">
+              <Play className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+              <span>Watch Now</span>
+            </button>
+          )}
+
+          {!isLive && match.date && match.date > Date.now() && (
+            <div className="text-xs text-muted-foreground text-center py-1">
+              Upcoming Match
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
