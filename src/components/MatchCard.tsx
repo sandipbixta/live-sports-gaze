@@ -27,6 +27,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
   preventNavigation,
   isPriority
 }) => {
+  const [countdown, setCountdown] = React.useState<string>('');
+  const [isMatchStarting, setIsMatchStarting] = React.useState(false);
+
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -41,6 +44,43 @@ const MatchCard: React.FC<MatchCardProps> = ({
     const date = new Date(timestamp);
     return format(date, 'MMM d, yyyy');
   };
+
+  // Calculate countdown for upcoming matches
+  React.useEffect(() => {
+    if (!match.date || match.date <= Date.now()) {
+      setCountdown('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const timeUntilMatch = match.date - now;
+
+      if (timeUntilMatch <= 0) {
+        setCountdown('');
+        setIsMatchStarting(true);
+        return;
+      }
+
+      const hours = Math.floor(timeUntilMatch / (1000 * 60 * 60));
+      const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
+
+      if (hours > 24) {
+        const days = Math.floor(hours / 24);
+        setCountdown(`${days}d ${hours % 24}h`);
+      } else if (hours > 0) {
+        setCountdown(`${hours}h ${minutes}m`);
+      } else {
+        setCountdown(`${minutes}m ${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [match.date]);
 
   // Get team badges with fallbacks
   const getTeamBadge = (team: any) => {
@@ -361,9 +401,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Action */}
           {hasStream && (
             <div className="pt-1">
-              <div className="bg-white text-black font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-primary hover:text-white transition-colors">
-                Watch Now
-              </div>
+              {isLive || isMatchStarting ? (
+                <div className="bg-white text-black font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-primary hover:text-white transition-colors">
+                  Watch Now
+                </div>
+              ) : countdown ? (
+                <div className="bg-gray-800 text-white border border-gray-700 font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
+                  <Clock className="w-3.5 h-3.5" />
+                  Starts in {countdown}
+                </div>
+              ) : null}
             </div>
           )}
         </div>
