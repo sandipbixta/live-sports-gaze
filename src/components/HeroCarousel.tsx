@@ -97,12 +97,12 @@ export const HeroCarousel = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
                 
-                {/* SEO-optimized header text */}
-                <div className="relative z-10 p-8 max-w-2xl">
-                  <h2 className="text-xl md:text-2xl font-semibold text-white/90 mb-2 drop-shadow-lg">
+                {/* SEO-optimized header text - positioned at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                  <h2 className="text-sm md:text-base font-medium text-white/95 mb-1 drop-shadow-lg">
                     Watch Live Sports Streaming Free - Champions League, Premier League, La Liga & More
                   </h2>
-                  <p className="text-sm md:text-base text-white/80 drop-shadow-md">
+                  <p className="text-xs md:text-sm text-white/75 drop-shadow-md">
                     Free HD sports streaming for football, basketball, tennis and all major leagues worldwide
                   </p>
                 </div>
