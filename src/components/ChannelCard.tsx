@@ -30,10 +30,10 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
   
   return (
     <Card 
-      className={`overflow-hidden cursor-pointer transition-all duration-200 ${
+      className={`overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg ${
         isActive 
-          ? 'bg-[#242836] border-[#ff5a36]' 
-          : 'bg-[#1A1F2C] border-[#343a4d] hover:bg-[#242836]'
+          ? 'bg-primary/20 border-primary/40 shadow-primary/20' 
+          : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/30'
       }`}
       onClick={onClick}
     >
