@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
 import { fetchAllMatches } from '@/api/sportsApi';
 import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
+import { filterMatchesWithImages } from '@/utils/matchImageFilter';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
 const POSTER_BASE_URL = 'https://streamed.pk';
@@ -46,8 +47,11 @@ export const HeroCarousel = () => {
         // Get featured matches from all sports (major competitions, popular teams)
         const featuredMatches = getFeaturedMatches(allMatches, 10);
         
-        console.log(`⭐ Found ${featuredMatches.length} featured matches from all sports (Football, Basketball, UFC, Cricket, AFL, etc.)`);
-        setMatchesWithPosters(featuredMatches);
+        // Only show matches with images on home page
+        const matchesWithImages = filterMatchesWithImages(featuredMatches);
+        
+        console.log(`⭐ Found ${matchesWithImages.length} featured matches with images from all sports (Football, Basketball, UFC, Cricket, AFL, etc.)`);
+        setMatchesWithPosters(matchesWithImages);
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }

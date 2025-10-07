@@ -6,6 +6,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
+import { filterMatchesWithImages } from '../utils/matchImageFilter';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -31,18 +32,21 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = consolidateMatches(cleanMatches);
+  
+  // Only show matches with images on home page
+  const matchesWithImages = filterMatchesWithImages(consolidatedMatches);
 
   // Enrich matches with viewer counts and sort
   React.useEffect(() => {
     const enrichMatches = async () => {
-      if (consolidatedMatches.length === 0) {
+      if (matchesWithImages.length === 0) {
         setEnrichedMatches([]);
         return;
       }
 
       setIsLoading(true);
       try {
-        const matchesWithViewers = await enrichMatchesWithViewerCounts(consolidatedMatches);
+        const matchesWithViewers = await enrichMatchesWithViewerCounts(matchesWithImages);
         
         // Sort by viewer count first, then by trending score
         const sortedMatches = matchesWithViewers.sort((a, b) => {
@@ -63,7 +67,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
       } catch (error) {
         console.error('Error enriching popular matches:', error);
         // Fallback to trending score sorting
-        const trendingSorted = consolidatedMatches.sort((a, b) => {
+        const trendingSorted = matchesWithImages.sort((a, b) => {
           const aTrending = isTrendingMatch(a.title);
           const bTrending = isTrendingMatch(b.title);
           return bTrending.score - aTrending.score;
@@ -75,7 +79,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
     };
 
     enrichMatches();
-  }, [consolidatedMatches]);
+  }, [matchesWithImages]);
 
   const filteredMatches = enrichedMatches;
   
