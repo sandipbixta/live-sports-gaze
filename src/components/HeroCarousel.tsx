@@ -91,7 +91,7 @@ export const HeroCarousel = () => {
             >
               <div className="relative min-h-[350px] flex items-center overflow-hidden">
                 <div
-                  className="absolute inset-0 bg-cover bg-center"
+                  className="absolute inset-0 bg-contain bg-center bg-no-repeat"
                   style={{ backgroundImage: `url(${posterUrl})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
@@ -114,12 +114,12 @@ export const HeroCarousel = () => {
               to={`/match/${slide.category}/${slide.id}`}
               className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
             >
-              <div className="relative min-h-[350px] flex items-center overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${posterUrl})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
+            <div className="relative min-h-[350px] flex items-center overflow-hidden">
+              <div
+                className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${posterUrl})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
                 <div className="relative z-10 p-8 max-w-xl">
                   <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
                     {slide.date && slide.date <= Date.now() ? 'LIVE NOW' : 'UPCOMING'}
