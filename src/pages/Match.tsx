@@ -19,6 +19,7 @@ import StreamTab from '@/components/match/StreamTab';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
+import LeagueStandings, { LEAGUE_IDS } from '@/components/LeagueStandings';
 
 const Match = () => {
   const { toast } = useToast();
@@ -200,6 +201,31 @@ const Match = () => {
             allStreams={allStreams}
           />
         </div>
+
+        {/* Show league standings for Premier League matches */}
+        {(() => {
+          const matchTitleLower = match.title.toLowerCase();
+          const matchCategoryLower = match.category?.toLowerCase() || '';
+          
+          // Check if this is a Premier League match
+          const leagueKey = Object.keys(LEAGUE_IDS).find(key => 
+            matchTitleLower.includes(key) || matchCategoryLower.includes(key)
+          );
+          
+          if (leagueKey) {
+            const leagueId = LEAGUE_IDS[leagueKey];
+            const leagueName = leagueKey === 'epl' ? 'Premier League' : 
+                             leagueKey.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            
+            return (
+              <LeagueStandings 
+                leagueId={leagueId} 
+                leagueName={leagueName}
+              />
+            );
+          }
+          return null;
+        })()}
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
