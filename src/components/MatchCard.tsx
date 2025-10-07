@@ -312,86 +312,112 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer">
-      {/* Thumbnail Section */}
-      <div className="relative mb-3">
-        <AspectRatio ratio={16 / 9} className="overflow-hidden rounded-xl bg-muted">
-          {generateThumbnail()}
-          
-          {/* Time badge - bottom left (smaller) */}
-          <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2">
-            <Badge className="bg-background/80 text-foreground px-1 py-0.5 text-[9px] font-normal backdrop-blur-sm">
-              <Clock className="w-2.5 h-2.5 mr-0.5" />
-              {match.date ? formatTime(match.date) : 'TBD'}
-            </Badge>
+    <div className="group cursor-pointer relative overflow-hidden rounded-2xl">
+      {/* Hero Card Container with Perspective Effect */}
+      <div className="relative h-64 sm:h-80 overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+        {/* Background with Tilt Effect */}
+        <div 
+          className="absolute inset-0 transform transition-transform duration-500 group-hover:scale-105"
+          style={{ 
+            transformStyle: 'preserve-3d',
+            perspective: '1000px'
+          }}
+        >
+          <div 
+            className="absolute inset-0 transform transition-all duration-500 group-hover:rotate-y-2"
+            style={{ 
+              transform: 'rotateY(-3deg) rotateX(2deg)',
+              transformStyle: 'preserve-3d'
+            }}
+          >
+            {generateThumbnail()}
           </div>
+        </div>
 
-          {/* Live status badge - bottom right */}
-          {isLive && (
-            <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2">
-              <Badge className="bg-destructive text-destructive-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium animate-pulse">
-                LIVE
-              </Badge>
-            </div>
-          )}
-
-          {/* Stream count overlay */}
-          {hasStream && (
-            <div className="absolute top-1 left-1 sm:top-2 sm:left-2">
-              <Badge className="bg-background/90 text-foreground px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-medium backdrop-blur-sm flex items-center gap-1">
-                <Play className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span className="hidden xs:inline">{match.sources.length}+ sources</span>
-              </Badge>
-            </div>
-          )}
-        </AspectRatio>
-      </div>
-
-      {/* Content Section */}
-      <div className="space-y-2">
-        {/* Title */}
-        <h3 className="font-semibold text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
-          {home && away ? `${home} vs ${away}` : match.title}
-        </h3>
+        {/* Dramatic Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/40" />
         
-        {/* Subtitle */}
-        <p className="text-xs text-muted-foreground/80 line-clamp-1">
-          {home && away ? `${home} vs ${away}` : match.title} on damitv.pro
-        </p>
+        {/* Golden Accent Gradient (DAZN-style) */}
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-yellow-500/20 via-orange-500/10 to-transparent opacity-60" />
 
-        {/* Metadata */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {match.date ? formatFullDate(match.date) : 'Date TBD'}
+        {/* Content Container */}
+        <div className="relative h-full flex flex-col justify-between p-4 sm:p-6 z-10">
+          {/* Top Badges */}
+          <div className="flex items-start justify-between">
+            {/* Live Status Badge */}
+            {isLive && (
+              <Badge className="bg-red-600 text-white px-3 py-1.5 text-sm font-bold animate-pulse shadow-lg shadow-red-500/50">
+                ● LIVE NOW
+              </Badge>
+            )}
+            
+            {/* Stream Sources Count */}
+            {hasStream && (
+              <Badge className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                <Play className="w-3.5 h-3.5 mr-1.5 inline" />
+                {match.sources.length}+ Sources
+              </Badge>
+            )}
           </div>
-          
-          {hasStream && (
-            <>
-              <span>•</span>
-              <div className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {match.sources.length}+ sources
+
+          {/* Bottom Content */}
+          <div className="space-y-3">
+            {/* Match Title - Bold & Dramatic */}
+            <h3 className="font-bold text-xl sm:text-2xl lg:text-3xl text-white leading-tight drop-shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:text-yellow-300">
+              {home && away ? (
+                <span className="block">
+                  <span className="text-yellow-400">{home}</span>
+                  <span className="text-white/60 mx-2">vs</span>
+                  <span className="text-yellow-400">{away}</span>
+                </span>
+              ) : (
+                match.title
+              )}
+            </h3>
+
+            {/* Subtitle with Icon */}
+            <p className="text-sm sm:text-base text-white/80 font-medium drop-shadow-lg">
+              Watch live on <span className="text-yellow-300 font-bold">DAMITV</span>
+            </p>
+
+            {/* Metadata Row */}
+            <div className="flex items-center gap-4 text-xs sm:text-sm text-white/70">
+              <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="font-medium">
+                  {match.date ? formatTime(match.date) : 'TBD'}
+                </span>
               </div>
-            </>
-          )}
+              
+              <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
+                <Calendar className="w-3.5 h-3.5" />
+                <span className="font-medium">
+                  {match.date ? formatDateShort(match.date) : 'TBD'}
+                </span>
+              </div>
+
+              {isLive && (
+                <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-sm px-2.5 py-1.5 rounded-lg border border-white/10">
+                  <Users className="w-3.5 h-3.5 text-green-400" />
+                  <ViewerCount matchId={match.id} enableRealtime={true} />
+                </div>
+              )}
+            </div>
+
+            {/* CTA Button */}
+            {hasStream && (
+              <button className="inline-flex items-center gap-2 bg-white text-black font-bold px-6 py-3 rounded-lg hover:bg-yellow-300 hover:scale-105 transition-all duration-300 shadow-xl shadow-white/20 group/btn">
+                <Play className="w-4 h-4 group-hover/btn:animate-pulse" />
+                <span>Watch for free</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Status indicator */}
-        <div className="text-xs flex items-center gap-2">
-          {isLive ? (
-            <>
-              <span className="text-destructive font-medium">Live now</span>
-              <ViewerCount matchId={match.id} enableRealtime={true} />
-            </>
-          ) : match.date ? (
-            <span className="text-muted-foreground">
-              {match.date > Date.now() ? 'Upcoming' : 'Ended'}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">Scheduled</span>
-          )}
-        </div>
+        {/* Decorative Corner Accent */}
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl" />
       </div>
     </div>
   );
