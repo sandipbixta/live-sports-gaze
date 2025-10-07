@@ -98,7 +98,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     return matches;
   }, [liveMatches, searchTerm]);
 
-  // Group matches by sport
+  // Group matches by sport and sort by date (newest first)
   const matchesBySport = React.useMemo(() => {
     const grouped: { [sportId: string]: Match[] } = {};
     
@@ -108,6 +108,14 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         grouped[sportId] = [];
       }
       grouped[sportId].push(match);
+    });
+    
+    // Sort matches within each sport by date (newest/most recent first)
+    Object.keys(grouped).forEach(sportId => {
+      grouped[sportId].sort((a, b) => {
+        // Sort by date descending (newest matches first)
+        return b.date - a.date;
+      });
     });
     
     return grouped;
