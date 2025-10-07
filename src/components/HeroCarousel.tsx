@@ -6,6 +6,10 @@ import { Match } from '@/types/sports';
 import { fetchAllMatches } from '@/api/sportsApi';
 import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
 import { filterMatchesWithImages } from '@/utils/matchImageFilter';
+import { isMatchLive } from '@/utils/matchUtils';
+import { ViewerCount } from './ViewerCount';
+import { Clock, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
 const POSTER_BASE_URL = 'https://streamed.pk';
@@ -125,12 +129,37 @@ export const HeroCarousel = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
                 <div className="relative z-10 p-8 max-w-xl">
-                  <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
-                    {slide.date && slide.date <= Date.now() ? 'LIVE NOW' : 'UPCOMING'}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full">
+                      {isMatchLive(slide) ? 'LIVE NOW' : 'UPCOMING'}
+                    </div>
+                    {isMatchLive(slide) && (
+                      <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-xs font-semibold">
+                        <ViewerCount matchId={slide.id} enableRealtime={true} size="sm" />
+                      </div>
+                    )}
                   </div>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
                     {slide.title}
                   </h2>
+                  <div className="space-y-2 mb-4">
+                    {slide.date && (
+                      <div className="flex items-center gap-3 text-white/90">
+                        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5">
+                          <Calendar className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {format(new Date(slide.date), 'MMM d, yyyy')}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 py-1.5">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            {format(new Date(slide.date), 'h:mm a')}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   <p className="text-base md:text-lg text-white drop-shadow-xl">
                     {slide.category && (
                       <span className="uppercase font-semibold">{slide.category}</span>
