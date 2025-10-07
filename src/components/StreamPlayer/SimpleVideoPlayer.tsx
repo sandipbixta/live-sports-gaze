@@ -200,31 +200,31 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       console.log(`🔧 Initializing HLS with optimized config for ${connectionInfo.effectiveType} connection (${connectionInfo.downlink}Mbps)`);
       console.log(`📊 Buffer settings: ${optimizedConfig.maxBufferLength}s buffer, ${optimizedConfig.maxBufferSize / 1000000}MB max`);
       
+      // Minimal configuration for direct streaming without buffering issues
       hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: false,
+        lowLatencyMode: true,
         
-        // Connection-optimized configuration
-        ...optimizedConfig,
+        // Minimal buffering for smooth playback
+        maxBufferLength: 10,  // Reduced buffer size
+        maxMaxBufferLength: 20,
+        maxBufferSize: 30 * 1000 * 1000,  // 30MB
+        maxBufferHole: 0.5,
         
-        // Fragment loading settings with adaptive timeouts
-        fragLoadingRetryDelay: 1000,
-        levelLoadingRetryDelay: 1000,
+        // Fast loading
+        fragLoadingTimeOut: 10000,
+        manifestLoadingTimeOut: 5000,
+        levelLoadingTimeOut: 5000,
         
-        // Quality and performance
+        // Direct streaming settings
         enableSoftwareAES: true,
         startFragPrefetch: true,
         testBandwidth: false,
-        capLevelToPlayerSize: false,
         
-        // Smart ABR settings based on connection
-        abrEwmaDefaultEstimate: connectionInfo.effectiveType === '4g' ? 1000000 : 500000,
-        abrEwmaFastLive: 3.0,
-        abrEwmaSlowLive: 9.0,
-        
-        startLevel: -1,  // Auto quality
+        // Auto quality
+        startLevel: -1,
         autoStartLoad: true,
-        progressive: false
+        progressive: true  // Enable progressive streaming
       });
       
       // Store reference for quality control

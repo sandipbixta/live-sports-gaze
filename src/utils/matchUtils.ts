@@ -1,60 +1,9 @@
 import { Match } from '../types/sports';
 
+// No consolidation - use matches directly from API with all their sources
 export const consolidateMatches = (matches: Match[]): Match[] => {
-  const matchMap = new Map<string, Match>();
-  
-  matches.forEach(match => {
-    // Create unique key based on match identity (title, date, teams)
-    const homeTeam = match.teams?.home?.name?.toLowerCase().trim() || '';
-    const awayTeam = match.teams?.away?.name?.toLowerCase().trim() || '';
-    const matchTitle = match.title?.toLowerCase().trim() || '';
-    const matchDate = new Date(match.date).toISOString().split('T')[0];
-    
-    // Primary key: teams and date
-    const teamKey = homeTeam && awayTeam 
-      ? `${homeTeam}-vs-${awayTeam}-${matchDate}`
-      : null;
-    
-    // Secondary key: title and date
-    const titleKey = matchTitle 
-      ? `${matchTitle}-${matchDate}`
-      : null;
-    
-    // Use the most specific key available
-    const uniqueKey = teamKey || titleKey || match.id;
-    
-    if (matchMap.has(uniqueKey)) {
-      // Merge sources from duplicate match
-      const existingMatch = matchMap.get(uniqueKey)!;
-      const combinedSources = [...(existingMatch.sources || [])];
-      
-      // Add new sources if they don't already exist
-      if (match.sources) {
-        match.sources.forEach(newSource => {
-          const exists = combinedSources.some(existing => 
-            existing.source === newSource.source && existing.id === newSource.id
-          );
-          if (!exists) {
-            combinedSources.push(newSource);
-          }
-        });
-      }
-      
-      // Update the existing match with combined sources
-      matchMap.set(uniqueKey, {
-        ...existingMatch,
-        sources: combinedSources,
-        // Keep the match with more complete data
-        ...(match.teams && !existingMatch.teams ? { teams: match.teams } : {}),
-        ...(match.title && match.title.length > existingMatch.title.length ? { title: match.title } : {})
-      });
-    } else {
-      // Add new match
-      matchMap.set(uniqueKey, { ...match });
-    }
-  });
-  
-  return Array.from(matchMap.values());
+  // Return matches as-is from API without merging or consolidation
+  return matches;
 };
 
 // Filter matches that have stream sources available
@@ -71,91 +20,12 @@ export const filterMatchesWithSources = (matches: Match[]): Match[] => {
   });
 };
 
+// Minimal filtering - only check if matches have sources
 export const filterCleanMatches = (matches: Match[]): Match[] => {
   return matches.filter(match => {
-    const title = match.title?.toLowerCase() || '';
-    const id = match.id?.toLowerCase() || '';
-    
-    // CRITICAL: Must have stream sources
+    // Only filter: Must have stream sources
     const hasSources = match.sources && Array.isArray(match.sources) && match.sources.length > 0;
-    if (!hasSources) {
-      return false;
-    }
-    
-    // Filter out unwanted football leagues/countries for football matches
-    const isFootball = match.category === 'football' || match.sportId === 'football';
-    if (isFootball) {
-      const homeTeam = match.teams?.home?.name?.toLowerCase() || '';
-      const awayTeam = match.teams?.away?.name?.toLowerCase() || '';
-      
-      const unwantedFootballRegions = [
-        'china', 'chinese', 'csl', 'super league china',
-        'korea', 'korean', 'k league', 'k-league', 'south korea',
-        'hong kong', 'hongkong', 'hk',
-        'thailand', 'thai', 'thai league',
-        'indonesia', 'indonesian', 'liga indonesia',
-        'bhutan', 'bhutanese',
-        'japan', 'japanese', 'j league', 'j-league'
-      ];
-      
-      const hasUnwantedRegion = unwantedFootballRegions.some(region => 
-        title.includes(region) || 
-        homeTeam.includes(region) || 
-        awayTeam.includes(region) ||
-        id.includes(region.replace(/\s+/g, '-'))
-      );
-      
-      if (hasUnwantedRegion) {
-        return false;
-      }
-    }
-    
-    // Extended unwanted content filter
-    const unwantedKeywords = [
-      'sky sports news',
-      'advertisement',
-      'ad break',
-      'promo',
-      'commercial',
-      'highlights only',
-      'preview',
-      'recap',
-      'analysis',
-      'talk show',
-      'studio',
-      'breaking news',
-      'weather',
-      'test transmission',
-      'technical difficulties',
-      'coming soon',
-      'maintenance',
-      'offline',
-      'no signal',
-      'unavailable',
-      'error'
-    ];
-    
-    // Check if title contains unwanted keywords
-    const hasUnwantedContent = unwantedKeywords.some(keyword => 
-      title.includes(keyword) || id.includes(keyword.replace(/\s+/g, '-'))
-    );
-    
-    // Minimum quality requirements
-    const hasValidTitle = match.title && match.title.length > 3;
-    const hasValidDate = match.date;
-    
-    // Filter out matches with suspicious titles (too short, all caps, weird characters)
-    const isSuspiciousTitle = !match.title || 
-      match.title.length < 4 || 
-      (match.title.length < 15 && match.title === match.title.toUpperCase()) ||
-      /^[0-9\s\-_]+$/.test(match.title) || // Only numbers, spaces, dashes, underscores
-      match.title.includes('???') ||
-      match.title.includes('***');
-    
-    return !hasUnwantedContent && 
-           hasValidTitle && 
-           hasValidDate && 
-           !isSuspiciousTitle;
+    return hasSources;
   });
 };
 
