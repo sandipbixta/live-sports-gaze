@@ -4,6 +4,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
 import { fetchLiveMatches } from '@/api/sportsApi';
+import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
 const POSTER_BASE_URL = 'https://streamed.pk';
@@ -36,19 +37,17 @@ export const HeroCarousel = () => {
     return `${POSTER_BASE_URL}${posterPath}`;
   };
   
-  // Fetch live matches with posters
+  // Fetch featured matches with posters
   useEffect(() => {
     const loadMatches = async () => {
       try {
         const liveMatches = await fetchLiveMatches();
         
-        // Only show popular/important matches with posters
-        const featuredMatches = liveMatches.filter(
-          match => match.popular === true && match.poster && match.poster.trim() !== ''
-        );
+        // Get only featured/trending matches (major leagues, popular teams)
+        const featuredMatches = getFeaturedMatches(liveMatches, 7);
         
-        console.log(`⭐ Found ${featuredMatches.length} popular/featured matches with posters out of ${liveMatches.length} total`);
-        setMatchesWithPosters(featuredMatches.slice(0, 8)); // Limit to 8 featured matches
+        console.log(`⭐ Found ${featuredMatches.length} featured matches from major leagues and popular teams`);
+        setMatchesWithPosters(featuredMatches);
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }
