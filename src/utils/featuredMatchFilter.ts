@@ -46,6 +46,30 @@ const MAJOR_BASEBALL = ['mlb', 'world series', 'playoff'];
 // Major tennis
 const MAJOR_TENNIS = ['wimbledon', 'us open', 'french open', 'australian open', 'grand slam', 'atp', 'wta'];
 
+// Major UFC/MMA
+const MAJOR_UFC = ['ufc', 'bellator', 'pfl', 'one championship', 'title fight', 'main event'];
+
+// Major Wrestling
+const MAJOR_WRESTLING = ['wwe', 'aew', 'wrestlemania', 'summerslam', 'royal rumble', 'all out'];
+
+// Major Cricket
+const MAJOR_CRICKET = ['ipl', 'world cup', 'ashes', 't20', 'odi', 'test match', 'bbl', 'psl', 'champions trophy'];
+
+// Major AFL
+const MAJOR_AFL = ['afl', 'grand final', 'finals series'];
+
+// Major Rugby
+const MAJOR_RUGBY = ['six nations', 'rugby world cup', 'rugby championship', 'super rugby', 'premiership'];
+
+// Major Hockey
+const MAJOR_HOCKEY = ['nhl', 'stanley cup', 'playoff'];
+
+// Major Motorsports
+const MAJOR_MOTORSPORTS = ['formula 1', 'f1', 'grand prix', 'motogp', 'nascar'];
+
+// Major Boxing
+const MAJOR_BOXING = ['title fight', 'championship', 'wbc', 'wba', 'ibf', 'wbo'];
+
 /**
  * Check if a match is featured/trending based on competition, teams, or sport
  */
@@ -84,6 +108,62 @@ export const isFeaturedMatch = (match: Match): boolean => {
   // Check for major tennis
   if (category.includes('tennis')) {
     if (MAJOR_TENNIS.some(tournament => title.includes(tournament))) {
+      return true;
+    }
+  }
+  
+  // Check for major UFC/MMA
+  if (category.includes('mma') || category.includes('ufc') || category.includes('fighting')) {
+    if (MAJOR_UFC.some(event => title.includes(event) || category.includes(event))) {
+      return true;
+    }
+  }
+  
+  // Check for major wrestling
+  if (category.includes('wrestling') || category.includes('wwe') || category.includes('aew')) {
+    if (MAJOR_WRESTLING.some(event => title.includes(event))) {
+      return true;
+    }
+  }
+  
+  // Check for major cricket
+  if (category.includes('cricket')) {
+    if (MAJOR_CRICKET.some(comp => title.includes(comp) || category.includes(comp))) {
+      return true;
+    }
+  }
+  
+  // Check for major AFL
+  if (category.includes('afl') || category.includes('australian football')) {
+    if (MAJOR_AFL.some(comp => title.includes(comp) || category.includes(comp))) {
+      return true;
+    }
+  }
+  
+  // Check for major rugby
+  if (category.includes('rugby')) {
+    if (MAJOR_RUGBY.some(comp => title.includes(comp))) {
+      return true;
+    }
+  }
+  
+  // Check for major hockey
+  if (category.includes('hockey') || category.includes('nhl')) {
+    if (MAJOR_HOCKEY.some(league => title.includes(league) || category.includes(league))) {
+      return true;
+    }
+  }
+  
+  // Check for major motorsports
+  if (category.includes('motor') || category.includes('racing') || category.includes('formula')) {
+    if (MAJOR_MOTORSPORTS.some(event => title.includes(event))) {
+      return true;
+    }
+  }
+  
+  // Check for major boxing
+  if (category.includes('boxing') || category.includes('fight')) {
+    if (MAJOR_BOXING.some(event => title.includes(event))) {
       return true;
     }
   }
