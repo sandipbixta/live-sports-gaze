@@ -205,9 +205,9 @@ const Index = () => {
       
       <main className="py-4">
         {/* Essential SEO Header - Compact */}
-        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[180px] flex items-center">
+        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[250px] flex items-center">
           <div 
-            className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroBackground})` }}
           />
           <div className="absolute inset-0 bg-black/40" />
