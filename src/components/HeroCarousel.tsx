@@ -3,7 +3,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
-import { fetchLiveMatches } from '@/api/sportsApi';
+import { fetchAllMatches } from '@/api/sportsApi';
 import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
@@ -37,16 +37,16 @@ export const HeroCarousel = () => {
     return `${POSTER_BASE_URL}${posterPath}`;
   };
   
-  // Fetch featured matches with posters
+  // Fetch featured matches with posters (live + scheduled)
   useEffect(() => {
     const loadMatches = async () => {
       try {
-        const liveMatches = await fetchLiveMatches();
+        const allMatches = await fetchAllMatches();
         
         // Get only featured/trending matches (major leagues, popular teams)
-        const featuredMatches = getFeaturedMatches(liveMatches, 7);
+        const featuredMatches = getFeaturedMatches(allMatches, 7);
         
-        console.log(`⭐ Found ${featuredMatches.length} featured matches from major leagues and popular teams`);
+        console.log(`⭐ Found ${featuredMatches.length} featured matches (live + scheduled) from major leagues and popular teams`);
         setMatchesWithPosters(featuredMatches);
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
@@ -122,7 +122,7 @@ export const HeroCarousel = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
                 <div className="relative z-10 p-8 max-w-xl">
                   <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
-                    LIVE NOW
+                    {slide.date && slide.date <= Date.now() ? 'LIVE NOW' : 'UPCOMING'}
                   </div>
                   <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
                     {slide.title}
