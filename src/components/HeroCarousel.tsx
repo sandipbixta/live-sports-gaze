@@ -32,12 +32,23 @@ export const HeroCarousel = () => {
       try {
         const liveMatches = await fetchLiveMatches();
         
-        const withPosters = liveMatches.filter(
+        // First, try to get popular matches with posters
+        const popularWithPosters = liveMatches.filter(
+          match => match.popular && match.poster && match.poster.trim() !== ''
+        );
+        
+        // If not enough popular matches, fall back to any matches with posters
+        const matchesWithPosters = liveMatches.filter(
           match => match.poster && match.poster.trim() !== ''
         );
         
-        console.log(`🎨 Loaded ${withPosters.length} matches with poster images`);
-        setMatchesWithPosters(withPosters.slice(0, 10)); // Limit to first 10 for performance
+        // Prioritize popular matches, then fill with others if needed
+        const finalMatches = popularWithPosters.length >= 5 
+          ? popularWithPosters 
+          : [...popularWithPosters, ...matchesWithPosters.filter(m => !m.popular)];
+        
+        console.log(`🎨 Loaded ${popularWithPosters.length} popular matches, ${finalMatches.length} total with posters`);
+        setMatchesWithPosters(finalMatches.slice(0, 8)); // Limit to 8 matches
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }
