@@ -9,6 +9,18 @@ export const hasMatchImage = (match: Match): boolean => {
     return true;
   }
 
+  // Check additional image properties that might exist in API response
+  const matchAny = match as any;
+  if (matchAny.photo && matchAny.photo.trim() !== '') {
+    return true;
+  }
+  if (matchAny.image && matchAny.image.trim() !== '') {
+    return true;
+  }
+  if (matchAny.web && matchAny.web.trim() !== '') {
+    return true;
+  }
+
   // Check if match has team badges or logos
   const hasHomeBadge = match.teams?.home?.badge && match.teams.home.badge.trim() !== '';
   const hasAwayBadge = match.teams?.away?.badge && match.teams.away.badge.trim() !== '';
