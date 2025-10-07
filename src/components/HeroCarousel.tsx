@@ -72,30 +72,30 @@ export const HeroCarousel = () => {
             to={`/match/${match.category}/${match.id}`}
             className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
           >
-            <div className="relative min-h-[350px] flex items-center overflow-hidden bg-black">
-              {/* Background Poster - Positioned Right, Bigger */}
+            <div className="relative min-h-[350px] flex items-center overflow-hidden">
+              {/* Background Poster - Full Width */}
               <div
-                className="absolute right-0 top-0 bottom-0 w-[65%] bg-cover bg-center"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${getAbsolutePosterUrl(match.poster || '')})` }}
               />
               
-              {/* Lighter Gradient Overlay - Less fade on poster */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black from-0% via-black/70 via-30% to-transparent to-50%" />
+              {/* Subtle Gradient - Just enough for text readability */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
               
-              {/* Content - Overlays on Left */}
-              <div className="relative z-10 p-8 max-w-lg">
+              {/* Content - Left Side */}
+              <div className="relative z-10 p-8 max-w-xl">
                 <div className="inline-block px-3 py-1 bg-red-600 text-white text-xs font-bold rounded mb-3">
                   LIVE NOW
                 </div>
                 <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
                   {match.title}
                 </h2>
-                <p className="text-base md:text-lg text-gray-200 drop-shadow-lg">
+                <p className="text-base md:text-lg text-white drop-shadow-xl">
                   {match.category && (
                     <span className="uppercase font-semibold">{match.category}</span>
                   )}
                   {match.teams?.home?.name && match.teams?.away?.name && (
-                    <span className="block mt-2 text-sm opacity-90">
+                    <span className="block mt-2 text-sm opacity-95">
                       {match.teams.home.name} vs {match.teams.away.name}
                     </span>
                   )}
