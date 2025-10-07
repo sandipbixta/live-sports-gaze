@@ -55,15 +55,15 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           return acc;
         }, {} as Record<string, number>));
         
-        // Enrich all matches with viewer counts and get top viewed
+        // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
         
         // Only show matches with images on home page
         const matchesWithImages = filterMatchesWithImages(enrichedAllMatches);
         
-        // Sort by viewers and show top 12 (will show matches even with 0 viewers)
         const sortedByViewers = sortMatchesByViewers(matchesWithImages);
-        setMostViewedMatches(sortedByViewers.slice(0, 12));
+        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+        setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
       } catch (error) {
         console.error('Error loading matches:', error);
