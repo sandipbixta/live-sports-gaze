@@ -204,6 +204,21 @@ const Index = () => {
       </Helmet>
       
       <main className="py-4">
+        {/* Quick Navigation Links */}
+        <div className="mb-4 flex flex-wrap gap-3 justify-center">
+          <Link to="/live" className="text-primary hover:text-primary/80 font-medium underline">
+            Live Sports Matches
+          </Link>
+          <span className="text-muted-foreground">•</span>
+          <Link to="/channels" className="text-primary hover:text-primary/80 font-medium underline">
+            TV Channels Collection
+          </Link>
+          <span className="text-muted-foreground">•</span>
+          <Link to="/schedule" className="text-primary hover:text-primary/80 font-medium underline">
+            Sports Schedule
+          </Link>
+        </div>
+
         {/* Essential SEO Header - Compact */}
         <header className="mb-6 relative rounded-xl overflow-hidden min-h-[350px] flex items-center">
           <div 
@@ -375,7 +390,7 @@ const Index = () => {
                       We cover major sports leagues worldwide including Premier League football, Champions League, NBA basketball, ATP tennis, Formula 1 racing, and boxing events. Our coverage spans European football leagues, American sports, and international tournaments.
                     </p>
                     <p className="text-muted-foreground text-sm">
-                      Whether you're looking for <Link to="/live" className="text-blue-400 hover:underline">live sports matches</Link>, want to browse our extensive <Link to="/channels" className="text-blue-400 hover:underline">TV channels collection</Link>, or check upcoming games in our <Link to="/schedule" className="text-blue-400 hover:underline">sports schedule</Link>, DamiTV provides comprehensive sports entertainment.
+                      DamiTV provides comprehensive sports entertainment with live matches, extensive TV channels, and complete schedules for all major sports.
                     </p>
                   </div>
             </div>
