@@ -21,6 +21,7 @@ import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
+import heroBanner from '@/assets/hero-banner.jpeg';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -205,10 +206,22 @@ const Index = () => {
       <main className="py-4">
         {/* Essential SEO Header - Compact */}
         <header className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-3">Free Live Sports Streaming Online - DamiTV</h1>
-          <p className="text-lg text-muted-foreground max-w-4xl">
-            Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
-          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-3">Free Live Sports Streaming Online - DamiTV</h1>
+              <p className="text-lg text-muted-foreground">
+                Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
+              </p>
+            </div>
+            <div className="relative rounded-lg overflow-hidden">
+              <img 
+                src={heroBanner} 
+                alt="DamiTV Live Sports Streaming" 
+                className="w-full h-auto object-cover"
+                loading="eager"
+              />
+            </div>
+          </div>
         </header>
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
