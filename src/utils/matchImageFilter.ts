@@ -9,11 +9,13 @@ export const hasMatchImage = (match: Match): boolean => {
     return true;
   }
 
-  // Check if match has team badges
+  // Check if match has team badges or logos
   const hasHomeBadge = match.teams?.home?.badge && match.teams.home.badge.trim() !== '';
   const hasAwayBadge = match.teams?.away?.badge && match.teams.away.badge.trim() !== '';
+  const hasHomeLogo = match.teams?.home?.logo && match.teams.home.logo.trim() !== '';
+  const hasAwayLogo = match.teams?.away?.logo && match.teams.away.logo.trim() !== '';
 
-  return hasHomeBadge || hasAwayBadge;
+  return hasHomeBadge || hasAwayBadge || hasHomeLogo || hasAwayLogo;
 };
 
 /**

@@ -58,7 +58,10 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
         
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
+        // Only show matches with images on home page
+        const matchesWithImages = filterMatchesWithImages(enrichedAllMatches);
+        
+        const sortedByViewers = sortMatchesByViewers(matchesWithImages);
         const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
         setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
@@ -79,7 +82,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredMatches = React.useMemo(() => {
-    let matches = liveMatches;
+    // Only show matches with images on home page
+    let matches = filterMatchesWithImages(liveMatches);
     
     // Apply search filter if provided
     if (searchTerm.trim()) {
