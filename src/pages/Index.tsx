@@ -205,15 +205,15 @@ const Index = () => {
       
       <main className="py-4">
         {/* Essential SEO Header - Compact */}
-        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[200px] flex items-center">
+        <header className="mb-6 relative rounded-xl overflow-hidden min-h-[180px] flex items-center">
           <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat"
             style={{ backgroundImage: `url(${heroBackground})` }}
           />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative z-10 p-6">
-            <h1 className="text-2xl font-bold text-white mb-2">Free Live Sports Streaming Online - DamiTV</h1>
-            <p className="text-base text-gray-100 max-w-4xl">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative z-10 p-4">
+            <h1 className="text-xl font-bold text-white mb-1">Free Live Sports Streaming Online - DamiTV</h1>
+            <p className="text-sm text-gray-100 max-w-3xl">
               Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
             </p>
           </div>
