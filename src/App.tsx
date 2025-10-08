@@ -28,6 +28,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -101,6 +103,16 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
+                </SEOPageTracker>
+              } />
+              <Route path="/blog" element={
+                <SEOPageTracker pageTitle="Sports Blog" contentType="news">
+                  <Blog />
+                </SEOPageTracker>
+              } />
+              <Route path="/blog/:slug" element={
+                <SEOPageTracker contentType="news">
+                  <BlogPost />
                 </SEOPageTracker>
               } />
               <Route path="/about" element={<About />} />
