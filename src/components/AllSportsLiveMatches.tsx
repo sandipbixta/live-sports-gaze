@@ -80,6 +80,27 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     loadLiveMatches();
   }, [toast]);
 
+  // Refresh viewer counts every 30 seconds to show newly watched matches
+  useEffect(() => {
+    const refreshViewerCounts = async () => {
+      if (allMatches.length === 0) return;
+      
+      try {
+        const enrichedAllMatches = await enrichMatchesWithViewerCounts(allMatches);
+        const matchesWithImages = filterMatchesWithImages(enrichedAllMatches);
+        const sortedByViewers = sortMatchesByViewers(matchesWithImages);
+        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+        setMostViewedMatches(matchesWithViewers.slice(0, 12));
+      } catch (error) {
+        console.error('Error refreshing viewer counts:', error);
+      }
+    };
+
+    const interval = setInterval(refreshViewerCounts, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(interval);
+  }, [allMatches]);
+
   // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredMatches = React.useMemo(() => {
     // Only show matches with images on home page
