@@ -106,10 +106,10 @@ export const HeroCarousel = () => {
                 
                 {/* SEO-optimized header text - positioned at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent">
-                  <h2 className="text-xs sm:text-sm md:text-base font-medium text-white/95 mb-0.5 sm:mb-1 drop-shadow-lg leading-tight">
+                  <h2 className="text-[10px] sm:text-xs md:text-sm font-medium text-white/95 mb-0.5 sm:mb-1 drop-shadow-lg leading-tight">
                     Watch Live Sports Streaming Free - Champions League, Premier League, La Liga & More
                   </h2>
-                  <p className="text-[10px] sm:text-xs md:text-sm text-white/75 drop-shadow-md leading-tight">
+                  <p className="text-[9px] sm:text-[10px] md:text-xs text-white/75 drop-shadow-md leading-tight">
                     Free HD sports streaming for football, basketball, tennis and all major leagues worldwide
                   </p>
                 </div>
@@ -139,7 +139,7 @@ export const HeroCarousel = () => {
                       </div>
                     )}
                   </div>
-                  <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 md:mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
+                  <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 md:mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
                     {slide.title}
                   </h2>
                   <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-3 md:mb-4">
@@ -160,12 +160,12 @@ export const HeroCarousel = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white drop-shadow-xl">
+                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-white drop-shadow-xl">
                     {slide.category && (
                       <span className="uppercase font-semibold">{slide.category}</span>
                     )}
                     {slide.teams?.home?.name && slide.teams?.away?.name && (
-                      <span className="block mt-1 sm:mt-1.5 md:mt-2 text-[10px] sm:text-xs md:text-sm opacity-95">
+                      <span className="block mt-1 sm:mt-1.5 md:mt-2 text-[9px] sm:text-[10px] md:text-xs opacity-95">
                         {slide.teams.home.name} vs {slide.teams.away.name}
                       </span>
                     )}
