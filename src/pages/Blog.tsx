@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import PageLayout from "@/components/PageLayout";
 import BlogGenerator from "@/components/BlogGenerator";
+import BlogAdUnit from "@/components/ads/BlogAdUnit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,9 @@ const Blog = () => {
           <BlogGenerator onSuccess={fetchPosts} />
         </div>
 
+        {/* Top Banner Ad */}
+        <BlogAdUnit position="top" />
+
         {/* Category Filter */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -212,6 +216,13 @@ const Blog = () => {
                 </div>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Bottom Banner Ad */}
+        {!loading && filteredPosts.length > 0 && (
+          <div className="mt-12">
+            <BlogAdUnit position="bottom" />
           </div>
         )}
       </div>

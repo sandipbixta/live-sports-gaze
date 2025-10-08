@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import PageLayout from "@/components/PageLayout";
+import BlogAdUnit from "@/components/ads/BlogAdUnit";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -209,10 +210,32 @@ const BlogPost = () => {
           </div>
         </header>
 
+        {/* Top Ad */}
+        <BlogAdUnit position="top" />
+
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none mb-12">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
+        <div className="prose prose-lg max-w-none mb-8">
+          {/* Split content and insert mid-article ad */}
+          {(() => {
+            const paragraphs = post.content.split('\n\n');
+            const midPoint = Math.floor(paragraphs.length / 2);
+            const firstHalf = paragraphs.slice(0, midPoint).join('\n\n');
+            const secondHalf = paragraphs.slice(midPoint).join('\n\n');
+            
+            return (
+              <>
+                <ReactMarkdown>{firstHalf}</ReactMarkdown>
+                <div className="not-prose my-8">
+                  <BlogAdUnit position="middle" />
+                </div>
+                <ReactMarkdown>{secondHalf}</ReactMarkdown>
+              </>
+            );
+          })()}
         </div>
+
+        {/* Bottom Ad */}
+        <BlogAdUnit position="bottom" />
 
         {/* Tags */}
         {post.tags.length > 0 && (
