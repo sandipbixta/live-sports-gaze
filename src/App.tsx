@@ -24,6 +24,10 @@ import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -99,6 +103,10 @@ const App: React.FC = () => {
                   <News />
                 </SEOPageTracker>
               } />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="/dmca" element={<DMCANotice />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
