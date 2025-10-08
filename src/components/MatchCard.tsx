@@ -262,7 +262,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-lg border border-white/30 bg-gray-800/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-primary hover:shadow-[0_8px_32px_0_rgba(255,90,54,0.3)] hover:bg-gray-700/40">
+      <div className="relative overflow-hidden rounded-lg border-2 border-white/5 bg-black transition-all duration-300 hover:border-primary">
         {/* Image Section */}
         <div className="relative aspect-video overflow-hidden bg-gray-900">
           {generateThumbnail()}

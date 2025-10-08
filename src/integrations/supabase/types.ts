@@ -14,63 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      blog_posts: {
-        Row: {
-          author: string | null
-          category: string
-          content: string
-          created_at: string
-          excerpt: string | null
-          featured_image: string | null
-          id: string
-          is_published: boolean | null
-          meta_description: string | null
-          meta_title: string | null
-          published_at: string | null
-          slug: string
-          tags: string[] | null
-          title: string
-          updated_at: string | null
-          views: number | null
-        }
-        Insert: {
-          author?: string | null
-          category: string
-          content: string
-          created_at?: string
-          excerpt?: string | null
-          featured_image?: string | null
-          id?: string
-          is_published?: boolean | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug: string
-          tags?: string[] | null
-          title: string
-          updated_at?: string | null
-          views?: number | null
-        }
-        Update: {
-          author?: string | null
-          category?: string
-          content?: string
-          created_at?: string
-          excerpt?: string | null
-          featured_image?: string | null
-          id?: string
-          is_published?: boolean | null
-          meta_description?: string | null
-          meta_title?: string | null
-          published_at?: string | null
-          slug?: string
-          tags?: string[] | null
-          title?: string
-          updated_at?: string | null
-          views?: number | null
-        }
-        Relationships: []
-      }
       iptv_providers: {
         Row: {
           base_url: string
@@ -107,54 +50,6 @@ export type Database = {
           playlist_type?: string | null
           updated_at?: string
           username?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          avatar_url: string | null
-          created_at: string
-          display_name: string | null
-          email: string | null
-          id: string
-          updated_at: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id: string
-          updated_at?: string
-        }
-        Update: {
-          avatar_url?: string | null
-          created_at?: string
-          display_name?: string | null
-          email?: string | null
-          id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
         }
         Relationships: []
       }
@@ -206,20 +101,13 @@ export type Database = {
         Args: { match_id_param: string }
         Returns: number
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
       heartbeat_viewer: {
         Args: { match_id_param: string; session_id_param: string }
         Returns: undefined
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -346,8 +234,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "moderator", "user"],
-    },
+    Enums: {},
   },
 } as const
