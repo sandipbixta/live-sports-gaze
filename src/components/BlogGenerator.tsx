@@ -37,6 +37,19 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
     checkAdminStatus();
   }, []);
 
+  useEffect(() => {
+    // Redirect to auth if not logged in
+    if (!checkingAuth && !isAdmin) {
+      const checkSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          navigate('/auth');
+        }
+      };
+      checkSession();
+    }
+  }, [checkingAuth, isAdmin, navigate]);
+
   const checkAdminStatus = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
