@@ -30,6 +30,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Auth from "./pages/Auth";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -120,6 +121,7 @@ const App: React.FC = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/dmca" element={<DMCANotice />} />
+              <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

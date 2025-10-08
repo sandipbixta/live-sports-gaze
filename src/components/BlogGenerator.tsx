@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const CATEGORIES = [
   'Sports Streaming',
@@ -23,9 +24,85 @@ interface BlogGeneratorProps {
 }
 
 const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
+  const navigate = useNavigate();
   const [topic, setTopic] = useState('');
   const [category, setCategory] = useState('Sports Streaming');
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, []);
+
+  const checkAdminStatus = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        setIsAdmin(false);
+        setCheckingAuth(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setIsAdmin(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!image) return null;
+
+    const fileExt = image.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('blog-images')
+      .upload(filePath, image);
+
+    if (uploadError) {
+      console.error('Error uploading image:', uploadError);
+      toast.error('Failed to upload image');
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('blog-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
 
   const generateBlogPost = async () => {
     if (!topic.trim()) {
@@ -35,8 +112,14 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
 
     setLoading(true);
     try {
+      let imageUrl = null;
+      
+      if (image) {
+        imageUrl = await uploadImage();
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-blog-post', {
-        body: { topic, category }
+        body: { topic, category, featured_image: imageUrl }
       });
 
       if (error) {
@@ -49,6 +132,8 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
 
       toast.success('Blog post generated and published!');
       setTopic('');
+      setImage(null);
+      setImagePreview('');
       onSuccess?.();
     } catch (error: any) {
       console.error('Error generating blog post:', error);
@@ -64,6 +149,32 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 animate-spin" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <Card className="p-6">
+        <div className="text-center space-y-4">
+          <div className="text-muted-foreground">
+            <p className="text-lg font-semibold">Admin Access Required</p>
+            <p className="text-sm mt-2">You need admin privileges to generate blog posts.</p>
+          </div>
+          <Button onClick={() => navigate('/auth')} variant="default">
+            Sign In
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -105,6 +216,45 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="image">Featured Image (Optional)</Label>
+            <div className="mt-2">
+              {imagePreview ? (
+                <div className="relative">
+                  <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setImage(null);
+                      setImagePreview('');
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label htmlFor="image-upload" className="cursor-pointer">
+                  <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Click to upload image</p>
+                    <p className="text-xs text-muted-foreground mt-1">Max 5MB</p>
+                  </div>
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                    disabled={loading}
+                  />
+                </label>
+              )}
+            </div>
           </div>
 
           <Button 
