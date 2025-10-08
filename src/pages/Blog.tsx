@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import PageLayout from "@/components/PageLayout";
+import BlogGenerator from "@/components/BlogGenerator";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,11 @@ const Blog = () => {
           <p className="text-muted-foreground text-lg">
             Expert guides, match previews, and everything you need to know about watching live sports
           </p>
+        </div>
+
+        {/* AI Blog Generator */}
+        <div className="mb-8">
+          <BlogGenerator onSuccess={fetchPosts} />
         </div>
 
         {/* Category Filter */}
