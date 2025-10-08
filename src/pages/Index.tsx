@@ -377,6 +377,12 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* SEO Content - Competitor keywords */}
+        <CompetitorSEOContent />
+        
+        {/* Rich Homepage Content for AdSense Approval */}
+        <HomepageContent />
       </main>
     </PageLayout>
   );
