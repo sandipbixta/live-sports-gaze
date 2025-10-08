@@ -61,6 +61,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         // For "Popular by Viewers", show ALL matches with viewers (no image filter)
         const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
         const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+        console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
         setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
       } catch (error) {
@@ -84,10 +85,12 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       if (allMatches.length === 0) return;
       
       try {
+        console.log('🔄 Refreshing viewer counts for', allMatches.length, 'matches');
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(allMatches);
         // Show ALL matches with viewers (no image filter)
         const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
         const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+        console.log('🔥 Refreshed - Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
         setMostViewedMatches(matchesWithViewers.slice(0, 12));
       } catch (error) {
         console.error('Error refreshing viewer counts:', error);

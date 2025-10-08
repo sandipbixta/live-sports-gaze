@@ -11,7 +11,8 @@ export const fetchMatchViewerCounts = async (matchIds: string[]): Promise<Map<st
         const { data: count, error: countError } = await supabase
           .rpc('get_viewer_count', { match_id_param: matchId });
         
-        if (!countError && count !== null) {
+        if (!countError && count !== null && count > 0) {
+          console.log(`👁️ Match ${matchId} has ${count} viewers`);
           viewerCounts.set(matchId, count);
         }
       } catch (err) {
