@@ -118,8 +118,19 @@ const BlogGenerator = ({ onSuccess }: BlogGeneratorProps) => {
         imageUrl = await uploadImage();
       }
 
+      // Get the current session to pass the auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Please log in to generate blog posts');
+        navigate('/auth');
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-blog-post', {
-        body: { topic, category, featured_image: imageUrl }
+        body: { topic, category, featured_image: imageUrl },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
 
       if (error) {
