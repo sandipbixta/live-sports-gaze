@@ -233,9 +233,9 @@ const ManualMatchPlayer = () => {
                 </div>
               )}
               
-              {/* Video Advertisement */}
-              <div className="mb-4">
-                <Advertisement type="video" className="w-full" />
+              {/* Banner Advertisement Above Video */}
+              <div className="mb-4 px-4 pt-4">
+                <Advertisement type="banner" className="w-full" />
               </div>
               
               <div className="relative aspect-video bg-black" data-player-container>
