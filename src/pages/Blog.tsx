@@ -5,6 +5,7 @@ import PageLayout from '@/components/PageLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Calendar, Tag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -71,8 +72,34 @@ const Blog = () => {
             <div className="h-12 w-12 border-4 border-t-primary rounded-full animate-spin"></div>
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-xl text-muted-foreground">No blog posts yet. Check back soon!</p>
+          <div className="text-center py-12 bg-white dark:bg-black border border-black dark:border-white rounded-lg p-8">
+            <h2 className="text-2xl font-bold mb-4 text-black dark:text-white">No blog posts yet</h2>
+            <p className="text-muted-foreground mb-6">
+              Want to create your first blog post? Follow these steps:
+            </p>
+            <div className="text-left max-w-md mx-auto space-y-3 mb-6">
+              <div className="flex items-start gap-3">
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                <p className="text-black dark:text-white">Make sure you're logged in and have admin privileges</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+                <p className="text-black dark:text-white">Go to the admin panel at <code className="bg-muted px-2 py-1 rounded">/admin/blog</code></p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+                <p className="text-black dark:text-white">Click "New Post" and start writing!</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">4</div>
+                <p className="text-black dark:text-white">Upload images, add content, and publish</p>
+              </div>
+            </div>
+            <Link to="/admin/blog">
+              <Button size="lg">
+                Go to Admin Panel
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
