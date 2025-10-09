@@ -41,14 +41,14 @@ const BlogPost = () => {
   const fetchPost = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('blog_posts' as any)
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setPost(data);
+      setPost(data as any);
     } catch (error) {
       console.error('Error fetching blog post:', error);
       toast({
@@ -158,7 +158,7 @@ const BlogPost = () => {
 
         <div className="border-t border-black dark:border-white pt-6">
           <h3 className="text-lg font-semibold mb-4">Share this post</h3>
-          <SocialShare />
+          <SocialShare title={post.title} />
         </div>
       </article>
     </PageLayout>

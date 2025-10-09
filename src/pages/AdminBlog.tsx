@@ -51,11 +51,11 @@ const AdminBlog = () => {
   const checkAdminRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_roles' as any)
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         toast({
@@ -77,12 +77,12 @@ const AdminBlog = () => {
   const fetchPosts = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('blog_posts' as any)
         .select('id, title, slug, excerpt, category, is_published, published_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      setPosts((data as any) || []);
     } catch (error) {
       console.error('Error fetching posts:', error);
       toast({
@@ -100,7 +100,7 @@ const AdminBlog = () => {
 
     try {
       const { error } = await supabase
-        .from('blog_posts')
+        .from('blog_posts' as any)
         .delete()
         .eq('id', id);
 

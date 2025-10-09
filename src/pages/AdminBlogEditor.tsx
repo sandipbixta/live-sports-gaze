@@ -48,11 +48,11 @@ const AdminBlogEditor = () => {
   const checkAdminRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_roles' as any)
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'admin')
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         toast({
@@ -71,22 +71,24 @@ const AdminBlogEditor = () => {
   const loadPost = async () => {
     try {
       const { data, error } = await supabase
-        .from('blog_posts')
+        .from('blog_posts' as any)
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) return;
 
-      setTitle(data.title);
-      setSlug(data.slug);
-      setExcerpt(data.excerpt || '');
-      setContent(data.content);
-      setCategory(data.category);
-      setTags(data.tags?.join(', ') || '');
-      setFeaturedImage(data.featured_image || '');
-      setAuthor(data.author || 'DamiTV Team');
-      setIsPublished(data.is_published);
+      const postData = data as any;
+      setTitle(postData.title);
+      setSlug(postData.slug);
+      setExcerpt(postData.excerpt || '');
+      setContent(postData.content);
+      setCategory(postData.category);
+      setTags(postData.tags?.join(', ') || '');
+      setFeaturedImage(postData.featured_image || '');
+      setAuthor(postData.author || 'DamiTV Team');
+      setIsPublished(postData.is_published);
     } catch (error) {
       console.error('Error loading post:', error);
       toast({
@@ -142,7 +144,7 @@ const AdminBlogEditor = () => {
 
       if (id === 'new') {
         const { error } = await supabase
-          .from('blog_posts')
+          .from('blog_posts' as any)
           .insert(postData);
 
         if (error) throw error;
@@ -153,7 +155,7 @@ const AdminBlogEditor = () => {
         });
       } else {
         const { error } = await supabase
-          .from('blog_posts')
+          .from('blog_posts' as any)
           .update(postData)
           .eq('id', id);
 
