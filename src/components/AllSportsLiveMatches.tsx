@@ -104,8 +104,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredMatches = React.useMemo(() => {
-    // Show all live matches regardless of images
-    let matches = liveMatches;
+    // Only show matches with images on home page
+    let matches = filterMatchesWithImages(liveMatches);
     
     // Apply search filter if provided
     if (searchTerm.trim()) {

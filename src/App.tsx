@@ -22,10 +22,6 @@ import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import News from "./pages/News";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import AdminBlog from "./pages/AdminBlog";
-import AdminBlogEditor from "./pages/AdminBlogEditor";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
@@ -105,26 +101,6 @@ const App: React.FC = () => {
               <Route path="/news" element={
                 <SEOPageTracker pageTitle="Latest Football News" contentType="news">
                   <News />
-                </SEOPageTracker>
-              } />
-              <Route path="/blog" element={
-                <SEOPageTracker pageTitle="Blog - Sports Analysis" contentType="blog">
-                  <Blog />
-                </SEOPageTracker>
-              } />
-              <Route path="/blog/:slug" element={
-                <SEOPageTracker contentType="blog">
-                  <BlogPost />
-                </SEOPageTracker>
-              } />
-              <Route path="/admin/blog" element={
-                <SEOPageTracker pageTitle="Admin - Manage Blog" contentType="admin">
-                  <AdminBlog />
-                </SEOPageTracker>
-              } />
-              <Route path="/admin/blog/:id" element={
-                <SEOPageTracker pageTitle="Admin - Edit Blog Post" contentType="admin">
-                  <AdminBlogEditor />
                 </SEOPageTracker>
               } />
               <Route path="/about" element={<About />} />

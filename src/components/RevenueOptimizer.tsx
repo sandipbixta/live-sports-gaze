@@ -3,7 +3,7 @@ import { analytics } from '@/utils/analytics';
 
 interface RevenueOptimizerProps {
   pagePath: string;
-  contentType: 'match' | 'live' | 'channels' | 'schedule' | 'news' | 'home' | 'blog' | 'admin';
+  contentType: 'match' | 'live' | 'channels' | 'schedule' | 'news' | 'home';
 }
 
 const RevenueOptimizer: React.FC<RevenueOptimizerProps> = ({ pagePath, contentType }) => {
