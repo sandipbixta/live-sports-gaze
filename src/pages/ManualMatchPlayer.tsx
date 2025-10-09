@@ -268,11 +268,6 @@ const ManualMatchPlayer = () => {
             </div>
           </div>
 
-          {/* Adult Banner Ad - below video player */}
-          <div className="mb-4 flex justify-center">
-            <AdultBannerAd type="mobile" />
-          </div>
-
           <div className="lg:col-span-1">
             <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-4">
               <h3 className="text-lg font-semibold text-white mb-4">Stream Sources</h3>
