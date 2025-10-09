@@ -19,6 +19,13 @@ const MAJOR_COMPETITIONS = [
   'carabao cup',
   'super cup', 'supercup',
   'club world cup',
+  // International football
+  'nations league', 'uefa nations',
+  'world cup qualifiers', 'wc qualifiers', 'qualifying',
+  'international friendly', 'friendly',
+  'conmebol', 'concacaf',
+  'afcon', 'africa cup',
+  'asian cup',
 ];
 
 // Popular teams across sports
