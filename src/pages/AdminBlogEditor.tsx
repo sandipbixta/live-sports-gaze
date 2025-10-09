@@ -9,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, ImagePlus } from 'lucide-react';
 import { Session } from '@supabase/supabase-js';
+import ImageUploader from '@/components/ImageUploader';
 
 const AdminBlogEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -280,14 +281,28 @@ const AdminBlogEditor = () => {
           </div>
 
           <div>
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input
-              id="featuredImage"
-              value={featuredImage}
-              onChange={(e) => setFeaturedImage(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="bg-white dark:bg-black"
+            <ImageUploader
+              label="Featured Image"
+              currentImage={featuredImage}
+              onImageUploaded={(url) => setFeaturedImage(url)}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="contentImages">Insert Images in Content</Label>
+            <div className="border border-black dark:border-white rounded-lg p-4">
+              <ImageUploader
+                label="Upload image for content"
+                onImageUploaded={(url) => {
+                  // Insert image markdown at cursor position
+                  const imageMarkdown = `\n<img src="${url}" alt="Blog image" class="w-full rounded-lg my-4" />\n`;
+                  setContent(content + imageMarkdown);
+                }}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Upload an image and it will be automatically inserted into your content
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
