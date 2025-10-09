@@ -28,7 +28,7 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
   const isDirectStream = streamUrl.match(/\.(m3u8|mp4|webm)(\?|$)/i);
 
   useEffect(() => {
-    if (!isDirectStream || !videoRef.current || !streamUrl) return;
+    if (!isDirectStream || !videoRef.current || !streamUrl || !isOpen) return;
 
     const video = videoRef.current;
 
@@ -39,31 +39,67 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
           enableWorker: true,
           lowLatencyMode: true,
           backBufferLength: 90,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          debug: false,
+          xhrSetup: (xhr: any) => {
+            xhr.withCredentials = false; // Disable credentials for CORS
+          }
         });
         
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
         
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video.play().catch(console.error);
+          console.log('HLS manifest loaded, attempting to play...');
+          video.play().catch(err => {
+            console.error('Error playing video:', err);
+          });
+        });
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          console.error('HLS error:', data);
+          if (data.fatal) {
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.log('Network error, trying to recover...');
+                hls.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.log('Media error, trying to recover...');
+                hls.recoverMediaError();
+                break;
+              default:
+                console.error('Fatal error, destroying HLS instance');
+                hls.destroy();
+                break;
+            }
+          }
         });
 
         hlsRef.current = hls;
 
         return () => {
-          hls.destroy();
+          if (hls) {
+            hls.destroy();
+          }
         };
       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         // Native HLS support (Safari)
+        console.log('Using native HLS support');
         video.src = streamUrl;
-        video.play().catch(console.error);
+        video.play().catch(err => {
+          console.error('Error playing video:', err);
+        });
       }
     } else {
       // Direct MP4 or other formats
       video.src = streamUrl;
-      video.play().catch(console.error);
+      video.play().catch(err => {
+        console.error('Error playing video:', err);
+      });
     }
-  }, [streamUrl, isDirectStream]);
+  }, [streamUrl, isDirectStream, isOpen]);
 
   const handleFullscreen = () => {
     const element = isDirectStream 
