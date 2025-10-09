@@ -11,6 +11,30 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
+    id: "india-women-vs-south-africa-women-live",
+    title: "India Cricket Women vs South Africa Cricket Women",
+    date: new Date().toISOString(), // Live now
+    teams: {
+      home: "India Cricket Women",
+      away: "South Africa Cricket Women"
+    },
+    links: [
+      {
+        id: "hls-stream",
+        name: "HD Stream",
+        url: "https://a111.azplay13.me/hls/streama239082/index.m3u8?cst=644fcbb4a357dfeafd5a2da5a0d09d03",
+        quality: "HD"
+      }
+    ],
+    visible: true,
+    image: "/api/images/proxy/GwZg7AZpYEZgHCAjAJgCzrAY29lBWSUYAUwVmDTAE5p5gJhqDh61hh1OPgBDYLKQRcOJBt15cyAE1LBCETI3BiOzdtRAwmNSgJC8QWECRBmzMLQZCIQLJBSwi5jFGFUoe78o2pzP+KzAYO7iYhBAA.webp",
+    seo: {
+      keywords: "India Women vs South Africa Women live stream, cricket women live, india cricket live",
+      description: "Watch India Cricket Women vs South Africa Cricket Women live stream online for free.",
+      category: "Cricket"
+    }
+  },
+  {
     id: "",
     title: "FC Barcelons vs Vissel kobe",
     date: getTomorrowDate(), // Auto-updates to tomorrow
