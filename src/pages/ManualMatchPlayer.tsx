@@ -233,26 +233,28 @@ const ManualMatchPlayer = () => {
                 </div>
               )}
               
-              {/* Banner Advertisement Above Video */}
-              <div className="mb-4 px-4 pt-4">
-                <Advertisement type="banner" className="w-full" />
-              </div>
-              
               <div className="relative aspect-video bg-black" data-player-container>
-                {selectedLink ? (
-                  <VideoPlayerSelector
-                    src={selectedLink.url}
-                    onLoad={handleVideoLoad}
-                    onError={handleVideoError}
-                    videoRef={videoRef}
-                    title={`${match.title} Stream`}
-                    isManualChannel={true}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-white">
-                    <p>No stream available</p>
-                  </div>
-                )}
+                {/* Banner Advertisement Above Video - Inside Frame */}
+                <div className="absolute top-0 left-0 right-0 z-10 bg-[#0A0F1C] p-2">
+                  <Advertisement type="banner" className="w-full" />
+                </div>
+                
+                <div className="absolute inset-0 pt-20">
+                  {selectedLink ? (
+                    <VideoPlayerSelector
+                      src={selectedLink.url}
+                      onLoad={handleVideoLoad}
+                      onError={handleVideoError}
+                      videoRef={videoRef}
+                      title={`${match.title} Stream`}
+                      isManualChannel={true}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-white">
+                      <p>No stream available</p>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Match Details Below Player */}
