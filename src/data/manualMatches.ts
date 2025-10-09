@@ -26,7 +26,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false,
+    visible: true,
     image: "/api/images/proxy/GwZg7AZpYEZgHCAjAJgCzrAY29lBWSUYAUwVmDTAE5p5gJhqDh61hh1OPgBDYLKQRcOJBt15cyAE1LBCETI3BiOzdtRAwmNSgJC8QWECRBmzMLQZCIQLJBSwi5jFGFUoe78o2pzP+KzAYO7iYhBAA.webp",
     seo: {
       keywords: "India Women vs South Africa Women live stream, cricket women live, india cricket live",
@@ -35,8 +35,8 @@ export const manualMatches: ManualMatch[] = [
     }
   },
   {
-    id: "",
-    title: "FC Barcelons vs Vissel kobe",
+    id: "fc-barcelona-vs-vissel-kobe",
+    title: "FC Barcelona vs Vissel Kobe",
     date: getTomorrowDate(), // Auto-updates to tomorrow
     teams: {
       home: "",
@@ -74,7 +74,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
+    visible: true,
     image: "",
     seo: {
       keywords: "FIFA Club WorldCup live stream, FiFA Club Worldcup watch online, Fifa club wprldcup free stream",
@@ -123,7 +123,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
+    visible: true,
     image: "https://i.imgur.com/ZDK0tgZ.jpeg",
     seo: {
       keywords: "UEFA women euro 2025 live stream, UEFA watch online,euro women 2025 free stream",
@@ -171,7 +171,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
+    visible: true,
     image: "https://i.imgur.com/2ttt7yh.jpeg",
     seo: {
       keywords: "Los Angeles FC vs Esperance Tunis live stream, Los Angeles FC Esperance Tunis watch online, Los Angeles FC vs Esperance Tunis free stream",
@@ -219,7 +219,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       },     
     ],
-    visible: false,
+    visible: true,
     image: "https://i.imgur.com/zZ4nHho.jpeg",
     seo: {
       keywords: "Bayern Munich vs Boca Juniors live stream, Bayern Munich Boca Juniors watch online, Bayern Munich vs Boca Juniors free stream",
