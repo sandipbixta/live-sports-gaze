@@ -31,74 +31,91 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
     if (!isDirectStream || !videoRef.current || !streamUrl || !isOpen) return;
 
     const video = videoRef.current;
+    
+    // Clear any existing source first
+    video.src = '';
+    video.load();
 
-    // Handle HLS streams
-    if (streamUrl.includes('.m3u8')) {
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          enableWorker: true,
-          lowLatencyMode: true,
-          backBufferLength: 90,
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
-          debug: false,
-          xhrSetup: (xhr: any) => {
-            xhr.withCredentials = false; // Disable credentials for CORS
-          }
-        });
+    // Small delay to ensure video element is ready
+    const timer = setTimeout(() => {
+      // Handle HLS streams
+      if (streamUrl.includes('.m3u8')) {
+        console.log('Initializing HLS player for:', streamUrl);
         
-        hls.loadSource(streamUrl);
-        hls.attachMedia(video);
-        
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          console.log('HLS manifest loaded, attempting to play...');
-          video.play().catch(err => {
-            console.error('Error playing video:', err);
-          });
-        });
-
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          console.error('HLS error:', data);
-          if (data.fatal) {
-            switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
-                console.log('Network error, trying to recover...');
-                hls.startLoad();
-                break;
-              case Hls.ErrorTypes.MEDIA_ERROR:
-                console.log('Media error, trying to recover...');
-                hls.recoverMediaError();
-                break;
-              default:
-                console.error('Fatal error, destroying HLS instance');
-                hls.destroy();
-                break;
+        if (Hls.isSupported()) {
+          console.log('HLS.js is supported');
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90,
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            debug: true, // Enable debug for troubleshooting
+            xhrSetup: (xhr: any) => {
+              xhr.withCredentials = false;
             }
-          }
-        });
+          });
+          
+          hls.loadSource(streamUrl);
+          hls.attachMedia(video);
+          
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.log('✅ HLS manifest loaded, attempting to play...');
+            video.play().catch(err => {
+              console.error('❌ Error playing video:', err);
+            });
+          });
 
-        hlsRef.current = hls;
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error('❌ HLS error:', data);
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.log('🔄 Network error, trying to recover...');
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.log('🔄 Media error, trying to recover...');
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  console.error('💀 Fatal error, destroying HLS instance');
+                  hls.destroy();
+                  break;
+              }
+            }
+          });
 
-        return () => {
-          if (hls) {
-            hls.destroy();
-          }
-        };
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (Safari)
-        console.log('Using native HLS support');
+          hlsRef.current = hls;
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          // Native HLS support (Safari)
+          console.log('✅ Using native HLS support');
+          video.src = streamUrl;
+          video.load();
+          video.play().catch(err => {
+            console.error('❌ Error playing video:', err);
+          });
+        } else {
+          console.error('❌ HLS is not supported in this browser');
+        }
+      } else {
+        // Direct MP4 or other formats
+        console.log('Loading direct video stream:', streamUrl);
         video.src = streamUrl;
+        video.load();
         video.play().catch(err => {
-          console.error('Error playing video:', err);
+          console.error('❌ Error playing video:', err);
         });
       }
-    } else {
-      // Direct MP4 or other formats
-      video.src = streamUrl;
-      video.play().catch(err => {
-        console.error('Error playing video:', err);
-      });
-    }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
   }, [streamUrl, isDirectStream, isOpen]);
 
   const handleFullscreen = () => {
@@ -152,6 +169,10 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
                 controls
                 playsInline
                 autoPlay
+                muted
+                preload="auto"
+                controlsList="nodownload"
+                disablePictureInPicture={false}
                 style={{ 
                   background: 'black',
                   objectFit: 'contain'
