@@ -25,11 +25,10 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       try {
         setLoading(true);
         
-        // Fetch sports, live matches, and all matches in parallel
-        const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
+        // Fetch sports and live matches (core data) - these are reliable
+        const [sportsData, liveMatchesData] = await Promise.all([
           fetchSports(),
-          fetchLiveMatches(),
-          fetchAllMatches()
+          fetchLiveMatches()
         ]);
         
         setSports(sportsData);
@@ -41,34 +40,45 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
         setLiveMatches(consolidatedLiveMatches);
         
-        // Filter and consolidate all matches (must have sources, remove ended matches)
-        const cleanAllMatches = filterActiveMatches(filterCleanMatches(
-          allMatchesData.filter(m => m.sources && m.sources.length > 0)
-        ));
-        const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
-        setAllMatches(consolidatedAllMatches);
-        
-        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches from all sports`);
+        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches`);
         console.log('Live matches by sport:', consolidatedLiveMatches.reduce((acc, match) => {
           const sport = match.sportId || match.category || 'unknown';
           acc[sport] = (acc[sport] || 0) + 1;
           return acc;
         }, {} as Record<string, number>));
         
-        // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
-        const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
-        
-        // For "Popular by Viewers", show ALL matches with viewers (no image filter)
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
-        setMostViewedMatches(matchesWithViewers.slice(0, 12));
+        // Try to fetch all matches for viewer counts (optional, non-blocking)
+        try {
+          const allMatchesData = await fetchAllMatches();
+          const cleanAllMatches = filterActiveMatches(filterCleanMatches(
+            allMatchesData.filter(m => m.sources && m.sources.length > 0)
+          ));
+          const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
+          setAllMatches(consolidatedAllMatches);
+          
+          console.log(`✅ Loaded ${consolidatedAllMatches.length} total matches for viewer tracking`);
+          
+          // Enrich with viewer counts
+          const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
+          const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
+          const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+          console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
+          setMostViewedMatches(matchesWithViewers.slice(0, 12));
+        } catch (allMatchesError) {
+          console.warn('⚠️ Could not load all matches for viewer counts (non-critical):', allMatchesError);
+          // Fallback: use live matches for viewer counts
+          const enrichedLiveMatches = await enrichMatchesWithViewerCounts(consolidatedLiveMatches);
+          const sortedByViewers = sortMatchesByViewers(enrichedLiveMatches);
+          const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
+          setMostViewedMatches(matchesWithViewers.slice(0, 12));
+          setAllMatches(consolidatedLiveMatches);
+        }
         
       } catch (error) {
-        console.error('Error loading matches:', error);
+        console.error('❌ Critical error loading matches:', error);
         toast({
-          title: "Error",
-          description: "Failed to load matches.",
+          title: "Connection Issue",
+          description: "Having trouble loading matches. Please refresh.",
           variant: "destructive",
         });
       } finally {
