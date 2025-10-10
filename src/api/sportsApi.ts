@@ -45,9 +45,9 @@ export const fetchSports = async (): Promise<Sport[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Detect mobile and adjust timeout
+  // Detect mobile and adjust timeout - be very generous
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 15000 : 10000; // Longer timeout for mobile
+  const timeout = 30000; // 30 seconds for all devices - API can be slow
 
   try {
     const controller = new AbortController();
@@ -109,9 +109,9 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Detect mobile and adjust timeout
+  // Detect mobile and adjust timeout - be very generous
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 20000 : 15000; // Even longer timeout for mobile matches
+  const timeout = 35000; // 35 seconds for all devices - matches API can be very slow
 
   try {
     const controller = new AbortController();
@@ -237,7 +237,7 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 25000 : 20000; // Generous timeout for live matches
+  const timeout = 35000; // 35 seconds - live matches API can be very slow
 
   try {
     const controller = new AbortController();
@@ -313,7 +313,7 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 25000 : 20000; // Generous timeout for all matches
+  const timeout = 35000; // 35 seconds - all matches API can be very slow
 
   try {
     const controller = new AbortController();
@@ -428,13 +428,18 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
 
     console.log(`🎬 Fetching streams for ${source}/${id}`);
     
-    // Direct API call like the HTML example
+    // Direct API call with generous timeout - stream API can be slow
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds
+    
     const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
       headers: {
         'Accept': 'application/json',
       },
-      signal: AbortSignal.timeout(15000)
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Stream API error: ${response.status}`);
