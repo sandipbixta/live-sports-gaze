@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://a113.azplay13.me/hls/streama241397/index.m3u8?cst=7ca4bedb8b1885097e7cb84bc45a4759",
+        url: "https://a111.azplay13.me/hls/streama241397/index.m3u8?cst=f5c97990278f8482aa3cf3ed74b576b3",
         quality: "HD"
       }
     ],
