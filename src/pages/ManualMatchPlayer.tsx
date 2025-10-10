@@ -6,7 +6,7 @@ import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
 import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { Helmet } from 'react-helmet-async';
-import ManualHLSPlayer from '@/components/StreamPlayer/ManualHLSPlayer';
+import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 import MatchDetails from '@/components/MatchDetails';
 import Advertisement from '@/components/Advertisement';
 import AdultBannerAd from '@/components/AdultBannerAd';
@@ -233,24 +233,28 @@ const ManualMatchPlayer = () => {
                 </div>
               )}
               
-              {/* Video Advertisement */}
-              <div className="mb-4">
-                <Advertisement type="video" className="w-full" />
-              </div>
-              
               <div className="relative aspect-video bg-black" data-player-container>
-                {selectedLink ? (
-                  <ManualHLSPlayer
-                    src={selectedLink.url}
-                    onLoad={handleVideoLoad}
-                    onError={handleVideoError}
-                    title={`${match.title} Stream`}
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-white">
-                    <p>No stream available</p>
-                  </div>
-                )}
+                {/* Banner Advertisement Above Video - Inside Frame */}
+                <div className="absolute top-0 left-0 right-0 z-10 bg-[#0A0F1C] p-2">
+                  <Advertisement type="banner" className="w-full" />
+                </div>
+                
+                <div className="absolute inset-0 pt-20">
+                  {selectedLink ? (
+                    <VideoPlayerSelector
+                      src={selectedLink.url}
+                      onLoad={handleVideoLoad}
+                      onError={handleVideoError}
+                      videoRef={videoRef}
+                      title={`${match.title} Stream`}
+                      isManualChannel={true}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-white">
+                      <p>No stream available</p>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* Match Details Below Player */}
@@ -262,11 +266,6 @@ const ManualMatchPlayer = () => {
                 />
               </div>
             </div>
-          </div>
-
-          {/* Adult Banner Ad - below video player */}
-          <div className="mb-4 flex justify-center">
-            <AdultBannerAd type="mobile" />
           </div>
 
           <div className="lg:col-span-1">

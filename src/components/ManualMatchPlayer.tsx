@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { X, Maximize2 } from 'lucide-react';
 import { ManualMatch } from '@/types/manualMatch';
 import {
@@ -9,6 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import Hls from 'hls.js';
 
 interface ManualMatchPlayerProps {
   match: ManualMatch | null;
@@ -17,19 +17,118 @@ interface ManualMatchPlayerProps {
 }
 
 const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) => {
-  const handleFullscreen = () => {
-    const iframe = document.querySelector('#manual-stream-iframe') as HTMLIFrameElement;
-    if (iframe) {
-      if (iframe.requestFullscreen) {
-        iframe.requestFullscreen();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+
+  // Use the first link as default
+  const defaultLink = match?.links?.[0];
+  const streamUrl = defaultLink?.url || '';
+  
+  // Check if it's a direct video stream
+  const isDirectStream = streamUrl.match(/\.(m3u8|mp4|webm)(\?|$)/i);
+
+  useEffect(() => {
+    if (!isDirectStream || !videoRef.current || !streamUrl || !isOpen) return;
+
+    const video = videoRef.current;
+    
+    // Clear any existing source first
+    video.src = '';
+    video.load();
+
+    // Small delay to ensure video element is ready
+    const timer = setTimeout(() => {
+      // Handle HLS streams
+      if (streamUrl.includes('.m3u8')) {
+        console.log('Initializing HLS player for:', streamUrl);
+        
+        if (Hls.isSupported()) {
+          console.log('HLS.js is supported');
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90,
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            debug: true, // Enable debug for troubleshooting
+            xhrSetup: (xhr: any) => {
+              xhr.withCredentials = false;
+            }
+          });
+          
+          hls.loadSource(streamUrl);
+          hls.attachMedia(video);
+          
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            console.log('✅ HLS manifest loaded, attempting to play...');
+            video.play().catch(err => {
+              console.error('❌ Error playing video:', err);
+            });
+          });
+
+          hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error('❌ HLS error:', data);
+            if (data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  console.log('🔄 Network error, trying to recover...');
+                  hls.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  console.log('🔄 Media error, trying to recover...');
+                  hls.recoverMediaError();
+                  break;
+                default:
+                  console.error('💀 Fatal error, destroying HLS instance');
+                  hls.destroy();
+                  break;
+              }
+            }
+          });
+
+          hlsRef.current = hls;
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          // Native HLS support (Safari)
+          console.log('✅ Using native HLS support');
+          video.src = streamUrl;
+          video.load();
+          video.play().catch(err => {
+            console.error('❌ Error playing video:', err);
+          });
+        } else {
+          console.error('❌ HLS is not supported in this browser');
+        }
+      } else {
+        // Direct MP4 or other formats
+        console.log('Loading direct video stream:', streamUrl);
+        video.src = streamUrl;
+        video.load();
+        video.play().catch(err => {
+          console.error('❌ Error playing video:', err);
+        });
       }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [streamUrl, isDirectStream, isOpen]);
+
+  const handleFullscreen = () => {
+    const element = isDirectStream 
+      ? videoRef.current 
+      : document.querySelector('#manual-stream-iframe') as HTMLIFrameElement;
+      
+    if (element?.requestFullscreen) {
+      element.requestFullscreen();
     }
   };
 
   if (!match) return null;
-
-  // Use the first link as default
-  const defaultLink = match.links?.[0];
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
@@ -63,7 +162,23 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
         
         <div className="flex-1 p-2">
           <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-            {defaultLink && (
+            {isDirectStream ? (
+              <video
+                ref={videoRef}
+                className="w-full h-full"
+                controls
+                playsInline
+                autoPlay
+                muted
+                preload="auto"
+                controlsList="nodownload"
+                disablePictureInPicture={false}
+                style={{ 
+                  background: 'black',
+                  objectFit: 'contain'
+                }}
+              />
+            ) : defaultLink ? (
               <iframe
                 id="manual-stream-iframe"
                 src={defaultLink.url}
@@ -76,7 +191,7 @@ const ManualMatchPlayer = ({ match, isOpen, onClose }: ManualMatchPlayerProps) =
                   background: 'black'
                 }}
               />
-            )}
+            ) : null}
           </div>
         </div>
         

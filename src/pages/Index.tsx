@@ -74,19 +74,13 @@ const Index = () => {
     });
   }, [matches, searchTerm]);
 
-  // Load sports and live matches on mount and when returning to page
+  // Load sports and live matches immediately on mount
   useEffect(() => {
-    let isActive = true;
-    
     const loadInitialData = async () => {
-      if (!isActive) return;
-      
       try {
         // Load sports
         let sportsData = await fetchSports();
         console.log('📊 Sports data loaded:', sportsData);
-        
-        if (!isActive) return;
         
         // Sort with football first for better UX
         sportsData = sportsData.sort((a, b) => {
@@ -104,9 +98,6 @@ const Index = () => {
         try {
           console.log('🔴 Loading live matches...');
           const liveMatchesData = await fetchLiveMatches();
-          
-          if (!isActive) return;
-          
           // Filter out ended matches from live matches
           const activeLiveMatches = filterActiveMatches(liveMatchesData);
           setLiveMatches(activeLiveMatches);
@@ -128,35 +119,17 @@ const Index = () => {
           
           // Retry after a short delay on mobile
           setTimeout(() => {
-            if (sports.length === 0 && isActive) {
+            if (sports.length === 0) {
               loadInitialData();
             }
           }, 2000);
         }
       } finally {
-        if (isActive) {
-          setLoadingSports(false);
-        }
+        setLoadingSports(false);
       }
     };
 
     loadInitialData();
-    
-    // Refetch when page becomes visible again (e.g., returning from another route)
-    const handleVisibilityChange = () => {
-      if (!document.hidden && isActive) {
-        console.log('📱 Page visible again, refreshing data...');
-        loadInitialData();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      isActive = false;
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   // Separate useEffect for handling sport auto-selection to avoid dependency issues
