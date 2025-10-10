@@ -32,19 +32,16 @@ export const useViewerTracking = (matchId: string | undefined) => {
       if (!isActive) return;
       
       try {
-        console.log(`📡 Sending heartbeat for match: ${matchId}, session: ${sessionIdRef.current}`);
         const { error } = await supabase.rpc('heartbeat_viewer', {
           match_id_param: matchId,
           session_id_param: sessionIdRef.current
         });
         
         if (error) {
-          console.error('❌ Error sending viewer heartbeat:', error);
-        } else {
-          console.log('✅ Heartbeat sent successfully');
+          console.error('Error sending viewer heartbeat:', error);
         }
       } catch (error) {
-        console.error('❌ Error sending viewer heartbeat:', error);
+        console.error('Error sending viewer heartbeat:', error);
       }
     };
 

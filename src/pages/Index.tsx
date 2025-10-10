@@ -23,7 +23,6 @@ import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
 import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
-import HomepageContent from '../components/HomepageContent';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -377,12 +376,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-
-        {/* SEO Content - Competitor keywords */}
-        <CompetitorSEOContent />
-        
-        {/* Rich Homepage Content for AdSense Approval */}
-        <HomepageContent />
       </main>
     </PageLayout>
   );

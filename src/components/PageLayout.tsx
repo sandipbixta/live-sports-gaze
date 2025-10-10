@@ -120,26 +120,26 @@ const PageLayout: React.FC<PageLayoutProps> = ({
               </ul>
             </div>
             
-          <div>
-            <h5 className="font-semibold text-black dark:text-white mb-2">Help</h5>
-            <ul className="space-y-1 text-xs">
-              <li>
-                <Link to="/about">About Us</Link>
-              </li>
-              <li>
-                <Link to="/contact">Contact Us</Link>
-              </li>
-              <li>
-                <Link to="/terms">Terms of Service</Link>
-              </li>
-              <li>
-                <Link to="/privacy">Privacy Policy</Link>
-              </li>
-              <li>
-                <Link to="/dmca">DMCA Notice</Link>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <h5 className="font-semibold text-black dark:text-white mb-2">Help</h5>
+              <ul className="space-y-1 text-xs">
+                <li>
+                  <Link to="/">FAQ</Link>
+                </li>
+                <li>
+                  <Link to="/">Contact Us</Link>
+                </li>
+                <li>
+                  <Link to="/">Terms of Service</Link>
+                </li>
+                <li>
+                  <Link to="/">Privacy Policy</Link>
+                </li>
+                <li>
+                  <Link to="/dmca">DMCA Notice</Link>
+                </li>
+              </ul>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

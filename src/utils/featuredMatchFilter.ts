@@ -19,21 +19,6 @@ const MAJOR_COMPETITIONS = [
   'carabao cup',
   'super cup', 'supercup',
   'club world cup',
-  // International football
-  'nations league', 'uefa nations',
-  'world cup qualifiers', 'wc qualifiers', 'qualifying',
-  'international friendly', 'friendly',
-  'conmebol', 'concacaf',
-  'afcon', 'africa cup',
-  'asian cup',
-];
-
-// Top 20 FIFA-ranked countries (national teams)
-const TOP_COUNTRIES = [
-  'argentina', 'france', 'spain', 'england', 'brazil', 'belgium', 
-  'netherlands', 'portugal', 'colombia', 'italy', 'uruguay', 'croatia',
-  'germany', 'morocco', 'switzerland', 'usa', 'mexico', 'japan',
-  'senegal', 'denmark', 'united states'
 ];
 
 // Popular teams across sports
@@ -183,11 +168,6 @@ export const isFeaturedMatch = (match: Match): boolean => {
     }
   }
   
-  // Check for top FIFA-ranked countries in title
-  if (TOP_COUNTRIES.some(country => title.includes(country))) {
-    return true;
-  }
-  
   // Check for popular teams
   if (POPULAR_TEAMS.some(team => title.includes(team))) {
     return true;
@@ -198,12 +178,6 @@ export const isFeaturedMatch = (match: Match): boolean => {
     const homeTeam = (match.teams.home?.name || '').toLowerCase();
     const awayTeam = (match.teams.away?.name || '').toLowerCase();
     
-    // Check for top countries in team names
-    if (TOP_COUNTRIES.some(country => homeTeam.includes(country) || awayTeam.includes(country))) {
-      return true;
-    }
-    
-    // Check for popular club teams
     if (POPULAR_TEAMS.some(team => homeTeam.includes(team) || awayTeam.includes(team))) {
       return true;
     }

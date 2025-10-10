@@ -58,10 +58,11 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
         
-        // For "Popular by Viewers", show ALL matches with viewers (no image filter)
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
+        // Only show matches with images on home page
+        const matchesWithImages = filterMatchesWithImages(enrichedAllMatches);
+        
+        const sortedByViewers = sortMatchesByViewers(matchesWithImages);
         const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
         setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
       } catch (error) {
@@ -78,29 +79,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
     loadLiveMatches();
   }, [toast]);
-
-  // Refresh viewer counts every 30 seconds to show newly watched matches
-  useEffect(() => {
-    const refreshViewerCounts = async () => {
-      if (allMatches.length === 0) return;
-      
-      try {
-        console.log('🔄 Refreshing viewer counts for', allMatches.length, 'matches');
-        const enrichedAllMatches = await enrichMatchesWithViewerCounts(allMatches);
-        // Show ALL matches with viewers (no image filter)
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Refreshed - Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
-        setMostViewedMatches(matchesWithViewers.slice(0, 12));
-      } catch (error) {
-        console.error('Error refreshing viewer counts:', error);
-      }
-    };
-
-    const interval = setInterval(refreshViewerCounts, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(interval);
-  }, [allMatches]);
 
   // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredMatches = React.useMemo(() => {
