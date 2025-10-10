@@ -12,11 +12,11 @@ const getTomorrowDate = () => {
 export const manualMatches: ManualMatch[] = [
   {
     id: "india-vs-west-indies-live",
-    title: "India Cricket Women vs South Africa Cricket Women",
+    title: "India Cricket vs West Indies Cricket ",
     date: new Date().toISOString(), // Live now
     teams: {
       home: "India Cricket",
-      away: "west indies Cricket"
+      away: "West Indies Cricket"
     },
     links: [
       {
@@ -29,8 +29,8 @@ export const manualMatches: ManualMatch[] = [
     visible: true,
     image: "/api/images/proxy/GwZg7AZpYEZgHCAjAJgCzrAY29lBWSUYAUwVmDTAE5p5gJhqDh61hh1OPgBDYLKQRcOJBt15cyAE1LBCETI3BiOzdtRAwmNSgJC8QWECRBmzMLQZCIQLJBSwi5jFGFUoe78o2pzP+KzAYO7iYhBAA.webp",
     seo: {
-      keywords: "India Women vs South Africa Women live stream, cricket women live, india cricket live",
-      description: "Watch India Cricket Women vs South Africa Cricket Women live stream online for free.",
+      keywords: "India vs West Indies live stream, cricket live, india cricket live",
+      description: "Watch India Cricket vs West Indies live stream online for free.",
       category: "Cricket"
     }
   },
