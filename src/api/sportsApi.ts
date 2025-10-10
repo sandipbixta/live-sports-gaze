@@ -236,12 +236,21 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const timeout = isMobile ? 25000 : 20000; // Generous timeout for live matches
+
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
     const response = await fetch(`${API_BASE}/matches/live`, {
+      signal: controller.signal,
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const matches = await response.json();
@@ -262,6 +271,38 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     return validMatches;
   } catch (error) {
     console.error('❌ Error fetching live matches from streamed.pk:', error);
+    
+    // Retry once on mobile with simpler request
+    if (isMobile && error.name !== 'retry-failed') {
+      console.log('🔄 Retrying live matches with mobile-optimized request...');
+      try {
+        const retryResponse = await fetch(`${API_BASE}/matches/live`, {
+          method: 'GET',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          if (Array.isArray(retryData)) {
+            const validMatches = retryData.filter(match => 
+              match && match.id && match.title && match.date && Array.isArray(match.sources)
+            ).map(match => ({
+              ...match,
+              sportId: match.category
+            }));
+            setCachedData(cacheKey, validMatches);
+            console.log(`✅ Mobile retry successful: ${validMatches.length} live matches`);
+            return validMatches;
+          }
+        }
+      } catch (retryError) {
+        console.error('❌ Mobile retry failed for live matches:', retryError);
+      }
+    }
+    
     throw error;
   }
 };
@@ -271,12 +312,21 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const timeout = isMobile ? 25000 : 20000; // Generous timeout for all matches
+
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
     const response = await fetch(`${API_BASE}/matches/all`, {
+      signal: controller.signal,
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const matches = await response.json();
@@ -297,6 +347,38 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     return validMatches;
   } catch (error) {
     console.error('❌ Error fetching all matches from streamed.pk:', error);
+    
+    // Retry once on mobile with simpler request
+    if (isMobile && error.name !== 'retry-failed') {
+      console.log('🔄 Retrying all matches with mobile-optimized request...');
+      try {
+        const retryResponse = await fetch(`${API_BASE}/matches/all`, {
+          method: 'GET',
+          cache: 'no-cache',
+          headers: {
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (retryResponse.ok) {
+          const retryData = await retryResponse.json();
+          if (Array.isArray(retryData)) {
+            const validMatches = retryData.filter(match => 
+              match && match.id && match.title && match.date && Array.isArray(match.sources)
+            ).map(match => ({
+              ...match,
+              sportId: match.category
+            }));
+            setCachedData(cacheKey, validMatches);
+            console.log(`✅ Mobile retry successful: ${validMatches.length} matches`);
+            return validMatches;
+          }
+        }
+      } catch (retryError) {
+        console.error('❌ Mobile retry failed for all matches:', retryError);
+      }
+    }
+    
     throw error;
   }
 };
