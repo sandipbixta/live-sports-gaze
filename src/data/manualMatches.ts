@@ -11,18 +11,18 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "india-women-vs-south-africa-women-live",
+    id: "india-vs-west-indies-live",
     title: "India Cricket Women vs South Africa Cricket Women",
     date: new Date().toISOString(), // Live now
     teams: {
-      home: "India Cricket Women",
-      away: "South Africa Cricket Women"
+      home: "India Cricket",
+      away: "west indies Cricket"
     },
     links: [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://a108.azplay13.me/hls/streama239082/index.m3u8?cst=40d41ad8d4b696a53e3273481081a4ef",
+        url: "https://a113.azplay13.me/hls/streama241397/index.m3u8?cst=7ca4bedb8b1885097e7cb84bc45a4759",
         quality: "HD"
       }
     ],
