@@ -26,7 +26,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/cricket-nepal-japan.jpg",
     seo: {
       keywords: "Nepal vs Japan cricket live stream, Nepal Japan cricket watch online, Nepal vs Japan free stream",
