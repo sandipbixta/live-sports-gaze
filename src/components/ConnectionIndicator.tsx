@@ -40,8 +40,9 @@ const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({
 
     if (saveData) return 'poor';
     if (effectiveType === 'slow-2g' || effectiveType === '2g') return 'poor';
+    if (effectiveType === '3g' && downlink < 1) return 'poor';
     if (effectiveType === '3g' || downlink < 2) return 'fair';
-    if (effectiveLatency > 300) return 'fair'; // High latency = fair quality
+    if (effectiveLatency > 500) return 'fair'; // Only warn on very high latency
     if (effectiveType === '4g' && downlink >= 5) return 'excellent';
     return 'good';
   };
@@ -88,13 +89,13 @@ const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({
       return 'Recommended: 360p or lower quality';
     }
     if (quality === 'fair') {
-      if (effectiveLatency > 300) {
-        return 'High latency detected. Buffering may occur. Try 480p or lower.';
+      if (effectiveLatency > 500) {
+        return 'High latency detected. Consider lower quality for stability.';
       }
-      return 'Recommended: 480p quality';
+      return 'Recommended: 480p-720p quality';
     }
     if (quality === 'good') {
-      return 'Recommended: 720p quality';
+      return 'Recommended: 720p-1080p quality';
     }
     return 'Recommended: Auto quality (best available)';
   };
