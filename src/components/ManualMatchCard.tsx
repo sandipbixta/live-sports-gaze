@@ -1,9 +1,9 @@
-
 import React from "react";
 import { ManualMatch } from "@/types/manualMatch";
 import { useNavigate } from "react-router-dom";
-import { Play, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
+import { format } from 'date-fns';
+import { ViewerCount } from './ViewerCount';
 
 interface ManualMatchCardProps {
   match: ManualMatch;
@@ -12,162 +12,125 @@ interface ManualMatchCardProps {
 const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
   const navigate = useNavigate();
 
-  // Format the date and time for Australia (AEST/AEDT)
   const matchDate = new Date(match.date);
+  
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  };
 
-  // Show as "12:00" 24hr on mobile, bigger on desktop.
-  const timeString = matchDate.toLocaleTimeString("en-AU", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "Australia/Sydney"
-  });
-  // Show as "16 June" on mobile, "Jun 16" on desktop.
-  const dateStringMobile = matchDate.toLocaleDateString("en-AU", {
-    day: "numeric",
-    month: "long",
-    timeZone: "Australia/Sydney",
-  });
-  const dateStringDesktop = matchDate.toLocaleDateString("en-AU", {
-    month: "short",
-    day: "numeric",
-    timeZone: "Australia/Sydney"
-  });
+  const formatDateShort = (date: Date) => {
+    return format(date, 'MMM d');
+  };
+
+  const isLive = Date.now() >= matchDate.getTime();
+  const hasStream = match.links?.length > 0;
 
   // Check if we have a valid image URL
   const hasValidImage = match.image && 
     match.image !== "https://imgur.com/undefined" && 
     match.image.trim() !== "";
 
-  return (
-    <div
-      className="
-        relative w-full 
-        cursor-pointer hover:scale-105 transition-transform duration-200 group shadow-lg
-        flex flex-col
-        "
-      style={{ minWidth: 0 }}
-      onClick={() => navigate(`/manual-match/${match.id}`)}
-    >
-      {/* Card Image Container */}
-      <div className="
-        relative w-full 
-        h-[120px] xs:h-[130px] sm:h-[140px] 
-        md:h-64
-        rounded-lg bg-black overflow-hidden 
-        flex flex-col
-      ">
-        {/* Background Image or Fallback */}
-        {hasValidImage ? (
-          <img
-            src={match.image}
-            alt={match.title || `${match.teams.home} vs ${match.teams.away}`}
-            className="w-full h-full object-cover"
-            draggable={false}
-            onError={(e) => {
-              // If image fails to load, hide it and show fallback
-              (e.target as HTMLImageElement).style.display = 'none';
-              const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
-              if (fallback) {
-                fallback.style.display = 'flex';
-              }
-            }}
-          />
-        ) : null}
-        
-        {/* Fallback background for when no image or image fails */}
-        <div 
-          className={`w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center ${hasValidImage ? 'hidden' : ''}`}
-          style={{ display: hasValidImage ? 'none' : 'flex' }}
-        >
-          <span className="text-white text-sm sm:text-lg font-bold text-center px-2">
+  const generateThumbnail = () => {
+    if (hasValidImage) {
+      return (
+        <img
+          src={match.image}
+          alt={match.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => {
+            // Fallback to team names display
+            const container = e.currentTarget.parentElement;
+            if (container) {
+              container.innerHTML = `
+                <div class="w-full h-full relative overflow-hidden bg-black">
+                  <div class="absolute inset-0 flex items-center justify-center z-10">
+                    <span class="text-white font-bold text-xl drop-shadow-lg text-center px-4">${match.teams.home} vs ${match.teams.away}</span>
+                  </div>
+                </div>
+              `;
+            }
+          }}
+        />
+      );
+    }
+
+    return (
+      <div className="w-full h-full relative overflow-hidden bg-black">
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <span className="text-white font-bold text-xl drop-shadow-lg text-center px-4">
             {match.teams.home} vs {match.teams.away}
           </span>
         </div>
-
-        {/* Top shadow overlays */}
-        <div className="pointer-events-none absolute top-0 left-0 w-full h-8 sm:h-10 bg-gradient-to-b from-black/60 via-black/20 to-transparent z-20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-        {/* Top Section - Time, Date and LIVE badge */}
-        <div
-          className="
-            absolute top-1 left-0 right-0 px-1 xs:px-2 sm:px-3
-            flex justify-between items-start z-30
-          "
-        >
-          {/* Time + Date + Timezone label */}
-          <div
-            className="bg-black/70 backdrop-blur-sm rounded px-1.5 xs:px-2 py-[2px] flex flex-col items-start"
-          >
-            <div
-              className="
-                text-white 
-                text-[11px] xs:text-[13px] sm:text-sm font-bold leading-tight 
-                flex items-baseline gap-1
-              "
-            >
-              <Clock className="w-2.5 h-2.5 xs:w-3 xs:h-3" />
-              {timeString}
-              <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-300 ml-0.5 font-semibold tracking-wide">AEST</span>
-            </div>
-            <div className="text-[10px] xs:text-[11px] sm:text-xs text-gray-300 font-medium mt-[1px]">
-              {/* Mobile: "16 June", desktop: "Jun 16" */}
-              <span className="sm:hidden">{dateStringMobile}</span>
-              <span className="hidden sm:inline">{dateStringDesktop}</span>
-            </div>
-          </div>
-          {/* LIVE Badge */}
-          <Badge
-            variant="live"
-            className="
-              text-[11px] xs:text-[12px] sm:text-xs font-bold 
-              px-1.5 xs:px-2 py-[1px] xs:py-[2px] bg-[#ff5a36] shadow 
-              rounded-full flex items-center
-              "
-            style={{ minHeight: 0, height: 'auto' }}
-          >
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse mr-1" />
-            LIVE
-          </Badge>
-        </div>
-
-        {/* Center Play Button - much smaller on mobile */}
-        <div className="absolute inset-0 flex items-center justify-center z-30">
-          <div className="
-              bg-[#ff5a36] rounded-full 
-              p-2 xs:p-2.5 
-              opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg
-            ">
-            <Play className="w-4 h-4 xs:w-5 xs:h-5 sm:w-7 sm:h-7 text-white fill-white" />
-          </div>
-        </div>
       </div>
+    );
+  };
 
-      {/* Team Names and Additional Date Below the Card */}
-      <div className="mt-2 px-1 xs:px-2">
-        <div className="
-          flex flex-col items-start justify-center
-          text-white
-          text-[13px] xs:text-[14px] sm:text-base md:text-lg 
-          font-bold leading-tight mb-1
-        ">
-          {/* Show title instead of team names with vs */}
-          <span className="truncate max-w-full text-left text-[12px] xs:text-[13px] sm:text-base">
-            {match.title}
-          </span>
-          {/* Subtitle */}
-          <span className="text-[10px] xs:text-[11px] sm:text-xs text-gray-400 mt-0.5">
-            {match.title} on damitv.pro
-          </span>
+  return (
+    <div 
+      className="group cursor-pointer"
+      onClick={() => navigate(`/manual-match/${match.id}`)}
+    >
+      <div className="relative overflow-hidden rounded-lg border-2 border-white/5 bg-black transition-all duration-300 hover:border-primary">
+        {/* Image Section */}
+        <div className="relative aspect-video overflow-hidden bg-gray-900">
+          {generateThumbnail()}
+          
+          {/* Simple Status Indicators */}
+          <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
+            {isLive ? (
+              <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 tracking-wider">
+                ● Live
+              </span>
+            ) : (
+              <span className="bg-gray-800/90 text-white/60 text-[10px] font-bold uppercase px-2 py-1">
+                Upcoming
+              </span>
+            )}
+            
+            {hasStream && (
+              <span className="bg-black/80 text-white text-[10px] font-bold px-2 py-1">
+                {match.links.length} HD
+              </span>
+            )}
+          </div>
         </div>
-        {/* Enhanced date and time display below the card */}
-        <div className="flex items-center gap-2 text-gray-400 text-[11px] xs:text-xs sm:text-sm text-left">
-          <Clock className="w-3 h-3" />
-          <span>
-            {timeString} • <span className="sm:hidden">{dateStringMobile}</span>
-            <span className="hidden sm:inline">{dateStringDesktop}</span>
-          </span>
+
+        {/* Info Section */}
+        <div className="p-3 space-y-2">
+          {/* Title */}
+          <h3 className="font-bold text-white text-sm line-clamp-2 min-h-[2.5rem]">
+            {match.title}
+          </h3>
+          
+          {/* Meta Info */}
+          <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+            <span>{formatTime(matchDate)}</span>
+            <span className="w-1 h-1 bg-gray-600 rounded-full" />
+            <span>{formatDateShort(matchDate)}</span>
+            {isLive && (
+              <>
+                <span className="w-1 h-1 bg-gray-600 rounded-full" />
+                <ViewerCount matchId={match.id} enableRealtime={true} />
+              </>
+            )}
+          </div>
+          
+          {/* Action */}
+          {hasStream && (
+            <div className="pt-1">
+              {isLive ? (
+                <div className="bg-sports-primary text-white font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
+                  Watch Now
+                </div>
+              ) : (
+                <div className="bg-gray-800 text-white border border-gray-700 font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
+                  <Clock className="w-3.5 h-3.5" />
+                  Starting Soon
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
