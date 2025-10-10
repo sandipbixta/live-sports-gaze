@@ -118,43 +118,43 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   // For HLS streams, render video element
   if (isHlsStream) {
     return (
-      <div className="w-full max-w-4xl mx-auto aspect-video bg-black rounded-lg overflow-hidden">
-        <video
-          ref={videoRef}
-          className="w-full h-full"
-          controls
-          playsInline
-          autoPlay
-          muted
-          preload="auto"
-          controlsList="nodownload"
-          style={{ 
-            border: 'none',
-            background: 'black',
-            objectFit: 'contain'
-          }}
-        />
-      </div>
+      <video
+        ref={videoRef}
+        className="w-full h-full"
+        controls
+        playsInline
+        autoPlay
+        muted
+        preload="auto"
+        controlsList="nodownload"
+        style={{ 
+          border: 'none',
+          background: 'black',
+          objectFit: 'contain',
+          width: '100%',
+          height: '100%'
+        }}
+      />
     );
   }
 
   // For other streams, use iframe
   return (
-    <div className="w-full max-w-4xl mx-auto aspect-video bg-black rounded-lg overflow-hidden">
-      <iframe
-        src={src}
-        width="100%"
-        height="100%"
-        allowFullScreen
-        title={title}
-        style={{ 
-          border: 'none',
-          background: 'black'
-        }}
-        onLoad={onLoad}
-        onError={onError}
-      />
-    </div>
+    <iframe
+      src={src}
+      width="100%"
+      height="100%"
+      allowFullScreen
+      title={title}
+      style={{ 
+        border: 'none',
+        background: 'black',
+        width: '100%',
+        height: '100%'
+      }}
+      onLoad={onLoad}
+      onError={onError}
+    />
   );
 };
 

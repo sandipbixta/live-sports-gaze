@@ -204,21 +204,19 @@ const ManualMatchPlayer = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto p-2 sm:p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
           <div className="lg:col-span-3">
             <div className="bg-[#242836] rounded-lg overflow-hidden border border-[#343a4d]">
-              <div className="bg-[#1a1f2e] p-3 border-b border-[#343a4d]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="text-white font-semibold">{match.title}</span>
-                  </div>
+              <div className="bg-[#1a1f2e] p-2 sm:p-3 border-b border-[#343a4d]">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <span className="text-white font-semibold text-sm sm:text-base">{match.title}</span>
                   <div className="flex items-center gap-2">
                     <span className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
                       LIVE
                     </span>
-                    <div className="text-sm text-gray-400">
+                    <div className="text-xs sm:text-sm text-gray-400 hidden sm:block">
                       {formattedDate} at {formattedTime}
                     </div>
                   </div>
@@ -226,20 +224,21 @@ const ManualMatchPlayer = () => {
               </div>
 
               {selectedLink && (
-                <div className="bg-[#242836] px-4 py-1 border-b border-[#343a4d]">
-                  <h2 className="text-base font-medium text-white text-center">
+                <div className="bg-[#242836] px-2 sm:px-4 py-1 border-b border-[#343a4d]">
+                  <h2 className="text-sm sm:text-base font-medium text-white text-center">
                     {selectedLink.name}
                   </h2>
                 </div>
               )}
               
-              <div className="relative aspect-video bg-black" data-player-container>
-                {/* Banner Advertisement Above Video - Inside Frame */}
-                <div className="absolute top-0 left-0 right-0 z-10 bg-[#0A0F1C] p-2">
-                  <Advertisement type="banner" className="w-full" />
-                </div>
-                
-                <div className="absolute inset-0 pt-20">
+              {/* Banner Ad Above Video */}
+              <div className="bg-[#0A0F1C] p-2">
+                <Advertisement type="banner" className="w-full" />
+              </div>
+              
+              {/* Video Player Container */}
+              <div className="relative w-full bg-black" style={{ paddingTop: '56.25%' }}>
+                <div className="absolute inset-0">
                   {selectedLink ? (
                     <VideoPlayerSelector
                       src={selectedLink.url}
@@ -269,23 +268,23 @@ const ManualMatchPlayer = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Stream Sources</h3>
+            <div className="bg-[#242836] rounded-lg border border-[#343a4d] p-3 sm:p-4">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Stream Sources</h3>
               <div className="space-y-2">
                 {match.links.map((link) => (
                   <Button
                     key={link.id}
                     onClick={() => setSelectedLink(link)}
                     variant={selectedLink?.id === link.id ? "default" : "outline"}
-                    className={`w-full justify-start text-left ${
+                    className={`w-full justify-start text-left text-sm ${
                       selectedLink?.id === link.id
                         ? "bg-[#ff5a36] hover:bg-[#e64d2e] text-white"
                         : "bg-transparent border-[#343a4d] text-gray-300 hover:bg-[#343a4d] hover:text-white"
                     }`}
                   >
-                    <Play size={14} className="mr-2" />
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{link.name}</span>
+                    <Play size={14} className="mr-2 flex-shrink-0" />
+                    <div className="flex flex-col items-start min-w-0">
+                      <span className="font-medium truncate w-full">{link.name}</span>
                       {link.quality && (
                         <span className="text-xs opacity-75">{link.quality}</span>
                       )}
@@ -294,9 +293,9 @@ const ManualMatchPlayer = () => {
                 ))}
               </div>
               
-              <div className="mt-6 pt-4 border-t border-[#343a4d]">
-                <h4 className="text-md font-semibold text-white mb-2">Match Details</h4>
-                <div className="space-y-2 text-sm text-gray-400">
+              <div className="mt-4 sm:mt-6 pt-4 border-t border-[#343a4d]">
+                <h4 className="text-sm sm:text-md font-semibold text-white mb-2">Match Details</h4>
+                <div className="space-y-2 text-xs sm:text-sm text-gray-400">
                   <p><span className="text-white">Title:</span> {match.title}</p>
                   <p><span className="text-white">Date:</span> {formattedDate}</p>
                   <p><span className="text-white">Time:</span> {formattedTime}</p>
