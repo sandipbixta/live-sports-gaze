@@ -6,7 +6,7 @@ import { manualMatches } from '@/data/manualMatches';
 import { ManualMatchLink } from '@/types/manualMatch';
 import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { Helmet } from 'react-helmet-async';
-import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
+import ManualHLSPlayer from '@/components/StreamPlayer/ManualHLSPlayer';
 import MatchDetails from '@/components/MatchDetails';
 import Advertisement from '@/components/Advertisement';
 import AdultBannerAd from '@/components/AdultBannerAd';
@@ -240,13 +240,11 @@ const ManualMatchPlayer = () => {
               
               <div className="relative aspect-video bg-black" data-player-container>
                 {selectedLink ? (
-                  <VideoPlayerSelector
+                  <ManualHLSPlayer
                     src={selectedLink.url}
                     onLoad={handleVideoLoad}
                     onError={handleVideoError}
-                    videoRef={videoRef}
                     title={`${match.title} Stream`}
-                    isManualChannel={true}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-white">
