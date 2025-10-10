@@ -47,26 +47,19 @@ const Match = () => {
   // Load match data and streams
   useEffect(() => {
     const loadMatchData = async () => {
-      if (!sportId || !matchId) {
-        console.log('❌ Missing sportId or matchId:', { sportId, matchId });
-        return;
-      }
+      if (!sportId || !matchId) return;
 
       try {
         setIsLoading(true);
-        console.log(`🔍 Loading match: ${sportId}/${matchId}`);
+        console.log(`Loading match: ${sportId}/${matchId}`);
         
         // Fetch the specific match
         const matchData = await fetchMatch(sportId, matchId);
-        console.log('✅ Match data fetched:', matchData);
         const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
-        console.log('✅ Enhanced match with logos:', enhancedMatch);
         setMatch(enhancedMatch);
 
         // Use the enhanced stream player to load all streams
-        console.log('🎬 Loading streams for match...');
         await handleMatchSelect(enhancedMatch);
-        console.log('✅ Streams loaded successfully');
 
         // Auto-scroll to video player after data loads
         setTimeout(() => {
@@ -100,8 +93,7 @@ const Match = () => {
         setTrendingMatches(trending);
         
       } catch (error) {
-        console.error('❌ Error loading match:', error);
-        console.error('❌ Error details:', JSON.stringify(error, null, 2));
+        console.error('Error loading match:', error);
         setMatch(null);
         toast({
           title: "Error loading match",
@@ -109,7 +101,6 @@ const Match = () => {
           variant: "destructive",
         });
       } finally {
-        console.log('🏁 Match loading finished, isLoading set to false');
         setIsLoading(false);
       }
     };
@@ -117,19 +108,13 @@ const Match = () => {
     loadMatchData();
   }, [sportId, matchId, toast, handleMatchSelect]);
 
-  // Show loading state immediately
   if (isLoading) {
-    console.log('🔄 Rendering loading state...');
     return <LoadingState />;
   }
 
-  // Show not found if no match data after loading
   if (!match) {
-    console.log('❌ No match data found, showing not found state');
     return <NotFoundState />;
   }
-
-  console.log('✅ Rendering match page with data:', match.title);
   
   // Format match title for SEO
   const homeTeam = match.teams?.home?.name || '';

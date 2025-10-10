@@ -109,19 +109,20 @@ const Index = () => {
       } catch (error) {
         console.error('Sports loading error:', error);
         
-        // Silently ignore AbortErrors (normal when component unmounts or navigates away)
-        if (error instanceof Error && error.name === 'AbortError') {
-          return;
-        }
-        
-        // Only show error if we don't have any sports data at all and it's not an abort
+        // Only show error if we don't have any sports data at all
         if (sports.length === 0) {
-          // Silently retry without showing toast - the loading state handles UX
+          toast({
+            title: "Connection Issue",
+            description: "Slow connection detected. Retrying...",
+            variant: "destructive",
+          });
+          
+          // Retry after a short delay on mobile
           setTimeout(() => {
             if (sports.length === 0) {
               loadInitialData();
             }
-          }, 3000);
+          }, 2000);
         }
       } finally {
         setLoadingSports(false);
