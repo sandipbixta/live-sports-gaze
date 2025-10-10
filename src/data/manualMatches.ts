@@ -11,6 +11,30 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
+    id: "nepal-vs-japan-cricket-live",
+    title: "Nepal vs Japan Cricket",
+    date: new Date().toISOString(), // Live now
+    teams: {
+      home: "Nepal",
+      away: "Japan"
+    },
+    links: [
+      {
+        id: "hls-stream",
+        name: "HD Stream",
+        url: "https://webott.viatv.com.np/v0t1/KntCineplexTv.stream/playlist.m3u8",
+        quality: "HD"
+      }
+    ],
+    visible: true,
+    image: "https://i.imgur.com/cricket-nepal-japan.jpg",
+    seo: {
+      keywords: "Nepal vs Japan cricket live stream, Nepal Japan cricket watch online, Nepal vs Japan free stream",
+      description: "Watch Nepal vs Japan cricket live stream online for free. Stream this exciting cricket match with high-quality video on DamiTV.",
+      category: "Cricket"
+    }
+  },
+  {
     id: "",
     title: "FC Barcelons vs Vissel kobe",
     date: getTomorrowDate(), // Auto-updates to tomorrow
