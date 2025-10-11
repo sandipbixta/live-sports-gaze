@@ -26,7 +26,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true,
+    visible: false,
     image: "/api/images/proxy/GwZg7AZpYEZgHCAjAJgCzrAY29lBWSUYAUwVmDTAE5p5gJhqDh61hh1OPgBDYLKQRcOJBt15cyAE1LBCETI3BiOzdtRAwmNSgJC8QWECRBmzMLQZCIQLJBSwi5jFGFUoe78o2pzP+KzAYO7iYhBAA.webp",
     seo: {
       keywords: "India Women vs South Africa Women live stream, cricket women live, india cricket live",
