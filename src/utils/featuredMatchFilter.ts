@@ -1,32 +1,39 @@
 import { Match } from '@/types/sports';
 import { isMatchLive } from './matchUtils';
 
-// Major football leagues and competitions
-const MAJOR_COMPETITIONS = [
-  'champions league', 'ucl', 'uefa champions',
-  'europa league', 'uel', 'uefa europa',
-  'conference league',
-  'premier league', 'epl', 'english premier',
-  'la liga', 'laliga', 'spanish',
-  'serie a', 'italian',
-  'bundesliga', 'german',
-  'ligue 1', 'ligue1', 'french',
+// Top priority: International football (country matches)
+const INTERNATIONAL_FOOTBALL = [
   'world cup', 'fifa world cup',
   'euro', 'european championship',
   'copa america',
-  'copa libertadores',
-  'copa del rey',
-  'fa cup',
-  'carabao cup',
-  'super cup', 'supercup',
-  'club world cup',
-  // International football
   'nations league', 'uefa nations',
   'world cup qualifiers', 'wc qualifiers', 'qualifying',
   'international friendly', 'friendly',
   'conmebol', 'concacaf',
   'afcon', 'africa cup',
   'asian cup',
+];
+
+// European Top 5 Leagues
+const TOP_5_LEAGUES = [
+  'premier league', 'epl', 'english premier',
+  'la liga', 'laliga', 'spanish la liga',
+  'serie a', 'italian serie',
+  'bundesliga', 'german bundesliga',
+  'ligue 1', 'ligue1', 'french ligue',
+];
+
+// Major football competitions
+const MAJOR_COMPETITIONS = [
+  'champions league', 'ucl', 'uefa champions',
+  'europa league', 'uel', 'uefa europa',
+  'conference league',
+  'copa libertadores',
+  'copa del rey',
+  'fa cup',
+  'carabao cup',
+  'super cup', 'supercup',
+  'club world cup',
 ];
 
 // Top 20 FIFA-ranked countries (national teams)
@@ -39,6 +46,9 @@ const TOP_COUNTRIES = [
 
 // Popular teams across sports
 const POPULAR_TEAMS = [
+  // High priority teams
+  'al nassr', 'al-nassr', 'alnassr',
+  'inter miami', 'miami',
   // Football
   'real madrid', 'barcelona', 'bayern munich', 'manchester united', 'manchester city',
   'liverpool', 'chelsea', 'arsenal', 'tottenham', 'psg', 'paris saint',
@@ -93,16 +103,41 @@ export const isFeaturedMatch = (match: Match): boolean => {
   const title = match.title.toLowerCase();
   const category = (match.category || '').toLowerCase();
   
-  // Check for major football competitions
+  // Exclude women's matches
+  if (title.includes('women') || title.includes('female') || title.includes('ladies')) {
+    return false;
+  }
+  
+  // HIGHEST PRIORITY: International football (country matches)
+  if (category.includes('football') || category.includes('soccer')) {
+    if (INTERNATIONAL_FOOTBALL.some(comp => title.includes(comp))) {
+      return true;
+    }
+  }
+  
+  // HIGH PRIORITY: Top 5 European leagues
+  if (category.includes('football') || category.includes('soccer')) {
+    if (TOP_5_LEAGUES.some(league => title.includes(league) || category.includes(league))) {
+      return true;
+    }
+  }
+  
+  // Other major football competitions
   if (category.includes('football') || category.includes('soccer')) {
     if (MAJOR_COMPETITIONS.some(comp => title.includes(comp))) {
       return true;
     }
   }
   
-  // Check for major basketball
+  // HIGH PRIORITY: Specific popular teams (Al Nassr, Inter Miami)
+  if (POPULAR_TEAMS.slice(0, 3).some(team => title.includes(team))) {
+    return true;
+  }
+  
+  // HIGH PRIORITY: Popular basketball (NBA, Euroleague)
   if (category.includes('basketball') || category.includes('basket')) {
-    if (MAJOR_BASKETBALL.some(league => title.includes(league) || category.includes(league))) {
+    const popularBasketball = ['nba', 'euroleague'];
+    if (popularBasketball.some(league => title.includes(league) || category.includes(league))) {
       return true;
     }
   }
@@ -128,11 +163,10 @@ export const isFeaturedMatch = (match: Match): boolean => {
     }
   }
   
-  // Check for major UFC/MMA
-  if (category.includes('mma') || category.includes('ufc') || category.includes('fighting')) {
-    if (MAJOR_UFC.some(event => title.includes(event) || category.includes(event))) {
-      return true;
-    }
+  // HIGHEST PRIORITY: Fighting (UFC/MMA/Boxing)
+  if (category.includes('mma') || category.includes('ufc') || category.includes('fighting') || 
+      category.includes('boxing') || category.includes('fight')) {
+    return true; // All fights are featured
   }
   
   // Check for major wrestling
@@ -142,18 +176,19 @@ export const isFeaturedMatch = (match: Match): boolean => {
     }
   }
   
-  // Check for major cricket
+  // HIGH PRIORITY: Major cricket (popular only)
   if (category.includes('cricket')) {
-    if (MAJOR_CRICKET.some(comp => title.includes(comp) || category.includes(comp))) {
+    // Only IPL, World Cup, T20, and other major tournaments
+    const popularCricket = ['ipl', 'world cup', 't20', 'odi', 'test match', 'ashes', 'bbl', 'psl'];
+    if (popularCricket.some(comp => title.includes(comp) || category.includes(comp))) {
       return true;
     }
   }
   
-  // Check for major AFL
+  // HIGH PRIORITY: AFL (popular matches)
   if (category.includes('afl') || category.includes('australian football')) {
-    if (MAJOR_AFL.some(comp => title.includes(comp) || category.includes(comp))) {
-      return true;
-    }
+    // All AFL matches are considered popular
+    return true;
   }
   
   // Check for major rugby
