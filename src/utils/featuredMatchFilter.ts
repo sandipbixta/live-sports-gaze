@@ -1,4 +1,5 @@
 import { Match } from '@/types/sports';
+import { isMatchLive } from './matchUtils';
 
 // Major football leagues and competitions
 const MAJOR_COMPETITIONS = [
@@ -214,10 +215,24 @@ export const isFeaturedMatch = (match: Match): boolean => {
 
 /**
  * Filter and sort matches by featured status
+ * Prioritizes: 1) Live matches, 2) Upcoming matches (sorted by date)
  */
 export const getFeaturedMatches = (matches: Match[], limit: number = 10): Match[] => {
-  return matches
+  // Filter for featured matches with posters
+  const featuredWithPosters = matches
     .filter(match => match.poster && match.poster.trim() !== '') // Must have poster
-    .filter(isFeaturedMatch) // Must be featured
-    .slice(0, limit);
+    .filter(isFeaturedMatch); // Must be featured
+  
+  // Separate live and upcoming matches using isMatchLive utility
+  const liveMatches = featuredWithPosters.filter(match => isMatchLive(match));
+  
+  const upcomingMatches = featuredWithPosters
+    .filter(match => !isMatchLive(match))
+    .sort((a, b) => {
+      // Sort upcoming matches by date (soonest first)
+      return a.date - b.date;
+    });
+  
+  // Combine: live matches first, then upcoming matches
+  return [...liveMatches, ...upcomingMatches].slice(0, limit);
 };
