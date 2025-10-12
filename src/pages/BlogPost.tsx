@@ -194,7 +194,7 @@ const BlogPost = () => {
               onClick={() => setImageDialogOpen(true)}
             >
               <img
-                src={post.featured_image}
+                src={post.featured_image.startsWith('/') ? post.featured_image : `/${post.featured_image}`}
                 alt={post.title}
                 className="w-full h-96 object-cover rounded-lg hover:opacity-90 transition-opacity"
               />

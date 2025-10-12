@@ -104,7 +104,7 @@ const RecentBlogPosts = () => {
               {post.featured_image && (
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={post.featured_image}
+                    src={post.featured_image.startsWith('/') ? post.featured_image : `/${post.featured_image}`}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

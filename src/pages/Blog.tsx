@@ -135,7 +135,7 @@ const Blog = () => {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
                   {post.featured_image && (
                     <img
-                      src={post.featured_image}
+                      src={post.featured_image.startsWith('/') ? post.featured_image : `/${post.featured_image}`}
                       alt={post.title}
                       className="w-full h-48 object-cover"
                     />
