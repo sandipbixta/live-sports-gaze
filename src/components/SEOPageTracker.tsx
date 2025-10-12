@@ -6,7 +6,7 @@ import RevenueOptimizer from './RevenueOptimizer';
 interface SEOPageTrackerProps {
   children: React.ReactNode;
   pageTitle?: string;
-  contentType?: 'match' | 'live' | 'channels' | 'schedule' | 'news' | 'home';
+  contentType?: 'match' | 'live' | 'channels' | 'schedule' | 'news' | 'home' | 'blog';
 }
 
 const SEOPageTracker: React.FC<SEOPageTrackerProps> = ({ 
