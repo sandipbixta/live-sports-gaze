@@ -251,8 +251,6 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            <RecentBlogPosts />
-            
             
             <div className="mb-8">
               {selectedSport && (
@@ -289,6 +287,8 @@ const Index = () => {
                 </>
               )}
             </div>
+            
+            <RecentBlogPosts />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div className="lg:col-span-2">
