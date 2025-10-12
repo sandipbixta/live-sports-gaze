@@ -131,6 +131,12 @@
   status = 301
   force = true
 
+# Dynamic sitemap generation from Supabase Edge Function
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "https://wxvsteaayxgygihpshoz.supabase.co/functions/v1/sitemap"
+  status = 200
+
 # SPA fallback - must be last
 [[redirects]]
   from = "/*"
