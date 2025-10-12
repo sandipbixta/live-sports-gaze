@@ -23,6 +23,7 @@ import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import BlogAdmin from "./pages/BlogAdmin";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
@@ -109,6 +110,7 @@ const App: React.FC = () => {
                   <BlogPost />
                 </SEOPageTracker>
               } />
+              <Route path="/blog-admin" element={<BlogAdmin />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
