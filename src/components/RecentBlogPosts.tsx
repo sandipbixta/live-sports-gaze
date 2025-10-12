@@ -97,40 +97,40 @@ const RecentBlogPosts = () => {
         </Link>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {posts.map((post) => (
           <Link key={post.id} to={`/blog/${post.slug}`}>
-            <Card className="overflow-hidden bg-card border-border hover:border-primary transition-all hover:shadow-lg group h-full">
+            <Card className="overflow-hidden bg-card border-border hover:border-primary transition-all hover:shadow-lg group h-full flex flex-col">
               {post.featured_image && (
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-36 overflow-hidden">
                   <img
-                    src={post.featured_image.startsWith('/') ? post.featured_image : `/${post.featured_image}`}
+                    src={post.featured_image}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <Badge 
                     variant="secondary" 
-                    className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm"
+                    className="absolute top-2 left-2 bg-background/90 backdrop-blur-sm text-xs"
                   >
                     {post.category}
                   </Badge>
                 </div>
               )}
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+              <div className="p-3 flex-1 flex flex-col">
+                <h3 className="font-bold text-base mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                   {post.title}
                 </h3>
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                <p className="text-muted-foreground text-sm mb-3 line-clamp-2 flex-1">
                   {post.excerpt}
                 </p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-auto">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {format(new Date(post.published_at), 'MMM d, yyyy')}
                   </div>
                   <div className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />
-                    {post.views} views
+                    {post.views}
                   </div>
                 </div>
               </div>

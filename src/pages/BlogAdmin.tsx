@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import PageLayout from '@/components/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Upload, Image as ImageIcon, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const BlogAdmin = () => {
   const navigate = useNavigate();
@@ -121,7 +121,16 @@ const BlogAdmin = () => {
   };
 
   return (
-    <PageLayout>
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="container mx-auto px-4 py-4">
+          <Link to="/blog" className="inline-flex items-center gap-2 text-sm hover:text-primary">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Blog
+          </Link>
+        </div>
+      </header>
+      
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-3xl font-bold mb-8">Create New Blog Post</h1>
 
@@ -297,7 +306,7 @@ const BlogAdmin = () => {
           </Card>
         </form>
       </div>
-    </PageLayout>
+    </div>
   );
 };
 
