@@ -6,6 +6,7 @@ import PageLayout from '@/components/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Calendar, Tag, Eye, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import SocialShare from '@/components/SocialShare';
@@ -31,6 +32,7 @@ const BlogPost = () => {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -187,11 +189,16 @@ const BlogPost = () => {
           )}
 
           {post.featured_image && (
-            <img
-              src={post.featured_image}
-              alt={post.title}
-              className="w-full h-96 object-cover rounded-lg mb-8"
-            />
+            <div 
+              className="cursor-pointer mb-8"
+              onClick={() => setImageDialogOpen(true)}
+            >
+              <img
+                src={post.featured_image}
+                alt={post.title}
+                className="w-full h-96 object-cover rounded-lg hover:opacity-90 transition-opacity"
+              />
+            </div>
           )}
         </header>
 
@@ -230,6 +237,18 @@ const BlogPost = () => {
           </section>
         )}
       </article>
+
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="max-w-7xl w-full p-0">
+          {post?.featured_image && (
+            <img
+              src={post.featured_image}
+              alt={post.title}
+              className="w-full h-auto"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 };
