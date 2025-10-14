@@ -71,6 +71,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean | null
+          subscribed_leagues: string[] | null
+          subscribed_teams: string[] | null
+          timezone: string | null
+          updated_at: string
+          verification_token: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_leagues?: string[] | null
+          subscribed_teams?: string[] | null
+          timezone?: string | null
+          updated_at?: string
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          subscribed_leagues?: string[] | null
+          subscribed_teams?: string[] | null
+          timezone?: string | null
+          updated_at?: string
+          verification_token?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
       iptv_providers: {
         Row: {
           base_url: string
@@ -137,6 +176,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_favorites: {
+        Row: {
+          created_at: string
+          favorite_id: string
+          favorite_name: string
+          favorite_type: string
+          id: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          favorite_id: string
+          favorite_name: string
+          favorite_type: string
+          id?: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          favorite_id?: string
+          favorite_name?: string
+          favorite_type?: string
+          id?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -179,6 +248,42 @@ export type Database = {
           last_heartbeat?: string
           match_id?: string
           session_id?: string
+        }
+        Relationships: []
+      }
+      watch_history: {
+        Row: {
+          created_at: string
+          id: string
+          last_watched_at: string
+          match_id: string
+          match_title: string
+          session_id: string
+          sport_id: string
+          user_id: string | null
+          watch_duration: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_watched_at?: string
+          match_id: string
+          match_title: string
+          session_id: string
+          sport_id: string
+          user_id?: string | null
+          watch_duration?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_watched_at?: string
+          match_id?: string
+          match_title?: string
+          session_id?: string
+          sport_id?: string
+          user_id?: string | null
+          watch_duration?: number | null
         }
         Relationships: []
       }

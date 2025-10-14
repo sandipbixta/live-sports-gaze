@@ -25,6 +25,7 @@ import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
 import HomepageContent from '../components/HomepageContent';
 import RecentBlogPosts from '../components/RecentBlogPosts';
+import EmailSubscription from '../components/EmailSubscription';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -383,6 +384,13 @@ const Index = () => {
 
         {/* SEO Content - Competitor keywords */}
         <CompetitorSEOContent />
+        
+        {/* Email Subscription Section */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-2xl mx-auto">
+            <EmailSubscription />
+          </div>
+        </section>
         
         {/* Rich Homepage Content for AdSense Approval */}
         <HomepageContent />

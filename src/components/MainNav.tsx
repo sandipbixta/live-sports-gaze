@@ -7,12 +7,13 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { Home, CalendarDays, Tv2, Radio, BookOpen, Info, Phone } from "lucide-react";
+import { Home, CalendarDays, Tv2, Radio, BookOpen, Info, Phone, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import Clock from "./Clock";
 import ThemeToggle from "./ThemeToggle";
 import PushNotifications from "./PushNotifications";
+import { Button } from "./ui/button";
 
 const MainNav = () => {
   const isMobile = useIsMobile();
@@ -62,6 +63,15 @@ const MainNav = () => {
       </NavigationMenu>
       
       <div className="hidden md:flex items-center gap-2 ml-auto">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/install")}
+          className="text-white hover:bg-[#343a4d]"
+          title="Install DamiTV App"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
         <PushNotifications />
         <ThemeToggle />
         <Clock />

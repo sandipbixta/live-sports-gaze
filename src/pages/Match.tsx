@@ -5,6 +5,7 @@ import { Match as MatchType } from '@/types/sports';
 import { fetchMatch, fetchMatches } from '@/api/sportsApi';
 import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { useViewerTracking } from '@/hooks/useViewerTracking';
+import { useWatchHistory } from '@/hooks/useWatchHistory';
 import { Helmet } from 'react-helmet-async';
 import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
@@ -12,6 +13,7 @@ import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
 import SEOMetaTags from '@/components/SEOMetaTags';
 import SocialShare from '@/components/SocialShare';
+import FavoriteButton from '@/components/FavoriteButton';
 
 // Component imports
 import MatchHeader from '@/components/match/MatchHeader';
@@ -33,6 +35,9 @@ const Match = () => {
 
   // Track viewer count for this match
   useViewerTracking(matchId);
+
+  // Track watch history
+  useWatchHistory(matchId, match?.title, sportId);
 
   // Use enhanced stream player hook for comprehensive stream management
   const {
@@ -158,18 +163,57 @@ const Match = () => {
 
       <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SportsEvent",
+            "name": matchTitle,
+            "description": matchDescription,
+            "startDate": match.date ? new Date(match.date).toISOString() : new Date().toISOString(),
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+            "location": {
+              "@type": "VirtualLocation",
+              "url": `https://damitv.pro/match/${sportId}/${matchId}`
+            },
+            "image": matchPosterUrl,
+            "organizer": {
+              "@type": "Organization",
+              "name": "DamiTV",
+              "url": "https://damitv.pro"
+            },
+            "competitor": [
+              {
+                "@type": "SportsTeam",
+                "name": homeTeam
+              },
+              {
+                "@type": "SportsTeam",
+                "name": awayTeam
+              }
+            ]
+          })}
+        </script>
       </Helmet>
       
       <MatchHeader 
         match={match} 
         streamAvailable={!!stream && stream.id !== "error"}
         socialShare={
-          <SocialShare 
-            title={matchTitle}
-            description={matchDescription}
-            image={matchPosterUrl}
-            url={`https://damitv.pro/match/${sportId}/${matchId}`}
-          />
+          <div className="flex items-center gap-2">
+            <FavoriteButton
+              type="match"
+              id={matchId || ''}
+              name={matchTitle}
+              variant="outline"
+            />
+            <SocialShare 
+              title={matchTitle}
+              description={matchDescription}
+              image={matchPosterUrl}
+              url={`https://damitv.pro/match/${sportId}/${matchId}`}
+            />
+          </div>
         }
       />
       

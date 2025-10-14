@@ -30,6 +30,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Install from "./pages/Install";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -116,6 +117,11 @@ const App: React.FC = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/dmca" element={<DMCANotice />} />
+              <Route path="/install" element={
+                <SEOPageTracker pageTitle="Install DamiTV App" contentType="home">
+                  <Install />
+                </SEOPageTracker>
+              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
