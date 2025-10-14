@@ -22,7 +22,7 @@ const Clock: React.FC = () => {
   };
 
   return (
-    <div className="text-white font-medium text-sm">
+    <div className="text-foreground font-medium text-sm">
       {formatTime(time)}
     </div>
   );

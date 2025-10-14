@@ -16,7 +16,7 @@ const MobileBottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-black border-t border-black dark:border-white shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t border-border shadow-lg">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = currentPath === item.path;
@@ -29,12 +29,12 @@ const MobileBottomNav = () => {
               <item.icon 
                 className={cn(
                   "h-5 w-5 transition-colors", 
-                  isActive ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"
+                  isActive ? "text-foreground" : "text-muted-foreground"
                 )} 
               />
               <span className={cn(
                 "text-xs mt-1 transition-colors",
-                isActive ? "text-black dark:text-white font-medium" : "text-black/60 dark:text-white/60"
+                isActive ? "text-foreground font-medium" : "text-muted-foreground"
               )}>
                 {item.title}
               </span>
