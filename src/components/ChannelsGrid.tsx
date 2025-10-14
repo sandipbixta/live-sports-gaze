@@ -49,10 +49,10 @@ const ChannelsGrid = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-white mb-2">All Channels by Country</h2>
+      <h2 className="text-2xl font-bold text-foreground mb-2">All Channels by Country</h2>
       
       {/* Search Bar */}
-      <div className="bg-[#1a1f2e] rounded-xl border border-[#343a4d] p-4">
+      <div className="bg-card rounded-xl border border-border p-4">
         <SearchBar
           value={searchTerm}
           onChange={handleSearchChange}
@@ -72,8 +72,8 @@ const ChannelsGrid = () => {
 
       {/* Channels Display */}
       {(searchTerm.trim() || selectedCountry) && (
-        <div className="bg-[#151922] rounded-xl border border-[#343a4d] p-4">
-          <h3 className="font-semibold text-white text-lg mb-2">
+        <div className="bg-card/50 rounded-xl border border-border p-4">
+          <h3 className="font-semibold text-foreground text-lg mb-2">
             {searchTerm.trim() 
               ? `Search Results for "${searchTerm}" (${filteredChannels.length} channels)`
               : selectedCountry
@@ -83,11 +83,11 @@ const ChannelsGrid = () => {
             {filteredChannels.map(channel => (
               <div
                 key={`${channel.country || selectedCountry}-${channel.id}`}
-                className="bg-[#1a1f2e] rounded-xl p-4 cursor-pointer hover:bg-[#242836] transition-all duration-200 border border-[#343a4d] hover:border-[#ff5a36] group"
+                className="bg-card rounded-xl p-4 cursor-pointer hover:bg-accent transition-all duration-200 border border-border hover:border-sports-primary group"
                 onClick={() => handleSelectChannel(channel, channel.country || selectedCountry)}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-[#343a4d] group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-muted group-hover:scale-110 transition-transform">
                     {channel.logo ? (
                       <img
                         src={channel.logo}
@@ -99,16 +99,16 @@ const ChannelsGrid = () => {
                         }}
                       />
                     ) : null}
-                    <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${channel.logo ? 'hidden' : ''}`}>
+                    <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-foreground ${channel.logo ? 'hidden' : ''}`}>
                       {getInitials(channel.title)}
                     </div>
                   </div>
-                  <h3 className="text-sm font-medium text-white group-hover:text-[#ff5a36] transition-colors">
+                  <h3 className="text-sm font-medium text-foreground group-hover:text-sports-primary transition-colors">
                     {channel.title}
                   </h3>
                   {/* Show country name when searching */}
                   {searchTerm.trim() && channel.country && (
-                    <p className="text-xs text-gray-400 mt-1">{channel.country}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{channel.country}</p>
                   )}
                 </div>
               </div>
@@ -116,7 +116,7 @@ const ChannelsGrid = () => {
           </div>
           {filteredChannels.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-gray-400">
+              <p className="text-muted-foreground">
                 {searchTerm.trim() 
                   ? "No channels found matching your search."
                   : "No channels available for this country."

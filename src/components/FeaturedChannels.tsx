@@ -32,9 +32,9 @@ const FeaturedChannels = () => {
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-white">Live TV Channels</h2>
+        <h2 className="text-2xl font-bold text-foreground">Live TV Channels</h2>
         <Link to="/channels">
-          <Button variant="outline" className="text-white border-white/20 bg-white/10 hover:bg-white/20 backdrop-blur-md shadow-lg rounded-full">
+          <Button variant="outline" className="backdrop-blur-md shadow-lg rounded-full">
             View All Channels <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

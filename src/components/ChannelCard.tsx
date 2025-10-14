@@ -32,16 +32,16 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     <Card 
       className={`overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg ${
         isActive 
-          ? 'bg-primary/20 border-primary/40 shadow-primary/20' 
-          : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/30'
+          ? 'bg-sports-primary/20 border-sports-primary/40 shadow-sports-primary/20' 
+          : 'bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30'
       }`}
       onClick={onClick}
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
           <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
-            isActive ? 'ring-2 ring-[#ff5a36]' : ''
-          } ${logo ? 'bg-black p-0.5' : (isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]')}`}>
+            isActive ? 'ring-2 ring-sports-primary' : ''
+          } ${logo ? 'bg-background p-0.5' : (isActive ? 'bg-sports-primary' : 'bg-muted')}`}>
             {logo ? (
               <img 
                 src={logo} 
@@ -52,23 +52,23 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                   const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
                   if (fallback) {
                     fallback.classList.remove('hidden');
-                    fallback.parentElement!.classList.remove('bg-black', 'p-0.5');
-                    fallback.parentElement!.classList.add(isActive ? 'bg-[#ff5a36]' : 'bg-[#343a4d]');
+                    fallback.parentElement!.classList.remove('bg-background', 'p-0.5');
+                    fallback.parentElement!.classList.add(isActive ? 'bg-sports-primary' : 'bg-muted');
                   }
                 }}
               />
             ) : null}
             <div className={`w-full h-full flex items-center justify-center ${logo ? 'hidden' : ''}`}>
               {isActive ? (
-                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
+                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
               ) : (
-                <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-gray-300">
+                <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-muted-foreground">
                   {generateInitials()}
                 </div>
               )}
             </div>
           </div>
-          <div className="font-medium text-xs sm:text-sm text-white truncate">{title}</div>
+          <div className="font-medium text-xs sm:text-sm text-foreground truncate">{title}</div>
         </div>
       </CardContent>
     </Card>

@@ -262,25 +262,25 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-lg border-2 border-white/5 bg-black transition-all duration-300 hover:border-primary">
+      <div className="relative overflow-hidden rounded-lg border-2 border-border bg-card transition-all duration-300 hover:border-sports-primary">
         {/* Image Section */}
-        <div className="relative aspect-video overflow-hidden bg-gray-900">
+        <div className="relative aspect-video overflow-hidden bg-muted">
           {generateThumbnail()}
           
           {/* Simple Status Indicators */}
           <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
             {isLive ? (
-              <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 tracking-wider">
+              <span className="bg-red-500 text-primary-foreground text-[10px] font-black uppercase px-2 py-1 tracking-wider">
                 ● Live
               </span>
             ) : (
-              <span className="bg-gray-800/90 text-white/60 text-[10px] font-bold uppercase px-2 py-1">
+              <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
                 {match.date && match.date > Date.now() ? 'Upcoming' : 'Ended'}
               </span>
             )}
             
             {hasStream && (
-              <span className="bg-black/80 text-white text-[10px] font-bold px-2 py-1">
+              <span className="bg-background/80 text-foreground text-[10px] font-bold px-2 py-1">
                 {match.sources.length} HD
               </span>
             )}
@@ -290,18 +290,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
         {/* Info Section */}
         <div className="p-3 space-y-2">
           {/* Title */}
-          <h3 className="font-bold text-white text-sm line-clamp-2 min-h-[2.5rem]">
+          <h3 className="font-bold text-foreground text-sm line-clamp-2 min-h-[2.5rem]">
             {home && away ? `${home} vs ${away}` : match.title}
           </h3>
           
           {/* Meta Info */}
-          <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium">
             <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
-            <span className="w-1 h-1 bg-gray-600 rounded-full" />
+            <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
             {isLive && (
               <>
-                <span className="w-1 h-1 bg-gray-600 rounded-full" />
+                <span className="w-1 h-1 bg-border rounded-full" />
                 <ViewerCount matchId={match.id} enableRealtime={true} />
               </>
             )}
@@ -311,11 +311,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {hasStream && (
             <div className="pt-1">
               {isLive || isMatchStarting ? (
-            <div className="bg-sports-primary text-white font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
+            <div className="bg-sports-primary text-primary-foreground font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
               Watch Now
             </div>
               ) : countdown ? (
-                <div className="bg-gray-800 text-white border border-gray-700 font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
+                <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
                   <Clock className="w-3.5 h-3.5" />
                   Starts in {countdown}
                 </div>
