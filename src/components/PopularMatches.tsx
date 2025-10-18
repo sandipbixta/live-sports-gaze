@@ -7,6 +7,8 @@ import { isTrendingMatch } from '../utils/popularLeagues';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
+import { isPopularMatch } from '../utils/popularTeamsFilter';
+import { isMatchLive } from '../utils/matchUtils';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -23,11 +25,13 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   
-  // Filter out matches without sources, advertisements, excluded IDs, and ended matches, then consolidate
+  // Filter: must have sources, not excluded, only LIVE matches, only popular teams
   const cleanMatches = filterActiveMatches(filterCleanMatches(
     popularMatches
       .filter(match => match.sources && match.sources.length > 0) // CRITICAL: Must have sources
       .filter(match => !excludeMatchIds.includes(match.id))
+      .filter(match => isMatchLive(match)) // Only LIVE matches
+      .filter(match => isPopularMatch(match.title)) // Only popular teams/competitions
   ));
   
   // Consolidate matches (merges duplicate matches with their stream sources)
@@ -89,7 +93,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-3 text-white">Trending Matches</h2>
+      <h2 className="text-xl font-bold mb-3 text-white">Popular by Viewers</h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 5).map((match, index) => (
           <MatchCard 

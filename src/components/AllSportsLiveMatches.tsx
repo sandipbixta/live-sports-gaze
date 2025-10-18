@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers, isMatchLive } from '../utils/matchUtils';
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
+import { isPopularMatch } from '../utils/popularTeamsFilter';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp } from 'lucide-react';
@@ -58,10 +59,13 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
         const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
         
-        // For "Popular by Viewers", show ALL matches with viewers (no image filter)
+        // For "Popular by Viewers", show only LIVE matches with popular teams that have viewers
         const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
+        const matchesWithViewers = sortedByViewers
+          .filter(m => isMatchLive(m)) // Only LIVE matches
+          .filter(m => isPopularMatch(m.title)) // Only popular teams/competitions
+          .filter(m => (m.viewerCount || 0) > 0); // Must have viewers
+        console.log('🔥 Popular matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
         setMostViewedMatches(matchesWithViewers.slice(0, 12));
         
       } catch (error) {
