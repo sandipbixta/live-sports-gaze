@@ -3,6 +3,7 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
+import { ManualMatch } from '@/types/manualMatch';
 import { fetchAllMatches } from '@/api/sportsApi';
 import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
 import { filterMatchesWithImages } from '@/utils/matchImageFilter';
@@ -11,6 +12,8 @@ import { ViewerCount } from './ViewerCount';
 import { Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
+import { manualMatches } from '@/data/manualMatches';
+import { isPopularMatch } from '@/utils/popularTeamsFilter';
 
 const POSTER_BASE_URL = 'https://streamed.pk';
 
@@ -54,8 +57,28 @@ export const HeroCarousel = () => {
         // Only show matches with images on home page
         const matchesWithImages = filterMatchesWithImages(featuredMatches);
         
-        console.log(`⭐ Found ${matchesWithImages.length} featured matches with images from all sports (Football, Basketball, UFC, Cricket, AFL, etc.)`);
-        setMatchesWithPosters(matchesWithImages);
+        // Get popular manual matches with images
+        const popularManualMatches = manualMatches
+          .filter(match => match.visible && match.image && isPopularMatch(match.title))
+          .map((match): Match => ({
+            id: match.id,
+            title: match.title,
+            category: match.seo?.category || 'Sports',
+            date: new Date(match.date).getTime(),
+            poster: match.image,
+            popular: true,
+            teams: {
+              home: { name: match.teams?.home || '' },
+              away: { name: match.teams?.away || '' }
+            },
+            sources: []
+          }));
+        
+        // Combine API matches with popular manual matches
+        const allFeaturedMatches = [...matchesWithImages, ...popularManualMatches];
+        
+        console.log(`⭐ Found ${allFeaturedMatches.length} featured matches with images (${matchesWithImages.length} from API, ${popularManualMatches.length} manual)`);
+        setMatchesWithPosters(allFeaturedMatches);
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }
@@ -119,7 +142,7 @@ export const HeroCarousel = () => {
             // Match slides - clickable
             <Link
               key={slide.id}
-              to={`/match/${slide.category}/${slide.id}`}
+              to={manualMatches.some(m => m.id === slide.id) ? `/manual-match/${slide.id}` : `/match/${slide.category}/${slide.id}`}
               className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
             >
               <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] flex items-center overflow-hidden">

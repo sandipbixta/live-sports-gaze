@@ -47,13 +47,24 @@ const TOP_COUNTRIES = [
 // Popular teams across sports
 const POPULAR_TEAMS = [
   // High priority teams
-  'al nassr', 'al-nassr', 'alnassr',
+  'al nassr', 'al-nassr', 'alnassr', 'al ittihad', 'al-ittihad', 'al ithihad',
   'inter miami', 'miami',
-  // Football
-  'real madrid', 'barcelona', 'bayern munich', 'manchester united', 'manchester city',
-  'liverpool', 'chelsea', 'arsenal', 'tottenham', 'psg', 'paris saint',
-  'juventus', 'milan', 'inter milan', 'napoli', 'atletico madrid',
-  'borussia dortmund', 'ajax', 'benfica', 'porto',
+  // Premier League
+  'arsenal', 'aston villa', 'bournemouth', 'brentford', 'brighton', 
+  'burnley', 'chelsea', 'crystal palace', 'everton', 'fulham',
+  'leeds united', 'liverpool', 'manchester city', 'manchester united',
+  'newcastle united', 'nottingham forest', 'sunderland', 
+  'tottenham', 'west ham', 'wolverhampton', 'wolves',
+  // La Liga
+  'real madrid', 'barcelona', 'atletico madrid', 'sevilla', 'valencia',
+  'villarreal', 'real betis', 'real sociedad', 'athletic club',
+  // Serie A
+  'juventus', 'milan', 'ac milan', 'inter milan', 'napoli', 'roma',
+  'lazio', 'atalanta', 'fiorentina',
+  // Ligue 1
+  'psg', 'paris saint-germain', 'monaco', 'marseille', 'lyon', 'lille',
+  // Other top clubs
+  'bayern munich', 'borussia dortmund', 'ajax', 'benfica', 'porto',
   // Basketball
   'lakers', 'warriors', 'celtics', 'heat', 'knicks', 'bulls', 'nets',
   // American Football
@@ -76,10 +87,10 @@ const MAJOR_TENNIS = ['wimbledon', 'us open', 'french open', 'australian open', 
 const MAJOR_UFC = ['ufc', 'bellator', 'pfl', 'one championship', 'title fight', 'main event'];
 
 // Major Wrestling
-const MAJOR_WRESTLING = ['wwe', 'aew', 'wrestlemania', 'summerslam', 'royal rumble', 'all out'];
+const MAJOR_WRESTLING = ['wwe', 'raw', 'smackdown', 'aew', 'wrestlemania', 'summerslam', 'royal rumble', 'all out'];
 
 // Major Cricket
-const MAJOR_CRICKET = ['ipl', 'world cup', 'ashes', 't20', 'odi', 'test match', 'bbl', 'psl', 'champions trophy'];
+const MAJOR_CRICKET = ['ipl', 'world cup', 'ashes', 't20', 'odi', 'test match', 'bbl', 'psl', 'champions trophy', 'india', 'australia', 'pakistan', 'nepal', 'new zealand'];
 
 // Major AFL
 const MAJOR_AFL = ['afl', 'grand final', 'finals series'];
