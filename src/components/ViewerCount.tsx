@@ -30,60 +30,22 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
     let mounted = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    // Generate fake viewer base
-    const generateFakeViewerBase = (matchId: string): number => {
-      let hash = 0;
-      for (let i = 0; i < matchId.length; i++) {
-        hash = ((hash << 5) - hash) + matchId.charCodeAt(i);
-        hash = hash & hash;
-      }
-      const base = 500 + (Math.abs(hash) % 1500);
-      return base;
-    };
-
-    // Generate realistic fluctuation
-    const generateFluctuation = (matchId: string): number => {
-      const now = Date.now();
-      const timeComponent = Math.floor(now / 10000);
-      let seed = 0;
-      for (let i = 0; i < matchId.length; i++) {
-        seed += matchId.charCodeAt(i);
-      }
-      seed += timeComponent;
-      const variation = ((seed * 9301 + 49297) % 233280) / 777.6 - 150;
-      return Math.floor(variation);
-    };
-
-    // Fetch viewer count with fake viewers
+    // Fetch viewer count
     const fetchViewerCount = async () => {
       try {
-        const { data: realCount, error } = await supabase.rpc('get_viewer_count', {
+        const { data, error } = await supabase.rpc('get_viewer_count', {
           match_id_param: matchId
         });
         
-        const fakeBase = generateFakeViewerBase(matchId);
-        const fluctuation = generateFluctuation(matchId);
-        const realViewers = (!error && realCount !== null) ? realCount : 0;
-        const totalCount = Math.max(500, fakeBase + fluctuation + realViewers);
-        
-        if (mounted) {
-          setViewerCount(totalCount);
+        if (!error && data !== null && mounted) {
+          setViewerCount(data);
         }
       } catch (error) {
         console.error('Error fetching viewer count:', error);
-        // Show fake viewers even on error
-        if (mounted) {
-          const fakeBase = generateFakeViewerBase(matchId);
-          const fluctuation = generateFluctuation(matchId);
-          setViewerCount(Math.max(500, fakeBase + fluctuation));
-        }
       }
     };
 
     fetchViewerCount();
-    
-    // Update count every 10 seconds for realistic fluctuation
-    const fluctuationInterval = setInterval(fetchViewerCount, 10000);
 
     // Set up real-time subscription only if enabled
     if (enableRealtime) {
@@ -112,15 +74,14 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
 
     return () => {
       mounted = false;
-      clearInterval(fluctuationInterval);
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
   }, [matchId, enableRealtime]);
 
-  // Always show viewers (minimum 500 with fake counts)
-  if (viewerCount < 500) {
+  // Don't show if 0 viewers
+  if (viewerCount === 0) {
     return null;
   }
 
