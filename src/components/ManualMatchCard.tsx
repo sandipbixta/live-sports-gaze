@@ -3,7 +3,7 @@ import { ManualMatch } from "@/types/manualMatch";
 import { useNavigate } from "react-router-dom";
 import { Clock } from "lucide-react";
 import { format } from 'date-fns';
-import { ViewerCount } from './ViewerCount';
+
 
 interface ManualMatchCardProps {
   match: ManualMatch;
@@ -108,12 +108,6 @@ const ManualMatchCard = ({ match }: ManualMatchCardProps) => {
             <span>{formatTime(matchDate)}</span>
             <span className="w-1 h-1 bg-gray-600 rounded-full" />
             <span>{formatDateShort(matchDate)}</span>
-            {isLive && (
-              <>
-                <span className="w-1 h-1 bg-gray-600 rounded-full" />
-                <ViewerCount matchId={match.id} enableRealtime={true} />
-              </>
-            )}
           </div>
           
           {/* Action */}
