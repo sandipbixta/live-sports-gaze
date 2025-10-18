@@ -8,7 +8,7 @@ import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
-
+import { ViewerCount } from './ViewerCount';
 
 interface MatchCardProps {
   match: Match;
@@ -299,6 +299,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
             <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
+            {isLive && (
+              <>
+                <span className="w-1 h-1 bg-border rounded-full" />
+                <ViewerCount matchId={match.id} enableRealtime={true} />
+              </>
+            )}
           </div>
           
           {/* Action */}
