@@ -57,10 +57,9 @@ export const HeroCarousel = () => {
         // Only show matches with images on home page
         const matchesWithImages = filterMatchesWithImages(featuredMatches);
         
-        // Get popular manual matches with images that are LIVE
+        // Get popular manual matches with images
         const popularManualMatches = manualMatches
           .filter(match => match.visible && match.image && isPopularMatch(match.title))
-          .filter(match => Date.now() >= new Date(match.date).getTime()) // Only LIVE matches
           .map((match): Match => ({
             id: match.id,
             title: match.title,
