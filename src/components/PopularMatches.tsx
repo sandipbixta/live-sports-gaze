@@ -4,8 +4,8 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
-import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
+import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
+import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
 
 interface PopularMatchesProps {
@@ -36,7 +36,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   // Only show matches with images on home page
   const matchesWithImages = filterMatchesWithImages(consolidatedMatches);
 
-  // Enrich matches with viewer counts and sort
+  // Enrich matches with viewer counts from stream API and sort
   React.useEffect(() => {
     const enrichMatches = async () => {
       if (matchesWithImages.length === 0) {
@@ -46,10 +46,16 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
       setIsLoading(true);
       try {
-        const matchesWithViewers = await enrichMatchesWithViewerCounts(matchesWithImages);
+        const matchesWithViewers = await enrichMatchesWithViewers(matchesWithImages);
+        
+        // Only include live matches with viewer counts
+        const liveMatchesWithViewers = matchesWithViewers.filter(m => 
+          isMatchLive(m) && 
+          (m.viewerCount || 0) > 0
+        );
         
         // Sort by viewer count first, then by trending score
-        const sortedMatches = matchesWithViewers.sort((a, b) => {
+        const sortedMatches = liveMatchesWithViewers.sort((a, b) => {
           const aViewers = a.viewerCount || 0;
           const bViewers = b.viewerCount || 0;
           
@@ -66,13 +72,15 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
         setEnrichedMatches(sortedMatches);
       } catch (error) {
         console.error('Error enriching popular matches:', error);
-        // Fallback to trending score sorting
-        const trendingSorted = matchesWithImages.sort((a, b) => {
-          const aTrending = isTrendingMatch(a.title);
-          const bTrending = isTrendingMatch(b.title);
-          return bTrending.score - aTrending.score;
-        });
-        setEnrichedMatches(trendingSorted);
+        // Fallback: filter for live matches without sorting
+        const fallbackMatches = matchesWithImages
+          .filter(m => isMatchLive(m))
+          .sort((a, b) => {
+            const aTrending = isTrendingMatch(a.title);
+            const bTrending = isTrendingMatch(b.title);
+            return bTrending.score - aTrending.score;
+          });
+        setEnrichedMatches(fallbackMatches);
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +97,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
   return (
     <div className="mb-6">
-      <h2 className="text-xl font-bold mb-3 text-white">Trending Matches</h2>
+      <h2 className="text-xl font-bold mb-3 text-white">Popular by Viewers</h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 5).map((match, index) => (
           <MatchCard 

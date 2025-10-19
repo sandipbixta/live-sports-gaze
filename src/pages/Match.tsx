@@ -22,6 +22,7 @@ import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
+import { ViewerStats } from '@/components/match/ViewerStats';
 
 const Match = () => {
   const { toast } = useToast();
@@ -244,6 +245,11 @@ const Match = () => {
             sportId={sportId || ''}
             allStreams={allStreams}
           />
+        </div>
+
+        {/* Viewer Statistics */}
+        <div className="mt-6">
+          <ViewerStats match={match} />
         </div>
 
         {/* Match Analysis and Preview Content */}

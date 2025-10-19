@@ -9,6 +9,7 @@ import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 import { ViewerCount } from './ViewerCount';
+import { LiveViewerCount } from './LiveViewerCount';
 
 interface MatchCardProps {
   match: Match;
@@ -269,15 +270,24 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Simple Status Indicators */}
           <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
-            {isLive ? (
-              <span className="bg-red-500 text-primary-foreground text-[10px] font-black uppercase px-2 py-1 tracking-wider">
-                ● Live
-              </span>
-            ) : (
-              <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
-                {match.date && match.date > Date.now() ? 'Upcoming' : 'Ended'}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <span className="bg-red-500 text-primary-foreground text-[10px] font-black uppercase px-2 py-1 tracking-wider animate-pulse">
+                  ● Live
+                </span>
+              ) : (
+                <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
+                  {match.date && match.date > Date.now() ? 'Upcoming' : 'Ended'}
+                </span>
+              )}
+              
+              {/* Popular badge for matches with high viewer counts */}
+              {match.popular && isLive && match.viewerCount && match.viewerCount > 10000 && (
+                <span className="bg-green-500 text-white text-[10px] font-black uppercase px-2 py-1 animate-scale-in">
+                  🔥 Popular
+                </span>
+              )}
+            </div>
             
             {hasStream && (
               <span className="bg-background/80 text-foreground text-[10px] font-bold px-2 py-1">
@@ -295,14 +305,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </h3>
           
           {/* Meta Info */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap">
             <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
             <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
             {isLive && (
               <>
                 <span className="w-1 h-1 bg-border rounded-full" />
-                <ViewerCount matchId={match.id} enableRealtime={true} />
+                <LiveViewerCount match={match} size="sm" />
               </>
             )}
           </div>

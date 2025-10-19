@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
-import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
+import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
 import MatchCard from './MatchCard';
 import { useToast } from '../hooks/use-toast';
@@ -55,14 +55,27 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           return acc;
         }, {} as Record<string, number>));
         
-        // Enrich all matches with viewer counts and get top viewed (only with actual viewers)
-        const enrichedAllMatches = await enrichMatchesWithViewerCounts(consolidatedAllMatches);
+        // Enrich all matches with viewer counts from stream API
+        const enrichedAllMatches = await enrichMatchesWithViewers(consolidatedAllMatches);
         
-        // For "Popular by Viewers", show ALL matches with viewers (no image filter)
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
-        setMostViewedMatches(matchesWithViewers.slice(0, 12));
+        // For "Popular by Viewers", only show live matches with viewers
+        const liveMatchesWithViewers = enrichedAllMatches.filter(m => 
+          isMatchLive(m) && 
+          (m.viewerCount || 0) > 0
+        );
+        
+        // Sort by viewer count
+        const sortedByViewers = liveMatchesWithViewers.sort((a, b) => 
+          (b.viewerCount || 0) - (a.viewerCount || 0)
+        );
+        
+        console.log('🔥 Popular live matches with viewers:', sortedByViewers.map(m => ({ 
+          id: m.id, 
+          title: m.title, 
+          viewers: m.viewerCount 
+        })));
+        
+        setMostViewedMatches(sortedByViewers.slice(0, 12));
         
       } catch (error) {
         console.error('Error loading matches:', error);
@@ -79,19 +92,33 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     loadLiveMatches();
   }, [toast]);
 
-  // Refresh viewer counts every 30 seconds to show newly watched matches
+  // Refresh viewer counts every 30 seconds
   useEffect(() => {
     const refreshViewerCounts = async () => {
       if (allMatches.length === 0) return;
       
       try {
         console.log('🔄 Refreshing viewer counts for', allMatches.length, 'matches');
-        const enrichedAllMatches = await enrichMatchesWithViewerCounts(allMatches);
-        // Show ALL matches with viewers (no image filter)
-        const sortedByViewers = sortMatchesByViewers(enrichedAllMatches);
-        const matchesWithViewers = sortedByViewers.filter(m => (m.viewerCount || 0) > 0);
-        console.log('🔥 Refreshed - Matches with viewers:', matchesWithViewers.map(m => ({ id: m.id, title: m.title, viewers: m.viewerCount })));
-        setMostViewedMatches(matchesWithViewers.slice(0, 12));
+        const enrichedAllMatches = await enrichMatchesWithViewers(allMatches);
+        
+        // Only show live matches with viewers
+        const liveMatchesWithViewers = enrichedAllMatches.filter(m => 
+          isMatchLive(m) && 
+          (m.viewerCount || 0) > 0
+        );
+        
+        // Sort by viewer count
+        const sortedByViewers = liveMatchesWithViewers.sort((a, b) => 
+          (b.viewerCount || 0) - (a.viewerCount || 0)
+        );
+        
+        console.log('🔥 Refreshed - Popular live matches with viewers:', sortedByViewers.map(m => ({ 
+          id: m.id, 
+          title: m.title, 
+          viewers: m.viewerCount 
+        })));
+        
+        setMostViewedMatches(sortedByViewers.slice(0, 12));
       } catch (error) {
         console.error('Error refreshing viewer counts:', error);
       }
@@ -216,8 +243,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-bold text-white">Popular by Viewer</h3>
-            <span className="text-sm text-gray-400">Live across all sports</span>
+            <h3 className="text-xl font-bold text-white">Popular by Viewers</h3>
+            <span className="text-sm text-gray-400">Live matches with high viewership</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
             {mostViewedMatches.map((match) => (
