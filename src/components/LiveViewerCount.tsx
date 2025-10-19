@@ -126,7 +126,6 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
     >
       <Users className={cn(iconSizes[size], 'text-sports-primary')} />
       <span>{formatViewerCount(viewerCount, rounded)}</span>
-      <span className="hidden sm:inline text-muted-foreground">viewers</span>
       {getTrendIcon()}
     </div>
   );

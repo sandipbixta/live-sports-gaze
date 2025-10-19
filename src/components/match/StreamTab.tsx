@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, Eye } from 'lucide-react';
+import { Clock, Users } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
@@ -186,12 +186,11 @@ const StreamTab = ({
         showMatchDetails={false}
       />
 
-      {/* Viewer Count Below Iframe */}
+      {/* Viewer Count Below Iframe - Right Aligned */}
       {currentStreamViewers > 0 && !loadingStream && (
-        <div className="mt-4 mb-2 flex items-center justify-center gap-2 text-lg animate-fade-in">
-          <Eye className="w-5 h-5 text-red-500 animate-pulse" />
+        <div className="mt-4 mb-2 flex items-center justify-end gap-2 text-lg animate-fade-in">
+          <Users className="w-5 h-5 text-red-500 animate-pulse" />
           <span className="font-bold text-white animate-counter-up">{currentStreamViewers.toLocaleString()}</span>
-          <span className="text-gray-400">watching now</span>
         </div>
       )}
       

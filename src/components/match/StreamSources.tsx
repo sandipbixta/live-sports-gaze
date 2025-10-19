@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader, Play, Eye } from 'lucide-react';
+import { Loader, Play } from 'lucide-react';
 import { getConnectionInfo } from '@/utils/connectionOptimizer';
 import { fetchViewerCountFromSource } from '@/services/viewerCountService';
 

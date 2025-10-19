@@ -89,7 +89,6 @@ export const ViewerCount: React.FC<ViewerCountProps> = ({ matchId, enableRealtim
     <div className={`flex items-center ${sizeClasses[size]} text-foreground`}>
       <Users className={iconSizes[size]} />
       <span className="font-semibold">{viewerCount.toLocaleString()}</span>
-      <span className="hidden sm:inline">viewers</span>
     </div>
   );
 };

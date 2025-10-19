@@ -305,17 +305,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </h3>
           
           {/* Meta Info - Fixed height */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap h-[20px] mb-2">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap mb-2">
             <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
             <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
-            {isLive && (
-              <>
-                <span className="w-1 h-1 bg-border rounded-full" />
-                <LiveViewerCount match={match} size="sm" />
-              </>
-            )}
           </div>
+          
+          {/* Viewer Count - Separate row above button */}
+          {isLive && (
+            <div className="mb-2">
+              <LiveViewerCount match={match} size="sm" />
+            </div>
+          )}
           
           {/* Action - Push to bottom */}
           {hasStream && (
