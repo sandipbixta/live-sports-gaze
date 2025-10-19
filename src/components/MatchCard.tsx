@@ -282,9 +282,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
               )}
               
               {/* Popular badge for matches with high viewer counts */}
-              {match.popular && isLive && match.viewerCount && match.viewerCount > 10000 && (
-                <span className="bg-green-500 text-white text-[10px] font-black uppercase px-2 py-1 animate-scale-in">
-                  🔥 Popular
+              {isLive && match.viewerCount && match.viewerCount > 500 && (
+                <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[10px] font-black uppercase px-2 py-1 animate-pulse shadow-lg">
+                  🔥 {match.viewerCount > 10000 ? 'HOT' : 'Popular'}
                 </span>
               )}
             </div>

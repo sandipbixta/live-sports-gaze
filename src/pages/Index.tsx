@@ -226,6 +226,16 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
+        {/* Popular Matches Section - Sorted by Highest Viewers */}
+        {liveMatches.length > 0 && (
+          <div className="mb-8">
+            <PopularMatches 
+              popularMatches={liveMatches}
+              selectedSport={selectedSport}
+            />
+          </div>
+        )}
+
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>

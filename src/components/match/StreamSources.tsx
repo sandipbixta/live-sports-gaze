@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader, Play } from 'lucide-react';
+import { Loader, Play, Eye } from 'lucide-react';
 import { getConnectionInfo } from '@/utils/connectionOptimizer';
+import { fetchViewerCountFromSource } from '@/services/viewerCountService';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -26,6 +27,7 @@ const StreamSources = ({
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
   const [connectionQuality, setConnectionQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('good');
+  const [streamViewers, setStreamViewers] = useState<Record<string, number>>({});
 
   // Monitor connection quality
   useEffect(() => {
@@ -136,6 +138,30 @@ const StreamSources = ({
     fetchMissingStreams();
   }, [sources]);
 
+  // Fetch viewer counts for all streams
+  useEffect(() => {
+    const fetchViewerCounts = async () => {
+      const viewers: Record<string, number> = {};
+      
+      for (const source of visibleSources) {
+        const count = await fetchViewerCountFromSource(source.source, source.id);
+        if (count !== null) {
+          const sourceKey = `${source.source}/${source.id}`;
+          viewers[sourceKey] = count;
+        }
+      }
+      
+      setStreamViewers(viewers);
+    };
+
+    if (visibleSources.length > 0) {
+      fetchViewerCounts();
+      // Refresh every 30 seconds
+      const interval = setInterval(fetchViewerCounts, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [sources]);
+
   if (!visibleSources || visibleSources.length === 0) {
     return null;
   }
@@ -181,21 +207,29 @@ const StreamSources = ({
     );
   }
 
+  // Calculate total viewers
+  const totalViewers = Object.values(streamViewers).reduce((sum, count) => sum + count, 0);
+
   return (
-    <div className="mt-3">
+    <div className="mt-6">
+      {/* Prominent Viewer Count Display */}
+      {totalViewers > 0 && (
+        <div className="mb-6 flex items-center justify-center gap-2 text-lg">
+          <Eye className="w-5 h-5 text-red-500" />
+          <span className="font-bold text-white">{totalViewers.toLocaleString()}</span>
+          <span className="text-gray-400">watching now</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-        {viewerCount !== undefined && (
-          <div className="flex items-center">
-            {viewerCount}
-          </div>
-        )}
       </div>
       
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const isActive = activeSource === streamKey;
+          const viewers = streamViewers[sourceKey] || 0;
           
           // Use API-provided names like the HTML code
           let streamName = stream.name || 
@@ -211,17 +245,25 @@ const StreamSources = ({
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2 min-w-[120px] ${
+              className={`rounded-full px-5 py-2 min-w-[140px] flex flex-col items-start gap-0.5 h-auto ${
                 isActive 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
-              <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} mr-2 animate-pulse`} />
-              <Play className="w-4 h-4 mr-2" />
-              {streamName}
-              {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
+              <div className="flex items-center w-full">
+                <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} mr-2 animate-pulse`} />
+                <Play className="w-4 h-4 mr-2" />
+                <span className="flex-1">{streamName}</span>
+                {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
+              </div>
+              {viewers > 0 && (
+                <div className="flex items-center gap-1 text-xs opacity-75 ml-6">
+                  <Eye className="w-3 h-3" />
+                  <span>{viewers.toLocaleString()}</span>
+                </div>
+              )}
             </Button>
           );
         })}
