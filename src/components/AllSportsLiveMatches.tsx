@@ -238,26 +238,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
-      {/* Most Viewed Matches - Across All Sports */}
-      {mostViewedMatches.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-bold text-white">Popular by Viewers</h3>
-            <span className="text-sm text-gray-400">Live matches with high viewership</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-            {mostViewedMatches.map((match) => (
-              <MatchCard
-                key={`most-viewed-${match.id}`}
-                match={match}
-                sportId={match.sportId || match.category}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Sports Sections */}
       {sortedSports.map(([sportId, matches]) => (
         <div key={sportId} className="space-y-4">

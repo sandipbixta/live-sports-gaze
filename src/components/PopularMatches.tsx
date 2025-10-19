@@ -102,13 +102,13 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
     <div className="mb-8">
       <div className="flex items-center gap-3 mb-4">
         <span className="text-2xl">🔥</span>
-        <h2 className="text-2xl font-bold text-white">Popular Live Matches</h2>
+        <h2 className="text-2xl font-bold text-white">Popular by Viewers</h2>
         <span className="text-sm px-3 py-1 rounded-full bg-red-600 text-white font-semibold animate-pulse">
           LIVE
         </span>
       </div>
       <p className="text-gray-400 text-sm mb-4">
-        Most watched matches right now - sorted by viewer count
+        Top live matches sorted by viewer count - updated in real-time
       </p>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 8).map((match, index) => (

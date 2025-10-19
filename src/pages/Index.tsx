@@ -226,12 +226,12 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Popular Matches Section - Sorted by Highest Viewers */}
+        {/* Popular by Viewers Section - Always visible */}
         {liveMatches.length > 0 && (
           <div className="mb-8">
             <PopularMatches 
               popularMatches={liveMatches}
-              selectedSport={selectedSport}
+              selectedSport={null}
             />
           </div>
         )}
