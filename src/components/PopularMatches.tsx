@@ -30,7 +30,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   ));
   
   // Consolidate matches (merges duplicate matches with their stream sources)
-  const consolidatedMatches = consolidateMatches(cleanMatches);
+  const consolidatedMatches = React.useMemo(() => consolidateMatches(cleanMatches), [cleanMatches.length, JSON.stringify(cleanMatches.map(m => m.id))]);
 
   // Enrich matches with viewer counts from stream API and sort
   React.useEffect(() => {
@@ -90,7 +90,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
     // Refresh every 60 seconds to get updated viewer counts
     const interval = setInterval(enrichMatches, 60000);
     return () => clearInterval(interval);
-  }, [consolidatedMatches.length]);
+  }, [consolidatedMatches]);
 
   const filteredMatches = enrichedMatches;
   
