@@ -6,7 +6,6 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
 import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
-import { filterMatchesWithImages } from '../utils/matchImageFilter';
 
 interface PopularMatchesProps {
   popularMatches: Match[];
@@ -32,21 +31,19 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = consolidateMatches(cleanMatches);
-  
-  // Only show matches with images on home page
-  const matchesWithImages = filterMatchesWithImages(consolidatedMatches);
 
   // Enrich matches with viewer counts from stream API and sort
   React.useEffect(() => {
     const enrichMatches = async () => {
-      if (matchesWithImages.length === 0) {
+      if (consolidatedMatches.length === 0) {
         setEnrichedMatches([]);
         return;
       }
 
       setIsLoading(true);
+      console.log('🔥 Enriching matches with viewer counts for Popular section:', consolidatedMatches.length);
       try {
-        const matchesWithViewers = await enrichMatchesWithViewers(matchesWithImages);
+        const matchesWithViewers = await enrichMatchesWithViewers(consolidatedMatches);
         
         // Only include live matches with viewer counts
         const liveMatchesWithViewers = matchesWithViewers.filter(m => 
@@ -54,26 +51,28 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
           (m.viewerCount || 0) > 0
         );
         
-        // Sort by viewer count first, then by trending score
+        console.log('🔥 Live matches with viewers:', liveMatchesWithViewers.map(m => ({
+          title: m.title,
+          viewers: m.viewerCount
+        })));
+        
+        // Sort by viewer count descending (highest first)
         const sortedMatches = liveMatchesWithViewers.sort((a, b) => {
           const aViewers = a.viewerCount || 0;
           const bViewers = b.viewerCount || 0;
-          
-          if (aViewers !== bViewers) {
-            return bViewers - aViewers; // Higher viewers first
-          }
-          
-          // If viewer counts are equal, sort by trending score
-          const aTrending = isTrendingMatch(a.title);
-          const bTrending = isTrendingMatch(b.title);
-          return bTrending.score - aTrending.score;
+          return bViewers - aViewers; // Higher viewers first
         });
+        
+        console.log('🔥 Top 8 matches by viewers:', sortedMatches.slice(0, 8).map(m => ({
+          title: m.title,
+          viewers: m.viewerCount
+        })));
         
         setEnrichedMatches(sortedMatches);
       } catch (error) {
         console.error('Error enriching popular matches:', error);
         // Fallback: filter for live matches without sorting
-        const fallbackMatches = matchesWithImages
+        const fallbackMatches = consolidatedMatches
           .filter(m => isMatchLive(m))
           .sort((a, b) => {
             const aTrending = isTrendingMatch(a.title);
@@ -87,7 +86,11 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
     };
 
     enrichMatches();
-  }, [matchesWithImages]);
+    
+    // Refresh every 60 seconds to get updated viewer counts
+    const interval = setInterval(enrichMatches, 60000);
+    return () => clearInterval(interval);
+  }, [consolidatedMatches.length]);
 
   const filteredMatches = enrichedMatches;
   
