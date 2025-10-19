@@ -66,11 +66,11 @@ const MatchSection: React.FC<MatchSectionProps> = ({
           {matches.length} {matches.length === 1 ? 'match' : 'matches'}
         </span>
       </h2>
-      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'}`}>
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'} auto-rows-fr`}>
         {matches.map((match, index) => (
           <div 
             key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}
-            className={preventNavigation ? "cursor-pointer" : ""}
+            className={`h-full ${preventNavigation ? "cursor-pointer" : ""}`}
             onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
           >
             <MatchCard 

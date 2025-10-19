@@ -262,10 +262,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer">
-      <div className="relative overflow-hidden rounded-lg border-2 border-border bg-card transition-all duration-300 hover:border-sports-primary">
-        {/* Image Section */}
-        <div className="relative aspect-video overflow-hidden bg-muted">
+    <div className="group cursor-pointer h-full">
+      <div className="relative overflow-hidden rounded-lg border-2 border-border bg-card transition-all duration-300 hover:border-sports-primary h-full flex flex-col">
+        {/* Image Section - Fixed aspect ratio */}
+        <div className="relative aspect-video overflow-hidden bg-muted flex-shrink-0">
           {generateThumbnail()}
           
           {/* Simple Status Indicators */}
@@ -297,15 +297,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
         </div>
 
-        {/* Info Section */}
-        <div className="p-3 space-y-2">
-          {/* Title */}
-          <h3 className="font-bold text-foreground text-sm line-clamp-2 min-h-[2.5rem]">
+        {/* Info Section - Fixed height */}
+        <div className="p-3 flex flex-col flex-1 min-h-[140px]">
+          {/* Title - Fixed 2 lines */}
+          <h3 className="font-bold text-foreground text-sm line-clamp-2 h-[2.5rem] mb-2">
             {home && away ? `${home} vs ${away}` : match.title}
           </h3>
           
-          {/* Meta Info */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap">
+          {/* Meta Info - Fixed height */}
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap h-[20px] mb-2">
             <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
             <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
@@ -317,9 +317,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
             )}
           </div>
           
-          {/* Action */}
+          {/* Action - Push to bottom */}
           {hasStream && (
-            <div className="pt-1">
+            <div className="mt-auto">
               {isLive || isMatchStarting ? (
             <div className="bg-sports-primary text-primary-foreground font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
               Watch Now

@@ -250,13 +250,14 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
             </span>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 auto-rows-fr">
             {matches.map((match) => (
-              <MatchCard
-                key={`${match.sportId || sportId}-${match.id}`}
-                match={match}
-                sportId={match.sportId || sportId}
-              />
+              <div key={`${match.sportId || sportId}-${match.id}`} className="h-full">
+                <MatchCard
+                  match={match}
+                  sportId={match.sportId || sportId}
+                />
+              </div>
             ))}
           </div>
         </div>
