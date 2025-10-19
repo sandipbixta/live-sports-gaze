@@ -226,16 +226,6 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        {/* Popular by Viewers Section - Always visible */}
-        {liveMatches.length > 0 && (
-          <div className="mb-8">
-            <PopularMatches 
-              popularMatches={liveMatches}
-              selectedSport={null}
-            />
-          </div>
-        )}
-
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
@@ -262,6 +252,15 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
+            {/* Popular by Viewers Section - Below Featured Sports/Channels */}
+            {liveMatches.length > 0 && (
+              <div className="mb-8">
+                <PopularMatches 
+                  popularMatches={liveMatches}
+                  selectedSport={null}
+                />
+              </div>
+            )}
             
             <div className="mb-8">
               {selectedSport && (
