@@ -31,6 +31,7 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Install from "./pages/Install";
+import StreamsListPage from "./pages/StreamsListPage";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -120,6 +121,11 @@ const App: React.FC = () => {
               <Route path="/install" element={
                 <SEOPageTracker pageTitle="Install DamiTV App" contentType="home">
                   <Install />
+                </SEOPageTracker>
+              } />
+              <Route path="/streams" element={
+                <SEOPageTracker pageTitle="Live Streams - DamiTV" contentType="home">
+                  <StreamsListPage />
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
