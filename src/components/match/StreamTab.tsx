@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Eye } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
@@ -39,6 +39,7 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [currentStreamViewers, setCurrentStreamViewers] = useState<number>(0);
   
   // Auto-fallback hook
   const { tryNextSource, isAutoRetrying, attemptedSourcesCount, totalSourcesCount } = useAutoFallback({
@@ -126,6 +127,42 @@ const StreamTab = ({
     );
   };
 
+  // Fetch viewer count for current active stream
+  useEffect(() => {
+    const fetchCurrentViewers = async () => {
+      if (!activeSource) return;
+      
+      const parts = activeSource.split('/');
+      const [source, id] = parts;
+      
+      if (source && id) {
+        try {
+          const response = await fetch(`https://streamed.pk/api/stream/${source}/${id}`, {
+            headers: { 'Accept': 'application/json' },
+            signal: AbortSignal.timeout(5000)
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Sum up all viewers from this source
+            if (Array.isArray(data)) {
+              const total = data.reduce((sum: number, stream: any) => sum + (stream.viewers || 0), 0);
+              setCurrentStreamViewers(total);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch viewer count:', error);
+        }
+      }
+    };
+
+    fetchCurrentViewers();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchCurrentViewers, 30000);
+    return () => clearInterval(interval);
+  }, [activeSource]);
+
   const sortedPopularMatches = [...popularMatches].sort((a, b) => {
     const aTrending = isTrendingMatch(a.title);
     const bTrending = isTrendingMatch(b.title);
@@ -148,6 +185,15 @@ const StreamTab = ({
         allStreams={allStreams}
         showMatchDetails={false}
       />
+
+      {/* Viewer Count Below Iframe */}
+      {currentStreamViewers > 0 && !loadingStream && (
+        <div className="mt-4 mb-2 flex items-center justify-center gap-2 text-lg animate-fade-in">
+          <Eye className="w-5 h-5 text-red-500 animate-pulse" />
+          <span className="font-bold text-white animate-counter-up">{currentStreamViewers.toLocaleString()}</span>
+          <span className="text-gray-400">watching now</span>
+        </div>
+      )}
       
       <StreamSources
         sources={match.sources}
