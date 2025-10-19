@@ -110,7 +110,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
       <p className="text-gray-400 text-sm mb-4">
         Top live matches sorted by viewer count - updated in real-time
       </p>
-      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'} gap-3 md:gap-4`}>
+      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4`}>
         {filteredMatches.slice(0, 8).map((match, index) => (
           <MatchCard 
             key={`popular-${match.id}-${index}`}
