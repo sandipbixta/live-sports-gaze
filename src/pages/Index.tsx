@@ -238,8 +238,8 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {/* Popular by Viewers Section - Below Featured Sports/Channels */}
-            {liveMatches.length > 0 && (
+            {/* Popular by Viewers Section - Only show on home page (no sport selected or All Sports) */}
+            {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
               <div className="mb-8">
                 <PopularMatches 
                   popularMatches={liveMatches}
