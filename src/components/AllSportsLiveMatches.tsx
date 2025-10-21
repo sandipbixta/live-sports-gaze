@@ -17,13 +17,13 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false - show skeletons
   const [mostViewedMatches, setMostViewedMatches] = useState<Match[]>([]);
 
   useEffect(() => {
     const loadLiveMatches = async () => {
       try {
-        setLoading(true);
+        // NO setLoading(true) - let content render immediately
         
         // Fetch sports, live matches, and all matches in parallel
         const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
@@ -84,9 +84,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           description: "Failed to load matches.",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
       }
+      // NO finally block - no loading state to manage
     };
 
     loadLiveMatches();
@@ -175,11 +174,12 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     return sport?.name || sportId.charAt(0).toUpperCase() + sportId.slice(1);
   };
 
-  if (loading) {
+  // Show skeleton while data is empty, but don't block - let it render
+  if (liveMatches.length === 0) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-          <div key={i} className="h-32 bg-[#242836] rounded-xl animate-pulse"></div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+          <div key={i} className="h-[280px] bg-[#242836] rounded-xl animate-pulse"></div>
         ))}
       </div>
     );

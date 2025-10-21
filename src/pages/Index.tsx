@@ -41,7 +41,7 @@ const Index = () => {
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   
-  const [loadingSports, setLoadingSports] = useState(true);
+  const [loadingSports, setLoadingSports] = useState(false); // Start false for instant render
   const [loadingMatches, setLoadingMatches] = useState(false);
 
   // Filter visible manual matches
@@ -120,13 +120,13 @@ const Index = () => {
     loadInitialData();
   }, []);
 
-  // Separate useEffect for handling sport auto-selection to avoid dependency issues
+  // Set default sport immediately on component mount - don't wait for data
   useEffect(() => {
-    if (sports.length > 0 && !selectedSport && !loadingSports) {
-      console.log('🏈 Auto-selecting "All Sports" as default');
+    if (!selectedSport) {
+      console.log('🏈 Auto-selecting "All Sports" as default immediately');
       setSelectedSport('all');
     }
-  }, [sports, selectedSport, loadingSports]);
+  }, [selectedSport]);
 
   // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
