@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://rgelive.akamaized.net/hls/live/2043151/radiolive/playlist.m3u8",
+        url: "https://hls.suanzsd6.com/hd-en-6MvXMfc5VhdYjLsGKH.m3u8",
         quality: "HD"
       }
     ],
