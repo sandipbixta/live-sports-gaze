@@ -223,10 +223,6 @@ const StreamSources = ({
                           (stream.language && stream.language !== 'Original' ? stream.language : null) ||
                           (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
                           `Stream ${stream.streamNo || index + 1}`;
-
-          if (stream.source?.toLowerCase().includes('admin')) {
-            streamName = `Admin - ${streamName}`;
-          }
           
           return (
             <Button

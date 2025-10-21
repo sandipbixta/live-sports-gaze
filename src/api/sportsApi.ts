@@ -555,20 +555,6 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       console.log(`✅ Successfully fetched ${allStreams[sourceKey]?.length || 0} streams from ${source.source}`);
     } catch (error) {
       console.warn(`⚠️ Failed to fetch streams from ${source.source}:`, error);
-      
-      // For admin sources, still add them to show the button even if stream fails
-      if (source.source?.toLowerCase().includes('admin')) {
-        console.log(`📍 Adding admin source "${source.source}" to show button despite fetch failure`);
-        allStreams[sourceKey] = [{
-          id: source.id,
-          streamNo: 1,
-          language: 'EN',
-          hd: true,
-          embedUrl: `https://admin-placeholder/${source.id}`, // Placeholder URL
-          source: source.source,
-          timestamp: Date.now()
-        }];
-      }
       // Continue with other sources even if one fails
     }
   });
