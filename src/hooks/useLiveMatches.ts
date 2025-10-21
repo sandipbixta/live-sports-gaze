@@ -22,72 +22,49 @@ export const useLiveMatches = () => {
       // Fetch sports data first (fast)
       const sportsData = await fetchSports();
       setSports(sportsData);
-      console.log('Sports data:', sportsData);
       
-      // Prioritize most popular sports for faster initial load
-      const prioritySports = ['football', 'basketball', 'tennis', 'fight'];
-      const secondarySports = ['hockey', 'baseball', 'cricket', 'rugby'];
-      
-      let allFetchedMatches: Match[] = [];
-      
-      // Fetch priority sports in parallel for faster loading
-      console.log('Fetching priority sports...');
-      const priorityPromises = prioritySports.map(async (sportId) => {
-        try {
-          console.log(`Fetching matches for priority sport: ${sportId}`);
-          const matches = await fetchMatches(sportId);
-          console.log(`Matches for ${sportId}:`, matches ? matches.length : 0);
-          return matches.map(match => ({ ...match, sportId }));
-        } catch (error) {
-          console.error(`Error fetching matches for sport ${sportId}:`, error);
-          return [];
-        }
-      });
-      
-      // Wait for priority sports (should be fast)
-      const priorityResults = await Promise.all(priorityPromises);
-      const priorityMatches = priorityResults.flat();
-      
-      // Process and display priority matches immediately
-      if (priorityMatches.length > 0) {
-        // CRITICAL: Filter matches that have stream sources
-        const matchesWithSources = priorityMatches.filter(m => m.sources && m.sources.length > 0);
+      // Fetch only football first for instant display
+      console.log('Fetching football matches for instant display...');
+      try {
+        const footballMatches = await fetchMatches('football');
+        const matchesWithSources = footballMatches.filter(m => m.sources && m.sources.length > 0);
         const cleanMatches = filterCleanMatches(matchesWithSources);
-        const consolidatedMatches = consolidateMatches(cleanMatches);
+        const consolidatedMatches = consolidateMatches(cleanMatches.map(m => ({ ...m, sportId: 'football' })));
         
-      const live = consolidatedMatches.filter(match => {
-        const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
-        const now = new Date().getTime();
-        const sixHoursInMs = 6 * 60 * 60 * 1000;
-        const oneHourInMs = 60 * 60 * 1000;
-        
-        return match.sources && 
-               match.sources.length > 0 && 
-               matchTime - now < oneHourInMs && 
-               now - matchTime < sixHoursInMs;
-      }).sort((a, b) => {
-        // Sort live matches by start time - most recent live matches first
-        const aTime = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
-        const bTime = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
-        return bTime - aTime; // Descending order (newest first)
-      });
+        const live = consolidatedMatches.filter(match => {
+          const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+          const now = new Date().getTime();
+          const sixHoursInMs = 6 * 60 * 60 * 1000;
+          const oneHourInMs = 60 * 60 * 1000;
+          
+          return match.sources && 
+                 match.sources.length > 0 && 
+                 matchTime - now < oneHourInMs && 
+                 now - matchTime < sixHoursInMs;
+        }).sort((a, b) => {
+          const aTime = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
+          const bTime = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
+          return bTime - aTime;
+        });
         
         const upcoming = consolidatedMatches.filter(match => 
           !live.some(liveMatch => liveMatch.id === match.id)
         );
         
-        // Update state with priority matches
+        // Show football matches immediately
         setAllMatches(consolidatedMatches);
         setLiveMatches(live);
         setUpcomingMatches(upcoming);
-        setLoading(false); // Stop loading spinner early
-        
-        console.log('Priority matches loaded - Live:', live.length, 'Upcoming:', upcoming.length);
+        setLoading(false);
+        console.log('Football matches displayed instantly');
+      } catch (error) {
+        console.error('Error fetching football matches:', error);
       }
       
-      // Fetch secondary sports in background
-      console.log('Fetching secondary sports in background...');
-      const secondaryPromises = secondarySports.map(async (sportId) => {
+      // Fetch remaining sports in background
+      const otherSports = ['basketball', 'tennis', 'cricket', 'hockey', 'fight', 'baseball', 'rugby'];
+      
+      const allSportPromises = otherSports.map(async (sportId) => {
         try {
           const matches = await fetchMatches(sportId);
           return matches.map(match => ({ ...match, sportId }));
@@ -97,21 +74,17 @@ export const useLiveMatches = () => {
         }
       });
       
-      // Wait for secondary sports
-      const secondaryResults = await Promise.all(secondaryPromises);
-      const secondaryMatches = secondaryResults.flat();
+      const results = await Promise.all(allSportPromises);
+      const allOtherMatches = results.flat();
       
-      // Combine all results
-      allFetchedMatches = [...priorityMatches, ...secondaryMatches];
+      // Get football matches again to merge with others
+      const footballMatches = await fetchMatches('football');
+      const allFetchedMatches = [...footballMatches.map(m => ({ ...m, sportId: 'football' })), ...allOtherMatches];
       
-      console.log('All matches before filtering:', allFetchedMatches.length);
-      
-      // Final processing with all matches - CRITICAL: Filter for sources first
+      // Final processing with all matches
       const matchesWithSources = allFetchedMatches.filter(m => m.sources && m.sources.length > 0);
       const cleanMatches = filterCleanMatches(matchesWithSources);
       const consolidatedMatches = consolidateMatches(cleanMatches);
-      
-      console.log('Matches after consolidation:', consolidatedMatches.length);
       
       const live = consolidatedMatches.filter(match => {
         const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
@@ -124,26 +97,25 @@ export const useLiveMatches = () => {
                matchTime - now < oneHourInMs && 
                now - matchTime < sixHoursInMs;
       }).sort((a, b) => {
-        // Sort live matches by start time - most recent live matches first
         const aTime = typeof a.date === 'number' ? a.date : new Date(a.date).getTime();
         const bTime = typeof b.date === 'number' ? b.date : new Date(b.date).getTime();
-        return bTime - aTime; // Descending order (newest first)
+        return bTime - aTime;
       });
       
       const upcoming = consolidatedMatches.filter(match => 
         !live.some(liveMatch => liveMatch.id === match.id)
       );
       
-      console.log('Final results - Live matches:', live.length);
-      console.log('Final results - Upcoming matches:', upcoming.length);
+      console.log('All matches loaded - Live:', live.length, 'Upcoming:', upcoming.length);
       
-      // Update with final complete data
+      // Update with complete data
       setAllMatches(consolidatedMatches);
       setLiveMatches(live);
       setUpcomingMatches(upcoming);
       
     } catch (error) {
       console.error('Error fetching live content:', error);
+      setLoading(false);
       toast({
         title: "Error",
         description: "Failed to load content. Please try again.",
