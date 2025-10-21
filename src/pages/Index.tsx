@@ -76,16 +76,20 @@ const Index = () => {
     });
   }, [matches, searchTerm]);
 
-  // Load sports and live matches immediately on mount
+  // Load sports and live matches in parallel immediately on mount
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Load sports
-        let sportsData = await fetchSports();
+        // Load sports AND live matches in parallel for instant display
+        const [sportsData, liveMatchesData] = await Promise.all([
+          fetchSports(),
+          fetchLiveMatches()
+        ]);
+        
         console.log('📊 Sports data loaded:', sportsData);
         
         // Sort with football first for better UX
-        sportsData = sportsData.sort((a, b) => {
+        const sortedSports = sportsData.sort((a, b) => {
           if (a.name.toLowerCase() === 'football') return -1;
           if (b.name.toLowerCase() === 'football') return 1;
           if (a.name.toLowerCase() === 'basketball') return -1;
@@ -93,39 +97,21 @@ const Index = () => {
           return a.name.localeCompare(b.name);
         });
         
-        setSports(sportsData);
-        console.log('✅ Sports state updated');
-
-        // Load live matches for featured sections
-        try {
-          console.log('🔴 Loading live matches...');
-          const liveMatchesData = await fetchLiveMatches();
-          // Filter out ended matches from live matches
-          const activeLiveMatches = filterActiveMatches(liveMatchesData);
-          setLiveMatches(activeLiveMatches);
-          console.log(`✅ Loaded ${activeLiveMatches.length} active live matches`);
-        } catch (error) {
-          console.error('Error loading live matches:', error);
-        }
+        setSports(sortedSports);
+        
+        // Filter out ended matches and display immediately
+        const activeLiveMatches = filterActiveMatches(liveMatchesData);
+        setLiveMatches(activeLiveMatches);
+        
+        console.log(`✅ Loaded ${activeLiveMatches.length} active live matches instantly`);
         
       } catch (error) {
         console.error('Sports loading error:', error);
-        
-        // Only show error if we don't have any sports data at all
-        if (sports.length === 0) {
-          toast({
-            title: "Connection Issue",
-            description: "Slow connection detected. Retrying...",
-            variant: "destructive",
-          });
-          
-          // Retry after a short delay on mobile
-          setTimeout(() => {
-            if (sports.length === 0) {
-              loadInitialData();
-            }
-          }, 2000);
-        }
+        toast({
+          title: "Connection Issue",
+          description: "Slow connection detected. Retrying...",
+          variant: "destructive",
+        });
       } finally {
         setLoadingSports(false);
       }
