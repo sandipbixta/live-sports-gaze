@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader, Play } from 'lucide-react';
+import { Loader, Play, Users } from 'lucide-react';
 import { getConnectionInfo } from '@/utils/connectionOptimizer';
-import { fetchViewerCountFromSource } from '@/services/viewerCountService';
+import { fetchViewerCountFromSource, formatViewerCount } from '@/services/viewerCountService';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -222,6 +222,7 @@ const StreamSources = ({
         {allAvailableStreams.map(({ stream, sourceKey, index }) => {
           const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
           const isActive = activeSource === streamKey;
+          const viewerCount = stream.viewers || 0;
           
           // Use API-provided names like the HTML code
           let streamName = stream.name || 
@@ -233,17 +234,25 @@ const StreamSources = ({
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2 min-w-[120px] ${
+              className={`rounded-full px-5 py-2.5 min-w-[120px] flex-col h-auto gap-1 ${
                 isActive 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
-              <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} mr-2 animate-pulse`} />
-              <Play className="w-4 h-4 mr-2" />
-              {streamName}
-              {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
+                <Play className="w-4 h-4" />
+                <span>{streamName}</span>
+                {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
+              </div>
+              {viewerCount > 0 && (
+                <div className="flex items-center gap-1 text-xs font-semibold">
+                  <Users className="w-3 h-3 text-sports-primary" />
+                  <span>{formatViewerCount(viewerCount, false)}</span>
+                </div>
+              )}
             </Button>
           );
         })}
