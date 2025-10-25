@@ -4,6 +4,45 @@ import { Match } from '@/types/sports';
 import { fetchMatchViewerCount, formatViewerCount, isMatchLive } from '@/services/viewerCountService';
 import { cn } from '@/lib/utils';
 
+// Smooth counter animation
+const useCounterAnimation = (targetValue: number, duration: number = 500) => {
+  const [displayValue, setDisplayValue] = useState(targetValue);
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    if (displayValue === targetValue) return;
+
+    const startValue = displayValue;
+    const startTime = Date.now();
+    const difference = targetValue - startValue;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out animation
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentValue = Math.round(startValue + difference * easeOut);
+      
+      setDisplayValue(currentValue);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [targetValue, duration]);
+
+  return displayValue;
+};
+
 interface LiveViewerCountProps {
   match: Match;
   showTrend?: boolean;
@@ -25,6 +64,9 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
   const [trend, setTrend] = useState<'up' | 'down' | 'neutral'>('neutral');
   const updateIntervalRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
+  
+  // Animated counter value
+  const animatedCount = useCounterAnimation(viewerCount || 0, 500);
 
   const sizeClasses = {
     sm: 'text-xs gap-1',
@@ -116,16 +158,16 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
   return (
     <div 
       className={cn(
-        'flex items-center font-semibold text-foreground transition-opacity duration-500',
+        'flex items-center font-semibold text-foreground transition-all duration-500',
         sizeClasses[size],
         isVisible ? 'animate-fade-in opacity-100' : 'opacity-0',
         className
       )}
-      aria-label={`Current viewer count: ${viewerCount.toLocaleString()}`}
+      aria-label={`Current viewer count: ${animatedCount.toLocaleString()}`}
       title="Live viewer count from stream data"
     >
-      <Users className={cn(iconSizes[size], 'text-sports-primary')} />
-      <span>{formatViewerCount(viewerCount, rounded)}</span>
+      <Users className={cn(iconSizes[size], 'text-sports-primary animate-pulse')} />
+      <span className="transition-all duration-500">{formatViewerCount(animatedCount, rounded)}</span>
       {getTrendIcon()}
     </div>
   );

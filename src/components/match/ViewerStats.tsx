@@ -5,6 +5,7 @@ import { Users, TrendingUp, TrendingDown, Eye, EyeOff } from 'lucide-react';
 import { Match } from '@/types/sports';
 import { fetchMatchViewerCount, formatViewerCount, isMatchLive } from '@/services/viewerCountService';
 import { cn } from '@/lib/utils';
+import confetti from 'canvas-confetti';
 
 interface ViewerStatsProps {
   match: Match;
@@ -33,10 +34,39 @@ export const ViewerStats: React.FC<ViewerStatsProps> = ({ match, className }) =>
         const count = await fetchMatchViewerCount(match);
         
         if (count !== null) {
-          // Trigger celebration for high viewer counts
+          // Trigger celebration for high viewer counts with confetti
           if (count > 10000 && viewerCount !== null && count > viewerCount) {
             setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 3000);
+            
+            // Launch confetti animation
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(() => {
+              const timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                clearInterval(interval);
+                setShowConfetti(false);
+                return;
+              }
+
+              const particleCount = 50 * (timeLeft / duration);
+              
+              confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+              });
+              confetti({
+                ...defaults,
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+              });
+            }, 250);
           }
 
           // Calculate trend
@@ -117,9 +147,10 @@ export const ViewerStats: React.FC<ViewerStatsProps> = ({ match, className }) =>
               <div className="flex items-center gap-2">
                 <span 
                   className={cn(
-                    'text-3xl font-bold text-foreground transition-all duration-500',
+                    'text-3xl font-bold text-foreground transition-all duration-500 animate-counter-up',
                     isAnimating && 'scale-110'
                   )}
+                  title="Live viewers from stream source"
                 >
                   {formatViewerCount(viewerCount, showRounded)}
                 </span>
@@ -156,10 +187,10 @@ export const ViewerStats: React.FC<ViewerStatsProps> = ({ match, className }) =>
 
         {/* High viewership celebration */}
         {viewerCount > 10000 && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-            <span className="text-2xl">🔥</span>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 animate-scale-in">
+            <span className="text-2xl animate-pulse">🔥</span>
             <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
-              This is a trending match with high viewership!
+              🎉 This is a trending match with high viewership! 🎉
             </p>
           </div>
         )}
