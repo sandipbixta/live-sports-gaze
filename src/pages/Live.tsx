@@ -5,7 +5,7 @@ import { Match } from '../types/sports';
 import { Separator } from '../components/ui/separator';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Radio, Clock } from 'lucide-react';
 import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
@@ -25,6 +25,7 @@ import TelegramBanner from '../components/TelegramBanner';
 
 const Live = () => {
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -57,7 +58,26 @@ const Live = () => {
   const handleUserMatchSelect = (match: Match) => {
     setUserSelectedMatch(true);
     handleMatchSelect(match);
+    // Scroll to player
+    setTimeout(() => {
+      document.getElementById('stream-player')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
+
+  // Auto-select match from URL params (when coming from home page)
+  useEffect(() => {
+    const matchIdFromUrl = searchParams.get('matchId');
+    const sportIdFromUrl = searchParams.get('sportId');
+    
+    if (matchIdFromUrl && allMatches.length > 0 && !userSelectedMatch) {
+      const matchToSelect = allMatches.find(m => m.id === matchIdFromUrl);
+      if (matchToSelect) {
+        handleUserMatchSelect(matchToSelect);
+        // Clear URL params after selection
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, allMatches, userSelectedMatch]);
 
   // Update filtered matches when search query or filters change
   useEffect(() => {

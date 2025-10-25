@@ -348,7 +348,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   if (hasStream) {
     return (
-      <Link to="/live" className={`block ${className}`}>
+      <Link to={`/live?sportId=${sportId || match.sportId}&matchId=${match.id}`} className={`block ${className}`}>
         {cardContent}
       </Link>
     );
