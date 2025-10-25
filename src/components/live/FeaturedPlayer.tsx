@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Match, Stream } from '../../types/sports';
 import StreamPlayer from '../StreamPlayer';
 import StreamSources from '../match/StreamSources';
-import { Clock, Tv, Calendar, RefreshCcw } from 'lucide-react';
+import { Clock, Tv, Calendar, RefreshCcw, Users } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Link } from 'react-router-dom';
 import { isMatchLive } from '../../utils/matchUtils';
@@ -29,6 +29,8 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
   onStreamRetry,
   onRetryLoading
 }) => {
+  const [currentStreamViewers, setCurrentStreamViewers] = useState<number>(0);
+
   const formatMatchTime = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -36,6 +38,42 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
 
   // Check if match is live
   const isLive = featuredMatch ? isMatchLive(featuredMatch) : false;
+
+  // Fetch viewer count for current active stream
+  useEffect(() => {
+    const fetchCurrentViewers = async () => {
+      if (!activeSource) return;
+      
+      const parts = activeSource.split('/');
+      const [source, id] = parts;
+      
+      if (source && id) {
+        try {
+          const response = await fetch(`https://streamed.pk/api/stream/${source}/${id}`, {
+            headers: { 'Accept': 'application/json' },
+            signal: AbortSignal.timeout(5000)
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Sum up all viewers from this source
+            if (Array.isArray(data)) {
+              const total = data.reduce((sum: number, stream: any) => sum + (stream.viewers || 0), 0);
+              setCurrentStreamViewers(total);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch viewer count:', error);
+        }
+      }
+    };
+
+    fetchCurrentViewers();
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchCurrentViewers, 30000);
+    return () => clearInterval(interval);
+  }, [activeSource]);
 
   // Show loading only for initial load, not when we have matches
   if (loading && !featuredMatch) {
@@ -98,6 +136,16 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
         match={featuredMatch}
         showMatchDetails={false}
       />
+
+      {/* Viewer Count Below Iframe - Right Aligned */}
+      {currentStreamViewers > 0 && !streamLoading && isLive && (
+        <div className="mt-4 mb-2 flex items-center justify-end gap-2 text-lg animate-fade-in">
+          <Users className="w-5 h-5 text-red-500 animate-pulse" />
+          <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
+            {currentStreamViewers.toLocaleString()}
+          </span>
+        </div>
+      )}
       
       {/* Stream Sources - only show if match has sources */}
       {featuredMatch.sources && featuredMatch.sources.length > 0 && (
@@ -107,7 +155,6 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
             activeSource={activeSource}
             onSourceChange={onSourceChange}
             streamId={featuredMatch.id}
-            viewerCount={isLive ? <ViewerCount matchId={featuredMatch.id} enableRealtime={true} size="lg" /> : undefined}
           />
         </div>
       )}

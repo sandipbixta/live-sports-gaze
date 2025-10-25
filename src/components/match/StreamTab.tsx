@@ -185,6 +185,14 @@ const StreamTab = ({
         allStreams={allStreams}
         showMatchDetails={false}
       />
+
+      {/* Viewer Count Below Iframe - Right Aligned */}
+      {currentStreamViewers > 0 && !loadingStream && (
+        <div className="mt-4 mb-2 flex items-center justify-end gap-2 text-lg animate-fade-in">
+          <Users className="w-5 h-5 text-red-500 animate-pulse" />
+          <span className="font-bold text-white animate-counter-up">{currentStreamViewers.toLocaleString()}</span>
+        </div>
+      )}
       
       <StreamSources
         sources={match.sources}
@@ -192,7 +200,6 @@ const StreamTab = ({
         onSourceChange={handleSourceChange}
         streamId={streamId}
         allStreams={allStreams}
-        viewerCount={<ViewerCount matchId={match.id} enableRealtime={true} size="lg" />}
       />
       
       {!loadingStream && (
