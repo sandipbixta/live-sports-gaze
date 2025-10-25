@@ -233,28 +233,29 @@ const StreamSources = ({
           const viewerCount = stream.viewers || 0;
           
           return (
-            <Button
-              key={streamKey}
-              variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2 min-w-[140px] flex items-center justify-between ${
-                isActive 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
-              }`}
-              onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
-            >
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
-                <Play className="w-4 h-4" />
-                <span>{streamName}</span>
-                {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
-              </div>
-              {viewerCount > 0 && (
-                <span className="ml-2 text-xs opacity-75">
-                  👁 {viewerCount.toLocaleString()}
-                </span>
-              )}
-            </Button>
+            <div key={streamKey} className="relative">
+              <Button
+                variant={isActive ? "default" : "outline"}
+                className={`rounded-lg px-4 py-3 min-w-[140px] flex flex-col items-start gap-1 h-auto ${
+                  isActive 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-400' 
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
+                }`}
+                onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
+                  <Play className="w-4 h-4" />
+                  <span className="font-semibold">{streamName}</span>
+                  {stream.hd && <span className="text-xs bg-red-600 px-1.5 py-0.5 rounded">HD</span>}
+                </div>
+                <div className="flex items-center gap-1 text-xs opacity-90 ml-6">
+                  <span>👁</span>
+                  <span className="font-medium">{viewerCount.toLocaleString()}</span>
+                  <span className="opacity-75">watching</span>
+                </div>
+              </Button>
+            </div>
           );
         })}
       </div>
