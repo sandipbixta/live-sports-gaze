@@ -211,6 +211,11 @@ const StreamSources = ({
     <div className="mt-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+        {viewerCount && (
+          <div className="flex items-center">
+            {viewerCount}
+          </div>
+        )}
       </div>
       
       <div className="flex flex-wrap gap-3">
