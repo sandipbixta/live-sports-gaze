@@ -229,21 +229,31 @@ const StreamSources = ({
                           (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
                           `Stream ${stream.streamNo || index + 1}`;
           
+          // Get viewer count for this specific stream
+          const viewerCount = stream.viewers || 0;
+          
           return (
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2 min-w-[120px] ${
+              className={`rounded-full px-5 py-2 min-w-[140px] flex items-center justify-between ${
                 isActive 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
             >
-              <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} mr-2 animate-pulse`} />
-              <Play className="w-4 h-4 mr-2" />
-              {streamName}
-              {stream.hd && <span className="ml-2 text-xs bg-red-600 px-1 rounded">HD</span>}
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
+                <Play className="w-4 h-4" />
+                <span>{streamName}</span>
+                {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
+              </div>
+              {viewerCount > 0 && (
+                <span className="ml-2 text-xs opacity-75">
+                  👁 {viewerCount.toLocaleString()}
+                </span>
+              )}
             </Button>
           );
         })}
