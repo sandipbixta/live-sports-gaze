@@ -22,6 +22,7 @@ import MatchesTabContent from '../components/live/MatchesTabContent';
 import MatchSection from '../components/MatchSection';
 import MatchCard from '../components/MatchCard';
 import TelegramBanner from '../components/TelegramBanner';
+import PopularMatches from '../components/PopularMatches';
 
 const Live = () => {
   const { toast } = useToast();
@@ -184,6 +185,16 @@ const Live = () => {
       </div>
       
       <Separator className="my-8 bg-[#343a4d]" />
+      
+      {/* Popular Matches Section - Sorted by Viewer Count */}
+      {!userSelectedMatch && liveMatches.length > 0 && (
+        <div className="mb-8">
+          <PopularMatches
+            popularMatches={liveMatches}
+            selectedSport={activeSportFilter === "all" ? null : activeSportFilter}
+          />
+        </div>
+      )}
       
       <SportFilterPills
         allMatches={allMatches}
