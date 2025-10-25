@@ -14,6 +14,8 @@ interface StreamSourcesProps {
   streamId: string;
   allStreams?: Record<string, Stream[]>;
   viewerCount?: React.ReactNode;
+  currentStreamViewers?: number;
+  isLive?: boolean;
 }
 
 const StreamSources = ({ 
@@ -22,7 +24,9 @@ const StreamSources = ({
   onSourceChange, 
   streamId,
   allStreams = {},
-  viewerCount
+  viewerCount,
+  currentStreamViewers = 0,
+  isLive = false
 }: StreamSourcesProps) => {
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
@@ -211,9 +215,12 @@ const StreamSources = ({
     <div className="mt-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-        {viewerCount && (
-          <div className="flex items-center">
-            {viewerCount}
+        {currentStreamViewers > 0 && isLive && (
+          <div className="flex items-center gap-2 text-lg animate-fade-in">
+            <Users className="w-5 h-5 text-red-500 animate-pulse" />
+            <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
+              {currentStreamViewers.toLocaleString()}
+            </span>
           </div>
         )}
       </div>
