@@ -7,7 +7,6 @@ import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
-import NetflixMatchGrid from '../components/NetflixMatchGrid';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
@@ -239,13 +238,14 @@ const Index = () => {
             
             <Separator className="my-8 bg-[#343a4d]" />
             
-            {/* Popular by Viewers Section - Netflix Style - Only show on home page */}
+            {/* Popular by Viewers Section - Only show on home page (no sport selected or All Sports) */}
             {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
-              <NetflixMatchGrid
-                matches={liveMatches.slice(0, 12)}
-                sportId={selectedSport || 'all'}
-                title="🔥 Popular Live Matches"
-              />
+              <div className="mb-8">
+                <PopularMatches 
+                  popularMatches={liveMatches}
+                  selectedSport={null}
+                />
+              </div>
             )}
             
             <div className="mb-8">
