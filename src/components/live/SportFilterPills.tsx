@@ -17,13 +17,9 @@ const SportFilterPills: React.FC<SportFilterPillsProps> = ({
   activeSportFilter,
   onSportFilterChange
 }) => {
-  // Get unique sport IDs from matches
-  const getUniqueSportIds = (): string[] => {
-    const sportIds = new Set<string>();
-    allMatches.forEach(match => {
-      if (match.sportId) sportIds.add(match.sportId);
-    });
-    return Array.from(sportIds);
+  // Get all sport IDs from the sports list
+  const getAllSportIds = (): string[] => {
+    return sports.map(sport => sport.id);
   };
 
   // Get sport name by ID
@@ -76,7 +72,7 @@ const SportFilterPills: React.FC<SportFilterPillsProps> = ({
         >
           All Sports
         </Button>
-        {getUniqueSportIds().map(sportId => (
+        {getAllSportIds().map(sportId => (
           <Button
             key={`filter-${sportId}`}
             variant="outline"
