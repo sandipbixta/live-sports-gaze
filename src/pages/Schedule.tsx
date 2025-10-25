@@ -152,9 +152,9 @@ const Schedule = () => {
   return (
     <>
       <Helmet>
-        <title>Football Schedule - Live Matches Today | DamiTV Free Sports Streaming</title>
+        <title>Sports Schedule Today - Match Times & Fixtures | DamiTV</title>
         <link rel="canonical" href="https://damitv.pro/schedule" />
-        <meta name="description" content="Check today's football schedule with Premier League, Champions League, La Liga and more live matches. Free sports streaming schedule on DamiTV." />
+        <meta name="description" content="Today's sports schedule with football, basketball, tennis fixtures. Check match times for Premier League, Champions League and more." />
         <meta name="keywords" content="football schedule, live matches today, premier league schedule, champions league schedule, free sports schedule" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
         <meta property="og:title" content="Football Schedule - Live Matches Today | DamiTV" />
@@ -164,9 +164,14 @@ const Schedule = () => {
       </Helmet>
       
       <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+        <header className="mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Sports Schedule</h1>
+          <p className="text-muted-foreground">Find upcoming matches and events across all sports</p>
+        </header>
+        
         <PageHeader 
-          title="Schedule" 
-          subtitle="Find upcoming matches and events" 
+          title="" 
+          subtitle="" 
           currentDate={currentDate}
           showCalendar={false}
         />
@@ -216,6 +221,34 @@ const Schedule = () => {
             />
           )}
         </div>
+        
+        {/* SEO Content Section */}
+        <section className="mt-12 mb-8">
+          <div className="prose prose-invert max-w-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Complete Sports Schedule</h2>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Browse today's complete sports schedule on DamiTV. Check match times and fixtures for football, basketball, tennis and more. Plan your viewing with our <a href="/live" className="text-primary hover:underline">live sports streaming</a> schedule updated daily.
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Access <a href="/" className="text-primary hover:underline">live streams</a> and <a href="/channels" className="text-primary hover:underline">TV channels</a> for all scheduled matches. Never miss a game with DamiTV.
+                </p>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Schedule Features</h2>
+                <ul className="text-muted-foreground space-y-1 text-sm">
+                  <li>• Daily updated match schedules</li>
+                  <li>• All time zones supported</li>
+                  <li>• Premier League, Champions League, La Liga</li>
+                  <li>• NBA, tennis, MMA, boxing schedules</li>
+                  <li>• Set reminders for your favorite matches</li>
+                  <li>• Direct links to live streams</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
       </PageLayout>
     </>
   );

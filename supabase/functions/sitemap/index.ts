@@ -121,6 +121,13 @@ ${blogPosts?.map(post => `  <url>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  
+  <url>
+    <loc>https://damitv.pro/news</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
 
 </urlset>`;
 

@@ -25,8 +25,8 @@ const Channels = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>{generateCompetitorTitle('Live TV Channels | Watch Football Streams', 'channels')}</title>
-        <meta name="description" content={generateCompetitorDescription('', 'channels')} />
+        <title>Live TV Sports Channels Free - 70+ Channels | DamiTV</title>
+        <meta name="description" content="Watch 70+ free sports TV channels online. International channels for football, basketball, tennis and more. HD streaming, no registration." />
         <meta name="keywords" content="live tv channels, sports tv, football streams, live football, premier league stream, champions league stream, free sports channels, tv guide, epg, totalsportek channels, hesgoal alternative, vipleague alternative" />
         <link rel="canonical" href="https://damitv.pro/channels" />
         <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -129,18 +129,20 @@ const Channels = () => {
       {/* Popunder Ad removed */}
       
       <div className="mb-6 sm:mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-foreground">Live TV Channels</h1>
-          <Link to="/schedule" className="hidden sm:flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-background border-border text-foreground hover:bg-muted">
-              <Calendar className="h-4 w-4 mr-2" />
-              Full Schedule
-            </Button>
-          </Link>
-        </div>
-        <p className="text-gray-300 mb-6">
-          Watch international sports channels from around the world with our comprehensive TV guide and live streams.
-        </p>
+        <header className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Live TV Sports Channels</h1>
+            <Link to="/schedule" className="hidden sm:flex items-center gap-2">
+              <Button variant="outline" size="sm" className="bg-background border-border text-foreground hover:bg-muted">
+                <Calendar className="h-4 w-4 mr-2" />
+                Full Schedule
+              </Button>
+            </Link>
+          </div>
+          <p className="text-muted-foreground">
+            Access 70+ international sports channels streaming live in HD quality. Watch football, basketball, tennis and more.
+          </p>
+        </header>
         
         {/* Telegram Banner */}
         <div className="mb-4">
@@ -164,18 +166,28 @@ const Channels = () => {
           <Advertisement type="autotag" className="w-full" />
         </div>
         
-        {/* Cross-promotion for News section */}
-        <div className="my-8 bg-gradient-to-r from-[#242836] to-[#1A1F2C] rounded-xl p-5 border border-[#343a4d] flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-foreground">Latest Sports Updates</h3>
-            <p className="text-sm text-gray-300">Get breaking news and match reports</p>
+        {/* Cross-promotion section */}
+        <section className="my-12 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
+          <div className="relative">
+            <h3 className="text-2xl font-bold mb-4">Watch Live Sports Now</h3>
+            <p className="text-lg mb-6 max-w-2xl">
+              Browse <a href="/live" className="underline hover:no-underline">live matches</a> or check the <a href="/schedule" className="underline hover:no-underline">sports schedule</a> for upcoming games. HD streaming available on all channels.
+            </p>
+            <div className="flex gap-3">
+              <Link to="/live">
+                <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100">
+                  Watch Live Now
+                </Button>
+              </Link>
+              <Link to="/schedule">
+                <Button variant="outline" className="border-white text-white hover:bg-white hover:text-purple-600">
+                  View Schedule
+                </Button>
+              </Link>
+            </div>
           </div>
-          <Link to="/news">
-            <Button className="bg-[#ff5a36] hover:bg-[#e64d2e]">
-              Visit News Section
-            </Button>
-          </Link>
-        </div>
+        </section>
         
         {/* Sports News section */}
         <div className="mt-8">
@@ -191,6 +203,34 @@ const Channels = () => {
         <div className="mt-6">
           <Advertisement type="sidebar" className="w-full" />
         </div>
+        
+        {/* SEO Content Section */}
+        <section className="my-12">
+          <div className="prose prose-invert max-w-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Free Sports TV Channels</h2>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Stream 70+ live sports TV channels free on DamiTV. Watch international sports channels broadcasting football, basketball, tennis, UFC, Formula 1 and more. All channels available in HD quality without registration or subscription fees.
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  Our <a href="/channels" className="text-primary hover:underline">TV channels</a> complement our <a href="/live" className="text-primary hover:underline">live match streaming</a> and complete <a href="/schedule" className="text-primary hover:underline">sports schedule</a>. Access everything sports in one place.
+                </p>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">Channel Categories</h2>
+                <ul className="text-muted-foreground space-y-1 text-sm">
+                  <li>• Football: Sky Sports, BT Sport, beIN Sports</li>
+                  <li>• Basketball: NBA TV, ESPN, EuroSport</li>
+                  <li>• Tennis: Tennis Channel, Sport TV</li>
+                  <li>• Combat Sports: UFC, Boxing channels</li>
+                  <li>• Racing: F1 TV, MotoGP channels</li>
+                  <li>• 24/7 sports news and analysis</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
         
         {/* Hidden SEO content for competitor targeting */}
         <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />

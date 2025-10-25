@@ -130,8 +130,8 @@ const Live = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>{generateCompetitorTitle('Live Sports Streaming | Watch Live Football Matches Online Free', 'live')}</title>
-        <meta name="description" content={generateCompetitorDescription('', 'live')} />
+        <title>Live Sports Streaming Free - Watch Football Online | DamiTV</title>
+        <meta name="description" content="Watch live football, basketball, tennis and more sports free. HD streaming with multiple sources. No registration needed." />
         <meta name="keywords" content="live football streaming, live soccer matches, watch sports online, free live sports, stream football live, totalsportek alternative live, streameast live free, crackstreams live matches, daddylivehd live sports" />
         <link rel="canonical" href="https://damitv.pro/live" />
         <script type="application/ld+json">
@@ -153,6 +153,12 @@ const Live = () => {
         `}
         </script>
       </Helmet>
+      
+      {/* Page Header with H1 */}
+      <header className="mb-6">
+        <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Live Sports Streaming</h1>
+        <p className="text-muted-foreground">Watch live football, basketball, tennis and more. HD streams updated in real-time.</p>
+      </header>
       
       {/* Telegram Banner */}
       <div className="mb-6">
@@ -372,6 +378,34 @@ const Live = () => {
           />
         </div>
       )}
+      
+      {/* SEO Content Section */}
+      <section className="mt-12 mb-8">
+        <div className="prose prose-invert max-w-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-3">Free Live Sports Streaming</h2>
+              <p className="text-muted-foreground text-sm mb-3">
+                DamiTV offers free live sports streaming with HD quality across all devices. Watch <a href="/" className="text-primary hover:underline">football matches</a>, basketball games, tennis tournaments, and more without registration. Our platform provides reliable streaming with multiple backup sources for uninterrupted viewing.
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Access <a href="/channels" className="text-primary hover:underline">live TV channels</a> and <a href="/schedule" className="text-primary hover:underline">match schedules</a> all in one place. Join millions of sports fans who trust DamiTV for their live streaming needs.
+              </p>
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-foreground mb-3">Popular Live Sports Today</h2>
+              <ul className="text-muted-foreground space-y-1 text-sm">
+                <li>• Premier League and Champions League football</li>
+                <li>• NBA and EuroLeague basketball</li>
+                <li>• ATP and WTA tennis tournaments</li>
+                <li>• UFC and boxing events</li>
+                <li>• Formula 1 and MotoGP racing</li>
+                <li>• Cricket, rugby, and more sports</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Hidden SEO content for competitor targeting */}
       <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />

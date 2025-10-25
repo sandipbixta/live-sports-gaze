@@ -202,10 +202,12 @@ const Index = () => {
         {/* Hero Carousel with Match Posters */}
         <HeroCarousel />
 
-        {/* Essential SEO Header - Hidden but kept for SEO */}
-        <header className="sr-only">
-          <h1>Free Live Sports Streaming Online - DamiTV</h1>
-          <p>
+        {/* SEO Header */}
+        <header className="mb-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 text-center">
+            Free Live Sports Streaming Online
+          </h1>
+          <p className="text-muted-foreground text-center max-w-3xl mx-auto text-base sm:text-lg">
             Watch live sports streaming for free at DamiTV. Access football matches, basketball games, tennis tournaments, and hundreds of sports TV channels from around the world without registration.
           </p>
         </header>
