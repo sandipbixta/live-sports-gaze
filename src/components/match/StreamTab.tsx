@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
-import Advertisement from '@/components/Advertisement';
 import MatchDetails from '@/components/MatchDetails';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { ViewerCount } from '@/components/ViewerCount';

@@ -7,8 +7,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import Clock from './Clock';
 import ThemeToggle from './ThemeToggle';
-import BannerAd from './BannerAd';
-import ContainerAd from './ContainerAd';
 
 
 interface PageLayoutProps {
@@ -70,14 +68,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </header>
 
-      {/* Moved BannerAd here so it shows under the menu/header bar */}
-      <BannerAd />
-      
       <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
-        
-        {/* Container Ad - placed after main content */}
-        <ContainerAd />
       </main>
       
       <footer className="bg-white dark:bg-black text-black dark:text-white py-6 mt-10 pb-20 md:pb-6 border-t border-black dark:border-white">

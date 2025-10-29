@@ -8,8 +8,6 @@ import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { Helmet } from 'react-helmet-async';
 import VideoPlayerSelector from '@/components/StreamPlayer/VideoPlayerSelector';
 import MatchDetails from '@/components/MatchDetails';
-import Advertisement from '@/components/Advertisement';
-import AdultBannerAd from '@/components/AdultBannerAd';
 
 const ManualMatchPlayer = () => {
   const { matchId } = useParams();
@@ -230,11 +228,6 @@ const ManualMatchPlayer = () => {
                   </h2>
                 </div>
               )}
-              
-              {/* Banner Ad Above Video */}
-              <div className="bg-[#0A0F1C] p-2">
-                <Advertisement type="banner" className="w-full" />
-              </div>
               
               {/* Video Player Container */}
               <div className="relative w-full bg-black" style={{ paddingTop: '56.25%' }}>

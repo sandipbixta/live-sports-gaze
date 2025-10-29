@@ -151,21 +151,6 @@ const Channels = () => {
         
         <ChannelsGrid />
         
-        {/* Native Bar Advertisement - after channels grid */}
-        <div className="my-6">
-          <Advertisement type="native-bar" className="w-full" />
-        </div>
-        
-        {/* Direct Link Advertisement - re-enabled */}
-        <div className="my-6 sm:my-8">
-          <Advertisement type="direct-link" className="w-full" />
-        </div>
-        
-        {/* AutoTag Advertisement - adblock bypass */}
-        <div className="my-4">
-          <Advertisement type="autotag" className="w-full" />
-        </div>
-        
         {/* Cross-promotion section */}
         <section className="my-12 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl p-8 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>

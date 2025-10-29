@@ -7,7 +7,6 @@ import { useStreamPlayer } from '@/hooks/useStreamPlayer';
 import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { useWatchHistory } from '@/hooks/useWatchHistory';
 import { Helmet } from 'react-helmet-async';
-import Advertisement from '@/components/Advertisement';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
@@ -221,10 +220,6 @@ const Match = () => {
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
           <TelegramBanner />
-        </div>
-
-        <div className="mb-4 sm:mb-6">
-          <Advertisement type="banner" className="w-full max-w-full overflow-hidden" />
         </div>
         
         <div className="w-full flex justify-center mb-4">
