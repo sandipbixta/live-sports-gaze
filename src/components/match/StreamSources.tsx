@@ -181,6 +181,8 @@ const StreamSources = ({
     const sourceKey = `${source.source}/${source.id}`;
     const streams = effectiveStreams[sourceKey] || [];
     
+    console.log(`📺 Source ${sourceKey} has ${streams.length} streams:`, streams);
+    
     streams.forEach((stream, index) => {
       allAvailableStreams.push({
         stream,
@@ -189,6 +191,8 @@ const StreamSources = ({
       });
     });
   });
+  
+  console.log(`📺 Total available streams to display: ${allAvailableStreams.length}`);
 
   const isAnyLoading = Object.values(loadingStreams).some(Boolean);
 
@@ -227,15 +231,19 @@ const StreamSources = ({
       
       <div className="flex flex-wrap gap-3">
         {allAvailableStreams.map(({ stream, sourceKey, index }) => {
-          const streamKey = `${stream.source}/${stream.id}/${stream.streamNo || index}`;
+          // Use streamNo from API, fallback to index + 1
+          const actualStreamNo = stream.streamNo !== undefined ? stream.streamNo : index + 1;
+          const streamKey = `${stream.source}/${stream.id}/${actualStreamNo}`;
           const isActive = activeSource === streamKey;
           const viewerCount = stream.viewers || 0;
           
-          // Use API-provided names like the HTML code
+          // Use API-provided names with streamNo priority
           let streamName = stream.name || 
-                          (stream.language && stream.language !== 'Original' ? stream.language : null) ||
-                          (stream.source && stream.source !== 'intel' ? stream.source.toUpperCase() : null) ||
-                          `Stream ${stream.streamNo || index + 1}`;
+                          (stream.language && stream.language !== 'Original' ? `${stream.language} ${actualStreamNo}` : null) ||
+                          (stream.source && stream.source !== 'intel' ? `${stream.source.toUpperCase()} ${actualStreamNo}` : null) ||
+                          `Stream ${actualStreamNo}`;
+          
+          console.log(`🎯 Rendering stream button: ${streamName}`, { streamNo: actualStreamNo, hd: stream.hd });
           
           return (
             <Button
@@ -246,7 +254,7 @@ const StreamSources = ({
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
               }`}
-              onClick={() => onSourceChange(stream.source, stream.id, stream.streamNo || index)}
+              onClick={() => onSourceChange(stream.source, stream.id, actualStreamNo)}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />

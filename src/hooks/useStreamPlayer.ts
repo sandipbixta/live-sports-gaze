@@ -43,8 +43,9 @@ export const useStreamPlayer = () => {
           ...firstStream,
           timestamp: Date.now()
         });
-        setActiveSource(sourceKeys[0]);
-        console.log(`✅ Auto-selected first stream from ${firstStream.source}`);
+        // Set active source with streamNo for proper button highlighting
+        setActiveSource(`${firstStream.source}/${firstStream.id}/${firstStream.streamNo || 1}`);
+        console.log(`✅ Auto-selected first stream: ${firstStream.source} Stream ${firstStream.streamNo}`);
       }
       
       console.log(`🎬 Total streams loaded: ${streams.length} from ${sourceKeys.length} sources`);
@@ -65,10 +66,12 @@ export const useStreamPlayer = () => {
     setActiveSource(sourceKey);
     
     try {
-      console.log(`🎯 Fetching stream: ${source.source}/${source.id}`);
+      console.log(`🎯 Fetching stream: ${source.source}/${source.id}${streamNo ? `/${streamNo}` : ''}`);
       
       // Simple direct API call like HTML example
       const streams = await fetchSimpleStream(source.source, source.id);
+      
+      console.log(`📺 Received ${streams.length} streams from API`);
       
       if (streams.length > 0) {
         const selectedStream = streamNo 
@@ -80,8 +83,12 @@ export const useStreamPlayer = () => {
             ...selectedStream,
             timestamp: Date.now()
           };
+          
+          // Update active source to include streamNo for proper matching
+          setActiveSource(`${source.source}/${source.id}/${selectedStream.streamNo || 1}`);
+          
           setCurrentStream(freshStream);
-          console.log(`✅ Stream loaded successfully`);
+          console.log(`✅ Stream loaded successfully: Stream ${selectedStream.streamNo}`, selectedStream);
         }
       }
       
