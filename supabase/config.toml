@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.fetch-team-stats]
 verify_jwt = false
+
+[functions.update-team-stats-scheduled]
+verify_jwt = false
