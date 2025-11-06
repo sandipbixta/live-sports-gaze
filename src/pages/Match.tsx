@@ -27,6 +27,8 @@ import { MatchPrediction } from '@/components/match/MatchPrediction';
 import { TeamStats } from '@/components/match/TeamStats';
 import { PredictionLeaderboard } from '@/components/match/PredictionLeaderboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 const Match = () => {
   const { toast } = useToast();
@@ -34,6 +36,7 @@ const Match = () => {
   const [match, setMatch] = useState<MatchType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [chatVisible, setChatVisible] = useState(true);
   
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
@@ -250,9 +253,9 @@ const Match = () => {
         </div>
         
         {/* YouTube-style layout: Video on left, Chat on right (desktop) */}
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 relative">
           {/* Left Column: Video Player */}
-          <div className="flex-1 lg:w-[calc(100%-400px)]" id="stream-container" data-stream-container>
+          <div className={`flex-1 transition-all duration-300 ${isDesktop && chatVisible ? 'lg:w-[calc(100%-400px)]' : 'lg:w-full'}`} id="stream-container" data-stream-container>
             <StreamTab
               match={match}
               stream={stream}
@@ -272,9 +275,22 @@ const Match = () => {
             </div>
           </div>
 
-          {/* Right Column: Live Chat (only on desktop) */}
+          {/* Chat Toggle Button (desktop only) */}
           {isDesktop && (
-            <div className="lg:w-[380px] flex-shrink-0">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setChatVisible(!chatVisible)}
+              className="fixed right-4 top-24 z-50 lg:flex hidden shadow-lg"
+              aria-label={chatVisible ? "Hide chat" : "Show chat"}
+            >
+              {chatVisible ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+            </Button>
+          )}
+
+          {/* Right Column: Live Chat (only on desktop when visible) */}
+          {isDesktop && chatVisible && (
+            <div className="lg:w-[380px] flex-shrink-0 transition-all duration-300">
               <div className="sticky top-4">
                 <LiveChat 
                   matchId={matchId || ''}
