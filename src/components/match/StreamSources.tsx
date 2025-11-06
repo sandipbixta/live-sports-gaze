@@ -21,6 +21,7 @@ interface StreamSourcesProps {
     sourcesWithStreams: number;
     sourceNames: string[];
   };
+  onRefresh?: () => Promise<void>;
 }
 
 const StreamSources = ({ 
@@ -32,12 +33,14 @@ const StreamSources = ({
   viewerCount,
   currentStreamViewers = 0,
   isLive = false,
-  streamDiscovery
+  streamDiscovery,
+  onRefresh
 }: StreamSourcesProps) => {
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
   const [connectionQuality, setConnectionQuality] = useState<'poor' | 'fair' | 'good' | 'excellent'>('good');
   const [streamViewers, setStreamViewers] = useState<Record<string, number>>({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Monitor connection quality
   useEffect(() => {
@@ -172,6 +175,21 @@ const StreamSources = ({
     }
   }, [sources]);
 
+  // Handle refresh button click
+  const handleRefresh = async () => {
+    if (!onRefresh) return;
+    
+    setIsRefreshing(true);
+    try {
+      await onRefresh();
+      console.log('🔄 Stream refresh completed');
+    } catch (error) {
+      console.error('❌ Stream refresh failed:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   if (!visibleSources || visibleSources.length === 0) {
     return null;
   }
@@ -242,7 +260,7 @@ const StreamSources = ({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
               {streamDiscovery.sourceNames.map((source) => (
                 <span 
                   key={source}
@@ -257,7 +275,43 @@ const StreamSources = ({
       )}
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+          {onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600"
+            >
+              {isRefreshing ? (
+                <>
+                  <Loader className="w-3 h-3 mr-1.5 animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="14" 
+                    height="14" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="mr-1.5"
+                  >
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  Refresh
+                </>
+              )}
+            </Button>
+          )}
+        </div>
         {currentStreamViewers > 0 && isLive && (
           <div className="flex items-center gap-2 text-lg animate-fade-in">
             <Users className="w-5 h-5 text-red-500 animate-pulse" />

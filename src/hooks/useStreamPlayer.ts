@@ -23,6 +23,10 @@ export const useStreamPlayer = () => {
     try {
       console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
       
+      // Clear cache before fetching to ensure fresh data
+      const { clearStreamCache } = await import('@/api/sportsApi');
+      clearStreamCache(match.id);
+      
       // Use the simple stream fetching approach but maintain compatibility
       const result = await fetchAllMatchStreams(match);
       
@@ -175,6 +179,7 @@ export const useStreamPlayer = () => {
     handleMatchSelect,
     handleSourceChange,
     handleStreamRetry,
+    handleRefreshStreams: fetchAllStreamsForMatch,
     setFeaturedMatch,
     fetchStreamData,
     fetchAllMatchStreams: fetchAllStreamsForMatch

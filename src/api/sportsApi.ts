@@ -7,6 +7,31 @@ const API_BASE = 'https://streamed.pk/api';
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// Helper function to clear cache (used for refresh)
+export const clearStreamCache = (matchId?: string) => {
+  if (matchId) {
+    // Clear only caches related to this match
+    const keysToDelete: string[] = [];
+    cache.forEach((_, key) => {
+      if (key.includes(matchId) || key.includes('stream')) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach(key => cache.delete(key));
+    console.log(`🗑️ Cleared ${keysToDelete.length} cache entries for match: ${matchId}`);
+  } else {
+    // Clear all stream-related caches
+    const keysToDelete: string[] = [];
+    cache.forEach((_, key) => {
+      if (key.includes('stream')) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach(key => cache.delete(key));
+    console.log(`🗑️ Cleared ${keysToDelete.length} stream cache entries`);
+  }
+};
+
 // Helper function to get cached data
 const getCachedData = (key: string) => {
   const cached = cache.get(key);

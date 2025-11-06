@@ -47,7 +47,8 @@ const Match = () => {
     allStreams,
     streamDiscovery,
     handleSourceChange,
-    handleMatchSelect
+    handleMatchSelect,
+    handleRefreshStreams
   } = useStreamPlayer();
 
   // Load match data and streams
@@ -241,6 +242,7 @@ const Match = () => {
             sportId={sportId || ''}
             allStreams={allStreams}
             streamDiscovery={streamDiscovery}
+            onRefreshStreams={handleRefreshStreams}
           />
         </div>
 

@@ -28,6 +28,7 @@ interface StreamTabProps {
     sourcesWithStreams: number;
     sourceNames: string[];
   };
+  onRefreshStreams?: (match: MatchType) => Promise<void>;
 }
 
 const StreamTab = ({ 
@@ -39,7 +40,8 @@ const StreamTab = ({
   popularMatches, 
   sportId,
   allStreams = {},
-  streamDiscovery
+  streamDiscovery,
+  onRefreshStreams
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
@@ -52,6 +54,30 @@ const StreamTab = ({
     onSourceChange: handleSourceChange,
     currentStream: stream
   });
+  
+  // Handle refresh with toast notification
+  const handleRefresh = async () => {
+    if (!onRefreshStreams) return;
+    
+    toast({
+      title: "Refreshing streams...",
+      description: "Scanning all sources for new streams",
+    });
+    
+    try {
+      await onRefreshStreams(match);
+      toast({
+        title: "Refresh complete",
+        description: `Found ${streamDiscovery?.sourcesWithStreams || 0} sources with streams`,
+      });
+    } catch (error) {
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh streams. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
   
   const getStreamId = () => {
     return match?.sources?.length > 0 ? match.sources[0].id : match.id;
@@ -200,6 +226,7 @@ const StreamTab = ({
         currentStreamViewers={currentStreamViewers}
         isLive={isMatchLive()}
         streamDiscovery={streamDiscovery}
+        onRefresh={handleRefresh}
       />
       
       {!loadingStream && (
