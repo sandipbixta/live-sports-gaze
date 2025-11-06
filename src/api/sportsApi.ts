@@ -392,30 +392,61 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
 
 // Simple function to fetch all streams for a match (like HTML example)
 export const fetchAllMatchStreams = async (match: Match): Promise<Stream[]> => {
-  if (!match.sources || match.sources.length === 0) {
-    return [];
-  }
-
+  // All possible sources according to API documentation
+  const allPossibleSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
+  
   const allStreams: Stream[] = [];
+  
+  // First, try the sources explicitly listed in match data
+  const listedSources = match.sources || [];
+  console.log(`🔍 Match has ${listedSources.length} listed sources:`, listedSources.map(s => s.source));
+  
+  // Build a list of source combinations to try
+  const sourcesToTry = new Set<string>();
+  
+  // Add listed sources
+  listedSources.forEach(source => {
+    sourcesToTry.add(`${source.source}:${source.id}`);
+  });
+  
+  // Also try all possible sources with the match ID
+  allPossibleSources.forEach(source => {
+    sourcesToTry.add(`${source}:${match.id}`);
+  });
+  
+  console.log(`🔍 Trying ${sourcesToTry.size} source combinations for match: ${match.title}`);
 
   // Fetch streams from all sources concurrently
-  const streamPromises = match.sources.map(async (source) => {
+  const streamPromises = Array.from(sourcesToTry).map(async (sourceCombo) => {
+    const [source, id] = sourceCombo.split(':');
     try {
-      return await fetchSimpleStream(source.source, source.id);
+      const streams = await fetchSimpleStream(source, id);
+      if (streams.length > 0) {
+        console.log(`✅ Found ${streams.length} streams from ${source}/${id}`);
+        return streams;
+      }
+      return [];
     } catch (error) {
-      console.error(`Failed to fetch streams from ${source.source}/${source.id}:`, error);
+      // Silently ignore errors for sources that don't exist
       return [];
     }
   });
 
   const streamResults = await Promise.all(streamPromises);
   
-  // Flatten and combine all streams
+  // Flatten and combine all streams, removing duplicates
+  const seenStreams = new Set<string>();
   streamResults.forEach(streams => {
-    allStreams.push(...streams);
+    streams.forEach(stream => {
+      const streamKey = `${stream.source}-${stream.id}-${stream.streamNo}`;
+      if (!seenStreams.has(streamKey)) {
+        seenStreams.add(streamKey);
+        allStreams.push(stream);
+      }
+    });
   });
 
-  console.log(`🎬 Total streams found for match: ${allStreams.length}`);
+  console.log(`🎬 Total unique streams found for match: ${allStreams.length} from ${new Set(allStreams.map(s => s.source)).size} sources`);
   return allStreams;
 };
 
