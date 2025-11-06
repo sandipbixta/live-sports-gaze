@@ -22,6 +22,11 @@ import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
+import { LiveChat } from '@/components/match/LiveChat';
+import { MatchPrediction } from '@/components/match/MatchPrediction';
+import { TeamStats } from '@/components/match/TeamStats';
+import { PredictionLeaderboard } from '@/components/match/PredictionLeaderboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Match = () => {
   const { toast } = useToast();
@@ -249,6 +254,57 @@ const Match = () => {
         {/* Viewer Statistics */}
         <div className="mt-6">
           <ViewerStats match={match} />
+        </div>
+
+        {/* Interactive Features: Chat, Predictions, and Stats */}
+        <div className="mt-8">
+          <Tabs defaultValue="chat" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="chat">Live Chat</TabsTrigger>
+              <TabsTrigger value="predictions">Predictions</TabsTrigger>
+              <TabsTrigger value="stats">Statistics</TabsTrigger>
+              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="chat" className="mt-6">
+              <LiveChat 
+                matchId={matchId || ''}
+                matchTitle={matchTitle}
+              />
+            </TabsContent>
+
+            <TabsContent value="predictions" className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <MatchPrediction
+                    matchId={matchId || ''}
+                    homeTeam={homeTeam}
+                    awayTeam={awayTeam}
+                    matchStartTime={match.date ? new Date(match.date) : new Date()}
+                  />
+                </div>
+                <div>
+                  <PredictionLeaderboard />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="stats" className="mt-6">
+              <TeamStats
+                homeTeamId={homeTeam}
+                homeTeamName={homeTeam}
+                awayTeamId={awayTeam}
+                awayTeamName={awayTeam}
+                sport={sportId || 'football'}
+              />
+            </TabsContent>
+
+            <TabsContent value="leaderboard" className="mt-6">
+              <div className="max-w-2xl mx-auto">
+                <PredictionLeaderboard />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Match Analysis and Preview Content */}

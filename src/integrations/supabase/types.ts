@@ -71,6 +71,39 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_deleted: boolean | null
+          match_id: string
+          message: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_deleted?: boolean | null
+          match_id: string
+          message: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_deleted?: boolean | null
+          match_id?: string
+          message?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_subscriptions: {
         Row: {
           created_at: string
@@ -107,6 +140,60 @@ export type Database = {
           updated_at?: string
           verification_token?: string | null
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      head_to_head_stats: {
+        Row: {
+          created_at: string
+          draws: number | null
+          id: string
+          last_5_results: string[] | null
+          last_match_date: string | null
+          last_match_score: string | null
+          sport: string
+          team_a_id: string
+          team_a_name: string
+          team_a_wins: number | null
+          team_b_id: string
+          team_b_name: string
+          team_b_wins: number | null
+          total_matches: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draws?: number | null
+          id?: string
+          last_5_results?: string[] | null
+          last_match_date?: string | null
+          last_match_score?: string | null
+          sport: string
+          team_a_id: string
+          team_a_name: string
+          team_a_wins?: number | null
+          team_b_id: string
+          team_b_name: string
+          team_b_wins?: number | null
+          total_matches?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draws?: number | null
+          id?: string
+          last_5_results?: string[] | null
+          last_match_date?: string | null
+          last_match_score?: string | null
+          sport?: string
+          team_a_id?: string
+          team_a_name?: string
+          team_a_wins?: number | null
+          team_b_id?: string
+          team_b_name?: string
+          team_b_wins?: number | null
+          total_matches?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -149,6 +236,54 @@ export type Database = {
         }
         Relationships: []
       }
+      match_predictions: {
+        Row: {
+          confidence_level: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_correct: boolean | null
+          match_id: string
+          match_start_time: string
+          points_earned: number | null
+          predicted_score_away: number | null
+          predicted_score_home: number | null
+          predicted_winner: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          confidence_level?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_correct?: boolean | null
+          match_id: string
+          match_start_time: string
+          points_earned?: number | null
+          predicted_score_away?: number | null
+          predicted_score_home?: number | null
+          predicted_winner: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          confidence_level?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_correct?: boolean | null
+          match_id?: string
+          match_start_time?: string
+          points_earned?: number | null
+          predicted_score_away?: number | null
+          predicted_score_home?: number | null
+          predicted_winner?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -173,6 +308,72 @@ export type Database = {
           email?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      team_stats: {
+        Row: {
+          average_goals: number | null
+          clean_sheets: number | null
+          created_at: string
+          current_position: number | null
+          draws: number | null
+          form_last_5: string[] | null
+          goals_conceded: number | null
+          goals_scored: number | null
+          id: string
+          league: string | null
+          losses: number | null
+          matches_played: number | null
+          sport: string
+          team_id: string
+          team_name: string
+          total_points: number | null
+          updated_at: string
+          win_rate: number | null
+          wins: number | null
+        }
+        Insert: {
+          average_goals?: number | null
+          clean_sheets?: number | null
+          created_at?: string
+          current_position?: number | null
+          draws?: number | null
+          form_last_5?: string[] | null
+          goals_conceded?: number | null
+          goals_scored?: number | null
+          id?: string
+          league?: string | null
+          losses?: number | null
+          matches_played?: number | null
+          sport: string
+          team_id: string
+          team_name: string
+          total_points?: number | null
+          updated_at?: string
+          win_rate?: number | null
+          wins?: number | null
+        }
+        Update: {
+          average_goals?: number | null
+          clean_sheets?: number | null
+          created_at?: string
+          current_position?: number | null
+          draws?: number | null
+          form_last_5?: string[] | null
+          goals_conceded?: number | null
+          goals_scored?: number | null
+          id?: string
+          league?: string | null
+          losses?: number | null
+          matches_played?: number | null
+          sport?: string
+          team_id?: string
+          team_name?: string
+          total_points?: number | null
+          updated_at?: string
+          win_rate?: number | null
+          wins?: number | null
         }
         Relationships: []
       }
@@ -289,15 +490,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      prediction_leaderboard: {
+        Row: {
+          accuracy_percentage: number | null
+          correct_predictions: number | null
+          display_name: string | null
+          session_id: string | null
+          total_points: number | null
+          total_predictions: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      cleanup_stale_viewer_sessions: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_stale_viewer_sessions: { Args: never; Returns: undefined }
       get_public_iptv_providers: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           id: string
@@ -307,10 +516,7 @@ export type Database = {
           playlist_type: string
         }[]
       }
-      get_viewer_count: {
-        Args: { match_id_param: string }
-        Returns: number
-      }
+      get_viewer_count: { Args: { match_id_param: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -322,10 +528,7 @@ export type Database = {
         Args: { match_id_param: string; session_id_param: string }
         Returns: undefined
       }
-      increment_blog_views: {
-        Args: { post_slug: string }
-        Returns: undefined
-      }
+      increment_blog_views: { Args: { post_slug: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
