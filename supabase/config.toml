@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.update-team-stats-scheduled]
 verify_jwt = false
+
+[functions.send-subscription-confirmation]
+verify_jwt = false

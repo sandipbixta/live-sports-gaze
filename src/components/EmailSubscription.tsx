@@ -54,10 +54,23 @@ const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = false }
           throw error;
         }
       } else {
+        // Send confirmation email
+        try {
+          await supabase.functions.invoke('send-subscription-confirmation', {
+            body: { 
+              email,
+              selectedTeams 
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send confirmation email:', emailError);
+          // Don't fail the subscription if email fails
+        }
+
         setSubscribed(true);
         toast({
           title: 'Successfully subscribed!',
-          description: 'You\'ll receive match alerts for your selected teams.',
+          description: 'Check your email for confirmation.',
         });
       }
     } catch (error) {
