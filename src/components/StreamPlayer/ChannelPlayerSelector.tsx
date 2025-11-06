@@ -17,6 +17,7 @@ interface ChannelPlayerSelectorProps {
   isTheaterMode?: boolean;
   onTheaterModeToggle?: () => void;
   title?: string;
+  matchStartTime?: number | Date | null;
 }
 
 const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
@@ -26,7 +27,8 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
   playerType = 'simple',
   isTheaterMode = false,
   onTheaterModeToggle,
-  title
+  title,
+  matchStartTime
 }) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
 
@@ -108,6 +110,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
             onLoad={handleLoad}
             onError={handleError}
             title={title}
+            matchStartTime={matchStartTime}
           />
         </div>
       );
@@ -119,6 +122,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           title={title}
+          matchStartTime={matchStartTime}
         />
       );
     

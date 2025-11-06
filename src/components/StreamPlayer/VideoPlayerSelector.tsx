@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
+import { Clock } from 'lucide-react';
 
 interface VideoPlayerSelectorProps {
   src: string;
@@ -9,6 +10,7 @@ interface VideoPlayerSelectorProps {
   isManualChannel?: boolean;
   isTvChannel?: boolean;
   videoRef?: React.RefObject<HTMLVideoElement>;
+  matchStartTime?: number | Date | null;
 }
 
 const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
@@ -16,14 +18,61 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   onLoad,
   onError,
   title = "Live Stream",
-  videoRef: externalVideoRef
+  videoRef: externalVideoRef,
+  matchStartTime
 }) => {
   const internalVideoRef = useRef<HTMLVideoElement>(null);
   const videoRef = externalVideoRef || internalVideoRef;
   const hlsRef = useRef<Hls | null>(null);
+  const [countdown, setCountdown] = useState<string>('');
   
   // Check if it's a direct HLS stream
   const isHlsStream = src.includes('.m3u8');
+  
+  // Calculate countdown for upcoming matches
+  useEffect(() => {
+    if (!matchStartTime) {
+      setCountdown('');
+      return;
+    }
+
+    const matchDate = typeof matchStartTime === 'number' ? matchStartTime : new Date(matchStartTime).getTime();
+
+    if (matchDate <= Date.now()) {
+      setCountdown('');
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = Date.now();
+      const timeUntilMatch = matchDate - now;
+
+      if (timeUntilMatch <= 0) {
+        setCountdown('');
+        return;
+      }
+
+      const days = Math.floor(timeUntilMatch / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeUntilMatch % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
+
+      if (days > 0) {
+        setCountdown(`${days}d ${hours}h ${minutes}m`);
+      } else if (hours > 0) {
+        setCountdown(`${hours}h ${minutes}m ${seconds}s`);
+      } else if (minutes > 0) {
+        setCountdown(`${minutes}m ${seconds}s`);
+      } else {
+        setCountdown(`${seconds}s`);
+      }
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [matchStartTime]);
   
   useEffect(() => {
     if (!isHlsStream || !videoRef.current) return;
@@ -118,43 +167,109 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
   // For HLS streams, render video element
   if (isHlsStream) {
     return (
-      <video
-        ref={videoRef}
-        className="w-full h-full"
-        controls
-        playsInline
-        autoPlay
-        muted
-        preload="auto"
-        controlsList="nodownload"
-        style={{ 
-          border: 'none',
-          background: 'black',
-          objectFit: 'contain',
-          width: '100%',
-          height: '100%'
-        }}
-      />
+      <div className="relative w-full h-full">
+        {/* Countdown Overlay */}
+        {countdown && matchStartTime && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+            {/* Background decoration */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
+              <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="text-center text-white p-6 z-10">
+              <Clock className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
+              <h3 className="text-xl font-bold mb-2">Match Starting Soon</h3>
+              <p className="text-sm text-gray-400 mb-4">Stream will be available when the match begins</p>
+              
+              {/* Countdown Display */}
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 inline-block">
+                <div className="text-4xl font-black text-white mb-1 font-mono tracking-wider">
+                  {countdown}
+                </div>
+                <div className="text-xs text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+              </div>
+              
+              {title && (
+                <p className="text-base text-white/80 mt-3 font-semibold">
+                  {title}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        
+        <video
+          ref={videoRef}
+          className="w-full h-full"
+          controls
+          playsInline
+          autoPlay
+          muted
+          preload="auto"
+          controlsList="nodownload"
+          style={{ 
+            border: 'none',
+            background: 'black',
+            objectFit: 'contain',
+            width: '100%',
+            height: '100%'
+          }}
+        />
+      </div>
     );
   }
 
-  // For other streams, use iframe
+  // For other streams, use iframe with countdown overlay
   return (
-    <iframe
-      src={src}
-      width="100%"
-      height="100%"
-      allowFullScreen
-      title={title}
-      style={{ 
-        border: 'none',
-        background: 'black',
-        width: '100%',
-        height: '100%'
-      }}
-      onLoad={onLoad}
-      onError={onError}
-    />
+    <div className="relative w-full h-full">
+      {/* Countdown Overlay */}
+      {countdown && matchStartTime && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+          </div>
+          
+          <div className="text-center text-white p-6 z-10">
+            <Clock className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
+            <h3 className="text-xl font-bold mb-2">Match Starting Soon</h3>
+            <p className="text-sm text-gray-400 mb-4">Stream will be available when the match begins</p>
+            
+            {/* Countdown Display */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 inline-block">
+              <div className="text-4xl font-black text-white mb-1 font-mono tracking-wider">
+                {countdown}
+              </div>
+              <div className="text-xs text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+            </div>
+            
+            {title && (
+              <p className="text-base text-white/80 mt-3 font-semibold">
+                {title}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      
+      <iframe
+        src={src}
+        width="100%"
+        height="100%"
+        allowFullScreen
+        title={title}
+        style={{ 
+          border: 'none',
+          background: 'black',
+          width: '100%',
+          height: '100%'
+        }}
+        onLoad={onLoad}
+        onError={onError}
+      />
+    </div>
   );
 };
 
