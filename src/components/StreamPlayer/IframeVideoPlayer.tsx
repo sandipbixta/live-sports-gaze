@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { Maximize, Home } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,16 +27,6 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     navigate('/');
   };
 
-  // Handle fullscreen
-  const toggleFullscreen = () => {
-    if (iframeRef.current) {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        iframeRef.current.requestFullscreen();
-      }
-    }
-  };
 
   // Handle iframe load success
   const handleIframeLoad = () => {
@@ -161,28 +151,6 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
         </Button>
       </div>
 
-      {/* Control Overlay */}
-      <div 
-        className={`absolute top-4 left-4 right-4 transition-opacity duration-300 ${
-          showControls ? 'opacity-100' : 'opacity-0'
-        }`}
-        onMouseEnter={() => setShowControls(true)}
-      >
-        <div className="flex items-center justify-between">
-          {/* Left spacer for back buttons */}
-          <div className="w-20"></div>
-
-          {/* Right side - Fullscreen Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleFullscreen}
-            className="bg-black/50 hover:bg-black/70 text-white h-8 w-8"
-          >
-            <Maximize className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 };

@@ -45,7 +45,6 @@ const StreamTab = ({
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
-  const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [currentStreamViewers, setCurrentStreamViewers] = useState<number>(0);
   
   // Auto-fallback hook
@@ -210,8 +209,6 @@ const StreamTab = ({
         title={match.title}
         isManualChannel={false}
         isTvChannel={false}
-        isTheaterMode={isTheaterMode}
-        onTheaterModeToggle={() => setIsTheaterMode(!isTheaterMode)}
         match={match}
         allStreams={allStreams}
         showMatchDetails={false}
@@ -257,8 +254,8 @@ const StreamTab = ({
         </Card>
       )}
       
-      {/* Hide trending matches in theater mode or show them normally */}
-      {!isTheaterMode && sortedPopularMatches.length > 0 && (
+      {/* Trending Matches */}
+      {sortedPopularMatches.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-xl">🔥</span>
@@ -281,15 +278,13 @@ const StreamTab = ({
       )}
       
       {/* Match Details at Bottom */}
-      {!isTheaterMode && (
-        <div className="mt-8 px-4">
-          <MatchDetails 
-            match={match}
-            isLive={isMatchLive()}
-            showCompact={false}
-          />
-        </div>
-      )}
+      <div className="mt-8 px-4">
+        <MatchDetails 
+          match={match}
+          isLive={isMatchLive()}
+          showCompact={false}
+        />
+      </div>
       
     </div>
   );
