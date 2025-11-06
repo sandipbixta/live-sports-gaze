@@ -40,5 +40,4 @@ export interface Stream {
   embedUrl: string;
   source: string;
   timestamp?: number;  // Optional timestamp for freshness tracking
-  viewers?: number;    // Number of current viewers for this stream
 }
