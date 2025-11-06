@@ -243,12 +243,12 @@ const StreamSources = ({
     <div className="mt-6">
       {/* Stream Discovery Indicator */}
       {streamDiscovery && streamDiscovery.sourcesWithStreams > 0 && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-lg">
+        <div className="mb-4 p-3 bg-gradient-to-r from-[#ff5722]/20 to-[#ff5722]/10 border border-[#ff5722]/30 rounded-lg">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-blue-400" />
+                <div className="h-8 w-8 rounded-full bg-[#ff5722]/20 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-[#ff5722]" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">
@@ -264,7 +264,7 @@ const StreamSources = ({
               {streamDiscovery.sourceNames.map((source) => (
                 <span 
                   key={source}
-                  className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-medium rounded-full border border-blue-400/30"
+                  className="px-2 py-1 bg-[#ff5722]/20 text-[#ff5722] text-xs font-medium rounded-full border border-[#ff5722]/40"
                 >
                   {source.toUpperCase()}
                 </span>
@@ -273,6 +273,54 @@ const StreamSources = ({
           </div>
         </div>
       )}
+      
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+          {onRefresh && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600 hover:border-[#ff5722]/50 hover:text-[#ff5722] transition-colors"
+            >
+              {isRefreshing ? (
+                <>
+                  <Loader className="w-3 h-3 mr-1.5 animate-spin" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="14" 
+                    height="14" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="mr-1.5"
+                  >
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  Refresh
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+        {currentStreamViewers > 0 && isLive && (
+          <div className="flex items-center gap-2 text-lg animate-fade-in">
+            <Users className="w-5 h-5 text-red-500 animate-pulse" />
+            <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
+              {currentStreamViewers.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
@@ -344,8 +392,8 @@ const StreamSources = ({
               variant={isActive ? "default" : "outline"}
               className={`rounded-full px-5 py-2.5 min-w-[120px] flex-col h-auto gap-1 ${
                 isActive 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600'
+                  ? 'bg-[#ff5722] hover:bg-[#ff5722]/90 text-white border-[#ff5722]' 
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
               }`}
               onClick={() => onSourceChange(stream.source, stream.id, actualStreamNo)}
             >
@@ -357,7 +405,7 @@ const StreamSources = ({
               </div>
               {viewerCount > 0 && (
                 <div className="flex items-center gap-1 text-xs font-semibold">
-                  <Users className="w-3 h-3 text-sports-primary" />
+                  <Users className="w-3 h-3 text-[#ff5722]" />
                   <span>{formatViewerCount(viewerCount, false)}</span>
                 </div>
               )}
