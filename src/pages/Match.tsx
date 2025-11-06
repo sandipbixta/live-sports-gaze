@@ -297,6 +297,7 @@ const Match = () => {
                   matchTitle={matchTitle}
                   homeTeam={homeTeam}
                   awayTeam={awayTeam}
+                  matchStartTime={match.date ? new Date(match.date) : undefined}
                 />
               </div>
             </div>
@@ -322,6 +323,7 @@ const Match = () => {
                   matchTitle={matchTitle}
                   homeTeam={homeTeam}
                   awayTeam={awayTeam}
+                  matchStartTime={match.date ? new Date(match.date) : undefined}
                 />
               </TabsContent>
             )}

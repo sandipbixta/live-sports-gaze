@@ -20,6 +20,7 @@ interface LiveChatProps {
   matchTitle: string;
   homeTeam?: string;
   awayTeam?: string;
+  matchStartTime?: Date;
 }
 
 interface VoteStats {
@@ -36,7 +37,7 @@ interface LeaderboardEntry {
   total_predictions: number;
 }
 
-export const LiveChat = ({ matchId, matchTitle, homeTeam = 'Home', awayTeam = 'Away' }: LiveChatProps) => {
+export const LiveChat = ({ matchId, matchTitle, homeTeam = 'Home', awayTeam = 'Away', matchStartTime }: LiveChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -162,6 +163,9 @@ export const LiveChat = ({ matchId, matchTitle, homeTeam = 'Home', awayTeam = 'A
       return;
     }
 
+    // Use provided match start time or default to 1 hour from now
+    const startTime = matchStartTime || new Date(Date.now() + 60 * 60 * 1000);
+
     const { error } = await supabase
       .from('match_predictions')
       .insert({
@@ -169,10 +173,11 @@ export const LiveChat = ({ matchId, matchTitle, homeTeam = 'Home', awayTeam = 'A
         session_id: sessionId.current,
         display_name: displayName,
         predicted_winner: team,
-        match_start_time: new Date().toISOString()
+        match_start_time: startTime.toISOString()
       });
 
     if (error) {
+      console.error('Vote error:', error);
       toast.error('Failed to submit vote');
     } else {
       setUserVote(team);
