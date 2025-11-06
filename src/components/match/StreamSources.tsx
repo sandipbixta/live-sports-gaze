@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Source, Stream } from '@/types/sports';
 import { useState, useEffect } from 'react';
 import { fetchStream } from '@/api/sportsApi';
-import { Loader, Play, Users } from 'lucide-react';
+import { Loader, Users } from 'lucide-react';
 import { getConnectionInfo } from '@/utils/connectionOptimizer';
 import { fetchViewerCountFromSource, formatViewerCount } from '@/services/viewerCountService';
 
@@ -48,7 +48,6 @@ const StreamSources = ({
       const info = getConnectionInfo();
       const effectiveType = info.effectiveType || '4g';
       const downlink = info.downlink || 10;
-      const rtt = info.rtt || 50;
 
       if (effectiveType === 'slow-2g' || effectiveType === '2g' || downlink < 1) {
         setConnectionQuality('poor');
@@ -69,21 +68,6 @@ const StreamSources = ({
       return () => connection.removeEventListener('change', updateConnectionQuality);
     }
   }, []);
-
-  const getConnectionDotColor = () => {
-    switch (connectionQuality) {
-      case 'poor':
-        return 'bg-red-500';
-      case 'fair':
-        return 'bg-yellow-500';
-      case 'good':
-        return 'bg-green-500';
-      case 'excellent':
-        return 'bg-green-400';
-      default:
-        return 'bg-green-500';
-    }
-  };
 
   // Mark admin sources but don't hide them
   const isAdminSourceName = (name: string) => name?.toLowerCase().includes('admin');
@@ -194,34 +178,10 @@ const StreamSources = ({
     return null;
   }
 
-  // Collect all available streams from all sources
-  const allAvailableStreams: Array<{
-    stream: any;
-    sourceKey: string;
-    index: number;
-  }> = [];
-  
-  visibleSources.forEach((source) => {
-    const sourceKey = `${source.source}/${source.id}`;
-    const streams = effectiveStreams[sourceKey] || [];
-    
-    console.log(`📺 Source ${sourceKey} has ${streams.length} streams:`, streams);
-    
-    streams.forEach((stream, index) => {
-      allAvailableStreams.push({
-        stream,
-        sourceKey,
-        index
-      });
-    });
-  });
-  
-  console.log(`📺 Total available streams to display: ${allAvailableStreams.length}`);
-
   const isAnyLoading = Object.values(loadingStreams).some(Boolean);
 
   // Show loading state
-  if (isAnyLoading && allAvailableStreams.length === 0) {
+  if (isAnyLoading && Object.keys(effectiveStreams).length === 0) {
     return (
       <div className="mt-6 flex items-center gap-2 text-gray-400 justify-center py-8">
         <Loader className="h-4 w-4 animate-spin" />
@@ -231,7 +191,7 @@ const StreamSources = ({
   }
 
   // Show no streams message
-  if (allAvailableStreams.length === 0) {
+  if (Object.keys(effectiveStreams).length === 0) {
     return (
       <div className="mt-6 text-center py-8">
         <p className="text-gray-400">No streams available for this match.</p>
@@ -241,175 +201,141 @@ const StreamSources = ({
 
   return (
     <div className="mt-6">
-      {/* Stream Discovery Indicator */}
-      {streamDiscovery && streamDiscovery.sourcesWithStreams > 0 && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-[#ff5722]/20 to-[#ff5722]/10 border border-[#ff5722]/30 rounded-lg">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-[#ff5722]/20 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-[#ff5722]" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">
-                    Stream Discovery Complete
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    Found {streamDiscovery.sourcesWithStreams} of {streamDiscovery.sourcesChecked} sources with streams
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              {streamDiscovery.sourceNames.map((source) => (
-                <span 
-                  key={source}
-                  className="px-2 py-1 bg-[#ff5722]/20 text-[#ff5722] text-xs font-medium rounded-full border border-[#ff5722]/40"
-                >
-                  {source.toUpperCase()}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      {/* Header with source count */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+          <h3 className="text-gray-400 text-sm">
+            Showing top quality sources • {streamDiscovery?.sourcesWithStreams || 0} of {streamDiscovery?.sourcesChecked || 9} sources
+          </h3>
           {onRefresh && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600 hover:border-[#ff5722]/50 hover:text-[#ff5722] transition-colors"
+              className="text-gray-400 hover:text-[#ff5722] text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
             >
               {isRefreshing ? (
                 <>
-                  <Loader className="w-3 h-3 mr-1.5 animate-spin" />
+                  <Loader className="w-3 h-3 animate-spin" />
                   Scanning...
                 </>
               ) : (
                 <>
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    width="14" 
-                    height="14" 
+                    width="12" 
+                    height="12" 
                     viewBox="0 0 24 24" 
                     fill="none" 
                     stroke="currentColor" 
                     strokeWidth="2" 
                     strokeLinecap="round" 
                     strokeLinejoin="round"
-                    className="mr-1.5"
                   >
                     <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
                   </svg>
                   Refresh
                 </>
               )}
-            </Button>
+            </button>
           )}
         </div>
         {currentStreamViewers > 0 && isLive && (
-          <div className="flex items-center gap-2 text-lg animate-fade-in">
-            <Users className="w-5 h-5 text-red-500 animate-pulse" />
-            <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
-              {currentStreamViewers.toLocaleString()}
-            </span>
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Users className="w-4 h-4" />
+            <span>{currentStreamViewers.toLocaleString()} watching</span>
           </div>
         )}
       </div>
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-          {onRefresh && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600"
-            >
-              {isRefreshing ? (
-                <>
-                  <Loader className="w-3 h-3 mr-1.5 animate-spin" />
-                  Scanning...
-                </>
-              ) : (
-                <>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="14" 
-                    height="14" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className="mr-1.5"
-                  >
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                  </svg>
-                  Refresh
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-        {currentStreamViewers > 0 && isLive && (
-          <div className="flex items-center gap-2 text-lg animate-fade-in">
-            <Users className="w-5 h-5 text-red-500 animate-pulse" />
-            <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
-              {currentStreamViewers.toLocaleString()}
-            </span>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex flex-wrap gap-3">
-        {allAvailableStreams.map(({ stream, sourceKey, index }) => {
-          // Use streamNo from API, fallback to index + 1
-          const actualStreamNo = stream.streamNo !== undefined ? stream.streamNo : index + 1;
-          const streamKey = `${stream.source}/${stream.id}/${actualStreamNo}`;
-          const isActive = activeSource === streamKey;
-          const viewerCount = stream.viewers || 0;
+      {/* Group streams by source */}
+      <div className="space-y-4">
+        {Object.entries(effectiveStreams).map(([sourceKey, streams]) => {
+          if (streams.length === 0) return null;
           
-          // Use API-provided names with streamNo priority
-          let streamName = stream.name || 
-                          (stream.language && stream.language !== 'Original' ? `${stream.language} ${actualStreamNo}` : null) ||
-                          (stream.source && stream.source !== 'intel' ? `${stream.source.toUpperCase()} ${actualStreamNo}` : null) ||
-                          `Stream ${actualStreamNo}`;
+          const sourceName = streams[0].source.toUpperCase();
+          const streamCount = streams.length;
           
-          console.log(`🎯 Rendering stream button: ${streamName}`, { streamNo: actualStreamNo, hd: stream.hd });
+          // Determine quality label based on source
+          let qualityLabel = "Good quality";
+          if (sourceName === "ALPHA") qualityLabel = "Most reliable (720p 30fps)";
+          else if (sourceName === "ECHO") qualityLabel = "Great quality overall";
+          else if (sourceName === "CHARLIE") qualityLabel = "Reliable backup";
           
           return (
-            <Button
-              key={streamKey}
-              variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2.5 min-w-[120px] flex-col h-auto gap-1 ${
-                isActive 
-                  ? 'bg-[#ff5722] hover:bg-[#ff5722]/90 text-white border-[#ff5722]' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
-              }`}
-              onClick={() => onSourceChange(stream.source, stream.id, actualStreamNo)}
-            >
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
-                <Play className="w-4 h-4" />
-                <span>{streamName}</span>
-                {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
-              </div>
-              {viewerCount > 0 && (
-                <div className="flex items-center gap-1 text-xs font-semibold">
-                  <Users className="w-3 h-3 text-[#ff5722]" />
-                  <span>{formatViewerCount(viewerCount, false)}</span>
+            <div key={sourceKey} className="border border-yellow-600/40 rounded-lg p-4 bg-black/40">
+              {/* Source header */}
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h4 className="text-white text-2xl font-bold mb-1">{sourceName}</h4>
+                  <p className="text-yellow-500 text-sm flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    {qualityLabel}
+                  </p>
                 </div>
-              )}
-            </Button>
+                <span className="text-[#ff5722] text-sm font-medium">{streamCount} streams</span>
+              </div>
+              
+              {/* Stream list */}
+              <div className="space-y-2">
+                {streams.map((stream, index) => {
+                  const actualStreamNo = stream.streamNo !== undefined ? stream.streamNo : index + 1;
+                  const streamKey = `${stream.source}/${stream.id}/${actualStreamNo}`;
+                  const isActive = activeSource === streamKey;
+                  const viewerCount = stream.viewers || 0;
+                  
+                  return (
+                    <button
+                      key={streamKey}
+                      onClick={() => onSourceChange(stream.source, stream.id, actualStreamNo)}
+                      className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                        isActive 
+                          ? 'bg-[#ff5722]/20 border border-[#ff5722]/50' 
+                          : 'bg-gray-900/50 border border-gray-800 hover:border-[#ff5722]/30 hover:bg-gray-800/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* HD/SD Badge */}
+                        <span className={`px-2 py-0.5 text-xs font-bold rounded ${
+                          stream.hd 
+                            ? 'bg-[#ff5722] text-white' 
+                            : 'bg-gray-700 text-gray-300'
+                        }`}>
+                          {stream.hd ? 'HD' : 'SD'}
+                        </span>
+                        
+                        {/* Stream name */}
+                        <span className="text-white font-medium">
+                          Stream {actualStreamNo}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        {/* Language */}
+                        <span className="text-gray-400 text-sm flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                          </svg>
+                          {stream.language || 'English'}
+                        </span>
+                        
+                        {/* Viewer count */}
+                        {viewerCount > 0 && (
+                          <span className="text-[#ff5722] text-sm flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                            </svg>
+                            {viewerCount}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
