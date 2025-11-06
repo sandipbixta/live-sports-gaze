@@ -236,37 +236,53 @@ const Match = () => {
           </div>
         </div>
         
-        <div id="stream-container" data-stream-container>
-          <StreamTab
-            match={match}
-            stream={stream}
-            loadingStream={loadingStream}
-            activeSource={activeSource}
-            handleSourceChange={handleSourceChange}
-            popularMatches={[]}
-            sportId={sportId || ''}
-            allStreams={allStreams}
-            streamDiscovery={streamDiscovery}
-            onRefreshStreams={handleRefreshStreams}
-          />
+        {/* YouTube-style layout: Video on left, Chat on right (desktop) */}
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+          {/* Left Column: Video Player */}
+          <div className="flex-1 lg:w-[calc(100%-400px)]" id="stream-container" data-stream-container>
+            <StreamTab
+              match={match}
+              stream={stream}
+              loadingStream={loadingStream}
+              activeSource={activeSource}
+              handleSourceChange={handleSourceChange}
+              popularMatches={[]}
+              sportId={sportId || ''}
+              allStreams={allStreams}
+              streamDiscovery={streamDiscovery}
+              onRefreshStreams={handleRefreshStreams}
+            />
+
+            {/* Viewer Statistics - show under video on desktop */}
+            <div className="mt-6">
+              <ViewerStats match={match} />
+            </div>
+          </div>
+
+          {/* Right Column: Live Chat (only on desktop) */}
+          <div className="hidden lg:block lg:w-[380px] flex-shrink-0">
+            <div className="sticky top-4">
+              <LiveChat 
+                matchId={matchId || ''}
+                matchTitle={matchTitle}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Viewer Statistics */}
-        <div className="mt-6">
-          <ViewerStats match={match} />
-        </div>
-
-        {/* Interactive Features: Chat, Predictions, and Stats */}
+        {/* Mobile Chat and Other Tabs */}
         <div className="mt-8">
           <Tabs defaultValue="chat" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="chat">Live Chat</TabsTrigger>
+            {/* Show all tabs on mobile, hide chat tab on desktop */}
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-3">
+              <TabsTrigger value="chat" className="lg:hidden">Live Chat</TabsTrigger>
               <TabsTrigger value="predictions">Predictions</TabsTrigger>
               <TabsTrigger value="stats">Statistics</TabsTrigger>
               <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="chat" className="mt-6">
+            {/* Mobile Chat Tab */}
+            <TabsContent value="chat" className="mt-6 lg:hidden">
               <LiveChat 
                 matchId={matchId || ''}
                 matchTitle={matchTitle}

@@ -146,7 +146,7 @@ export const LiveChat = ({ matchId, matchTitle }: LiveChatProps) => {
   }
 
   return (
-    <div className="flex flex-col h-[500px] bg-card rounded-lg border overflow-hidden">
+    <div className="flex flex-col h-[500px] lg:h-[calc(100vh-200px)] bg-card rounded-lg border overflow-hidden">
       <div className="p-4 border-b bg-muted/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
