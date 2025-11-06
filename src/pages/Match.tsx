@@ -295,6 +295,8 @@ const Match = () => {
                 <LiveChat 
                   matchId={matchId || ''}
                   matchTitle={matchTitle}
+                  homeTeam={homeTeam}
+                  awayTeam={awayTeam}
                 />
               </div>
             </div>
@@ -318,6 +320,8 @@ const Match = () => {
                 <LiveChat 
                   matchId={matchId || ''}
                   matchTitle={matchTitle}
+                  homeTeam={homeTeam}
+                  awayTeam={awayTeam}
                 />
               </TabsContent>
             )}
