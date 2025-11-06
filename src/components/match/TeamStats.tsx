@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart3, TrendingUp, Shield, Target } from 'lucide-react';
+import { statsService } from '@/services/statsService';
 
 interface TeamStat {
   team_name: string;
@@ -60,32 +61,27 @@ export const TeamStats = ({
   const loadStats = async () => {
     setLoading(true);
 
-    // Load team stats
-    const [homeResult, awayResult, h2hResult] = await Promise.all([
-      supabase
-        .from('team_stats')
-        .select('*')
-        .eq('team_id', homeTeamId)
-        .eq('sport', sport)
-        .maybeSingle(),
-      supabase
-        .from('team_stats')
-        .select('*')
-        .eq('team_id', awayTeamId)
-        .eq('sport', sport)
-        .maybeSingle(),
-      supabase
-        .from('head_to_head_stats')
-        .select('*')
-        .or(`and(team_a_id.eq.${homeTeamId},team_b_id.eq.${awayTeamId}),and(team_a_id.eq.${awayTeamId},team_b_id.eq.${homeTeamId})`)
-        .eq('sport', sport)
-        .maybeSingle()
-    ]);
+    try {
+      // Fetch stats from API if not in DB, using team names
+      const [homeData, awayData, h2hResult] = await Promise.all([
+        statsService.getTeamStats(homeTeamName, sport),
+        statsService.getTeamStats(awayTeamName, sport),
+        supabase
+          .from('head_to_head_stats')
+          .select('*')
+          .or(`and(team_a_name.eq.${homeTeamName},team_b_name.eq.${awayTeamName}),and(team_a_name.eq.${awayTeamName},team_b_name.eq.${homeTeamName})`)
+          .eq('sport', sport.toLowerCase())
+          .maybeSingle()
+      ]);
 
-    setHomeStats(homeResult.data);
-    setAwayStats(awayResult.data);
-    setH2hStats(h2hResult.data);
-    setLoading(false);
+      setHomeStats(homeData);
+      setAwayStats(awayData);
+      setH2hStats(h2hResult.data);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderForm = (form: string[]) => {
