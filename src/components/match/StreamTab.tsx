@@ -22,7 +22,12 @@ interface StreamTabProps {
   handleSourceChange: (source: string, id: string, streamNo?: number) => void;
   popularMatches: MatchType[];
   sportId: string;
-  allStreams?: Record<string, Stream[]>; // Add allStreams prop
+  allStreams?: Record<string, Stream[]>;
+  streamDiscovery?: {
+    sourcesChecked: number;
+    sourcesWithStreams: number;
+    sourceNames: string[];
+  };
 }
 
 const StreamTab = ({ 
@@ -33,7 +38,8 @@ const StreamTab = ({
   handleSourceChange, 
   popularMatches, 
   sportId,
-  allStreams = {}
+  allStreams = {},
+  streamDiscovery
 }: StreamTabProps) => {
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
@@ -193,6 +199,7 @@ const StreamTab = ({
         allStreams={allStreams}
         currentStreamViewers={currentStreamViewers}
         isLive={isMatchLive()}
+        streamDiscovery={streamDiscovery}
       />
       
       {!loadingStream && (

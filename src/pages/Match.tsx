@@ -45,6 +45,7 @@ const Match = () => {
     streamLoading: loadingStream,
     activeSource,
     allStreams,
+    streamDiscovery,
     handleSourceChange,
     handleMatchSelect
   } = useStreamPlayer();
@@ -239,6 +240,7 @@ const Match = () => {
             popularMatches={[]}
             sportId={sportId || ''}
             allStreams={allStreams}
+            streamDiscovery={streamDiscovery}
           />
         </div>
 

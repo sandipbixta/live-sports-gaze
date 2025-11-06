@@ -10,6 +10,11 @@ export const useStreamPlayer = () => {
   const [streamLoading, setStreamLoading] = useState(false);
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
+  const [streamDiscovery, setStreamDiscovery] = useState<{
+    sourcesChecked: number;
+    sourcesWithStreams: number;
+    sourceNames: string[];
+  }>({ sourcesChecked: 0, sourcesWithStreams: 0, sourceNames: [] });
 
   // Simple function to fetch ALL streams from ALL sources (like HTML example)
   const fetchAllStreamsForMatch = useCallback(async (match: Match) => {
@@ -19,14 +24,21 @@ export const useStreamPlayer = () => {
       console.log(`🎯 Fetching ALL streams for match: ${match.title}`);
       
       // Use the simple stream fetching approach but maintain compatibility
-      const streams = await fetchAllMatchStreams(match);
+      const result = await fetchAllMatchStreams(match);
+      
+      // Store discovery metadata
+      setStreamDiscovery({
+        sourcesChecked: result.sourcesChecked,
+        sourcesWithStreams: result.sourcesWithStreams,
+        sourceNames: result.sourceNames
+      });
       
       // Convert simple array back to Record format for compatibility
       const streamsData: Record<string, Stream[]> = {};
       
       // Group streams by source
-      streams.forEach(stream => {
-        const sourceKey = `${stream.source}/${match.sources.find(s => s.source === stream.source)?.id}`;
+      result.streams.forEach(stream => {
+        const sourceKey = `${stream.source}/${stream.id}`;
         if (!streamsData[sourceKey]) {
           streamsData[sourceKey] = [];
         }
@@ -48,12 +60,13 @@ export const useStreamPlayer = () => {
         console.log(`✅ Auto-selected first stream: ${firstStream.source} Stream ${firstStream.streamNo}`);
       }
       
-      console.log(`🎬 Total streams loaded: ${streams.length} from ${sourceKeys.length} sources`);
+      console.log(`🎬 Total streams loaded: ${result.streams.length} from ${result.sourcesWithStreams} sources`);
       
     } catch (error) {
       console.error('❌ Error fetching all streams:', error);
       setAllStreams({});
       setCurrentStream(null);
+      setStreamDiscovery({ sourcesChecked: 0, sourcesWithStreams: 0, sourceNames: [] });
     } finally {
       setStreamLoading(false);
     }
@@ -158,6 +171,7 @@ export const useStreamPlayer = () => {
     streamLoading,
     activeSource,
     allStreams,
+    streamDiscovery,
     handleMatchSelect,
     handleSourceChange,
     handleStreamRetry,

@@ -16,6 +16,11 @@ interface StreamSourcesProps {
   viewerCount?: React.ReactNode;
   currentStreamViewers?: number;
   isLive?: boolean;
+  streamDiscovery?: {
+    sourcesChecked: number;
+    sourcesWithStreams: number;
+    sourceNames: string[];
+  };
 }
 
 const StreamSources = ({ 
@@ -26,7 +31,8 @@ const StreamSources = ({
   allStreams = {},
   viewerCount,
   currentStreamViewers = 0,
-  isLive = false
+  isLive = false,
+  streamDiscovery
 }: StreamSourcesProps) => {
   const [localStreams, setLocalStreams] = useState<Record<string, Stream[]>>({});
   const [loadingStreams, setLoadingStreams] = useState<Record<string, boolean>>({});
@@ -217,6 +223,39 @@ const StreamSources = ({
 
   return (
     <div className="mt-6">
+      {/* Stream Discovery Indicator */}
+      {streamDiscovery && streamDiscovery.sourcesWithStreams > 0 && (
+        <div className="mb-4 p-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-lg">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    Stream Discovery Complete
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Found {streamDiscovery.sourcesWithStreams} of {streamDiscovery.sourcesChecked} sources with streams
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {streamDiscovery.sourceNames.map((source) => (
+                <span 
+                  key={source}
+                  className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-medium rounded-full border border-blue-400/30"
+                >
+                  {source.toUpperCase()}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h3 className="text-lg font-semibold text-white">Stream Links</h3>
         {currentStreamViewers > 0 && isLive && (

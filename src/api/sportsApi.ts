@@ -391,11 +391,17 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
 };
 
 // Simple function to fetch all streams for a match (like HTML example)
-export const fetchAllMatchStreams = async (match: Match): Promise<Stream[]> => {
+export const fetchAllMatchStreams = async (match: Match): Promise<{
+  streams: Stream[];
+  sourcesChecked: number;
+  sourcesWithStreams: number;
+  sourceNames: string[];
+}> => {
   // All possible sources according to API documentation
   const allPossibleSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
   
   const allStreams: Stream[] = [];
+  const sourcesWithStreams = new Set<string>();
   
   // First, try the sources explicitly listed in match data
   const listedSources = match.sources || [];
@@ -423,6 +429,7 @@ export const fetchAllMatchStreams = async (match: Match): Promise<Stream[]> => {
       const streams = await fetchSimpleStream(source, id);
       if (streams.length > 0) {
         console.log(`✅ Found ${streams.length} streams from ${source}/${id}`);
+        sourcesWithStreams.add(source);
         return streams;
       }
       return [];
@@ -446,8 +453,15 @@ export const fetchAllMatchStreams = async (match: Match): Promise<Stream[]> => {
     });
   });
 
-  console.log(`🎬 Total unique streams found for match: ${allStreams.length} from ${new Set(allStreams.map(s => s.source)).size} sources`);
-  return allStreams;
+  const sourceNames = Array.from(sourcesWithStreams);
+  console.log(`🎬 Total unique streams found: ${allStreams.length} from ${sourceNames.length} sources (${sourceNames.join(', ')})`);
+  
+  return {
+    streams: allStreams,
+    sourcesChecked: allPossibleSources.length,
+    sourcesWithStreams: sourceNames.length,
+    sourceNames
+  };
 };
 
 // Legacy complex stream function (replaced by simpler approach above)
