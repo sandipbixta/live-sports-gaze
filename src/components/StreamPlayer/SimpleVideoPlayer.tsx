@@ -437,6 +437,37 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           isFullscreen ? 'w-screen h-screen' : 'aspect-video w-full'
         }`}
       >
+      {/* Countdown Overlay - Show over everything when match hasn't started */}
+      {countdown && match && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+          </div>
+          
+          <div className="text-center text-white p-6 z-10">
+            <Clock className="w-20 h-20 mx-auto mb-6 text-primary animate-pulse" />
+            <h3 className="text-2xl font-bold mb-3">Match Starting Soon</h3>
+            <p className="text-gray-400 mb-6">Stream will be available when the match begins</p>
+            
+            {/* Countdown Display */}
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-4 inline-block">
+              <div className="text-5xl font-black text-white mb-2 font-mono tracking-wider">
+                {countdown}
+              </div>
+              <div className="text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+            </div>
+            
+            {match.title && (
+              <p className="text-lg text-white/80 mt-4 font-semibold">
+                {match.title}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {isM3U8 ? (
         <video
           ref={videoRef}
