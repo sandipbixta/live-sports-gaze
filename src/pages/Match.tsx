@@ -33,6 +33,7 @@ const Match = () => {
   const { sportId, matchId } = useParams();
   const [match, setMatch] = useState<MatchType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(false);
   
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
@@ -43,6 +44,18 @@ const Match = () => {
 
   // Track watch history
   useWatchHistory(matchId, match?.title, sportId);
+
+  // Check if screen is desktop size (>= 1024px for lg breakpoint)
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   // Use enhanced stream player hook for comprehensive stream management
   const {
@@ -260,14 +273,16 @@ const Match = () => {
           </div>
 
           {/* Right Column: Live Chat (only on desktop) */}
-          <div className="hidden lg:block lg:w-[380px] flex-shrink-0">
-            <div className="sticky top-4">
-              <LiveChat 
-                matchId={matchId || ''}
-                matchTitle={matchTitle}
-              />
+          {isDesktop && (
+            <div className="lg:w-[380px] flex-shrink-0">
+              <div className="sticky top-4">
+                <LiveChat 
+                  matchId={matchId || ''}
+                  matchTitle={matchTitle}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Mobile Chat and Other Tabs */}
@@ -282,12 +297,14 @@ const Match = () => {
             </TabsList>
 
             {/* Mobile Chat Tab */}
-            <TabsContent value="chat" className="mt-6 lg:hidden">
-              <LiveChat 
-                matchId={matchId || ''}
-                matchTitle={matchTitle}
-              />
-            </TabsContent>
+            {!isDesktop && (
+              <TabsContent value="chat" className="mt-6">
+                <LiveChat 
+                  matchId={matchId || ''}
+                  matchTitle={matchTitle}
+                />
+              </TabsContent>
+            )}
 
             <TabsContent value="predictions" className="mt-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
