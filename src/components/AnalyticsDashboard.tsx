@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { Eye, Users, TrendingUp } from 'lucide-react';
+import { Eye, Users, TrendingUp, Radio } from 'lucide-react';
 
 interface AnalyticsStats {
   totalViews: number;
   uniqueSessions: number;
+  liveViewers: number;
   topPages: Array<{ page_path: string; views: number }>;
 }
 
@@ -13,13 +14,32 @@ const AnalyticsDashboard: React.FC = () => {
   const [stats, setStats] = useState<AnalyticsStats>({
     totalViews: 0,
     uniqueSessions: 0,
+    liveViewers: 0,
     topPages: []
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAnalytics();
+    fetchLiveViewers();
+    
+    // Update live viewers every 10 seconds
+    const interval = setInterval(fetchLiveViewers, 10000);
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchLiveViewers = async () => {
+    try {
+      const { count } = await supabase
+        .from('viewer_sessions')
+        .select('*', { count: 'exact', head: true })
+        .gt('last_heartbeat', new Date(Date.now() - 30000).toISOString());
+      
+      setStats(prev => ({ ...prev, liveViewers: count || 0 }));
+    } catch (error) {
+      console.error('Error fetching live viewers:', error);
+    }
+  };
 
   const fetchAnalytics = async () => {
     try {
@@ -35,17 +55,19 @@ const AnalyticsDashboard: React.FC = () => {
           ? stats.top_pages as Array<{ page_path: string; views: number }>
           : [];
         
-        setStats({
+        setStats(prev => ({
+          ...prev,
           totalViews: Number(totalData || 0),
           uniqueSessions: Number(stats.unique_sessions || 0),
           topPages
-        });
+        }));
       } else {
-        setStats({
+        setStats(prev => ({
+          ...prev,
           totalViews: Number(totalData || 0),
           uniqueSessions: 0,
           topPages: []
-        });
+        }));
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
@@ -56,8 +78,8 @@ const AnalyticsDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
-        {[1, 2, 3].map((i) => (
+      <div className="grid gap-4 md:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="p-6 animate-pulse">
             <div className="h-20 bg-muted rounded" />
           </Card>
@@ -68,7 +90,19 @@ const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="p-6 hover:shadow-lg transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-green-500/10 rounded-full">
+              <Radio className="h-6 w-6 text-green-500 animate-pulse" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Live Viewers</p>
+              <p className="text-2xl font-bold">{stats.liveViewers.toLocaleString()}</p>
+            </div>
+          </div>
+        </Card>
+
         <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-full">
