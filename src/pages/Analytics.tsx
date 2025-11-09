@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import PageHeader from '@/components/PageHeader';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import SEOMetaTags from '@/components/SEOMetaTags';
 
 const Analytics: React.FC = () => {
+  // Mark this session as admin when viewing analytics
+  useEffect(() => {
+    localStorage.setItem('is_admin_session', 'true');
+  }, []);
+
   return (
     <PageLayout>
       <SEOMetaTags

@@ -18,6 +18,14 @@ const SEOPageTracker: React.FC<SEOPageTrackerProps> = ({
   const location = useLocation();
 
   useEffect(() => {
+    // Check if this is an admin session (visited /analytics page)
+    const isAdminSession = localStorage.getItem('is_admin_session') === 'true';
+    
+    // Don't track admin views
+    if (isAdminSession) {
+      return;
+    }
+
     // Save page view to database
     const savePageView = async () => {
       try {
