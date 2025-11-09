@@ -284,6 +284,36 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          page_path: string
+          page_title: string | null
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_path: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_path?: string
+          page_title?: string | null
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -505,6 +535,14 @@ export type Database = {
     }
     Functions: {
       cleanup_stale_viewer_sessions: { Args: never; Returns: undefined }
+      get_page_views_stats: {
+        Args: { end_date?: string; start_date?: string }
+        Returns: {
+          top_pages: Json
+          total_views: number
+          unique_sessions: number
+        }[]
+      }
       get_public_iptv_providers: {
         Args: never
         Returns: {
@@ -516,6 +554,7 @@ export type Database = {
           playlist_type: string
         }[]
       }
+      get_total_page_views: { Args: never; Returns: number }
       get_viewer_count: { Args: { match_id_param: string }; Returns: number }
       has_role: {
         Args: {
