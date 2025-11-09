@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { analytics } from '@/utils/analytics';
 import RevenueOptimizer from './RevenueOptimizer';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SEOPageTrackerProps {
   children: React.ReactNode;
@@ -17,6 +18,29 @@ const SEOPageTracker: React.FC<SEOPageTrackerProps> = ({
   const location = useLocation();
 
   useEffect(() => {
+    // Save page view to database
+    const savePageView = async () => {
+      try {
+        let sessionId = sessionStorage.getItem('analytics_session_id');
+        if (!sessionId) {
+          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          sessionStorage.setItem('analytics_session_id', sessionId);
+        }
+
+        await supabase.from('page_views').insert({
+          page_path: location.pathname,
+          page_title: pageTitle || document.title,
+          referrer: document.referrer || null,
+          user_agent: navigator.userAgent.substring(0, 255),
+          session_id: sessionId
+        });
+      } catch (error) {
+        console.error('Error saving page view:', error);
+      }
+    };
+
+    savePageView();
+
     // Track page view with enhanced data
     analytics.trackPageView(location.pathname, pageTitle);
     

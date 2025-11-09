@@ -22,6 +22,7 @@ import ManualMatchPlayer from "./pages/ManualMatchPlayer";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import BlogAdmin from "./pages/BlogAdmin";
+import Analytics from "./pages/Analytics";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
@@ -102,6 +103,11 @@ const App: React.FC = () => {
                 </SEOPageTracker>
               } />
               <Route path="/blog-admin" element={<BlogAdmin />} />
+              <Route path="/analytics" element={
+                <SEOPageTracker pageTitle="Website Analytics" contentType="home">
+                  <Analytics />
+                </SEOPageTracker>
+              } />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
