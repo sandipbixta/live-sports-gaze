@@ -15,10 +15,6 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
     window.open('https://mirafootball.site/', '_blank', 'noopener,noreferrer');
   };
 
-  const handleGoalKickClick = () => {
-    window.open('https://goalkick.live/', '_blank', 'noopener,noreferrer');
-  };
-
   return (
     <div className={`w-full space-y-3 ${className}`}>
       {/* MiraFootball Promotion */}
@@ -30,19 +26,6 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
         <div className="flex items-center justify-center gap-2 w-full">
           <Zap className="h-5 w-5" />
           <span className="font-medium">MiraFootball - Zero Buffer, Clean HD Streams</span>
-          <ExternalLink className="h-4 w-4 opacity-80" />
-        </div>
-      </Button>
-
-      {/* GoalKick Promotion */}
-      <Button
-        onClick={handleGoalKickClick}
-        className="w-full bg-sports-secondary hover:bg-sports-accent text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
-        variant="default"
-      >
-        <div className="flex items-center justify-center gap-2 w-full">
-          <Zap className="h-5 w-5" />
-          <span className="font-medium">GoalKick.live - Premium Sports Streaming</span>
           <ExternalLink className="h-4 w-4 opacity-80" />
         </div>
       </Button>
