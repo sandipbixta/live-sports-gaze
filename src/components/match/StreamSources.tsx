@@ -279,12 +279,13 @@ const StreamSources = ({
             </Button>
           )}
         </div>
-        {currentStreamViewers > 0 && isLive && (
+        {currentStreamViewers > 0 && (
           <div className="flex items-center gap-2 text-lg animate-fade-in">
             <Users className="w-5 h-5 text-red-500 animate-pulse" />
             <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
               {currentStreamViewers.toLocaleString()}
             </span>
+            <span className="text-muted-foreground text-sm ml-1">watching</span>
           </div>
         )}
       </div>
