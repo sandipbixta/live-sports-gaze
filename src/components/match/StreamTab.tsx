@@ -216,7 +216,7 @@ const StreamTab = ({
       
       {/* Live viewer count - right side below iframe */}
       {currentStreamViewers > 0 && (
-        <div className="px-4 py-3 flex justify-end">
+        <div className="px-4 pb-2 flex justify-end">
           <div className="flex items-center gap-2 text-sm bg-secondary/50 px-4 py-2 rounded-lg border border-border">
             <Users size={16} className="text-primary" />
             <span className="font-semibold text-foreground">{currentStreamViewers.toLocaleString()}</span>
