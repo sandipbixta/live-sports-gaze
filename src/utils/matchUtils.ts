@@ -40,7 +40,7 @@ export const isMatchLive = (match: Match): boolean => {
   const now = new Date().getTime();
   const fiveMinutesBeforeMs = 5 * 60 * 1000;
   
-  // Extended live windows for different sports
+  // Extended live windows for all sports (generous to avoid marking live events as ended)
   const isCricket = match.category === 'cricket' || match.sportId === 'cricket';
   const title = match.title.toLowerCase();
   const category = (match.category || '').toLowerCase();
@@ -51,11 +51,11 @@ export const isMatchLive = (match: Match): boolean => {
   
   let liveWindowMs;
   if (isCricket) {
-    liveWindowMs = 7 * 24 * 60 * 60 * 1000;  // 7 days for cricket
+    liveWindowMs = 7 * 24 * 60 * 60 * 1000;  // 7 days for cricket (test matches)
   } else if (isUFC) {
-    liveWindowMs = 12 * 60 * 60 * 1000;      // 12 hours for UFC/MMA events
+    liveWindowMs = 12 * 60 * 60 * 1000;      // 12 hours for UFC/MMA/Boxing events
   } else {
-    liveWindowMs = 6 * 60 * 60 * 1000;       // 6 hours for other sports
+    liveWindowMs = 8 * 60 * 60 * 1000;       // 8 hours for all other sports (generous window)
   }
   
   // Match is live if:
