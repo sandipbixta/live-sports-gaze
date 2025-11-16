@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import PopularMatches from '../components/PopularMatches';
@@ -49,15 +49,14 @@ const Index = () => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation - exclude ended matches and filter by selected sport
+  // Memoize popular matches calculation - filter by selected sport
   const popularMatches = useMemo(() => {
     // If "All Sports" is selected, don't show popular matches section to avoid duplication
     if (selectedSport === 'all') {
       return [];
     }
     
-    const activeMatches = filterActiveMatches(matches);
-    return activeMatches.filter(match => 
+    return matches.filter(match => 
       isPopularLeague(match.title) && 
       !match.title.toLowerCase().includes('sky sports news') && 
       !match.id.includes('sky-sports-news')
@@ -99,11 +98,10 @@ const Index = () => {
         
         setSports(sortedSports);
         
-        // Filter out ended matches and display immediately
-        const activeLiveMatches = filterActiveMatches(liveMatchesData);
-        setLiveMatches(activeLiveMatches);
+        // Display all live matches from API
+        setLiveMatches(liveMatchesData);
         
-        console.log(`✅ Loaded ${activeLiveMatches.length} active live matches instantly`);
+        console.log(`✅ Loaded ${liveMatchesData.length} live matches instantly`);
         
       } catch (error) {
         console.error('Sports loading error:', error);
@@ -158,9 +156,9 @@ const Index = () => {
         const rawMatchesData = await fetchMatches(sportId);
         console.log('📥 Raw matches data:', rawMatchesData.length);
         
-        // Filter and consolidate matches to remove duplicates, ended matches, and combine stream sources
-        const cleanMatches = filterActiveMatches(filterCleanMatches(rawMatchesData));
-        console.log('🧹 Clean active matches:', cleanMatches.length);
+        // Filter and consolidate matches to remove duplicates and combine stream sources
+        const cleanMatches = filterCleanMatches(rawMatchesData);
+        console.log('🧹 Clean matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         console.log('🔗 Consolidated matches:', consolidatedMatches.length);
         

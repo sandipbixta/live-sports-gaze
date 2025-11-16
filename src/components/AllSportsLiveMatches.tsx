@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
 import MatchCard from './MatchCard';
@@ -34,17 +34,17 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         
         setSports(sportsData);
         
-        // Filter and consolidate live matches (remove matches without sources and ended matches)
-        const cleanLiveMatches = filterActiveMatches(filterCleanMatches(
+        // Filter and consolidate live matches (remove matches without sources)
+        const cleanLiveMatches = filterCleanMatches(
           liveMatchesData.filter(m => m.sources && m.sources.length > 0)
-        ));
+        );
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
         setLiveMatches(consolidatedLiveMatches);
         
-        // Filter and consolidate all matches (must have sources, remove ended matches)
-        const cleanAllMatches = filterActiveMatches(filterCleanMatches(
+        // Filter and consolidate all matches (must have sources)
+        const cleanAllMatches = filterCleanMatches(
           allMatchesData.filter(m => m.sources && m.sources.length > 0)
-        ));
+        );
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         setAllMatches(consolidatedAllMatches);
         
