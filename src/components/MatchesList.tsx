@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Match } from '../types/sports';
-import { consolidateMatches, filterCleanMatches, isMatchLive, filterActiveMatches, sortMatchesByViewers } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches, isMatchLive, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
@@ -30,8 +30,8 @@ const MatchesList: React.FC<MatchesListProps> = ({
   const consolidatedMatches = React.useMemo(() => {
     // CRITICAL: First filter - MUST have stream sources
     const matchesWithSources = matches.filter(m => m.sources && m.sources.length > 0);
-    // Second filter: clean and active matches
-    const cleanMatches = filterActiveMatches(filterCleanMatches(matchesWithSources));
+    // Second filter: clean matches
+    const cleanMatches = filterCleanMatches(matchesWithSources);
     // Third: consolidate duplicates
     const consolidated = consolidateMatches(cleanMatches);
     console.log(`📊 MatchesList: ${matches.length} → ${matchesWithSources.length} (with sources) → ${consolidated.length} (final)`);

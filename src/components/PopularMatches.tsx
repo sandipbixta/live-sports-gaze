@@ -4,7 +4,7 @@ import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
 import { useIsMobile } from '../hooks/use-mobile';
 import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches, filterActiveMatches } from '../utils/matchUtils';
+import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 
 interface PopularMatchesProps {
@@ -22,12 +22,12 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   
-  // Filter out matches without sources, advertisements, excluded IDs, and ended matches, then consolidate
-  const cleanMatches = filterActiveMatches(filterCleanMatches(
+  // Filter out matches without sources, advertisements, and excluded IDs, then consolidate
+  const cleanMatches = filterCleanMatches(
     popularMatches
       .filter(match => match.sources && match.sources.length > 0) // CRITICAL: Must have sources
       .filter(match => !excludeMatchIds.includes(match.id))
-  ));
+  );
   
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = React.useMemo(() => consolidateMatches(cleanMatches), [cleanMatches.length, JSON.stringify(cleanMatches.map(m => m.id))]);
