@@ -30,15 +30,33 @@ export const filterCleanMatches = (matches: Match[]): Match[] => {
 };
 
 export const isMatchLive = (match: Match): boolean => {
+  // Primary check: If match has viewer count data, it's definitely live
+  if (match.viewerCount && match.viewerCount > 0) {
+    return true;
+  }
+  
+  // Fallback to time-based check for matches without viewer data yet
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
   const fiveMinutesBeforeMs = 5 * 60 * 1000;
   
-  // Cricket matches (especially test matches) can last up to 5 days
+  // Extended live windows for different sports
   const isCricket = match.category === 'cricket' || match.sportId === 'cricket';
-  const liveWindowMs = isCricket 
-    ? 7 * 24 * 60 * 60 * 1000  // 7 days for cricket (test matches last 5 days)
-    : 4 * 60 * 60 * 1000;       // 4 hours for other sports
+  const title = match.title.toLowerCase();
+  const category = (match.category || '').toLowerCase();
+  const matchId = (match.id || '').toLowerCase();
+  const isUFC = title.includes('ufc') || title.includes('mma') || title.includes('boxing') ||
+                category.includes('ufc') || category.includes('mma') || category.includes('boxing') ||
+                matchId.includes('ufc') || matchId.includes('mma') || matchId.includes('boxing');
+  
+  let liveWindowMs;
+  if (isCricket) {
+    liveWindowMs = 7 * 24 * 60 * 60 * 1000;  // 7 days for cricket
+  } else if (isUFC) {
+    liveWindowMs = 12 * 60 * 60 * 1000;      // 12 hours for UFC/MMA events
+  } else {
+    liveWindowMs = 6 * 60 * 60 * 1000;       // 6 hours for other sports
+  }
   
   // Match is live if:
   // 1. It has sources available

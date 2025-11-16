@@ -275,11 +275,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
                 <span className="bg-red-500 text-primary-foreground text-[10px] font-black uppercase px-2 py-1 tracking-wider animate-pulse">
                   ● Live
                 </span>
-              ) : (
-                <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
-                  {match.date && match.date > Date.now() ? 'Upcoming' : 'Ended'}
+              ) : match.sources && match.sources.length > 0 ? (
+                <span className="bg-blue-500/90 text-white text-[10px] font-bold uppercase px-2 py-1">
+                  Available
                 </span>
-              )}
+              ) : match.date && match.date > Date.now() ? (
+                <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
+                  Upcoming
+                </span>
+              ) : null}
               
               {/* Popular badge for matches with high viewer counts */}
               {isLive && match.viewerCount && match.viewerCount > 500 && (
