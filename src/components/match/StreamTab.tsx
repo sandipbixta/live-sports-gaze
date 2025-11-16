@@ -214,6 +214,17 @@ const StreamTab = ({
         showMatchDetails={false}
       />
       
+      {/* Live viewer count right below iframe */}
+      {currentStreamViewers > 0 && (
+        <div className="px-4 py-2 bg-background/50 border-b border-border">
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Users size={16} />
+            <span className="font-medium">{currentStreamViewers.toLocaleString()}</span>
+            <span>watching now</span>
+          </div>
+        </div>
+      )}
+      
       <StreamSources
         sources={match.sources}
         activeSource={activeSource}
@@ -238,14 +249,6 @@ const StreamTab = ({
               <Badge variant="info" className="flex items-center gap-1.5 px-3 py-1 text-white">
                 <Clock size={14} />
                 Starts at {formatMatchTime(match.date)}
-              </Badge>
-            )}
-            
-            {/* Live viewer count for current stream */}
-            {currentStreamViewers > 0 && (
-              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1">
-                <Users size={14} />
-                {currentStreamViewers.toLocaleString()} watching
               </Badge>
             )}
           </div>
