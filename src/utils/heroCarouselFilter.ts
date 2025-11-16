@@ -69,12 +69,9 @@ const ELITE_DERBIES = [
 const isEliteMatch = (match: Match): boolean => {
   const title = match.title.toLowerCase();
   const category = (match.category || '').toLowerCase();
-  const matchId = (match.id || '').toLowerCase();
   
-  // Check elite competitions in title, category, AND match ID
-  if (ELITE_COMPETITIONS.some(comp => 
-    title.includes(comp) || category.includes(comp) || matchId.includes(comp)
-  )) {
+  // Check elite competitions
+  if (ELITE_COMPETITIONS.some(comp => title.includes(comp) || category.includes(comp))) {
     return true;
   }
   
@@ -93,13 +90,10 @@ const isEliteMatch = (match: Match): boolean => {
     return true;
   }
   
-  // All UFC/MMA/WWE events are elite - check title, category, AND match ID
-  if (title.includes('ufc') || title.includes('mma') || title.includes('wwe') ||
-      title.includes('fight') || title.includes('boxing') ||
-      category.includes('ufc') || category.includes('mma') || 
+  // All UFC/MMA/WWE events are elite
+  if (category.includes('ufc') || category.includes('mma') || 
       category.includes('wwe') || category.includes('fight') || 
-      category.includes('wrestling') || category.includes('boxing') ||
-      matchId.includes('ufc') || matchId.includes('mma') || matchId.includes('wwe')) {
+      category.includes('wrestling') || category.includes('boxing')) {
     return true;
   }
   
@@ -150,43 +144,31 @@ export const getCarouselMatches = async (
   allMatches: Match[], 
   limit: number = 8
 ): Promise<Match[]> => {
-  // 1. Separate matches with and without posters
+  // 1. Filter for matches with posters (visual requirement)
   const matchesWithPosters = allMatches.filter(
     match => match.poster && match.poster.trim() !== ''
   );
-  const matchesWithoutPosters = allMatches.filter(
-    match => !match.poster || match.poster.trim() === ''
-  );
   
-  // 2. Filter for elite matches (prefer with posters, but include without if elite)
-  const eliteMatchesWithPosters = matchesWithPosters.filter(isEliteMatch);
-  const eliteMatchesWithoutPosters = matchesWithoutPosters.filter(isEliteMatch);
+  // 2. Filter for elite matches only
+  const eliteMatches = matchesWithPosters.filter(isEliteMatch);
   
   // 3. Filter for live or upcoming within 14 days
   const now = Date.now();
   const fourteenDaysFromNow = now + (14 * 24 * 60 * 60 * 1000);
-  
-  const relevantMatchesWithPosters = eliteMatchesWithPosters.filter(match => {
-    const matchTime = new Date(match.date).getTime();
-    return matchTime <= fourteenDaysFromNow;
-  });
-  
-  const relevantMatchesWithoutPosters = eliteMatchesWithoutPosters.filter(match => {
+  const relevantMatches = eliteMatches.filter(match => {
     const matchTime = new Date(match.date).getTime();
     return matchTime <= fourteenDaysFromNow;
   });
   
   // 4. Enrich with viewer counts
-  const enrichedWithPosters = await enrichMatchesWithViewers(relevantMatchesWithPosters);
-  const enrichedWithoutPosters = await enrichMatchesWithViewers(relevantMatchesWithoutPosters);
+  const enrichedMatches = await enrichMatchesWithViewers(relevantMatches);
   
-  // 5. Combine and prioritize matches with posters, but include high-viewer matches without posters
-  const carouselCandidates = [
-    ...enrichedWithPosters, // Always include elite matches with posters
-    ...enrichedWithoutPosters.filter(match => 
-      match.viewerCount && match.viewerCount >= HOT_VIEWER_THRESHOLD
-    ) // Include matches without posters only if they have high viewers
-  ];
+  // 5. Filter for high-profile matches (elite OR high viewers)
+  const carouselCandidates = enrichedMatches.filter(match => {
+    const hasHighViewers = match.viewerCount && match.viewerCount >= HOT_VIEWER_THRESHOLD;
+    const isTopTier = isEliteMatch(match);
+    return hasHighViewers || isTopTier;
+  });
   
   // 6. Sort by priority score
   const sortedMatches = carouselCandidates.sort((a, b) => {
