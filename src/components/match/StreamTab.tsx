@@ -241,7 +241,13 @@ const StreamTab = ({
               </Badge>
             )}
             
-            {/* Viewer count removed - only show in match cards */}
+            {/* Live viewer count for current stream */}
+            {currentStreamViewers > 0 && (
+              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1">
+                <Users size={14} />
+                {currentStreamViewers.toLocaleString()} watching
+              </Badge>
+            )}
           </div>
         </div>
       )}
