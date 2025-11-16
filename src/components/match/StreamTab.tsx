@@ -214,13 +214,13 @@ const StreamTab = ({
         showMatchDetails={false}
       />
       
-      {/* Live viewer count right below iframe */}
+      {/* Live viewer count - right side below iframe */}
       {currentStreamViewers > 0 && (
-        <div className="px-4 py-2 bg-background/50 border-b border-border">
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Users size={16} />
-            <span className="font-medium">{currentStreamViewers.toLocaleString()}</span>
-            <span>watching now</span>
+        <div className="px-4 py-3 flex justify-end">
+          <div className="flex items-center gap-2 text-sm bg-secondary/50 px-4 py-2 rounded-lg border border-border">
+            <Users size={16} className="text-primary" />
+            <span className="font-semibold text-foreground">{currentStreamViewers.toLocaleString()}</span>
+            <span className="text-muted-foreground">watching</span>
           </div>
         </div>
       )}
