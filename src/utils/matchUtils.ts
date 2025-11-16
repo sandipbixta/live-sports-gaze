@@ -53,11 +53,24 @@ export const isMatchEnded = (match: Match): boolean => {
   const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
   const now = new Date().getTime();
   
-  // Cricket matches can last up to 5 days, other sports typically 4 hours
-  const isCricket = match.category === 'cricket' || match.sportId === 'cricket';
-  const endedThresholdMs = isCricket 
-    ? 7 * 24 * 60 * 60 * 1000  // 7 days for cricket
-    : 4 * 60 * 60 * 1000;       // 4 hours for other sports
+  const title = match.title.toLowerCase();
+  const category = (match.category || '').toLowerCase();
+  const matchId = (match.id || '').toLowerCase();
+  
+  // Different sports have different durations
+  const isCricket = category === 'cricket' || match.sportId === 'cricket';
+  const isUFC = title.includes('ufc') || title.includes('mma') || title.includes('boxing') ||
+                category.includes('ufc') || category.includes('mma') || category.includes('boxing') ||
+                matchId.includes('ufc') || matchId.includes('mma') || matchId.includes('boxing');
+  
+  let endedThresholdMs;
+  if (isCricket) {
+    endedThresholdMs = 7 * 24 * 60 * 60 * 1000;  // 7 days for cricket
+  } else if (isUFC) {
+    endedThresholdMs = 8 * 60 * 60 * 1000;       // 8 hours for UFC/MMA events
+  } else {
+    endedThresholdMs = 4 * 60 * 60 * 1000;       // 4 hours for other sports
+  }
   
   // Match is ended if it's past the threshold and not live
   return now - matchTime > endedThresholdMs && !isMatchLive(match);
