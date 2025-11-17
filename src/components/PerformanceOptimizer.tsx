@@ -57,19 +57,12 @@ const PerformanceOptimizer: React.FC = () => {
       setTimeout(cleanupUnusedListeners, 30000);
     };
 
-    // Execute optimizations
+    // Execute optimizations once only
     preloadResources();
-    
-    // Run image optimization periodically
-    const imageOptInterval = setInterval(optimizeImages, 5000);
+    optimizeImages();
     
     // Start cleanup process
     cleanupResources();
-
-    // Cleanup on unmount
-    return () => {
-      clearInterval(imageOptInterval);
-    };
   }, []);
 
   return null; // This is a utility component with no UI

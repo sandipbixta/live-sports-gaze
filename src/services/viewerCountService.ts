@@ -9,7 +9,7 @@ interface ViewerCountCache {
 }
 
 const viewerCountCache = new Map<string, ViewerCountCache>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes - increased for better performance
 
 /**
  * Check if a match is currently live
@@ -126,8 +126,8 @@ export const fetchBatchViewerCounts = async (
   // Filter to only live matches
   const liveMatches = matches.filter(isMatchLive);
   
-  // Fetch in batches of 5 to avoid overwhelming the API
-  const batchSize = 5;
+  // Fetch in batches of 3 to avoid overwhelming the API and improve performance
+  const batchSize = 3;
   for (let i = 0; i < liveMatches.length; i += batchSize) {
     const batch = liveMatches.slice(i, i + batchSize);
     

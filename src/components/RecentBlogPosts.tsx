@@ -37,10 +37,15 @@ const RecentBlogPosts = () => {
         .order('published_at', { ascending: false })
         .limit(3);
 
-      if (error) throw error;
+      if (error) {
+        // Silently fail if table doesn't exist
+        setPosts([]);
+        return;
+      }
       setPosts((data as any) || []);
     } catch (error) {
-      console.error('Error fetching blog posts:', error);
+      // Silently fail - blog feature may not be set up
+      setPosts([]);
     } finally {
       setLoading(false);
     }
