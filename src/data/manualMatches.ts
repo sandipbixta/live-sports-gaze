@@ -11,12 +11,12 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "Fc-barcelona-vs-Olympiakos-Piraeus",
-    title: "Fc barcelona vs Olympiakos Piraeus",
+    id: "Janakpur-Bolt-vs-Kathmandu_Gurkha",
+    title: "Janakpur Bolt vs Kathmandu Gurkha",
     date: new Date().toISOString(), // Live now
     teams: {
-      home: "fc Barcelona",
-      away: "Olympiakos piraeus"
+      home: "Janakpur Bolt",
+      away: "Kathmandu Gurkha"
     },
     links: [
       {
@@ -26,8 +26,8 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: false,
-    image: "",
+    visible: True,
+    image: "https://imgur.com/10PbZeK",
     seo: {
       keywords: "fc barcelona champions league",
       description: "",
