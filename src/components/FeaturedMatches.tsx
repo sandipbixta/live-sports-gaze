@@ -12,8 +12,11 @@ interface FeaturedMatchesProps {
 const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ 
   visibleManualMatches
 }) => {
+  console.log('🔴 FeaturedMatches received:', visibleManualMatches.length, visibleManualMatches);
+  
   // Don't show section if no manual matches are visible
   if (visibleManualMatches.length === 0) {
+    console.log('🔴 FeaturedMatches: returning null - no matches');
     return null;
   }
 
