@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://hls.suanzsd6.com/hd-en-6MvXMfc5VhdYjLsGKH.m3u8",
+        url: "https://bd-mc-fdlive.fancode.com/mumbai/138293_english_hls_fd44d488d616019_1ta-di_h264/1080p.m3u8",
         quality: "HD"
       }
     ],
