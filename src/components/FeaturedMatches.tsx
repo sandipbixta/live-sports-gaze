@@ -7,15 +7,13 @@ import { ManualMatch } from '../types/manualMatch';
 
 interface FeaturedMatchesProps {
   visibleManualMatches: ManualMatch[];
-  hasApiMatches?: boolean; // Add prop to check if API matches are available
 }
 
 const FeaturedMatches: React.FC<FeaturedMatchesProps> = ({ 
-  visibleManualMatches, 
-  hasApiMatches = false 
+  visibleManualMatches
 }) => {
-  // Don't show manual matches if API matches are available
-  if (hasApiMatches || visibleManualMatches.length === 0) {
+  // Don't show section if no manual matches are visible
+  if (visibleManualMatches.length === 0) {
     return null;
   }
 
