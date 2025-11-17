@@ -176,6 +176,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Show skeleton while data is empty, but don't block - let it render
   if (liveMatches.length === 0) {
+    console.log('🟡 AllSportsLiveMatches: No live matches, showing skeleton');
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -186,6 +187,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   }
 
   if (filteredMatches.length === 0) {
+    console.log('🟡 AllSportsLiveMatches: No filtered matches');
     return (
       <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
         <div className="text-4xl mb-4">📺</div>
@@ -194,6 +196,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       </div>
     );
   }
+
+  console.log('🟢 AllSportsLiveMatches: Rendering', filteredMatches.length, 'matches');
 
   // Define preferred sport order with tennis at the end (excluded: golf, hockey, billiards)
   const getSportPriority = (sportId: string): number => {

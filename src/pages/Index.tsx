@@ -122,6 +122,8 @@ const Index = () => {
     if (!selectedSport) {
       console.log('🏈 Auto-selecting "All Sports" as default immediately');
       setSelectedSport('all');
+    } else {
+      console.log('🔵 Index: selectedSport is:', selectedSport);
     }
   }, [selectedSport]);
 
