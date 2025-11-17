@@ -51,18 +51,17 @@ const NewsSection = () => {
       for (const url of feedUrls) {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
           
           const response = await fetch(url, { 
             signal: controller.signal,
-            cache: 'no-store' // Force fresh data
+            cache: 'force-cache' // Use cache to improve performance
           });
           
           clearTimeout(timeoutId);
           
           if (!response.ok) {
-            console.warn(`Failed to fetch from ${url}: ${response.status}`);
-            continue;
+            continue; // Silently skip failed feeds
           }
           
           const data = await response.text();
@@ -149,7 +148,7 @@ const NewsSection = () => {
             });
           });
         } catch (err) {
-          console.error(`Error processing feed ${url}:`, err);
+          // Silently skip failed feeds to avoid console spam
         }
       }
       
@@ -162,7 +161,7 @@ const NewsSection = () => {
         setLastUpdated(new Date());
       }
     } catch (err) {
-      console.error('Error fetching news:', err);
+      // Silently handle news fetch errors
       setError('Failed to load news. Please try again later.');
     } finally {
       setLoading(false);
