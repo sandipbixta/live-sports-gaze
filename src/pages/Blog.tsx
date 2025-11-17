@@ -42,13 +42,10 @@ const Blog = () => {
         .eq('is_published', true)
         .order('published_at', { ascending: false });
 
-      if (error) {
-        setPosts([]);
-        return;
-      }
+      if (error) throw error;
       setPosts((data as any) || []);
     } catch (error) {
-      setPosts([]);
+      console.error('Error fetching blog posts:', error);
     } finally {
       setLoading(false);
     }
@@ -61,14 +58,11 @@ const Blog = () => {
         .select('category')
         .eq('is_published', true);
 
-      if (error) {
-        setCategories([]);
-        return;
-      }
+      if (error) throw error;
       const uniqueCategories = [...new Set((data as any)?.map((p: any) => p.category) || [])] as string[];
       setCategories(uniqueCategories);
     } catch (error) {
-      setCategories([]);
+      console.error('Error fetching categories:', error);
     }
   };
 

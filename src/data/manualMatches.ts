@@ -20,24 +20,18 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "rumble-stream",
-        name: "Rumble HD",
-        url: "https://hugh.cdn.rumble.cloud/live/d0t27del/slot-159/gc4g-6qy5_1080p/chunklist_DVR.m3u8",
-        quality: "HD"
-      },
-      {
-        id: "soplay-stream",
-        name: "SoPlay HD",
-        url: "https://soplay.pro/embed2.php?id=criclife3&v=su",
+        id: "hls-stream",
+        name: "HD Stream",
+        url: "https://hls.suanzsd6.com/hd-en-6MvXMfc5VhdYjLsGKH.m3u8",
         quality: "HD"
       }
     ],
-    visible: false,
-    image: "https://i.imgur.com/10PbZeK.jpeg",
+    visible: true,
+    image: "https://imgur.com/10PbZeK",
     seo: {
       keywords: "fc barcelona champions league",
       description: "",
-      category: "Cricket"
+      category: "football"
     }
   },
   {

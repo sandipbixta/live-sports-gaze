@@ -19,6 +19,9 @@ import Live from "./pages/Live";
 import Channels from "./pages/Channels";
 import ChannelPlayer from "./pages/ChannelPlayer";
 import ManualMatchPlayer from "./pages/ManualMatchPlayer";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import BlogAdmin from "./pages/BlogAdmin";
 import Analytics from "./pages/Analytics";
 import DMCANotice from "./pages/DMCANotice";
 import NotFound from "./pages/NotFound";
@@ -89,6 +92,17 @@ const App: React.FC = () => {
                   <ChannelPlayer />
                 </SEOPageTracker>
               } />
+              <Route path="/blog" element={
+                <SEOPageTracker pageTitle="DamiTV Blog - Sports News & Updates" contentType="blog">
+                  <Blog />
+                </SEOPageTracker>
+              } />
+              <Route path="/blog/:slug" element={
+                <SEOPageTracker contentType="blog">
+                  <BlogPost />
+                </SEOPageTracker>
+              } />
+              <Route path="/blog-admin" element={<BlogAdmin />} />
               <Route path="/analytics" element={
                 <SEOPageTracker pageTitle="Website Analytics" contentType="home">
                   <Analytics />

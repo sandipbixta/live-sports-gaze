@@ -24,10 +24,13 @@ import TelegramBanner from '../components/TelegramBanner';
 import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
 import HomepageContent from '../components/HomepageContent';
+import RecentBlogPosts from '../components/RecentBlogPosts';
 import EmailSubscription from '../components/EmailSubscription';
 
 // Lazy load heavy components
+const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
+const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
 
 const Index = () => {
   const { toast } = useToast();
@@ -43,9 +46,7 @@ const Index = () => {
 
   // Filter visible manual matches
   const visibleManualMatches = useMemo(() => {
-    const filtered = manualMatches.filter(match => match.visible);
-    console.log('🎯 Visible manual matches:', filtered.length, filtered);
-    return filtered;
+    return manualMatches.filter(match => match.visible);
   }, []);
 
   // Memoize popular matches calculation - filter by selected sport
@@ -117,11 +118,13 @@ const Index = () => {
     loadInitialData();
   }, []);
 
-  // Set default sport to 'all' immediately - ensure it's always set
+  // Set default sport immediately on component mount - don't wait for data
   useEffect(() => {
-    console.log('🏈 Setting default sport to "all" for homepage');
-    setSelectedSport('all');
-  }, []);  // Empty dependency array - only run once on mount
+    if (!selectedSport) {
+      console.log('🏈 Auto-selecting "All Sports" as default immediately');
+      setSelectedSport('all');
+    }
+  }, [selectedSport]);
 
   // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,37 +238,55 @@ const Index = () => {
               </div>
             )}
             
-            {/* API Matches Section - Always show when no specific sport is selected */}
             <div className="mb-8">
-              {(!selectedSport || selectedSport === 'all') ? (
-                <div>
-                  <div className="mb-4">
-                    <h4 className="text-xl font-bold text-foreground">
-                      Live Matches - All Sports
-                    </h4>
-                    <p className="text-gray-400 text-sm">
-                      Currently live matches from all sports categories
-                    </p>
-                  </div>
-                  <AllSportsLiveMatches searchTerm={searchTerm} />
-                </div>
-              ) : selectedSport ? (
+              {selectedSport && (
                 <>
-                  <div className="mb-4">
-                    <h4 className="text-xl font-bold text-foreground">
-                      {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                    </h4>
-                    <p className="text-gray-400 text-sm">
-                      {filteredMatches.length} matches available
-                    </p>
-                  </div>
-                  <MatchesList
-                    matches={filteredMatches}
-                    sportId={selectedSport}
-                    isLoading={loadingMatches}
-                  />
+                  {selectedSport === 'all' ? (
+                    <div>
+                      <div className="mb-4">
+                        <h4 className="text-xl font-bold text-foreground">
+                          Live Matches - All Sports
+                        </h4>
+                        <p className="text-gray-400 text-sm">
+                          Currently live matches from all sports categories
+                        </p>
+                      </div>
+                      <AllSportsLiveMatches searchTerm={searchTerm} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <h4 className="text-xl font-bold text-foreground">
+                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                        </h4>
+                        <p className="text-gray-400 text-sm">
+                          {filteredMatches.length} matches available
+                        </p>
+                      </div>
+                      <MatchesList
+                        matches={filteredMatches}
+                        sportId={selectedSport}
+                        isLoading={loadingMatches}
+                      />
+                    </>
+                  )}
                 </>
-              ) : null}
+              )}
+            </div>
+            
+            <RecentBlogPosts />
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <div className="lg:col-span-2">
+                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                  <NewsSection />
+                </React.Suspense>
+              </div>
+              <div>
+                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
+                  <TrendingTopics />
+                </React.Suspense>
+              </div>
             </div>
             
             <PromotionBoxes />
