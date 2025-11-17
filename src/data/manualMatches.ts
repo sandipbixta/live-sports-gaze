@@ -26,7 +26,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true,
+    visible: false,
     image: "https://imgur.com/10PbZeK",
     seo: {
       keywords: "fc barcelona champions league",
