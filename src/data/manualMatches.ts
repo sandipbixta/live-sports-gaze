@@ -31,7 +31,7 @@ export const manualMatches: ManualMatch[] = [
     seo: {
       keywords: "fc barcelona champions league",
       description: "",
-      category: "football"
+      category: "Cricket"
     }
   },
   {
