@@ -43,7 +43,9 @@ const Index = () => {
 
   // Filter visible manual matches
   const visibleManualMatches = useMemo(() => {
-    return manualMatches.filter(match => match.visible);
+    const filtered = manualMatches.filter(match => match.visible);
+    console.log('🎯 Visible manual matches:', filtered.length, filtered);
+    return filtered;
   }, []);
 
   // Memoize popular matches calculation - filter by selected sport
