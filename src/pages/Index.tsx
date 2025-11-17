@@ -235,9 +235,9 @@ const Index = () => {
               </div>
             )}
             
-            {/* API Matches Section - Always show on homepage */}
+            {/* API Matches Section - Always show when no specific sport is selected */}
             <div className="mb-8">
-              {!selectedSport || selectedSport === 'all' ? (
+              {(!selectedSport || selectedSport === 'all') ? (
                 <div>
                   <div className="mb-4">
                     <h4 className="text-xl font-bold text-foreground">
@@ -249,7 +249,7 @@ const Index = () => {
                   </div>
                   <AllSportsLiveMatches searchTerm={searchTerm} />
                 </div>
-              ) : selectedSport && (
+              ) : selectedSport ? (
                 <>
                   <div className="mb-4">
                     <h4 className="text-xl font-bold text-foreground">
@@ -265,7 +265,7 @@ const Index = () => {
                     isLoading={loadingMatches}
                   />
                 </>
-              )}
+              ) : null}
             </div>
             
             <PromotionBoxes />
