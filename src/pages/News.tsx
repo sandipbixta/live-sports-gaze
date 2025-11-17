@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
-import NewsSection from '../components/NewsSection';
 import { useToast } from '../hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
 // import Advertisement from '../components/Advertisement';
@@ -30,23 +29,8 @@ const News = () => {
     });
   }, [toast]);
   
-  // Set up regular page refresh in background
-  useEffect(() => {
-    const refreshIntervalId = setInterval(() => {
-      console.log("News page auto-refresh triggered");
-      setLastRefreshed(new Date());
-      
-      // Get any NewsSection components and trigger their refresh logic
-      const newsComponents = document.querySelectorAll('.news-section-component button[aria-label="Refresh news"]');
-      if (newsComponents.length > 0) {
-        (newsComponents[0] as HTMLButtonElement).click();
-      }
-    }, 15 * 60 * 1000); // Every 15 minutes
-    
-    return () => {
-      clearInterval(refreshIntervalId);
-    };
-  }, []);
+  // Auto-refresh removed as news section is no longer used
+  useEffect(() => {}, []);
   
   return (
     <PageLayout>
@@ -111,9 +95,9 @@ const News = () => {
           </div>
         </div>
         
-        {/* Featured news section with enhanced SEO */}
-        <div className="mb-6 sm:mb-8 news-section-component">
-          <NewsSection />
+        {/* News content removed as requested */}
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">News section has been removed.</p>
         </div>
         
         {/* Direct Link Advertisement removed */}
