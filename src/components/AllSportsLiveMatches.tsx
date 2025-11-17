@@ -23,59 +23,64 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   useEffect(() => {
     const loadLiveMatches = async () => {
       try {
-        // NO setLoading(true) - let content render immediately
-        
-        // Fetch sports, live matches, and all matches in parallel
-        const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
+        // Fetch sports, live matches, and all matches - use allSettled for resilience
+        const [sportsResult, liveMatchesResult, allMatchesResult] = await Promise.allSettled([
           fetchSports(),
           fetchLiveMatches(),
           fetchAllMatches()
         ]);
         
+        // Handle sports data
+        const sportsData = sportsResult.status === 'fulfilled' ? sportsResult.value : [];
         setSports(sportsData);
         
-        // Filter and consolidate live matches (remove matches without sources)
+        // Handle live matches
+        const liveMatchesData = liveMatchesResult.status === 'fulfilled' ? liveMatchesResult.value : [];
         const cleanLiveMatches = filterCleanMatches(
           liveMatchesData.filter(m => m.sources && m.sources.length > 0)
         );
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
         setLiveMatches(consolidatedLiveMatches);
         
-        // Filter and consolidate all matches (must have sources)
+        // Handle all matches - fallback to live matches if failed
+        let allMatchesData: Match[] = [];
+        if (allMatchesResult.status === 'fulfilled') {
+          allMatchesData = allMatchesResult.value;
+        } else {
+          console.warn('⚠️ All matches endpoint failed, using live matches as fallback');
+          allMatchesData = liveMatchesData;
+        }
+        
         const cleanAllMatches = filterCleanMatches(
           allMatchesData.filter(m => m.sources && m.sources.length > 0)
         );
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         setAllMatches(consolidatedAllMatches);
         
-        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches from all sports`);
-        console.log('Live matches by sport:', consolidatedLiveMatches.reduce((acc, match) => {
-          const sport = match.sportId || match.category || 'unknown';
-          acc[sport] = (acc[sport] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>));
+        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches`);
         
-        // Enrich all matches with viewer counts from stream API
+        // Enrich matches with viewer counts
         const enrichedAllMatches = await enrichMatchesWithViewers(consolidatedAllMatches);
         
-        // For "Popular by Viewers", only show live matches with viewers
+        // Filter for popular matches with viewers
         const liveMatchesWithViewers = enrichedAllMatches.filter(m => 
-          isMatchLive(m) && 
-          (m.viewerCount || 0) > 0
+          isMatchLive(m) && (m.viewerCount || 0) > 0
         );
         
-        // Sort by viewer count
         const sortedByViewers = liveMatchesWithViewers.sort((a, b) => 
           (b.viewerCount || 0) - (a.viewerCount || 0)
         );
         
-        console.log('🔥 Popular live matches with viewers:', sortedByViewers.map(m => ({ 
-          id: m.id, 
-          title: m.title, 
-          viewers: m.viewerCount 
-        })));
-        
         setMostViewedMatches(sortedByViewers.slice(0, 12));
+        
+        // Only show error if ALL critical fetches failed
+        if (liveMatchesResult.status === 'rejected' && allMatchesResult.status === 'rejected') {
+          toast({
+            title: "Error",
+            description: "Failed to load matches. Please try again.",
+            variant: "destructive",
+          });
+        }
         
       } catch (error) {
         console.error('Error loading matches:', error);
@@ -85,7 +90,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           variant: "destructive",
         });
       }
-      // NO finally block - no loading state to manage
     };
 
     loadLiveMatches();
