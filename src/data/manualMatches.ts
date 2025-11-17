@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://bd-mc-fdlive.fancode.com/mumbai/138293_english_hls_fd44d488d616019_1ta-di_h264/1080p.m3u8",
+        url: "https://jan.player0003.com:8099/hls/criclife3.m3u8?md6=yI-eScLUXYIxvVcDGA6VLA&expires=1763380589&s=MmEwOTpiYWM1OjEyMDoxZDc6OjJmOmQ3",
         quality: "HD"
       }
     ],
