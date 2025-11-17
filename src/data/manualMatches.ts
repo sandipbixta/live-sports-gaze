@@ -20,8 +20,14 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "hls-stream",
-        name: "HD Stream",
+        id: "rumble-stream",
+        name: "Rumble HD",
+        url: "https://hugh.cdn.rumble.cloud/live/d0t27del/slot-159/gc4g-6qy5_1080p/chunklist_DVR.m3u8",
+        quality: "HD"
+      },
+      {
+        id: "soplay-stream",
+        name: "SoPlay HD",
         url: "https://soplay.pro/embed2.php?id=criclife3&v=su",
         quality: "HD"
       }
@@ -34,36 +40,6 @@ export const manualMatches: ManualMatch[] = [
       category: "Cricket"
     }
   },
-    {
-    id: "Janakpur-Bolt-vs-Kathmandu_Gurkha",
-    title: "Janakpur Bolt vs Kathmandu Gurkha",
-    date: new Date().toISOString(), // Live now
-    teams: {
-      home: "Janakpur Bolt",
-      away: "Kathmandu Gurkha"
-    },
-    links: [
-      {
-        id: "hls-stream",
-        name: "HD Stream",
-        url: "https://soplay.pro/embed2.php?id=criclife3&v=su",
-        quality: "HD"
-      }
-      {
-        id: "hls-stream",
-        name: "HD Stream",
-        url: "https://hugh.cdn.rumble.cloud/live/d0t27del/slot-159/gc4g-6qy5_1080p/chunklist_DVR.m3u8",
-        quality: "HD"
-      }
-    ],
-    visible: true,
-    image: "https://i.imgur.com/10PbZeK.jpeg",
-    seo: {
-      keywords: "fc barcelona champions league",
-      description: "",
-      category: "Cricket"
-    }
-  }
   {
     id: "",
     title: "FC Barcelons vs Vissel kobe",
