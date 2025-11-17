@@ -22,7 +22,7 @@ export const manualMatches: ManualMatch[] = [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://jan.player0003.com:8099/hls/criclife3.m3u8?md6=yI-eScLUXYIxvVcDGA6VLA&expires=1763380589&s=MmEwOTpiYWM1OjEyMDoxZDc6OjJmOmQ3",
+        url: "https://soplay.pro/embed2.php?id=criclife3&v=su",
         quality: "HD"
       }
     ],
