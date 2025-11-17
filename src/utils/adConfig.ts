@@ -8,12 +8,12 @@ export const adConfig = {
     height: 250
   },
   directLink: {
-    url: 'https://temperweekly.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
+    url: 'https://gistreticence.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
     cooldownMinutes: 5,
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
-    scriptSrc: '//temperweekly.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
+    scriptSrc: '//gistreticence.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
     cooldownMinutes: 5,
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3
