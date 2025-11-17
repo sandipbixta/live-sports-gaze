@@ -117,15 +117,11 @@ const Index = () => {
     loadInitialData();
   }, []);
 
-  // Set default sport immediately on component mount - don't wait for data
+  // Set default sport to 'all' immediately - ensure it's always set
   useEffect(() => {
-    if (!selectedSport) {
-      console.log('🏈 Auto-selecting "All Sports" as default immediately');
-      setSelectedSport('all');
-    } else {
-      console.log('🔵 Index: selectedSport is:', selectedSport);
-    }
-  }, [selectedSport]);
+    console.log('🏈 Setting default sport to "all" for homepage');
+    setSelectedSport('all');
+  }, []);  // Empty dependency array - only run once on mount
 
   // Optimized search handler
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,38 +235,35 @@ const Index = () => {
               </div>
             )}
             
+            {/* API Matches Section - Always show on homepage */}
             <div className="mb-8">
-              {selectedSport && (
+              {!selectedSport || selectedSport === 'all' ? (
+                <div>
+                  <div className="mb-4">
+                    <h4 className="text-xl font-bold text-foreground">
+                      Live Matches - All Sports
+                    </h4>
+                    <p className="text-gray-400 text-sm">
+                      Currently live matches from all sports categories
+                    </p>
+                  </div>
+                  <AllSportsLiveMatches searchTerm={searchTerm} />
+                </div>
+              ) : selectedSport && (
                 <>
-                  {selectedSport === 'all' ? (
-                    <div>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          Live Matches - All Sports
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          Currently live matches from all sports categories
-                        </p>
-                      </div>
-                      <AllSportsLiveMatches searchTerm={searchTerm} />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          {filteredMatches.length} matches available
-                        </p>
-                      </div>
-                      <MatchesList
-                        matches={filteredMatches}
-                        sportId={selectedSport}
-                        isLoading={loadingMatches}
-                      />
-                    </>
-                  )}
+                  <div className="mb-4">
+                    <h4 className="text-xl font-bold text-foreground">
+                      {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
+                    </h4>
+                    <p className="text-gray-400 text-sm">
+                      {filteredMatches.length} matches available
+                    </p>
+                  </div>
+                  <MatchesList
+                    matches={filteredMatches}
+                    sportId={selectedSport}
+                    isLoading={loadingMatches}
+                  />
                 </>
               )}
             </div>
