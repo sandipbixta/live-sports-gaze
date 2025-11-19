@@ -11,6 +11,30 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
+    id: "Kathmandu-vs-Sudurpaschim",
+    title: "Kathmandu vs Sudurpaschim",
+    date: new Date().toISOString(), // Live now
+    teams: {
+      home: "Kathmandu",
+      away: "Sudurpaschim"
+    },
+    links: [
+      {
+        id: "stream-1",
+        name: "HD Stream",
+        url: "https://topembed.pw/channel/ex11352675",
+        quality: "HD"
+      }
+    ],
+    visible: true,
+    image: "https://imgur.com/fzmGbot",
+    seo: {
+      keywords: "Kathmandu vs Sudurpaschim cricket live stream",
+      description: "Watch Kathmandu vs Sudurpaschim cricket match live stream online for free.",
+      category: "Cricket"
+    }
+  },
+  {
     id: "Janakpur-Bolt-vs-Kathmandu_Gurkha",
     title: "Janakpur Bolt vs Kathmandu Gurkha",
     date: new Date().toISOString(), // Live now
