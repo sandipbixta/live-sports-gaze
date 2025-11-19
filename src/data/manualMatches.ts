@@ -27,7 +27,7 @@ export const manualMatches: ManualMatch[] = [
       }
     ],
     visible: true,
-    image: "https://imgur.com/fzmGbot",
+    image: "https://i.imgur.com/fzmGbot.jpeg",
     seo: {
       keywords: "Kathmandu vs Sudurpaschim cricket live stream",
       description: "Watch Kathmandu vs Sudurpaschim cricket match live stream online for free.",
