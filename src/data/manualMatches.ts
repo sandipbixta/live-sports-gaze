@@ -26,7 +26,7 @@ export const manualMatches: ManualMatch[] = [
         quality: "HD"
       }
     ],
-    visible: true,
+    visible: false,
     image: "https://i.imgur.com/zskXAVP.jpeg",
     seo: {
       keywords: "Kathmandu vs Sudurpaschim cricket live stream",
