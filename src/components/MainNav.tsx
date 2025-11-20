@@ -38,7 +38,7 @@ const MainNav = () => {
   return (
     <div className="flex items-center gap-6 w-full md:w-auto">
       <button onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-2">
-        <img src={damitvLogo} alt="DAMITV Logo" className="h-8 w-8" />
+        <img src={damitvLogo} alt="DAMITV Logo" className="h-12 w-12" />
         <h1 className="text-2xl font-bold text-foreground">
           DAMITV
         </h1>
