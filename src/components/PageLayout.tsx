@@ -25,7 +25,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
       <header className="bg-[#ff5a36] shadow-md">
-        <div className="container mx-auto py-2 px-2">
+        <div className="container mx-auto py-1 px-2">
           <div className="flex flex-row justify-between items-center gap-2">
             {isMobile ? (
               <>
