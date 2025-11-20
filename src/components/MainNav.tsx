@@ -14,6 +14,7 @@ import Clock from "./Clock";
 import ThemeToggle from "./ThemeToggle";
 import PushNotifications from "./PushNotifications";
 import { Button } from "./ui/button";
+import damitvLogo from "@/assets/damitv-logo.png";
 
 const MainNav = () => {
   const isMobile = useIsMobile();
@@ -36,10 +37,12 @@ const MainNav = () => {
 
   return (
     <div className="flex items-center gap-6 w-full md:w-auto">
-      <button onClick={() => navigate("/")} className="cursor-pointer">
-        <h1 className="text-2xl font-bold text-foreground">
-          DAMITV
-        </h1>
+      <button onClick={() => navigate("/")} className="cursor-pointer flex items-center">
+        <img 
+          src={damitvLogo} 
+          alt="DAMITV Logo" 
+          className="h-8 md:h-10 w-auto"
+        />
       </button>
       
       <NavigationMenu className="hidden md:flex">
