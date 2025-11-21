@@ -153,6 +153,12 @@
     Content-Type = "application/xml; charset=utf-8"
     Cache-Control = "public, max-age=3600, s-maxage=3600"
 
+# Explicitly serve the static sitemap file as a 200 OK rewrite
+[[redirects]]
+  from = "/sitemap-static.xml"
+  to = "/sitemap-static.xml"
+  status = 200
+
 # SPA fallback - must be last
 [[redirects]]
   from = "/*"
