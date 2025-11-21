@@ -161,6 +161,29 @@ const Schedule = () => {
         <meta property="og:description" content="Check today's football schedule with Premier League, Champions League and more live matches" />
         <meta property="og:url" content="https://damitv.pro/schedule" />
         <meta property="og:type" content="website" />
+        
+        <script type="application/ld+json">
+        {`
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://damitv.pro/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Sports Schedule",
+                "item": "https://damitv.pro/schedule"
+              }
+            ]
+          }
+        `}
+        </script>
       </Helmet>
       
       <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>

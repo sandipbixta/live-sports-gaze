@@ -152,6 +152,29 @@ const Live = () => {
           }
         `}
         </script>
+        
+        <script type="application/ld+json">
+        {`
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://damitv.pro/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Live Sports Streaming",
+                "item": "https://damitv.pro/live"
+              }
+            ]
+          }
+        `}
+        </script>
       </Helmet>
       
       {/* Page Header with H1 */}
