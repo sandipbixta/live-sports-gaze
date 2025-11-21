@@ -24,7 +24,6 @@ import TelegramBanner from '../components/TelegramBanner';
 import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
 import HomepageContent from '../components/HomepageContent';
-import RecentBlogPosts from '../components/RecentBlogPosts';
 import EmailSubscription from '../components/EmailSubscription';
 
 // Lazy load heavy components
@@ -313,8 +312,6 @@ const Index = () => {
                 </>
               )}
             </div>
-            
-            <RecentBlogPosts />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div className="lg:col-span-2">

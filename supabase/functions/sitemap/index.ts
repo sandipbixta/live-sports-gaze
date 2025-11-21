@@ -12,39 +12,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-
-    let blogPosts: { slug: string; updated_at: string | null; published_at: string; title: string }[] = [];
-
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
-      try {
-        // Fetch all published blog posts (optional)
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select('slug, updated_at, published_at, title')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching blog posts for sitemap:', error);
-        } else if (data) {
-          blogPosts = data as typeof blogPosts;
-        }
-      } catch (blogError) {
-        console.error('Unexpected error fetching blog posts for sitemap:', blogError);
-      }
-    } else {
-      console.warn('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set; generating sitemap without blog posts.');
-    }
-
     // Generate sitemap XML
-    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
-        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <!-- Home Page - Highest Priority -->
   <url>
@@ -75,30 +45,6 @@ Deno.serve(async (req) => {
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
-  
-  <!-- Blog Pages -->
-  <url>
-    <loc>https://damitv.pro/blog</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  
-  <!-- Blog Posts - Dynamically Generated -->
-${blogPosts?.map(post => `  <url>
-    <loc>https://damitv.pro/blog/${post.slug}</loc>
-    <lastmod>${post.updated_at ? new Date(post.updated_at).toISOString().split('T')[0] : new Date(post.published_at).toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-    <news:news>
-      <news:publication>
-        <news:name>DamiTV</news:name>
-        <news:language>en</news:language>
-      </news:publication>
-      <news:publication_date>${new Date(post.published_at).toISOString().split('T')[0]}</news:publication_date>
-      <news:title>${post.title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')}</news:title>
-    </news:news>
-  </url>`).join('\n') || ''}
   
   <!-- Legal Pages -->
   <url>
