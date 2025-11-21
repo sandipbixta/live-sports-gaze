@@ -21,7 +21,7 @@ export const manualMatches: ManualMatch[] = [
     links: [
       {
         id: "stream-1",
-        name: "HD Stream",
+        name: "HD Stream 1",
         url: "https://topembed.pw/channel/ex11352694",
         quality: "HD"
       }
