@@ -131,12 +131,6 @@
   status = 301
   force = true
 
-# Dynamic sitemap generation from Supabase Edge Function
-[[redirects]]
-  from = "/sitemap.xml"
-  to = "https://wxvsteaayxgygihpshoz.supabase.co/functions/v1/sitemap"
-  status = 200
-  force = true
 
 # Add XML content-type header for sitemap
 [[headers]]
