@@ -28,8 +28,6 @@
 # Static sitemap - serve directly without SPA fallback
 /sitemap-static.xml  /sitemap-static.xml  200
 
-# Dynamic sitemap - proxy to Supabase Edge Function
-/sitemap.xml  https://wxvsteaayxgygihpshoz.supabase.co/functions/v1/sitemap  200
 
 # Handle 404s properly - send to custom 404 page with SPA fallback
 /*                 /index.html    200
