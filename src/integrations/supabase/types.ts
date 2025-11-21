@@ -57,6 +57,7 @@ export type Database = {
           subscribed_teams: string[] | null
           timezone: string | null
           updated_at: string
+          user_id: string | null
           verification_token: string | null
           verified: boolean | null
         }
@@ -69,6 +70,7 @@ export type Database = {
           subscribed_teams?: string[] | null
           timezone?: string | null
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verified?: boolean | null
         }
@@ -81,6 +83,7 @@ export type Database = {
           subscribed_teams?: string[] | null
           timezone?: string | null
           updated_at?: string
+          user_id?: string | null
           verification_token?: string | null
           verified?: boolean | null
         }
