@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,14 @@ const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = false }
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserId(user?.id || null);
+    });
+  }, []);
 
   const popularTeams = [
     'Manchester United', 'Liverpool', 'Arsenal', 'Chelsea', 'Manchester City',
@@ -40,6 +47,7 @@ const EmailSubscription: React.FC<EmailSubscriptionProps> = ({ compact = false }
         .from('email_subscriptions')
         .insert({
           email,
+          user_id: userId,
           subscribed_teams: selectedTeams,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
         });
