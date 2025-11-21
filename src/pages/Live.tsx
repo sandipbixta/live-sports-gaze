@@ -157,7 +157,7 @@ const Live = () => {
       {/* Page Header with H1 */}
       <header className="mb-6">
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Live Sports Streaming</h1>
-        <p className="text-muted-foreground">Watch live football, basketball, tennis and more. HD streams updated in real-time.</p>
+        <p className="text-muted-foreground">Watch live football, basketball, tennis and more. HD streams updated in real-time. Discover the <a href="https://damitv.pro/" className="text-primary hover:underline font-medium">best sports streaming site alternatives</a> for reliable free streaming.</p>
       </header>
       
       {/* Telegram Banner */}

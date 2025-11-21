@@ -232,7 +232,7 @@ const Schedule = () => {
                   Browse today's complete sports schedule on DamiTV. Check match times and fixtures for football, basketball, tennis and more. Plan your viewing with our <a href="/live" className="text-primary hover:underline">live sports streaming</a> schedule updated daily.
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  Access <a href="/" className="text-primary hover:underline">live streams</a> and <a href="/channels" className="text-primary hover:underline">TV channels</a> for all scheduled matches. Never miss a game with DamiTV.
+                  Access <a href="/" className="text-primary hover:underline">live streams</a> and <a href="/channels" className="text-primary hover:underline">TV channels</a> for all scheduled matches. As one of the <a href="https://damitv.pro/" className="text-primary hover:underline font-medium">top totalsportek similar sites for live sports</a>, DamiTV ensures you never miss a game.
                 </p>
               </div>
               <div>

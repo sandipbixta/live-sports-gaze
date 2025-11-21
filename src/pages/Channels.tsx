@@ -140,7 +140,7 @@ const Channels = () => {
             </Link>
           </div>
           <p className="text-muted-foreground">
-            Access 70+ international sports channels streaming live in HD quality. Watch football, basketball, tennis and more.
+            Access 70+ international sports channels streaming live in HD quality. Watch football, basketball, tennis and more. DamiTV is your trusted <a href="https://damitv.pro/" className="text-primary hover:underline font-medium">vipleague alternative with HD streams</a> for all major sports.
           </p>
         </header>
         
