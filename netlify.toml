@@ -136,6 +136,15 @@
   from = "/sitemap.xml"
   to = "https://wxvsteaayxgygihpshoz.supabase.co/functions/v1/sitemap"
   status = 200
+  force = true
+
+# Add XML content-type header for sitemap
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    X-Robots-Tag = "noindex"
+    Cache-Control = "public, max-age=3600, s-maxage=3600"
 
 # SPA fallback - must be last
 [[redirects]]
