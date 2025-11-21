@@ -25,5 +25,8 @@
 /news/             /news          301!
 /dmca/             /dmca          301!
 
+# Static sitemap - serve directly without SPA fallback
+/sitemap-static.xml  /sitemap-static.xml  200
+
 # Handle 404s properly - send to custom 404 page with SPA fallback
 /*                 /index.html    200
