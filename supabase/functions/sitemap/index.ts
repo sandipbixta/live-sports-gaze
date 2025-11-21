@@ -12,18 +12,33 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Fetch all published blog posts
-    const { data: blogPosts, error } = await supabase
-      .from('blog_posts')
-      .select('slug, updated_at, published_at, title')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false });
+    let blogPosts: { slug: string; updated_at: string | null; published_at: string; title: string }[] = [];
 
-    if (error) throw error;
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      try {
+        // Fetch all published blog posts (optional)
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('slug, updated_at, published_at, title')
+          .eq('is_published', true)
+          .order('published_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching blog posts for sitemap:', error);
+        } else if (data) {
+          blogPosts = data as typeof blogPosts;
+        }
+      } catch (blogError) {
+        console.error('Unexpected error fetching blog posts for sitemap:', blogError);
+      }
+    } else {
+      console.warn('SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set; generating sitemap without blog posts.');
+    }
 
     // Generate sitemap XML
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
