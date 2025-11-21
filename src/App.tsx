@@ -31,6 +31,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Install from "./pages/Install";
 import DaddylivehdAlternatives from "./pages/DaddylivehdAlternatives";
+import BatmanstreamAlternatives from "./pages/BatmanstreamAlternatives";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -122,6 +123,11 @@ const App: React.FC = () => {
               <Route path="/daddylivehd-alternatives" element={
                 <SEOPageTracker pageTitle="DaddyliveHD Alternatives - Best Sports Streaming Sites" contentType="home">
                   <DaddylivehdAlternatives />
+                </SEOPageTracker>
+              } />
+              <Route path="/batmanstream-alternatives" element={
+                <SEOPageTracker pageTitle="Batmanstream Alternatives - Safe Sports Streaming Sites" contentType="home">
+                  <BatmanstreamAlternatives />
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
