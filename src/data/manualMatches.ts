@@ -11,23 +11,23 @@ const getTomorrowDate = () => {
 
 export const manualMatches: ManualMatch[] = [
   {
-    id: "Lumbini-Lions-vs-Chitwan-Rhino",
-    title: "Lumbini Lions vs Chitwan Rhino",
+    id: "pokhara-Avengers-vs-Sudurpaschim-Royals",
+    title: "Pokhara Avengers - Sudurpaschim Royals",
     date: new Date().toISOString(), // Live now
     teams: {
-      home: "Lumbini Lions",
-      away: "Chitwan Rhino"
+      home: "Pokhara Avengers",
+      away: "Sudurpaschim Royals"
     },
     links: [
       {
         id: "stream-1",
         name: "HD Stream",
-        url: "https://topembed.pw/channel/ex11352685",
+        url: "https://topembed.pw/channel/ex11352694",
         quality: "HD"
       }
     ],
-    visible: false,
-    image: "https://i.imgur.com/zskXAVP.jpeg",
+    visible: true,
+    image: "https://i.imgur.com/3bP8W5K.jpeg",
     seo: {
       keywords: "Kathmandu vs Sudurpaschim cricket live stream",
       description: "Watch Kathmandu vs Sudurpaschim cricket match live stream online for free.",
