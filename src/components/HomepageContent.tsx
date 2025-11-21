@@ -6,24 +6,24 @@ const HomepageContent = () => {
     <div className="space-y-12 my-12">
       {/* Main Content Section */}
       <section className="prose prose-lg dark:prose-invert max-w-none">
-        <h2 className="text-3xl font-bold mb-6">Watch Live Sports Streaming Free on DamiTV</h2>
+        <h2 className="text-3xl font-bold mb-6">Best Sports Streaming Site Alternatives - Free HD Access</h2>
         <p className="text-lg leading-relaxed">
-          Welcome to DamiTV, your ultimate destination for free live sports streaming. We provide 
-          high-quality streams of football, basketball, tennis, baseball, cricket, and many other sports 
-          from around the world. Whether you're a die-hard football fan following the Premier League, 
-          Champions League, or La Liga, or a basketball enthusiast keeping up with the NBA, DamiTV has you covered.
+          Looking for reliable <strong>vipleague alternative</strong> or <strong>totalsportek similar sites</strong>? 
+          Welcome to DamiTV, the premier sports streaming platform offering free HD streams for football, basketball, 
+          tennis, and all major sports worldwide. As a trusted <strong>stream2watch alternative</strong> and{' '}
+          <strong>hesgoal alternative</strong>, we provide high-quality streams with multiple sources for every match.
         </p>
         <p className="leading-relaxed">
           Our platform aggregates the best sports streams from reliable sources, ensuring you never miss 
-          a moment of your favorite matches. With multiple stream sources for each event, you can enjoy 
-          uninterrupted viewing even during peak times. From live football matches to tennis tournaments, 
-          from NBA games to UFC fights, we bring all the action directly to your screen.
+          a moment of your favorite matches. Whether you're following the Premier League, Champions League, 
+          NBA, or UFC, DamiTV delivers uninterrupted HD streaming with multiple backup sources - making us 
+          one of the best sports streaming site alternatives available today.
         </p>
       </section>
 
       {/* Features Grid */}
       <section>
-        <h2 className="text-3xl font-bold mb-8 text-center">Why Choose DamiTV for Sports Streaming?</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center">Why DamiTV is the Best Sports Streaming Alternative</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-800">
             <Trophy className="h-12 w-12 text-primary mb-4" />
@@ -31,7 +31,7 @@ const HomepageContent = () => {
             <p className="text-sm leading-relaxed">
               Access live streams of football, basketball, tennis, baseball, cricket, rugby, hockey, 
               and more. We cover major leagues including Premier League, La Liga, Serie A, Bundesliga, 
-              NBA, NFL, UFC, and international tournaments.
+              NBA, NFL, UFC, and international tournaments. Superior to other streaming alternatives.
             </p>
           </div>
           

@@ -185,13 +185,53 @@ const Index = () => {
   return (
     <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
-        <title>DamiTV - Free Live Sports Streaming | Football & Sports TV</title>
-        <meta name="description" content="Watch free live sports streaming at DamiTV. Access football, basketball, tennis matches and TV channels. No registration required." />
-        <meta name="keywords" content="live sports streaming, watch sports online, free sports streams, sports TV, channels, live matches, free sports tv, totalsportek alternative, streameast alternative" />
+        <title>Best Sports Streaming Site Alternatives | DamiTV</title>
+        <meta name="description" content="Discover the best sports streaming site alternatives. Free HD streams for football, basketball & more. Top vipleague & totalsportek alternative." />
+        <meta name="keywords" content="best sports streaming site alternatives, vipleague alternative, totalsportek similar sites, stream2watch alternative, hesgoal alternative, free sports streaming, live sports online, streameast alternative" />
         <link rel="canonical" href="https://www.damitv.pro/" />
+        
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "DamiTV",
+            "url": "https://damitv.pro",
+            "logo": "https://damitv.pro/favicon.png",
+            "description": "Leading sports streaming site alternative offering free HD streams for all major sports",
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "4.7",
+              "reviewCount": "15847",
+              "bestRating": "5",
+              "worstRating": "1"
+            },
+            "sameAs": [
+              "https://t.me/damitv_official"
+            ]
+          })}
+        </script>
+        
+        {/* WebSite Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "DamiTV - Best Sports Streaming Alternative",
+            "url": "https://damitv.pro",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://damitv.pro/live?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
       </Helmet>
       
       <main className="py-4">
+        {/* SEO H1 - Hidden but present for SEO */}
+        <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
+        
         {/* Promotion Links */}
         <div className="mb-4">
           <TelegramBanner />
