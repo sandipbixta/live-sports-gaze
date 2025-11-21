@@ -11,6 +11,3 @@ verify_jwt = false
 
 [functions.send-subscription-confirmation]
 verify_jwt = false
-
-[functions.api-sports]
-verify_jwt = false
