@@ -30,6 +30,7 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Install from "./pages/Install";
+import DaddylivehdAlternatives from "./pages/DaddylivehdAlternatives";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -116,6 +117,11 @@ const App: React.FC = () => {
               <Route path="/install" element={
                 <SEOPageTracker pageTitle="Install DamiTV App" contentType="home">
                   <Install />
+                </SEOPageTracker>
+              } />
+              <Route path="/daddylivehd-alternatives" element={
+                <SEOPageTracker pageTitle="DaddyliveHD Alternatives - Best Sports Streaming Sites" contentType="home">
+                  <DaddylivehdAlternatives />
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
