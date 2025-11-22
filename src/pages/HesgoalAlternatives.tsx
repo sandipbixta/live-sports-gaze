@@ -6,6 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import FAQSection from '@/components/FAQSection';
+import InternalLinks from '@/components/InternalLinks';
+import { hesgoalFAQs } from '@/utils/faqData';
+import { INTERNAL_LINKS } from '@/utils/seoConfig';
 
 const HesgoalAlternatives = () => {
   const currentYear = new Date().getFullYear();
@@ -129,6 +133,21 @@ const HesgoalAlternatives = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
+        </script>
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": hesgoalFAQs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          })}
         </script>
       </Helmet>
 
@@ -595,6 +614,15 @@ const HesgoalAlternatives = () => {
               </p>
             </div>
           </section>
+
+          {/* FAQ Section with Schema */}
+          <FAQSection faqs={hesgoalFAQs} title="Hesgoal Alternatives - Frequently Asked Questions" />
+
+          {/* Internal Links for SEO */}
+          <InternalLinks 
+            links={INTERNAL_LINKS.alternatives}
+            title="Explore More Sports Streaming Options"
+          />
         </div>
       </PageLayout>
     </>

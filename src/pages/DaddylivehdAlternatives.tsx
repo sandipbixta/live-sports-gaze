@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import FAQSection from '@/components/FAQSection';
+import InternalLinks from '@/components/InternalLinks';
+import { daddylivehdFAQs } from '@/utils/faqData';
+import { INTERNAL_LINKS } from '@/utils/seoConfig';
 
 const DaddylivehdAlternatives = () => {
   const currentYear = new Date().getFullYear();
@@ -102,6 +106,21 @@ const DaddylivehdAlternatives = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
+        </script>
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": daddylivehdFAQs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          })}
         </script>
       </Helmet>
 
@@ -366,6 +385,15 @@ const DaddylivehdAlternatives = () => {
               </p>
             </div>
           </section>
+
+          {/* FAQ Section with Schema */}
+          <FAQSection faqs={daddylivehdFAQs} title="DaddyliveHD Alternatives - Frequently Asked Questions" />
+
+          {/* Internal Links for SEO */}
+          <InternalLinks 
+            links={INTERNAL_LINKS.alternatives}
+            title="Explore More Sports Streaming Options"
+          />
         </div>
       </PageLayout>
     </>

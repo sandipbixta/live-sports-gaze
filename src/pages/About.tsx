@@ -9,8 +9,35 @@ const About = () => {
       <Helmet>
         <title>About DamiTV - Free Live Sports Streaming Platform</title>
         <meta name="description" content="Learn about DamiTV, your premier destination for free live sports streaming. Watch football, basketball, tennis, and more in HD quality." />
-        <meta name="keywords" content="about damitv, sports streaming platform, free sports, live football streaming" />
+        <meta name="keywords" content="about damitv, sports streaming platform, free sports, live football streaming, totalsportek alternative" />
         <link rel="canonical" href="https://damitv.pro/about" />
+        <meta name="robots" content="index, follow" />
+        
+        <meta property="og:title" content="About DamiTV - Free Live Sports Streaming Platform" />
+        <meta property="og:description" content="Premier destination for free live sports streaming. Watch football, basketball, tennis in HD quality." />
+        <meta property="og:url" content="https://damitv.pro/about" />
+        <meta property="og:type" content="website" />
+        
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://damitv.pro/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "About",
+              "item": "https://damitv.pro/about"
+            }
+          ]
+        })}
+        </script>
       </Helmet>
 
       <div className="py-8">
