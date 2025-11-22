@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 
 // Google Analytics 4 Measurement ID
-const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Replace with your actual GA4 measurement ID
+const GA_MEASUREMENT_ID = 'G-012D2PN0S2';
 
 /**
  * Google Analytics 4 integration component
