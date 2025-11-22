@@ -30,6 +30,10 @@ import Install from "./pages/Install";
 import DaddylivehdAlternatives from "./pages/DaddylivehdAlternatives";
 import BatmanstreamAlternatives from "./pages/BatmanstreamAlternatives";
 import HesgoalAlternatives from "./pages/HesgoalAlternatives";
+import WatchPremierLeague from "./pages/WatchPremierLeague";
+import NbaStreaming from "./pages/NbaStreaming";
+import UfcStreaming from "./pages/UfcStreaming";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -52,6 +56,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <BrowserRouter>
+          <GoogleAnalytics />
           <MonetizationTracker>
             <TooltipProvider>
               <Toaster />
@@ -120,6 +125,21 @@ const App: React.FC = () => {
               <Route path="/hesgoal-alternatives" element={
                 <SEOPageTracker pageTitle="Hesgoal Alternatives - Legal Sports Streaming Sites" contentType="home">
                   <HesgoalAlternatives />
+                </SEOPageTracker>
+              } />
+              <Route path="/watch-premier-league-free" element={
+                <SEOPageTracker pageTitle="Watch Premier League Free" contentType="home">
+                  <WatchPremierLeague />
+                </SEOPageTracker>
+              } />
+              <Route path="/nba-streaming-free" element={
+                <SEOPageTracker pageTitle="NBA Streaming Free" contentType="home">
+                  <NbaStreaming />
+                </SEOPageTracker>
+              } />
+              <Route path="/ufc-streaming-free" element={
+                <SEOPageTracker pageTitle="UFC Streaming Free" contentType="home">
+                  <UfcStreaming />
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
