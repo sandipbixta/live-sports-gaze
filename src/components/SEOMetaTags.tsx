@@ -157,32 +157,55 @@ const SEOMetaTags: React.FC<SEOMetaTagsProps> = ({
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       
-      {/* Open Graph */}
+      {/* Open Graph Meta Tags */}
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="DamiTV - Free Sports Streaming" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
+      <meta property="og:url" content={canonicalUrl || window.location.href} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/jpeg" />
-      <meta property="og:url" content={canonicalUrl || window.location.href} />
-      <meta property="og:type" content="article" />
-      <meta property="og:site_name" content="DamiTV" />
-      <meta property="article:author" content="DamiTV" />
-      <meta property="article:publisher" content="DamiTV" />
+      <meta property="og:image:alt" content={title} />
+      <meta property="og:locale" content="en_US" />
       
-      {/* Twitter Cards */}
+      {/* Article specific tags for match pages */}
+      {matchInfo && (
+        <>
+          <meta property="article:published_time" content={matchInfo.date?.toISOString()} />
+          <meta property="article:author" content="DamiTV" />
+          <meta property="article:section" content="Sports" />
+          {matchInfo.league && <meta property="article:tag" content={matchInfo.league} />}
+        </>
+      )}
+      
+      {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@damitv_official" />
+      <meta name="twitter:creator" content="@damitv_official" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:image:width" content="1200" />
-      <meta name="twitter:image:height" content="630" />
-      <meta name="twitter:site" content="@damitv_official" />
-      <meta name="twitter:creator" content="@damitv_official" />
+      <meta name="twitter:image:alt" content={title} />
       
-      {/* Additional SEO */}
-      <meta name="robots" content="index, follow, max-image-preview:large" />
-      <meta name="googlebot" content="index, follow" />
+      {/* SEO & Crawling Directives */}
+      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <meta name="googlebot" content="index, follow, max-image-preview:large" />
+      <meta name="bingbot" content="index, follow" />
+      
+      {/* Geo Tags */}
+      <meta name="geo.region" content="US" />
+      <meta name="geo.placename" content="United States" />
+      
+      {/* Additional Meta Tags */}
+      <meta name="author" content="DamiTV" />
+      <meta name="publisher" content="DamiTV" />
+      <meta name="copyright" content="DamiTV" />
+      <meta name="revisit-after" content="1 days" />
+      <meta name="rating" content="general" />
+      <meta name="distribution" content="global" />
       
       {/* Performance hints */}
       <link rel="dns-prefetch" href="//embedsports.top" />

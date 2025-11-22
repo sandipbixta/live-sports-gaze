@@ -1,56 +1,124 @@
-
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Home, Tv, Calendar, Newspaper } from 'lucide-react';
 
 const NotFound = () => {
-  // Set the proper 404 status code when this component renders
   useEffect(() => {
-    // This is a client-side solution that helps some crawlers
-    // Note: For full SEO compliance, server-side status code is needed
-    document.title = "404 - Page Not Found | DamiTV";
-    
-    // Log for analytics purposes
-    console.log("404 error page served", window.location.pathname);
+    document.title = '404 - Page Not Found | DamiTV';
   }, []);
 
+  const quickLinks = [
+    {
+      title: 'Live Sports Streaming',
+      description: 'Watch live matches now',
+      url: '/live',
+      icon: Tv
+    },
+    {
+      title: 'TV Channels',
+      description: '70+ sports channels',
+      url: '/channels',
+      icon: Tv
+    },
+    {
+      title: 'Sports Schedule',
+      description: 'Upcoming fixtures',
+      url: '/schedule',
+      icon: Calendar
+    },
+    {
+      title: 'Sports News',
+      description: 'Latest updates',
+      url: '/news',
+      icon: Newspaper
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-background py-12">
       <Helmet>
-        <title>404 - Page Not Found | DamiTV - Free Live Football Streaming</title>
+        <title>404 - Page Not Found | DamiTV Sports Streaming</title>
         <link rel="canonical" href="https://damitv.pro/404" />
-        <meta name="description" content="The page you're looking for doesn't exist or has been moved. Return to DamiTV homepage for live sports streaming including Premier League, Champions League and more." />
+        <meta name="description" content="Page not found. The page you're looking for doesn't exist. Return to DamiTV homepage to watch free live sports streaming - football, basketball, tennis & more." />
         <meta name="robots" content="noindex, follow" />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content="404 - Page Not Found | DamiTV" />
+        <meta property="og:description" content="Page not found. Return to DamiTV to watch free live sports streaming." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://damitv.pro/404" />
+        
+        {/* Schema.org */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "404 Not Found",
+            "description": "This page could not be found",
+            "url": "https://damitv.pro/404"
+          })}
+        </script>
       </Helmet>
       
-      <div className="text-center max-w-md">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-[#fa2d04] to-[#ff6347] bg-clip-text text-transparent">
-            404
-          </h1>
-          <h2 className="text-xl sm:text-2xl font-semibold mt-3 sm:mt-4 mb-1 sm:mb-2 text-black dark:text-white">Page Not Found</h2>
-          <p className="text-black/60 dark:text-white/60 text-sm sm:text-base">
-            The page you're looking for doesn't exist or has been removed.
-          </p>
-        </div>
+      <div className="text-center max-w-4xl mx-auto">
+        <h1 className="text-9xl font-bold text-primary mb-4" aria-label="Error 404">404</h1>
+        <h2 className="text-3xl font-semibold text-foreground mb-4">Oops! Page Not Found</h2>
+        <p className="text-muted-foreground mb-8 text-lg max-w-2xl mx-auto">
+          The page you're looking for doesn't exist or has been moved. Don't worry, you can still watch 
+          free live sports streaming on DamiTV.
+        </p>
         
-        <Button className="bg-[#fa2d04] hover:bg-[#e02703] text-white" asChild>
-          <Link to="/" className="flex items-center">
-            Back to Home <ArrowRight className="ml-2 h-4 w-4" />
+        <Button asChild size="lg" className="mb-12">
+          <Link to="/">
+            <Home className="mr-2 h-5 w-5" />
+            Return to Homepage
           </Link>
         </Button>
-        
-        <div className="mt-8 text-sm text-black/60 dark:text-white/60">
-          <p>Popular pages:</p>
-          <div className="mt-2 flex flex-wrap justify-center gap-2">
-            <Link to="/live" className="text-[#ff6347] hover:underline">Live Streams</Link>
-            <Link to="/channels" className="text-[#ff6347] hover:underline">TV Channels</Link>
-            <Link to="/schedule" className="text-[#ff6347] hover:underline">Schedule</Link>
-            <Link to="/news" className="text-[#ff6347] hover:underline">Sports News</Link>
+
+        {/* Quick Links Section */}
+        <section className="mt-12">
+          <h3 className="text-2xl font-bold text-foreground mb-6">Popular Pages</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link key={link.url} to={link.url} className="group">
+                  <Card className="h-full transition-all hover:border-primary hover:shadow-lg">
+                    <CardHeader>
+                      <Icon className="h-8 w-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                        {link.title}
+                      </CardTitle>
+                      <CardDescription>{link.description}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
-        </div>
+        </section>
+
+        {/* Additional Help Section */}
+        <section className="mt-12 p-6 bg-secondary/50 rounded-lg">
+          <h3 className="text-xl font-semibold text-foreground mb-4">Need Help?</h3>
+          <div className="flex flex-wrap gap-6 justify-center text-sm">
+            <Link to="/about" className="text-primary hover:underline flex items-center gap-2">
+              About DamiTV
+            </Link>
+            <Link to="/contact" className="text-primary hover:underline flex items-center gap-2">
+              Contact Support
+            </Link>
+            <Link to="/daddylivehd-alternatives" className="text-primary hover:underline flex items-center gap-2">
+              Streaming Alternatives
+            </Link>
+            <Link to="/install" className="text-primary hover:underline flex items-center gap-2">
+              Install App
+            </Link>
+          </div>
+        </section>
       </div>
     </div>
   );

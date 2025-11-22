@@ -1,17 +1,38 @@
 
-# DamiTV Robots.txt - Fixed for better indexing
+# DamiTV Robots.txt - Optimized for SEO
 User-agent: *
 Allow: /
 
-# High priority content - ensure these are crawled
+# High priority content - explicitly allow crawling
 Allow: /live
-Allow: /channels  
+Allow: /live?*
+Allow: /channels
 Allow: /schedule
 Allow: /news
 Allow: /match/*
 Allow: /manual-match/*
+Allow: /channel/*
+Allow: /watch-premier-league-free
+Allow: /nba-streaming-free
+Allow: /ufc-streaming-free
+Allow: /daddylivehd-alternatives
+Allow: /batmanstream-alternatives
+Allow: /hesgoal-alternatives
 
-# Crawl rate optimization
+# Block duplicate content and admin areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /static/
+Disallow: /*.json$
+Disallow: /*?preview=
+Disallow: /*?utm_*
+Disallow: /*?ref=*
+Disallow: /*?source=*
+Disallow: /*?fbclid=*
+Disallow: /*?gclid=*
+
+# Crawl rate optimization for major search engines
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 1
@@ -20,7 +41,15 @@ User-agent: Bingbot
 Allow: /
 Crawl-delay: 2
 
-# Social media crawlers
+User-agent: Slurp
+Allow: /
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 2
+
+# Social media crawlers - allow full access
 User-agent: Twitterbot
 Allow: /
 
@@ -33,16 +62,22 @@ Allow: /
 User-agent: WhatsApp
 Allow: /
 
-# Block problematic paths that cause duplicate content
-Disallow: /api/
-Disallow: /admin/
-Disallow: /_next/
-Disallow: /static/
-Disallow: /*.json$
-Disallow: /*?preview=
-Disallow: /*?utm_*
-Disallow: /*?ref=*
-Disallow: /*?source=*
+User-agent: TelegramBot
+Allow: /
 
-# Important: Sitemap location
+# Block problematic bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
+
+# Sitemap location (critical for SEO)
 Sitemap: https://damitv.pro/sitemap.xml
+Sitemap: https://damitv.pro/sitemap-static.xml
