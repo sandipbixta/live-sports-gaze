@@ -20,7 +20,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       {/* MiraFootball Promotion */}
       <Button
         onClick={handleMiraFootballClick}
-        className="w-full bg-sports-primary hover:bg-sports-accent text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+        className="w-full bg-sports-primary hover:bg-sports-accent text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         variant="default"
       >
         <div className="flex items-center justify-center gap-2 w-full">
@@ -33,7 +33,7 @@ const TelegramBanner: React.FC<TelegramBannerProps> = ({ className = "" }) => {
       {/* Blog Banner */}
       <Button
         onClick={handleBlogClick}
-        className="w-full bg-gradient-to-r from-sports-primary to-sports-accent hover:from-sports-accent hover:to-sports-primary text-primary-foreground py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+        className="w-full bg-gradient-to-r from-sports-primary to-sports-accent hover:from-sports-accent hover:to-sports-primary text-white py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
         variant="default"
       >
         <div className="flex items-center justify-center gap-2 w-full">
