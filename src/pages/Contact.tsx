@@ -30,10 +30,78 @@ const Contact = () => {
   return (
     <PageLayout>
       <Helmet>
-        <title>Contact DamiTV - Get in Touch with Us</title>
-        <meta name="description" content="Contact DamiTV for support, feedback, or inquiries. We're here to help with any questions about our live sports streaming service." />
-        <meta name="keywords" content="contact damitv, sports streaming support, damitv help, customer service" />
+        <title>Contact DamiTV - Get in Touch With Us</title>
+        <meta name="description" content="Contact DamiTV for support, feedback, or partnership inquiries. We're here to help with any questions about our free sports streaming service." />
+        <meta name="keywords" content="contact damitv, sports streaming support, damitv help, customer service, report broken stream" />
         <link rel="canonical" href="https://damitv.pro/contact" />
+        <meta name="robots" content="index, follow" />
+        
+        <meta property="og:title" content="Contact DamiTV - Get in Touch With Us" />
+        <meta property="og:description" content="Contact DamiTV for support, feedback, or partnership inquiries." />
+        <meta property="og:url" content="https://damitv.pro/contact" />
+        <meta property="og:type" content="website" />
+        
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://damitv.pro/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Contact",
+              "item": "https://damitv.pro/contact"
+            }
+          ]
+        })}
+        </script>
+        
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is DamiTV really free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, DamiTV is completely free to use. There are no hidden fees, subscriptions, or registration required."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is my stream not working?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Try switching to an alternative stream source. We provide multiple sources for each match. Also, ensure you have a stable internet connection and try disabling ad blockers if streams won't load."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I watch on mobile devices?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely! DamiTV is fully responsive and works on smartphones, tablets, and desktop computers."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I report a broken stream?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Use the contact form or email us at support@damitv.pro with the match details and the issue you're experiencing."
+              }
+            }
+          ]
+        })}
+        </script>
       </Helmet>
 
       <div className="py-8">

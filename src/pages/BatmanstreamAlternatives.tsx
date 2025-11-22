@@ -6,6 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
+import FAQSection from '@/components/FAQSection';
+import InternalLinks from '@/components/InternalLinks';
+import { batmanstreamFAQs } from '@/utils/faqData';
+import { INTERNAL_LINKS } from '@/utils/seoConfig';
 
 const BatmanstreamAlternatives = () => {
   const currentYear = new Date().getFullYear();
@@ -113,6 +117,21 @@ const BatmanstreamAlternatives = () => {
         </script>
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
+        </script>
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": batmanstreamFAQs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          })}
         </script>
       </Helmet>
 
@@ -479,6 +498,15 @@ const BatmanstreamAlternatives = () => {
               </p>
             </div>
           </section>
+
+          {/* FAQ Section with Schema */}
+          <FAQSection faqs={batmanstreamFAQs} title="Batmanstream Alternatives - Frequently Asked Questions" />
+
+          {/* Internal Links for SEO */}
+          <InternalLinks 
+            links={INTERNAL_LINKS.alternatives}
+            title="Explore More Sports Streaming Options"
+          />
         </div>
       </PageLayout>
     </>
