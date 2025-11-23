@@ -12,21 +12,24 @@ serve(async (req) => {
   }
 
   try {
-    const { leagueName } = await req.json();
+    const { sportKey } = await req.json();
     
-    console.log(`Fetching teams for league: ${leagueName}`);
+    console.log(`Fetching teams for sport: ${sportKey}`);
 
-    const apiKey = Deno.env.get('THESPORTSDB_API_KEY') || '3';
+    const apiKey = Deno.env.get('ODDS_API_KEY');
+    if (!apiKey) {
+      throw new Error('ODDS_API_KEY not configured');
+    }
     
-    // Fetch all teams in the league
-    const teamsUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/search_all_teams.php?l=${encodeURIComponent(leagueName)}`;
-    const teamsResponse = await fetch(teamsUrl);
-    const teamsData = await teamsResponse.json();
+    // Fetch events (matches) from The Odds API to extract team names
+    const eventsUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds?apiKey=${apiKey}&regions=us`;
+    const eventsResponse = await fetch(eventsUrl);
+    const eventsData = await eventsResponse.json();
 
-    if (!teamsData.teams || teamsData.teams.length === 0) {
-      console.log(`No teams found for league: ${leagueName}`);
+    if (!eventsData || eventsData.length === 0) {
+      console.log(`No events found for sport: ${sportKey}`);
       return new Response(
-        JSON.stringify({ success: false, message: 'No teams found', teams: [] }),
+        JSON.stringify({ success: false, message: 'No events found', teams: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -36,18 +39,44 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const teams = teamsData.teams.map((team: any) => ({
-      team_id: team.idTeam,
-      team_name: team.strTeam,
-      league_name: leagueName,
-      sport: team.strSport?.toLowerCase() || 'unknown',
-      logo_url: team.strTeamBadge || null,
-      stadium: team.strStadium || null,
-      description: team.strDescriptionEN || null,
-      year_founded: team.intFormedYear || null,
-      country: team.strCountry || null,
-      website: team.strWebsite || null,
-    }));
+    // Extract unique teams from events
+    const teamsMap = new Map();
+    
+    eventsData.forEach((event: any) => {
+      // Add home team
+      if (!teamsMap.has(event.home_team)) {
+        teamsMap.set(event.home_team, {
+          team_id: `${sportKey}_${event.home_team.toLowerCase().replace(/\s+/g, '_')}`,
+          team_name: event.home_team,
+          league_name: sportKey,
+          sport: event.sport_key,
+          logo_url: null,
+          stadium: null,
+          description: null,
+          year_founded: null,
+          country: null,
+          website: null,
+        });
+      }
+      
+      // Add away team
+      if (!teamsMap.has(event.away_team)) {
+        teamsMap.set(event.away_team, {
+          team_id: `${sportKey}_${event.away_team.toLowerCase().replace(/\s+/g, '_')}`,
+          team_name: event.away_team,
+          league_name: sportKey,
+          sport: event.sport_key,
+          logo_url: null,
+          stadium: null,
+          description: null,
+          year_founded: null,
+          country: null,
+          website: null,
+        });
+      }
+    });
+
+    const teams = Array.from(teamsMap.values());
 
     // Upsert teams into database
     const { data, error } = await supabase

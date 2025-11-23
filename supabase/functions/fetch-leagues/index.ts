@@ -12,21 +12,22 @@ serve(async (req) => {
   }
 
   try {
-    const { sport } = await req.json();
-    
-    console.log(`Fetching leagues for sport: ${sport}`);
+    console.log('Fetching all sports from The Odds API');
 
-    const apiKey = Deno.env.get('THESPORTSDB_API_KEY') || '3';
+    const apiKey = Deno.env.get('ODDS_API_KEY');
+    if (!apiKey) {
+      throw new Error('ODDS_API_KEY not configured');
+    }
     
-    // Fetch all leagues for the sport
-    const leaguesUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/search_all_leagues.php?s=${encodeURIComponent(sport)}`;
-    const leaguesResponse = await fetch(leaguesUrl);
-    const leaguesData = await leaguesResponse.json();
+    // Fetch all sports from The Odds API
+    const sportsUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${apiKey}`;
+    const sportsResponse = await fetch(sportsUrl);
+    const sportsData = await sportsResponse.json();
 
-    if (!leaguesData.countries || leaguesData.countries.length === 0) {
-      console.log(`No leagues found for sport: ${sport}`);
+    if (!sportsData || sportsData.length === 0) {
+      console.log('No sports found');
       return new Response(
-        JSON.stringify({ success: false, message: 'No leagues found', leagues: [] }),
+        JSON.stringify({ success: false, message: 'No sports found', leagues: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -36,16 +37,19 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const leagues = leaguesData.countries.map((league: any) => ({
-      league_id: league.idLeague,
-      league_name: league.strLeague,
-      sport: sport.toLowerCase(),
-      country: league.strCountry || null,
-      logo_url: league.strBadge || null,
-      description: league.strDescriptionEN || null,
-      website: league.strWebsite || null,
-      year_founded: league.intFormedYear || null,
-    }));
+    // Transform sports into leagues format
+    const leagues = sportsData
+      .filter((sport: any) => sport.active) // Only active sports
+      .map((sport: any) => ({
+        league_id: sport.key,
+        league_name: sport.title,
+        sport: sport.group.toLowerCase().replace(/\s+/g, '_'),
+        country: null, // The Odds API doesn't provide country info
+        logo_url: null, // The Odds API doesn't provide logos
+        description: sport.description,
+        website: null,
+        year_founded: null,
+      }));
 
     // Upsert leagues into database
     const { data, error } = await supabase

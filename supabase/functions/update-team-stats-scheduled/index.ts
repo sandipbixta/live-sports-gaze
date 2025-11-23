@@ -18,6 +18,11 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const apiKey = Deno.env.get('ODDS_API_KEY');
+    if (!apiKey) {
+      throw new Error('ODDS_API_KEY not configured');
+    }
+
     // Get all unique team names from existing stats
     const { data: existingTeams, error: fetchError } = await supabase
       .from('team_stats')
@@ -38,20 +43,59 @@ serve(async (req) => {
       try {
         console.log(`Updating stats for ${team.team_name} (${team.sport})`);
         
-        const apiKey = Deno.env.get('THESPORTSDB_API_KEY') || '3';
-        const searchUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/searchteams.php?t=${encodeURIComponent(team.team_name)}`;
-        const searchResponse = await fetch(searchUrl);
-        const searchData = await searchResponse.json();
+        // Fetch sports to find the right sport key
+        const sportsUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${apiKey}`;
+        const sportsResponse = await fetch(sportsUrl);
+        const sportsData = await sportsResponse.json();
 
-        if (searchData.teams && searchData.teams.length > 0) {
-          const teamData = searchData.teams[0];
-          
-          // Update team stats with fresh data
+        const matchingSport = sportsData.find((s: any) => 
+          s.group.toLowerCase() === team.sport.toLowerCase()
+        );
+
+        if (matchingSport) {
+          // Fetch recent scores for this sport
+          const scoresUrl = `https://api.the-odds-api.com/v4/sports/${matchingSport.key}/scores?apiKey=${apiKey}&daysFrom=30`;
+          const scoresResponse = await fetch(scoresUrl);
+          const scoresData = await scoresResponse.json();
+
+          // Filter events for this team
+          const teamEvents = scoresData.filter((event: any) => 
+            event.home_team === team.team_name || event.away_team === team.team_name
+          );
+
+          // Calculate stats
+          let wins = 0, draws = 0, losses = 0;
+          let goalsScored = 0, goalsConceded = 0;
+
+          teamEvents.forEach((event: any) => {
+            if (event.scores) {
+              const isHome = event.home_team === team.team_name;
+              const teamScore = isHome ? event.scores[0]?.score : event.scores[1]?.score;
+              const opponentScore = isHome ? event.scores[1]?.score : event.scores[0]?.score;
+
+              if (teamScore !== undefined && opponentScore !== undefined) {
+                goalsScored += teamScore;
+                goalsConceded += opponentScore;
+                if (teamScore > opponentScore) wins++;
+                else if (teamScore < opponentScore) losses++;
+                else draws++;
+              }
+            }
+          });
+
+          // Update team stats
           const { error: updateError } = await supabase
             .from('team_stats')
             .update({
-              team_id: teamData.idTeam,
-              league: teamData.strLeague || null,
+              matches_played: teamEvents.length,
+              wins,
+              draws,
+              losses,
+              goals_scored: goalsScored,
+              goals_conceded: goalsConceded,
+              win_rate: teamEvents.length > 0 ? (wins / teamEvents.length) * 100 : 0,
+              average_goals: teamEvents.length > 0 ? goalsScored / teamEvents.length : 0,
+              total_points: (wins * 3) + draws,
               updated_at: new Date().toISOString(),
             })
             .eq('team_name', team.team_name)
@@ -66,7 +110,7 @@ serve(async (req) => {
         }
 
         // Add delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error) {
         console.error(`Error updating ${team.team_name}:`, error);
         failedCount++;

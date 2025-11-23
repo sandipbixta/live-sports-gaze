@@ -1,12 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const leaguesService = {
-  async fetchLeagues(sport: string) {
+  async fetchLeagues() {
     try {
-      console.log(`Fetching leagues for ${sport}`);
+      console.log('Fetching all sports leagues');
       
       const { data, error } = await supabase.functions.invoke('fetch-leagues', {
-        body: { sport }
+        body: {}
       });
 
       if (error) throw error;
@@ -26,7 +26,7 @@ export const leaguesService = {
         .order('league_name');
       
       if (sport) {
-        query = query.eq('sport', sport.toLowerCase());
+        query = query.ilike('sport', `%${sport.toLowerCase().replace(/\s+/g, '_')}%`);
       }
 
       const { data, error } = await query;
@@ -57,12 +57,12 @@ export const leaguesService = {
     }
   },
 
-  async fetchLeagueTeams(leagueName: string) {
+  async fetchLeagueTeams(sportKey: string) {
     try {
-      console.log(`Fetching teams for league: ${leagueName}`);
+      console.log(`Fetching teams for sport: ${sportKey}`);
       
       const { data, error } = await supabase.functions.invoke('fetch-league-teams', {
-        body: { leagueName }
+        body: { sportKey }
       });
 
       if (error) throw error;
@@ -74,12 +74,12 @@ export const leaguesService = {
     }
   },
 
-  async getLeagueTeams(leagueName: string) {
+  async getLeagueTeams(sportKey: string) {
     try {
       const { data, error } = await supabase
         .from('league_teams')
         .select('*')
-        .eq('league_name', leagueName)
+        .eq('league_name', sportKey)
         .order('team_name');
 
       if (error) throw error;
