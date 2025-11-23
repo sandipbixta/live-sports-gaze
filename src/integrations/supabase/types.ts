@@ -182,6 +182,96 @@ export type Database = {
         }
         Relationships: []
       }
+      league_teams: {
+        Row: {
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          league_name: string
+          logo_url: string | null
+          sport: string
+          stadium: string | null
+          team_id: string
+          team_name: string
+          updated_at: string
+          website: string | null
+          year_founded: number | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_name: string
+          logo_url?: string | null
+          sport: string
+          stadium?: string | null
+          team_id: string
+          team_name: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: number | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_name?: string
+          logo_url?: string | null
+          sport?: string
+          stadium?: string | null
+          team_id?: string
+          team_name?: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: number | null
+        }
+        Relationships: []
+      }
+      leagues: {
+        Row: {
+          country: string | null
+          created_at: string
+          description: string | null
+          id: string
+          league_id: string
+          league_name: string
+          logo_url: string | null
+          sport: string
+          updated_at: string
+          website: string | null
+          year_founded: number | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_id: string
+          league_name: string
+          logo_url?: string | null
+          sport: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: number | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          league_id?: string
+          league_name?: string
+          logo_url?: string | null
+          sport?: string
+          updated_at?: string
+          website?: string | null
+          year_founded?: number | null
+        }
+        Relationships: []
+      }
       match_predictions: {
         Row: {
           confidence_level: string | null
