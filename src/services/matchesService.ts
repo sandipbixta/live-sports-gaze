@@ -21,12 +21,12 @@ export const matchesService = {
     }
   },
 
-  async fetchRecentScores(competitionCode: string) {
+  async fetchRecentScores(sportKey: string) {
     try {
-      console.log(`Fetching recent scores for: ${competitionCode}`);
+      console.log(`Fetching recent scores for: ${sportKey}`);
       
       const { data, error } = await supabase.functions.invoke('fetch-league-scores', {
-        body: { competitionCode }
+        body: { sportKey }
       });
 
       if (error) {

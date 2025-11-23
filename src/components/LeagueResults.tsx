@@ -16,15 +16,14 @@ interface MatchResult {
 }
 
 const FEATURED_LEAGUES = [
-  { name: "Premier League", competitionCode: "PL" },
-  { name: "La Liga", competitionCode: "PD" },
-  { name: "Bundesliga", competitionCode: "BL1" },
-  { name: "Serie A", competitionCode: "SA" },
-  { name: "Ligue 1", competitionCode: "FL1" },
+  { name: 'Premier League', sportKey: 'soccer_epl' },
+  { name: 'La Liga', sportKey: 'soccer_spain_la_liga' },
+  { name: 'Serie A', sportKey: 'soccer_italy_serie_a' },
+  { name: 'Bundesliga', sportKey: 'soccer_germany_bundesliga' },
 ];
 
 const CACHE_KEY = 'league_results_cache';
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour to reduce API calls
+const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
 
 interface CachedData {
   results: MatchResult[];
@@ -37,8 +36,6 @@ const LeagueResults: React.FC = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      console.log('🏆 LeagueResults: Starting to fetch league results...');
-      
       // Check cache first
       const cached = localStorage.getItem(CACHE_KEY);
       let cachedData: CachedData | null = null;
@@ -48,21 +45,15 @@ const LeagueResults: React.FC = () => {
           cachedData = JSON.parse(cached);
           const cacheAge = Date.now() - cachedData.timestamp;
           
-          console.log(`📦 Cache found: ${cachedData.results.length} results, age: ${Math.round(cacheAge / 1000)}s`);
-          
           if (cacheAge < CACHE_DURATION) {
-            console.log('✅ Using cached league results');
+            console.log('Using cached league results');
             setResults(cachedData.results);
             setLoading(false);
             return;
-          } else {
-            console.log('⏰ Cache expired, fetching fresh data');
           }
         } catch (error) {
-          console.error('❌ Error parsing cache:', error);
+          console.error('Error parsing cache:', error);
         }
-      } else {
-        console.log('📭 No cache found, fetching fresh data');
       }
       
       // If we have expired cache, show it while we try to fetch
@@ -77,18 +68,12 @@ const LeagueResults: React.FC = () => {
       const allResults: MatchResult[] = [];
       let quotaExceeded = false;
 
-      console.log(`🔄 Fetching from ${FEATURED_LEAGUES.length} leagues...`);
-      
       for (const league of FEATURED_LEAGUES) {
         try {
-          console.log(`📡 Fetching ${league.name} (${league.competitionCode})...`);
-          const response = await matchesService.fetchRecentScores(league.competitionCode);
-          
-          console.log(`📥 ${league.name} response:`, response);
+          const response = await matchesService.fetchRecentScores(league.sportKey);
           
           // Check for quota exceeded
           if (response.quotaExceeded) {
-            console.warn(`⚠️ ${league.name}: Quota exceeded`);
             quotaExceeded = true;
             break;
           }
@@ -103,19 +88,16 @@ const LeagueResults: React.FC = () => {
               completed: score.completed || true,
               league: league.name,
             }));
-            console.log(`✅ ${league.name}: Added ${leagueResults.length} results`);
             allResults.push(...leagueResults);
-          } else {
-            console.warn(`⚠️ ${league.name}: No scores in response`);
           }
         } catch (error) {
-          console.error(`❌ Error fetching ${league.name} results:`, error);
+          console.error(`Error fetching ${league.name} results:`, error);
         }
       }
 
       // If quota exceeded, keep using old cached data
       if (quotaExceeded) {
-        console.log('⚠️ API quota exceeded, using cached data');
+        console.log('API quota exceeded, using cached data');
         if (cachedData) {
           setResults(cachedData.results);
         }
@@ -125,19 +107,15 @@ const LeagueResults: React.FC = () => {
 
       // Cache the new results if we got any
       if (allResults.length > 0) {
-        console.log(`✅ Successfully fetched ${allResults.length} total results, caching...`);
         const newCacheData: CachedData = {
           results: allResults,
           timestamp: Date.now()
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(newCacheData));
         setResults(allResults);
-      } else {
-        console.warn('⚠️ No results fetched from any league');
       }
       
       setLoading(false);
-      console.log('🏁 LeagueResults: Fetch complete');
     };
 
     fetchResults();
