@@ -4,10 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, ArrowLeft, ExternalLink, RefreshCw, Calendar, History } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { leaguesService } from "@/services/leaguesService";
+import { matchesService } from "@/services/matchesService";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 interface League {
   league_id: string;
@@ -33,7 +36,33 @@ const LeagueDetail = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [league, setLeague] = useState<League | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
+  const [recentScores, setRecentScores] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+
+  const loadMatchesData = async (leagueData: League) => {
+    setMatchesLoading(true);
+    try {
+      // Fetch upcoming matches and recent scores in parallel
+      const [matchesResult, scoresResult] = await Promise.all([
+        matchesService.fetchUpcomingMatches(leagueData.league_id),
+        matchesService.fetchRecentScores(leagueData.league_id)
+      ]);
+
+      if (matchesResult?.success) {
+        setUpcomingMatches(matchesResult.matches || []);
+      }
+
+      if (scoresResult?.success) {
+        setRecentScores(scoresResult.scores || []);
+      }
+    } catch (error) {
+      console.error("Error loading matches data:", error);
+    } finally {
+      setMatchesLoading(false);
+    }
+  };
 
   const loadLeagueData = async () => {
     if (!leagueId) return;
@@ -44,13 +73,12 @@ const LeagueDetail = () => {
       setLeague(leagueData);
 
       if (leagueData) {
-        console.log(`Loading teams for league: ${leagueData.league_id}`);
+        console.log(`Loading data for league: ${leagueData.league_id}`);
         
-        // Try to get teams from DB first
+        // Load teams from DB first
         let teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
         
         if (teamsData.length === 0) {
-          // If not in DB, fetch from API using sport key
           toast.info("Fetching teams from API...");
           const result = await leaguesService.fetchLeagueTeams(leagueData.league_id);
           
@@ -63,6 +91,9 @@ const LeagueDetail = () => {
         }
         
         setTeams(teamsData);
+        
+        // Load matches and scores
+        loadMatchesData(leagueData);
       }
     } catch (error) {
       console.error("Error loading league data:", error);
@@ -181,16 +212,140 @@ const LeagueDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Teams Section */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Teams</h2>
-          <Button onClick={handleRefresh} variant="outline" size="sm">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
-        </div>
+        {/* Content Tabs */}
+        <Tabs defaultValue="matches" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="matches">
+              <Calendar className="w-4 h-4 mr-2" />
+              Upcoming
+            </TabsTrigger>
+            <TabsTrigger value="results">
+              <History className="w-4 h-4 mr-2" />
+              Results
+            </TabsTrigger>
+            <TabsTrigger value="teams">
+              <Trophy className="w-4 h-4 mr-2" />
+              Teams
+            </TabsTrigger>
+          </TabsList>
 
-        {teams.length === 0 ? (
+          {/* Upcoming Matches */}
+          <TabsContent value="matches" className="mt-6">
+            {matchesLoading ? (
+              <div className="grid gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-24" />
+                ))}
+              </div>
+            ) : upcomingMatches.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Upcoming Matches</h3>
+                  <p className="text-muted-foreground">
+                    Check back later for upcoming fixtures
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {upcomingMatches.map((match) => (
+                  <Card key={match.match_id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-lg font-bold">{match.home_team}</span>
+                            <Badge variant="outline">vs</Badge>
+                            <span className="text-lg font-bold">{match.away_team}</span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>
+                              {new Date(match.commence_time).toLocaleDateString()} at{' '}
+                              {new Date(match.commence_time).toLocaleTimeString()}
+                            </span>
+                            <Badge variant="secondary">
+                              {formatDistanceToNow(new Date(match.commence_time), { addSuffix: true })}
+                            </Badge>
+                          </div>
+                          {match.bookmakers?.length > 0 && (
+                            <div className="mt-3 flex gap-2">
+                              {match.bookmakers[0].markets.map((outcome: any, idx: number) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {outcome.name}: {outcome.price}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Recent Results */}
+          <TabsContent value="results" className="mt-6">
+            {matchesLoading ? (
+              <div className="grid gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-24" />
+                ))}
+              </div>
+            ) : recentScores.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <History className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Recent Results</h3>
+                  <p className="text-muted-foreground">
+                    Recent match results will appear here
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {recentScores.map((score) => (
+                  <Card key={score.match_id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 text-right">
+                              <span className="text-lg font-bold">{score.home_team}</span>
+                            </div>
+                            <div className="px-6">
+                              <Badge variant="default" className="text-lg px-4 py-1">
+                                {score.home_score} - {score.away_score}
+                              </Badge>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-lg font-bold">{score.away_team}</span>
+                            </div>
+                          </div>
+                          <div className="text-center text-sm text-muted-foreground">
+                            {new Date(score.commence_time).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Teams */}
+          <TabsContent value="teams" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={handleRefresh} variant="outline" size="sm">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh Teams
+              </Button>
+            </div>
+
+            {teams.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
@@ -202,9 +357,9 @@ const LeagueDetail = () => {
                 The Odds API provides data for leagues with upcoming matches. Try checking back during the season.
               </p>
             </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {teams.map((team) => (
               <Card key={team.team_id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
@@ -248,9 +403,11 @@ const LeagueDetail = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </PageLayout>
   );
