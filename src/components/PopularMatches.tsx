@@ -32,16 +32,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
   // Consolidate matches (merges duplicate matches with their stream sources)
   const consolidatedMatches = React.useMemo(() => consolidateMatches(cleanMatches), [cleanMatches.length, JSON.stringify(cleanMatches.map(m => m.id))]);
 
-  // Show matches immediately (they'll update when viewer counts are fetched)
-  React.useEffect(() => {
-    if (consolidatedMatches.length > 0 && enrichedMatches.length === 0) {
-      // Show live matches immediately with any existing data
-      const liveMatches = consolidatedMatches.filter(m => isMatchLive(m));
-      setEnrichedMatches(liveMatches);
-    }
-  }, [consolidatedMatches.length]);
-
-  // Enrich matches with viewer counts from stream API and sort (in background)
+  // Enrich matches with viewer counts from stream API and sort
   React.useEffect(() => {
     const enrichMatches = async () => {
       if (consolidatedMatches.length === 0) {
@@ -49,7 +40,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
         return;
       }
 
-      // Don't set loading state - let matches show immediately
+      setIsLoading(true);
       console.log('🔥 Enriching matches with viewer counts for Popular section:', consolidatedMatches.length);
       try {
         const matchesWithViewers = await enrichMatchesWithViewers(consolidatedMatches);
@@ -89,6 +80,8 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
             return bTrending.score - aTrending.score;
           });
         setEnrichedMatches(fallbackMatches);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -101,8 +94,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
   const filteredMatches = enrichedMatches;
   
-  // Show nothing if no matches at all
-  if (filteredMatches.length === 0) {
+  if (isLoading || filteredMatches.length === 0) {
     return null;
   }
 
