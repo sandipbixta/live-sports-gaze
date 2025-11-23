@@ -45,13 +45,13 @@ const LeagueDetail = () => {
 
       if (leagueData) {
         // Try to get teams from DB first
-        let teamsData = await leaguesService.getLeagueTeams(leagueData.league_name);
+        let teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
         
         if (teamsData.length === 0) {
-          // If not in DB, fetch from API
+          // If not in DB, fetch from API using sport key
           toast.info("Fetching teams...");
-          await leaguesService.fetchLeagueTeams(leagueData.league_name);
-          teamsData = await leaguesService.getLeagueTeams(leagueData.league_name);
+          await leaguesService.fetchLeagueTeams(leagueData.league_id);
+          teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
         }
         
         setTeams(teamsData);
@@ -71,7 +71,7 @@ const LeagueDetail = () => {
   const handleRefresh = () => {
     if (league) {
       toast.info("Refreshing teams...");
-      leaguesService.fetchLeagueTeams(league.league_name).then(() => {
+      leaguesService.fetchLeagueTeams(league.league_id).then(() => {
         loadLeagueData();
         toast.success("Teams updated!");
       });

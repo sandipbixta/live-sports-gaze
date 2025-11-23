@@ -34,9 +34,9 @@ const Leagues = () => {
       if (dbLeagues.length > 0) {
         setLeagues(dbLeagues);
       } else {
-        // If not in DB, fetch from API
-        toast.info(`Fetching ${sport} leagues...`);
-        await leaguesService.fetchLeagues(sport);
+        // If not in DB, fetch all sports from API
+        toast.info("Fetching sports leagues...");
+        await leaguesService.fetchLeagues();
         const newLeagues = await leaguesService.getLeagues(sport);
         setLeagues(newLeagues);
       }
@@ -54,7 +54,7 @@ const Leagues = () => {
 
   const handleRefresh = () => {
     toast.info("Refreshing leagues...");
-    leaguesService.fetchLeagues(selectedSport).then(() => {
+    leaguesService.fetchLeagues().then(() => {
       loadLeagues(selectedSport);
       toast.success("Leagues updated!");
     });
