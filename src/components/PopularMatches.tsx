@@ -41,26 +41,26 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
       }
 
       setIsLoading(true);
-      console.log('🔥 Enriching matches with viewer counts for Popular section:', consolidatedMatches.length);
+      
+      // OPTIMIZATION: Only check top 50 live matches to reduce API calls
+      const liveMatches = consolidatedMatches.filter(m => isMatchLive(m));
+      const matchesToCheck = liveMatches.slice(0, 50);
+      
+      console.log(`🔥 Checking viewer counts for ${matchesToCheck.length} of ${liveMatches.length} live matches`);
+      
       try {
-        const matchesWithViewers = await enrichMatchesWithViewers(consolidatedMatches);
+        const matchesWithViewers = await enrichMatchesWithViewers(matchesToCheck);
         
-        // Only include live matches with viewer counts
+        // Only include matches with viewer counts
         const liveMatchesWithViewers = matchesWithViewers.filter(m => 
-          isMatchLive(m) && 
           (m.viewerCount || 0) > 0
         );
-        
-        console.log('🔥 Live matches with viewers:', liveMatchesWithViewers.map(m => ({
-          title: m.title,
-          viewers: m.viewerCount
-        })));
         
         // Sort by viewer count descending (highest first)
         const sortedMatches = liveMatchesWithViewers.sort((a, b) => {
           const aViewers = a.viewerCount || 0;
           const bViewers = b.viewerCount || 0;
-          return bViewers - aViewers; // Higher viewers first
+          return bViewers - aViewers;
         });
         
         console.log('🔥 Top 8 matches by viewers:', sortedMatches.slice(0, 8).map(m => ({
@@ -74,6 +74,7 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
         // Fallback: filter for live matches without sorting
         const fallbackMatches = consolidatedMatches
           .filter(m => isMatchLive(m))
+          .slice(0, 20)
           .sort((a, b) => {
             const aTrending = isTrendingMatch(a.title);
             const bTrending = isTrendingMatch(b.title);
@@ -87,14 +88,15 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
     enrichMatches();
     
-    // Refresh every 60 seconds to get updated viewer counts
-    const interval = setInterval(enrichMatches, 60000);
+    // Refresh every 2 minutes to get updated viewer counts
+    const interval = setInterval(enrichMatches, 120000);
     return () => clearInterval(interval);
-  }, [consolidatedMatches]);
+  }, [consolidatedMatches.length]);
 
   const filteredMatches = enrichedMatches;
   
-  if (isLoading || filteredMatches.length === 0) {
+  // Show section immediately with skeleton loaders
+  if (filteredMatches.length === 0 && !isLoading) {
     return null;
   }
 
@@ -111,15 +113,28 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
         Top live matches sorted by viewer count - updated in real-time
       </p>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 auto-rows-fr`}>
-        {filteredMatches.slice(0, 8).map((match, index) => (
-          <div key={`popular-${match.id}-${index}`} className="h-full">
-            <MatchCard 
-              match={match}
-              sportId={selectedSport || ''}
-              isPriority={true}
-            />
-          </div>
-        ))}
+        {isLoading && filteredMatches.length === 0 ? (
+          // Show skeleton loaders while loading
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="h-full">
+              <div className="bg-card rounded-lg p-4 animate-pulse">
+                <div className="h-32 bg-muted rounded mb-2"></div>
+                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </div>
+            </div>
+          ))
+        ) : (
+          filteredMatches.slice(0, 8).map((match, index) => (
+            <div key={`popular-${match.id}-${index}`} className="h-full">
+              <MatchCard 
+                match={match}
+                sportId={selectedSport || ''}
+                isPriority={true}
+              />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

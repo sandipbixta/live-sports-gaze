@@ -126,20 +126,24 @@ export const fetchBatchViewerCounts = async (
   // Filter to only live matches
   const liveMatches = matches.filter(isMatchLive);
   
-  // Fetch in batches of 5 to avoid overwhelming the API
-  const batchSize = 5;
+  console.log(`🔄 Refreshing viewer counts for ${liveMatches.length} matches`);
+  
+  // Fetch in batches of 10 to speed up (parallel requests)
+  const batchSize = 10;
   for (let i = 0; i < liveMatches.length; i += batchSize) {
     const batch = liveMatches.slice(i, i + batchSize);
     
     const promises = batch.map(async (match) => {
       const count = await fetchMatchViewerCount(match);
-      if (count !== null) {
+      if (count !== null && count > 0) {
         viewerCounts.set(match.id, count);
       }
     });
     
     await Promise.all(promises);
   }
+  
+  console.log(`✅ Found ${viewerCounts.size} matches with viewer data`);
   
   return viewerCounts;
 };
