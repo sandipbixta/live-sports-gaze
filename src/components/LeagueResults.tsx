@@ -39,8 +39,8 @@ const LeagueResults: React.FC = () => {
               id: score.match_id || score.id,
               home_team: score.home_team,
               away_team: score.away_team,
-              home_score: score.scores?.[0]?.score,
-              away_score: score.scores?.[1]?.score,
+              home_score: score.home_score,
+              away_score: score.away_score,
               completed: score.completed || true,
               league: league.name,
             }));
