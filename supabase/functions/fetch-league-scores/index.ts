@@ -30,6 +30,20 @@ serve(async (req) => {
     if (!scoresResponse.ok) {
       const errorText = await scoresResponse.text();
       console.error(`API Error (${scoresResponse.status}):`, errorText);
+      
+      // Handle quota exceeded gracefully
+      if (scoresResponse.status === 401 || scoresResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            message: 'API quota exceeded',
+            quotaExceeded: true,
+            scores: [] 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       throw new Error(`API returned ${scoresResponse.status}: ${errorText.substring(0, 200)}`);
     }
     

@@ -36,13 +36,13 @@ const LeagueResults: React.FC = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      setLoading(true);
-      
       // Check cache first
       const cached = localStorage.getItem(CACHE_KEY);
+      let cachedData: CachedData | null = null;
+      
       if (cached) {
         try {
-          const cachedData: CachedData = JSON.parse(cached);
+          cachedData = JSON.parse(cached);
           const cacheAge = Date.now() - cachedData.timestamp;
           
           if (cacheAge < CACHE_DURATION) {
@@ -56,12 +56,28 @@ const LeagueResults: React.FC = () => {
         }
       }
       
+      // If we have expired cache, show it while we try to fetch
+      if (cachedData) {
+        setResults(cachedData.results);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+      
       // Fetch fresh data
       const allResults: MatchResult[] = [];
+      let quotaExceeded = false;
 
       for (const league of FEATURED_LEAGUES) {
         try {
           const response = await matchesService.fetchRecentScores(league.sportKey);
+          
+          // Check for quota exceeded
+          if (response.quotaExceeded) {
+            quotaExceeded = true;
+            break;
+          }
+          
           if (response.success && response.scores) {
             const leagueResults = response.scores.slice(0, 3).map((score: any) => ({
               id: score.match_id || score.id,
@@ -79,14 +95,26 @@ const LeagueResults: React.FC = () => {
         }
       }
 
-      // Cache the results
-      const cacheData: CachedData = {
-        results: allResults,
-        timestamp: Date.now()
-      };
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      // If quota exceeded, keep using old cached data
+      if (quotaExceeded) {
+        console.log('API quota exceeded, using cached data');
+        if (cachedData) {
+          setResults(cachedData.results);
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Cache the new results if we got any
+      if (allResults.length > 0) {
+        const newCacheData: CachedData = {
+          results: allResults,
+          timestamp: Date.now()
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(newCacheData));
+        setResults(allResults);
+      }
       
-      setResults(allResults);
       setLoading(false);
     };
 
