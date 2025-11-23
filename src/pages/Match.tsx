@@ -22,21 +22,12 @@ import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
-import { LiveChat } from '@/components/match/LiveChat';
-import { MatchPrediction } from '@/components/match/MatchPrediction';
-import { TeamStats } from '@/components/match/TeamStats';
-import { PredictionLeaderboard } from '@/components/match/PredictionLeaderboard';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { PanelRightClose, PanelRightOpen } from 'lucide-react';
 
 const Match = () => {
   const { toast } = useToast();
   const { sportId, matchId } = useParams();
   const [match, setMatch] = useState<MatchType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [chatVisible, setChatVisible] = useState(true);
   
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
@@ -47,18 +38,6 @@ const Match = () => {
 
   // Track watch history
   useWatchHistory(matchId, match?.title, sportId);
-
-  // Check if screen is desktop size (>= 1024px for lg breakpoint)
-  useEffect(() => {
-    const checkDesktop = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
 
   // Use enhanced stream player hook for comprehensive stream management
   const {
@@ -252,114 +231,25 @@ const Match = () => {
           </div>
         </div>
         
-        {/* YouTube-style layout: Video on left, Chat on right (desktop) */}
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 relative">
-          {/* Left Column: Video Player */}
-          <div className={`flex-1 transition-all duration-300 ${isDesktop && chatVisible ? 'lg:w-[calc(100%-400px)]' : 'lg:w-full'}`} id="stream-container" data-stream-container>
-            <StreamTab
-              match={match}
-              stream={stream}
-              loadingStream={loadingStream}
-              activeSource={activeSource}
-              handleSourceChange={handleSourceChange}
-              popularMatches={[]}
-              sportId={sportId || ''}
-              allStreams={allStreams}
-              streamDiscovery={streamDiscovery}
-              onRefreshStreams={handleRefreshStreams}
-            />
+        {/* Video Player Section */}
+        <div className="w-full" id="stream-container" data-stream-container>
+          <StreamTab
+            match={match}
+            stream={stream}
+            loadingStream={loadingStream}
+            activeSource={activeSource}
+            handleSourceChange={handleSourceChange}
+            popularMatches={[]}
+            sportId={sportId || ''}
+            allStreams={allStreams}
+            streamDiscovery={streamDiscovery}
+            onRefreshStreams={handleRefreshStreams}
+          />
 
-            {/* Viewer Statistics - show under video on desktop */}
-            <div className="mt-6">
-              <ViewerStats match={match} />
-            </div>
+          {/* Viewer Statistics */}
+          <div className="mt-6">
+            <ViewerStats match={match} />
           </div>
-
-          {/* Chat Toggle Button (desktop only) */}
-          {isDesktop && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setChatVisible(!chatVisible)}
-              className="fixed right-4 top-24 z-50 lg:flex hidden shadow-lg"
-              aria-label={chatVisible ? "Hide chat" : "Show chat"}
-            >
-              {chatVisible ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
-            </Button>
-          )}
-
-          {/* Right Column: Live Chat (only on desktop when visible) */}
-          {isDesktop && chatVisible && (
-            <div className="lg:w-[380px] flex-shrink-0 transition-all duration-300">
-              <div className="sticky top-4">
-                <LiveChat 
-                  matchId={matchId || ''}
-                  matchTitle={matchTitle}
-                  homeTeam={homeTeam}
-                  awayTeam={awayTeam}
-                  matchStartTime={match.date ? new Date(match.date) : undefined}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Chat and Other Tabs */}
-        <div className="mt-8">
-          <Tabs defaultValue="chat" className="w-full">
-            {/* Show all tabs on mobile, hide chat tab on desktop */}
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-3">
-              <TabsTrigger value="chat" className="lg:hidden">Live Chat</TabsTrigger>
-              <TabsTrigger value="predictions">Predictions</TabsTrigger>
-              <TabsTrigger value="stats">Statistics</TabsTrigger>
-              <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-            </TabsList>
-
-            {/* Mobile Chat Tab */}
-            {!isDesktop && (
-              <TabsContent value="chat" className="mt-6">
-                <LiveChat 
-                  matchId={matchId || ''}
-                  matchTitle={matchTitle}
-                  homeTeam={homeTeam}
-                  awayTeam={awayTeam}
-                  matchStartTime={match.date ? new Date(match.date) : undefined}
-                />
-              </TabsContent>
-            )}
-
-            <TabsContent value="predictions" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                  <MatchPrediction
-                    matchId={matchId || ''}
-                    homeTeam={homeTeam}
-                    awayTeam={awayTeam}
-                    matchStartTime={match.date ? new Date(match.date) : new Date()}
-                  />
-                </div>
-                <div>
-                  <PredictionLeaderboard />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="stats" className="mt-6">
-              <TeamStats
-                homeTeamId={homeTeam}
-                homeTeamName={homeTeam}
-                awayTeamId={awayTeam}
-                awayTeamName={awayTeam}
-                sport={sportId || 'football'}
-              />
-            </TabsContent>
-
-            <TabsContent value="leaderboard" className="mt-6">
-              <div className="max-w-2xl mx-auto">
-                <PredictionLeaderboard />
-              </div>
-            </TabsContent>
-          </Tabs>
         </div>
 
         {/* Match Analysis and Preview Content */}
