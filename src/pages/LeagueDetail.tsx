@@ -216,15 +216,15 @@ const LeagueDetail = () => {
         </Card>
 
         {/* Content Tabs */}
-        <Tabs defaultValue="matches" className="w-full">
+        <Tabs defaultValue="results" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="matches">
-              <Calendar className="w-4 h-4 mr-2" />
-              Upcoming
-            </TabsTrigger>
             <TabsTrigger value="results">
               <History className="w-4 h-4 mr-2" />
               Results
+            </TabsTrigger>
+            <TabsTrigger value="matches">
+              <Calendar className="w-4 h-4 mr-2" />
+              Upcoming
             </TabsTrigger>
             <TabsTrigger value="teams">
               <Trophy className="w-4 h-4 mr-2" />
