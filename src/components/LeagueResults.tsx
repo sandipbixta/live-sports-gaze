@@ -22,6 +22,14 @@ const FEATURED_LEAGUES = [
   { name: 'Bundesliga', sportKey: 'soccer_germany_bundesliga' },
 ];
 
+const CACHE_KEY = 'league_results_cache';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+interface CachedData {
+  results: MatchResult[];
+  timestamp: number;
+}
+
 const LeagueResults: React.FC = () => {
   const [results, setResults] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +37,26 @@ const LeagueResults: React.FC = () => {
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
+      
+      // Check cache first
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const cachedData: CachedData = JSON.parse(cached);
+          const cacheAge = Date.now() - cachedData.timestamp;
+          
+          if (cacheAge < CACHE_DURATION) {
+            console.log('Using cached league results');
+            setResults(cachedData.results);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Error parsing cache:', error);
+        }
+      }
+      
+      // Fetch fresh data
       const allResults: MatchResult[] = [];
 
       for (const league of FEATURED_LEAGUES) {
@@ -51,6 +79,13 @@ const LeagueResults: React.FC = () => {
         }
       }
 
+      // Cache the results
+      const cacheData: CachedData = {
+        results: allResults,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+      
       setResults(allResults);
       setLoading(false);
     };
