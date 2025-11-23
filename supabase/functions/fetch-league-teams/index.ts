@@ -23,13 +23,44 @@ serve(async (req) => {
     
     // Fetch events (matches) from The Odds API to extract team names
     const eventsUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds?apiKey=${apiKey}&regions=us`;
+    console.log(`Calling API: ${eventsUrl.replace(apiKey, 'API_KEY_HIDDEN')}`);
+    
     const eventsResponse = await fetch(eventsUrl);
+    
+    // Check if response is OK
+    if (!eventsResponse.ok) {
+      const errorText = await eventsResponse.text();
+      console.error(`API Error (${eventsResponse.status}):`, errorText);
+      throw new Error(`API returned ${eventsResponse.status}: ${errorText.substring(0, 200)}`);
+    }
+    
+    // Check content type before parsing JSON
+    const contentType = eventsResponse.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const responseText = await eventsResponse.text();
+      console.error('Non-JSON response:', responseText.substring(0, 500));
+      throw new Error(`API returned non-JSON response (${contentType})`);
+    }
+    
     const eventsData = await eventsResponse.json();
 
-    if (!eventsData || eventsData.length === 0) {
+    // Check if API returned an error object
+    if (eventsData.error) {
+      console.error('API error:', eventsData.error);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: `API Error: ${eventsData.error}`,
+          teams: [] 
+        }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!eventsData || !Array.isArray(eventsData) || eventsData.length === 0) {
       console.log(`No events found for sport: ${sportKey}`);
       return new Response(
-        JSON.stringify({ success: false, message: 'No events found', teams: [] }),
+        JSON.stringify({ success: false, message: 'No events found for this sport', teams: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
