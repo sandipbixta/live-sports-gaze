@@ -33,6 +33,15 @@ const Leagues = () => {
       
       if (dbLeagues.length > 0) {
         setLeagues(dbLeagues);
+
+        // If leagues exist but none have logos yet, fetch/enrich from API
+        const hasLogos = dbLeagues.some((league) => league.logo_url);
+        if (!hasLogos) {
+          toast.info("Fetching league logos...");
+          await leaguesService.fetchLeagues();
+          const updatedLeagues = await leaguesService.getLeagues(sport);
+          setLeagues(updatedLeagues);
+        }
       } else {
         // If not in DB, fetch all sports from API
         toast.info("Fetching sports leagues...");

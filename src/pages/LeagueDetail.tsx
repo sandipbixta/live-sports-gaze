@@ -78,8 +78,11 @@ const LeagueDetail = () => {
         // Load teams from DB first
         let teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
         
-        if (teamsData.length === 0) {
-          toast.info("Fetching teams from API...");
+        const needsTeamFetch =
+          teamsData.length === 0 || teamsData.every((team) => !team.logo_url);
+
+        if (needsTeamFetch) {
+          toast.info("Fetching teams and logos from API...");
           const result = await leaguesService.fetchLeagueTeams(leagueData.league_id);
           
           if (result && result.success) {
