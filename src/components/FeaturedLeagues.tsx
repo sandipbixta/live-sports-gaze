@@ -41,10 +41,10 @@ const FeaturedLeagues: React.FC = () => {
           <button
             key={league.sportKey}
             onClick={() => handleLeagueClick(league.sportKey)}
-            className="flex-shrink-0 w-32 h-32 bg-white rounded-xl border border-border hover:border-primary transition-all duration-200 hover:shadow-lg hover:scale-105 flex flex-col items-center justify-center p-3 gap-2 group"
+            className="flex-shrink-0 w-40 h-40 bg-white rounded-xl border border-border hover:border-primary transition-all duration-200 hover:shadow-lg hover:scale-105 flex flex-col items-center justify-center p-4 gap-3 group"
             aria-label={`View ${league.name}`}
           >
-            <div className="w-16 h-16 flex items-center justify-center p-2">
+            <div className="w-20 h-20 flex items-center justify-center p-2">
               <img
                 src={league.logo}
                 alt={`${league.name} logo`}
