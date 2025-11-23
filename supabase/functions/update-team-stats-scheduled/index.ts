@@ -38,7 +38,8 @@ serve(async (req) => {
       try {
         console.log(`Updating stats for ${team.team_name} (${team.sport})`);
         
-        const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(team.team_name)}`;
+        const apiKey = Deno.env.get('THESPORTSDB_API_KEY') || '3';
+        const searchUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/searchteams.php?t=${encodeURIComponent(team.team_name)}`;
         const searchResponse = await fetch(searchUrl);
         const searchData = await searchResponse.json();
 
