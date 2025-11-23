@@ -76,7 +76,7 @@ const LeagueResults: React.FC = () => {
   }
 
   return (
-    <div className="w-full mb-8 px-4 md:px-6">
+    <div className="w-full mb-8 px-12">
       <h2 className="text-2xl font-bold mb-4 text-foreground">Recent Results</h2>
       
       <Carousel
@@ -94,7 +94,7 @@ const LeagueResults: React.FC = () => {
             
             return (
               <CarouselItem key={result.id} className="pl-2 md:pl-3 basis-auto">
-                <Card className="w-40 h-28 p-3 bg-card hover:bg-accent/50 transition-all duration-200 border border-border cursor-pointer">
+                <Card className="w-40 h-28 p-3 bg-card hover:bg-accent/50 transition-all duration-200 border border-border cursor-grab active:cursor-grabbing">
                   <div className="text-xs text-muted-foreground mb-2 truncate font-medium">{result.league}</div>
                   
                   <div className="space-y-1">
@@ -123,6 +123,8 @@ const LeagueResults: React.FC = () => {
             );
           })}
         </CarouselContent>
+        <CarouselPrevious className="-left-4" />
+        <CarouselNext className="-right-4" />
       </Carousel>
     </div>
   );
