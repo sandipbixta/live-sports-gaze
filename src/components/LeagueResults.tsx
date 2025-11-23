@@ -76,75 +76,45 @@ const LeagueResults: React.FC = () => {
   }
 
   return (
-    <div className="w-full mb-8 px-12">
+    <div className="w-full mb-8 px-4 md:px-6">
       <h2 className="text-2xl font-bold mb-4 text-foreground">Recent Results</h2>
       
       <Carousel
         opts={{
           align: "start",
           loop: false,
+          dragFree: true,
         }}
         className="w-full"
       >
         <CarouselContent className="-ml-2 md:-ml-3">
           {results.map((result) => {
-            const homeLogo = teamLogoService.getTeamLogo(result.home_team);
-            const awayLogo = teamLogoService.getTeamLogo(result.away_team);
+            const homeWon = (result.home_score ?? 0) > (result.away_score ?? 0);
+            const awayWon = (result.away_score ?? 0) > (result.home_score ?? 0);
             
             return (
               <CarouselItem key={result.id} className="pl-2 md:pl-3 basis-auto">
-                <Card className="w-48 h-32 p-3 bg-card hover:bg-accent/50 transition-colors border border-border">
-                  <div className="text-xs text-muted-foreground mb-2 truncate">{result.league}</div>
+                <Card className="w-40 h-28 p-3 bg-card hover:bg-accent/50 transition-all duration-200 border border-border cursor-pointer">
+                  <div className="text-xs text-muted-foreground mb-2 truncate font-medium">{result.league}</div>
                   
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="space-y-1">
                     {/* Home Team */}
-                    <div className="flex flex-col items-center flex-1 min-w-0">
-                      <div className="w-10 h-10 mb-1 flex items-center justify-center">
-                        {homeLogo ? (
-                          <img 
-                            src={homeLogo} 
-                            alt={result.home_team}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                            {result.home_team.substring(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-center line-clamp-2 leading-tight">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-sm truncate flex-1 ${homeWon ? 'font-bold text-foreground' : 'font-normal text-muted-foreground'}`}>
                         {result.home_team}
                       </span>
-                    </div>
-
-                    {/* Score */}
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="text-xl font-bold text-foreground">
+                      <span className={`text-base font-bold min-w-[24px] text-right ${homeWon ? 'text-foreground' : 'text-muted-foreground'}`}>
                         {result.home_score ?? '-'}
-                      </div>
-                      <div className="text-xs text-muted-foreground">-</div>
-                      <div className="text-xl font-bold text-foreground">
-                        {result.away_score ?? '-'}
-                      </div>
+                      </span>
                     </div>
-
+                    
                     {/* Away Team */}
-                    <div className="flex flex-col items-center flex-1 min-w-0">
-                      <div className="w-10 h-10 mb-1 flex items-center justify-center">
-                        {awayLogo ? (
-                          <img 
-                            src={awayLogo} 
-                            alt={result.away_team}
-                            className="max-w-full max-h-full object-contain"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                            {result.away_team.substring(0, 2).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-xs font-medium text-center line-clamp-2 leading-tight">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`text-sm truncate flex-1 ${awayWon ? 'font-bold text-foreground' : 'font-normal text-muted-foreground'}`}>
                         {result.away_team}
+                      </span>
+                      <span className={`text-base font-bold min-w-[24px] text-right ${awayWon ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {result.away_score ?? '-'}
                       </span>
                     </div>
                   </div>
@@ -153,8 +123,6 @@ const LeagueResults: React.FC = () => {
             );
           })}
         </CarouselContent>
-        <CarouselPrevious className="-left-4" />
-        <CarouselNext className="-right-4" />
       </Carousel>
     </div>
   );
