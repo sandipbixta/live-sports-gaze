@@ -59,18 +59,22 @@ export const leaguesService = {
 
   async fetchLeagueTeams(sportKey: string) {
     try {
-      console.log(`Fetching teams for sport: ${sportKey}`);
+      console.log(`Fetching teams for sport key: ${sportKey}`);
       
       const { data, error } = await supabase.functions.invoke('fetch-league-teams', {
         body: { sportKey }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
       
       return data;
     } catch (error) {
       console.error('Error fetching league teams:', error);
-      return null;
+      // Return empty success result instead of null
+      return { success: false, message: error.message || 'Failed to fetch teams', teams: [] };
     }
   },
 

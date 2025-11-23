@@ -44,21 +44,29 @@ const LeagueDetail = () => {
       setLeague(leagueData);
 
       if (leagueData) {
+        console.log(`Loading teams for league: ${leagueData.league_id}`);
+        
         // Try to get teams from DB first
         let teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
         
         if (teamsData.length === 0) {
           // If not in DB, fetch from API using sport key
-          toast.info("Fetching teams...");
-          await leaguesService.fetchLeagueTeams(leagueData.league_id);
-          teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
+          toast.info("Fetching teams from API...");
+          const result = await leaguesService.fetchLeagueTeams(leagueData.league_id);
+          
+          if (result && result.success) {
+            teamsData = await leaguesService.getLeagueTeams(leagueData.league_id);
+            toast.success(`Loaded ${teamsData.length} teams`);
+          } else {
+            toast.warning(result?.message || "No teams found for this league");
+          }
         }
         
         setTeams(teamsData);
       }
     } catch (error) {
       console.error("Error loading league data:", error);
-      toast.error("Failed to load league data");
+      toast.error("Failed to load league data: " + (error.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -186,9 +194,12 @@ const LeagueDetail = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">No Teams Found</h3>
-              <p className="text-muted-foreground">
-                Click refresh to fetch teams for this league
+              <h3 className="text-xl font-semibold mb-2">No Teams Available</h3>
+              <p className="text-muted-foreground mb-4">
+                {league.description || "This league doesn't have any upcoming events or teams data available at the moment."}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                The Odds API provides data for leagues with upcoming matches. Try checking back during the season.
               </p>
             </CardContent>
           </Card>
