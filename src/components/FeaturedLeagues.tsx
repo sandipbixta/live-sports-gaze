@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface League {
   id: string;
@@ -27,36 +28,44 @@ const FeaturedLeagues: React.FC = () => {
   useEffect(() => {
     const loadLeagues = async () => {
       try {
-        const fetchedLeagues = await Promise.all(
-          FEATURED_LEAGUES.map(async (league) => {
-            try {
-              const response = await fetch(
-                `https://www.thesportsdb.com/api/v1/json/3/searchleagues.php?l=${encodeURIComponent(league.searchName)}`
-              );
-              const data = await response.json();
-              
-              const leagueData = data.leagues?.[0];
-              return {
-                id: league.sportKey,
-                name: league.name,
-                logo: leagueData?.strBadge || leagueData?.strLogo || null,
-                sportKey: league.sportKey,
-              };
-            } catch (error) {
-              console.error(`Error fetching ${league.name}:`, error);
-              return {
-                id: league.sportKey,
-                name: league.name,
-                logo: null,
-                sportKey: league.sportKey,
-              };
-            }
-          })
+        const leagueIds = FEATURED_LEAGUES.map((league) => league.sportKey);
+
+        const { data, error } = await supabase
+          .from('leagues')
+          .select('league_id, league_name, logo_url, sport')
+          .in('league_id', leagueIds);
+
+        if (error) {
+          throw error;
+        }
+
+        const leaguesById = new Map(
+          (data || []).map((league) => [league.league_id, league])
         );
-        
-        setLeagues(fetchedLeagues);
+
+        const mappedLeagues: League[] = FEATURED_LEAGUES.map((league) => {
+          const dbLeague = leaguesById.get(league.sportKey);
+
+          return {
+            id: league.sportKey,
+            name: league.name,
+            logo: dbLeague?.logo_url || null,
+            sportKey: league.sportKey,
+          };
+        });
+
+        setLeagues(mappedLeagues);
       } catch (error) {
         console.error('Error loading leagues:', error);
+
+        const fallbackLeagues: League[] = FEATURED_LEAGUES.map((league) => ({
+          id: league.sportKey,
+          name: league.name,
+          logo: null,
+          sportKey: league.sportKey,
+        }));
+
+        setLeagues(fallbackLeagues);
       } finally {
         setLoading(false);
       }
