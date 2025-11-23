@@ -9,7 +9,34 @@ interface ViewerCountCache {
 }
 
 const viewerCountCache = new Map<string, ViewerCountCache>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+// LocalStorage cache key
+const LOCAL_STORAGE_KEY = 'viewer_counts_cache';
+
+// Load cache from localStorage on init
+const loadCacheFromStorage = (): Map<string, ViewerCountCache> => {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return new Map(Object.entries(parsed));
+    }
+  } catch (error) {
+    console.warn('Failed to load viewer count cache:', error);
+  }
+  return new Map();
+};
+
+// Save cache to localStorage
+const saveCacheToStorage = () => {
+  try {
+    const cacheObj = Object.fromEntries(viewerCountCache);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cacheObj));
+  } catch (error) {
+    console.warn('Failed to save viewer count cache:', error);
+  }
+};
 
 /**
  * Check if a match is currently live
@@ -148,7 +175,18 @@ export const fetchBatchViewerCounts = async (
  * Enrich matches with viewer counts and mark popular ones
  */
 export const enrichMatchesWithViewers = async (matches: Match[]): Promise<Match[]> => {
+  // Load cache from storage on first call
+  if (viewerCountCache.size === 0) {
+    const storedCache = loadCacheFromStorage();
+    storedCache.forEach((value, key) => {
+      viewerCountCache.set(key, value);
+    });
+  }
+
   const viewerCounts = await fetchBatchViewerCounts(matches);
+  
+  // Save updated cache to storage
+  saveCacheToStorage();
   
   return matches.map(match => {
     const viewerCount = viewerCounts.get(match.id);
