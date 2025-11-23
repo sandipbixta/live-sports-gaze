@@ -16,14 +16,15 @@ interface MatchResult {
 }
 
 const FEATURED_LEAGUES = [
-  { name: 'Premier League', sportKey: 'soccer_epl' },
-  { name: 'La Liga', sportKey: 'soccer_spain_la_liga' },
-  { name: 'Serie A', sportKey: 'soccer_italy_serie_a' },
-  { name: 'Bundesliga', sportKey: 'soccer_germany_bundesliga' },
+  { name: "Premier League", competitionCode: "PL" },
+  { name: "La Liga", competitionCode: "PD" },
+  { name: "Bundesliga", competitionCode: "BL1" },
+  { name: "Serie A", competitionCode: "SA" },
+  { name: "Ligue 1", competitionCode: "FL1" },
 ];
 
 const CACHE_KEY = 'league_results_cache';
-const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour to reduce API calls
 
 interface CachedData {
   results: MatchResult[];
@@ -70,7 +71,7 @@ const LeagueResults: React.FC = () => {
 
       for (const league of FEATURED_LEAGUES) {
         try {
-          const response = await matchesService.fetchRecentScores(league.sportKey);
+          const response = await matchesService.fetchRecentScores(league.competitionCode);
           
           // Check for quota exceeded
           if (response.quotaExceeded) {

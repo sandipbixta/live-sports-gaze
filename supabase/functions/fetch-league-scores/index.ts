@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,31 +11,34 @@ serve(async (req) => {
   }
 
   try {
-    const { sportKey } = await req.json();
-    console.log(`Fetching recent scores for sport: ${sportKey}`);
+    const { competitionCode } = await req.json();
+    console.log(`Fetching recent scores for competition: ${competitionCode}`);
 
-    const apiKey = Deno.env.get('ODDS_API_KEY');
+    const apiKey = Deno.env.get('FOOTBALL_DATA_API_KEY');
     if (!apiKey) {
-      throw new Error('ODDS_API_KEY not configured');
+      throw new Error('FOOTBALL_DATA_API_KEY not configured');
     }
     
-    // Fetch recent scores (last 3 days)
-    const daysFrom = 3;
-    const scoresUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/scores?apiKey=${apiKey}&daysFrom=${daysFrom}`;
-    console.log(`Calling API: ${scoresUrl.replace(apiKey, 'API_KEY_HIDDEN')}`);
+    // Fetch recent finished matches for the competition
+    const scoresUrl = `https://api.football-data.org/v4/competitions/${competitionCode}/matches?status=FINISHED`;
+    console.log(`Calling football-data.org API for ${competitionCode}`);
     
-    const scoresResponse = await fetch(scoresUrl);
+    const scoresResponse = await fetch(scoresUrl, {
+      headers: {
+        'X-Auth-Token': apiKey
+      }
+    });
     
     if (!scoresResponse.ok) {
       const errorText = await scoresResponse.text();
       console.error(`API Error (${scoresResponse.status}):`, errorText);
       
-      // Handle quota exceeded gracefully
-      if (scoresResponse.status === 401 || scoresResponse.status === 429) {
+      // Handle quota/rate limit errors gracefully
+      if (scoresResponse.status === 429) {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            message: 'API quota exceeded',
+            message: 'API rate limit reached',
             quotaExceeded: true,
             scores: [] 
           }),
@@ -47,16 +49,9 @@ serve(async (req) => {
       throw new Error(`API returned ${scoresResponse.status}: ${errorText.substring(0, 200)}`);
     }
     
-    const contentType = scoresResponse.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const responseText = await scoresResponse.text();
-      console.error('Non-JSON response:', responseText.substring(0, 500));
-      throw new Error(`API returned non-JSON response (${contentType})`);
-    }
-    
-    const scoresData = await scoresResponse.json();
+    const data = await scoresResponse.json();
 
-    if (!scoresData || scoresData.length === 0) {
+    if (!data.matches || data.matches.length === 0) {
       console.log('No recent scores found');
       return new Response(
         JSON.stringify({ success: true, message: 'No recent scores', scores: [] }),
@@ -64,22 +59,23 @@ serve(async (req) => {
       );
     }
 
-    // Filter completed matches and transform
-    const scores = scoresData
-      .filter((event: any) => event.completed)
-      .map((event: any) => ({
-        match_id: event.id,
-        home_team: event.home_team,
-        away_team: event.away_team,
-        home_score: event.scores?.find((s: any) => s.name === event.home_team)?.score || 0,
-        away_score: event.scores?.find((s: any) => s.name === event.away_team)?.score || 0,
-        commence_time: event.commence_time,
-        completed: event.completed,
-        sport_key: event.sport_key,
-        sport_title: event.sport_title
+    // Transform to our format and get last 10 matches
+    const scores = data.matches
+      .slice(-10)
+      .reverse()
+      .map((match: any) => ({
+        match_id: match.id.toString(),
+        home_team: match.homeTeam.name,
+        away_team: match.awayTeam.name,
+        home_score: match.score.fullTime.home || 0,
+        away_score: match.score.fullTime.away || 0,
+        commence_time: match.utcDate,
+        completed: match.status === 'FINISHED',
+        sport_key: competitionCode,
+        sport_title: match.competition.name
       }));
 
-    console.log(`Successfully fetched ${scores.length} recent scores`);
+    console.log(`Successfully fetched ${scores.length} recent scores from ${data.competition.name}`);
 
     return new Response(
       JSON.stringify({ 
