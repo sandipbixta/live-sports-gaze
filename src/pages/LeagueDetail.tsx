@@ -252,39 +252,76 @@ const LeagueDetail = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {upcomingMatches.map((match) => (
-                  <Card key={match.match_id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="text-lg font-bold">{match.home_team}</span>
-                            <Badge variant="outline">vs</Badge>
-                            <span className="text-lg font-bold">{match.away_team}</span>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>
-                              {new Date(match.commence_time).toLocaleDateString()} at{' '}
-                              {new Date(match.commence_time).toLocaleTimeString()}
-                            </span>
-                            <Badge variant="secondary">
-                              {formatDistanceToNow(new Date(match.commence_time), { addSuffix: true })}
-                            </Badge>
-                          </div>
-                          {match.bookmakers?.length > 0 && (
-                            <div className="mt-3 flex gap-2">
-                              {match.bookmakers[0].markets.map((outcome: any, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs">
-                                  {outcome.name}: {outcome.price}
-                                </Badge>
-                              ))}
+                {upcomingMatches.map((match) => {
+                  const homeTeam = teams.find(t => t.team_name === match.home_team);
+                  const awayTeam = teams.find(t => t.team_name === match.away_team);
+                  
+                  return (
+                    <Card key={match.match_id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3 flex-1">
+                                <div className="w-10 h-10 flex-shrink-0">
+                                  {homeTeam?.logo_url ? (
+                                    <img
+                                      src={homeTeam.logo_url}
+                                      alt={match.home_team}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
+                                      <Trophy className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="text-lg font-bold">{match.home_team}</span>
+                              </div>
+                              
+                              <Badge variant="outline" className="mx-4">vs</Badge>
+                              
+                              <div className="flex items-center gap-3 flex-1 justify-end">
+                                <span className="text-lg font-bold">{match.away_team}</span>
+                                <div className="w-10 h-10 flex-shrink-0">
+                                  {awayTeam?.logo_url ? (
+                                    <img
+                                      src={awayTeam.logo_url}
+                                      alt={match.away_team}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
+                                      <Trophy className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          )}
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>
+                                {new Date(match.commence_time).toLocaleDateString()} at{' '}
+                                {new Date(match.commence_time).toLocaleTimeString()}
+                              </span>
+                              <Badge variant="secondary">
+                                {formatDistanceToNow(new Date(match.commence_time), { addSuffix: true })}
+                              </Badge>
+                            </div>
+                            {match.bookmakers?.length > 0 && (
+                              <div className="mt-3 flex gap-2">
+                                {match.bookmakers[0].markets.map((outcome: any, idx: number) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {outcome.name}: {outcome.price}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
@@ -309,32 +346,65 @@ const LeagueDetail = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {recentScores.map((score) => (
-                  <Card key={score.match_id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex-1 text-right">
-                              <span className="text-lg font-bold">{score.home_team}</span>
+                {recentScores.map((score) => {
+                  const homeTeam = teams.find(t => t.team_name === score.home_team);
+                  const awayTeam = teams.find(t => t.team_name === score.away_team);
+                  
+                  return (
+                    <Card key={score.match_id}>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-3 flex-1 justify-end">
+                                <span className="text-lg font-bold">{score.home_team}</span>
+                                <div className="w-10 h-10 flex-shrink-0">
+                                  {homeTeam?.logo_url ? (
+                                    <img
+                                      src={homeTeam.logo_url}
+                                      alt={score.home_team}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
+                                      <Trophy className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div className="px-6">
+                                <Badge variant="default" className="text-lg px-4 py-1">
+                                  {score.home_score} - {score.away_score}
+                                </Badge>
+                              </div>
+                              
+                              <div className="flex items-center gap-3 flex-1">
+                                <div className="w-10 h-10 flex-shrink-0">
+                                  {awayTeam?.logo_url ? (
+                                    <img
+                                      src={awayTeam.logo_url}
+                                      alt={score.away_team}
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
+                                      <Trophy className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="text-lg font-bold">{score.away_team}</span>
+                              </div>
                             </div>
-                            <div className="px-6">
-                              <Badge variant="default" className="text-lg px-4 py-1">
-                                {score.home_score} - {score.away_score}
-                              </Badge>
+                            <div className="text-center text-sm text-muted-foreground">
+                              {new Date(score.commence_time).toLocaleDateString()}
                             </div>
-                            <div className="flex-1">
-                              <span className="text-lg font-bold">{score.away_team}</span>
-                            </div>
-                          </div>
-                          <div className="text-center text-sm text-muted-foreground">
-                            {new Date(score.commence_time).toLocaleDateString()}
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
