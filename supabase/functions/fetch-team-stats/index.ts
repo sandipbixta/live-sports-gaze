@@ -16,8 +16,11 @@ serve(async (req) => {
     
     console.log(`Fetching stats for team: ${teamName}, sport: ${sport}`);
 
-    // Search for team on TheSportsDB (free API, no key needed)
-    const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`;
+    // Get API key from environment
+    const apiKey = Deno.env.get('THESPORTSDB_API_KEY') || '3';
+    
+    // Search for team on TheSportsDB
+    const searchUrl = `https://www.thesportsdb.com/api/v1/json/${apiKey}/searchteams.php?t=${encodeURIComponent(teamName)}`;
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
 
