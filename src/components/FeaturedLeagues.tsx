@@ -75,7 +75,7 @@ const FeaturedLeagues: React.FC = () => {
   }, []);
 
   const handleLeagueClick = (sportKey: string) => {
-    navigate(`/leagues/${sportKey}`);
+    navigate(`/league/${sportKey}`);
   };
 
   if (loading) {
