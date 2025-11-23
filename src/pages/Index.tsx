@@ -25,6 +25,7 @@ import { HeroCarousel } from '../components/HeroCarousel';
 import heroBackground from '../assets/hero-background.jpeg';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
+import FeaturedLeagues from '../components/FeaturedLeagues';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -235,6 +236,9 @@ const Index = () => {
         <div className="mb-4">
           <TelegramBanner />
         </div>
+
+        {/* Featured Leagues Widget */}
+        <FeaturedLeagues />
 
         {/* Hero Carousel with Match Posters */}
         <HeroCarousel />
