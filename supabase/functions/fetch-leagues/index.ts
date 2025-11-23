@@ -55,24 +55,55 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Transform sports into leagues format
-    const leagues = sportsData
-      .filter((sport: any) => sport.active) // Only active sports
-      .map((sport: any) => ({
-        league_id: sport.key,
-        league_name: sport.title,
-        sport: sport.group.toLowerCase().replace(/\s+/g, '_'),
-        country: null, // The Odds API doesn't provide country info
-        logo_url: null, // The Odds API doesn't provide logos
-        description: sport.description,
-        website: null,
-        year_founded: null,
-      }));
+    // Transform sports into leagues format and fetch logos
+    console.log('Fetching league badges from TheSportsDB...');
+    const leaguesWithLogos = await Promise.all(
+      sportsData
+        .filter((sport: any) => sport.active)
+        .map(async (sport: any) => {
+          const league = {
+            league_id: sport.key,
+            league_name: sport.title,
+            sport: sport.group.toLowerCase().replace(/\s+/g, '_'),
+            country: null,
+            logo_url: null,
+            description: sport.description,
+            website: null,
+            year_founded: null,
+          };
+
+          // Try to fetch logo from TheSportsDB
+          try {
+            const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?s=${encodeURIComponent(sport.group)}`;
+            const response = await fetch(searchUrl);
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.countries && data.countries.length > 0) {
+                // Try to find matching league by title
+                const matchedLeague = data.countries.find((l: any) => 
+                  l.strLeague?.toLowerCase().includes(sport.title.toLowerCase()) ||
+                  sport.title.toLowerCase().includes(l.strLeague?.toLowerCase())
+                );
+                
+                if (matchedLeague) {
+                  league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
+                  league.country = matchedLeague.strCountry || null;
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`Error fetching logo for ${sport.title}:`, error);
+          }
+
+          return league;
+        })
+    );
 
     // Upsert leagues into database
     const { data, error } = await supabase
       .from('leagues')
-      .upsert(leagues, { onConflict: 'league_id' })
+      .upsert(leaguesWithLogos, { onConflict: 'league_id' })
       .select();
 
     if (error) {
@@ -80,7 +111,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Successfully fetched and stored ${leagues.length} leagues`);
+    console.log(`Successfully fetched and stored ${leaguesWithLogos.length} leagues with logos`);
 
     return new Response(
       JSON.stringify({ 
