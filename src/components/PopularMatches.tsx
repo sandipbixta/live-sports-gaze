@@ -42,11 +42,26 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
 
       setIsLoading(true);
       
-      // OPTIMIZATION: Only check top 50 live matches to reduce API calls
+      // SMART PRIORITIZATION: Sort by likelihood of having viewers BEFORE fetching
       const liveMatches = consolidatedMatches.filter(m => isMatchLive(m));
-      const matchesToCheck = liveMatches.slice(0, 50);
       
-      console.log(`🔥 Checking viewer counts for ${matchesToCheck.length} of ${liveMatches.length} live matches`);
+      const prioritizedMatches = liveMatches
+        .map(match => {
+          const trendingInfo = isTrendingMatch(match.title);
+          // Calculate priority score: popular flag + trending score + has poster
+          const priorityScore = 
+            (match.popular ? 100 : 0) + 
+            (trendingInfo.score * 10) + 
+            (match.poster ? 50 : 0);
+          return { match, priorityScore };
+        })
+        .sort((a, b) => b.priorityScore - a.priorityScore)
+        .map(item => item.match);
+      
+      // Only check top 25 most likely popular matches (faster!)
+      const matchesToCheck = prioritizedMatches.slice(0, 25);
+      
+      console.log(`🔥 Checking viewer counts for top ${matchesToCheck.length} prioritized matches`);
       
       try {
         const matchesWithViewers = await enrichMatchesWithViewers(matchesToCheck);
@@ -71,15 +86,8 @@ const PopularMatches: React.FC<PopularMatchesProps> = ({
         setEnrichedMatches(sortedMatches);
       } catch (error) {
         console.error('Error enriching popular matches:', error);
-        // Fallback: filter for live matches without sorting
-        const fallbackMatches = consolidatedMatches
-          .filter(m => isMatchLive(m))
-          .slice(0, 20)
-          .sort((a, b) => {
-            const aTrending = isTrendingMatch(a.title);
-            const bTrending = isTrendingMatch(b.title);
-            return bTrending.score - aTrending.score;
-          });
+        // Fallback: use prioritized matches without viewer counts
+        const fallbackMatches = prioritizedMatches.slice(0, 20);
         setEnrichedMatches(fallbackMatches);
       } finally {
         setIsLoading(false);
