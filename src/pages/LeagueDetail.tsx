@@ -5,12 +5,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, ArrowLeft, ExternalLink, RefreshCw, Calendar, History } from "lucide-react";
+import { Trophy, ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import { leaguesService } from "@/services/leaguesService";
-import { matchesService } from "@/services/matchesService";
 import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
 
 interface League {
   league_id: string;
@@ -36,33 +34,7 @@ const LeagueDetail = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [league, setLeague] = useState<League | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
-  const [recentScores, setRecentScores] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [matchesLoading, setMatchesLoading] = useState(false);
-
-  const loadMatchesData = async (leagueData: League) => {
-    setMatchesLoading(true);
-    try {
-      // Fetch upcoming matches and recent scores in parallel
-      const [matchesResult, scoresResult] = await Promise.all([
-        matchesService.fetchUpcomingMatches(leagueData.league_id),
-        matchesService.fetchRecentScores(leagueData.league_id)
-      ]);
-
-      if (matchesResult?.success) {
-        setUpcomingMatches(matchesResult.matches || []);
-      }
-
-      if (scoresResult?.success) {
-        setRecentScores(scoresResult.scores || []);
-      }
-    } catch (error) {
-      console.error("Error loading matches data:", error);
-    } finally {
-      setMatchesLoading(false);
-    }
-  };
 
   const loadLeagueData = async () => {
     if (!leagueId) return;
@@ -94,9 +66,6 @@ const LeagueDetail = () => {
         }
         
         setTeams(teamsData);
-        
-        // Load matches and scores
-        loadMatchesData(leagueData);
       }
     } catch (error) {
       console.error("Error loading league data:", error);
@@ -216,198 +185,13 @@ const LeagueDetail = () => {
         </Card>
 
         {/* Content Tabs */}
-        <Tabs defaultValue="results" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="results">
-              <History className="w-4 h-4 mr-2" />
-              Results
-            </TabsTrigger>
-            <TabsTrigger value="matches">
-              <Calendar className="w-4 h-4 mr-2" />
-              Upcoming
-            </TabsTrigger>
+        <Tabs defaultValue="teams" className="w-full">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="teams">
               <Trophy className="w-4 h-4 mr-2" />
               Teams
             </TabsTrigger>
           </TabsList>
-
-          {/* Upcoming Matches */}
-          <TabsContent value="matches" className="mt-6">
-            {matchesLoading ? (
-              <div className="grid gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-24" />
-                ))}
-              </div>
-            ) : upcomingMatches.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">No Upcoming Matches</h3>
-                  <p className="text-muted-foreground">
-                    Check back later for upcoming fixtures
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {upcomingMatches.map((match) => {
-                  const homeTeam = teams.find(t => t.team_name === match.home_team);
-                  const awayTeam = teams.find(t => t.team_name === match.away_team);
-                  
-                  return (
-                    <Card key={match.match_id}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-4">
-                              <div className="flex items-center gap-3 flex-1">
-                                <div className="w-10 h-10 flex-shrink-0">
-                                  {homeTeam?.logo_url ? (
-                                    <img
-                                      src={homeTeam.logo_url}
-                                      alt={match.home_team}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
-                                      <Trophy className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                  )}
-                                </div>
-                                <span className="text-lg font-bold">{match.home_team}</span>
-                              </div>
-                              
-                              <Badge variant="outline" className="mx-4">vs</Badge>
-                              
-                              <div className="flex items-center gap-3 flex-1 justify-end">
-                                <span className="text-lg font-bold">{match.away_team}</span>
-                                <div className="w-10 h-10 flex-shrink-0">
-                                  {awayTeam?.logo_url ? (
-                                    <img
-                                      src={awayTeam.logo_url}
-                                      alt={match.away_team}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
-                                      <Trophy className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>
-                                {new Date(match.commence_time).toLocaleDateString()} at{' '}
-                                {new Date(match.commence_time).toLocaleTimeString()}
-                              </span>
-                              <Badge variant="secondary">
-                                {formatDistanceToNow(new Date(match.commence_time), { addSuffix: true })}
-                              </Badge>
-                            </div>
-                            {match.bookmakers?.length > 0 && (
-                              <div className="mt-3 flex gap-2">
-                                {match.bookmakers[0].markets.map((outcome: any, idx: number) => (
-                                  <Badge key={idx} variant="outline" className="text-xs">
-                                    {outcome.name}: {outcome.price}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Recent Results */}
-          <TabsContent value="results" className="mt-6">
-            {matchesLoading ? (
-              <div className="grid gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-24" />
-                ))}
-              </div>
-            ) : recentScores.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <History className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">No Recent Results</h3>
-                  <p className="text-muted-foreground">
-                    Recent match results will appear here
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {recentScores.map((score) => {
-                  const homeTeam = teams.find(t => t.team_name === score.home_team);
-                  const awayTeam = teams.find(t => t.team_name === score.away_team);
-                  
-                  return (
-                    <Card key={score.match_id}>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-3 flex-1 justify-end">
-                                <span className="text-lg font-bold">{score.home_team}</span>
-                                <div className="w-10 h-10 flex-shrink-0">
-                                  {homeTeam?.logo_url ? (
-                                    <img
-                                      src={homeTeam.logo_url}
-                                      alt={score.home_team}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
-                                      <Trophy className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              
-                              <div className="px-6">
-                                <Badge variant="default" className="text-lg px-4 py-1">
-                                  {score.home_score} - {score.away_score}
-                                </Badge>
-                              </div>
-                              
-                              <div className="flex items-center gap-3 flex-1">
-                                <div className="w-10 h-10 flex-shrink-0">
-                                  {awayTeam?.logo_url ? (
-                                    <img
-                                      src={awayTeam.logo_url}
-                                      alt={score.away_team}
-                                      className="w-full h-full object-contain"
-                                    />
-                                  ) : (
-                                    <div className="w-full h-full rounded-full bg-muted flex items-center justify-center">
-                                      <Trophy className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                  )}
-                                </div>
-                                <span className="text-lg font-bold">{score.away_team}</span>
-                              </div>
-                            </div>
-                            <div className="text-center text-sm text-muted-foreground">
-                              {new Date(score.commence_time).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
 
           {/* Teams */}
           <TabsContent value="teams" className="mt-6">
