@@ -109,10 +109,39 @@ serve(async (req) => {
 
     const teams = Array.from(teamsMap.values());
 
+    // Fetch logos from TheSportsDB for each team
+    console.log('Fetching logos from TheSportsDB...');
+    const teamsWithLogos = await Promise.all(
+      teams.map(async (team) => {
+        try {
+          const logoUrl = `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(team.team_name)}`;
+          const logoResponse = await fetch(logoUrl);
+          
+          if (logoResponse.ok) {
+            const logoData = await logoResponse.json();
+            if (logoData.teams && logoData.teams.length > 0) {
+              const teamData = logoData.teams[0];
+              return {
+                ...team,
+                logo_url: teamData.strBadge || teamData.strLogo || null,
+                stadium: teamData.strStadium || team.stadium,
+                country: teamData.strCountry || team.country,
+                year_founded: teamData.intFormedYear || team.year_founded,
+                description: teamData.strDescriptionEN || team.description
+              };
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching logo for ${team.team_name}:`, error);
+        }
+        return team;
+      })
+    );
+
     // Upsert teams into database
     const { data, error } = await supabase
       .from('league_teams')
-      .upsert(teams, { onConflict: 'team_id' })
+      .upsert(teamsWithLogos, { onConflict: 'team_id' })
       .select();
 
     if (error) {
@@ -120,7 +149,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Successfully fetched and stored ${teams.length} teams`);
+    console.log(`Successfully fetched and stored ${teams.length} teams with logos`);
 
     return new Response(
       JSON.stringify({ 

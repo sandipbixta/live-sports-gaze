@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.fetch-league-scores]
 verify_jwt = false
+
+[functions.fetch-team-logo]
+verify_jwt = false
