@@ -74,21 +74,37 @@ serve(async (req) => {
 
           // Try to fetch logo from TheSportsDB
           try {
-            const searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?s=${encodeURIComponent(sport.group)}`;
-            const response = await fetch(searchUrl);
+            // First try searching by league name
+            let searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?l=${encodeURIComponent(sport.title)}`;
+            let response = await fetch(searchUrl);
             
             if (response.ok) {
               const data = await response.json();
               if (data.countries && data.countries.length > 0) {
-                // Try to find matching league by title
-                const matchedLeague = data.countries.find((l: any) => 
-                  l.strLeague?.toLowerCase().includes(sport.title.toLowerCase()) ||
-                  sport.title.toLowerCase().includes(l.strLeague?.toLowerCase())
-                );
-                
-                if (matchedLeague) {
-                  league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
-                  league.country = matchedLeague.strCountry || null;
+                const matchedLeague = data.countries[0]; // Take first match
+                league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
+                league.country = matchedLeague.strCountry || null;
+              }
+            }
+            
+            // If no logo found, try searching by sport group
+            if (!league.logo_url) {
+              searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?s=${encodeURIComponent(sport.group)}`;
+              response = await fetch(searchUrl);
+              
+              if (response.ok) {
+                const data = await response.json();
+                if (data.countries && data.countries.length > 0) {
+                  // Try to find matching league by title
+                  const matchedLeague = data.countries.find((l: any) => 
+                    l.strLeague?.toLowerCase().includes(sport.title.toLowerCase()) ||
+                    sport.title.toLowerCase().includes(l.strLeague?.toLowerCase())
+                  );
+                  
+                  if (matchedLeague) {
+                    league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
+                    league.country = matchedLeague.strCountry || null;
+                  }
                 }
               }
             }
