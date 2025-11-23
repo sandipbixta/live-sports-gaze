@@ -44,11 +44,11 @@ const FeaturedLeagues: React.FC = () => {
             className="flex-shrink-0 w-32 h-32 bg-white rounded-xl border border-border hover:border-primary transition-all duration-200 hover:shadow-lg hover:scale-105 flex flex-col items-center justify-center p-3 gap-2 group"
             aria-label={`View ${league.name}`}
           >
-            <div className="w-16 h-16 flex items-center justify-center">
+            <div className="w-16 h-16 flex items-center justify-center p-2">
               <img
                 src={league.logo}
                 alt={`${league.name} logo`}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full object-contain"
               />
             </div>
             <p className="text-xs font-semibold text-center text-foreground line-clamp-2">
