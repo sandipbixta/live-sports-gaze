@@ -116,7 +116,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        count: leagues.length,
+        count: leaguesWithLogos.length,
         leagues: data 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
