@@ -1,0 +1,325 @@
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, ArrowLeft, Calendar, TrendingUp } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
+import { format } from "date-fns";
+
+interface Standing {
+  position: number;
+  team: {
+    name: string;
+    crest: string;
+  };
+  playedGames: number;
+  won: number;
+  draw: number;
+  lost: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+}
+
+interface Match {
+  id: number;
+  homeTeam: { name: string; crest: string };
+  awayTeam: { name: string; crest: string };
+  score: { home: number | null; away: number | null };
+  utcDate: string;
+  status: string;
+}
+
+interface CompetitionData {
+  competition: {
+    id: number;
+    name: string;
+    emblem: string;
+    area: { name: string; flag: string };
+  };
+  standings: Standing[];
+  upcomingMatches: Match[];
+  finishedMatches: Match[];
+}
+
+const FootballLeagueDetail = () => {
+  const { competitionId } = useParams();
+  const navigate = useNavigate();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['football-league-detail', competitionId],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('fetch-league-detail', {
+        body: { competitionId: Number(competitionId) }
+      });
+      if (error) throw error;
+      return data as CompetitionData;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!competitionId,
+  });
+
+  if (isLoading) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Skeleton className="h-12 w-48 mb-8" />
+          <Skeleton className="h-64 w-full mb-8" />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-8">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Leagues
+          </Button>
+          <div className="text-center py-12 bg-card rounded-lg border border-border">
+            <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-xl font-semibold mb-2">Unable to Load League Data</h3>
+            <p className="text-muted-foreground">
+              {error instanceof Error ? error.message : 'Please try again later'}
+            </p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <PageLayout>
+      <div className="container mx-auto px-4 py-8">
+        <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-8">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Leagues
+        </Button>
+
+        {/* League Header */}
+        <Card className="mb-8">
+          <CardContent className="p-8">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-32 h-32 flex-shrink-0">
+                <img
+                  src={data.competition.emblem}
+                  alt={data.competition.name}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
+                />
+              </div>
+              
+              <div className="flex-1 text-center md:text-left">
+                <h1 className="text-4xl font-bold mb-2">{data.competition.name}</h1>
+                <div className="flex items-center gap-2 justify-center md:justify-start">
+                  {data.competition.area.flag && (
+                    <img
+                      src={data.competition.area.flag}
+                      alt={data.competition.area.name}
+                      className="w-6 h-4 object-cover rounded-sm"
+                    />
+                  )}
+                  <Badge variant="secondary">{data.competition.area.name}</Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Content Tabs */}
+        <Tabs defaultValue="standings" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="standings">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Standings
+            </TabsTrigger>
+            <TabsTrigger value="upcoming">
+              <Calendar className="w-4 h-4 mr-2" />
+              Upcoming
+            </TabsTrigger>
+            <TabsTrigger value="results">
+              <Trophy className="w-4 h-4 mr-2" />
+              Results
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Standings Table */}
+          <TabsContent value="standings" className="mt-6">
+            {data.standings.length > 0 ? (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="border-b border-border bg-muted/50">
+                        <tr>
+                          <th className="text-left p-3 font-semibold">#</th>
+                          <th className="text-left p-3 font-semibold">Team</th>
+                          <th className="text-center p-3 font-semibold">P</th>
+                          <th className="text-center p-3 font-semibold">W</th>
+                          <th className="text-center p-3 font-semibold">D</th>
+                          <th className="text-center p-3 font-semibold">L</th>
+                          <th className="text-center p-3 font-semibold">GF</th>
+                          <th className="text-center p-3 font-semibold">GA</th>
+                          <th className="text-center p-3 font-semibold">GD</th>
+                          <th className="text-center p-3 font-semibold font-bold">Pts</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.standings.map((standing) => (
+                          <tr key={standing.position} className="border-b border-border hover:bg-muted/50">
+                            <td className="p-3 font-semibold">{standing.position}</td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src={standing.team.crest}
+                                  alt={standing.team.name}
+                                  className="w-6 h-6 object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.src = '/placeholder.svg';
+                                  }}
+                                />
+                                <span className="font-medium">{standing.team.name}</span>
+                              </div>
+                            </td>
+                            <td className="text-center p-3">{standing.playedGames}</td>
+                            <td className="text-center p-3">{standing.won}</td>
+                            <td className="text-center p-3">{standing.draw}</td>
+                            <td className="text-center p-3">{standing.lost}</td>
+                            <td className="text-center p-3">{standing.goalsFor}</td>
+                            <td className="text-center p-3">{standing.goalsAgainst}</td>
+                            <td className="text-center p-3">{standing.goalDifference}</td>
+                            <td className="text-center p-3 font-bold">{standing.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Standings Available</h3>
+                  <p className="text-muted-foreground">Standings data is not available for this competition yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Upcoming Matches */}
+          <TabsContent value="upcoming" className="mt-6">
+            {data.upcomingMatches.length > 0 ? (
+              <div className="grid gap-4">
+                {data.upcomingMatches.map((match) => (
+                  <Card key={match.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1">
+                          <img
+                            src={match.homeTeam.crest}
+                            alt={match.homeTeam.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          <span className="font-semibold">{match.homeTeam.name}</span>
+                        </div>
+                        <div className="text-center px-4">
+                          <Badge variant="outline">{format(new Date(match.utcDate), "MMM dd, HH:mm")}</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1 justify-end">
+                          <span className="font-semibold">{match.awayTeam.name}</span>
+                          <img
+                            src={match.awayTeam.crest}
+                            alt={match.awayTeam.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Upcoming Matches</h3>
+                  <p className="text-muted-foreground">There are no scheduled matches at this time.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Finished Matches */}
+          <TabsContent value="results" className="mt-6">
+            {data.finishedMatches.length > 0 ? (
+              <div className="grid gap-4">
+                {data.finishedMatches.map((match) => (
+                  <Card key={match.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1">
+                          <img
+                            src={match.homeTeam.crest}
+                            alt={match.homeTeam.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          <span className="font-semibold">{match.homeTeam.name}</span>
+                        </div>
+                        <div className="text-center px-6">
+                          <div className="text-2xl font-bold">
+                            {match.score.home} - {match.score.away}
+                          </div>
+                          <Badge variant="secondary" className="text-xs mt-1">FT</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1 justify-end">
+                          <span className="font-semibold">{match.awayTeam.name}</span>
+                          <img
+                            src={match.awayTeam.crest}
+                            alt={match.awayTeam.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-semibold mb-2">No Recent Results</h3>
+                  <p className="text-muted-foreground">There are no finished matches yet.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </PageLayout>
+  );
+};
+
+export default FootballLeagueDetail;

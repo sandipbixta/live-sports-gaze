@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.fetch-football-competitions]
 verify_jwt = false
+
+[functions.fetch-league-detail]
+verify_jwt = false

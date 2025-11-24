@@ -36,6 +36,7 @@ import UfcStreaming from "./pages/UfcStreaming";
 import Leagues from "./pages/Leagues";
 import LeagueDetail from "./pages/LeagueDetail";
 import FootballLeagues from "./pages/FootballLeagues";
+import FootballLeagueDetail from "./pages/FootballLeagueDetail";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
@@ -112,7 +113,7 @@ const App: React.FC = () => {
               } />
               <Route path="/football-league/:competitionId" element={
                 <SEOPageTracker contentType="home">
-                  <LeagueDetail />
+                  <FootballLeagueDetail />
                 </SEOPageTracker>
               } />
               <Route path="/analytics" element={
