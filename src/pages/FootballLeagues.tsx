@@ -44,22 +44,8 @@ const FootballLeagues = () => {
   const cupCompetitions = competitions?.filter(c => c.type === 'CUP') || [];
 
   const handleCompetitionClick = (competitionId: number, competitionCode: string) => {
-    // Map competition codes to existing routes or use generic route
-    const routeMap: Record<string, string> = {
-      'PL': 'premier-league',
-      'PD': 'laliga',
-      'FL1': 'ligue-1',
-      'BL1': 'bundesliga',
-      'SA': 'serie-a',
-      'CL': 'champions-league',
-    };
-
-    const route = routeMap[competitionCode];
-    if (route) {
-      navigate(`/leagues/${route}`);
-    } else {
-      navigate(`/football-league/${competitionId}`);
-    }
+    // Always use the new football league detail page
+    navigate(`/football-league/${competitionId}`);
   };
 
   if (isLoading) {
