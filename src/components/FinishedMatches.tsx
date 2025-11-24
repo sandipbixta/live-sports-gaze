@@ -43,20 +43,8 @@ const FinishedMatches = () => {
   });
 
   const handleMatchClick = (competitionId: number, competitionName: string) => {
-    // Map competition IDs to league routes
-    const leagueMap: Record<number, string> = {
-      2021: 'premier-league', // Premier League
-      2014: 'laliga', // La Liga
-      2015: 'ligue-1', // Ligue 1
-      2002: 'bundesliga', // Bundesliga
-      2019: 'serie-a', // Serie A
-      2001: 'champions-league', // Champions League
-    };
-
-    const leagueRoute = leagueMap[competitionId];
-    if (leagueRoute) {
-      navigate(`/leagues/${leagueRoute}`);
-    }
+    // Navigate to football league detail page
+    navigate(`/football-league/${competitionId}`);
   };
 
   if (isLoading) {
