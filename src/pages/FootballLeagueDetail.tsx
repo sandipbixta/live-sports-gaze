@@ -67,9 +67,9 @@ const FootballLeagueDetail = () => {
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-12 w-48 mb-8" />
-          <Skeleton className="h-64 w-full mb-8" />
+        <div className="container mx-auto px-4 py-4">
+          <Skeleton className="h-10 w-40 mb-4" />
+          <Skeleton className="h-48 w-full mb-4" />
         </div>
       </PageLayout>
     );
@@ -78,15 +78,15 @@ const FootballLeagueDetail = () => {
   if (error || !data) {
     return (
       <PageLayout>
-        <div className="container mx-auto px-4 py-8">
-          <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-8">
+        <div className="container mx-auto px-4 py-4">
+          <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Leagues
           </Button>
-          <div className="text-center py-12 bg-card rounded-lg border border-border">
-            <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">Unable to Load League Data</h3>
-            <p className="text-muted-foreground">
+          <div className="text-center py-8 bg-card rounded-lg border border-border">
+            <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">Unable to Load League Data</h3>
+            <p className="text-sm text-muted-foreground">
               {error instanceof Error ? error.message : 'Please try again later'}
             </p>
           </div>
@@ -97,17 +97,17 @@ const FootballLeagueDetail = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-8">
+      <div className="container mx-auto px-4 py-4">
+        <Button onClick={() => navigate('/leagues')} variant="ghost" className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Leagues
         </Button>
 
         {/* League Header */}
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-32 h-32 flex-shrink-0">
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="w-20 h-20 flex-shrink-0">
                 <img
                   src={data.competition.emblem}
                   alt={data.competition.name}
@@ -119,16 +119,16 @@ const FootballLeagueDetail = () => {
               </div>
               
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl font-bold mb-2">{data.competition.name}</h1>
+                <h1 className="text-2xl font-bold mb-2">{data.competition.name}</h1>
                 <div className="flex items-center gap-2 justify-center md:justify-start">
                   {data.competition.area.flag && (
                     <img
                       src={data.competition.area.flag}
                       alt={data.competition.area.name}
-                      className="w-6 h-4 object-cover rounded-sm"
+                      className="w-5 h-3 object-cover rounded-sm"
                     />
                   )}
-                  <Badge variant="secondary">{data.competition.area.name}</Badge>
+                  <Badge variant="secondary" className="text-xs">{data.competition.area.name}</Badge>
                 </div>
               </div>
             </div>
@@ -153,36 +153,36 @@ const FootballLeagueDetail = () => {
           </TabsList>
 
           {/* Standings Table */}
-          <TabsContent value="standings" className="mt-6">
+          <TabsContent value="standings" className="mt-4">
             {data.standings.length > 0 ? (
               <Card>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full text-sm">
                       <thead className="border-b border-border bg-muted/50">
                         <tr>
-                          <th className="text-left p-3 font-semibold">#</th>
-                          <th className="text-left p-3 font-semibold">Team</th>
-                          <th className="text-center p-3 font-semibold">P</th>
-                          <th className="text-center p-3 font-semibold">W</th>
-                          <th className="text-center p-3 font-semibold">D</th>
-                          <th className="text-center p-3 font-semibold">L</th>
-                          <th className="text-center p-3 font-semibold">GF</th>
-                          <th className="text-center p-3 font-semibold">GA</th>
-                          <th className="text-center p-3 font-semibold">GD</th>
-                          <th className="text-center p-3 font-semibold font-bold">Pts</th>
+                          <th className="text-left p-2 font-semibold">#</th>
+                          <th className="text-left p-2 font-semibold">Team</th>
+                          <th className="text-center p-2 font-semibold">P</th>
+                          <th className="text-center p-2 font-semibold">W</th>
+                          <th className="text-center p-2 font-semibold">D</th>
+                          <th className="text-center p-2 font-semibold">L</th>
+                          <th className="text-center p-2 font-semibold">GF</th>
+                          <th className="text-center p-2 font-semibold">GA</th>
+                          <th className="text-center p-2 font-semibold">GD</th>
+                          <th className="text-center p-2 font-semibold font-bold">Pts</th>
                         </tr>
                       </thead>
                       <tbody>
                         {data.standings.map((standing) => (
                           <tr key={standing.position} className="border-b border-border hover:bg-muted/50">
-                            <td className="p-3 font-semibold">{standing.position}</td>
-                            <td className="p-3">
+                            <td className="p-2 font-semibold">{standing.position}</td>
+                            <td className="p-2">
                               <div className="flex items-center gap-2">
                                 <img
                                   src={standing.team.crest}
                                   alt={standing.team.name}
-                                  className="w-6 h-6 object-contain"
+                                  className="w-5 h-5 object-contain"
                                   onError={(e) => {
                                     e.currentTarget.src = '/placeholder.svg';
                                   }}
@@ -190,14 +190,14 @@ const FootballLeagueDetail = () => {
                                 <span className="font-medium">{standing.team.name}</span>
                               </div>
                             </td>
-                            <td className="text-center p-3">{standing.playedGames}</td>
-                            <td className="text-center p-3">{standing.won}</td>
-                            <td className="text-center p-3">{standing.draw}</td>
-                            <td className="text-center p-3">{standing.lost}</td>
-                            <td className="text-center p-3">{standing.goalsFor}</td>
-                            <td className="text-center p-3">{standing.goalsAgainst}</td>
-                            <td className="text-center p-3">{standing.goalDifference}</td>
-                            <td className="text-center p-3 font-bold">{standing.points}</td>
+                            <td className="text-center p-2">{standing.playedGames}</td>
+                            <td className="text-center p-2">{standing.won}</td>
+                            <td className="text-center p-2">{standing.draw}</td>
+                            <td className="text-center p-2">{standing.lost}</td>
+                            <td className="text-center p-2">{standing.goalsFor}</td>
+                            <td className="text-center p-2">{standing.goalsAgainst}</td>
+                            <td className="text-center p-2">{standing.goalDifference}</td>
+                            <td className="text-center p-2 font-bold">{standing.points}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -207,28 +207,77 @@ const FootballLeagueDetail = () => {
               </Card>
             ) : (
               <Card>
-                <CardContent className="p-12 text-center">
-                  <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">No Standings Available</h3>
-                  <p className="text-muted-foreground">Standings data is not available for this competition yet.</p>
+                <CardContent className="p-8 text-center">
+                  <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Standings Available</h3>
+                  <p className="text-sm text-muted-foreground">Standings data is not available for this competition yet.</p>
                 </CardContent>
               </Card>
             )}
           </TabsContent>
 
           {/* Upcoming Matches */}
-          <TabsContent value="upcoming" className="mt-6">
+          <TabsContent value="upcoming" className="mt-4">
             {data.upcomingMatches.length > 0 ? (
-              <div className="grid gap-4">
+              <div className="grid gap-3">
                 {data.upcomingMatches.map((match) => (
                   <Card key={match.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <div className="flex items-center gap-2 flex-1">
                           <img
                             src={match.homeTeam.crest}
                             alt={match.homeTeam.name}
-                            className="w-10 h-10 object-contain"
+                            className="w-7 h-7 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                          <span className="font-semibold">{match.homeTeam.name}</span>
+                        </div>
+                        <div className="text-center px-3">
+                          <Badge variant="outline" className="text-xs">{format(new Date(match.utcDate), "MMM dd, HH:mm")}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2 flex-1 justify-end">
+                          <span className="font-semibold">{match.awayTeam.name}</span>
+                          <img
+                            src={match.awayTeam.crest}
+                            alt={match.awayTeam.name}
+                            className="w-7 h-7 object-contain"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Upcoming Matches</h3>
+                  <p className="text-sm text-muted-foreground">There are no scheduled matches at this time.</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Finished Matches */}
+          <TabsContent value="results" className="mt-4">
+            {data.finishedMatches.length > 0 ? (
+              <div className="grid gap-3">
+                {data.finishedMatches.map((match) => (
+                  <Card key={match.id}>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between gap-3 text-sm">
+                        <div className="flex items-center gap-2 flex-1">
+                          <img
+                            src={match.homeTeam.crest}
+                            alt={match.homeTeam.name}
+                            className="w-7 h-7 object-contain"
                             onError={(e) => {
                               e.currentTarget.src = '/placeholder.svg';
                             }}
@@ -236,66 +285,17 @@ const FootballLeagueDetail = () => {
                           <span className="font-semibold">{match.homeTeam.name}</span>
                         </div>
                         <div className="text-center px-4">
-                          <Badge variant="outline">{format(new Date(match.utcDate), "MMM dd, HH:mm")}</Badge>
-                        </div>
-                        <div className="flex items-center gap-3 flex-1 justify-end">
-                          <span className="font-semibold">{match.awayTeam.name}</span>
-                          <img
-                            src={match.awayTeam.crest}
-                            alt={match.awayTeam.name}
-                            className="w-10 h-10 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder.svg';
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Calendar className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">No Upcoming Matches</h3>
-                  <p className="text-muted-foreground">There are no scheduled matches at this time.</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Finished Matches */}
-          <TabsContent value="results" className="mt-6">
-            {data.finishedMatches.length > 0 ? (
-              <div className="grid gap-4">
-                {data.finishedMatches.map((match) => (
-                  <Card key={match.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1">
-                          <img
-                            src={match.homeTeam.crest}
-                            alt={match.homeTeam.name}
-                            className="w-10 h-10 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder.svg';
-                            }}
-                          />
-                          <span className="font-semibold">{match.homeTeam.name}</span>
-                        </div>
-                        <div className="text-center px-6">
-                          <div className="text-2xl font-bold">
+                          <div className="text-xl font-bold">
                             {match.score.home} - {match.score.away}
                           </div>
-                          <Badge variant="secondary" className="text-xs mt-1">FT</Badge>
+                          <Badge variant="secondary" className="text-[10px] mt-1 py-0 h-4">FT</Badge>
                         </div>
-                        <div className="flex items-center gap-3 flex-1 justify-end">
+                        <div className="flex items-center gap-2 flex-1 justify-end">
                           <span className="font-semibold">{match.awayTeam.name}</span>
                           <img
                             src={match.awayTeam.crest}
                             alt={match.awayTeam.name}
-                            className="w-10 h-10 object-contain"
+                            className="w-7 h-7 object-contain"
                             onError={(e) => {
                               e.currentTarget.src = '/placeholder.svg';
                             }}
@@ -308,10 +308,10 @@ const FootballLeagueDetail = () => {
               </div>
             ) : (
               <Card>
-                <CardContent className="p-12 text-center">
-                  <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">No Recent Results</h3>
-                  <p className="text-muted-foreground">There are no finished matches yet.</p>
+                <CardContent className="p-8 text-center">
+                  <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">No Recent Results</h3>
+                  <p className="text-sm text-muted-foreground">There are no finished matches yet.</p>
                 </CardContent>
               </Card>
             )}

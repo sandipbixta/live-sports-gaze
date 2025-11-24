@@ -51,18 +51,18 @@ const FootballLeagues = () => {
   if (isLoading) {
     return (
       <PageLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-8">
-            <Trophy className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold">Football Leagues</h1>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">Football Leagues</h1>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {[...Array(10)].map((_, i) => (
               <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="w-20 h-20 rounded-full mx-auto mb-3" />
-                  <Skeleton className="h-4 w-3/4 mx-auto mb-2" />
-                  <Skeleton className="h-3 w-1/2 mx-auto" />
+                <CardContent className="p-3">
+                  <Skeleton className="w-14 h-14 rounded-full mx-auto mb-2" />
+                  <Skeleton className="h-3 w-3/4 mx-auto mb-1" />
+                  <Skeleton className="h-2 w-1/2 mx-auto" />
                 </CardContent>
               </Card>
             ))}
@@ -75,15 +75,15 @@ const FootballLeagues = () => {
   if (error) {
     return (
       <PageLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-3 mb-8">
-            <Trophy className="w-8 h-8 text-primary" />
-            <h1 className="text-4xl font-bold">Football Leagues</h1>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy className="w-6 h-6 text-primary" />
+            <h1 className="text-2xl font-bold">Football Leagues</h1>
           </div>
-          <div className="text-center py-12 bg-card rounded-lg border border-border">
-            <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">Loading Error</h3>
-            <p className="text-muted-foreground mb-4">
+          <div className="text-center py-8 bg-card rounded-lg border border-border">
+            <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">Loading Error</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               Unable to load competitions. Showing major leagues.
             </p>
           </div>
@@ -94,28 +94,28 @@ const FootballLeagues = () => {
 
   return (
     <PageLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Trophy className="w-8 h-8 text-primary" />
-          <h1 className="text-4xl font-bold">Football Leagues & Competitions</h1>
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Trophy className="w-6 h-6 text-primary" />
+          <h1 className="text-2xl font-bold">Football Leagues & Competitions</h1>
         </div>
 
         {/* League Competitions */}
         {leagueCompetitions.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-primary" />
+          <div className="mb-6">
+            <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-primary" />
               Leagues
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {leagueCompetitions.map((competition) => (
                 <Card
                   key={competition.id}
                   onClick={() => handleCompetitionClick(competition.id, competition.code)}
                   className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group"
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="relative w-20 h-20 mx-auto mb-3">
+                  <CardContent className="p-3 text-center">
+                    <div className="relative w-14 h-14 mx-auto mb-2">
                       <img
                         src={competition.emblem}
                         alt={competition.name}
@@ -125,23 +125,23 @@ const FootballLeagues = () => {
                         }}
                       />
                     </div>
-                    <h3 className="font-bold text-sm mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="font-bold text-xs mb-1 group-hover:text-primary transition-colors line-clamp-2">
                       {competition.name}
                     </h3>
-                    <div className="flex items-center justify-center gap-1 mb-2">
+                    <div className="flex items-center justify-center gap-1 mb-1">
                       {competition.area.flag && (
                         <img
                           src={competition.area.flag}
                           alt={competition.area.name}
-                          className="w-4 h-3 object-cover rounded-sm"
+                          className="w-3 h-2 object-cover rounded-sm"
                         />
                       )}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {competition.area.name}
                       </p>
                     </div>
                     {competition.currentSeason && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[9px] py-0 px-1.5 h-4">
                         MD {competition.currentSeason.currentMatchday}
                       </Badge>
                     )}
@@ -155,19 +155,19 @@ const FootballLeagues = () => {
         {/* Cup Competitions */}
         {cupCompetitions.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-              <Globe className="w-6 h-6 text-primary" />
+            <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
               Cup Competitions
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {cupCompetitions.map((competition) => (
                 <Card
                   key={competition.id}
                   onClick={() => handleCompetitionClick(competition.id, competition.code)}
                   className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-105 group"
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="relative w-20 h-20 mx-auto mb-3">
+                  <CardContent className="p-3 text-center">
+                    <div className="relative w-14 h-14 mx-auto mb-2">
                       <img
                         src={competition.emblem}
                         alt={competition.name}
@@ -177,23 +177,23 @@ const FootballLeagues = () => {
                         }}
                       />
                     </div>
-                    <h3 className="font-bold text-sm mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                    <h3 className="font-bold text-xs mb-1 group-hover:text-primary transition-colors line-clamp-2">
                       {competition.name}
                     </h3>
-                    <div className="flex items-center justify-center gap-1 mb-2">
+                    <div className="flex items-center justify-center gap-1 mb-1">
                       {competition.area.flag && (
                         <img
                           src={competition.area.flag}
                           alt={competition.area.name}
-                          className="w-4 h-3 object-cover rounded-sm"
+                          className="w-3 h-2 object-cover rounded-sm"
                         />
                       )}
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[10px] text-muted-foreground">
                         {competition.area.name}
                       </p>
                     </div>
                     {competition.currentSeason && (
-                      <Badge variant="secondary" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[9px] py-0 px-1.5 h-4">
                         MD {competition.currentSeason.currentMatchday}
                       </Badge>
                     )}
