@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.fetch-team-logo]
 verify_jwt = false
+
+[functions.fetch-finished-matches]
+verify_jwt = false
