@@ -53,8 +53,22 @@ serve(async (req) => {
       }),
     ]);
 
-    if (!competitionRes.ok || !standingsRes.ok || !matchesRes.ok) {
-      throw new Error(`API error: ${competitionRes.status}`);
+    if (!competitionRes.ok) {
+      const errorText = await competitionRes.text();
+      console.error(`Competition API error: ${competitionRes.status}`, errorText);
+      throw new Error(`Failed to fetch competition info: ${competitionRes.status} - ${errorText}`);
+    }
+
+    if (!standingsRes.ok) {
+      const errorText = await standingsRes.text();
+      console.error(`Standings API error: ${standingsRes.status}`, errorText);
+      throw new Error(`Failed to fetch standings: ${standingsRes.status} - ${errorText}`);
+    }
+
+    if (!matchesRes.ok) {
+      const errorText = await matchesRes.text();
+      console.error(`Matches API error: ${matchesRes.status}`, errorText);
+      throw new Error(`Failed to fetch matches: ${matchesRes.status} - ${errorText}`);
     }
 
     const [competitionData, standingsData, matchesData] = await Promise.all([
@@ -62,6 +76,10 @@ serve(async (req) => {
       standingsRes.json(),
       matchesRes.json(),
     ]);
+
+    console.log('Competition data fetched:', competitionData.name);
+    console.log('Standings data:', standingsData.standings?.length || 0, 'tables');
+    console.log('Matches data:', matchesData.matches?.length || 0, 'matches');
 
     // Extract standings (usually first table for league competitions)
     const standings = standingsData.standings?.[0]?.table || [];
