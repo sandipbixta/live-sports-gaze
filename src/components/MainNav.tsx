@@ -26,6 +26,7 @@ const MainNav = () => {
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
     { title: "Live", icon: Tv2, path: "/live" },
     { title: "Channels", icon: Radio, path: "/channels" },
+    { title: "Leagues", icon: Trophy, path: "/leagues" },
     { title: "About", icon: Info, path: "/about" },
     { title: "Contact", icon: Phone, path: "/contact" }
   ];

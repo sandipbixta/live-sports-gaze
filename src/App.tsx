@@ -35,6 +35,7 @@ import NbaStreaming from "./pages/NbaStreaming";
 import UfcStreaming from "./pages/UfcStreaming";
 import Leagues from "./pages/Leagues";
 import LeagueDetail from "./pages/LeagueDetail";
+import FootballLeagues from "./pages/FootballLeagues";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
@@ -100,11 +101,16 @@ const App: React.FC = () => {
                 </SEOPageTracker>
               } />
               <Route path="/leagues" element={
-                <SEOPageTracker pageTitle="Sports Leagues - Teams and Standings" contentType="home">
-                  <Leagues />
+                <SEOPageTracker pageTitle="Football Leagues & Competitions" contentType="home">
+                  <FootballLeagues />
                 </SEOPageTracker>
               } />
               <Route path="/league/:leagueId" element={
+                <SEOPageTracker contentType="home">
+                  <LeagueDetail />
+                </SEOPageTracker>
+              } />
+              <Route path="/football-league/:competitionId" element={
                 <SEOPageTracker contentType="home">
                   <LeagueDetail />
                 </SEOPageTracker>
