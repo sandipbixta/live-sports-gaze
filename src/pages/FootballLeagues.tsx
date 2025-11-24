@@ -28,7 +28,7 @@ interface Competition {
 const FootballLeagues = () => {
   const navigate = useNavigate();
 
-  const { data: competitions, isLoading } = useQuery({
+  const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['football-competitions'],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('fetch-football-competitions');
@@ -36,6 +36,7 @@ const FootballLeagues = () => {
       return data as Competition[];
     },
     staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    retry: 1, // Only retry once
   });
 
   // Group competitions by type
@@ -79,6 +80,26 @@ const FootballLeagues = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-3 mb-8">
+            <Trophy className="w-8 h-8 text-primary" />
+            <h1 className="text-4xl font-bold">Football Leagues</h1>
+          </div>
+          <div className="text-center py-12 bg-card rounded-lg border border-border">
+            <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-xl font-semibold mb-2">Loading Error</h3>
+            <p className="text-muted-foreground mb-4">
+              Unable to load competitions. Showing major leagues.
+            </p>
           </div>
         </div>
       </PageLayout>
