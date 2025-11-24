@@ -44,12 +44,17 @@ export const manualMatches: ManualMatch[] = [
     },
     links: [
       {
-        id: "hls-stream",
-        name: "HD Stream",
-        url: "https://a109.azplay21.me/hls/streama243125/index.m3u8?cst=53e31c247aee403257c0a92921860ba7",
+        id: "stream-1",
+        name: "stream 1",
+        url: "https://topembed.pw/channel/USANetwork[USA]",
         quality: "HD"
-      }
-    ],
+      },     
+      {
+        id: "stream-2",
+        name: "stream 2",
+        url: "https://topembed.pw/channel/SkySport8[NewZealand]",
+        quality: "HD"
+      },]
     visible: true,
     image: "https://i.imgur.com/V4VYggg.jpeg",
     seo: {
