@@ -35,23 +35,23 @@ export const manualMatches: ManualMatch[] = [
     }
   },
   {
-    id: "Janakpur-Bolt-vs-Kathmandu_Gurkha",
-    title: "Janakpur Bolt vs Kathmandu Gurkha",
+    id: "man-united-vs-everton",
+    title: "man united vs everton",
     date: new Date().toISOString(), // Live now
     teams: {
-      home: "Janakpur Bolt",
-      away: "Kathmandu Gurkha"
+      home: "Man United",
+      away: "Everton"
     },
     links: [
       {
         id: "hls-stream",
         name: "HD Stream",
-        url: "https://hls.suanzsd6.com/hd-en-6MvXMfc5VhdYjLsGKH.m3u8",
+        url: "https://a109.azplay21.me/hls/streama243125/index.m3u8?cst=53e31c247aee403257c0a92921860ba7",
         quality: "HD"
       }
     ],
-    visible: false,
-    image: "https://imgur.com/10PbZeK",
+    visible: true,
+    image: "",
     seo: {
       keywords: "fc barcelona champions league",
       description: "",
