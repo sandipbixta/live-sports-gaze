@@ -84,10 +84,17 @@ serve(async (req) => {
     // Extract standings (usually first table for league competitions)
     const standings = standingsData.standings?.[0]?.table || [];
 
-    // Separate matches into upcoming and finished
+    // Separate matches into upcoming and finished with proper date filtering
     const now_date = new Date();
+    
+    // Filter upcoming matches: must be in the future and scheduled
     const upcomingMatches = matchesData.matches
-      .filter((m: any) => m.status === 'SCHEDULED' || m.status === 'TIMED')
+      .filter((m: any) => {
+        if (m.status !== 'SCHEDULED' && m.status !== 'TIMED') return false;
+        const matchDate = new Date(m.utcDate);
+        return matchDate >= now_date; // Only future matches
+      })
+      .sort((a: any, b: any) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()) // Sort by date ascending
       .slice(0, 15)
       .map((m: any) => ({
         id: m.id,
@@ -98,8 +105,14 @@ serve(async (req) => {
         score: { home: null, away: null }
       }));
 
+    // Filter finished matches: must be completed and recent
     const finishedMatches = matchesData.matches
-      .filter((m: any) => m.status === 'FINISHED')
+      .filter((m: any) => {
+        if (m.status !== 'FINISHED') return false;
+        const matchDate = new Date(m.utcDate);
+        return matchDate <= now_date; // Only past matches
+      })
+      .sort((a: any, b: any) => new Date(b.utcDate).getTime() - new Date(a.utcDate).getTime()) // Sort by date descending (most recent first)
       .slice(0, 15)
       .map((m: any) => ({
         id: m.id,
@@ -112,6 +125,8 @@ serve(async (req) => {
           away: m.score.fullTime.away
         }
       }));
+
+    console.log(`Filtered ${upcomingMatches.length} upcoming matches and ${finishedMatches.length} finished matches`);
 
     const result = {
       competition: {
