@@ -54,7 +54,8 @@ export const manualMatches: ManualMatch[] = [
         name: "stream 2",
         url: "https://topembed.pw/channel/SkySport8[NewZealand]",
         quality: "HD"
-      },]
+      },
+    ],
     visible: true,
     image: "",
     seo: {
