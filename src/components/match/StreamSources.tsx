@@ -6,6 +6,7 @@ import { fetchStream } from '@/api/sportsApi';
 import { Loader, Play, Users } from 'lucide-react';
 import { getConnectionInfo } from '@/utils/connectionOptimizer';
 import { fetchViewerCountFromSource, formatViewerCount } from '@/services/viewerCountService';
+import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
 interface StreamSourcesProps {
   sources: Source[];
@@ -315,7 +316,10 @@ const StreamSources = ({
                   ? 'bg-[#ff5722] hover:bg-[#ff5722]/90 text-white border-[#ff5722]' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
               }`}
-              onClick={() => onSourceChange(stream.source, stream.id, actualStreamNo)}
+              onClick={() => {
+                triggerStreamChangeAd();
+                onSourceChange(stream.source, stream.id, actualStreamNo);
+              }}
             >
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
