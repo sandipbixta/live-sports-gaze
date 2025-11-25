@@ -155,52 +155,54 @@ const FootballLeagueDetail = () => {
           {/* Standings Table */}
           <TabsContent value="standings" className="mt-4">
             {data.standings.length > 0 ? (
-              <Card>
-                <CardContent className="p-0 overflow-x-auto">
-                  <table className="w-full text-sm min-w-[640px]">
-                      <thead className="border-b border-border bg-muted/50">
-                        <tr>
-                          <th className="text-left p-2 font-semibold">#</th>
-                          <th className="text-left p-2 font-semibold">Team</th>
-                          <th className="text-center p-2 font-semibold">P</th>
-                          <th className="text-center p-2 font-semibold">W</th>
-                          <th className="text-center p-2 font-semibold">D</th>
-                          <th className="text-center p-2 font-semibold">L</th>
-                          <th className="text-center p-2 font-semibold">GF</th>
-                          <th className="text-center p-2 font-semibold">GA</th>
-                          <th className="text-center p-2 font-semibold">GD</th>
-                          <th className="text-center p-2 font-semibold font-bold">Pts</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.standings.map((standing) => (
-                          <tr key={standing.position} className="border-b border-border hover:bg-muted/50">
-                            <td className="p-2 font-semibold">{standing.position}</td>
-                            <td className="p-2">
-                              <div className="flex items-center gap-2">
-                                <img
-                                  src={standing.team.crest}
-                                  alt={standing.team.name}
-                                  className="w-5 h-5 object-contain"
-                                  onError={(e) => {
-                                    e.currentTarget.src = '/placeholder.svg';
-                                  }}
-                                />
-                                <span className="font-medium">{standing.team.name}</span>
-                              </div>
-                            </td>
-                            <td className="text-center p-2">{standing.playedGames}</td>
-                            <td className="text-center p-2">{standing.won}</td>
-                            <td className="text-center p-2">{standing.draw}</td>
-                            <td className="text-center p-2">{standing.lost}</td>
-                            <td className="text-center p-2">{standing.goalsFor}</td>
-                            <td className="text-center p-2">{standing.goalsAgainst}</td>
-                            <td className="text-center p-2">{standing.goalDifference}</td>
-                            <td className="text-center p-2 font-bold">{standing.points}</td>
+              <Card className="-mx-4 sm:mx-0 rounded-none sm:rounded-lg border-x-0 sm:border-x">
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm min-w-[640px]">
+                        <thead className="border-b border-border bg-muted/50">
+                          <tr>
+                            <th className="text-left p-2 font-semibold sticky left-0 bg-muted/50 z-10">#</th>
+                            <th className="text-left p-2 font-semibold sticky left-8 bg-muted/50 z-10">Team</th>
+                            <th className="text-center p-2 font-semibold">P</th>
+                            <th className="text-center p-2 font-semibold">W</th>
+                            <th className="text-center p-2 font-semibold">D</th>
+                            <th className="text-center p-2 font-semibold">L</th>
+                            <th className="text-center p-2 font-semibold">GF</th>
+                            <th className="text-center p-2 font-semibold">GA</th>
+                            <th className="text-center p-2 font-semibold">GD</th>
+                            <th className="text-center p-2 font-semibold font-bold">Pts</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {data.standings.map((standing) => (
+                            <tr key={standing.position} className="border-b border-border hover:bg-muted/50">
+                              <td className="p-2 font-semibold sticky left-0 bg-background z-10">{standing.position}</td>
+                              <td className="p-2 sticky left-8 bg-background z-10">
+                                <div className="flex items-center gap-2">
+                                  <img
+                                    src={standing.team.crest}
+                                    alt={standing.team.name}
+                                    className="w-5 h-5 object-contain"
+                                    onError={(e) => {
+                                      e.currentTarget.src = '/placeholder.svg';
+                                    }}
+                                  />
+                                  <span className="font-medium">{standing.team.name}</span>
+                                </div>
+                              </td>
+                              <td className="text-center p-2">{standing.playedGames}</td>
+                              <td className="text-center p-2">{standing.won}</td>
+                              <td className="text-center p-2">{standing.draw}</td>
+                              <td className="text-center p-2">{standing.lost}</td>
+                              <td className="text-center p-2">{standing.goalsFor}</td>
+                              <td className="text-center p-2">{standing.goalsAgainst}</td>
+                              <td className="text-center p-2">{standing.goalDifference}</td>
+                              <td className="text-center p-2 font-bold">{standing.points}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
