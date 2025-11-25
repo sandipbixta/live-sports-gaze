@@ -156,9 +156,8 @@ const FootballLeagueDetail = () => {
           <TabsContent value="standings" className="mt-4">
             {data.standings.length > 0 ? (
               <Card>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                <CardContent className="p-0 overflow-x-auto">
+                  <table className="w-full text-sm min-w-[640px]">
                       <thead className="border-b border-border bg-muted/50">
                         <tr>
                           <th className="text-left p-2 font-semibold">#</th>
@@ -202,7 +201,6 @@ const FootballLeagueDetail = () => {
                         ))}
                       </tbody>
                     </table>
-                  </div>
                 </CardContent>
               </Card>
             ) : (

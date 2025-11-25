@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { Trophy } from "lucide-react";
+import { Trophy, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState, useMemo } from "react";
 
 interface FinishedMatch {
   id: number;
@@ -29,6 +31,7 @@ interface FinishedMatch {
 
 const FinishedMatches = () => {
   const navigate = useNavigate();
+  const [selectedLeague, setSelectedLeague] = useState<string>("all");
 
   const { data: matches, isLoading } = useQuery({
     queryKey: ['finished-matches'],
@@ -42,6 +45,20 @@ const FinishedMatches = () => {
     refetchInterval: 15 * 60 * 1000, // Refetch every 15 minutes
   });
 
+  // Get unique leagues for the filter
+  const leagues = useMemo(() => {
+    if (!matches) return [];
+    const uniqueLeagues = Array.from(new Set(matches.map(m => m.competition.name)));
+    return uniqueLeagues.sort();
+  }, [matches]);
+
+  // Filter matches by selected league
+  const filteredMatches = useMemo(() => {
+    if (!matches) return [];
+    if (selectedLeague === "all") return matches;
+    return matches.filter(m => m.competition.name === selectedLeague);
+  }, [matches, selectedLeague]);
+
   const handleMatchClick = (competitionId: number, competitionName: string) => {
     // Navigate to football league detail page
     navigate(`/football-league/${competitionId}`);
@@ -50,9 +67,12 @@ const FinishedMatches = () => {
   if (isLoading) {
     return (
       <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Trophy className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-bold text-foreground">Finished Match Results</h2>
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Finished Match Results</h2>
+          </div>
+          <Skeleton className="h-10 w-[180px]" />
         </div>
         <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -69,12 +89,28 @@ const FinishedMatches = () => {
 
   return (
     <div className="mb-8">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-5 h-5 text-primary" />
-        <h2 className="text-xl font-bold text-foreground">Finished Match Results</h2>
+      <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-bold text-foreground">Finished Match Results</h2>
+        </div>
+        <Select value={selectedLeague} onValueChange={setSelectedLeague}>
+          <SelectTrigger className="w-[180px] bg-card border-border">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="All Leagues" />
+          </SelectTrigger>
+          <SelectContent className="bg-card border-border z-50">
+            <SelectItem value="all">All Leagues</SelectItem>
+            {leagues.map((league) => (
+              <SelectItem key={league} value={league}>
+                {league}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-        {matches.map((match) => (
+        {filteredMatches.map((match) => (
           <Card
             key={match.id}
             onClick={() => handleMatchClick(match.competition.id, match.competition.name)}
