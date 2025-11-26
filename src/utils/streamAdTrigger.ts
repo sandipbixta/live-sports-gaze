@@ -1,4 +1,5 @@
 import { adConfig, isAdCooldownPassed, markAdTriggered } from './adConfig';
+import { adTracking } from './adTracking';
 
 /**
  * Triggers smartlink ad when changing streams
@@ -13,6 +14,7 @@ export const triggerStreamChangeAd = (): void => {
 
   // Mark as triggered and open the smartlink ad
   markAdTriggered(adConfig.directLink.sessionKey);
+  adTracking.trackStreamChangeAd();
   window.open(adConfig.directLink.url, "_blank", "noopener noreferrer");
   console.log('🎯 Stream change ad triggered!');
 };
