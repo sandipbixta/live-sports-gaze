@@ -19,9 +19,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   // Handle iframe clicks on mobile to prevent automatic opening
   const handleIframeClick = (e: React.MouseEvent) => {
     if (isMobile) {
-      // Prevent default behavior that might cause automatic opening
       e.preventDefault();
-      console.log('Mobile iframe click prevented');
     }
   };
 
@@ -29,10 +27,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     setLoaded(false);
     setHadError(false);
     setTimedOut(false);
-    const t = window.setTimeout(() => {
-      setTimedOut(true);
-    }, 8000);
-    return () => window.clearTimeout(t);
+    // No timeout needed - load immediately
   }, [src]);
 
   const handleLoad = () => {
@@ -45,7 +40,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     onError?.();
   };
 
-  const showOpenOverlay = isAndroid && (hadError || (timedOut && !loaded));
+  const showOpenOverlay = isAndroid && hadError;
 
   return (
     <div className="absolute inset-0 w-full h-full">
