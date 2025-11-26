@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
 import instantAccessImage from "@/assets/instant-access-offer.jpeg";
+import { adTracking } from "@/utils/adTracking";
 
 const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
 
@@ -16,9 +17,10 @@ const PopupAd: React.FC = () => {
   });
   const popupRef = useRef<HTMLDivElement | null>(null);
 
-  // Prevent background scrolling when the popup is open
+  // Track ad impression when popup opens
   useEffect(() => {
     if (open) {
+      adTracking.trackPopupImpression();
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -30,14 +32,15 @@ const PopupAd: React.FC = () => {
 
   // Handler to close popup and mark in sessionStorage
   const handleClose = () => {
+    adTracking.trackPopupClose();
     setOpen(false);
     sessionStorage.setItem(SESSION_KEY, "true");
-    // For debugging: log close action
     console.log("[PopupAd] Special offer popup closed");
   };
 
   // Handler to open the smartlink URL (only when clicking image)
   const handleImageClick = () => {
+    adTracking.trackPopupClick();
     window.open(SMARTLINK_URL, "_blank", "noopener noreferrer");
     console.log("[PopupAd] Smartlink opened");
   };

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { adConfig, shouldShowAds, isAdCooldownPassed, markAdTriggered } from '@/utils/adConfig';
+import { adTracking } from '@/utils/adTracking';
 
 export const usePopunderAd = () => {
   useEffect(() => {
@@ -24,11 +25,14 @@ export const usePopunderAd = () => {
         // Add error handling
         script.onerror = () => {
           console.warn('Popunder ad script failed to load');
+          adTracking.trackPopunderError('Script failed to load');
         };
         
         script.onload = () => {
           // Mark as triggered after successful load
           markAdTriggered(adConfig.popunder.sessionKey);
+          adTracking.trackPopunderLoad();
+          console.log('[Popunder] Ad loaded successfully');
         };
         
         // Append to head
