@@ -8,13 +8,13 @@ export const adConfig = {
     height: 250
   },
   directLink: {
-    url: 'https://foreseehawancestor.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37',
-    cooldownMinutes: 1440, // 24 hours
+    url: 'https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7',
+    cooldownMinutes: 360, // 6 hours
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
     scriptSrc: '//foreseehawancestor.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js',
-    cooldownMinutes: 1440, // 24 hours
+    cooldownMinutes: 360, // 6 hours
     sessionKey: 'popunderAdTriggered',
     delaySeconds: 3
   }
