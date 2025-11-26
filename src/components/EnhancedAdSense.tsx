@@ -129,11 +129,7 @@ const EnhancedAdSense: React.FC<EnhancedAdSenseProps> = ({
       ref={adRef}
       className={`ad-container ${className}`}
       onClick={handleAdClick}
-      style={{ 
-        minHeight: responsive ? '250px' : '100px',
-        width: '100%',
-        display: 'block'
-      }}
+      style={{ minHeight: responsive ? '100px' : undefined }}
     >
       {isVisible && (
         <ins

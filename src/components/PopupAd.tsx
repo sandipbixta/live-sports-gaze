@@ -1,7 +1,8 @@
+
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
-import christmasSale from "@/assets/christmas-sale-banner.webp";
 
 const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
+const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
 
 const SESSION_KEY = "specialOfferClosed";
 
@@ -80,17 +81,29 @@ const PopupAd: React.FC = () => {
         >
           ×
         </button>
-        {/* Christmas Sale Image */}
-        <div className="p-0 flex justify-center items-center select-none pointer-events-none rounded-xl overflow-hidden">
-          <img
-            src={christmasSale}
-            alt="Christmas Gift Sale - 50% Off"
-            className="w-full h-auto pointer-events-auto"
-            style={{
-              display: "block",
-              maxWidth: "100%",
-            }}
-          />
+        {/* Special Offer Header */}
+        <div className="w-full flex items-center justify-center py-2 border-b border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900 rounded-t-xl pointer-events-none select-none">
+          <span className="text-base font-semibold text-orange-600 dark:text-orange-200">
+            🎁 Special Offer
+          </span>
+        </div>
+        {/* Ad iframe */}
+        <div className="p-3 flex justify-center items-center select-none pointer-events-none">
+          <div className="pointer-events-auto">
+            <iframe
+              src={AD_URL}
+              title="Special Offer Advertisement"
+              className="w-[300px] h-[250px] rounded-lg border-none"
+              style={{
+                minWidth: "200px",
+                minHeight: "100px",
+                display: "block",
+                backgroundColor: "#fff",
+                border: "none",
+              }}
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            ></iframe>
+          </div>
         </div>
       </div>
     </div>

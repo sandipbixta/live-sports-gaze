@@ -478,7 +478,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           playsInline
           preload="auto"
           crossOrigin="anonymous"
-          {...({ fetchpriority: "high" } as any)}
           onError={handleError}
           onLoadStart={() => console.log('Video load started')}
           onCanPlay={() => {
