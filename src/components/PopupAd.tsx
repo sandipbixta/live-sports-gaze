@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
-import christmasOfferImage from "@/assets/christmas-special-offer.jpeg";
+import instantAccessImage from "@/assets/instant-access-offer.jpeg";
 
 const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
 
@@ -77,8 +77,8 @@ const PopupAd: React.FC = () => {
         {/* Special Offer Image - Click to open smartlink */}
         <div className="w-full overflow-hidden rounded-xl">
           <img
-            src={christmasOfferImage}
-            alt="Special Christmas Offer - Up to 70% Off"
+            src={instantAccessImage}
+            alt="Instant High-Speed Access - Unlock Exclusive Sports Streams"
             className="w-full h-auto cursor-pointer hover:scale-105 transition-transform duration-300"
             onClick={handleImageClick}
             role="button"
