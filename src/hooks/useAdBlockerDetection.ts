@@ -1,43 +1,104 @@
 import { useState, useEffect } from 'react';
 
+// Whitelist of allowed browsers
+const ALLOWED_BROWSERS = ['Chrome', 'Safari', 'Edge', 'Firefox'];
+
+// Detect browser type
+const detectBrowser = (): string => {
+  const userAgent = navigator.userAgent;
+  
+  if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) return 'Chrome';
+  if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+  if (userAgent.includes('Edg')) return 'Edge';
+  if (userAgent.includes('Firefox')) return 'Firefox';
+  
+  return 'Unknown';
+};
+
 export const useAdBlockerDetection = () => {
   const [isAdBlockerDetected, setIsAdBlockerDetected] = useState(false);
+  const [isUnsupportedBrowser, setIsUnsupportedBrowser] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const detectAdBlocker = async () => {
       try {
-        // Method 1: Try to fetch a known ad URL
-        const testAd = document.createElement('div');
-        testAd.innerHTML = '&nbsp;';
-        testAd.className = 'adsbox ad-placement carbon-ads';
-        testAd.style.cssText = 'height: 1px; width: 1px; position: absolute; left: -9999px;';
-        document.body.appendChild(testAd);
+        // Step 1: Check browser whitelist
+        const browserName = detectBrowser();
+        const isBrowserAllowed = ALLOWED_BROWSERS.includes(browserName);
+        
+        if (!isBrowserAllowed) {
+          setIsUnsupportedBrowser(true);
+          setIsChecking(false);
+          return;
+        }
 
-        // Wait a bit for ad blockers to process
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Step 2: Multiple AdBlock Detection Methods
+        
+        // Method 1: CSS Class Bait Element (ad-banner, ad-container)
+        const baitElement = document.createElement('div');
+        baitElement.className = 'ad-banner ad-container ad-placement adsbox';
+        baitElement.style.cssText = 'height: 1px; width: 1px; position: absolute; left: -9999px; top: -9999px;';
+        document.body.appendChild(baitElement);
 
-        // Check if the element was blocked or hidden
-        const isBlocked = 
-          testAd.offsetHeight === 0 || 
-          testAd.offsetWidth === 0 || 
-          window.getComputedStyle(testAd).display === 'none' ||
-          window.getComputedStyle(testAd).visibility === 'hidden';
+        // Method 2: Fake Ad Script Loading Test
+        const scriptBait = document.createElement('script');
+        scriptBait.src = '/ads.js';
+        scriptBait.type = 'text/javascript';
+        let scriptBlocked = false;
+        
+        scriptBait.onerror = () => {
+          scriptBlocked = true;
+        };
+        
+        document.head.appendChild(scriptBait);
 
-        document.body.removeChild(testAd);
+        // Wait for ad blockers to process
+        await new Promise(resolve => setTimeout(resolve, 150));
 
-        // Method 2: Check for common ad-blocker artifacts
-        const hasAdBlockerArtifacts = 
-          // Check if fetch to ad domains fails
+        // Check Method 1: CSS element visibility
+        const isBaitHidden = 
+          baitElement.offsetHeight === 0 || 
+          baitElement.offsetWidth === 0 || 
+          window.getComputedStyle(baitElement).display === 'none' ||
+          window.getComputedStyle(baitElement).visibility === 'hidden';
+
+        // Clean up bait elements
+        document.body.removeChild(baitElement);
+        document.head.removeChild(scriptBait);
+
+        // Method 3: Google AdSense fetch test
+        let googleAdsBlocked = false;
+        try {
           await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
             method: 'HEAD',
             mode: 'no-cors',
             cache: 'no-store'
-          }).then(() => false).catch(() => true);
+          });
+        } catch {
+          googleAdsBlocked = true;
+        }
 
-        setIsAdBlockerDetected(isBlocked || hasAdBlockerArtifacts);
+        // Method 4: Check for common adblocker window properties
+        const hasAdBlockerProperties = 
+          !!(window as any).canRunAds === false ||
+          typeof (window as any).adsbygoogle === 'undefined';
+
+        // If ANY method detects adblock, flag it
+        const adBlockDetected = isBaitHidden || scriptBlocked || googleAdsBlocked || hasAdBlockerProperties;
+        
+        setIsAdBlockerDetected(adBlockDetected);
+        
+        console.log('🛡️ AdBlock Detection Results:', {
+          browser: browserName,
+          baitHidden: isBaitHidden,
+          scriptBlocked,
+          googleAdsBlocked,
+          hasAdBlockerProperties,
+          finalResult: adBlockDetected
+        });
+
       } catch (error) {
-        // If any error occurs, assume ad blocker might be present
         console.log('Ad blocker detection error:', error);
         setIsAdBlockerDetected(true);
       } finally {
@@ -48,5 +109,5 @@ export const useAdBlockerDetection = () => {
     detectAdBlocker();
   }, []);
 
-  return { isAdBlockerDetected, isChecking };
+  return { isAdBlockerDetected, isUnsupportedBrowser, isChecking };
 };
