@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
 
-const LOCAL_SPECIAL_OFFER_URL = "/special-offer";
+const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
 const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
 
 const SESSION_KEY = "specialOfferClosed";
@@ -36,13 +36,13 @@ const PopupAd: React.FC = () => {
     console.log("[PopupAd] Special offer popup closed");
   };
 
-  // Handler to open the special offer route (not when clicking close btn)
+  // Handler to open the smartlink URL (not when clicking close btn)
   const handleBoxClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('[data-close-btn="true"]')) {
       return;
     }
-    window.open(LOCAL_SPECIAL_OFFER_URL, "_blank", "noopener noreferrer");
+    window.open(SMARTLINK_URL, "_blank", "noopener noreferrer");
   };
 
   // Fallback: allow overlay click to close if adblocker breaks close button
