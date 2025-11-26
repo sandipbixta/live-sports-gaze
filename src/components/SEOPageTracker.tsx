@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { analytics } from '@/utils/analytics';
-import RevenueOptimizer from './RevenueOptimizer';
+import DeferredTrackers from './DeferredTrackers';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SEOPageTrackerProps {
@@ -104,7 +104,7 @@ const SEOPageTracker: React.FC<SEOPageTrackerProps> = ({
 
   return (
     <>
-      <RevenueOptimizer pagePath={location.pathname} contentType={contentType} />
+      <DeferredTrackers pagePath={location.pathname} contentType={contentType} />
       {children}
     </>
   );

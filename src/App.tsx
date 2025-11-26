@@ -13,6 +13,8 @@ import PopupAd from "./components/PopupAd";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
 import { CookieConsent } from "./components/CookieConsent";
+import DeferredTrackers from "./components/DeferredTrackers";
+import PerformanceOptimizations from "./components/PerformanceOptimizations";
 
 // Import pages directly instead of lazy loading to avoid module import errors
 import Index from "./pages/Index";
@@ -83,6 +85,7 @@ const App: React.FC = () => {
       <HelmetProvider>
         <BrowserRouter>
           <GoogleAnalytics />
+          <PerformanceOptimizations />
           <MonetizationTracker>
             <TooltipProvider>
               <PopupAd />
