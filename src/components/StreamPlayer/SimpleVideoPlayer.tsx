@@ -476,7 +476,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           autoPlay
           muted={false}
           playsInline
-          preload="metadata"
+          preload="auto"
           crossOrigin="anonymous"
           {...({ fetchpriority: "high" } as any)}
           onError={handleError}
