@@ -1,8 +1,8 @@
 
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
+import christmasOfferImage from "@/assets/christmas-special-offer.jpeg";
 
 const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
-const AD_URL = "https://monkeyhundredsarmed.com/zbt0wegpe?key=39548340a9430381e48a2856c8cf8d37";
 
 const SESSION_KEY = "specialOfferClosed";
 
@@ -36,13 +36,10 @@ const PopupAd: React.FC = () => {
     console.log("[PopupAd] Special offer popup closed");
   };
 
-  // Handler to open the smartlink URL (not when clicking close btn)
-  const handleBoxClick = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('[data-close-btn="true"]')) {
-      return;
-    }
+  // Handler to open the smartlink URL (only when clicking image)
+  const handleImageClick = () => {
     window.open(SMARTLINK_URL, "_blank", "noopener noreferrer");
+    console.log("[PopupAd] Smartlink opened");
   };
 
   // Fallback: allow overlay click to close if adblocker breaks close button
@@ -63,12 +60,8 @@ const PopupAd: React.FC = () => {
     >
       <div
         ref={popupRef}
-        className="relative rounded-xl shadow-2xl bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 max-w-xs w-full mx-2 animate-scale-in cursor-pointer"
-        onClick={handleBoxClick}
-        tabIndex={0}
-        aria-label="Special Offer (click to open)"
-        role="button"
-        style={{ outline: "none" }}
+        className="relative rounded-xl shadow-2xl bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 max-w-md w-full mx-2 animate-scale-in"
+        aria-label="Special Offer"
       >
         <button
           aria-label="Close Special Offer"
@@ -81,29 +74,21 @@ const PopupAd: React.FC = () => {
         >
           ×
         </button>
-        {/* Special Offer Header */}
-        <div className="w-full flex items-center justify-center py-2 border-b border-gray-200 dark:border-gray-700 bg-orange-50 dark:bg-orange-900 rounded-t-xl pointer-events-none select-none">
-          <span className="text-base font-semibold text-orange-600 dark:text-orange-200">
-            🎁 Special Offer
-          </span>
-        </div>
-        {/* Ad iframe */}
-        <div className="p-3 flex justify-center items-center select-none pointer-events-none">
-          <div className="pointer-events-auto">
-            <iframe
-              src={AD_URL}
-              title="Special Offer Advertisement"
-              className="w-[300px] h-[250px] rounded-lg border-none"
-              style={{
-                minWidth: "200px",
-                minHeight: "100px",
-                display: "block",
-                backgroundColor: "#fff",
-                border: "none",
-              }}
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            ></iframe>
-          </div>
+        {/* Special Offer Image - Click to open smartlink */}
+        <div className="w-full overflow-hidden rounded-xl">
+          <img
+            src={christmasOfferImage}
+            alt="Special Christmas Offer - Up to 70% Off"
+            className="w-full h-auto cursor-pointer hover:scale-105 transition-transform duration-300"
+            onClick={handleImageClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleImageClick();
+              }
+            }}
+          />
         </div>
       </div>
     </div>
