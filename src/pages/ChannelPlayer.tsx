@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
-import RectangleAd from '@/components/RectangleAd';
 import MatchDetails from '@/components/MatchDetails';
 
 const ChannelPlayer = () => {

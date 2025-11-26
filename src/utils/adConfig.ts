@@ -1,12 +1,6 @@
 
 // Ad configuration utility
 export const adConfig = {
-  rectangle: {
-    key: '7c589340b2a1155dcea92f44cc468438',
-    scriptSrc: '//uncertainbill.com/7c589340b2a1155dcea92f44cc468438/invoke.js',
-    width: 300,
-    height: 250
-  },
   directLink: {
     url: 'https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7',
     cooldownMinutes: 360, // 6 hours
