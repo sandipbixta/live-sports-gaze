@@ -67,25 +67,17 @@ export const useAdBlockerDetection = () => {
         document.body.removeChild(baitElement);
         document.head.removeChild(scriptBait);
 
-        // Method 3: Google AdSense fetch test
-        let googleAdsBlocked = false;
-        try {
-          await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
-            method: 'HEAD',
-            mode: 'no-cors',
-            cache: 'no-store'
-          });
-        } catch {
-          googleAdsBlocked = true;
-        }
-
+        // Method 3: Google AdSense fetch test (disabled to reduce false positives)
+        // Network errors can occur for many reasons, not just ad blockers
+        
         // Method 4: Check for common adblocker window properties
         const hasAdBlockerProperties = 
-          !!(window as any).canRunAds === false ||
-          typeof (window as any).adsbygoogle === 'undefined';
+          (window as any).canRunAds === false;
 
-        // If ANY method detects adblock, flag it
-        const adBlockDetected = isBaitHidden || scriptBlocked || googleAdsBlocked || hasAdBlockerProperties;
+        // Require MULTIPLE methods to detect adblock to reduce false positives
+        // Only block if bait is hidden AND either script was blocked OR adblocker properties detected
+        const detectionCount = [isBaitHidden, scriptBlocked, hasAdBlockerProperties].filter(Boolean).length;
+        const adBlockDetected = detectionCount >= 2;
         
         setIsAdBlockerDetected(adBlockDetected);
         
@@ -93,14 +85,15 @@ export const useAdBlockerDetection = () => {
           browser: browserName,
           baitHidden: isBaitHidden,
           scriptBlocked,
-          googleAdsBlocked,
           hasAdBlockerProperties,
+          detectionCount,
           finalResult: adBlockDetected
         });
 
       } catch (error) {
         console.log('Ad blocker detection error:', error);
-        setIsAdBlockerDetected(true);
+        // Don't block on detection errors - assume no ad blocker
+        setIsAdBlockerDetected(false);
       } finally {
         setIsChecking(false);
       }
