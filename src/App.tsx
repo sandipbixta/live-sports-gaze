@@ -9,6 +9,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import { useAdBlockerDetection } from "./hooks/useAdBlockerDetection";
 import { AdBlockerWarning } from "./components/AdBlockerWarning";
+import PopupAd from "./components/PopupAd";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
 
@@ -83,6 +84,7 @@ const App: React.FC = () => {
           <GoogleAnalytics />
           <MonetizationTracker>
             <TooltipProvider>
+              <PopupAd />
               <Toaster />
               <Sonner />
             <Routes>
