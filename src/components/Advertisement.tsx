@@ -29,7 +29,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       const script = document.createElement('script');
       script.type = 'text/javascript';
       script.src = '//monkeyhundredsarmed.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js';
-      script.async = true;
+      script.defer = true; // Use defer for better INP performance
       
       // Add error handling
       script.onerror = () => {
@@ -47,7 +47,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       const script = document.createElement('script');
       script.type = 'text/javascript';
       script.src = '//uncertainbill.com/ae/f7/eb/aef7eba12c46ca91518228f813db6ce5.js';
-      script.async = true;
+      script.defer = true; // Use defer for better INP performance
       
       // Add error handling
       script.onerror = () => {
@@ -78,7 +78,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
         const aclibScript = document.createElement('script');
         aclibScript.type = 'text/javascript';
         aclibScript.src = '/js/aclib.js'; // Local adblock bypass library
-        aclibScript.async = true;
+        aclibScript.defer = true; // Use defer for better INP performance
         
         aclibScript.onload = () => {
           // Run AutoTag after aclib is loaded
@@ -127,10 +127,13 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
       style={{ 
-        minHeight: type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'autotag' ? '100px' : 'auto',
+        minHeight: type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'autotag' ? '100px' : '90px',
+        width: '100%',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        // Reserve space to prevent CLS
+        minWidth: type === 'video' ? '300px' : '100%'
       }}
     />
   );
