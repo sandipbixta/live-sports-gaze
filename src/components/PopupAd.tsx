@@ -2,18 +2,9 @@
 import React, { useEffect, useRef, useState, MouseEvent } from "react";
 import instantAccessImage from "@/assets/instant-access-offer.jpeg";
 import { adTracking } from "@/utils/adTracking";
-import { adConfig } from "@/utils/adConfig";
 
+const SMARTLINK_URL = "https://foreseehawancesator.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
 const SESSION_KEY = "specialOfferClosed";
-
-/**
- * Randomly selects a Smartlink from the rotation pool (50/50)
- */
-const selectSmartlink = (): string => {
-  const urls = adConfig.directLink.urls;
-  const randomIndex = Math.floor(Math.random() * urls.length);
-  return urls[randomIndex];
-};
 
 const PopupAd: React.FC = () => {
   const [open, setOpen] = useState<boolean>(() => {
@@ -48,11 +39,9 @@ const PopupAd: React.FC = () => {
 
   // Handler to open the smartlink URL (only when clicking image)
   const handleImageClick = () => {
-    const selectedUrl = selectSmartlink();
-    const provider = selectedUrl.includes('foreseehawancesator') ? 'Adsterra' : 'Monetag';
     adTracking.trackPopupClick();
-    window.open(selectedUrl, "_blank", "noopener noreferrer");
-    console.log(`[PopupAd] Smartlink opened (${provider})`);
+    window.open(SMARTLINK_URL, "_blank", "noopener noreferrer");
+    console.log("[PopupAd] Smartlink opened");
   };
 
   // Fallback: allow overlay click to close if adblocker breaks close button
