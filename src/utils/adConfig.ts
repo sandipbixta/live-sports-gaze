@@ -2,8 +2,12 @@
 // Ad configuration utility
 export const adConfig = {
   directLink: {
-    url: 'https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7',
-    cooldownMinutes: 360, // 6 hours
+    // 50/50 rotation between Adsterra and Monetag Smartlinks
+    urls: [
+      'https://foreseehawancesator.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7', // Adsterra
+      'https://otieu.com/4/10244011' // Monetag
+    ],
+    cooldownMinutes: 360, // 6 hours - applies to entire rotation system
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
