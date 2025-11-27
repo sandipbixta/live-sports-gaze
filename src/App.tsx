@@ -32,6 +32,16 @@ import Install from "./pages/Install";
 import DaddylivehdAlternatives from "./pages/DaddylivehdAlternatives";
 import BatmanstreamAlternatives from "./pages/BatmanstreamAlternatives";
 import HesgoalAlternatives from "./pages/HesgoalAlternatives";
+import Hesgoal from "./pages/Hesgoal";
+import Vipleague from "./pages/Vipleague";
+import Myp2p from "./pages/Myp2p";
+import CrackstreamsAlternative from "./pages/CrackstreamsAlternative";
+import FreestreamsLive1 from "./pages/FreestreamsLive1";
+import TotalsportekFormula1 from "./pages/TotalsportekFormula1";
+import TotalsportekTennis from "./pages/TotalsportekTennis";
+import HesgoalLiveStream from "./pages/HesgoalLiveStream";
+import HesgoalTV from "./pages/HesgoalTV";
+import Sport365Live from "./pages/Sport365Live";
 import WatchPremierLeague from "./pages/WatchPremierLeague";
 import NbaStreaming from "./pages/NbaStreaming";
 import UfcStreaming from "./pages/UfcStreaming";
@@ -168,6 +178,16 @@ const App: React.FC = () => {
                   <HesgoalAlternatives />
                 </SEOPageTracker>
               } />
+              <Route path="/hesgoal" element={<Hesgoal />} />
+              <Route path="/vipleague" element={<Vipleague />} />
+              <Route path="/myp2p" element={<Myp2p />} />
+              <Route path="/crackstreams-alternative" element={<CrackstreamsAlternative />} />
+              <Route path="/freestreams-live1" element={<FreestreamsLive1 />} />
+              <Route path="/totalsportek-formula-1" element={<TotalsportekFormula1 />} />
+              <Route path="/totalsportek-tennis" element={<TotalsportekTennis />} />
+              <Route path="/hesgoal-live-stream" element={<HesgoalLiveStream />} />
+              <Route path="/hesgoal-tv" element={<HesgoalTV />} />
+              <Route path="/sport365-live" element={<Sport365Live />} />
               <Route path="/watch-premier-league-free" element={
                 <SEOPageTracker pageTitle="Watch Premier League Free" contentType="home">
                   <WatchPremierLeague />
