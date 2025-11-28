@@ -44,15 +44,11 @@ const AdsterraSidebar: React.FC = () => {
     <>
       {/* Desktop Sidebar Ad */}
       <div 
-        className="hidden lg:block fixed top-20 right-4 z-40"
-        style={{
-          width: '300px',
-          height: '600px',
-        }}
+        className="hidden lg:block lg:w-[300px] lg:min-w-[300px] lg:flex-shrink-0"
       >
         <div 
           ref={desktopAdRef}
-          className="w-full h-full bg-sports-card/50 border border-border rounded-lg overflow-hidden"
+          className="w-full h-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4"
         >
           <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
         </div>
