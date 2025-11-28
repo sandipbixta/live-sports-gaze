@@ -52,35 +52,13 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4 flex flex-col"
+          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4"
           style={{ 
-            maxHeight: '600px',
             width: '300px',
             minHeight: '600px'
           }}
         >
-          <div 
-            id="container-a873bc1d3d203f2f13c32a99592441b8"
-            style={{
-              width: '300px',
-              height: '600px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}
-          >
-            <style>{`
-              #container-a873bc1d3d203f2f13c32a99592441b8 {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
-              }
-              #container-a873bc1d3d203f2f13c32a99592441b8 > * {
-                width: 100% !important;
-                max-width: 300px !important;
-              }
-            `}</style>
-          </div>
+          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
         </div>
       </div>
 
