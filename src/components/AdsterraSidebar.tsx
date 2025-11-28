@@ -11,8 +11,11 @@ const AdsterraSidebar: React.FC = () => {
   const mobileAdRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load script for desktop container
-    if (desktopAdRef.current) {
+    // Determine if we're on mobile or desktop
+    const isMobile = window.innerWidth < 1024;
+
+    // Load script for desktop container only on desktop
+    if (!isMobile && desktopAdRef.current) {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
@@ -20,8 +23,8 @@ const AdsterraSidebar: React.FC = () => {
       desktopAdRef.current.appendChild(script);
     }
 
-    // Load script for mobile container
-    if (mobileAdRef.current) {
+    // Load script for mobile container only on mobile
+    if (isMobile && mobileAdRef.current) {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
@@ -49,10 +52,22 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4"
-          style={{ maxHeight: '600px' }}
+          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4 flex flex-col"
+          style={{ 
+            maxHeight: '600px',
+            width: '300px',
+            minHeight: '600px'
+          }}
         >
-          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
+          <div 
+            id="container-a873bc1d3d203f2f13c32a99592441b8"
+            style={{
+              width: '300px',
+              height: '600px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          ></div>
         </div>
       </div>
 
@@ -70,7 +85,13 @@ const AdsterraSidebar: React.FC = () => {
             minHeight: '250px',
           }}
         >
-          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
+          <div 
+            id="container-a873bc1d3d203f2f13c32a99592441b8-mobile"
+            style={{
+              width: '100%',
+              minHeight: '250px'
+            }}
+          ></div>
         </div>
       </div>
     </>
