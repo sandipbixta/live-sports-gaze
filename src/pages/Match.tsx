@@ -22,6 +22,7 @@ import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
+import AdsterraSidebar from '@/components/AdsterraSidebar';
 
 const Match = () => {
   const { toast } = useToast();
@@ -219,7 +220,7 @@ const Match = () => {
         }
       />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8 lg:pr-[320px]">
         <div className="mb-4">
           <TelegramBanner />
         </div>
@@ -268,7 +269,13 @@ const Match = () => {
             </div>
           </div>
         )}
+
+        {/* Mobile Bottom Ad (shown only on mobile) */}
+        <AdsterraSidebar />
       </div>
+
+      {/* Desktop Sidebar Ad (shown only on desktop) */}
+      <AdsterraSidebar />
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
         <div className="container mx-auto px-4 text-center">
