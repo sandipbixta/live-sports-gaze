@@ -1,0 +1,82 @@
+import React, { useEffect, useRef } from 'react';
+
+/**
+ * Adsterra Sidebar Ad Component
+ * - Desktop: Fixed sidebar next to content (300x600px reserved space)
+ * - Mobile: Bottom placement (250px min-height reserved space)
+ * - Maintains CLS = 0 by reserving container space before ad loads
+ */
+const AdsterraSidebar: React.FC = () => {
+  const desktopAdRef = useRef<HTMLDivElement>(null);
+  const mobileAdRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Load script for desktop container
+    if (desktopAdRef.current) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      desktopAdRef.current.appendChild(script);
+    }
+
+    // Load script for mobile container
+    if (mobileAdRef.current) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.setAttribute('data-cfasync', 'false');
+      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      mobileAdRef.current.appendChild(script);
+    }
+
+    // Cleanup
+    return () => {
+      if (desktopAdRef.current) {
+        desktopAdRef.current.innerHTML = '';
+      }
+      if (mobileAdRef.current) {
+        mobileAdRef.current.innerHTML = '';
+      }
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Desktop Sidebar Ad */}
+      <div 
+        className="hidden lg:block fixed top-20 right-4 z-40"
+        style={{
+          width: '300px',
+          height: '600px',
+        }}
+      >
+        <div 
+          ref={desktopAdRef}
+          className="w-full h-full bg-sports-card/50 border border-border rounded-lg overflow-hidden"
+        >
+          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
+        </div>
+      </div>
+
+      {/* Mobile Bottom Ad */}
+      <div 
+        className="lg:hidden w-full mt-8"
+        style={{
+          minHeight: '250px',
+        }}
+      >
+        <div 
+          ref={mobileAdRef}
+          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden p-2"
+          style={{
+            minHeight: '250px',
+          }}
+        >
+          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AdsterraSidebar;
