@@ -51,10 +51,9 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-auto sticky top-4"
+          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-visible sticky top-4"
           style={{ 
-            width: '300px',
-            maxHeight: 'calc(100vh - 2rem)'
+            width: '300px'
           }}
         >
           <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
