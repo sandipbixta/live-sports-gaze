@@ -220,7 +220,7 @@ const Match = () => {
         }
       />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 lg:pr-[320px]">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
           <TelegramBanner />
         </div>
@@ -232,25 +232,31 @@ const Match = () => {
           </div>
         </div>
         
-        {/* Video Player Section */}
-        <div className="w-full" id="stream-container" data-stream-container>
-          <StreamTab
-            match={match}
-            stream={stream}
-            loadingStream={loadingStream}
-            activeSource={activeSource}
-            handleSourceChange={handleSourceChange}
-            popularMatches={[]}
-            sportId={sportId || ''}
-            allStreams={allStreams}
-            streamDiscovery={streamDiscovery}
-            onRefreshStreams={handleRefreshStreams}
-          />
+        {/* Video Player and Ad Sidebar Layout */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Video Player Section */}
+          <div className="flex-1 min-w-0" id="stream-container" data-stream-container>
+            <StreamTab
+              match={match}
+              stream={stream}
+              loadingStream={loadingStream}
+              activeSource={activeSource}
+              handleSourceChange={handleSourceChange}
+              popularMatches={[]}
+              sportId={sportId || ''}
+              allStreams={allStreams}
+              streamDiscovery={streamDiscovery}
+              onRefreshStreams={handleRefreshStreams}
+            />
 
-          {/* Viewer Statistics */}
-          <div className="mt-6">
-            <ViewerStats match={match} />
+            {/* Viewer Statistics */}
+            <div className="mt-6">
+              <ViewerStats match={match} />
+            </div>
           </div>
+
+          {/* Desktop Sidebar Ad (shown only on desktop, next to player) */}
+          <AdsterraSidebar />
         </div>
 
         {/* Match Analysis and Preview Content */}
@@ -271,11 +277,10 @@ const Match = () => {
         )}
 
         {/* Mobile Bottom Ad (shown only on mobile) */}
-        <AdsterraSidebar />
+        <div className="lg:hidden">
+          <AdsterraSidebar />
+        </div>
       </div>
-
-      {/* Desktop Sidebar Ad (shown only on desktop) */}
-      <AdsterraSidebar />
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
         <div className="container mx-auto px-4 text-center">
