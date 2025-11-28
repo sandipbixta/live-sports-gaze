@@ -65,9 +65,22 @@ const AdsterraSidebar: React.FC = () => {
               width: '300px',
               height: '600px',
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              gap: '8px'
             }}
-          ></div>
+          >
+            <style>{`
+              #container-a873bc1d3d203f2f13c32a99592441b8 {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+              }
+              #container-a873bc1d3d203f2f13c32a99592441b8 > * {
+                width: 100% !important;
+                max-width: 300px !important;
+              }
+            `}</style>
+          </div>
         </div>
       </div>
 
