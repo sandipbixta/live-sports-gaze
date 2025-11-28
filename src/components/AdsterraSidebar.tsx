@@ -45,10 +45,12 @@ const AdsterraSidebar: React.FC = () => {
       {/* Desktop Sidebar Ad */}
       <div 
         className="hidden lg:block lg:w-[300px] lg:min-w-[300px] lg:flex-shrink-0"
+        style={{ maxHeight: '600px' }}
       >
         <div 
           ref={desktopAdRef}
-          className="w-full h-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4"
+          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden sticky top-4"
+          style={{ maxHeight: '600px' }}
         >
           <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
         </div>
