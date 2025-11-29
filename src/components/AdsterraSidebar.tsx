@@ -53,10 +53,10 @@ const AdsterraSidebar: React.FC = () => {
       atOptionsScript.type = 'text/javascript';
       atOptionsScript.innerHTML = `
         atOptions = {
-          'key' : 'f6b9ed5242d1d0b7ebdc00c5ebba1752',
+          'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
           'format' : 'iframe',
-          'height' : 600,
-          'width' : 160,
+          'height' : 90,
+          'width' : 728,
           'params' : {}
         };
       `;
@@ -66,10 +66,10 @@ const AdsterraSidebar: React.FC = () => {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancesator.com/f6b9ed5242d1d0b7ebdc00c5ebba1752/invoke.js';
+      script.src = '//foreseehawancesator.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
       script.onload = () => {
-        console.log('✅ Banner sidebar ad loaded (mobile)');
-        trackAdEvent('impression', 'native', 'sidebar-banner-mobile');
+        console.log('✅ Native ad loaded (mobile)');
+        trackAdEvent('impression', 'native', 'mobile-native-bottom');
       };
       mobileAdRef.current.appendChild(script);
       hasLoadedMobile.current = true;
@@ -103,18 +103,18 @@ const AdsterraSidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Banner Ad */}
+      {/* Mobile Bottom Native Ad - 728x90 */}
       <div 
         className="lg:hidden w-full mt-8"
         style={{
-          minHeight: '250px',
+          minHeight: '90px',
         }}
       >
         <div 
           ref={mobileAdRef}
-          className="w-full bg-muted/30 border border-border rounded-lg overflow-hidden p-2 flex items-center justify-center"
+          className="w-full bg-muted/30 border border-border rounded-lg overflow-hidden flex items-center justify-center"
           style={{
-            minHeight: '250px',
+            minHeight: '90px',
           }}
         >
         </div>
