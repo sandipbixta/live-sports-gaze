@@ -30,7 +30,7 @@ import FinishedMatches from '../components/FinishedMatches';
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
-const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
+const AdsterraSidebar = React.lazy(() => import('../components/AdsterraSidebar'));
 
 const Index = () => {
   const { toast } = useToast();
@@ -325,7 +325,7 @@ const Index = () => {
               </div>
               <div>
                 <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                  <TrendingTopics />
+                  <AdsterraSidebar />
                 </React.Suspense>
               </div>
             </div>
