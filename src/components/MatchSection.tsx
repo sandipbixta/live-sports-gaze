@@ -2,6 +2,7 @@
 import React from 'react';
 import { Match } from '../types/sports';
 import MatchCard from './MatchCard';
+import { NativeAdInline } from './NativeAdInline';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Clock } from 'lucide-react';
 
@@ -68,18 +69,25 @@ const MatchSection: React.FC<MatchSectionProps> = ({
       </h2>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'} auto-rows-fr`}>
         {matches.map((match, index) => (
-          <div 
-            key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}
-            className={`h-full ${preventNavigation ? "cursor-pointer" : ""}`}
-            onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
-          >
-            <MatchCard 
-              match={match}
-              sportId={sportId}
+          <React.Fragment key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}>
+            {/* Insert native ad every 6 matches */}
+            {index > 0 && index % 6 === 0 && (
+              <div className="col-span-full">
+                <NativeAdInline placement={`${isLive ? 'live' : 'upcoming'}-matches-${Math.floor(index / 6)}`} />
+              </div>
+            )}
+            <div 
+              className={`h-full ${preventNavigation ? "cursor-pointer" : ""}`}
               onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
-              preventNavigation={preventNavigation}
-            />
-          </div>
+            >
+              <MatchCard 
+                match={match}
+                sportId={sportId}
+                onClick={preventNavigation && onMatchSelect ? () => onMatchSelect(match) : undefined}
+                preventNavigation={preventNavigation}
+              />
+            </div>
+          </React.Fragment>
         ))}
       </div>
     </div>
