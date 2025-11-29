@@ -172,7 +172,7 @@ const ChannelPlayer = () => {
       )}
 
       {/* Video Player with Sidebar Ad */}
-      <div className="flex gap-2 px-2">
+      <div className="flex gap-0.5 px-2">
         <div className="flex-1 min-w-0">
           <ChannelPlayerSelector
             stream={stream}

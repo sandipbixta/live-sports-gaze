@@ -94,7 +94,7 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-muted/30 border border-border rounded-lg overflow-visible sticky top-4"
+          className="w-full overflow-visible sticky top-4"
           style={{ 
             width: '160px',
             minHeight: '600px'
@@ -112,7 +112,7 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={mobileAdRef}
-          className="w-full bg-muted/30 border border-border rounded-lg overflow-hidden flex items-center justify-center"
+          className="w-full overflow-hidden flex items-center justify-center"
           style={{
             minHeight: '90px',
           }}
