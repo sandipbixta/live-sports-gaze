@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 import MatchDetails from '@/components/MatchDetails';
-import AdsterraSidebar from '@/components/AdsterraSidebar';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -171,18 +170,15 @@ const ChannelPlayer = () => {
         </div>
       )}
 
-      {/* Video Player with Sidebar Ad */}
-      <div className="flex gap-0.5 px-2">
-        <div className="flex-1 min-w-0">
-          <ChannelPlayerSelector
-            stream={stream}
-            isLoading={false}
-            onRetry={handleRetry}
-            playerType={playerType}
-            title={channel.title}
-          />
-        </div>
-        <AdsterraSidebar />
+      {/* Video Player - Full width, optimized for mobile */}
+      <div className="w-full">
+        <ChannelPlayerSelector
+          stream={stream}
+          isLoading={false}
+          onRetry={handleRetry}
+          playerType={playerType}
+          title={channel.title}
+        />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 p-4">
