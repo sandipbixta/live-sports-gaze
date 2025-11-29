@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * Adsterra Sidebar Ad Component
- * - Desktop: Fixed sidebar next to content (300x600px reserved space)
- * - Mobile: Bottom placement (250px min-height reserved space)
+ * Adsterra Sidebar Banner Ad Component
+ * - Desktop: Fixed sidebar next to content (160x300px banner)
+ * - Mobile: Bottom placement (160x300px banner)
  * - Maintains CLS = 0 by reserving container space before ad loads
  */
 const AdsterraSidebar: React.FC = () => {
@@ -14,21 +14,37 @@ const AdsterraSidebar: React.FC = () => {
     // Determine if we're on mobile or desktop
     const isMobile = window.innerWidth < 1024;
 
-    // Load script for desktop container only on desktop
+    // Load banner ad script for desktop
     if (!isMobile && desktopAdRef.current) {
+      // Set atOptions for banner ad
+      (window as any).atOptions = {
+        'key' : 'a15877b546566779d012a746c76b88da',
+        'format' : 'iframe',
+        'height' : 300,
+        'width' : 160,
+        'params' : {}
+      };
+
       const script = document.createElement('script');
-      script.async = true;
-      script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      script.type = 'text/javascript';
+      script.src = '//foreseehawancestor.com/a15877b546566779d012a746c76b88da/invoke.js';
       desktopAdRef.current.appendChild(script);
     }
 
-    // Load script for mobile container only on mobile
+    // Load banner ad script for mobile
     if (isMobile && mobileAdRef.current) {
+      // Set atOptions for banner ad
+      (window as any).atOptions = {
+        'key' : 'a15877b546566779d012a746c76b88da',
+        'format' : 'iframe',
+        'height' : 300,
+        'width' : 160,
+        'params' : {}
+      };
+
       const script = document.createElement('script');
-      script.async = true;
-      script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      script.type = 'text/javascript';
+      script.src = '//foreseehawancesator.com/a15877b546566779d012a746c76b88da/invoke.js';
       mobileAdRef.current.appendChild(script);
     }
 
@@ -45,43 +61,32 @@ const AdsterraSidebar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Sidebar Ad */}
+      {/* Desktop Sidebar Banner Ad - 160x300 */}
       <div 
-        className="hidden lg:block lg:w-[300px] lg:min-w-[300px] lg:flex-shrink-0"
+        className="hidden lg:block lg:w-[160px] lg:min-w-[160px] lg:flex-shrink-0"
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-visible sticky top-4"
+          className="w-full bg-card/50 border border-border rounded-lg overflow-visible sticky top-4 flex items-center justify-center"
           style={{ 
-            width: '300px'
+            width: '160px',
+            height: '300px'
           }}
-        >
-          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
-        </div>
+        />
       </div>
 
-      {/* Mobile Bottom Ad */}
+      {/* Mobile Bottom Banner Ad - 160x300 */}
       <div 
-        className="lg:hidden w-full mt-8"
-        style={{
-          minHeight: '250px',
-        }}
+        className="lg:hidden w-full mt-8 flex justify-center"
       >
         <div 
           ref={mobileAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden p-2"
+          className="bg-card/50 border border-border rounded-lg overflow-hidden flex items-center justify-center"
           style={{
-            minHeight: '250px',
+            width: '160px',
+            height: '300px'
           }}
-        >
-          <div 
-            id="container-a873bc1d3d203f2f13c32a99592441b8-mobile"
-            style={{
-              width: '100%',
-              minHeight: '250px'
-            }}
-          ></div>
-        </div>
+        />
       </div>
     </>
   );
