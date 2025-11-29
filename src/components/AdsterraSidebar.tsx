@@ -37,7 +37,7 @@ const AdsterraSidebar: React.FC = () => {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancesator.com/a15877b546566779d012a746c76b88da/invoke.js';
+      script.src = '//foreseehawancestor.com/a15877b546566779d012a746c76b88da/invoke.js';
       script.onload = () => {
         console.log('✅ Banner sidebar ad loaded (desktop)');
         trackAdEvent('impression', 'native', 'sidebar-banner-desktop');
@@ -66,7 +66,7 @@ const AdsterraSidebar: React.FC = () => {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancesator.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
+      script.src = '//foreseehawancestor.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
       script.onload = () => {
         console.log('✅ Native ad loaded (mobile)');
         trackAdEvent('impression', 'native', 'mobile-native-bottom');
