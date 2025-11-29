@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, Eye, MousePointer, TrendingUp } from 'lucide-react';
+import { DollarSign, Eye, MousePointer, TrendingUp, Lock } from 'lucide-react';
 import PageLayout from '@/components/PageLayout';
 
 interface AdStats {
@@ -14,11 +15,59 @@ interface AdStats {
 }
 
 export default function AdRevenueDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<AdStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication and admin status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Get current session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          // Not logged in - redirect to home
+          navigate('/');
+          return;
+        }
+
+        // Check if user has admin role
+        const { data: hasAdminRole, error } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'admin'
+        });
+
+        if (error) {
+          console.error('Error checking admin role:', error);
+          navigate('/');
+          return;
+        }
+
+        if (!hasAdminRole) {
+          // Not an admin - redirect to home
+          navigate('/');
+          return;
+        }
+
+        setIsAdmin(true);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        navigate('/');
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
 
   const fetchStats = async () => {
+    if (!isAdmin) return;
+    
     setLoading(true);
     try {
       const daysAgo = timeRange === '7d' ? 7 : 30;
@@ -40,11 +89,48 @@ export default function AdRevenueDashboard() {
   };
 
   useEffect(() => {
+    if (!isAdmin) return;
+    
     fetchStats();
     // Refresh every 5 minutes
     const interval = setInterval(fetchStats, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [timeRange]);
+  }, [timeRange, isAdmin]);
+
+  // Show loading while checking auth
+  if (isCheckingAuth) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Checking permissions...</p>
+            </div>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // This shouldn't render as we redirect, but just in case
+  if (!isAdmin) {
+    return (
+      <PageLayout>
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+                <p className="text-muted-foreground">You don't have permission to view this page.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </PageLayout>
+    );
+  }
 
   const totalRevenue = stats.reduce((sum, stat) => sum + Number(stat.estimated_revenue), 0);
   const totalImpressions = stats.reduce((sum, stat) => sum + Number(stat.impressions), 0);
