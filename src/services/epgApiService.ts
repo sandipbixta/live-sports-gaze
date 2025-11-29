@@ -30,6 +30,8 @@ interface EPGApiResponse {
 
 class EPGApiService {
   private baseUrl = 'https://epg.pw/api';
+  private cache: Map<string, { data: EPGApiResponse; timestamp: number }> = new Map();
+  private cacheExpiry = 5 * 60 * 1000; // 5 minutes
   
   // Map channel names to their EPG API IDs
   private channelIdMap: Record<string, string> = {
@@ -49,6 +51,13 @@ class EPGApiService {
 
   private async fetchChannelEPG(channelId: string): Promise<EPGApiResponse | null> {
     try {
+      // Check cache first
+      const cached = this.cache.get(channelId);
+      if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
+        console.log(`Using cached EPG data for channel ID: ${channelId}`);
+        return cached.data;
+      }
+
       console.log(`Fetching EPG data for channel ID: ${channelId}`);
       const response = await fetch(`${this.baseUrl}/epg.json?channel_id=${channelId}`);
       
@@ -58,6 +67,10 @@ class EPGApiService {
       }
       
       const data = await response.json();
+      
+      // Cache the response
+      this.cache.set(channelId, { data, timestamp: Date.now() });
+      
       return data;
     } catch (error) {
       console.error(`Error fetching EPG for channel ${channelId}:`, error);

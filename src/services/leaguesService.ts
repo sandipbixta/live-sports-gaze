@@ -1,8 +1,34 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Cache configuration
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry<any>>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+const getCachedData = <T>(key: string): T | null => {
+  const entry = cache.get(key);
+  if (entry && Date.now() - entry.timestamp < CACHE_DURATION) {
+    return entry.data;
+  }
+  cache.delete(key);
+  return null;
+};
+
+const setCachedData = <T>(key: string, data: T): void => {
+  cache.set(key, { data, timestamp: Date.now() });
+};
+
 export const leaguesService = {
   async fetchLeagues() {
     try {
+      const cacheKey = 'all-leagues';
+      const cached = getCachedData(cacheKey);
+      if (cached) return cached;
+
       console.log('Fetching all sports leagues');
       
       const { data, error } = await supabase.functions.invoke('fetch-leagues', {
@@ -11,6 +37,7 @@ export const leaguesService = {
 
       if (error) throw error;
       
+      setCachedData(cacheKey, data);
       return data;
     } catch (error) {
       console.error('Error fetching leagues:', error);
@@ -59,6 +86,10 @@ export const leaguesService = {
 
   async fetchLeagueTeams(sportKey: string) {
     try {
+      const cacheKey = `league-teams-${sportKey}`;
+      const cached = getCachedData(cacheKey);
+      if (cached) return cached;
+
       console.log(`Fetching teams for sport key: ${sportKey}`);
       
       const { data, error } = await supabase.functions.invoke('fetch-league-teams', {
@@ -70,6 +101,7 @@ export const leaguesService = {
         throw error;
       }
       
+      setCachedData(cacheKey, data);
       return data;
     } catch (error) {
       console.error('Error fetching league teams:', error);
