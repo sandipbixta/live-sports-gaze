@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Home, CalendarDays, Tv2, Radio, Trophy, Info, Phone, Download, DollarSign } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Clock from "./Clock";
 import ThemeToggle from "./ThemeToggle";
 import PushNotifications from "./PushNotifications";
@@ -20,6 +21,7 @@ const MainNav = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAdmin } = useIsAdmin();
 
   const menuItems = [
     { title: "Home", icon: Home, path: "/" },
@@ -27,7 +29,7 @@ const MainNav = () => {
     { title: "Live", icon: Tv2, path: "/live" },
     { title: "Channels", icon: Radio, path: "/channels" },
     { title: "Leagues", icon: Trophy, path: "/leagues" },
-    { title: "Revenue", icon: DollarSign, path: "/ad-revenue" },
+    ...(isAdmin ? [{ title: "Revenue", icon: DollarSign, path: "/ad-revenue" }] : []),
     { title: "About", icon: Info, path: "/about" },
     { title: "Contact", icon: Phone, path: "/contact" }
   ];
