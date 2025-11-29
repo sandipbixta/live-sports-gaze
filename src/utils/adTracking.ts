@@ -271,3 +271,20 @@ class AdTracking {
 }
 
 export const adTracking = new AdTracking();
+
+// Simple function for components to track ad events
+export const trackAdEvent = async (
+  type: 'impression' | 'click',
+  adFormat: string,
+  placement: string
+) => {
+  console.log(`📊 Tracking: ${type} - ${adFormat} at ${placement}`);
+  
+  // Use existing tracking
+  const action = type === 'impression' ? 'impression' : 'click';
+  adTracking.trackAdEvent({
+    adType: adFormat as AdType,
+    action: action as AdAction,
+    adUnit: placement
+  });
+};
