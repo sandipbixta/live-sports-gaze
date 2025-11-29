@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { trackAdEvent } from '@/utils/adTracking';
 
-const INTERSTITIAL_COOLDOWN = 12 * 60 * 60 * 1000; // 12 hours
+const INTERSTITIAL_COOLDOWN = 6 * 60 * 60 * 1000; // 6 hours - optimized for revenue
 const INTERSTITIAL_SCRIPT_ID = 'adsterra-interstitial';
 
 export const useInterstitialAd = (trigger: boolean) => {
