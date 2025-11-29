@@ -1,35 +1,78 @@
 import React, { useEffect, useRef } from 'react';
+import { trackAdEvent } from '@/utils/adTracking';
 
 /**
- * Adsterra Sidebar Ad Component
- * - Desktop: Fixed sidebar next to content (300x600px reserved space)
- * - Mobile: Bottom placement (250px min-height reserved space)
+ * Adsterra Banner Ad Component (Sidebar)
+ * - Desktop: Fixed sidebar next to content (160x600px banner)
+ * - Mobile: Bottom placement (adapted for mobile view)
  * - Maintains CLS = 0 by reserving container space before ad loads
  */
 const AdsterraSidebar: React.FC = () => {
   const desktopAdRef = useRef<HTMLDivElement>(null);
   const mobileAdRef = useRef<HTMLDivElement>(null);
+  const hasLoadedDesktop = useRef(false);
+  const hasLoadedMobile = useRef(false);
 
   useEffect(() => {
     // Determine if we're on mobile or desktop
     const isMobile = window.innerWidth < 1024;
 
     // Load script for desktop container only on desktop
-    if (!isMobile && desktopAdRef.current) {
+    if (!isMobile && desktopAdRef.current && !hasLoadedDesktop.current) {
+      // Add atOptions before the script
+      const atOptionsScript = document.createElement('script');
+      atOptionsScript.type = 'text/javascript';
+      atOptionsScript.innerHTML = `
+        atOptions = {
+          'key' : 'f6b9ed5242d1d0b7ebdc00c5ebba1752',
+          'format' : 'iframe',
+          'height' : 600,
+          'width' : 160,
+          'params' : {}
+        };
+      `;
+      desktopAdRef.current.appendChild(atOptionsScript);
+
+      // Load the ad script
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      script.src = '//foreseehawancesator.com/f6b9ed5242d1d0b7ebdc00c5ebba1752/invoke.js';
+      script.onload = () => {
+        console.log('✅ Banner sidebar ad loaded (desktop)');
+        trackAdEvent('impression', 'native', 'sidebar-banner-desktop');
+      };
       desktopAdRef.current.appendChild(script);
+      hasLoadedDesktop.current = true;
     }
 
     // Load script for mobile container only on mobile
-    if (isMobile && mobileAdRef.current) {
+    if (isMobile && mobileAdRef.current && !hasLoadedMobile.current) {
+      // Add atOptions before the script
+      const atOptionsScript = document.createElement('script');
+      atOptionsScript.type = 'text/javascript';
+      atOptionsScript.innerHTML = `
+        atOptions = {
+          'key' : 'f6b9ed5242d1d0b7ebdc00c5ebba1752',
+          'format' : 'iframe',
+          'height' : 600,
+          'width' : 160,
+          'params' : {}
+        };
+      `;
+      mobileAdRef.current.appendChild(atOptionsScript);
+
+      // Load the ad script
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancestor.com/a873bc1d3d203f2f13c32a99592441b8/invoke.js';
+      script.src = '//foreseehawancesator.com/f6b9ed5242d1d0b7ebdc00c5ebba1752/invoke.js';
+      script.onload = () => {
+        console.log('✅ Banner sidebar ad loaded (mobile)');
+        trackAdEvent('impression', 'native', 'sidebar-banner-mobile');
+      };
       mobileAdRef.current.appendChild(script);
+      hasLoadedMobile.current = true;
     }
 
     // Cleanup
@@ -45,22 +88,22 @@ const AdsterraSidebar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Sidebar Ad */}
+      {/* Desktop Sidebar Banner Ad - 160x600 */}
       <div 
-        className="hidden lg:block lg:w-[300px] lg:min-w-[300px] lg:flex-shrink-0"
+        className="hidden lg:block lg:w-[160px] lg:min-w-[160px] lg:flex-shrink-0"
       >
         <div 
           ref={desktopAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-visible sticky top-4"
+          className="w-full bg-muted/30 border border-border rounded-lg overflow-visible sticky top-4"
           style={{ 
-            width: '300px'
+            width: '160px',
+            minHeight: '600px'
           }}
         >
-          <div id="container-a873bc1d3d203f2f13c32a99592441b8"></div>
         </div>
       </div>
 
-      {/* Mobile Bottom Ad */}
+      {/* Mobile Bottom Banner Ad */}
       <div 
         className="lg:hidden w-full mt-8"
         style={{
@@ -69,18 +112,11 @@ const AdsterraSidebar: React.FC = () => {
       >
         <div 
           ref={mobileAdRef}
-          className="w-full bg-sports-card/50 border border-border rounded-lg overflow-hidden p-2"
+          className="w-full bg-muted/30 border border-border rounded-lg overflow-hidden p-2 flex items-center justify-center"
           style={{
             minHeight: '250px',
           }}
         >
-          <div 
-            id="container-a873bc1d3d203f2f13c32a99592441b8-mobile"
-            style={{
-              width: '100%',
-              minHeight: '250px'
-            }}
-          ></div>
         </div>
       </div>
     </>
