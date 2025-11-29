@@ -24,9 +24,9 @@ const AdsterraSidebar: React.FC = () => {
       atOptionsScript.type = 'text/javascript';
       atOptionsScript.innerHTML = `
         atOptions = {
-          'key' : 'f6b9ed5242d1d0b7ebdc00c5ebba1752',
+          'key' : 'a15877b546566779d012a746c76b88da',
           'format' : 'iframe',
-          'height' : 600,
+          'height' : 300,
           'width' : 160,
           'params' : {}
         };
@@ -37,7 +37,7 @@ const AdsterraSidebar: React.FC = () => {
       const script = document.createElement('script');
       script.async = true;
       script.setAttribute('data-cfasync', 'false');
-      script.src = '//foreseehawancesator.com/f6b9ed5242d1d0b7ebdc00c5ebba1752/invoke.js';
+      script.src = '//foreseehawancesator.com/a15877b546566779d012a746c76b88da/invoke.js';
       script.onload = () => {
         console.log('✅ Banner sidebar ad loaded (desktop)');
         trackAdEvent('impression', 'native', 'sidebar-banner-desktop');
@@ -88,7 +88,7 @@ const AdsterraSidebar: React.FC = () => {
 
   return (
     <>
-      {/* Desktop Sidebar Banner Ad - 160x600 */}
+      {/* Desktop Sidebar Banner Ad - 160x300 */}
       <div 
         className="hidden lg:block lg:w-[160px] lg:min-w-[160px] lg:flex-shrink-0"
       >
@@ -97,7 +97,7 @@ const AdsterraSidebar: React.FC = () => {
           className="w-full overflow-visible sticky top-4"
           style={{ 
             width: '160px',
-            minHeight: '600px'
+            minHeight: '300px'
           }}
         >
         </div>
