@@ -214,10 +214,20 @@
     <script type='text/javascript' src='//temperweekly.com/2d/10/9c/2d109cea62316aeb5d20389246c3d8a9.js'></script>
     
     <!-- Adcash Auto-Tag -->
+    <script async type="text/javascript" src="https://cdn.aclib.net/aclib.min.js"></script>
     <script type="text/javascript">
-        aclib.runAutoTag({
-            zoneId: 'nzdqohul1q',
-        });
+        (function() {
+            function initAdcash() {
+                if (typeof aclib !== 'undefined') {
+                    aclib.runAutoTag({
+                        zoneId: 'nzdqohul1q',
+                    });
+                } else {
+                    setTimeout(initAdcash, 100);
+                }
+            }
+            initAdcash();
+        })();
     </script>
   </body>
 </html>
