@@ -256,7 +256,7 @@ const Match = () => {
           </div>
 
           {/* Desktop Sidebar Ad (shown only on desktop, next to player) */}
-          <AdsterraSidebar />
+          <AdsterraSidebar key={`sidebar-${matchId}`} />
         </div>
 
         {/* Match Analysis and Preview Content */}
@@ -278,7 +278,7 @@ const Match = () => {
 
         {/* Mobile Bottom Ad (shown only on mobile) */}
         <div className="lg:hidden">
-          <AdsterraSidebar />
+          <AdsterraSidebar key={`sidebar-mobile-${matchId}`} />
         </div>
       </div>
       
