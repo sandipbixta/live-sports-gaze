@@ -3,7 +3,7 @@
 export const adConfig = {
   directLink: {
     url: 'https://foreseehawancesator.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7', // Adsterra only
-    cooldownMinutes: 90, // 1.5 hours - optimized for higher revenue
+    cooldownMinutes: 360, // 6 hours - prevents ad fatigue and maintains CTR
     sessionKey: 'directLinkAdTriggered'
   },
   popunder: {
