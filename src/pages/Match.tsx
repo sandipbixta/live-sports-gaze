@@ -275,11 +275,6 @@ const Match = () => {
             </div>
           </div>
         )}
-
-        {/* Mobile Bottom Ad (shown only on mobile) */}
-        <div className="lg:hidden">
-          <AdsterraSidebar />
-        </div>
       </div>
       
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
