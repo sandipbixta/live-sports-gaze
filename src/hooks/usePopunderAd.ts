@@ -10,8 +10,13 @@ export const usePopunderAd = () => {
 
     // Check if cooldown period has passed
     if (!isAdCooldownPassed(adConfig.popunder.sessionKey, adConfig.popunder.cooldownMinutes)) {
+      console.log('⏳ Popunder ad on cooldown');
       return;
     }
+
+    // Mark as triggered IMMEDIATELY to prevent multiple instances
+    markAdTriggered(adConfig.popunder.sessionKey);
+    console.log('🎯 Popunder ad scheduled');
 
     // Delay the popunder execution
     const timer = setTimeout(() => {
@@ -29,10 +34,9 @@ export const usePopunderAd = () => {
         };
         
         script.onload = () => {
-          // Mark as triggered after successful load
-          markAdTriggered(adConfig.popunder.sessionKey);
+          // Track successful load
           adTracking.trackPopunderLoad();
-          console.log('[Popunder] Ad loaded successfully');
+          console.log('✅ Popunder script loaded successfully');
         };
         
         // Append to head
