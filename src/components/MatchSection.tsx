@@ -70,10 +70,10 @@ const MatchSection: React.FC<MatchSectionProps> = ({
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 ${isLive ? 'live-matches-grid' : 'upcoming-matches-grid'} auto-rows-fr`}>
         {matches.map((match, index) => (
           <React.Fragment key={`${isLive ? 'live' : 'upcoming'}-${match.id}-${index}`}>
-            {/* Insert native ad every 3 matches for higher ad density */}
-            {index > 0 && index % 3 === 0 && (
+            {/* Insert native ad every 6 matches */}
+            {index > 0 && index % 6 === 0 && (
               <div className="col-span-full">
-                <NativeAdInline placement={`${isLive ? 'live' : 'upcoming'}-matches-${Math.floor(index / 3)}`} />
+                <NativeAdInline placement={`${isLive ? 'live' : 'upcoming'}-matches-${Math.floor(index / 6)}`} />
               </div>
             )}
             <div 

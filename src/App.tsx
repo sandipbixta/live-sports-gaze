@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
+import { useAdBlockerDetection } from "./hooks/useAdBlockerDetection";
+import { AdBlockerWarning } from "./components/AdBlockerWarning";
 import PopupAd from "./components/PopupAd";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
@@ -65,6 +67,26 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   // Initialize ad hooks
   usePopunderAd();
+  
+  // AdBlock and browser detection
+  const { isAdBlockerDetected, isUnsupportedBrowser, isChecking } = useAdBlockerDetection();
+
+  // Show loading state while checking
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Block content if adblock detected or unsupported browser
+  if (isAdBlockerDetected || isUnsupportedBrowser) {
+    return <AdBlockerWarning isUnsupportedBrowser={isUnsupportedBrowser} />;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

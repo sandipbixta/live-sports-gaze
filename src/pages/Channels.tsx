@@ -4,6 +4,7 @@ import PageLayout from '../components/PageLayout';
 import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import ChannelsGrid from '../components/ChannelsGrid';
+import Advertisement from '../components/Advertisement';
 import NewsSection from '../components/NewsSection';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Link } from 'react-router-dom';
@@ -199,6 +200,16 @@ const Channels = () => {
         {/* Sports News section */}
         <div className="mt-8">
           <NewsSection />
+        </div>
+        
+        {/* Video Advertisement - moved to bottom */}
+        <div className="mt-6">
+          <Advertisement type="video" className="w-full" />
+        </div>
+        
+        {/* Sidebar Advertisement - at the bottom */}
+        <div className="mt-6">
+          <Advertisement type="sidebar" className="w-full" />
         </div>
         
         {/* SEO Content Section */}
