@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_performance: {
+        Row: {
+          ad_type: string
+          ad_unit_id: string
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          event_type: string
+          id: string
+          page_path: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          ad_type: string
+          ad_unit_id: string
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          event_type: string
+          id?: string
+          page_path?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          ad_type?: string
+          ad_unit_id?: string
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          event_type?: string
+          id?: string
+          page_path?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -571,6 +610,16 @@ export type Database = {
     }
     Functions: {
       cleanup_stale_viewer_sessions: { Args: never; Returns: undefined }
+      get_ad_stats: {
+        Args: { end_date?: string; start_date?: string }
+        Returns: {
+          ad_type: string
+          clicks: number
+          ctr: number
+          estimated_revenue: number
+          impressions: number
+        }[]
+      }
       get_page_views_stats: {
         Args: { end_date?: string; start_date?: string }
         Returns: {

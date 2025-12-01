@@ -12,9 +12,15 @@ export const triggerStreamChangeAd = (): void => {
     return;
   }
 
-  // Mark as triggered and open the smartlink ad
-  markAdTriggered(adConfig.directLink.sessionKey);
-  adTracking.trackStreamChangeAd();
-  window.open(adConfig.directLink.url, "_blank", "noopener noreferrer");
-  console.log('🎯 Stream change ad triggered!');
+  // Try to open the smartlink ad
+  const adWindow = window.open(adConfig.directLink.url, "_blank", "noopener noreferrer");
+  
+  // Only mark as triggered if the window opened successfully
+  if (adWindow && !adWindow.closed) {
+    markAdTriggered(adConfig.directLink.sessionKey);
+    adTracking.trackStreamChangeAd();
+    console.log('🎯 Stream change ad triggered!');
+  } else {
+    console.log('❌ Stream change ad blocked by popup blocker');
+  }
 };
