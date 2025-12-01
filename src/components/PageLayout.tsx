@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useInterstitialAd } from '@/hooks/useInterstitialAd';
+import { Link } from 'react-router-dom';
 import MainNav from './MainNav';
 import MobileBottomNav from './MobileBottomNav';
 import ScrollToTop from './ScrollToTop';
@@ -22,25 +21,6 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onSearch
 }) => {
   const isMobile = useIsMobile();
-  const location = useLocation();
-  const [previousPath, setPreviousPath] = React.useState('');
-  
-  // Detect major page navigation and trigger interstitial ad
-  const shouldTriggerAd = React.useMemo(() => {
-    const majorSections = ['/', '/live', '/channels', '/schedule', '/leagues'];
-    const currentSection = majorSections.find(section => location.pathname === section);
-    const previousSection = majorSections.find(section => previousPath === section);
-    
-    // Only trigger if moving between different major sections
-    return currentSection && previousSection && currentSection !== previousSection;
-  }, [location.pathname, previousPath]);
-  
-  useInterstitialAd(shouldTriggerAd);
-  
-  // Update previous path
-  React.useEffect(() => {
-    setPreviousPath(location.pathname);
-  }, [location.pathname]);
   
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">

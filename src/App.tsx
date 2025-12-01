@@ -50,7 +50,6 @@ import LeagueDetail from "./pages/LeagueDetail";
 import FootballLeagues from "./pages/FootballLeagues";
 import FootballLeagueDetail from "./pages/FootballLeagueDetail";
 import GoogleAnalytics from "./components/GoogleAnalytics";
-import AdRevenueDashboard from "./pages/AdRevenueDashboard";
 
 // Optimized query client configuration
 const queryClient = new QueryClient({
@@ -152,11 +151,6 @@ const App: React.FC = () => {
               <Route path="/analytics" element={
                 <SEOPageTracker pageTitle="Website Analytics" contentType="home">
                   <Analytics />
-                </SEOPageTracker>
-              } />
-              <Route path="/ad-revenue" element={
-                <SEOPageTracker pageTitle="Ad Revenue Dashboard" contentType="home">
-                  <AdRevenueDashboard />
                 </SEOPageTracker>
               } />
               <Route path="/about" element={<About />} />
