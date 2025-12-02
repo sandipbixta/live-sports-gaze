@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, CalendarDays, Tv2, Tv, Trophy } from "lucide-react";
+import { Home, CalendarDays, Tv2, Tv, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MobileBottomNav = () => {
@@ -13,7 +13,7 @@ const MobileBottomNav = () => {
     { title: "Schedule", icon: CalendarDays, path: "/schedule" },
     { title: "Live", icon: Tv2, path: "/live" },
     { title: "Channels", icon: Tv, path: "/channels" },
-    { title: "Leagues", icon: Trophy, path: "/leagues" }
+    { title: "Download", icon: Download, path: "/install" }
   ];
 
   return (

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, Check } from 'lucide-react';
+import { Download, Smartphone, Check, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import PageLayout from '@/components/PageLayout';
 import SEOMetaTags from '@/components/SEOMetaTags';
+import qrCodeImage from '@/assets/qr-code-download.png';
 
 const Install = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -80,25 +81,50 @@ const Install = () => {
             </Card>
           ) : (
             <>
-              {isInstallable && (
-                <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-                  <CardContent className="p-8 text-center">
-                    <Download className="h-12 w-12 text-primary mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold mb-2">Ready to Install</h2>
-                    <p className="text-muted-foreground mb-6">
-                      Click below to add DamiTV to your home screen
-                    </p>
-                    <Button 
-                      onClick={handleInstallClick}
-                      size="lg"
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      <Download className="mr-2 h-5 w-5" />
-                      Install App
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+              <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                <CardContent className="p-8">
+                  <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="text-center md:text-left">
+                      <Download className="h-12 w-12 text-primary mx-auto md:mx-0 mb-4" />
+                      <h2 className="text-2xl font-bold mb-2">Download DamiTV App</h2>
+                      <p className="text-muted-foreground mb-6">
+                        Scan the QR code or click the button to download and install DamiTV
+                      </p>
+                      <Button 
+                        asChild
+                        size="lg"
+                        className="bg-primary hover:bg-primary/90 mb-4"
+                      >
+                        <a href="https://damitv-pro.netlify.app" target="_blank" rel="noopener noreferrer">
+                          <Download className="mr-2 h-5 w-5" />
+                          Download App
+                        </a>
+                      </Button>
+                      {isInstallable && (
+                        <Button 
+                          onClick={handleInstallClick}
+                          size="lg"
+                          variant="outline"
+                          className="ml-0 md:ml-2"
+                        >
+                          <Smartphone className="mr-2 h-5 w-5" />
+                          Quick Install
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex justify-center">
+                      <div className="bg-white p-4 rounded-lg">
+                        <img 
+                          src={qrCodeImage} 
+                          alt="QR Code to download DamiTV app" 
+                          className="w-48 h-48 md:w-56 md:h-56"
+                        />
+                        <p className="text-center text-sm text-gray-600 mt-2">Scan to download</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <Card>
