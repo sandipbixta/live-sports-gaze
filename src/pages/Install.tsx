@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Smartphone, Check, QrCode } from 'lucide-react';
+import { Download, Smartphone, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import PageLayout from '@/components/PageLayout';
 import SEOMetaTags from '@/components/SEOMetaTags';
-import qrCodeImage from '@/assets/qr-code-download.png';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Install = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [downloadStats, setDownloadStats] = useState<{ android: number; ios: number }>({ android: 0, ios: 0 });
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if already installed
@@ -26,10 +29,55 @@ const Install = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
+    // Fetch download stats
+    fetchDownloadStats();
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
   }, []);
+
+  const fetchDownloadStats = async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_download_stats');
+      if (!error && data) {
+        const stats = { android: 0, ios: 0 };
+        data.forEach((item: { platform: string; total_downloads: number }) => {
+          if (item.platform === 'android') stats.android = item.total_downloads;
+          if (item.platform === 'ios') stats.ios = item.total_downloads;
+        });
+        setDownloadStats(stats);
+      }
+    } catch (error) {
+      console.error('Error fetching download stats:', error);
+    }
+  };
+
+  const trackDownload = async (platform: 'android' | 'ios') => {
+    try {
+      const sessionId = localStorage.getItem('session_id') || crypto.randomUUID();
+      localStorage.setItem('session_id', sessionId);
+
+      await supabase.from('app_downloads').insert({
+        platform,
+        session_id: sessionId,
+        user_agent: navigator.userAgent,
+      });
+
+      // Update local stats
+      setDownloadStats(prev => ({
+        ...prev,
+        [platform]: prev[platform] + 1
+      }));
+
+      toast({
+        title: "Download started",
+        description: `Thank you for downloading DamiTV for ${platform === 'android' ? 'Android' : 'iOS'}!`,
+      });
+    } catch (error) {
+      console.error('Error tracking download:', error);
+    }
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
@@ -66,6 +114,16 @@ const Install = () => {
             </p>
           </div>
 
+          {/* Ad Information Banner */}
+          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20 mb-8">
+            <CardContent className="p-6 text-center">
+              <h3 className="text-xl font-bold mb-2">📱 Ad-Free Experience After Installation</h3>
+              <p className="text-muted-foreground">
+                You may see 1-2 ads during installation, but after that, <strong>enjoy unlimited matches without any restrictions or interruptions!</strong>
+              </p>
+            </CardContent>
+          </Card>
+
           {isInstalled ? (
             <Card className="bg-gradient-to-r from-green-500/10 to-green-500/5 border-green-500/20">
               <CardContent className="p-8 text-center">
@@ -82,32 +140,36 @@ const Install = () => {
           ) : (
             <>
               {/* Horizontal Layout for Android and iOS */}
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
                 {/* Android APK Download Section */}
                 <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4">
                     <div className="text-center">
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <Download className="h-10 w-10 text-green-500" />
-                        <span className="text-2xl font-bold">Android</span>
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <Download className="h-8 w-8 text-green-500" />
+                        <span className="text-xl font-bold">Android</span>
                       </div>
-                      <h2 className="text-xl font-bold mb-2">Download APK File</h2>
-                      <p className="text-sm text-muted-foreground mb-6">
-                        For Android phones: Download and install the DamiTV APK file directly
+                      <h2 className="text-lg font-bold mb-2">Download APK File</h2>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        For Android phones: Download and install the DamiTV APK file
                       </p>
                       
                       <Button 
-                        asChild
-                        size="lg"
-                        className="bg-green-600 hover:bg-green-700 text-white w-full"
+                        onClick={() => {
+                          trackDownload('android');
+                          window.open('https://drive.google.com/uc?export=download&id=1a0WI10a3sIwFuPzqXm0zWcUfilX4SufQ', '_blank');
+                        }}
+                        size="default"
+                        className="bg-green-600 hover:bg-green-700 text-white w-full mb-2"
                       >
-                        <a href="https://drive.google.com/uc?export=download&id=1a0WI10a3sIwFuPzqXm0zWcUfilX4SufQ" target="_blank" rel="noopener noreferrer">
-                          <Download className="mr-2 h-5 w-5" />
-                          Download Android APK
-                        </a>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download APK
                       </Button>
-                      <p className="text-xs text-muted-foreground mt-3">
-                        Enable "Install from Unknown Sources" in settings
+                      <p className="text-xs text-green-600 font-semibold mb-2">
+                        {downloadStats.android.toLocaleString()} downloads
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Enable "Unknown Sources" in settings
                       </p>
                     </div>
                   </CardContent>
@@ -115,44 +177,40 @@ const Install = () => {
 
                 {/* iOS Installation Section */}
                 <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4">
                     <div className="text-center">
-                      <div className="flex items-center justify-center gap-2 mb-4">
-                        <Smartphone className="h-10 w-10 text-blue-500" />
-                        <span className="text-2xl font-bold">iOS</span>
+                      <div className="flex items-center justify-center gap-2 mb-3">
+                        <Smartphone className="h-8 w-8 text-blue-500" />
+                        <span className="text-xl font-bold">iOS</span>
                       </div>
-                      <h2 className="text-xl font-bold mb-2">Install Web App</h2>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <h2 className="text-lg font-bold mb-2">Install Web App</h2>
+                      <p className="text-xs text-muted-foreground mb-4">
                         For iPhone/iPad: Add DamiTV to your home screen
                       </p>
                       
-                      <div className="bg-white p-4 rounded-lg mb-4 inline-block">
-                        <img 
-                          src={qrCodeImage} 
-                          alt="QR Code to open DamiTV on iOS" 
-                          className="w-40 h-40"
-                        />
-                        <p className="text-center text-xs text-gray-600 mt-2">Scan to open in Safari</p>
-                      </div>
-                      
                       <Button 
-                        asChild
-                        size="lg"
-                        className="bg-blue-600 hover:bg-blue-700 text-white w-full mb-4"
+                        onClick={() => {
+                          trackDownload('ios');
+                          window.open('https://damitv-pro.netlify.app', '_blank');
+                        }}
+                        size="default"
+                        className="bg-blue-600 hover:bg-blue-700 text-white w-full mb-2"
                       >
-                        <a href="https://damitv-pro.netlify.app" target="_blank" rel="noopener noreferrer">
-                          <Smartphone className="mr-2 h-5 w-5" />
-                          Open DamiTV.pro
-                        </a>
+                        <Smartphone className="mr-2 h-4 w-4" />
+                        Open DamiTV.pro
                       </Button>
                       
-                      <div className="bg-background/50 p-4 rounded-lg border text-left">
-                        <p className="text-xs font-semibold mb-2">Quick Steps:</p>
-                        <ol className="space-y-1 text-xs text-muted-foreground">
-                          <li>1. Open link in Safari browser</li>
-                          <li>2. Tap Share button (↑)</li>
-                          <li>3. Select "Add to Home Screen"</li>
-                          <li>4. Tap "Add" to install</li>
+                      <p className="text-xs text-blue-600 font-semibold mb-3">
+                        {downloadStats.ios.toLocaleString()} installations
+                      </p>
+                      
+                      <div className="bg-background/50 p-3 rounded-lg border text-left">
+                        <p className="text-xs font-semibold mb-1">Quick Steps:</p>
+                        <ol className="space-y-0.5 text-xs text-muted-foreground">
+                          <li>1. Open link in Safari</li>
+                          <li>2. Tap Share (↑)</li>
+                          <li>3. "Add to Home Screen"</li>
+                          <li>4. Tap "Add"</li>
                         </ol>
                       </div>
                     </div>
