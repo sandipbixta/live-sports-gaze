@@ -81,100 +81,90 @@ const Install = () => {
             </Card>
           ) : (
             <>
-              <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+              {/* Android APK Download Section */}
+              <Card className="mb-8 bg-gradient-to-r from-green-500/10 to-green-500/5 border-green-500/20">
                 <CardContent className="p-8">
                   <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="text-center md:text-left">
-                      <Download className="h-12 w-12 text-primary mx-auto md:mx-0 mb-4" />
-                      <h2 className="text-2xl font-bold mb-2">Download DamiTV App</h2>
+                      <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                        <Download className="h-12 w-12 text-green-500" />
+                        <span className="text-2xl font-bold">Android</span>
+                      </div>
+                      <h2 className="text-2xl font-bold mb-2">Download APK File</h2>
                       <p className="text-muted-foreground mb-6">
-                        Scan the QR code or click the button to download and install DamiTV
+                        For Android phones: Download and install the DamiTV APK file directly
                       </p>
                       <Button 
                         asChild
                         size="lg"
-                        className="bg-[hsl(var(--sports-primary))] hover:bg-[hsl(var(--sports-primary))]/90 text-white mb-4"
+                        className="bg-green-600 hover:bg-green-700 text-white"
                       >
                         <a href="https://drive.google.com/uc?export=download&id=1LODUu3TmijmFDRA0aYCpxO88h6a5w7gO" target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-5 w-5" />
-                          Download Android App
+                          Download Android APK
                         </a>
                       </Button>
-                      {isInstallable && (
-                        <Button 
-                          onClick={handleInstallClick}
-                          size="lg"
-                          variant="outline"
-                          className="ml-0 md:ml-2"
-                        >
-                          <Smartphone className="mr-2 h-5 w-5" />
-                          Quick Install
-                        </Button>
-                      )}
+                      <p className="text-xs text-muted-foreground mt-3">
+                        Note: Enable "Install from Unknown Sources" in your phone settings
+                      </p>
                     </div>
                     <div className="flex justify-center">
                       <div className="bg-white p-4 rounded-lg">
                         <img 
                           src={qrCodeImage} 
-                          alt="QR Code to download DamiTV app" 
+                          alt="QR Code to download DamiTV Android APK" 
                           className="w-48 h-48 md:w-56 md:h-56"
                         />
-                        <p className="text-center text-sm text-gray-600 mt-2">Scan to download</p>
+                        <p className="text-center text-sm text-gray-600 mt-2">Scan to download APK</p>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-4">📱 On Mobile (iOS)</h3>
-                    <ol className="space-y-2 text-sm text-muted-foreground">
-                      <li>1. Open this page in Safari</li>
-                      <li>2. Tap the Share button (square with arrow)</li>
-                      <li>3. Scroll and tap "Add to Home Screen"</li>
-                      <li>4. Tap "Add" to confirm</li>
-                    </ol>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-4">📱 On Mobile (Android)</h3>
-                    <ol className="space-y-2 text-sm text-muted-foreground">
-                      <li>1. Open this page in Chrome</li>
-                      <li>2. Tap the menu (three dots)</li>
-                      <li>3. Tap "Install app" or "Add to Home screen"</li>
-                      <li>4. Tap "Install" to confirm</li>
-                    </ol>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-4">💻 On Desktop (Chrome)</h3>
-                    <ol className="space-y-2 text-sm text-muted-foreground">
-                      <li>1. Look for the install icon in the address bar</li>
-                      <li>2. Click the install button</li>
-                      <li>3. Or use the menu (three dots) → Install DamiTV</li>
-                      <li>4. The app will open in its own window</li>
-                    </ol>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold mb-4">💻 On Desktop (Edge)</h3>
-                    <ol className="space-y-2 text-sm text-muted-foreground">
-                      <li>1. Click the app icon in the address bar</li>
-                      <li>2. Or go to Settings → Apps → Install DamiTV</li>
-                      <li>3. Click "Install"</li>
-                      <li>4. Access from your apps menu anytime</li>
-                    </ol>
-                  </CardContent>
-                </Card>
-              </div>
+              {/* iOS Installation Section */}
+              <Card className="mb-8 bg-gradient-to-r from-blue-500/10 to-blue-500/5 border-blue-500/20">
+                <CardContent className="p-8">
+                  <div className="text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
+                      <Smartphone className="h-12 w-12 text-blue-500" />
+                      <span className="text-2xl font-bold">iOS (iPhone/iPad)</span>
+                    </div>
+                    <h2 className="text-2xl font-bold mb-2">Install Web App</h2>
+                    <p className="text-muted-foreground mb-6">
+                      For iPhone/iPad: Add DamiTV to your home screen as a web app
+                    </p>
+                    <div className="bg-background/50 p-6 rounded-lg border">
+                      <h3 className="font-bold mb-4 flex items-center gap-2">
+                        <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm">📱</span>
+                        Installation Steps:
+                      </h3>
+                      <ol className="space-y-3 text-muted-foreground">
+                        <li className="flex gap-3">
+                          <span className="font-bold text-foreground">1.</span>
+                          <span>Open <strong>damitv.pro</strong> in <strong>Safari browser</strong></span>
+                        </li>
+                        <li className="flex gap-3">
+                          <span className="font-bold text-foreground">2.</span>
+                          <span>Tap the <strong>Share button</strong> (square with arrow pointing up) at the bottom</span>
+                        </li>
+                        <li className="flex gap-3">
+                          <span className="font-bold text-foreground">3.</span>
+                          <span>Scroll down and tap <strong>"Add to Home Screen"</strong></span>
+                        </li>
+                        <li className="flex gap-3">
+                          <span className="font-bold text-foreground">4.</span>
+                          <span>Tap <strong>"Add"</strong> in the top right corner</span>
+                        </li>
+                        <li className="flex gap-3">
+                          <span className="font-bold text-foreground">5.</span>
+                          <span>The DamiTV app icon will appear on your home screen!</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card className="bg-card">
                 <CardContent className="p-6">
