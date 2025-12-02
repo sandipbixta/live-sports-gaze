@@ -95,9 +95,9 @@ const Install = () => {
                         size="lg"
                         className="bg-[hsl(var(--sports-primary))] hover:bg-[hsl(var(--sports-primary))]/90 text-white mb-4"
                       >
-                        <a href="https://damitv-pro.netlify.app" target="_blank" rel="noopener noreferrer">
+                        <a href="https://drive.google.com/uc?export=download&id=1LODUu3TmijmFDRA0aYCpxO88h6a5w7gO" target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-5 w-5" />
-                          Download App
+                          Download Android App
                         </a>
                       </Button>
                       {isInstallable && (
