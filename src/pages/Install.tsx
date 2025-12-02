@@ -93,7 +93,7 @@ const Install = () => {
                       <Button 
                         asChild
                         size="lg"
-                        className="bg-primary hover:bg-primary/90 mb-4"
+                        className="bg-[hsl(var(--sports-primary))] hover:bg-[hsl(var(--sports-primary))]/90 text-white mb-4"
                       >
                         <a href="https://damitv-pro.netlify.app" target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-5 w-5" />
