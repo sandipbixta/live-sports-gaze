@@ -92,18 +92,9 @@ const Install = () => {
                         <span className="text-2xl font-bold">Android</span>
                       </div>
                       <h2 className="text-xl font-bold mb-2">Download APK File</h2>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-sm text-muted-foreground mb-6">
                         For Android phones: Download and install the DamiTV APK file directly
                       </p>
-                      
-                      <div className="bg-white p-4 rounded-lg mb-4 inline-block">
-                        <img 
-                          src={qrCodeImage} 
-                          alt="QR Code to download DamiTV Android APK" 
-                          className="w-40 h-40"
-                        />
-                        <p className="text-center text-xs text-gray-600 mt-2">Scan to download APK</p>
-                      </div>
                       
                       <Button 
                         asChild
