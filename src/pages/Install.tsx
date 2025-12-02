@@ -140,7 +140,7 @@ const Install = () => {
                         size="lg"
                         className="bg-blue-600 hover:bg-blue-700 text-white w-full mb-4"
                       >
-                        <a href="https://damitv.pro" target="_blank" rel="noopener noreferrer">
+                        <a href="https://damitv-pro.netlify.app" target="_blank" rel="noopener noreferrer">
                           <Smartphone className="mr-2 h-5 w-5" />
                           Open DamiTV.pro
                         </a>
