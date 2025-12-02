@@ -53,6 +53,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_downloads: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -618,6 +642,13 @@ export type Database = {
           ctr: number
           estimated_revenue: number
           impressions: number
+        }[]
+      }
+      get_download_stats: {
+        Args: never
+        Returns: {
+          platform: string
+          total_downloads: number
         }[]
       }
       get_page_views_stats: {
