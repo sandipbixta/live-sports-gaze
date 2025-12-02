@@ -101,7 +101,7 @@ const Install = () => {
                         size="lg"
                         className="bg-green-600 hover:bg-green-700 text-white w-full"
                       >
-                        <a href="https://drive.google.com/uc?export=download&id=1LODUu3TmijmFDRA0aYCpxO88h6a5w7gO" target="_blank" rel="noopener noreferrer">
+                        <a href="https://drive.google.com/uc?export=download&id=1a0WI10a3sIwFuPzqXm0zWcUfilX4SufQ" target="_blank" rel="noopener noreferrer">
                           <Download className="mr-2 h-5 w-5" />
                           Download Android APK
                         </a>
