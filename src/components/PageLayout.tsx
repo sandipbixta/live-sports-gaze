@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import MainNav from './MainNav';
 import MobileBottomNav from './MobileBottomNav';
 import ScrollToTop from './ScrollToTop';
@@ -22,6 +22,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onSearch
 }) => {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
   
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
@@ -69,16 +71,18 @@ const PageLayout: React.FC<PageLayoutProps> = ({
         </div>
       </header>
 
-      {/* Download App Banner - 728x90 Ad Style */}
-      <div className="container mx-auto px-4 py-3">
-        <Link to="/install" className="block mx-auto max-w-[728px]">
-          <img 
-            src={downloadBanner} 
-            alt="Download DAMITV App for Android and iOS" 
-            className="w-full h-[90px] md:h-[90px] object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          />
-        </Link>
-      </div>
+      {/* Download App Banner - 728x90 Ad Style - Homepage Only */}
+      {isHomePage && (
+        <div className="container mx-auto px-4 py-3">
+          <Link to="/install" className="block mx-auto max-w-[728px]">
+            <img 
+              src={downloadBanner} 
+              alt="Download DAMITV App for Android and iOS" 
+              className="w-full h-[90px] md:h-[90px] object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+            />
+          </Link>
+        </div>
+      )}
 
       <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
