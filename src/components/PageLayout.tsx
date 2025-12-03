@@ -7,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import Clock from './Clock';
 import ThemeToggle from './ThemeToggle';
+import downloadBanner from '@/assets/download-banner.jpeg';
 
 
 interface PageLayoutProps {
@@ -67,6 +68,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </div>
         </div>
       </header>
+
+      {/* Download App Banner */}
+      <Link to="/install" className="block w-full">
+        <img 
+          src={downloadBanner} 
+          alt="Download DAMITV App for Android and iOS" 
+          className="w-full h-auto object-cover"
+        />
+      </Link>
 
       <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
         {children}
