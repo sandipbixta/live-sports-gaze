@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import PopupAd from "./components/PopupAd";
+import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
 
@@ -73,6 +74,7 @@ const App: React.FC = () => {
           <MonetizationTracker>
             <TooltipProvider>
               <PopupAd />
+              <AdsterraSocialBar />
               <Toaster />
               <Sonner />
             <Routes>
