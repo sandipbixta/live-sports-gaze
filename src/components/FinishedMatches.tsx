@@ -114,20 +114,22 @@ const FinishedMatches = () => {
           <Card
             key={match.id}
             onClick={() => handleMatchClick(match.competition.id, match.competition.name)}
-            className="min-w-[160px] p-3 cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-card border-border"
+            className="min-w-[160px] overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30 hover:shadow-sports-primary/20"
           >
-            <div className="flex flex-col gap-3">
+            <div className="p-3 flex flex-col gap-3">
               {/* Competition Badge */}
-              <div className="flex items-center gap-1.5 pb-2 border-b border-border">
-                {match.competition.logo ? (
-                  <img
-                    src={match.competition.logo}
-                    alt={match.competition.name}
-                    className="w-3.5 h-3.5 object-contain"
-                  />
-                ) : (
-                  <Trophy className="w-3.5 h-3.5 text-muted-foreground" />
-                )}
+              <div className="flex items-center gap-1.5 pb-2 border-b border-border/50">
+                <div className="w-5 h-5 rounded-full bg-muted/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {match.competition.logo ? (
+                    <img
+                      src={match.competition.logo}
+                      alt={match.competition.name}
+                      className="w-4 h-4 object-contain"
+                    />
+                  ) : (
+                    <Trophy className="w-3 h-3 text-muted-foreground" />
+                  )}
+                </div>
                 <span className="text-[10px] text-muted-foreground truncate">
                   {match.competition.name}
                 </span>
@@ -135,19 +137,21 @@ const FinishedMatches = () => {
 
               {/* Home Team */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  {match.homeTeam.logo ? (
-                    <img
-                      src={match.homeTeam.logo}
-                      alt={match.homeTeam.name}
-                      className="w-5 h-5 object-contain flex-shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-muted flex-shrink-0" />
-                  )}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {match.homeTeam.logo ? (
+                      <img
+                        src={match.homeTeam.logo}
+                        alt={match.homeTeam.name}
+                        className="w-5 h-5 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full bg-muted" />
+                    )}
+                  </div>
                   <span className="text-xs font-medium text-foreground truncate">
                     {match.homeTeam.name}
                   </span>
@@ -159,19 +163,21 @@ const FinishedMatches = () => {
 
               {/* Away Team */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  {match.awayTeam.logo ? (
-                    <img
-                      src={match.awayTeam.logo}
-                      alt={match.awayTeam.name}
-                      className="w-5 h-5 object-contain flex-shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.src = '/placeholder.svg';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-muted flex-shrink-0" />
-                  )}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {match.awayTeam.logo ? (
+                      <img
+                        src={match.awayTeam.logo}
+                        alt={match.awayTeam.name}
+                        className="w-5 h-5 object-contain"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-4 h-4 rounded-full bg-muted" />
+                    )}
+                  </div>
                   <span className="text-xs font-medium text-foreground truncate">
                     {match.awayTeam.name}
                   </span>
@@ -182,8 +188,8 @@ const FinishedMatches = () => {
               </div>
 
               {/* Full Time Badge */}
-              <div className="pt-1.5 border-t border-border">
-                <span className="text-[10px] text-muted-foreground font-medium">
+              <div className="pt-1.5 border-t border-border/50">
+                <span className="text-[10px] text-muted-foreground font-medium bg-muted/30 px-2 py-0.5 rounded-full">
                   FT
                 </span>
               </div>
