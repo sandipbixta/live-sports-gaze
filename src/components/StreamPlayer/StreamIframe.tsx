@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { Play } from 'lucide-react';
 
 interface StreamIframeProps {
   src: string;
@@ -15,40 +14,24 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [loaded, setLoaded] = useState(false);
   const [hadError, setHadError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
-  const [showClickShield, setShowClickShield] = useState(true);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
-  // Number of clicks to absorb before allowing through (blocks ad clicks)
-  const CLICKS_TO_ABSORB = 3;
-
-  // Handle click shield - absorbs first few clicks
-  const handleShieldClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
-    console.log(`🛡️ Click absorbed (${newCount}/${CLICKS_TO_ABSORB})`);
-    
-    if (newCount >= CLICKS_TO_ABSORB) {
-      setShowClickShield(false);
-      console.log('🎬 Click shield removed - player now interactive');
+  // Handle iframe clicks on mobile to prevent automatic opening
+  const handleIframeClick = (e: React.MouseEvent) => {
+    if (isMobile) {
+      // Prevent default behavior that might cause automatic opening
+      e.preventDefault();
+      console.log('Mobile iframe click prevented');
     }
   };
 
-  // Reset click shield when source changes
   useEffect(() => {
-    setClickCount(0);
-    setShowClickShield(true);
     setLoaded(false);
     setHadError(false);
     setTimedOut(false);
-    
     const t = window.setTimeout(() => {
       setTimedOut(true);
     }, 8000);
-    
     return () => window.clearTimeout(t);
   }, [src]);
 
@@ -76,6 +59,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         title="Live Sports Stream - DAMITV"
         onLoad={handleLoad}
         onError={handleError}
+        onClick={handleIframeClick}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
         referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
@@ -83,7 +67,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         scrolling="no"
         style={{ 
           border: 'none',
-          pointerEvents: showClickShield ? 'none' : 'auto',
+          pointerEvents: isMobile ? 'auto' : 'auto',
           minWidth: '100%',
           minHeight: '100%',
           willChange: 'transform',
@@ -98,26 +82,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         }}
       />
 
-      {/* Click absorption shield - blocks ad clicks */}
-      {showClickShield && !showOpenOverlay && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center bg-black/60 cursor-pointer z-10 transition-opacity"
-          onClick={handleShieldClick}
-        >
-          <div className="text-center text-white">
-            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 hover:bg-white/30 transition-colors">
-              <Play className="w-10 h-10 text-white ml-1" />
-            </div>
-            <p className="text-lg font-semibold">Click to Play</p>
-            <p className="text-sm text-gray-400 mt-1">
-              {clickCount > 0 ? `${CLICKS_TO_ABSORB - clickCount} more click${CLICKS_TO_ABSORB - clickCount !== 1 ? 's' : ''} to start` : 'Tap the play button'}
-            </p>
-          </div>
-        </div>
-      )}
-
       {showOpenOverlay && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4 z-20">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4">
           <a
             href={src}
             target="_blank"
