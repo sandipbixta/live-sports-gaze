@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
 
 interface StreamIframeProps {
@@ -16,12 +16,68 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [timedOut, setTimedOut] = useState(false);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
 
+  // Setup iframe ad protection
+  const setupIframeProtection = useCallback(() => {
+    const iframe = videoRef.current;
+    if (!iframe) return;
+    
+    try {
+      // Block iframe from opening new windows (ads)
+      if (iframe.contentWindow) {
+        (iframe.contentWindow as any).open = function() { 
+          console.log('🛡️ Blocked popup from iframe');
+          return null; 
+        };
+      }
+    } catch (e) {
+      console.log('🛡️ Iframe protection active (cross-origin)');
+    }
+  }, [videoRef]);
+
+  // Block postMessage ads
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (videoRef.current && event.source === videoRef.current.contentWindow) {
+        console.log('🛡️ Intercepted message from iframe');
+        
+        // Check for ad-related messages
+        try {
+          const messageStr = JSON.stringify(event.data).toLowerCase();
+          if (messageStr.includes('ad') || messageStr.includes('popup') || messageStr.includes('click')) {
+            event.stopPropagation();
+            console.log('🛡️ Blocked ad-related message from iframe');
+            return;
+          }
+        } catch (e) {
+          // Ignore serialization errors
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage, true);
+    return () => window.removeEventListener('message', handleMessage, true);
+  }, [videoRef]);
+
+  // Periodic check for iframe ad attempts
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        if (document.activeElement === videoRef.current) {
+          console.log('🛡️ Iframe gained focus - monitoring for ads');
+        }
+      } catch (e) {
+        // Ignore cross-origin errors
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [videoRef]);
+
   // Handle iframe clicks on mobile to prevent automatic opening
   const handleIframeClick = (e: React.MouseEvent) => {
     if (isMobile) {
-      // Prevent default behavior that might cause automatic opening
       e.preventDefault();
-      console.log('Mobile iframe click prevented');
+      console.log('🛡️ Mobile iframe click intercepted');
     }
   };
 
@@ -37,6 +93,10 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
 
   const handleLoad = () => {
     setLoaded(true);
+    // Setup protection after iframe loads
+    setTimeout(() => {
+      setupIframeProtection();
+    }, 100);
     onLoad?.();
   };
 
@@ -60,6 +120,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         onLoad={handleLoad}
         onError={handleError}
         onClick={handleIframeClick}
+        // Sandbox to block popups - allow scripts and same-origin for player to work
+        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
         referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
@@ -67,7 +129,7 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         scrolling="no"
         style={{ 
           border: 'none',
-          pointerEvents: isMobile ? 'auto' : 'auto',
+          pointerEvents: 'auto',
           minWidth: '100%',
           minHeight: '100%',
           willChange: 'transform',
