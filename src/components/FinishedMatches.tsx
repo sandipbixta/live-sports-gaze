@@ -109,88 +109,81 @@ const FinishedMatches = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
         {filteredMatches.map((match) => (
           <Card
             key={match.id}
             onClick={() => handleMatchClick(match.competition.id, match.competition.name)}
-            className="min-w-[160px] overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30 hover:shadow-sports-primary/20"
+            className="min-w-[140px] overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30 hover:shadow-sports-primary/20"
           >
-            <div className="p-3 flex flex-col gap-3">
+            <div className="p-2 flex flex-col gap-1.5">
               {/* Competition Badge */}
-              <div className="flex items-center gap-1.5 pb-2 border-b border-border/50">
-                <div className="w-5 h-5 rounded-full bg-muted/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <div className="flex items-center gap-1 pb-1 border-b border-border/50">
+                <div className="w-4 h-4 rounded-full bg-muted/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   {match.competition.logo ? (
                     <img
                       src={match.competition.logo}
                       alt={match.competition.name}
-                      className="w-4 h-4 object-contain"
+                      className="w-3 h-3 object-contain"
                     />
                   ) : (
-                    <Trophy className="w-3 h-3 text-muted-foreground" />
+                    <Trophy className="w-2.5 h-2.5 text-muted-foreground" />
                   )}
                 </div>
-                <span className="text-[10px] text-muted-foreground truncate">
+                <span className="text-[9px] text-muted-foreground truncate">
                   {match.competition.name}
                 </span>
               </div>
 
               {/* Home Team */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-5 h-5 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {match.homeTeam.logo ? (
                       <img
                         src={match.homeTeam.logo}
                         alt={match.homeTeam.name}
-                        className="w-5 h-5 object-contain"
+                        className="w-4 h-4 object-contain"
                         onError={(e) => {
                           e.currentTarget.src = '/placeholder.svg';
                         }}
                       />
                     ) : (
-                      <div className="w-4 h-4 rounded-full bg-muted" />
+                      <div className="w-3 h-3 rounded-full bg-muted" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-foreground truncate">
+                  <span className="text-[10px] font-medium text-foreground truncate">
                     {match.homeTeam.name}
                   </span>
                 </div>
-                <span className="text-base font-bold text-foreground ml-2">
+                <span className="text-sm font-bold text-foreground ml-1">
                   {match.score.home}
                 </span>
               </div>
 
               {/* Away Team */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <div className="w-5 h-5 rounded-full bg-background/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                     {match.awayTeam.logo ? (
                       <img
                         src={match.awayTeam.logo}
                         alt={match.awayTeam.name}
-                        className="w-5 h-5 object-contain"
+                        className="w-4 h-4 object-contain"
                         onError={(e) => {
                           e.currentTarget.src = '/placeholder.svg';
                         }}
                       />
                     ) : (
-                      <div className="w-4 h-4 rounded-full bg-muted" />
+                      <div className="w-3 h-3 rounded-full bg-muted" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-foreground truncate">
+                  <span className="text-[10px] font-medium text-foreground truncate">
                     {match.awayTeam.name}
                   </span>
                 </div>
-                <span className="text-base font-bold text-foreground ml-2">
+                <span className="text-sm font-bold text-foreground ml-1">
                   {match.score.away}
-                </span>
-              </div>
-
-              {/* Full Time Badge */}
-              <div className="pt-1.5 border-t border-border/50">
-                <span className="text-[10px] text-muted-foreground font-medium bg-muted/30 px-2 py-0.5 rounded-full">
-                  FT
                 </span>
               </div>
             </div>
