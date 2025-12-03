@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { Play } from 'lucide-react';
 
@@ -21,66 +21,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
 
   // Number of clicks to absorb before allowing through (blocks ad clicks)
   const CLICKS_TO_ABSORB = 3;
-
-  // Setup iframe ad protection
-  const setupIframeProtection = useCallback(() => {
-    const iframe = videoRef.current;
-    if (!iframe) return;
-    
-    try {
-      // Block iframe from opening new windows (ads)
-      if (iframe.contentWindow) {
-        (iframe.contentWindow as any).open = function() { 
-          console.log('🛡️ Blocked popup from iframe');
-          return null; 
-        };
-      }
-    } catch (e) {
-      console.log('🛡️ Iframe protection active (cross-origin)');
-    }
-  }, [videoRef]);
-
-  // Block postMessage ads
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (videoRef.current && event.source === videoRef.current.contentWindow) {
-        console.log('🛡️ Intercepted message from iframe');
-        
-        try {
-          const messageStr = JSON.stringify(event.data).toLowerCase();
-          if (messageStr.includes('ad') || messageStr.includes('popup') || messageStr.includes('click')) {
-            event.stopPropagation();
-            console.log('🛡️ Blocked ad-related message from iframe');
-            return;
-          }
-        } catch (e) {
-          // Ignore serialization errors
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage, true);
-    return () => window.removeEventListener('message', handleMessage, true);
-  }, [videoRef]);
-
-  // Block window.open globally when iframe is focused
-  useEffect(() => {
-    const originalOpen = window.open;
-    
-    const blockedOpen = function(...args: Parameters<typeof window.open>) {
-      console.log('🛡️ Blocked window.open attempt:', args[0]);
-      return null;
-    };
-
-    // Replace window.open when stream is active
-    if (src) {
-      (window as any).open = blockedOpen;
-    }
-
-    return () => {
-      window.open = originalOpen;
-    };
-  }, [src]);
 
   // Handle click shield - absorbs first few clicks
   const handleShieldClick = (e: React.MouseEvent) => {
@@ -114,9 +54,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
 
   const handleLoad = () => {
     setLoaded(true);
-    setTimeout(() => {
-      setupIframeProtection();
-    }, 100);
     onLoad?.();
   };
 
@@ -139,7 +76,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         title="Live Sports Stream - DAMITV"
         onLoad={handleLoad}
         onError={handleError}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
         referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
