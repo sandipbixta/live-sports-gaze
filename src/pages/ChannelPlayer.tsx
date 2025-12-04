@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import TelegramBanner from '@/components/TelegramBanner';
 import MatchDetails from '@/components/MatchDetails';
+import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
 const ChannelPlayer = () => {
   const { country, channelId } = useParams();
@@ -69,6 +70,7 @@ const ChannelPlayer = () => {
   };
 
   const handleChannelSwitch = (newChannelId: string) => {
+    triggerStreamChangeAd();
     navigate(`/channel/${country}/${newChannelId}`);
   };
 
