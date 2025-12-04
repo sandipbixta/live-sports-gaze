@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { triggerStreamChangeAd } from '../../utils/streamAdTrigger';
 
 interface StreamIframeProps {
   src: string;
@@ -38,7 +37,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
 
   const handleLoad = () => {
     setLoaded(true);
-    triggerStreamChangeAd(); // Trigger smartlink ad when stream loads
     onLoad?.();
   };
 
