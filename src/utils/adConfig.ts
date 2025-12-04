@@ -2,7 +2,7 @@
 // Ad configuration utility
 export const adConfig = {
   directLink: {
-    url: 'https://foreseehawancesator.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7', // Adsterra only
+    url: 'https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7', // Adsterra smartlink
     cooldownMinutes: 360, // 6 hours
     sessionKey: 'directLinkAdTriggered'
   },
