@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
-import { useIframeProtection } from '../../hooks/useIframeProtection';
 
 interface StreamIframeProps {
   src: string;
@@ -14,15 +14,12 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
   const [loaded, setLoaded] = useState(false);
   const [hadError, setHadError] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [showAdBlocked, setShowAdBlocked] = useState(false);
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-
-  // Use iframe protection hook
-  useIframeProtection(videoRef);
 
   // Handle iframe clicks on mobile to prevent automatic opening
   const handleIframeClick = (e: React.MouseEvent) => {
     if (isMobile) {
+      // Prevent default behavior that might cause automatic opening
       e.preventDefault();
       console.log('Mobile iframe click prevented');
     }
@@ -32,7 +29,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
     setLoaded(false);
     setHadError(false);
     setTimedOut(false);
-    setShowAdBlocked(false);
     const t = window.setTimeout(() => {
       setTimedOut(true);
     }, 8000);
@@ -64,9 +60,8 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         onLoad={handleLoad}
         onError={handleError}
         onClick={handleIframeClick}
-        sandbox="allow-scripts allow-same-origin allow-presentation allow-fullscreen"
-        allow="accelerometer; autoplay; fullscreen; picture-in-picture"
-        referrerPolicy="no-referrer"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen; camera; microphone"
+        referrerPolicy="no-referrer-when-downgrade"
         loading="eager"
         frameBorder="0"
         scrolling="no"
@@ -86,23 +81,6 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
           })
         }}
       />
-
-      {/* Ad Blocked Overlay */}
-      {showAdBlocked && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 z-50">
-          <div className="text-5xl mb-5">🛡️</div>
-          <div className="text-2xl font-bold text-white mb-2">Ad Blocked</div>
-          <div className="text-base text-white/80 mb-8 text-center max-w-xs">
-            Safe Mode prevented unwanted content
-          </div>
-          <button 
-            onClick={() => setShowAdBlocked(false)}
-            className="px-8 py-3 bg-primary text-white border-none rounded-lg text-base font-bold cursor-pointer hover:bg-primary/90"
-          >
-            Continue Watching
-          </button>
-        </div>
-      )}
 
       {showOpenOverlay && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/70 px-4">
