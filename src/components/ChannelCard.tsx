@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tv } from 'lucide-react';
+import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
 interface ChannelCardProps {
   title: string;
@@ -28,6 +29,11 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
       .join('');
   };
   
+  const handleClick = () => {
+    triggerStreamChangeAd();
+    onClick?.();
+  };
+  
   return (
     <Card 
       className={`overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl backdrop-blur-md shadow-lg ${
@@ -35,7 +41,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
           ? 'bg-sports-primary/20 border-sports-primary/40 shadow-sports-primary/20' 
           : 'bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30'
       }`}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
