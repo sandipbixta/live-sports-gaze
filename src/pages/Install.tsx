@@ -141,7 +141,7 @@ const Install = () => {
             <>
               {/* Horizontal Layout for Android and iOS */}
               <div className="grid md:grid-cols-2 gap-4 mb-6">
-                {/* Android APK Download Section */}
+                {/* Android Installation Section */}
                 <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20">
                   <CardContent className="p-4">
                     <div className="text-center">
@@ -149,28 +149,35 @@ const Install = () => {
                         <Download className="h-8 w-8 text-green-500" />
                         <span className="text-xl font-bold">Android</span>
                       </div>
-                      <h2 className="text-lg font-bold mb-2">Download APK File</h2>
+                      <h2 className="text-lg font-bold mb-2">Install DamiTV App</h2>
                       <p className="text-xs text-muted-foreground mb-4">
-                        For Android phones: Download and install the DamiTV APK file
+                        For Android phones: Add DamiTV to your home screen
                       </p>
                       
                       <Button 
                         onClick={() => {
                           trackDownload('android');
-                          window.open('https://drive.google.com/uc?export=download&id=1a0WI10a3sIwFuPzqXm0zWcUfilX4SufQ', '_blank');
+                          window.open('https://damitv-pro.netlify.app', '_blank');
                         }}
                         size="default"
                         className="bg-green-600 hover:bg-green-700 text-white w-full mb-2"
                       >
                         <Download className="mr-2 h-4 w-4" />
-                        Download APK
+                        Download App
                       </Button>
-                      <p className="text-xs text-green-600 font-semibold mb-2">
+                      <p className="text-xs text-green-600 font-semibold mb-3">
                         {downloadStats.android.toLocaleString()} downloads
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Enable "Unknown Sources" in settings
-                      </p>
+                      
+                      <div className="bg-background/50 p-3 rounded-lg border text-left">
+                        <p className="text-xs font-semibold mb-1">Quick Steps:</p>
+                        <ol className="space-y-0.5 text-xs text-muted-foreground">
+                          <li>1. Open Chrome browser</li>
+                          <li>2. Tap Menu (⋮)</li>
+                          <li>3. Tap "Install app" or "Add to Home Screen"</li>
+                          <li>4. ✅ App icon on home screen</li>
+                        </ol>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -183,7 +190,7 @@ const Install = () => {
                         <Smartphone className="h-8 w-8 text-blue-500" />
                         <span className="text-xl font-bold">iOS</span>
                       </div>
-                      <h2 className="text-lg font-bold mb-2">Install Web App</h2>
+                      <h2 className="text-lg font-bold mb-2">Install DamiTV App</h2>
                       <p className="text-xs text-muted-foreground mb-4">
                         For iPhone/iPad: Add DamiTV to your home screen
                       </p>
@@ -197,7 +204,7 @@ const Install = () => {
                         className="bg-blue-600 hover:bg-blue-700 text-white w-full mb-2"
                       >
                         <Smartphone className="mr-2 h-4 w-4" />
-                        Open DamiTV.pro
+                        Download App
                       </Button>
                       
                       <p className="text-xs text-blue-600 font-semibold mb-3">
@@ -207,10 +214,10 @@ const Install = () => {
                       <div className="bg-background/50 p-3 rounded-lg border text-left">
                         <p className="text-xs font-semibold mb-1">Quick Steps:</p>
                         <ol className="space-y-0.5 text-xs text-muted-foreground">
-                          <li>1. Open link in Safari</li>
-                          <li>2. Tap Share (↑)</li>
-                          <li>3. "Add to Home Screen"</li>
-                          <li>4. Tap "Add"</li>
+                          <li>1. Open Safari browser</li>
+                          <li>2. Tap Share (↗️)</li>
+                          <li>3. Tap "Add to Home Screen"</li>
+                          <li>4. ✅ App icon on home screen</li>
                         </ol>
                       </div>
                     </div>
