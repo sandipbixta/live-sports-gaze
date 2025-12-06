@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source } from '../types/sports';
 import { fetchSimpleStream, fetchAllMatchStreams } from '../api/sportsApi';
+import { trackMatchSelect, trackSourceChange } from '@/utils/videoAnalytics';
 
 export const useStreamPlayer = () => {
   const { toast } = useToast();
@@ -129,6 +130,9 @@ export const useStreamPlayer = () => {
     console.log(`🎯 Selected match: ${match.title}`);
     setFeaturedMatch(match);
     
+    // Track match selection in GA4
+    trackMatchSelect(match.title, match.id, match.category || 'unknown');
+    
     // Fetch all streams for this match from all sources
     await fetchAllStreamsForMatch(match);
     
@@ -147,6 +151,9 @@ export const useStreamPlayer = () => {
   const handleSourceChange = async (source: string, id: string, streamNo?: number) => {
     console.log(`🔄 Source change requested: ${source}/${id}/${streamNo || 'default'}`);
     setCurrentStream(null); // Clear current stream first
+    
+    // Track source change in GA4
+    trackSourceChange(source, id);
     
     if (featuredMatch) {
       // Force fresh load with delay
