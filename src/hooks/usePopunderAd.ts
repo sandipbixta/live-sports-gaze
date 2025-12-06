@@ -1,53 +1,70 @@
-import { useEffect } from 'react';
-import { adConfig, shouldShowAds, isAdCooldownPassed, markAdTriggered } from '@/utils/adConfig';
+import { useEffect, useRef } from 'react';
+import { 
+  adConfig, 
+  shouldShowAds, 
+  isAdCooldownPassed, 
+  markAdTriggered,
+  wasAdShownThisSession,
+  markAdShownThisSession
+} from '@/utils/adConfig';
 import { adTracking } from '@/utils/adTracking';
 
 export const usePopunderAd = () => {
+  const hasTriggeredRef = useRef(false);
+
   useEffect(() => {
+    // Prevent multiple triggers in the same component lifecycle
+    if (hasTriggeredRef.current) {
+      return;
+    }
+
     if (!shouldShowAds()) {
       return;
     }
 
-    // Check if cooldown period has passed
-    if (!isAdCooldownPassed(adConfig.popunder.sessionKey, adConfig.popunder.cooldownMinutes)) {
-      console.log('⏳ Popunder ad on cooldown');
+    // Check session-level flag first (prevents SPA navigation re-triggers)
+    if (wasAdShownThisSession(adConfig.popunder.sessionKey)) {
+      console.log('⏳ Popunder already shown this session');
       return;
     }
 
-    // Mark as triggered IMMEDIATELY to prevent multiple instances
+    // Check if cooldown period has passed (6 hours)
+    if (!isAdCooldownPassed(adConfig.popunder.sessionKey, adConfig.popunder.cooldownMinutes)) {
+      return;
+    }
+
+    // Mark as triggered IMMEDIATELY to prevent race conditions
+    hasTriggeredRef.current = true;
     markAdTriggered(adConfig.popunder.sessionKey);
-    console.log('🎯 Popunder ad scheduled');
+    markAdShownThisSession(adConfig.popunder.sessionKey);
+    console.log('🎯 Popunder ad scheduled (once per 6 hours)');
 
     // Delay the popunder execution
     const timer = setTimeout(() => {
       try {
-        // Create script element
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = adConfig.popunder.scriptSrc;
         script.async = true;
         
-        // Add error handling
         script.onerror = () => {
           console.warn('Popunder ad script failed to load');
           adTracking.trackPopunderError('Script failed to load');
         };
         
         script.onload = () => {
-          // Track successful load
           adTracking.trackPopunderLoad();
           console.log('✅ Popunder script loaded successfully');
         };
         
-        // Append to head
         document.head.appendChild(script);
         
-        // Clean up script after some time to avoid memory leaks
+        // Clean up script after 10 seconds
         setTimeout(() => {
           if (script.parentNode) {
             script.parentNode.removeChild(script);
           }
-        }, 10000); // Remove after 10 seconds
+        }, 10000);
         
       } catch (error) {
         console.warn('Error loading popunder ad:', error);
