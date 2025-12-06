@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { initVideoAnalytics, trackPageView } from '@/utils/videoAnalytics';
 
 // Google Analytics 4 Measurement ID
 const GA_MEASUREMENT_ID = 'G-012D2PN0S2';
@@ -12,12 +13,30 @@ const GA_MEASUREMENT_ID = 'G-012D2PN0S2';
 const GoogleAnalytics = () => {
   const location = useLocation();
 
+  // Initialize video analytics on mount
+  useEffect(() => {
+    initVideoAnalytics();
+  }, []);
+
   useEffect(() => {
     // Track page view on route change
     if (window.gtag) {
+      const pageTitle = document.title || 'DamiTV';
+      const pagePath = location.pathname + location.search;
+      
+      // Determine stream ID for live pages
+      let streamId: string | undefined;
+      if (location.pathname.includes('/live') || location.pathname.includes('/match')) {
+        streamId = location.pathname.split('/').pop();
+      }
+      
+      // Track with custom page view function
+      trackPageView(pageTitle, pagePath, streamId);
+      
+      // Also send standard GA4 config
       window.gtag('config', GA_MEASUREMENT_ID, {
-        page_path: location.pathname + location.search,
-        page_title: document.title,
+        page_path: pagePath,
+        page_title: pageTitle,
       });
     }
   }, [location]);
@@ -32,9 +51,14 @@ const GoogleAnalytics = () => {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', '${GA_MEASUREMENT_ID}', {
-            send_page_view: false,
+            send_page_view: true,
             anonymize_ip: true,
-            cookie_flags: 'SameSite=None;Secure'
+            cookie_flags: 'SameSite=None;Secure',
+            custom_map: {
+              'dimension1': 'stream_id',
+              'dimension2': 'match_title',
+              'dimension3': 'quality_level'
+            }
           });
         `}
       </script>
