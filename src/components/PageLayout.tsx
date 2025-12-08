@@ -78,6 +78,10 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             <img 
               src={downloadBanner} 
               alt="Download DAMITV App for Android and iOS" 
+              width={728}
+              height={90}
+              loading="eager"
+              fetchPriority="high"
               className="w-full h-auto md:h-[90px] object-contain md:object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
             />
           </Link>

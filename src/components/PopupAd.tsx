@@ -81,6 +81,8 @@ const PopupAd: React.FC = () => {
           <img
             src={instantAccessImage}
             alt="Instant High-Speed Access - Unlock Exclusive Sports Streams"
+            width={446}
+            height={446}
             className="w-full h-auto cursor-pointer hover:scale-105 transition-transform duration-300"
             onClick={handleImageClick}
             role="button"
