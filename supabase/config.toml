@@ -38,6 +38,3 @@ verify_jwt = false
 
 [functions.fetch-league-detail]
 verify_jwt = false
-
-[functions.fetch-cdn-live-events]
-verify_jwt = false
