@@ -48,6 +48,7 @@ import Leagues from "./pages/Leagues";
 import LeagueDetail from "./pages/LeagueDetail";
 import FootballLeagues from "./pages/FootballLeagues";
 import FootballLeagueDetail from "./pages/FootballLeagueDetail";
+import CDNMatchPlayer from "./pages/CDNMatchPlayer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
@@ -181,6 +182,11 @@ const App: React.FC = () => {
               <Route path="/ufc-streaming-free" element={
                 <SEOPageTracker pageTitle="UFC Streaming Free" contentType="home">
                   <UfcStreaming />
+                </SEOPageTracker>
+              } />
+              <Route path="/cdn-match/:gameId" element={
+                <SEOPageTracker contentType="match">
+                  <CDNMatchPlayer />
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
