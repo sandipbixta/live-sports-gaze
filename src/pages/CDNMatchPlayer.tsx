@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CDNMatch, CDNMatchChannel, CDNMatchData } from '@/types/cdnMatch';
+import IframeVideoPlayer from '@/components/StreamPlayer/IframeVideoPlayer';
 
 const CDN_MATCHES_API = 'https://api.cdn-live.tv/api/v1/events/sports/';
 
@@ -15,6 +16,8 @@ const CDNMatchPlayer: React.FC = () => {
   const [selectedChannel, setSelectedChannel] = useState<CDNMatchChannel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [streamLoading, setStreamLoading] = useState(false);
+  const [streamError, setStreamError] = useState(false);
 
   const fetchMatch = async () => {
     try {
@@ -54,6 +57,34 @@ const CDNMatchPlayer: React.FC = () => {
     fetchMatch();
   }, [gameId]);
 
+  const handleChannelSelect = (channel: CDNMatchChannel) => {
+    setSelectedChannel(channel);
+    setStreamLoading(true);
+    setStreamError(false);
+  };
+
+  const handleStreamLoad = () => {
+    console.log('✅ CDN Stream loaded successfully');
+    setStreamLoading(false);
+    setStreamError(false);
+  };
+
+  const handleStreamError = () => {
+    console.error('❌ CDN Stream failed to load');
+    setStreamLoading(false);
+    setStreamError(true);
+  };
+
+  // Parse match start time
+  const getMatchStartTime = (): Date | null => {
+    if (!match?.start) return null;
+    try {
+      return new Date(match.start);
+    } catch {
+      return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -80,6 +111,7 @@ const CDNMatchPlayer: React.FC = () => {
   }
 
   const isLive = match.status === 'live';
+  const matchStartTime = getMatchStartTime();
 
   return (
     <>
@@ -105,6 +137,12 @@ const CDNMatchPlayer: React.FC = () => {
                   {isLive && (
                     <Badge variant="destructive" className="animate-pulse">LIVE</Badge>
                   )}
+                  {match.status === 'upcoming' && (
+                    <Badge variant="secondary">UPCOMING</Badge>
+                  )}
+                  {match.status === 'finished' && (
+                    <Badge variant="outline">FINISHED</Badge>
+                  )}
                 </div>
                 <h1 className="text-xl font-bold text-foreground">
                   {match.homeTeam} vs {match.awayTeam}
@@ -120,19 +158,29 @@ const CDNMatchPlayer: React.FC = () => {
             <div className="lg:col-span-2">
               {selectedChannel ? (
                 <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
-                  <iframe 
+                  <IframeVideoPlayer
                     src={selectedChannel.url}
-                    className="w-full h-full"
-                    allowFullScreen
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    onLoad={handleStreamLoad}
+                    onError={handleStreamError}
                     title={`${match.homeTeam} vs ${match.awayTeam}`}
-                    referrerPolicy="no-referrer"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
+                    matchStartTime={match.status === 'upcoming' ? matchStartTime : null}
                   />
                 </div>
               ) : (
                 <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                  <p className="text-muted-foreground">No channels available for this match</p>
+                  <div className="text-center">
+                    <Tv className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No channels available for this match</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Stream Error State */}
+              {streamError && selectedChannel && (
+                <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-destructive text-sm">
+                    Stream failed to load. Try selecting a different channel below.
+                  </p>
                 </div>
               )}
 
@@ -172,34 +220,37 @@ const CDNMatchPlayer: React.FC = () => {
                 Available Channels ({match.channels.length})
               </h2>
               <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                {match.channels.map((channel, idx) => (
-                  <Card 
-                    key={idx}
-                    className={`p-3 cursor-pointer transition-all hover:border-primary/50 ${
-                      selectedChannel?.url === channel.url ? 'border-primary bg-primary/10' : ''
-                    }`}
-                    onClick={() => setSelectedChannel(channel)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src={channel.image} 
-                        alt={channel.channel_name}
-                        className="w-10 h-10 object-contain rounded"
-                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">{channel.channel_name}</p>
-                        <p className="text-xs text-muted-foreground uppercase">{channel.channel_code}</p>
-                      </div>
-                      {parseInt(channel.viewers) > 0 && (
-                        <div className="flex items-center gap-1 text-muted-foreground shrink-0">
-                          <Users className="w-3.5 h-3.5" />
-                          <span className="text-xs">{channel.viewers}</span>
+                {match.channels.map((channel, idx) => {
+                  const viewerCount = parseInt(channel.viewers) || 0;
+                  return (
+                    <Card 
+                      key={idx}
+                      className={`p-3 cursor-pointer transition-all hover:border-primary/50 ${
+                        selectedChannel?.url === channel.url ? 'border-primary bg-primary/10' : ''
+                      }`}
+                      onClick={() => handleChannelSelect(channel)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={channel.image} 
+                          alt={channel.channel_name}
+                          className="w-10 h-10 object-contain rounded bg-white/5"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-foreground text-sm truncate">{channel.channel_name}</p>
+                          <p className="text-xs text-muted-foreground uppercase">{channel.channel_code}</p>
                         </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+                        {viewerCount > 0 && (
+                          <div className="flex items-center gap-1 text-green-500 shrink-0">
+                            <Users className="w-3.5 h-3.5" />
+                            <span className="text-xs font-medium">{viewerCount}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
 
                 {match.channels.length === 0 && (
                   <Card className="p-4 text-center">
