@@ -1,19 +1,14 @@
-import { convertCDNChannels } from './cdnChannels';
-
-export interface Channel {
+interface Channel {
   id: string;
   title: string;
   country: string;
   embedUrl: string;
   category: 'sports' | 'news' | 'entertainment';
   logo?: string;
-  status?: 'online' | 'offline';
-  viewers?: number;
-  source?: 'local' | 'cdn';
 }
 
 // Updated comprehensive channel list with all new channels
-const localChannels: Channel[] = [
+export const tvChannels: Channel[] = [
   // UK Channels
   { id: "sky-sports-news", title: "Sky Sports News", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsNews[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-news-uk.png?raw=true" },
   { id: "sky-sports-main-event", title: "Sky Sports Main Event", country: "UK", embedUrl: "https://topembed.pw/channel/SkySportsMainEvent[UK]", category: "sports", logo: "https://github.com/tv-logo/tv-logos/blob/main/countries/united-kingdom/sky-sports-main-event-icon-uk.png?raw=true" },
@@ -559,15 +554,6 @@ const localChannels: Channel[] = [
   { id: "lecot", title: "Lecot", country: "Special", embedUrl: "https://topembed.pw/channel/lecot", category: "sports" },
   { id: "exusdarers", title: "Exusdarers", country: "Special", embedUrl: "https://topembed.pw/channel/exusdarers", category: "sports" },
 ];
-
-// Get CDN channels and merge with local channels
-const cdnChannels = convertCDNChannels();
-
-// Combine both sources - local channels take priority
-const localIds = new Set(localChannels.map(ch => ch.title.toLowerCase()));
-const uniqueCdnChannels = cdnChannels.filter(ch => !localIds.has(ch.title.toLowerCase()));
-
-export const tvChannels: Channel[] = [...localChannels, ...uniqueCdnChannels];
 
 // Group channels by country
 export const getChannelsByCountry = (): Record<string, Channel[]> => {
