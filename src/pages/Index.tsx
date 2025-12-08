@@ -1,195 +1,40 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useToast } from '../hooks/use-toast';
-import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
-import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
-import SportsList from '../components/SportsList';
-import MatchesList from '../components/MatchesList';
-import FeaturedMatches from '../components/FeaturedMatches';
-import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
-
-// Lazy load more components to reduce initial bundle
-const PopularMatches = React.lazy(() => import('../components/PopularMatches'));
-const PromotionBoxes = React.lazy(() => import('../components/PromotionBoxes'));
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
-import { isPopularLeague } from '../utils/popularLeagues';
-import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
 import { HeroCarousel } from '../components/HeroCarousel';
-import heroBackground from '../assets/hero-background.jpeg';
-import HomepageContent from '../components/HomepageContent';
-import EmailSubscription from '../components/EmailSubscription';
-import FinishedMatches from '../components/FinishedMatches';
+import FeaturedMatches from '../components/FeaturedMatches';
 import CDNMatchesSection from '../components/CDNMatchesSection';
 import { useCDNMatches } from '../hooks/useCDNMatches';
+import EmailSubscription from '../components/EmailSubscription';
+import HomepageContent from '../components/HomepageContent';
 
 // Lazy load heavy components
+const PromotionBoxes = React.lazy(() => import('../components/PromotionBoxes'));
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
 
 const Index = () => {
-  const { toast } = useToast();
-  const [sports, setSports] = useState<Sport[]>([]);
-  const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
-  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const [loadingSports, setLoadingSports] = useState(false); // Start false for instant render
-  const [loadingMatches, setLoadingMatches] = useState(false);
-  
   // CDN Matches data
-  const { matches: cdnMatches, loading: cdnLoading } = useCDNMatches();
+  const { liveMatches: cdnLiveMatches, upcomingMatches: cdnUpcomingMatches, matchesBySport, loading: cdnLoading } = useCDNMatches();
 
   // Filter visible manual matches
   const visibleManualMatches = useMemo(() => {
     return manualMatches.filter(match => match.visible);
   }, []);
 
-  // Memoize popular matches calculation - filter by selected sport
-  const popularMatches = useMemo(() => {
-    // If "All Sports" is selected, don't show popular matches section to avoid duplication
-    if (selectedSport === 'all') {
-      return [];
-    }
-    
-    return matches.filter(match => 
-      isPopularLeague(match.title) && 
-      !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news')
-    );
-  }, [matches, selectedSport]);
-
-  // Memoize filtered matches
-  const filteredMatches = useMemo(() => {
-    if (!searchTerm.trim()) return matches;
-    
-    const lowercaseSearch = searchTerm.toLowerCase();
-    return matches.filter(match => {
-      return match.title.toLowerCase().includes(lowercaseSearch) || 
-        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
-    });
-  }, [matches, searchTerm]);
-
-  // Load sports and live matches in parallel immediately on mount
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        // Load sports AND live matches in parallel for instant display
-        const [sportsData, liveMatchesData] = await Promise.all([
-          fetchSports(),
-          fetchLiveMatches()
-        ]);
-        
-        console.log('📊 Sports data loaded:', sportsData);
-        
-        // Sort with football first for better UX
-        const sortedSports = sportsData.sort((a, b) => {
-          if (a.name.toLowerCase() === 'football') return -1;
-          if (b.name.toLowerCase() === 'football') return 1;
-          if (a.name.toLowerCase() === 'basketball') return -1;
-          if (b.name.toLowerCase() === 'basketball') return 1;
-          return a.name.localeCompare(b.name);
-        });
-        
-        setSports(sortedSports);
-        
-        // Display all live matches from API
-        setLiveMatches(liveMatchesData);
-        
-        console.log(`✅ Loaded ${liveMatchesData.length} live matches instantly`);
-        
-      } catch (error) {
-        console.error('Sports loading error:', error);
-        toast({
-          title: "Connection Issue",
-          description: "Slow connection detected. Retrying...",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingSports(false);
-      }
-    };
-
-    loadInitialData();
-  }, []);
-
-  // Set default sport immediately on component mount - don't wait for data
-  useEffect(() => {
-    if (!selectedSport) {
-      console.log('🏈 Auto-selecting "All Sports" as default immediately');
-      setSelectedSport('all');
-    }
-  }, [selectedSport]);
-
-  // Optimized search handler
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  // Optimized sport selection with caching
-  const handleSelectSport = async (sportId: string) => {
-    console.log(`🎯 Selecting sport: ${sportId}, current: ${selectedSport}`);
-    if (selectedSport === sportId) return;
-    
-    setSelectedSport(sportId);
-    
-    // For "All Sports", we don't need to load specific matches
-    // as AllSportsLiveMatches component handles its own data fetching
-    if (sportId === 'all') {
-      setMatches([]);
-      return;
-    }
-    
-    setLoadingMatches(true);
-    console.log('🔄 Loading matches for sport:', sportId);
-    
-    try {
-      if (allMatches[sportId]) {
-        console.log('📁 Using cached matches:', allMatches[sportId].length);
-        setMatches(allMatches[sportId]);
-      } else {
-        const rawMatchesData = await fetchMatches(sportId);
-        console.log('📥 Raw matches data:', rawMatchesData.length);
-        
-        // Filter and consolidate matches to remove duplicates and combine stream sources
-        const cleanMatches = filterCleanMatches(rawMatchesData);
-        console.log('🧹 Clean matches:', cleanMatches.length);
-        const consolidatedMatches = consolidateMatches(cleanMatches);
-        console.log('🔗 Consolidated matches:', consolidatedMatches.length);
-        
-        setMatches(consolidatedMatches);
-        
-        setAllMatches(prev => ({
-          ...prev,
-          [sportId]: consolidatedMatches
-        }));
-      }
-    } catch (error) {
-      console.error('Error loading matches:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load matches data.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingMatches(false);
-      console.log('✅ Finished loading matches');
-    }
-  };
+  // Get soccer matches from CDN
+  const soccerMatches = matchesBySport['Soccer'] || [];
 
   return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+    <PageLayout>
       <Helmet>
         <title>Best Sports Streaming Site Alternatives | DamiTV</title>
         <meta name="description" content="Discover the best sports streaming site alternatives. Free HD streams for football, basketball & more. Top vipleague & totalsportek alternative." />
@@ -243,97 +88,26 @@ const Index = () => {
           <TelegramBanner />
         </div>
 
-        {/* Finished Match Results */}
-        <FinishedMatches />
-
         {/* Hero Carousel with Match Posters */}
         <HeroCarousel />
 
         {/* CDN Live Matches Section */}
-        {cdnMatches.length > 0 && (
+        {soccerMatches.length > 0 && (
           <CDNMatchesSection 
-            matches={cdnMatches} 
+            matches={soccerMatches} 
             sport="Soccer" 
             title="Live & Upcoming Soccer Matches"
-            maxItems={8}
+            maxItems={12}
           />
         )}
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
-            <div className="flex gap-2">
-              <Link to="/schedule">
-                <Button variant="outline" className="text-foreground border-border hover:bg-muted bg-background">
-                  <Calendar className="mr-2 h-4 w-4" /> View Schedule
-                </Button>
-              </Link>
-            </div>
-          </div>
-          
-          <SportsList 
-            sports={sports}
-            onSelectSport={handleSelectSport}
-            selectedSport={selectedSport}
-            isLoading={loadingSports}
-          />
-        </div>
-        
-        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+        <React.Suspense fallback={<div className="h-32 bg-muted rounded-lg animate-pulse" />}>
           <FeaturedChannels />
         </React.Suspense>
             
-            <Separator className="my-8 bg-[#343a4d]" />
-            
-            {/* Popular by Viewers Section - Only show on home page (no sport selected or All Sports) */}
-            {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
-              <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
-                <div className="mb-8">
-                  <PopularMatches 
-                    popularMatches={liveMatches}
-                    selectedSport={null}
-                  />
-                </div>
-              </React.Suspense>
-            )}
-            
-            <div className="mb-8">
-              {selectedSport && (
-                <>
-                  {selectedSport === 'all' ? (
-                    <div>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          Live Matches - All Sports
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          Currently live matches from all sports categories
-                        </p>
-                      </div>
-                      <AllSportsLiveMatches searchTerm={searchTerm} />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          {filteredMatches.length} matches available
-                        </p>
-                      </div>
-                      <MatchesList
-                        matches={filteredMatches}
-                        sportId={selectedSport}
-                        isLoading={loadingMatches}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+        <Separator className="my-8 bg-border" />
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
               <div className="lg:col-span-2">
