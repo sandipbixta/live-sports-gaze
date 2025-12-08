@@ -6,11 +6,12 @@ import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
 import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
-import PopularMatches from '../components/PopularMatches';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 
-import PromotionBoxes from '../components/PromotionBoxes';
+// Lazy load more components to reduce initial bundle
+const PopularMatches = React.lazy(() => import('../components/PopularMatches'));
+const PromotionBoxes = React.lazy(() => import('../components/PromotionBoxes'));
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -273,12 +274,14 @@ const Index = () => {
             
             {/* Popular by Viewers Section - Only show on home page (no sport selected or All Sports) */}
             {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
-              <div className="mb-8">
-                <PopularMatches 
-                  popularMatches={liveMatches}
-                  selectedSport={null}
-                />
-              </div>
+              <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+                <div className="mb-8">
+                  <PopularMatches 
+                    popularMatches={liveMatches}
+                    selectedSport={null}
+                  />
+                </div>
+              </React.Suspense>
             )}
             
             <div className="mb-8">
@@ -330,7 +333,9 @@ const Index = () => {
               </div>
             </div>
             
-            <PromotionBoxes />
+            <React.Suspense fallback={<div className="h-24 bg-[#242836] rounded-lg animate-pulse" />}>
+              <PromotionBoxes />
+            </React.Suspense>
             
             {/* Hidden SEO content for competitor targeting */}
             <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
