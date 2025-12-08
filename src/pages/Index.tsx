@@ -27,6 +27,8 @@ import heroBackground from '../assets/hero-background.jpeg';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
+import CDNMatchesSection from '../components/CDNMatchesSection';
+import { useCDNMatches } from '../hooks/useCDNMatches';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -44,6 +46,9 @@ const Index = () => {
   
   const [loadingSports, setLoadingSports] = useState(false); // Start false for instant render
   const [loadingMatches, setLoadingMatches] = useState(false);
+  
+  // CDN Matches data
+  const { matches: cdnMatches, loading: cdnLoading } = useCDNMatches();
 
   // Filter visible manual matches
   const visibleManualMatches = useMemo(() => {
@@ -243,6 +248,16 @@ const Index = () => {
 
         {/* Hero Carousel with Match Posters */}
         <HeroCarousel />
+
+        {/* CDN Live Matches Section */}
+        {cdnMatches.length > 0 && (
+          <CDNMatchesSection 
+            matches={cdnMatches} 
+            sport="Soccer" 
+            title="Live & Upcoming Soccer Matches"
+            maxItems={8}
+          />
+        )}
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
