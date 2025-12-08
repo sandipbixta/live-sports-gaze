@@ -4,6 +4,7 @@ import { useToast } from './use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
 import { fetchMatches, fetchStream, fetchSports, fetchLiveMatches, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { fetchAllCdnLiveEvents, CdnLiveMatch } from '../services/cdnLiveService';
 
 export const useLiveMatches = () => {
   const { toast } = useToast();
@@ -18,18 +19,53 @@ export const useLiveMatches = () => {
     try {
       console.log('Fetching live matches...');
       
-      // Fetch sports and football data in parallel - NO LOADING STATE
-      const [sportsData, initialFootballMatches] = await Promise.all([
+      // Fetch sports, football data, and CDN-Live events in parallel
+      const [sportsData, initialFootballMatches, cdnLiveMatches] = await Promise.all([
         fetchSports(),
-        fetchMatches('football')
+        fetchMatches('football'),
+        fetchAllCdnLiveEvents().catch(err => {
+          console.warn('CDN-Live API failed, continuing without it:', err);
+          return [] as CdnLiveMatch[];
+        })
       ]);
       
       setSports(sportsData);
       
+      // Process CDN-Live matches
+      console.log(`CDN-Live returned ${cdnLiveMatches.length} matches`);
+      
+      // Merge CDN-Live matches with existing (avoid duplicates by title similarity)
+      const mergeMatches = (existing: Match[], cdnMatches: CdnLiveMatch[]): Match[] => {
+        const merged = [...existing];
+        
+        for (const cdnMatch of cdnMatches) {
+          // Check if similar match already exists (by team names)
+          const isDuplicate = existing.some(m => {
+            const existingTitle = m.title.toLowerCase();
+            const cdnTitle = cdnMatch.title.toLowerCase();
+            const homeTeam = cdnMatch.teams?.home?.name?.toLowerCase() || '';
+            const awayTeam = cdnMatch.teams?.away?.name?.toLowerCase() || '';
+            
+            return existingTitle.includes(homeTeam) && existingTitle.includes(awayTeam);
+          });
+          
+          if (!isDuplicate) {
+            merged.push(cdnMatch);
+          }
+        }
+        
+        return merged;
+      };
+      
       // Process and display football matches instantly
       const initialMatchesWithSources = initialFootballMatches.filter(m => m.sources && m.sources.length > 0);
       const initialCleanMatches = filterCleanMatches(initialMatchesWithSources);
-      const initialConsolidatedMatches = consolidateMatches(initialCleanMatches.map(m => ({ ...m, sportId: 'football' })));
+      const footballWithSportId = initialCleanMatches.map(m => ({ ...m, sportId: 'football' }));
+      
+      // Merge with CDN-Live football/soccer matches
+      const cdnFootball = cdnLiveMatches.filter(m => m.category === 'football');
+      const mergedFootball = mergeMatches(footballWithSportId, cdnFootball);
+      const initialConsolidatedMatches = consolidateMatches(mergedFootball);
       
       const initialLive = initialConsolidatedMatches.filter(match => {
         const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
@@ -78,8 +114,11 @@ export const useLiveMatches = () => {
       const finalFootballMatches = await fetchMatches('football');
       const allFetchedMatches = [...finalFootballMatches.map(m => ({ ...m, sportId: 'football' })), ...allOtherMatches];
       
+      // Merge all CDN-Live matches
+      const allMergedMatches = mergeMatches(allFetchedMatches, cdnLiveMatches);
+      
       // Final processing with all matches
-      const finalMatchesWithSources = allFetchedMatches.filter(m => m.sources && m.sources.length > 0);
+      const finalMatchesWithSources = allMergedMatches.filter(m => m.sources && m.sources.length > 0);
       const finalCleanMatches = filterCleanMatches(finalMatchesWithSources);
       const finalConsolidatedMatches = consolidateMatches(finalCleanMatches);
       
@@ -103,7 +142,7 @@ export const useLiveMatches = () => {
         !finalLive.some(liveMatch => liveMatch.id === match.id)
       );
       
-      console.log('All matches loaded - Live:', finalLive.length, 'Upcoming:', finalUpcoming.length);
+      console.log('All matches loaded - Live:', finalLive.length, 'Upcoming:', finalUpcoming.length, 'CDN-Live contributed:', cdnLiveMatches.length);
       
       // Update with complete data
       setAllMatches(finalConsolidatedMatches);
