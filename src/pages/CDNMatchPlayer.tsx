@@ -1,34 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Tv, Users, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Tv, Users, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CDNMatch, CDNMatchChannel } from '@/types/cdnMatch';
+import { CDNMatch, CDNMatchChannel, CDNMatchData } from '@/types/cdnMatch';
+
+const CDN_MATCHES_API = 'https://api.cdn-live.tv/api/v1/events/sports/';
 
 const CDNMatchPlayer: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [match, setMatch] = useState<CDNMatch | null>(null);
   const [selectedChannel, setSelectedChannel] = useState<CDNMatchChannel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Get match data from window (set by the parent component or API)
-    const data = (window as any).__CDN_MATCH_DATA__;
-    if (data && data['cdn-live-tv']) {
-      for (const sport of Object.keys(data['cdn-live-tv'])) {
-        const found = data['cdn-live-tv'][sport].find((m: CDNMatch) => m.gameID === gameId);
-        if (found) {
-          setMatch(found);
-          if (found.channels.length > 0) {
-            setSelectedChannel(found.channels[0]);
+  const fetchMatch = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(CDN_MATCHES_API);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data: CDNMatchData = await response.json();
+      
+      if (data && data['cdn-live-tv']) {
+        for (const [sport, sportMatches] of Object.entries(data['cdn-live-tv'])) {
+          if (!Array.isArray(sportMatches)) continue;
+          
+          const found = sportMatches.find((m: CDNMatch) => m.gameID === gameId);
+          if (found) {
+            setMatch(found);
+            if (found.channels.length > 0 && !selectedChannel) {
+              setSelectedChannel(found.channels[0]);
+            }
+            break;
           }
-          break;
         }
       }
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching match:', err);
+      setError('Failed to load match data');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchMatch();
   }, [gameId]);
 
   if (loading) {
@@ -39,13 +62,19 @@ const CDNMatchPlayer: React.FC = () => {
     );
   }
 
-  if (!match) {
+  if (error || !match) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-foreground mb-4">Match Not Found</h1>
-        <Link to="/">
-          <Button>Go Home</Button>
-        </Link>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold text-foreground">Match Not Found</h1>
+        <p className="text-muted-foreground">{error || 'Unable to find this match'}</p>
+        <div className="flex gap-2">
+          <Button onClick={fetchMatch} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" /> Retry
+          </Button>
+          <Link to="/">
+            <Button>Go Home</Button>
+          </Link>
+        </div>
       </div>
     );
   }
@@ -90,13 +119,15 @@ const CDNMatchPlayer: React.FC = () => {
             {/* Player */}
             <div className="lg:col-span-2">
               {selectedChannel ? (
-                <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
                   <iframe 
                     src={selectedChannel.url}
                     className="w-full h-full"
                     allowFullScreen
-                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                     title={`${match.homeTeam} vs ${match.awayTeam}`}
+                    referrerPolicy="no-referrer"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
                   />
                 </div>
               ) : (
@@ -109,7 +140,12 @@ const CDNMatchPlayer: React.FC = () => {
               <Card className="mt-4 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <img src={match.homeTeamIMG} alt={match.homeTeam} className="w-12 h-12 object-contain" />
+                    <img 
+                      src={match.homeTeamIMG} 
+                      alt={match.homeTeam} 
+                      className="w-12 h-12 object-contain"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
+                    />
                     <span className="font-bold text-foreground">{match.homeTeam}</span>
                   </div>
                   <div className="text-center">
@@ -118,7 +154,12 @@ const CDNMatchPlayer: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="font-bold text-foreground">{match.awayTeam}</span>
-                    <img src={match.awayTeamIMG} alt={match.awayTeam} className="w-12 h-12 object-contain" />
+                    <img 
+                      src={match.awayTeamIMG} 
+                      alt={match.awayTeam} 
+                      className="w-12 h-12 object-contain"
+                      onError={(e) => { e.currentTarget.src = '/placeholder.svg'; }}
+                    />
                   </div>
                 </div>
               </Card>
@@ -130,7 +171,7 @@ const CDNMatchPlayer: React.FC = () => {
                 <Tv className="w-5 h-5" />
                 Available Channels ({match.channels.length})
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[500px] overflow-y-auto">
                 {match.channels.map((channel, idx) => (
                   <Card 
                     key={idx}
@@ -146,12 +187,12 @@ const CDNMatchPlayer: React.FC = () => {
                         className="w-10 h-10 object-contain rounded"
                         onError={(e) => { e.currentTarget.style.display = 'none'; }}
                       />
-                      <div className="flex-1">
-                        <p className="font-medium text-foreground text-sm">{channel.channel_name}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm truncate">{channel.channel_name}</p>
                         <p className="text-xs text-muted-foreground uppercase">{channel.channel_code}</p>
                       </div>
                       {parseInt(channel.viewers) > 0 && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
+                        <div className="flex items-center gap-1 text-muted-foreground shrink-0">
                           <Users className="w-3.5 h-3.5" />
                           <span className="text-xs">{channel.viewers}</span>
                         </div>
