@@ -36,7 +36,13 @@ const MainNav = () => {
   return (
     <div className="flex items-center gap-4 w-full md:w-auto">
       <button onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-2 flex-shrink-0">
-        <img src={damitvLogo} alt="DAMITV Logo" className="h-14 w-14 object-cover" />
+        <img 
+          src={damitvLogo} 
+          alt="DAMITV Logo" 
+          width={56}
+          height={56}
+          className="h-14 w-14 object-cover" 
+        />
         <h1 className="text-xl font-bold text-foreground whitespace-nowrap">
           DAMITV
         </h1>
