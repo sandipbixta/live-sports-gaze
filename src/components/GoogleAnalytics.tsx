@@ -41,32 +41,46 @@ const GoogleAnalytics = () => {
     }
   }, [location]);
 
-  return (
-    <Helmet>
-      {/* Google Analytics 4 */}
-      <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
-      <script>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}', {
-            send_page_view: true,
-            anonymize_ip: true,
-            cookie_flags: 'SameSite=None;Secure',
-            custom_map: {
-              'dimension1': 'stream_id',
-              'dimension2': 'match_title',
-              'dimension3': 'quality_level'
-            }
-          });
-        `}
-      </script>
-      
-      {/* Google Search Console Verification */}
-      <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE_HERE" />
-    </Helmet>
-  );
+  // Load GA script dynamically after page load
+  useEffect(() => {
+    // Check if GA is already loaded
+    if (window.gtag) return;
+
+    const loadGA = () => {
+      const script = document.createElement('script');
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag() {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', GA_MEASUREMENT_ID, {
+          send_page_view: true,
+          anonymize_ip: true,
+          cookie_flags: 'SameSite=None;Secure',
+          custom_map: {
+            'dimension1': 'stream_id',
+            'dimension2': 'match_title',
+            'dimension3': 'quality_level'
+          }
+        });
+      };
+    };
+
+    // Delay GA loading to prioritize critical content
+    if (document.readyState === 'complete') {
+      setTimeout(loadGA, 1000);
+    } else {
+      window.addEventListener('load', () => setTimeout(loadGA, 1000));
+    }
+  }, []);
+
+  return null;
 };
 
 // Helper function to track custom events
