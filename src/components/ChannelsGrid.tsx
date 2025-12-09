@@ -1,9 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
-import { getChannelsByCountry } from '@/data/tvChannels';
+import { getChannelsByCountryAsync, Channel } from '@/data/tvChannels';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -11,11 +11,32 @@ const getInitials = (title: string) =>
 
 const ChannelsGrid = () => {
   const navigate = useNavigate();
-  const channelsByCountry = getChannelsByCountry();
-  const allCountryNames = Object.keys(channelsByCountry);
-  // Default to first country alphabetical if exists
-  const [selectedCountry, setSelectedCountry] = useState(allCountryNames[0] || "");
+  const [channelsByCountry, setChannelsByCountry] = useState<Record<string, Channel[]>>({});
+  const [allCountryNames, setAllCountryNames] = useState<string[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  // Fetch channels on mount
+  useEffect(() => {
+    const loadChannels = async () => {
+      setLoading(true);
+      try {
+        const channels = await getChannelsByCountryAsync();
+        setChannelsByCountry(channels);
+        const countries = Object.keys(channels).sort();
+        setAllCountryNames(countries);
+        if (countries.length > 0 && !selectedCountry) {
+          setSelectedCountry(countries[0]);
+        }
+      } catch (error) {
+        console.error('Failed to load channels:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadChannels();
+  }, []);
 
   const handleSelectChannel = (channel: any, country: string) => {
     navigate(`/channel/${country}/${channel.id}`);
@@ -46,6 +67,29 @@ const ChannelsGrid = () => {
     });
     return allChannels;
   }, [searchTerm, selectedCountry, channelsByCountry]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold text-foreground mb-2">All Channels by Country</h2>
+        <div className="bg-card rounded-xl border border-border p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sports-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading channels...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (allCountryNames.length === 0) {
+    return (
+      <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold text-foreground mb-2">All Channels by Country</h2>
+        <div className="bg-card rounded-xl border border-border p-8 text-center">
+          <p className="text-muted-foreground">No channels available at the moment.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
