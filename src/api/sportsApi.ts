@@ -57,47 +57,83 @@ const sportEndpointMap: Record<string, string> = {
   'all': 'sports'
 };
 
+// Sport name mapping for the API
+const sportNameMap: Record<string, string> = {
+  'Soccer': 'football',
+  'Football': 'football',
+  'Basketball': 'basketball',
+  'NBA': 'basketball',
+  'NFL': 'american-football',
+  'American Football': 'american-football',
+  'NHL': 'hockey',
+  'Hockey': 'hockey',
+  'Tennis': 'tennis',
+  'Cricket': 'cricket',
+  'Boxing': 'boxing',
+  'MMA': 'mma',
+  'UFC': 'mma',
+  'Rugby': 'rugby',
+  'Motorsport': 'motorsport',
+  'F1': 'motorsport'
+};
+
 // Transform API response to Match format
 const transformMatch = (event: any, sportId: string): Match => {
-  // Build sources array from stream data
+  // Build sources array from channels data
   const sources: Source[] = [];
   
-  if (event.streams && Array.isArray(event.streams)) {
-    event.streams.forEach((stream: any, index: number) => {
+  if (event.channels && Array.isArray(event.channels)) {
+    event.channels.forEach((channel: any, index: number) => {
       sources.push({
-        source: stream.source || 'default',
-        id: stream.id || `stream-${index}`
+        source: channel.channel_name || channel.channel_code || 'default',
+        id: channel.url || `channel-${index}`
       });
     });
   }
   
-  // If no streams, create a default source from the event ID
-  if (sources.length === 0 && event.id) {
+  // If no channels, create a default source from the event ID
+  if (sources.length === 0 && event.gameID) {
     sources.push({
       source: 'default',
-      id: String(event.id)
+      id: event.gameID
     });
   }
 
+  // Parse date from start field (format: "2025-12-08 11:30")
+  let matchDate = Date.now();
+  if (event.start) {
+    const parsed = new Date(event.start.replace(' ', 'T') + ':00Z');
+    if (!isNaN(parsed.getTime())) {
+      matchDate = parsed.getTime();
+    }
+  }
+
+  // Create title from team names
+  const title = event.homeTeam && event.awayTeam 
+    ? `${event.homeTeam} vs ${event.awayTeam}`
+    : event.title || event.name || '';
+
   return {
-    id: String(event.id || event._id || ''),
-    title: event.title || event.name || '',
-    category: event.category || event.sport || sportId,
-    date: event.date ? new Date(event.date).getTime() : (event.timestamp || Date.now()),
-    poster: event.poster || event.image || event.thumbnail || undefined,
+    id: event.gameID || String(event.id || event._id || ''),
+    title,
+    category: event.tournament || event.category || sportId,
+    date: matchDate,
+    poster: event.homeTeamIMG || event.awayTeamIMG || event.poster || event.image || undefined,
     popular: event.popular || event.featured || false,
-    teams: event.teams ? {
-      home: event.teams.home ? {
-        name: event.teams.home.name || event.teams.home,
-        badge: event.teams.home.badge || event.teams.home.logo
-      } : undefined,
-      away: event.teams.away ? {
-        name: event.teams.away.name || event.teams.away,
-        badge: event.teams.away.badge || event.teams.away.logo
-      } : undefined
-    } : undefined,
+    teams: {
+      home: {
+        name: event.homeTeam || '',
+        badge: event.homeTeamIMG || ''
+      },
+      away: {
+        name: event.awayTeam || '',
+        badge: event.awayTeamIMG || ''
+      }
+    },
     sources,
-    sportId: event.category || event.sport || sportId
+    sportId: sportNameMap[sportId] || sportId.toLowerCase(),
+    isLive: event.status === 'live' || event.status === 'playing',
+    viewerCount: event.channels?.reduce((sum: number, ch: any) => sum + (parseInt(ch.viewers) || 0), 0) || 0
   };
 };
 
@@ -146,25 +182,27 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    // Handle different response formats
-    let events: any[] = [];
-    if (Array.isArray(data)) {
-      events = data;
-    } else if (data.events && Array.isArray(data.events)) {
-      events = data.events;
-    } else if (data.data && Array.isArray(data.data)) {
-      events = data.data;
-    } else if (data.matches && Array.isArray(data.matches)) {
-      events = data.matches;
+    // Handle the cdn-live.tv response format: {"cdn-live-tv": {"Soccer": [...], "Basketball": [...]}}
+    let allMatches: Match[] = [];
+    
+    if (data['cdn-live-tv'] && typeof data['cdn-live-tv'] === 'object') {
+      Object.entries(data['cdn-live-tv']).forEach(([sportName, events]) => {
+        if (Array.isArray(events)) {
+          const sportMatches = events
+            .filter((event: any) => event && (event.gameID || event.id))
+            .map((event: any) => transformMatch(event, sportName));
+          allMatches = allMatches.concat(sportMatches);
+        }
+      });
+    } else if (Array.isArray(data)) {
+      allMatches = data
+        .filter((event: any) => event && (event.gameID || event.id))
+        .map((event: any) => transformMatch(event, sportId));
     }
     
-    const validMatches = events
-      .filter((event: any) => event && (event.id || event._id) && (event.title || event.name))
-      .map((event: any) => transformMatch(event, sportId));
-    
-    setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from cdn-live.tv API`);
-    return validMatches;
+    setCachedData(cacheKey, allMatches);
+    console.log(`✅ Fetched ${allMatches.length} matches for sport ${sportId} from cdn-live.tv API`);
+    return allMatches;
   } catch (error) {
     console.error(`❌ Error fetching matches for sport ${sportId}:`, error);
     throw error;
@@ -190,25 +228,39 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    // Handle different response formats
-    let events: any[] = [];
-    if (Array.isArray(data)) {
-      events = data;
-    } else if (data.events && Array.isArray(data.events)) {
-      events = data.events;
-    } else if (data.data && Array.isArray(data.data)) {
-      events = data.data;
-    } else if (data.matches && Array.isArray(data.matches)) {
-      events = data.matches;
+    // Handle the cdn-live.tv response format: {"cdn-live-tv": {"Soccer": [...], "Basketball": [...]}}
+    let allMatches: Match[] = [];
+    
+    if (data['cdn-live-tv'] && typeof data['cdn-live-tv'] === 'object') {
+      // API returns sports as keys with arrays of events
+      Object.entries(data['cdn-live-tv']).forEach(([sportName, events]) => {
+        if (Array.isArray(events)) {
+          const sportMatches = events
+            .filter((event: any) => event && (event.gameID || event.id))
+            .map((event: any) => transformMatch(event, sportName));
+          allMatches = allMatches.concat(sportMatches);
+        }
+      });
+    } else if (Array.isArray(data)) {
+      allMatches = data
+        .filter((event: any) => event && (event.gameID || event.id))
+        .map((event: any) => transformMatch(event, 'all'));
     }
     
-    const validMatches = events
-      .filter((event: any) => event && (event.id || event._id) && (event.title || event.name))
-      .map((event: any) => transformMatch(event, 'all'));
+    // Sort by date (most recent first) and filter out finished matches
+    allMatches = allMatches
+      .filter(m => m.isLive || new Date(m.date) > new Date(Date.now() - 3 * 60 * 60 * 1000)) // Include live or started within 3 hours
+      .sort((a, b) => {
+        // Live matches first
+        if (a.isLive && !b.isLive) return -1;
+        if (!a.isLive && b.isLive) return 1;
+        // Then by date
+        return a.date - b.date;
+      });
     
-    setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from cdn-live.tv API`);
-    return validMatches;
+    setCachedData(cacheKey, allMatches);
+    console.log(`✅ Fetched ${allMatches.length} matches from cdn-live.tv API`);
+    return allMatches;
   } catch (error) {
     console.error('❌ Error fetching all matches:', error);
     throw error;
