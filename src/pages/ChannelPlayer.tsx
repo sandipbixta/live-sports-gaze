@@ -34,14 +34,20 @@ const ChannelPlayer = () => {
 
       try {
         const channelsByCountry = await getChannelsByCountryAsync();
-        const countryChannels = channelsByCountry[country];
         
-        if (!countryChannels || countryChannels.length === 0) {
-          navigate('/channels');
-          return;
+        // Find channel by countryCode and channelId
+        let foundChannel: Channel | null = null;
+        let countryChannels: Channel[] = [];
+        
+        // Search through all countries to find the channel with matching countryCode
+        for (const [countryName, channels] of Object.entries(channelsByCountry)) {
+          const matching = channels.find(ch => ch.countryCode === country && ch.id === channelId);
+          if (matching) {
+            foundChannel = matching;
+            countryChannels = channels;
+            break;
+          }
         }
-
-        const foundChannel = countryChannels.find(ch => ch.id === channelId);
         
         if (!foundChannel) {
           navigate('/channels');
@@ -50,7 +56,7 @@ const ChannelPlayer = () => {
 
         setChannel(foundChannel);
         
-        // Set other channels (excluding current one)
+        // Set other channels from same country (excluding current one)
         const otherChannelsList = countryChannels.filter(ch => ch.id !== channelId);
         setOtherChannels(otherChannelsList);
       } catch (error) {
