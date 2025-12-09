@@ -1,6 +1,6 @@
 import { Match } from '@/types/sports';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = 'https://api.cdn-live.tv/api/v1/vip/damitv';
 
 // Cache for viewer counts to minimize API calls (5 minute cache)
 interface ViewerCountCache {
@@ -31,34 +31,15 @@ const validateViewerCount = (viewers: any): number | null => {
 
 /**
  * Fetch viewer count from stream API for a specific source
+ * Note: With the new API, viewer counts are typically embedded in the event data
  */
 export const fetchViewerCountFromSource = async (
   source: string,
   id: string
 ): Promise<number | null> => {
   try {
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
-      headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(5000)
-    });
-
-    if (!response.ok) {
-      console.warn(`Stream API returned ${response.status} for ${source}/${id}`);
-      return null;
-    }
-
-    const data = await response.json();
-    
-    // Check if viewers field exists and is valid
-    if (data && typeof data.viewers === 'number') {
-      return validateViewerCount(data.viewers);
-    }
-    
-    // If it's an array, check the first stream
-    if (Array.isArray(data) && data.length > 0 && typeof data[0].viewers === 'number') {
-      return validateViewerCount(data[0].viewers);
-    }
-
+    // The new API doesn't have a separate stream endpoint for viewer counts
+    // Viewer counts are embedded in the events data
     return null;
   } catch (error) {
     console.warn(`Failed to fetch viewer count for ${source}/${id}:`, error);
@@ -67,7 +48,7 @@ export const fetchViewerCountFromSource = async (
 };
 
 /**
- * Fetch viewer count for a match (tries all sources)
+ * Fetch viewer count for a match (from match data)
  */
 export const fetchMatchViewerCount = async (match: Match): Promise<number | null> => {
   // Only fetch for live matches
@@ -82,37 +63,16 @@ export const fetchMatchViewerCount = async (match: Match): Promise<number | null
     return cached.count;
   }
 
-  // Try all sources and sum up viewer counts
-  if (!match.sources || match.sources.length === 0) {
-    return null;
-  }
-
-  try {
-    const viewerPromises = match.sources.map(source =>
-      fetchViewerCountFromSource(source.source, source.id)
-    );
-
-    const results = await Promise.all(viewerPromises);
-    const validCounts = results.filter((count): count is number => count !== null);
-
-    if (validCounts.length === 0) {
-      return null;
-    }
-
-    // Sum up all valid viewer counts
-    const totalViewers = validCounts.reduce((sum, count) => sum + count, 0);
-
-    // Cache the result
+  // With the new API, viewer counts should be in the match data
+  if (match.viewerCount !== undefined) {
     viewerCountCache.set(cacheKey, {
-      count: totalViewers,
+      count: match.viewerCount,
       timestamp: Date.now()
     });
-
-    return totalViewers;
-  } catch (error) {
-    console.error(`Error fetching viewer count for match ${match.id}:`, error);
-    return null;
+    return match.viewerCount;
   }
+
+  return null;
 };
 
 /**
@@ -126,22 +86,14 @@ export const fetchBatchViewerCounts = async (
   // Filter to only live matches
   const liveMatches = matches.filter(isMatchLive);
   
-  console.log(`🔄 Refreshing viewer counts for ${liveMatches.length} matches`);
+  console.log(`🔄 Getting viewer counts for ${liveMatches.length} matches`);
   
-  // Fetch in batches of 10 to speed up (parallel requests)
-  const batchSize = 10;
-  for (let i = 0; i < liveMatches.length; i += batchSize) {
-    const batch = liveMatches.slice(i, i + batchSize);
-    
-    const promises = batch.map(async (match) => {
-      const count = await fetchMatchViewerCount(match);
-      if (count !== null && count > 0) {
-        viewerCounts.set(match.id, count);
-      }
-    });
-    
-    await Promise.all(promises);
-  }
+  // With the new API, viewer counts are embedded in match data
+  liveMatches.forEach(match => {
+    if (match.viewerCount !== undefined && match.viewerCount > 0) {
+      viewerCounts.set(match.id, match.viewerCount);
+    }
+  });
   
   console.log(`✅ Found ${viewerCounts.size} matches with viewer data`);
   
@@ -155,7 +107,7 @@ export const enrichMatchesWithViewers = async (matches: Match[]): Promise<Match[
   const viewerCounts = await fetchBatchViewerCounts(matches);
   
   return matches.map(match => {
-    const viewerCount = viewerCounts.get(match.id);
+    const viewerCount = viewerCounts.get(match.id) || match.viewerCount;
     
     return {
       ...match,

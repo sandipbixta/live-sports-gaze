@@ -49,19 +49,9 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
       
       if (source && id) {
         try {
-          const response = await fetch(`https://streamed.pk/api/stream/${source}/${id}`, {
-            headers: { 'Accept': 'application/json' },
-            signal: AbortSignal.timeout(5000)
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Sum up all viewers from this source
-            if (Array.isArray(data)) {
-              const total = data.reduce((sum: number, stream: any) => sum + (stream.viewers || 0), 0);
-              setCurrentStreamViewers(total);
-            }
+          // Viewer count is now embedded in match data from the new API
+          if (featuredMatch?.viewerCount) {
+            setCurrentStreamViewers(featuredMatch.viewerCount);
           }
         } catch (error) {
           console.error('Failed to fetch viewer count:', error);
@@ -73,7 +63,7 @@ const FeaturedPlayer: React.FC<FeaturedPlayerProps> = ({
     // Refresh every 30 seconds
     const interval = setInterval(fetchCurrentViewers, 30000);
     return () => clearInterval(interval);
-  }, [activeSource]);
+  }, [activeSource, featuredMatch?.viewerCount]);
 
   // Show loading only for initial load, not when we have matches
   if (loading && !featuredMatch) {

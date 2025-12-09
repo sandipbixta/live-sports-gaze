@@ -22,8 +22,8 @@ const PerformanceOptimizer: React.FC = () => {
 
       // Preload critical API endpoints
       const criticalEndpoints = [
-        'https://streamed.pk/api/sports',
-        'https://streamed.pk/api/matches/live'
+        'https://api.cdn-live.tv/api/v1/vip/damitv/events/sports/',
+        'https://api.cdn-live.tv/api/v1/vip/damitv/channels/'
       ];
 
       criticalEndpoints.forEach(url => {
