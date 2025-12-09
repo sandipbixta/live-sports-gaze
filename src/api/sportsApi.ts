@@ -118,7 +118,8 @@ const transformMatch = (event: any, sportId: string): Match => {
     title,
     category: event.tournament || event.category || sportId,
     date: matchDate,
-    poster: event.homeTeamIMG || event.awayTeamIMG || event.poster || event.image || undefined,
+    // Only use actual poster images, not team images (those go in badges)
+    poster: event.poster || event.image || undefined,
     popular: event.popular || event.featured || false,
     teams: {
       home: {
