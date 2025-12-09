@@ -393,32 +393,106 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   if (!stream || error) {
     // Show countdown timer if match hasn't started yet
     if (!stream && countdown && match) {
+      // Parse countdown into separate parts
+      const countdownParts = countdown.split(/[hms\s]+/).filter(Boolean);
+      const hasHours = countdown.includes('h');
+      const hasMinutes = countdown.includes('m');
+      const hasDays = countdown.includes('d');
+      
+      // Extract time values
+      let hours = '00', minutes = '00', seconds = '00';
+      if (hasDays) {
+        // Format: "Xd Xh Xm"
+        hours = countdownParts[1]?.padStart(2, '0') || '00';
+        minutes = countdownParts[2]?.padStart(2, '0') || '00';
+        seconds = '00';
+      } else if (hasHours) {
+        // Format: "Xh Xm Xs"
+        hours = countdownParts[0]?.padStart(2, '0') || '00';
+        minutes = countdownParts[1]?.padStart(2, '0') || '00';
+        seconds = countdownParts[2]?.padStart(2, '0') || '00';
+      } else if (hasMinutes) {
+        // Format: "Xm Xs"
+        hours = '00';
+        minutes = countdownParts[0]?.padStart(2, '0') || '00';
+        seconds = countdownParts[1]?.padStart(2, '0') || '00';
+      } else {
+        // Just seconds
+        seconds = countdownParts[0]?.padStart(2, '0') || '00';
+      }
+
+      const homeTeam = (match as Match).teams?.home;
+      const awayTeam = (match as Match).teams?.away;
+      const tournament = (match as Match).tournament;
+
       return (
-        <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gradient-to-br from-gray-900 to-black rounded-lg sm:rounded-2xl flex items-center justify-center relative overflow-hidden`}>
-          {/* Background decoration */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 left-4 sm:top-10 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-primary rounded-full blur-2xl sm:blur-3xl" />
-            <div className="absolute bottom-4 right-4 sm:bottom-10 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-purple-500 rounded-full blur-2xl sm:blur-3xl" />
+        <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] rounded-lg sm:rounded-2xl flex items-center justify-center relative overflow-hidden`}>
+          {/* Background decoration - colorful blurs */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-20 -left-20 w-40 h-40 sm:w-64 sm:h-64 bg-blue-600/30 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -right-20 w-40 h-40 sm:w-64 sm:h-64 bg-red-500/20 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-purple-500/20 rounded-full blur-3xl" />
           </div>
           
-          <div className="text-center text-white p-3 sm:p-6 z-10 max-w-full">
-            <Clock className="w-10 h-10 sm:w-16 md:w-20 sm:h-16 md:h-20 mx-auto mb-3 sm:mb-6 text-primary animate-pulse" />
-            <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3">Match Starting Soon</h3>
-            <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-6 px-2">Stream will be available when the match begins</p>
+          <div className="text-center text-white p-3 sm:p-6 z-10 w-full max-w-lg">
+            {/* Watch Live In */}
+            <p className="text-xs sm:text-sm text-gray-300 mb-2 sm:mb-3 tracking-wide">Watch Live In</p>
             
-            {/* Countdown Display */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-2 sm:mb-4 inline-block">
-              <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 font-mono tracking-wider">
-                {countdown}
+            {/* Countdown Timer Boxes */}
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-4 sm:mb-6">
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {hours}
               </div>
-              <div className="text-[10px] sm:text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+              <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {minutes}
+              </div>
+              <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {seconds}
+              </div>
             </div>
-            
-            {match.title && (
-              <p className="text-xs sm:text-base md:text-lg text-white/80 mt-2 sm:mt-4 font-semibold px-2 line-clamp-2">
-                {match.title}
-              </p>
+
+            {/* Tournament/League Name */}
+            {tournament && (
+              <p className="text-xs sm:text-sm text-gray-300 mb-3 sm:mb-4">{tournament}</p>
             )}
+
+            {/* Team Names and Logos */}
+            <div className="flex items-center justify-center gap-2 sm:gap-4">
+              {/* Home Team */}
+              <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
+                {homeTeam?.badge && (
+                  <img 
+                    src={homeTeam.badge} 
+                    alt={homeTeam.name || 'Home team'} 
+                    className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
+                <span className="text-xs sm:text-sm md:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                  {homeTeam?.name || 'Home'}
+                </span>
+              </div>
+
+              {/* VS */}
+              <span className="text-[hsl(16,100%,60%)] font-bold text-sm sm:text-lg mx-1 sm:mx-2">Vs</span>
+
+              {/* Away Team */}
+              <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
+                {awayTeam?.badge && (
+                  <img 
+                    src={awayTeam.badge} 
+                    alt={awayTeam.name || 'Away team'} 
+                    className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                )}
+                <span className="text-xs sm:text-sm md:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                  {awayTeam?.name || 'Away'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -467,35 +541,107 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         }`}
       >
       {/* Countdown Overlay - Show over everything when match hasn't started */}
-      {countdown && match && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-          {/* Background decoration */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 left-4 sm:top-10 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-primary rounded-full blur-2xl sm:blur-3xl" />
-            <div className="absolute bottom-4 right-4 sm:bottom-10 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-purple-500 rounded-full blur-2xl sm:blur-3xl" />
-          </div>
-          
-          <div className="text-center text-white p-3 sm:p-6 z-10 max-w-full">
-            <Clock className="w-10 h-10 sm:w-16 md:w-20 sm:h-16 md:h-20 mx-auto mb-3 sm:mb-6 text-primary animate-pulse" />
-            <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3">Match Starting Soon</h3>
-            <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-6 px-2">Stream will be available when the match begins</p>
-            
-            {/* Countdown Display */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-2 sm:mb-4 inline-block">
-              <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 font-mono tracking-wider">
-                {countdown}
-              </div>
-              <div className="text-[10px] sm:text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+      {countdown && match && (() => {
+        // Parse countdown into separate parts
+        const countdownParts = countdown.split(/[hms\s]+/).filter(Boolean);
+        const hasHours = countdown.includes('h');
+        const hasMinutes = countdown.includes('m');
+        const hasDays = countdown.includes('d');
+        
+        // Extract time values
+        let hours = '00', minutes = '00', seconds = '00';
+        if (hasDays) {
+          hours = countdownParts[1]?.padStart(2, '0') || '00';
+          minutes = countdownParts[2]?.padStart(2, '0') || '00';
+          seconds = '00';
+        } else if (hasHours) {
+          hours = countdownParts[0]?.padStart(2, '0') || '00';
+          minutes = countdownParts[1]?.padStart(2, '0') || '00';
+          seconds = countdownParts[2]?.padStart(2, '0') || '00';
+        } else if (hasMinutes) {
+          hours = '00';
+          minutes = countdownParts[0]?.padStart(2, '0') || '00';
+          seconds = countdownParts[1]?.padStart(2, '0') || '00';
+        } else {
+          seconds = countdownParts[0]?.padStart(2, '0') || '00';
+        }
+
+        const homeTeam = (match as Match).teams?.home;
+        const awayTeam = (match as Match).teams?.away;
+        const tournament = (match as Match).tournament;
+
+        return (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419]">
+            {/* Background decoration */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -top-20 -left-20 w-40 h-40 sm:w-64 sm:h-64 bg-blue-600/30 rounded-full blur-3xl" />
+              <div className="absolute -bottom-20 -right-20 w-40 h-40 sm:w-64 sm:h-64 bg-red-500/20 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-purple-500/20 rounded-full blur-3xl" />
             </div>
             
-            {match.title && (
-              <p className="text-xs sm:text-base md:text-lg text-white/80 mt-2 sm:mt-4 font-semibold px-2 line-clamp-2">
-                {match.title}
-              </p>
-            )}
+            <div className="text-center text-white p-3 sm:p-6 z-10 w-full max-w-lg">
+              {/* Watch Live In */}
+              <p className="text-xs sm:text-sm text-gray-300 mb-2 sm:mb-3 tracking-wide">Watch Live In</p>
+              
+              {/* Countdown Timer Boxes */}
+              <div className="flex items-center justify-center gap-1 sm:gap-2 mb-4 sm:mb-6">
+                <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                  {hours}
+                </div>
+                <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+                <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                  {minutes}
+                </div>
+                <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+                <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                  {seconds}
+                </div>
+              </div>
+
+              {/* Tournament/League Name */}
+              {tournament && (
+                <p className="text-xs sm:text-sm text-gray-300 mb-3 sm:mb-4">{tournament}</p>
+              )}
+
+              {/* Team Names and Logos */}
+              <div className="flex items-center justify-center gap-2 sm:gap-4">
+                {/* Home Team */}
+                <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
+                  {homeTeam?.badge && (
+                    <img 
+                      src={homeTeam.badge} 
+                      alt={homeTeam.name || 'Home team'} 
+                      className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )}
+                  <span className="text-xs sm:text-sm md:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                    {homeTeam?.name || 'Home'}
+                  </span>
+                </div>
+
+                {/* VS */}
+                <span className="text-[hsl(16,100%,60%)] font-bold text-sm sm:text-lg mx-1 sm:mx-2">Vs</span>
+
+                {/* Away Team */}
+                <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1">
+                  {awayTeam?.badge && (
+                    <img 
+                      src={awayTeam.badge} 
+                      alt={awayTeam.name || 'Away team'} 
+                      className="w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  )}
+                  <span className="text-xs sm:text-sm md:text-base font-semibold text-white truncate max-w-[100px] sm:max-w-[150px]">
+                    {awayTeam?.name || 'Away'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {isM3U8 ? (
         <video
