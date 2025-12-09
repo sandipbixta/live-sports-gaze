@@ -383,7 +383,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           </div>
           
           
-          {/* Viewer Count - Separate row above button */}
+          {/* Viewer Count - Only show for live matches */}
           {isLive && (
             <div className="mb-2">
               <LiveViewerCount match={match} size="sm" />
@@ -391,20 +391,23 @@ const MatchCard: React.FC<MatchCardProps> = ({
           )}
           
           {/* Action - Push to bottom */}
-          {hasStream && (
-            <div className="mt-auto">
-              {isLive || isMatchStarting ? (
-            <div className="bg-sports-primary text-primary-foreground font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
-              Watch Now
-            </div>
-              ) : countdown ? (
-                <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
-                  <Clock className="w-3.5 h-3.5" />
-                  Starts in {countdown}
-                </div>
-              ) : null}
-            </div>
-          )}
+          <div className="mt-auto">
+            {isLive || isMatchStarting ? (
+              <div className="bg-sports-primary text-primary-foreground font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
+                Watch Now
+              </div>
+            ) : countdown ? (
+              <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
+                <Clock className="w-3.5 h-3.5" />
+                Starts in {countdown}
+              </div>
+            ) : match.date && match.date > Date.now() ? (
+              <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
+                <Clock className="w-3.5 h-3.5" />
+                {formatTime(match.date)} • {formatDateShort(match.date)}
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
