@@ -48,6 +48,7 @@ import Leagues from "./pages/Leagues";
 import LeagueDetail from "./pages/LeagueDetail";
 import FootballLeagues from "./pages/FootballLeagues";
 import FootballLeagueDetail from "./pages/FootballLeagueDetail";
+import TVGuide from "./pages/TVGuide";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
@@ -111,6 +112,11 @@ const App: React.FC = () => {
               <Route path="/channel/:country/:channelId" element={
                 <SEOPageTracker contentType="channels">
                   <ChannelPlayer />
+                </SEOPageTracker>
+              } />
+              <Route path="/tv-guide" element={
+                <SEOPageTracker pageTitle="Live TV Guide - What's On Now" contentType="channels">
+                  <TVGuide />
                 </SEOPageTracker>
               } />
               <Route path="/leagues" element={
