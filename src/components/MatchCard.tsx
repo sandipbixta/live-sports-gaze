@@ -153,11 +153,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
         : `https://api.cdn-live.tv${posterToUse}`;
       
       return (
-        <div className="w-full h-full relative flex items-center justify-center bg-black">
+        <div className="w-full h-full relative bg-black">
           <img
             src={posterUrl}
             alt={match.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain"
+            className="w-full h-full object-cover"
             loading="lazy"
             onError={(e) => {
               console.error('Poster failed to load for:', match.title, 'URL:', posterUrl);
@@ -306,108 +306,55 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer h-full">
-      <div className="relative overflow-hidden rounded-lg border-2 border-border bg-card transition-all duration-300 hover:border-sports-primary h-full flex flex-col">
-        {/* Image Section - Fixed aspect ratio */}
-        <div className="relative aspect-video overflow-hidden bg-muted flex-shrink-0">
+      <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:scale-[1.02] h-full flex flex-col">
+        {/* Poster Image Section - Vertical aspect ratio like reference */}
+        <div className="relative aspect-[3/4] overflow-hidden rounded-xl flex-shrink-0">
           {generateThumbnail()}
           
-          {/* Simple Status Indicators */}
-          <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
-            <div className="flex items-center gap-2">
-              {isLive ? (
-                <span className="bg-red-500 text-primary-foreground text-[10px] font-black uppercase px-2 py-1 tracking-wider animate-pulse">
-                  ● Live
-                </span>
-              ) : match.sources && match.sources.length > 0 ? (
-                <span className="bg-blue-500/90 text-white text-[10px] font-bold uppercase px-2 py-1">
-                  Available
-                </span>
-              ) : match.date && match.date > Date.now() ? (
-                <span className="bg-muted/90 text-muted-foreground text-[10px] font-bold uppercase px-2 py-1">
-                  Upcoming
-                </span>
-              ) : null}
-              
-              {/* Popular badge for matches with high viewer counts */}
-              {isLive && match.viewerCount && match.viewerCount > 500 && (
-                <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-[10px] font-black uppercase px-2 py-1 animate-pulse shadow-lg">
-                  🔥 {match.viewerCount > 10000 ? 'HOT' : 'Popular'}
-                </span>
-              )}
-            </div>
-            
-            {hasStream && (
-              <span className="bg-background/80 text-foreground text-[10px] font-bold px-2 py-1">
+          {/* Status Badge - Top left */}
+          <div className="absolute top-2 left-2 z-10">
+            {isLive ? (
+              <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded tracking-wider animate-pulse">
+                ● Live
+              </span>
+            ) : hasStream ? (
+              <span className="bg-blue-500/90 text-white text-[10px] font-bold uppercase px-2 py-1 rounded">
+                Available
+              </span>
+            ) : null}
+          </div>
+          
+          {/* HD Badge - Top right */}
+          {hasStream && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded">
                 {match.sources.length} HD
               </span>
-            )}
-          </div>
-        </div>
-
-        {/* Info Section - Fixed height */}
-        <div className="p-3 flex flex-col flex-1 min-h-[160px]">
-          {/* Tournament & Country */}
-          {(match.tournament || match.country) && (
-            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              {match.countryFlag && (
-                <img 
-                  src={match.countryFlag} 
-                  alt={match.country || 'Country'} 
-                  className="w-4 h-3 object-cover rounded-sm"
-                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                />
-              )}
-              {match.tournament && (
-                <span className="text-[10px] font-medium text-sports-primary truncate max-w-[140px]">
-                  {match.tournament}
-                </span>
-              )}
-              {match.country && !match.tournament && (
-                <span className="text-[10px] font-medium text-muted-foreground">
-                  {match.country}
-                </span>
-              )}
             </div>
           )}
-          
-          {/* Title - Fixed 2 lines */}
-          <h3 className="font-bold text-foreground text-sm line-clamp-2 h-[2.5rem] mb-2">
+        </div>
+
+        {/* Info Section - Clean minimal like reference */}
+        <div className="p-3 flex flex-col gap-1">
+          {/* Title */}
+          <h3 className="font-semibold text-foreground text-sm line-clamp-2 leading-tight">
             {home && away ? `${home} vs ${away}` : match.title}
           </h3>
           
-          {/* Meta Info - Fixed height */}
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-medium flex-wrap mb-2">
-            <span>{match.date ? formatTime(match.date) : 'TBD'}</span>
-            <span className="w-1 h-1 bg-border rounded-full" />
-            <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
-          </div>
-          
-          
-          {/* Viewer Count - Only show for live matches */}
-          {isLive && (
-            <div className="mb-2">
+          {/* Date/Time or Action */}
+          {isLive || isMatchStarting ? (
+            <div className="flex items-center gap-2">
               <LiveViewerCount match={match} size="sm" />
             </div>
-          )}
-          
-          {/* Action - Push to bottom */}
-          <div className="mt-auto">
-            {isLive || isMatchStarting ? (
-              <div className="bg-sports-primary text-primary-foreground font-bold text-xs py-2 text-center uppercase tracking-wide hover:bg-sports-primary/90 transition-colors">
-                Watch Now
-              </div>
-            ) : countdown ? (
-              <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
-                <Clock className="w-3.5 h-3.5" />
-                Starts in {countdown}
-              </div>
-            ) : match.date && match.date > Date.now() ? (
-              <div className="bg-muted text-foreground border border-border font-bold text-xs py-2 text-center uppercase tracking-wide flex items-center justify-center gap-2">
-                <Clock className="w-3.5 h-3.5" />
-                {formatTime(match.date)} • {formatDateShort(match.date)}
-              </div>
-            ) : null}
-          </div>
+          ) : countdown ? (
+            <p className="text-xs text-muted-foreground">
+              Starts in {countdown}
+            </p>
+          ) : match.date ? (
+            <p className="text-xs text-muted-foreground">
+              {formatDateShort(match.date)} • {formatTime(match.date)}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
