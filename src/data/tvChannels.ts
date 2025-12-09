@@ -62,15 +62,11 @@ const transformChannel = (apiChannel: any): Channel => {
   const countryCode = apiChannel.code || 'us';
   const countryName = countryCodeMap[countryCode] || countryCode.toUpperCase();
   
-  // Ensure embed URL uses HTTPS and correct domain
+  // Ensure embed URL uses HTTPS
   let embedUrl = apiChannel.url || apiChannel.embedUrl || '';
   if (embedUrl) {
-    // Fix protocol
+    // Fix protocol to HTTPS
     embedUrl = embedUrl.replace(/^http:\/\//i, 'https://');
-    // Ensure it uses the right domain format for embedding
-    if (embedUrl.includes('cdn-live.tv') && !embedUrl.includes('api.cdn-live.tv')) {
-      embedUrl = embedUrl.replace('cdn-live.tv', 'api.cdn-live.tv');
-    }
   }
   
   return {
