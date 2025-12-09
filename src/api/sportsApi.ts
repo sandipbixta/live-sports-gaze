@@ -321,7 +321,8 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
         streamNo: index + 1,
         language: 'EN',
         hd: true,
-        embedUrl: `${API_BASE}/stream/${src.id}`,
+        // The source.id already contains the full player URL from the API
+        embedUrl: src.id.startsWith('http') ? src.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(src.source)}&code=us`,
         source: src.source,
         timestamp: Date.now()
       }));
@@ -354,7 +355,8 @@ export const fetchAllMatchStreams = async (match: Match): Promise<{
         streamNo: index + 1,
         language: 'EN',
         hd: true,
-        embedUrl: `${API_BASE}/stream/${source.id}`,
+        // The source.id already contains the full player URL from the API
+        embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
         source: source.source,
         timestamp: Date.now()
       };
@@ -389,7 +391,8 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       streamNo: index + 1,
       language: 'EN',
       hd: true,
-      embedUrl: `${API_BASE}/stream/${source.id}`,
+      // The source.id already contains the full player URL from the API
+      embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
       source: source.source,
       timestamp: Date.now()
     };
