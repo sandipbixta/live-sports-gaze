@@ -206,12 +206,12 @@ export const searchTeam = async (teamName: string): Promise<SportsDbTeam | null>
   }
 };
 
-// Get the best available image for an event (prioritize poster for vertical card layout)
+// Get the best available image for an event (prioritize thumb/banner for 16:9 card layout)
 export const getEventPoster = (event: SportsDbEvent | null, size: 'medium' | 'small' | 'tiny' = 'medium'): string | null => {
   if (!event) return null;
   
-  // Priority for vertical poster card layout: poster > fanart > thumb > square
-  const imageUrl = event.strPoster || event.strFanart || event.strThumb || event.strSquare || event.strBanner;
+  // Priority for 16:9 banner layout: thumb > banner > fanart > poster > square
+  const imageUrl = event.strThumb || event.strBanner || event.strFanart || event.strPoster || event.strSquare;
   
   if (!imageUrl) return null;
   
