@@ -370,7 +370,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                           <img 
                             src={channel.image} 
                             alt={channel.name}
-                            className="w-5 h-5 rounded object-contain bg-white p-0.5"
+                            className="w-5 h-5 rounded object-contain bg-neutral-200 dark:bg-neutral-700 p-0.5"
                             onError={(e) => (e.currentTarget.style.display = 'none')}
                           />
                         ) : (
