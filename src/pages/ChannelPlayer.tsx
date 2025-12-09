@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
@@ -24,6 +24,14 @@ const ChannelPlayer = () => {
   const [otherChannels, setOtherChannels] = useState<Channel[]>([]);
   const [playerType, setPlayerType] = useState<PlayerType>('simple');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to player when channel loads
+  useEffect(() => {
+    if (channel && playerRef.current) {
+      playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [channel]);
 
   useEffect(() => {
     const loadChannel = async () => {
@@ -184,7 +192,7 @@ const ChannelPlayer = () => {
       )}
 
       {/* Video Player - Full width, optimized for mobile */}
-      <div className="w-full">
+      <div ref={playerRef} className="w-full">
         <ChannelPlayerSelector
           stream={stream}
           isLoading={false}
