@@ -291,7 +291,7 @@ const StreamSources = ({
         )}
       </div>
       
-      <div className="flex flex-wrap gap-3">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
         {allAvailableStreams.map(({ stream, sourceKey, index }) => {
           // Use streamNo from API, fallback to index + 1
           const actualStreamNo = stream.streamNo !== undefined ? stream.streamNo : index + 1;
@@ -308,7 +308,7 @@ const StreamSources = ({
             <Button
               key={streamKey}
               variant={isActive ? "default" : "outline"}
-              className={`rounded-full px-5 py-2.5 min-w-[120px] flex-col h-auto gap-1 ${
+              className={`rounded-full px-3 sm:px-5 py-2.5 sm:min-w-[120px] flex-col h-auto gap-1 ${
                 isActive 
                   ? 'bg-[#ff5722] hover:bg-[#ff5722]/90 text-white border-[#ff5722]' 
                   : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
@@ -318,24 +318,24 @@ const StreamSources = ({
                 onSourceChange(stream.source, stream.id, actualStreamNo);
               }}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {stream.image && (
                   <img 
                     src={stream.image} 
                     alt={streamName}
-                    className="w-5 h-5 object-contain rounded"
+                    className="w-4 h-4 sm:w-5 sm:h-5 object-contain rounded"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
                 )}
                 <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
-                <Play className="w-4 h-4" />
-                <span className="truncate max-w-[100px]">{streamName}</span>
-                {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
+                <Play className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="truncate max-w-[60px] sm:max-w-[100px] text-xs sm:text-sm">{streamName}</span>
+                {stream.hd && <span className="text-[10px] sm:text-xs bg-red-600 px-1 rounded">HD</span>}
               </div>
               {viewerCount > 0 && (
-                <div className="flex items-center gap-1 text-xs font-semibold">
+                <div className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold">
                   <Users className="w-3 h-3 text-[#ff5722]" />
                   <span>{formatViewerCount(viewerCount, false)}</span>
                 </div>
