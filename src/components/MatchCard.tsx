@@ -382,44 +382,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
           </div>
           
-          {/* Available Channels Preview */}
-          {match.channels && match.channels.length > 0 && (
-            <div className="flex items-center gap-1.5 mb-2 overflow-hidden">
-              <Tv className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-              <div className="flex items-center gap-1 overflow-hidden">
-                {match.channels.slice(0, 3).map((channel, idx) => (
-                  <Tooltip key={idx}>
-                    <TooltipTrigger asChild>
-                      <div className="flex-shrink-0">
-                        {channel.image ? (
-                          <img 
-                            src={channel.image} 
-                            alt={channel.name}
-                            className="w-5 h-5 rounded object-contain bg-neutral-200 dark:bg-neutral-700 p-0.5"
-                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                          />
-                        ) : (
-                          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
-                            <span className="text-[8px] font-bold text-muted-foreground">
-                              {channel.code?.toUpperCase().slice(0, 2)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">
-                      {channel.name}
-                    </TooltipContent>
-                  </Tooltip>
-                ))}
-                {match.channels.length > 3 && (
-                  <span className="text-[10px] text-muted-foreground font-medium">
-                    +{match.channels.length - 3}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
           
           {/* Viewer Count - Separate row above button */}
           {isLive && (
