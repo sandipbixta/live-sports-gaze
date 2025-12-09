@@ -129,7 +129,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   }, [allMatches]);
 
   // Filter matches by search term (ended matches already filtered out in data loading)
-  const filteredMatches = React.useMemo(() => {
+  const filteredLiveMatches = React.useMemo(() => {
     // Only show matches with images on home page
     let matches = filterMatchesWithImages(liveMatches);
     
@@ -146,36 +146,32 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     return matches;
   }, [liveMatches, searchTerm]);
 
-  // Group matches by sport and sort by date (newest first)
-  const matchesBySport = React.useMemo(() => {
-    const grouped: { [sportId: string]: Match[] } = {};
+  // Filter upcoming matches (not live)
+  const filteredUpcomingMatches = React.useMemo(() => {
+    // Get non-live matches from allMatches
+    let upcoming = allMatches.filter(match => !isMatchLive(match));
+    // Only show matches with images
+    upcoming = filterMatchesWithImages(upcoming);
     
-    filteredMatches.forEach(match => {
-      const sportId = match.sportId || match.category || 'unknown';
-      if (!grouped[sportId]) {
-        grouped[sportId] = [];
-      }
-      grouped[sportId].push(match);
-    });
-    
-    // Sort matches within each sport by date (newest/most recent first)
-    Object.keys(grouped).forEach(sportId => {
-      grouped[sportId].sort((a, b) => {
-        // Sort by date descending (newest matches first)
-        return b.date - a.date;
+    // Apply search filter if provided
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      upcoming = upcoming.filter(match => {
+        return match.title.toLowerCase().includes(lowercaseSearch) || 
+          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
       });
-    });
+    }
     
-    return grouped;
-  }, [filteredMatches]);
+    // Sort by date (earliest first)
+    return upcoming.sort((a, b) => a.date - b.date);
+  }, [allMatches, searchTerm]);
 
-  const getSportName = (sportId: string) => {
-    const sport = sports.find(s => s.id === sportId);
-    return sport?.name || sportId.charAt(0).toUpperCase() + sportId.slice(1);
-  };
+  const hasLiveMatches = filteredLiveMatches.length > 0;
+  const hasUpcomingMatches = filteredUpcomingMatches.length > 0;
 
   // Show skeleton while data is empty, but don't block - let it render
-  if (liveMatches.length === 0) {
+  if (liveMatches.length === 0 && allMatches.length === 0) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
@@ -185,12 +181,12 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     );
   }
 
-  if (filteredMatches.length === 0) {
+  if (!hasLiveMatches && !hasUpcomingMatches) {
     return (
       <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
         <div className="text-4xl mb-4">📺</div>
-        <h3 className="text-xl font-bold text-white mb-2">No Live Matches</h3>
-        <p className="text-gray-400">There are currently no live matches available.</p>
+        <h3 className="text-xl font-bold text-white mb-2">No Matches Available</h3>
+        <p className="text-gray-400">There are currently no matches available.</p>
       </div>
     );
   }
@@ -229,39 +225,125 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     return 14.5;
   };
 
-  // Sort sports by priority with tennis at the end
-  const sortedSports = Object.entries(matchesBySport).sort(([sportIdA], [sportIdB]) => {
-    const priorityA = getSportPriority(sportIdA);
-    const priorityB = getSportPriority(sportIdB);
-    return priorityA - priorityB;
+  const getSportName = (sportId: string) => {
+    const sport = sports.find(s => s.id === sportId);
+    return sport?.name || sportId.charAt(0).toUpperCase() + sportId.slice(1);
+  };
+
+  // Group live matches by sport
+  const liveMatchesBySport = React.useMemo(() => {
+    const grouped: { [sportId: string]: Match[] } = {};
+    
+    filteredLiveMatches.forEach(match => {
+      const sportId = match.sportId || match.category || 'unknown';
+      if (!grouped[sportId]) {
+        grouped[sportId] = [];
+      }
+      grouped[sportId].push(match);
+    });
+    
+    // Sort matches within each sport by date (newest/most recent first)
+    Object.keys(grouped).forEach(sportId => {
+      grouped[sportId].sort((a, b) => b.date - a.date);
+    });
+    
+    return grouped;
+  }, [filteredLiveMatches]);
+
+  // Group upcoming matches by sport
+  const upcomingMatchesBySport = React.useMemo(() => {
+    const grouped: { [sportId: string]: Match[] } = {};
+    
+    filteredUpcomingMatches.forEach(match => {
+      const sportId = match.sportId || match.category || 'unknown';
+      if (!grouped[sportId]) {
+        grouped[sportId] = [];
+      }
+      grouped[sportId].push(match);
+    });
+    
+    // Sort matches within each sport by date (earliest first for upcoming)
+    Object.keys(grouped).forEach(sportId => {
+      grouped[sportId].sort((a, b) => a.date - b.date);
+    });
+    
+    return grouped;
+  }, [filteredUpcomingMatches]);
+
+  // Sort sports by priority
+  const sortedLiveSports = Object.entries(liveMatchesBySport).sort(([sportIdA], [sportIdB]) => {
+    return getSportPriority(sportIdA) - getSportPriority(sportIdB);
+  });
+
+  const sortedUpcomingSports = Object.entries(upcomingMatchesBySport).sort(([sportIdA], [sportIdB]) => {
+    return getSportPriority(sportIdA) - getSportPriority(sportIdB);
   });
 
   return (
     <div className="space-y-8">
-      {/* Sports Sections */}
-      {sortedSports.map(([sportId, matches]) => (
-        <div key={sportId} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">
-              {getSportName(sportId)}
-            </h3>
-            <span className="text-sm text-gray-400">
-              {matches.length} live match{matches.length !== 1 ? 'es' : ''}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 auto-rows-fr">
-            {matches.map((match) => (
-              <div key={`${match.sportId || sportId}-${match.id}`} className="h-full">
-                <MatchCard
-                  match={match}
-                  sportId={match.sportId || sportId}
-                />
+      {/* Live Matches Sections */}
+      {hasLiveMatches && (
+        <>
+          {sortedLiveSports.map(([sportId, matches]) => (
+            <div key={sportId} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  {getSportName(sportId)}
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white animate-pulse">
+                    LIVE
+                  </span>
+                </h3>
+                <span className="text-sm text-gray-400">
+                  {matches.length} live match{matches.length !== 1 ? 'es' : ''}
+                </span>
               </div>
-            ))}
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 auto-rows-fr">
+                {matches.map((match) => (
+                  <div key={`live-${match.sportId || sportId}-${match.id}`} className="h-full">
+                    <MatchCard
+                      match={match}
+                      sportId={match.sportId || sportId}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
+
+      {/* Upcoming Matches Sections */}
+      {hasUpcomingMatches && (
+        <>
+          <div className="border-t border-[#343a4d] pt-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Upcoming Matches</h2>
           </div>
-        </div>
-      ))}
+          {sortedUpcomingSports.map(([sportId, matches]) => (
+            <div key={`upcoming-${sportId}`} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-white">
+                  {getSportName(sportId)}
+                </h3>
+                <span className="text-sm text-gray-400">
+                  {matches.length} upcoming match{matches.length !== 1 ? 'es' : ''}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 auto-rows-fr">
+                {matches.slice(0, 12).map((match) => (
+                  <div key={`upcoming-${match.sportId || sportId}-${match.id}`} className="h-full">
+                    <MatchCard
+                      match={match}
+                      sportId={match.sportId || sportId}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 };
