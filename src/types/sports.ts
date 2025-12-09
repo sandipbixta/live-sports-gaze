@@ -33,6 +33,18 @@ export interface Match {
   sportId?: string;        // Added for compatibility - maps to category
   viewerCount?: number;    // Number of current viewers
   isLive?: boolean;        // Whether the match is currently live
+  tournament?: string;     // Tournament/competition name
+  country?: string;        // Country name
+  countryFlag?: string;    // Country flag URL
+  channels?: MatchChannel[]; // Available broadcast channels
+}
+
+export interface MatchChannel {
+  name: string;
+  code: string;
+  url: string;
+  image?: string;
+  viewers?: number;
 }
 
 export interface Stream {

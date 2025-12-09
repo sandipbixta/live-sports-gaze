@@ -81,6 +81,7 @@ const sportNameMap: Record<string, string> = {
 const transformMatch = (event: any, sportId: string): Match => {
   // Build sources array from channels data
   const sources: Source[] = [];
+  const channels: any[] = [];
   
   if (event.channels && Array.isArray(event.channels)) {
     event.channels.forEach((channel: any, index: number) => {
@@ -89,6 +90,15 @@ const transformMatch = (event: any, sportId: string): Match => {
         id: channel.url || `channel-${index}`,
         name: channel.channel_name || channel.channel_code || `Stream ${index + 1}`,
         image: channel.channel_image || channel.image || undefined
+      });
+      
+      // Also build channels array for display
+      channels.push({
+        name: channel.channel_name || channel.channel_code || 'Stream',
+        code: channel.channel_code || '',
+        url: channel.url || '',
+        image: channel.image || channel.channel_image || undefined,
+        viewers: parseInt(channel.viewers) || 0
       });
     });
   }
@@ -137,7 +147,12 @@ const transformMatch = (event: any, sportId: string): Match => {
     sources,
     sportId: sportNameMap[sportId] || sportId.toLowerCase(),
     isLive: event.status === 'live' || event.status === 'playing',
-    viewerCount: event.channels?.reduce((sum: number, ch: any) => sum + (parseInt(ch.viewers) || 0), 0) || 0
+    viewerCount: event.channels?.reduce((sum: number, ch: any) => sum + (parseInt(ch.viewers) || 0), 0) || 0,
+    // New fields from API
+    tournament: event.tournament || undefined,
+    country: event.country || undefined,
+    countryFlag: event.countryIMG || undefined,
+    channels: channels.length > 0 ? channels : undefined
   };
 };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Clock, Play, Users, Calendar } from 'lucide-react';
+import { Clock, Play, Users, Calendar, Tv, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
@@ -10,6 +10,7 @@ import { teamLogoService } from '../services/teamLogoService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MatchCardProps {
   match: Match;
@@ -319,7 +320,31 @@ const MatchCard: React.FC<MatchCardProps> = ({
         </div>
 
         {/* Info Section - Fixed height */}
-        <div className="p-3 flex flex-col flex-1 min-h-[140px]">
+        <div className="p-3 flex flex-col flex-1 min-h-[160px]">
+          {/* Tournament & Country */}
+          {(match.tournament || match.country) && (
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              {match.countryFlag && (
+                <img 
+                  src={match.countryFlag} 
+                  alt={match.country || 'Country'} 
+                  className="w-4 h-3 object-cover rounded-sm"
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                />
+              )}
+              {match.tournament && (
+                <span className="text-[10px] font-medium text-sports-primary truncate max-w-[140px]">
+                  {match.tournament}
+                </span>
+              )}
+              {match.country && !match.tournament && (
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  {match.country}
+                </span>
+              )}
+            </div>
+          )}
+          
           {/* Title - Fixed 2 lines */}
           <h3 className="font-bold text-foreground text-sm line-clamp-2 h-[2.5rem] mb-2">
             {home && away ? `${home} vs ${away}` : match.title}
@@ -331,6 +356,45 @@ const MatchCard: React.FC<MatchCardProps> = ({
             <span className="w-1 h-1 bg-border rounded-full" />
             <span>{match.date ? formatDateShort(match.date) : 'TBD'}</span>
           </div>
+          
+          {/* Available Channels Preview */}
+          {match.channels && match.channels.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2 overflow-hidden">
+              <Tv className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-1 overflow-hidden">
+                {match.channels.slice(0, 3).map((channel, idx) => (
+                  <Tooltip key={idx}>
+                    <TooltipTrigger asChild>
+                      <div className="flex-shrink-0">
+                        {channel.image ? (
+                          <img 
+                            src={channel.image} 
+                            alt={channel.name}
+                            className="w-5 h-5 rounded object-contain bg-white p-0.5"
+                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center">
+                            <span className="text-[8px] font-bold text-muted-foreground">
+                              {channel.code?.toUpperCase().slice(0, 2)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">
+                      {channel.name}
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+                {match.channels.length > 3 && (
+                  <span className="text-[10px] text-muted-foreground font-medium">
+                    +{match.channels.length - 3}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
           
           {/* Viewer Count - Separate row above button */}
           {isLive && (

@@ -31,6 +31,7 @@ const Live = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<string>("all");
   const [activeSportFilter, setActiveSportFilter] = useState<string>("all");
+  const [activeTournamentFilter, setActiveTournamentFilter] = useState<string>("all");
   const [userSelectedMatch, setUserSelectedMatch] = useState<boolean>(false);
   
   // Custom hooks for data management
@@ -99,6 +100,12 @@ const Live = () => {
       });
       console.log(`🎯 Filtered to ${matchesToFilter.length} matches for sport: ${activeSportFilter}`);
     }
+
+    // Then filter by tournament if not "all"
+    if (activeTournamentFilter !== "all") {
+      matchesToFilter = matchesToFilter.filter(match => match.tournament === activeTournamentFilter);
+      console.log(`🏆 Filtered to ${matchesToFilter.length} matches for tournament: ${activeTournamentFilter}`);
+    }
     
     // Then filter by search query
     if (searchQuery.trim() === '') {
@@ -113,8 +120,8 @@ const Live = () => {
       setFilteredMatches(filtered);
     }
     
-    console.log(`📊 Total filtered matches: ${matchesToFilter.length} (tab: ${activeTab}, sport: ${activeSportFilter})`);
-  }, [searchQuery, activeTab, activeSportFilter, allMatches, liveMatches, upcomingMatches]);
+    console.log(`📊 Total filtered matches: ${matchesToFilter.length} (tab: ${activeTab}, sport: ${activeSportFilter}, tournament: ${activeTournamentFilter})`);
+  }, [searchQuery, activeTab, activeSportFilter, activeTournamentFilter, allMatches, liveMatches, upcomingMatches]);
 
   // Handle search form submit
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -230,6 +237,8 @@ const Live = () => {
         sports={sports}
         activeSportFilter={activeSportFilter}
         onSportFilterChange={setActiveSportFilter}
+        activeTournamentFilter={activeTournamentFilter}
+        onTournamentFilterChange={setActiveTournamentFilter}
       />
       
       {/* Tabs Navigation for All/Live/Upcoming */}
