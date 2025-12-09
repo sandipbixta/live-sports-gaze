@@ -3,6 +3,7 @@ import { Clock, Users } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
 import StreamPlayer from '@/components/StreamPlayer';
+import PreMatchCountdown from '@/components/StreamPlayer/PreMatchCountdown';
 import StreamSources from './StreamSources';
 import MatchCard from '@/components/MatchCard';
 import MatchDetails from '@/components/MatchDetails';
@@ -157,6 +158,16 @@ const StreamTab = ({
     );
   };
 
+  // Check if match hasn't started yet (more than 1 hour away)
+  const isMatchUpcoming = (): boolean => {
+    const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+    const now = Date.now();
+    const oneHourInMs = 60 * 60 * 1000;
+    return matchTime - now > oneHourInMs;
+  };
+
+  const [showCountdown, setShowCountdown] = useState(isMatchUpcoming());
+
   // Fetch viewer count for current active stream
   useEffect(() => {
     const fetchCurrentViewers = async () => {
@@ -192,18 +203,26 @@ const StreamTab = ({
 
   return (
     <div>
-      <StreamPlayer
-        stream={stream}
-        isLoading={loadingStream || isAutoRetrying}
-        onRetry={handleRetry}
-        onAutoFallback={handleAutoFallback}
-        title={match.title}
-        isManualChannel={false}
-        isTvChannel={false}
-        match={match}
-        allStreams={allStreams}
-        showMatchDetails={false}
-      />
+      {/* Show countdown screen for upcoming matches, otherwise show stream player */}
+      {showCountdown ? (
+        <PreMatchCountdown 
+          match={match} 
+          onMatchStart={() => setShowCountdown(false)} 
+        />
+      ) : (
+        <StreamPlayer
+          stream={stream}
+          isLoading={loadingStream || isAutoRetrying}
+          onRetry={handleRetry}
+          onAutoFallback={handleAutoFallback}
+          title={match.title}
+          isManualChannel={false}
+          isTvChannel={false}
+          match={match}
+          allStreams={allStreams}
+          showMatchDetails={false}
+        />
+      )}
       
       <StreamSources
         sources={match.sources}
