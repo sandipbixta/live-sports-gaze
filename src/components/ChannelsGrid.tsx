@@ -150,7 +150,7 @@ const ChannelsGrid = () => {
                 
                 <div className="flex flex-col items-center text-center">
                   {/* Channel Logo */}
-                  <div className="w-14 h-14 rounded-xl mb-2 overflow-hidden flex items-center justify-center bg-gray-100 p-1.5 transition-transform shadow-sm group-hover:scale-105">
+                  <div className="w-14 h-14 rounded-xl mb-2 overflow-hidden flex items-center justify-center bg-sports-primary p-1.5 transition-transform shadow-sm group-hover:scale-105">
                     {channel.logo ? (
                       <>
                         <img
