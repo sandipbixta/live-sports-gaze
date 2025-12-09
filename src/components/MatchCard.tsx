@@ -163,7 +163,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     };
 
     const badgeLayoutHTML = () => `
-      <div class="w-full h-full relative overflow-hidden bg-muted">
+      <div class="w-full h-full relative overflow-hidden bg-black">
         <div class="flex items-center gap-4 z-10 relative h-full justify-center">
           ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
           <span class="text-white font-bold text-lg drop-shadow-sm">VS</span>
@@ -189,7 +189,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
     const defaultImageHTML = () => {
       return `
-        <div class="w-full h-full relative overflow-hidden bg-muted">
+        <div class="w-full h-full relative overflow-hidden bg-black">
           <div class="absolute inset-0 flex items-center justify-center z-10">
             <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
           </div>
@@ -200,7 +200,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
     // Priority 2: Use team badges with plain black background if available
     if (homeBadge || awayBadge) {
       return (
-        <div className="w-full h-full relative overflow-hidden bg-muted">
+        <div className="w-full h-full relative overflow-hidden bg-black">
           
           {/* Teams display with enhanced badges */}
           <div className="flex items-center gap-4 z-10 relative h-full justify-center">
@@ -270,7 +270,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
     // Priority 3: Use plain black background with DAMITV text for matches without logos/badges or posters
     return (
-      <div className="w-full h-full relative overflow-hidden bg-muted">
+      <div className="w-full h-full relative overflow-hidden bg-black">
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
