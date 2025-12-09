@@ -312,7 +312,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {generateThumbnail()}
           
           {/* FREE Badge - Top left */}
-          {hasStream && (
+          {hasStream && !isLive && !isMatchStarting && (
             <div className="absolute top-2 left-2 z-10">
               <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                 FREE
@@ -320,18 +320,23 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
           
-          {/* Countdown Badge - Bottom center (yellow/gold gradient) */}
-          <div className="absolute bottom-0 left-0 right-0 z-10">
-            {isLive || isMatchStarting ? (
-              <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-bold py-1.5 px-3 text-center uppercase tracking-wide">
-                ● LIVE NOW
-              </div>
-            ) : countdown ? (
+          {/* LIVE Badge - Top right */}
+          {(isLive || isMatchStarting) && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
+                ● LIVE
+              </span>
+            </div>
+          )}
+          
+          {/* Countdown Badge - Bottom center (yellow/gold gradient) - Only for upcoming */}
+          {!isLive && !isMatchStarting && countdown && (
+            <div className="absolute bottom-0 left-0 right-0 z-10">
               <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold py-1.5 px-3 text-center uppercase tracking-wide">
                 WATCH IN {countdown.replace('h', 'h :').replace('m', 'm').replace('d', 'd :')}
               </div>
-            ) : null}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Info Section */}
