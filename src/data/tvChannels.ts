@@ -62,11 +62,13 @@ const transformChannel = (apiChannel: any): Channel => {
   const countryCode = apiChannel.code || 'us';
   const countryName = countryCodeMap[countryCode] || countryCode.toUpperCase();
   
-  // Ensure embed URL uses HTTPS
+  // Ensure embed URL uses HTTPS and decode HTML entities
   let embedUrl = apiChannel.url || apiChannel.embedUrl || '';
   if (embedUrl) {
     // Fix protocol to HTTPS
     embedUrl = embedUrl.replace(/^http:\/\//i, 'https://');
+    // Decode HTML entities (API returns &amp; instead of &)
+    embedUrl = embedUrl.replace(/&amp;/g, '&');
   }
   
   return {
