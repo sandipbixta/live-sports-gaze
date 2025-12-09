@@ -128,69 +128,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     return () => clearInterval(interval);
   }, [allMatches]);
 
-  // Filter matches by search term (ended matches already filtered out in data loading)
-  const filteredLiveMatches = React.useMemo(() => {
-    // Only show matches with images on home page
-    let matches = filterMatchesWithImages(liveMatches);
-    
-    // Apply search filter if provided
-    if (searchTerm.trim()) {
-      const lowercaseSearch = searchTerm.toLowerCase();
-      matches = matches.filter(match => {
-        return match.title.toLowerCase().includes(lowercaseSearch) || 
-          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
-      });
-    }
-    
-    return matches;
-  }, [liveMatches, searchTerm]);
-
-  // Filter upcoming matches (not live)
-  const filteredUpcomingMatches = React.useMemo(() => {
-    // Get non-live matches from allMatches
-    let upcoming = allMatches.filter(match => !isMatchLive(match));
-    // Only show matches with images
-    upcoming = filterMatchesWithImages(upcoming);
-    
-    // Apply search filter if provided
-    if (searchTerm.trim()) {
-      const lowercaseSearch = searchTerm.toLowerCase();
-      upcoming = upcoming.filter(match => {
-        return match.title.toLowerCase().includes(lowercaseSearch) || 
-          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
-      });
-    }
-    
-    // Sort by date (earliest first)
-    return upcoming.sort((a, b) => a.date - b.date);
-  }, [allMatches, searchTerm]);
-
-  const hasLiveMatches = filteredLiveMatches.length > 0;
-  const hasUpcomingMatches = filteredUpcomingMatches.length > 0;
-
-  // Show skeleton while data is empty, but don't block - let it render
-  if (liveMatches.length === 0 && allMatches.length === 0) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-          <div key={i} className="h-[280px] bg-[#242836] rounded-xl animate-pulse"></div>
-        ))}
-      </div>
-    );
-  }
-
-  if (!hasLiveMatches && !hasUpcomingMatches) {
-    return (
-      <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
-        <div className="text-4xl mb-4">📺</div>
-        <h3 className="text-xl font-bold text-white mb-2">No Matches Available</h3>
-        <p className="text-gray-400">There are currently no matches available.</p>
-      </div>
-    );
-  }
-
   // Define preferred sport order with tennis at the end (excluded: golf, hockey, billiards)
   const getSportPriority = (sportId: string): number => {
     const sportOrder: { [key: string]: number } = {
@@ -229,6 +166,45 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     const sport = sports.find(s => s.id === sportId);
     return sport?.name || sportId.charAt(0).toUpperCase() + sportId.slice(1);
   };
+
+  // Filter matches by search term (ended matches already filtered out in data loading)
+  const filteredLiveMatches = React.useMemo(() => {
+    // Only show matches with images on home page
+    let matches = filterMatchesWithImages(liveMatches);
+    
+    // Apply search filter if provided
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      matches = matches.filter(match => {
+        return match.title.toLowerCase().includes(lowercaseSearch) || 
+          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+      });
+    }
+    
+    return matches;
+  }, [liveMatches, searchTerm]);
+
+  // Filter upcoming matches (not live)
+  const filteredUpcomingMatches = React.useMemo(() => {
+    // Get non-live matches from allMatches
+    let upcoming = allMatches.filter(match => !isMatchLive(match));
+    // Only show matches with images
+    upcoming = filterMatchesWithImages(upcoming);
+    
+    // Apply search filter if provided
+    if (searchTerm.trim()) {
+      const lowercaseSearch = searchTerm.toLowerCase();
+      upcoming = upcoming.filter(match => {
+        return match.title.toLowerCase().includes(lowercaseSearch) || 
+          match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+          match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+      });
+    }
+    
+    // Sort by date (earliest first)
+    return upcoming.sort((a, b) => a.date - b.date);
+  }, [allMatches, searchTerm]);
 
   // Group live matches by sport
   const liveMatchesBySport = React.useMemo(() => {
@@ -271,13 +247,39 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   }, [filteredUpcomingMatches]);
 
   // Sort sports by priority
-  const sortedLiveSports = Object.entries(liveMatchesBySport).sort(([sportIdA], [sportIdB]) => {
-    return getSportPriority(sportIdA) - getSportPriority(sportIdB);
-  });
+  const sortedLiveSports = React.useMemo(() => 
+    Object.entries(liveMatchesBySport).sort(([sportIdA], [sportIdB]) => {
+      return getSportPriority(sportIdA) - getSportPriority(sportIdB);
+    }), [liveMatchesBySport]);
 
-  const sortedUpcomingSports = Object.entries(upcomingMatchesBySport).sort(([sportIdA], [sportIdB]) => {
-    return getSportPriority(sportIdA) - getSportPriority(sportIdB);
-  });
+  const sortedUpcomingSports = React.useMemo(() => 
+    Object.entries(upcomingMatchesBySport).sort(([sportIdA], [sportIdB]) => {
+      return getSportPriority(sportIdA) - getSportPriority(sportIdB);
+    }), [upcomingMatchesBySport]);
+
+  const hasLiveMatches = filteredLiveMatches.length > 0;
+  const hasUpcomingMatches = filteredUpcomingMatches.length > 0;
+
+  // Show skeleton while data is empty, but don't block - let it render
+  if (liveMatches.length === 0 && allMatches.length === 0) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+          <div key={i} className="h-[280px] bg-[#242836] rounded-xl animate-pulse"></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!hasLiveMatches && !hasUpcomingMatches) {
+    return (
+      <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
+        <div className="text-4xl mb-4">📺</div>
+        <h3 className="text-xl font-bold text-white mb-2">No Matches Available</h3>
+        <p className="text-gray-400">There are currently no matches available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
