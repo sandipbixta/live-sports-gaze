@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
-import { getChannelsByCountry } from '@/data/tvChannels';
+import { getChannelsByCountryAsync, Channel } from '@/data/tvChannels';
 import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { ArrowLeft, Share, Star, ChevronRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,41 +19,46 @@ const ChannelPlayer = () => {
   // Track viewer count for this channel
   useViewerTracking(channelId);
   
-  const [channel, setChannel] = useState<any>(null);
+  const [channel, setChannel] = useState<Channel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [otherChannels, setOtherChannels] = useState<any[]>([]);
+  const [otherChannels, setOtherChannels] = useState<Channel[]>([]);
   const [playerType, setPlayerType] = useState<PlayerType>('simple');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
-    const loadChannel = () => {
+    const loadChannel = async () => {
       if (!country || !channelId) {
         navigate('/channels');
         return;
       }
 
-      const channelsByCountry = getChannelsByCountry();
-      const countryChannels = channelsByCountry[country];
-      
-      if (!countryChannels) {
-        navigate('/channels');
-        return;
-      }
+      try {
+        const channelsByCountry = await getChannelsByCountryAsync();
+        const countryChannels = channelsByCountry[country];
+        
+        if (!countryChannels || countryChannels.length === 0) {
+          navigate('/channels');
+          return;
+        }
 
-      const foundChannel = countryChannels.find(ch => ch.id === channelId);
-      
-      if (!foundChannel) {
-        navigate('/channels');
-        return;
-      }
+        const foundChannel = countryChannels.find(ch => ch.id === channelId);
+        
+        if (!foundChannel) {
+          navigate('/channels');
+          return;
+        }
 
-      setChannel(foundChannel);
-      
-      // Set other channels (excluding current one)
-      const otherChannelsList = countryChannels.filter(ch => ch.id !== channelId);
-      setOtherChannels(otherChannelsList);
-      
-      setIsLoading(false);
+        setChannel(foundChannel);
+        
+        // Set other channels (excluding current one)
+        const otherChannelsList = countryChannels.filter(ch => ch.id !== channelId);
+        setOtherChannels(otherChannelsList);
+      } catch (error) {
+        console.error('Failed to load channel:', error);
+        navigate('/channels');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadChannel();
@@ -250,51 +255,53 @@ const ChannelPlayer = () => {
         </div>
 
         {/* Other Channels Sidebar */}
-        <div className="lg:w-80">
-          <div className="bg-[#151922] rounded-xl border border-[#343a4d] overflow-hidden">
-            <div className="p-4 border-b border-[#343a4d]">
-              <h3 className="font-semibold text-white text-sm">Other Channels</h3>
-              <p className="text-xs text-gray-400 mt-1">Switch to another channel</p>
-            </div>
-            
-            <ScrollArea className="h-[400px]">
-              <div className="p-2">
-                {otherChannels.map(otherChannel => (
-                  <div
-                    key={otherChannel.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#242836] cursor-pointer transition-colors group"
-                    onClick={() => handleChannelSwitch(otherChannel.id)}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {otherChannel.logo ? (
-                        <img 
-                          src={otherChannel.logo} 
-                          alt={otherChannel.title}
-                          className="w-8 h-8 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${otherChannel.logo ? 'hidden' : ''}`}>
-                        {otherChannel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-white truncate group-hover:text-[#ff5a36] transition-colors">
-                        {otherChannel.title}
-                      </h4>
-                    </div>
-                    
-                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-[#ff5a36] transition-colors" />
-                  </div>
-                ))}
+        {otherChannels.length > 0 && (
+          <div className="lg:w-80">
+            <div className="bg-[#151922] rounded-xl border border-[#343a4d] overflow-hidden">
+              <div className="p-4 border-b border-[#343a4d]">
+                <h3 className="font-semibold text-white text-sm">Other Channels</h3>
+                <p className="text-xs text-gray-400 mt-1">Switch to another channel</p>
               </div>
-            </ScrollArea>
+              
+              <ScrollArea className="h-[400px]">
+                <div className="p-2">
+                  {otherChannels.map(otherChannel => (
+                    <div
+                      key={otherChannel.id}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#242836] cursor-pointer transition-colors group"
+                      onClick={() => handleChannelSwitch(otherChannel.id)}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-[#343a4d] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {otherChannel.logo ? (
+                          <img 
+                            src={otherChannel.logo} 
+                            alt={otherChannel.title}
+                            className="w-8 h-8 object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-white ${otherChannel.logo ? 'hidden' : ''}`}>
+                          {otherChannel.title.split(' ').map((word: string) => word.charAt(0).toUpperCase()).slice(0, 2).join('')}
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium text-white truncate group-hover:text-[#ff5a36] transition-colors">
+                          {otherChannel.title}
+                        </h4>
+                      </div>
+                      
+                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-[#ff5a36] transition-colors" />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
     </div>
