@@ -62,12 +62,23 @@ const transformChannel = (apiChannel: any): Channel => {
   const countryCode = apiChannel.code || 'us';
   const countryName = countryCodeMap[countryCode] || countryCode.toUpperCase();
   
+  // Ensure embed URL uses HTTPS and correct domain
+  let embedUrl = apiChannel.url || apiChannel.embedUrl || '';
+  if (embedUrl) {
+    // Fix protocol
+    embedUrl = embedUrl.replace(/^http:\/\//i, 'https://');
+    // Ensure it uses the right domain format for embedding
+    if (embedUrl.includes('cdn-live.tv') && !embedUrl.includes('api.cdn-live.tv')) {
+      embedUrl = embedUrl.replace('cdn-live.tv', 'api.cdn-live.tv');
+    }
+  }
+  
   return {
     id: apiChannel.name?.toLowerCase().replace(/\s+/g, '-') || String(apiChannel.id || ''),
     title: apiChannel.name || apiChannel.title || '',
     country: countryName,
     countryCode: countryCode,
-    embedUrl: apiChannel.url || apiChannel.embedUrl || '',
+    embedUrl: embedUrl,
     category: 'sports' as const,
     logo: apiChannel.image || apiChannel.logo || undefined,
     viewers: apiChannel.viewers || 0
