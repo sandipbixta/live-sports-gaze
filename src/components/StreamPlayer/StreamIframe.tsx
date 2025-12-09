@@ -1,15 +1,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/use-mobile';
+import { Match } from '../../types/sports';
+import { ManualMatch } from '../../types/manualMatch';
 
 interface StreamIframeProps {
   src: string;
   onLoad: () => void;
   onError: () => void;
   videoRef: React.RefObject<HTMLIFrameElement>;
+  match?: Match | ManualMatch | null;
 }
 
-const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, videoRef }) => {
+const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, videoRef, match }) => {
   const isMobile = useIsMobile();
   const [loaded, setLoaded] = useState(false);
   const [hadError, setHadError] = useState(false);
@@ -93,6 +96,35 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
           >
             Open stream in new tab
           </a>
+        </div>
+      )}
+
+      {/* Match Title with Team Logos - Bottom of Player */}
+      {match && 'teams' in match && match.teams && (
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-40">
+          <div className="bg-black/80 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2 border border-white/10">
+            {/* Home team logo - only for Match type with Team objects */}
+            {typeof match.teams.home === 'object' && match.teams.home?.badge && (
+              <img 
+                src={match.teams.home.badge} 
+                alt={match.teams.home.name || 'Home'} 
+                className="w-5 h-5 object-contain"
+                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+              />
+            )}
+            <span className="text-white text-xs font-medium max-w-[200px] truncate">
+              {match.title}
+            </span>
+            {/* Away team logo - only for Match type with Team objects */}
+            {typeof match.teams.away === 'object' && match.teams.away?.badge && (
+              <img 
+                src={match.teams.away.badge} 
+                alt={match.teams.away.name || 'Away'} 
+                className="w-5 h-5 object-contain"
+                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+              />
+            )}
+          </div>
         </div>
       )}
     </div>
