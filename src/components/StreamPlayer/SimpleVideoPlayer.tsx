@@ -394,28 +394,28 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
     // Show countdown timer if match hasn't started yet
     if (!stream && countdown && match) {
       return (
-        <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gradient-to-br from-gray-900 to-black rounded-2xl flex items-center justify-center relative overflow-hidden`}>
+        <div className={`w-full ${isTheaterMode ? 'max-w-none' : 'max-w-5xl'} mx-auto aspect-video bg-gradient-to-br from-gray-900 to-black rounded-lg sm:rounded-2xl flex items-center justify-center relative overflow-hidden`}>
           {/* Background decoration */}
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+            <div className="absolute top-4 left-4 sm:top-10 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-primary rounded-full blur-2xl sm:blur-3xl" />
+            <div className="absolute bottom-4 right-4 sm:bottom-10 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-purple-500 rounded-full blur-2xl sm:blur-3xl" />
           </div>
           
-          <div className="text-center text-white p-6 z-10">
-            <Clock className="w-20 h-20 mx-auto mb-6 text-primary animate-pulse" />
-            <h3 className="text-2xl font-bold mb-3">Match Starting Soon</h3>
-            <p className="text-gray-400 mb-6">Stream will be available when the match begins</p>
+          <div className="text-center text-white p-3 sm:p-6 z-10 max-w-full">
+            <Clock className="w-10 h-10 sm:w-16 md:w-20 sm:h-16 md:h-20 mx-auto mb-3 sm:mb-6 text-primary animate-pulse" />
+            <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3">Match Starting Soon</h3>
+            <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-6 px-2">Stream will be available when the match begins</p>
             
             {/* Countdown Display */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-4 inline-block">
-              <div className="text-5xl font-black text-white mb-2 font-mono tracking-wider">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-2 sm:mb-4 inline-block">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 font-mono tracking-wider">
                 {countdown}
               </div>
-              <div className="text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+              <div className="text-[10px] sm:text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
             </div>
             
             {match.title && (
-              <p className="text-lg text-white/80 mt-4 font-semibold">
+              <p className="text-xs sm:text-base md:text-lg text-white/80 mt-2 sm:mt-4 font-semibold px-2 line-clamp-2">
                 {match.title}
               </p>
             )}
@@ -471,25 +471,25 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
           {/* Background decoration */}
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+            <div className="absolute top-4 left-4 sm:top-10 sm:left-10 w-16 h-16 sm:w-32 sm:h-32 bg-primary rounded-full blur-2xl sm:blur-3xl" />
+            <div className="absolute bottom-4 right-4 sm:bottom-10 sm:right-10 w-16 h-16 sm:w-32 sm:h-32 bg-purple-500 rounded-full blur-2xl sm:blur-3xl" />
           </div>
           
-          <div className="text-center text-white p-6 z-10">
-            <Clock className="w-20 h-20 mx-auto mb-6 text-primary animate-pulse" />
-            <h3 className="text-2xl font-bold mb-3">Match Starting Soon</h3>
-            <p className="text-gray-400 mb-6">Stream will be available when the match begins</p>
+          <div className="text-center text-white p-3 sm:p-6 z-10 max-w-full">
+            <Clock className="w-10 h-10 sm:w-16 md:w-20 sm:h-16 md:h-20 mx-auto mb-3 sm:mb-6 text-primary animate-pulse" />
+            <h3 className="text-base sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3">Match Starting Soon</h3>
+            <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-6 px-2">Stream will be available when the match begins</p>
             
             {/* Countdown Display */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-4 inline-block">
-              <div className="text-5xl font-black text-white mb-2 font-mono tracking-wider">
+            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-2 sm:mb-4 inline-block">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-black text-white mb-1 sm:mb-2 font-mono tracking-wider">
                 {countdown}
               </div>
-              <div className="text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+              <div className="text-[10px] sm:text-sm text-gray-400 uppercase tracking-widest">Until Kickoff</div>
             </div>
             
             {match.title && (
-              <p className="text-lg text-white/80 mt-4 font-semibold">
+              <p className="text-xs sm:text-base md:text-lg text-white/80 mt-2 sm:mt-4 font-semibold px-2 line-clamp-2">
                 {match.title}
               </p>
             )}
