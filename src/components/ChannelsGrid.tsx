@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
 import { getChannelsByCountryAsync, Channel } from '@/data/tvChannels';
-import { Users, Tv, X, Maximize2, ExternalLink } from 'lucide-react';
+import { Users, Tv, X, Maximize2, Settings, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -18,6 +21,8 @@ const ChannelsGrid = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
+  const [playerType, setPlayerType] = useState<PlayerType>('simple');
+  const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   // Fetch channels on mount
   useEffect(() => {
@@ -53,6 +58,20 @@ const ChannelsGrid = () => {
       navigate(`/channel/${activeChannel.countryCode}/${activeChannel.id}`);
     }
   };
+
+  const handleRetry = () => {
+    if (!activeChannel) return;
+    const temp = activeChannel;
+    setActiveChannel(null);
+    setTimeout(() => setActiveChannel(temp), 100);
+  };
+
+  // Get other channels from same country for sidebar
+  const otherChannels = useMemo(() => {
+    if (!activeChannel) return [];
+    const countryChannels = channelsByCountry[activeChannel.country || selectedCountry] || [];
+    return countryChannels.filter(ch => ch.id !== activeChannel.id).slice(0, 15);
+  }, [activeChannel, channelsByCountry, selectedCountry]);
 
   const handleSelectCountry = (country: string) => {
     setSelectedCountry(country);
@@ -117,7 +136,7 @@ const ChannelsGrid = () => {
         </span>
       </div>
 
-      {/* Inline Player */}
+      {/* Inline Player with ChannelPlayerSelector */}
       {activeChannel && (
         <div className="bg-card rounded-xl border border-border overflow-hidden">
           {/* Player Header */}
@@ -134,11 +153,18 @@ const ChannelsGrid = () => {
                 <h3 className="font-semibold text-foreground text-sm">{activeChannel.title}</h3>
                 <p className="text-xs text-muted-foreground">{activeChannel.country}</p>
               </div>
-              <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded animate-pulse">
-                ● LIVE
-              </span>
+              <Badge className="bg-red-500 text-white text-[10px]">● LIVE</Badge>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPlayerSettings(!showPlayerSettings)}
+                className="text-muted-foreground hover:text-foreground"
+                title="Player settings"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -159,33 +185,95 @@ const ChannelsGrid = () => {
               </Button>
             </div>
           </div>
-          
-          {/* Video Player */}
-          <div className="relative w-full aspect-video bg-black">
-            <iframe
-              src={activeChannel.embedUrl}
-              className="absolute inset-0 w-full h-full"
-              allowFullScreen
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              referrerPolicy="no-referrer"
-              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups"
-            />
-          </div>
-          
-          {/* Quick Actions */}
-          <div className="p-3 bg-muted/30 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              Click another channel to switch or close to browse
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleOpenFullscreen}
-              className="text-xs"
-            >
-              <ExternalLink className="w-3 h-3 mr-1" />
-              Full Page
-            </Button>
+
+          {/* Player Settings Panel */}
+          {showPlayerSettings && (
+            <div className="p-3 bg-muted/30 border-b border-border">
+              <h4 className="text-foreground font-semibold text-sm mb-2">Video Player Settings</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                {[
+                  { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best option' },
+                  { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Provider controls' },
+                  { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls' },
+                  { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple fallback' },
+                  { type: 'extracted' as PlayerType, name: 'Stream Extractor', desc: 'Advanced' },
+                  { type: 'html5' as PlayerType, name: 'HTML5 Player', desc: 'Direct streams' }
+                ].map((player) => (
+                  <button
+                    key={player.type}
+                    onClick={() => setPlayerType(player.type)}
+                    className={`p-2 rounded-lg border text-left transition-all ${
+                      playerType === player.type
+                        ? 'bg-sports-primary border-sports-primary text-white'
+                        : 'bg-muted border-border text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <div className="font-medium text-xs">{player.name}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">{player.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Main Player Area */}
+          <div className="flex flex-col lg:flex-row">
+            {/* Video Player */}
+            <div className="flex-1">
+              <ChannelPlayerSelector
+                stream={{
+                  id: activeChannel.id,
+                  streamNo: 1,
+                  language: 'English',
+                  hd: true,
+                  embedUrl: activeChannel.embedUrl,
+                  source: 'TV Channel'
+                }}
+                isLoading={false}
+                onRetry={handleRetry}
+                playerType={playerType}
+                title={activeChannel.title}
+              />
+            </div>
+
+            {/* Other Channels Sidebar */}
+            {otherChannels.length > 0 && (
+              <div className="lg:w-64 border-t lg:border-t-0 lg:border-l border-border">
+                <div className="p-3 border-b border-border bg-muted/30">
+                  <h4 className="font-semibold text-foreground text-sm">Other Channels</h4>
+                  <p className="text-[10px] text-muted-foreground">Click to switch</p>
+                </div>
+                <ScrollArea className="h-48 lg:h-[300px]">
+                  <div className="p-2">
+                    {otherChannels.map(otherChannel => (
+                      <div
+                        key={otherChannel.id}
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent cursor-pointer transition-colors group"
+                        onClick={() => handleSelectChannel(otherChannel)}
+                      >
+                        <div className="w-8 h-8 rounded bg-white flex items-center justify-center overflow-hidden flex-shrink-0 p-0.5">
+                          {otherChannel.logo ? (
+                            <img 
+                              src={otherChannel.logo} 
+                              alt={otherChannel.title}
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <Tv className="w-4 h-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h5 className="text-xs font-medium text-foreground truncate group-hover:text-sports-primary transition-colors">
+                            {otherChannel.title}
+                          </h5>
+                        </div>
+                        <ChevronRight className="h-3 w-3 text-muted-foreground group-hover:text-sports-primary transition-colors" />
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
           </div>
         </div>
       )}
