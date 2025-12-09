@@ -10,6 +10,7 @@ import { ViewerCount } from './ViewerCount';
 import { Clock, Calendar, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
+import { teamLogoService } from '@/services/teamLogoService';
 
 const POSTER_BASE_URL = 'https://api.cdn-live.tv';
 
@@ -40,6 +41,18 @@ export const HeroCarousel = () => {
     if (!posterPath) return '';
     if (posterPath.startsWith('http')) return posterPath;
     return `${POSTER_BASE_URL}${posterPath}`;
+  };
+
+  // Get team badge URL
+  const getTeamBadge = (team: any) => {
+    if (!team) return '';
+    if (team.badge) {
+      return team.badge.startsWith('http') ? team.badge : `https://api.cdn-live.tv/api/v1/team/images/${team.badge}`;
+    }
+    if (team.logo) {
+      return team.logo.startsWith('http') ? team.logo : `https://api.cdn-live.tv/api/v1/team/images/${team.logo}`;
+    }
+    return teamLogoService.getTeamLogo(team?.name || '', team?.badge) || '';
   };
   
   // Fetch ELITE matches only (La Liga, Premier League, Champions League, UFC, WWE, top teams)
@@ -111,6 +124,9 @@ export const HeroCarousel = () => {
         {allSlides.map((slide) => {
           const isCover = (slide as any).isCover;
           const posterUrl = isCover ? slide.poster : getAbsolutePosterUrl(slide.poster || '');
+          const homeBadge = !isCover ? getTeamBadge(slide.teams?.home) : '';
+          const awayBadge = !isCover ? getTeamBadge(slide.teams?.away) : '';
+          const hasPoster = posterUrl && posterUrl.trim() !== '';
           
           return isCover ? (
             // Cover photo slide - not clickable
@@ -144,10 +160,23 @@ export const HeroCarousel = () => {
               className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
             >
               <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] flex items-center overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${posterUrl})` }}
-                />
+                {/* Background: poster or team badges fallback */}
+                {hasPoster ? (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${posterUrl})` }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-black flex items-center justify-center gap-8">
+                    {homeBadge && (
+                      <img src={homeBadge} alt="" className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain opacity-80" />
+                    )}
+                    <span className="text-white/60 font-bold text-2xl sm:text-3xl">VS</span>
+                    {awayBadge && (
+                      <img src={awayBadge} alt="" className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain opacity-80" />
+                    )}
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
                 <div className="relative z-10 p-3 sm:p-5 md:p-8 max-w-xl">
                   <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3">
