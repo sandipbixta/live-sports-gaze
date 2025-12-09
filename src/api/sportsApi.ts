@@ -1,7 +1,7 @@
 
-import { Sport, Match, Stream } from '../types/sports';
+import { Sport, Match, Stream, Source } from '../types/sports';
 
-const API_BASE = 'https://streamed.pk/api';
+const API_BASE = 'https://api.cdn-live.tv/api/v1/vip/damitv';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -10,7 +10,6 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 // Helper function to clear cache (used for refresh)
 export const clearStreamCache = (matchId?: string) => {
   if (matchId) {
-    // Clear only caches related to this match
     const keysToDelete: string[] = [];
     cache.forEach((_, key) => {
       if (key.includes(matchId) || key.includes('stream')) {
@@ -20,7 +19,6 @@ export const clearStreamCache = (matchId?: string) => {
     keysToDelete.forEach(key => cache.delete(key));
     console.log(`🗑️ Cleared ${keysToDelete.length} cache entries for match: ${matchId}`);
   } else {
-    // Clear all stream-related caches
     const keysToDelete: string[] = [];
     cache.forEach((_, key) => {
       if (key.includes('stream')) {
@@ -46,23 +44,61 @@ const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
-// Helper function to filter and reorder sports list
-const filterAndReorderSports = (sports: Sport[]): Sport[] => {
-  // Filter out unwanted sports: golf, hockey, billiards, darts
-  const excludedSports = ['golf', 'hockey', 'billiards', 'darts'];
-  const filteredSports = sports.filter(sport => 
-    !excludedSports.includes(sport.id.toLowerCase())
-  );
+// Map sport IDs to API endpoints
+const sportEndpointMap: Record<string, string> = {
+  'football': 'football',
+  'soccer': 'football',
+  'basketball': 'nba',
+  'nba': 'nba',
+  'american-football': 'nfl',
+  'nfl': 'nfl',
+  'hockey': 'nhl',
+  'nhl': 'nhl',
+  'all': 'sports'
+};
+
+// Transform API response to Match format
+const transformMatch = (event: any, sportId: string): Match => {
+  // Build sources array from stream data
+  const sources: Source[] = [];
   
-  // Move tennis to the end
-  const tennisIndex = filteredSports.findIndex(sport => sport.id === 'tennis');
-  if (tennisIndex === -1) return filteredSports; // Tennis not found, return as is
+  if (event.streams && Array.isArray(event.streams)) {
+    event.streams.forEach((stream: any, index: number) => {
+      sources.push({
+        source: stream.source || 'default',
+        id: stream.id || `stream-${index}`
+      });
+    });
+  }
   
-  const sportsWithoutTennis = filteredSports.filter(sport => sport.id !== 'tennis');
-  const tennisSport = filteredSports[tennisIndex];
-  
-  // Add tennis at the end
-  return [...sportsWithoutTennis, tennisSport];
+  // If no streams, create a default source from the event ID
+  if (sources.length === 0 && event.id) {
+    sources.push({
+      source: 'default',
+      id: String(event.id)
+    });
+  }
+
+  return {
+    id: String(event.id || event._id || ''),
+    title: event.title || event.name || '',
+    category: event.category || event.sport || sportId,
+    date: event.date ? new Date(event.date).getTime() : (event.timestamp || Date.now()),
+    poster: event.poster || event.image || event.thumbnail || undefined,
+    popular: event.popular || event.featured || false,
+    teams: event.teams ? {
+      home: event.teams.home ? {
+        name: event.teams.home.name || event.teams.home,
+        badge: event.teams.home.badge || event.teams.home.logo
+      } : undefined,
+      away: event.teams.away ? {
+        name: event.teams.away.name || event.teams.away,
+        badge: event.teams.away.badge || event.teams.away.logo
+      } : undefined
+    } : undefined,
+    sources,
+    sportId: event.category || event.sport || sportId
+  };
 };
 
 export const fetchSports = async (): Promise<Sport[]> => {
@@ -70,18 +106,38 @@ export const fetchSports = async (): Promise<Sport[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Detect mobile and adjust timeout
+  // Return static sports list since the new API uses specific endpoints per sport
+  const sports: Sport[] = [
+    { id: 'football', name: 'Football' },
+    { id: 'basketball', name: 'Basketball' },
+    { id: 'american-football', name: 'American Football' },
+    { id: 'hockey', name: 'Hockey' }
+  ];
+
+  setCachedData(cacheKey, sports);
+  console.log(`✅ Loaded ${sports.length} sports`);
+  return sports;
+};
+
+export const fetchMatches = async (sportId: string): Promise<Match[]> => {
+  const cacheKey = `matches-${sportId}`;
+  const cached = getCachedData(cacheKey);
+  if (cached) return cached;
+
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 15000 : 10000; // Longer timeout for mobile
+  const timeout = isMobile ? 20000 : 15000;
+
+  // Map sportId to API endpoint
+  const endpoint = sportEndpointMap[sportId.toLowerCase()] || 'sports';
 
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
-    const response = await fetch(`${API_BASE}/sports`, {
+    const response = await fetch(`${API_BASE}/events/${endpoint}/`, {
       signal: controller.signal,
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
     
@@ -90,205 +146,33 @@ export const fetchSports = async (): Promise<Sport[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    if (!Array.isArray(data)) {
-      throw new Error('Invalid sports data format');
+    // Handle different response formats
+    let events: any[] = [];
+    if (Array.isArray(data)) {
+      events = data;
+    } else if (data.events && Array.isArray(data.events)) {
+      events = data.events;
+    } else if (data.data && Array.isArray(data.data)) {
+      events = data.data;
+    } else if (data.matches && Array.isArray(data.matches)) {
+      events = data.matches;
     }
     
-    // Filter and reorder sports
-    const reorderedData = filterAndReorderSports(data);
-    setCachedData(cacheKey, reorderedData);
-    console.log(`✅ Fetched ${reorderedData.length} sports from streamed.pk API`);
-    return reorderedData;
-  } catch (error) {
-    console.error('❌ Error fetching sports from streamed.pk:', error);
-    
-    // On mobile, try one more time with a simpler request
-    if (isMobile && !error.message.includes('retry')) {
-      console.log('🔄 Retrying with mobile-optimized request...');
-      try {
-        const retryResponse = await fetch(`${API_BASE}/sports`, {
-          method: 'GET',
-          cache: 'no-cache'
-        });
-        
-        if (retryResponse.ok) {
-          const retryData = await retryResponse.json();
-          if (Array.isArray(retryData)) {
-            const reorderedRetryData = filterAndReorderSports(retryData);
-            setCachedData(cacheKey, reorderedRetryData);
-            console.log(`✅ Mobile retry successful: ${reorderedRetryData.length} sports`);
-            return reorderedRetryData;
-          }
-        }
-      } catch (retryError) {
-        console.error('❌ Mobile retry failed:', retryError);
-      }
-    }
-    
-    throw error;
-  }
-};
-
-export const fetchMatches = async (sportId: string): Promise<Match[]> => {
-  const cacheKey = `matches-${sportId}`;
-  const cached = getCachedData(cacheKey);
-  if (cached) return cached;
-
-  // Detect mobile and adjust timeout
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  const timeout = isMobile ? 20000 : 15000; // Even longer timeout for mobile matches
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    const response = await fetch(`${API_BASE}/matches/${sportId}`, {
-      signal: controller.signal,
-      headers: {
-'Accept': 'application/json'
-      }
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const matches = await response.json();
-    
-    if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
-    }
-    
-    // Simple transform - no filtering
-    const validMatches = matches.filter(match => 
-      match && 
-      match.id && 
-      match.title && 
-      match.date &&
-      Array.isArray(match.sources)
-    ).map(match => ({
-      ...match,
-      sportId: match.category || sportId,
-      category: match.category || sportId
-    }));
+    const validMatches = events
+      .filter((event: any) => event && (event.id || event._id) && (event.title || event.name))
+      .map((event: any) => transformMatch(event, sportId));
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} (filtered from ${matches.length} total matches)`);
+    console.log(`✅ Fetched ${validMatches.length} matches for sport ${sportId} from cdn-live.tv API`);
     return validMatches;
   } catch (error) {
-    console.error(`❌ Error fetching matches for sport ${sportId} from streamed.pk:`, error);
-    
-    // On mobile, try one more time with a simpler request
-    if (isMobile && !error.message.includes('retry')) {
-      console.log(`🔄 Mobile retry for matches ${sportId}...`);
-      try {
-        const retryResponse = await fetch(`${API_BASE}/matches/${sportId}`, {
-          method: 'GET',
-          cache: 'no-cache',
-          headers: {
-            'Accept': 'application/json',
-          }
-        });
-        
-        if (retryResponse.ok) {
-          const retryData = await retryResponse.json();
-          if (Array.isArray(retryData)) {
-            const validMatches = retryData.filter(match => 
-              match && 
-              match.id && 
-              match.title && 
-              match.date &&
-              Array.isArray(match.sources)
-            ).map(match => ({
-              ...match,
-              sportId: match.category || sportId,
-              category: match.category || sportId
-            }))
-            // Apply same filtering logic for mobile retry
-            .filter(match => {
-              const matchCategory = (match.category || match.sportId || '').toLowerCase();
-              const requestedSport = sportId.toLowerCase();
-              
-              // If requesting 'all', include everything
-              if (requestedSport === 'all') {
-                return true;
-              }
-              
-              // Exact match first
-              if (matchCategory === requestedSport) {
-                return true;
-              }
-              
-              // Excluded: golf, hockey, billiards
-              const sportMapping: { [key: string]: string[] } = {
-                'football': ['football', 'soccer'],
-                'basketball': ['basketball', 'basket'],
-                'tennis': ['tennis'],
-                'baseball': ['baseball'],
-                'american-football': ['american-football', 'nfl', 'american football'],
-                'motor-sports': ['motor-sports', 'motorsports', 'racing', 'motogp', 'f1', 'formula'],
-                'fight': ['fight', 'boxing', 'mma', 'ufc', 'martial'],
-                'rugby': ['rugby'],
-                'cricket': ['cricket'],
-                'afl': ['afl', 'australian football'],
-                'other': ['other']
-              };
-              
-              const allowedCategories = sportMapping[requestedSport] || [requestedSport];
-              
-              // Check if the match category contains any of the allowed terms
-              return allowedCategories.some(cat => {
-                const categoryLower = cat.toLowerCase();
-                return matchCategory.includes(categoryLower) || categoryLower.includes(matchCategory);
-              });
-            });
-            setCachedData(cacheKey, validMatches);
-            console.log(`✅ Mobile retry successful: ${validMatches.length} matches for ${sportId} (filtered from ${retryData.length} total)`);
-            return validMatches;
-          }
-        }
-      } catch (retryError) {
-        console.error(`❌ Mobile retry failed for ${sportId}:`, retryError);
-      }
-    }
-    
+    console.error(`❌ Error fetching matches for sport ${sportId}:`, error);
     throw error;
   }
 };
 
-// New functions to support different match endpoints
 export const fetchLiveMatches = async (): Promise<Match[]> => {
-  const cacheKey = 'matches-live';
-  const cached = getCachedData(cacheKey);
-  if (cached) return cached;
-
-  try {
-    const response = await fetch(`${API_BASE}/matches/live`, {
-      headers: {
-'Accept': 'application/json'
-      }
-    });
-    
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const matches = await response.json();
-    
-    if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
-    }
-    
-    const validMatches = matches.filter(match => 
-      match && match.id && match.title && match.date && Array.isArray(match.sources)
-    ).map(match => ({
-      ...match,
-      sportId: match.category
-    }));
-    
-    setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} live matches from streamed.pk API`);
-    return validMatches;
-  } catch (error) {
-    console.error('❌ Error fetching live matches from streamed.pk:', error);
-    throw error;
-  }
+  return fetchAllMatches();
 };
 
 export const fetchAllMatches = async (): Promise<Match[]> => {
@@ -297,31 +181,36 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
   if (cached) return cached;
 
   try {
-    const response = await fetch(`${API_BASE}/matches/all`, {
+    const response = await fetch(`${API_BASE}/events/sports/`, {
       headers: {
-'Accept': 'application/json'
+        'Accept': 'application/json'
       }
     });
     
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const matches = await response.json();
+    const data = await response.json();
     
-    if (!Array.isArray(matches)) {
-      throw new Error('Invalid matches data format');
+    // Handle different response formats
+    let events: any[] = [];
+    if (Array.isArray(data)) {
+      events = data;
+    } else if (data.events && Array.isArray(data.events)) {
+      events = data.events;
+    } else if (data.data && Array.isArray(data.data)) {
+      events = data.data;
+    } else if (data.matches && Array.isArray(data.matches)) {
+      events = data.matches;
     }
     
-    const validMatches = matches.filter(match => 
-      match && match.id && match.title && match.date && Array.isArray(match.sources)
-    ).map(match => ({
-      ...match,
-      sportId: match.category
-    }));
+    const validMatches = events
+      .filter((event: any) => event && (event.id || event._id) && (event.title || event.name))
+      .map((event: any) => transformMatch(event, 'all'));
     
     setCachedData(cacheKey, validMatches);
-    console.log(`✅ Fetched ${validMatches.length} matches from streamed.pk API`);
+    console.log(`✅ Fetched ${validMatches.length} matches from cdn-live.tv API`);
     return validMatches;
   } catch (error) {
-    console.error('❌ Error fetching all matches from streamed.pk:', error);
+    console.error('❌ Error fetching all matches:', error);
     throw error;
   }
 };
@@ -343,9 +232,9 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
       }
     }
 
-    // If not in cache, fetch all matches for this sport and find the specific match
-    const matches = await fetchMatches(sportId);
-    const match = matches.find(m => m.id === matchId);
+    // If not in cache, fetch all matches and find the specific match
+    const allMatches = await fetchAllMatches();
+    const match = allMatches.find(m => m.id === matchId);
     
     if (!match) {
       throw new Error(`Match ${matchId} not found`);
@@ -360,286 +249,143 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
   }
 };
 
-// Simple direct stream fetching like the HTML example
+// Fetch streams for a specific event
 export const fetchSimpleStream = async (source: string, id: string): Promise<Stream[]> => {
   const cacheKey = `simple-stream-${source}-${id}`;
   
   try {
-    // Check cache first
     const cached = getCachedData(cacheKey);
     if (cached) return cached;
 
     console.log(`🎬 Fetching streams for ${source}/${id}`);
     
-    // Direct API call like the HTML example
-    const response = await fetch(`${API_BASE}/stream/${source}/${id}`, {
-      headers: {
-        'Accept': 'application/json',
-      },
-      signal: AbortSignal.timeout(15000)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Stream API error: ${response.status}`);
-    }
-
-    const streams = await response.json();
+    // Try to get match data which should contain stream URLs
+    const allMatches = await fetchAllMatches();
+    const match = allMatches.find(m => m.id === id || m.sources?.some(s => s.id === id));
     
-    if (!Array.isArray(streams)) {
-      console.warn('Invalid stream response format');
-      return [];
+    if (match && match.sources && match.sources.length > 0) {
+      const streams: Stream[] = match.sources.map((src, index) => ({
+        id: src.id,
+        streamNo: index + 1,
+        language: 'EN',
+        hd: true,
+        embedUrl: `${API_BASE}/stream/${src.id}`,
+        source: src.source,
+        timestamp: Date.now()
+      }));
+      
+      setCachedData(cacheKey, streams);
+      console.log(`✅ Found ${streams.length} streams for ${id}`);
+      return streams;
     }
 
-    // Process streams - no filtering
-    const validStreams: Stream[] = streams
-      .map((stream: any, index: number) => ({
-        id: stream.id || `stream-${index}`,
-        streamNo: stream.streamNo || index + 1,
-        language: stream.language || 'EN',
-        hd: stream.hd || false,
-        embedUrl: stream.embedUrl || stream.url,
-        source: source,
-        timestamp: Date.now()
-      }))
-      .filter(stream => stream.embedUrl); // Only check if URL exists
-
-    // Cache the results
-    setCachedData(cacheKey, validStreams);
-
-    console.log(`✅ Found ${validStreams.length} valid streams`);
-    return validStreams;
-
+    return [];
   } catch (error) {
     console.error(`❌ Error fetching streams for ${source}/${id}:`, error);
     return [];
   }
 };
 
-// Simple function to fetch all streams for a match (like HTML example)
 export const fetchAllMatchStreams = async (match: Match): Promise<{
   streams: Stream[];
   sourcesChecked: number;
   sourcesWithStreams: number;
   sourceNames: string[];
 }> => {
-  // All possible sources according to API documentation
-  const allPossibleSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
-  
   const allStreams: Stream[] = [];
   const sourcesWithStreams = new Set<string>();
   
-  // First, try the sources explicitly listed in match data
-  const listedSources = match.sources || [];
-  console.log(`🔍 Match has ${listedSources.length} listed sources:`, listedSources.map(s => s.source));
-  
-  // Build a list of source combinations to try
-  const sourcesToTry = new Set<string>();
-  
-  // Add listed sources
-  listedSources.forEach(source => {
-    sourcesToTry.add(`${source.source}:${source.id}`);
-  });
-  
-  // Also try all possible sources with the match ID
-  allPossibleSources.forEach(source => {
-    sourcesToTry.add(`${source}:${match.id}`);
-  });
-  
-  console.log(`🔍 Trying ${sourcesToTry.size} source combinations for match: ${match.title}`);
-
-  // Fetch streams from all sources concurrently
-  const streamPromises = Array.from(sourcesToTry).map(async (sourceCombo) => {
-    const [source, id] = sourceCombo.split(':');
-    try {
-      const streams = await fetchSimpleStream(source, id);
-      if (streams.length > 0) {
-        console.log(`✅ Found ${streams.length} streams from ${source}/${id}`);
-        sourcesWithStreams.add(source);
-        return streams;
-      }
-      return [];
-    } catch (error) {
-      // Silently ignore errors for sources that don't exist
-      return [];
-    }
-  });
-
-  const streamResults = await Promise.all(streamPromises);
-  
-  // Flatten and combine all streams, removing duplicates
-  const seenStreams = new Set<string>();
-  streamResults.forEach(streams => {
-    streams.forEach(stream => {
-      const streamKey = `${stream.source}-${stream.id}-${stream.streamNo}`;
-      if (!seenStreams.has(streamKey)) {
-        seenStreams.add(streamKey);
-        allStreams.push(stream);
-      }
+  if (match.sources && match.sources.length > 0) {
+    match.sources.forEach((source, index) => {
+      const stream: Stream = {
+        id: source.id,
+        streamNo: index + 1,
+        language: 'EN',
+        hd: true,
+        embedUrl: `${API_BASE}/stream/${source.id}`,
+        source: source.source,
+        timestamp: Date.now()
+      };
+      allStreams.push(stream);
+      sourcesWithStreams.add(source.source);
     });
-  });
+  }
 
   const sourceNames = Array.from(sourcesWithStreams);
-  console.log(`🎬 Total unique streams found: ${allStreams.length} from ${sourceNames.length} sources (${sourceNames.join(', ')})`);
+  console.log(`🎬 Total streams found: ${allStreams.length} from ${sourceNames.length} sources`);
   
   return {
     streams: allStreams,
-    sourcesChecked: allPossibleSources.length,
+    sourcesChecked: match.sources?.length || 0,
     sourcesWithStreams: sourceNames.length,
     sourceNames
   };
 };
 
-// Legacy complex stream function (replaced by simpler approach above)
-// Keeping for backward compatibility, but not used anymore
-export const fetchStream_legacy = async (source: string, id: string, streamNo?: number): Promise<Stream | Stream[]> => {
-  // Allow all available sources as per API documentation
-  const allowedSources = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel', 'intel'];
-  if (!allowedSources.includes(source.toLowerCase())) {
-    throw new Error(`Source "${source}" is not allowed. Supported sources: ${allowedSources.join(', ')}`);
-  }
-
-  const cacheKey = `stream-${source}-${id}-${streamNo || 'all'}`;
-  const cached = getCachedData(cacheKey);
-  if (cached) return cached;
-
-  try {
-    console.log(`📡 Fetching stream from streamed.pk: source=${source}, id=${id}, streamNo=${streamNo}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const suUrl = `https://streamed.su/api/stream/${source}/${id}`;
-    const pkUrl = `${API_BASE}/stream/${source}/${id}`;
-
-    let response: Response | null = null;
-
-    if (isMobile) {
-      try {
-        console.log('📡 Trying streamed.su for stream (mobile first)...');
-        response = await fetch(suUrl, {
-          signal: controller.signal,
-          headers: {
-'Accept': 'application/json'
-          },
-          cache: 'no-store',
-        });
-      } catch (e) {
-        console.warn('⚠️ streamed.su stream fetch failed, will fallback to streamed.pk', e);
-      }
-    }
-
-    if (!response || !response.ok) {
-      console.log('↩️ Falling back to streamed.pk for stream...');
-      response = await fetch(pkUrl, {
-        signal: controller.signal,
-        headers: {
-'Accept': 'application/json'
-        },
-        cache: 'no-store',
-      });
-    }
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('📺 Stream API response received:', { source, id, streamCount: Array.isArray(data) ? data.length : 1 });
-
-    // Normalize helper for embed URLs
-    const normalize = (url: string) => {
-      if (!url) return url as any;
-      if (url.startsWith('//')) return 'https:' + url;
-      if (url.startsWith('http://')) return url.replace(/^http:\/\//i, 'https://');
-      return url;
-    };
-    
-    // Handle response format with normalization
-    if (Array.isArray(data) && data.length > 0) {
-      const sanitized = data.map((stream: any) =>
-        stream && stream.embedUrl ? { ...stream, embedUrl: normalize(stream.embedUrl) } : stream
-      );
-      const validStreams = sanitized.filter(stream => stream && isValidStreamUrl(stream.embedUrl));
-      
-      if (validStreams.length === 0) {
-        throw new Error('No valid streams found in response');
-      }
-      
-      if (streamNo !== undefined) {
-        const specificStream = validStreams.find(stream => stream.streamNo === streamNo);
-        if (specificStream) {
-          setCachedData(cacheKey, specificStream);
-          console.log(`✅ Found specific stream ${streamNo} for ${source}/${id}`);
-          return specificStream;
-        }
-        // If specific stream not found, return the first valid stream
-        const firstStream = validStreams[0];
-        setCachedData(cacheKey, firstStream);
-        console.log(`⚠️ Stream ${streamNo} not found, returning first available stream`);
-        return firstStream;
-      }
-      
-      setCachedData(cacheKey, validStreams);
-      console.log(`✅ Fetched ${validStreams.length} valid streams for ${source}/${id}`);
-      return validStreams;
-    } else if (data && typeof data === 'object' && data.embedUrl) {
-      const single = { ...data, embedUrl: normalize(data.embedUrl) };
-      if (isValidStreamUrl(single.embedUrl)) {
-        setCachedData(cacheKey, single);
-        console.log(`✅ Fetched single stream for ${source}/${id}`);
-        return single;
-      }
-    }
-    
-    throw new Error('No valid streams found in API response');
-    
-  } catch (error) {
-    console.error(`❌ Error fetching stream ${source}/${id}:`, error);
-    throw error;
-  }
-};
-
-// Enhanced function to fetch ALL streams from ALL available sources for a match
+// Fetch all streams from all available sources for a match
 export const fetchAllStreams = async (match: Match): Promise<Record<string, Stream[]>> => {
   if (!match.sources || match.sources.length === 0) {
     throw new Error('No sources available for this match');
   }
 
   const allStreams: Record<string, Stream[]> = {};
-  const fetchPromises = match.sources.map(async (source) => {
+  
+  match.sources.forEach((source, index) => {
     const sourceKey = `${source.source}/${source.id}`;
+    const stream: Stream = {
+      id: source.id,
+      streamNo: index + 1,
+      language: 'EN',
+      hd: true,
+      embedUrl: `${API_BASE}/stream/${source.id}`,
+      source: source.source,
+      timestamp: Date.now()
+    };
     
-    try {
-      console.log(`🔄 Fetching streams from ${source.source} for match: ${match.title}`);
-      const streamData = await fetchStream(source.source, source.id);
-      
-      if (Array.isArray(streamData)) {
-        allStreams[sourceKey] = streamData;
-      } else if (streamData) {
-        allStreams[sourceKey] = [streamData];
-      }
-      
-      console.log(`✅ Successfully fetched ${allStreams[sourceKey]?.length || 0} streams from ${source.source}`);
-    } catch (error) {
-      console.warn(`⚠️ Failed to fetch streams from ${source.source}:`, error);
-      // Continue with other sources even if one fails
+    if (!allStreams[sourceKey]) {
+      allStreams[sourceKey] = [];
     }
+    allStreams[sourceKey].push(stream);
   });
 
-  // Wait for all sources to complete (with failures handled gracefully)
-  await Promise.allSettled(fetchPromises);
-
-  console.log(`🎯 Total streams fetched from ${Object.keys(allStreams).length} sources for match: ${match.title}`);
+  console.log(`🎯 Total streams from ${Object.keys(allStreams).length} sources for match: ${match.title}`);
   return allStreams;
 };
 
-// Simple URL check - no blocking
-function isValidStreamUrl(url: string): boolean {
-  return !!(url && typeof url === 'string');
-}
+// Fetch TV channels
+export const fetchChannels = async (): Promise<any[]> => {
+  const cacheKey = 'channels';
+  const cached = getCachedData(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(`${API_BASE}/channels/`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await response.json();
+    
+    // Handle different response formats
+    let channels: any[] = [];
+    if (Array.isArray(data)) {
+      channels = data;
+    } else if (data.channels && Array.isArray(data.channels)) {
+      channels = data.channels;
+    } else if (data.data && Array.isArray(data.data)) {
+      channels = data.data;
+    }
+    
+    setCachedData(cacheKey, channels);
+    console.log(`✅ Fetched ${channels.length} channels from cdn-live.tv API`);
+    return channels;
+  } catch (error) {
+    console.error('❌ Error fetching channels:', error);
+    throw error;
+  }
+};
 
 // Export alias for backward compatibility
 export const fetchStream = fetchSimpleStream;
