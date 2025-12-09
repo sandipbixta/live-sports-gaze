@@ -227,7 +227,25 @@ const Match = () => {
         
         <div className="w-full flex justify-center mb-4">
           <div className="text-center max-w-4xl px-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{match.title}</h1>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              {match.teams?.home?.badge && (
+                <img 
+                  src={match.teams.home.badge} 
+                  alt={match.teams.home.name || 'Home'} 
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                  onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                />
+              )}
+              <h1 className="text-2xl md:text-3xl font-bold text-white">{match.title}</h1>
+              {match.teams?.away?.badge && (
+                <img 
+                  src={match.teams.away.badge} 
+                  alt={match.teams.away.name || 'Away'} 
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                  onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                />
+              )}
+            </div>
             <p className="text-sm md:text-base text-gray-400">{matchTitle} on damitv.pro</p>
           </div>
         </div>
