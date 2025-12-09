@@ -110,13 +110,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
       const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
 
+      // Format: "10h : 31m" or "46m : 50s"
       if (hours > 24) {
         const days = Math.floor(hours / 24);
-        setCountdown(`${days}d ${hours % 24}h`);
+        const remainingHours = hours % 24;
+        setCountdown(`${days}d : ${remainingHours}h`);
       } else if (hours > 0) {
-        setCountdown(`${hours}h ${minutes}m`);
+        setCountdown(`${hours}h : ${minutes.toString().padStart(2, '0')}m`);
       } else {
-        setCountdown(`${minutes}m ${seconds}s`);
+        setCountdown(`${minutes}m : ${seconds.toString().padStart(2, '0')}s`);
       }
     };
 
@@ -346,11 +348,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
           
-          {/* Countdown Badge - Bottom center (yellow/gold gradient) - Only for upcoming */}
           {!isLive && !isMatchStarting && countdown && (
             <div className="absolute bottom-0 left-0 right-0 z-10">
               <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold py-1.5 px-3 text-center uppercase tracking-wide">
-                WATCH IN {countdown.replace('h', 'h :').replace('m', 'm').replace('d', 'd :')}
+                WATCH IN {countdown}
               </div>
             </div>
           )}
