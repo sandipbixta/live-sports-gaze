@@ -306,55 +306,85 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const cardContent = (
     <div className="group cursor-pointer h-full">
-      <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:scale-[1.02] h-full flex flex-col">
-        {/* Poster Image Section - Vertical aspect ratio like reference */}
-        <div className="relative aspect-[3/4] overflow-hidden rounded-xl flex-shrink-0">
+      <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
+        {/* Banner Image Section - 16:9 aspect ratio */}
+        <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
           {generateThumbnail()}
           
-          {/* Status Badge - Top left */}
-          <div className="absolute top-2 left-2 z-10">
-            {isLive ? (
-              <span className="bg-red-500 text-white text-[10px] font-black uppercase px-2 py-1 rounded tracking-wider animate-pulse">
-                ● Live
-              </span>
-            ) : hasStream ? (
-              <span className="bg-blue-500/90 text-white text-[10px] font-bold uppercase px-2 py-1 rounded">
-                Available
-              </span>
-            ) : null}
-          </div>
-          
-          {/* HD Badge - Top right */}
+          {/* FREE Badge - Top left */}
           {hasStream && (
-            <div className="absolute top-2 right-2 z-10">
-              <span className="bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded">
-                {match.sources.length} HD
+            <div className="absolute top-2 left-2 z-10">
+              <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
+                FREE
               </span>
             </div>
           )}
+          
+          {/* Countdown Badge - Bottom center (yellow/gold gradient) */}
+          <div className="absolute bottom-0 left-0 right-0 z-10">
+            {isLive || isMatchStarting ? (
+              <div className="bg-gradient-to-r from-red-600 to-red-500 text-white text-xs font-bold py-1.5 px-3 text-center uppercase tracking-wide">
+                ● LIVE NOW
+              </div>
+            ) : countdown ? (
+              <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold py-1.5 px-3 text-center uppercase tracking-wide">
+                WATCH IN {countdown.replace('h', 'h :').replace('m', 'm').replace('d', 'd :')}
+              </div>
+            ) : null}
+          </div>
         </div>
 
-        {/* Info Section - Clean minimal like reference */}
-        <div className="p-3 flex flex-col gap-1">
-          {/* Title */}
-          <h3 className="font-semibold text-foreground text-sm line-clamp-2 leading-tight">
-            {home && away ? `${home} vs ${away}` : match.title}
-          </h3>
+        {/* Info Section */}
+        <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
+          {/* Sport • Tournament */}
+          <p className="text-xs text-muted-foreground truncate">
+            {match.category || 'Sports'} • {match.tournament || match.title}
+          </p>
           
-          {/* Date/Time or Action */}
-          {isLive || isMatchStarting ? (
-            <div className="flex items-center gap-2">
+          {/* Team 1 */}
+          <div className="flex items-center gap-2">
+            {homeBadge ? (
+              <img 
+                src={homeBadge} 
+                alt={home} 
+                className="w-5 h-5 object-contain rounded-full"
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+              />
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-[8px] font-bold text-muted-foreground">{home.slice(0, 2).toUpperCase()}</span>
+              </div>
+            )}
+            <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
+          </div>
+          
+          {/* Team 2 */}
+          <div className="flex items-center gap-2">
+            {awayBadge ? (
+              <img 
+                src={awayBadge} 
+                alt={away} 
+                className="w-5 h-5 object-contain rounded-full"
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+              />
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-[8px] font-bold text-muted-foreground">{away.slice(0, 2).toUpperCase()}</span>
+              </div>
+            )}
+            <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
+          </div>
+          
+          {/* Match Start Time */}
+          <p className="text-xs text-muted-foreground mt-auto">
+            {isLive ? (
               <LiveViewerCount match={match} size="sm" />
-            </div>
-          ) : countdown ? (
-            <p className="text-xs text-muted-foreground">
-              Starts in {countdown}
-            </p>
-          ) : match.date ? (
-            <p className="text-xs text-muted-foreground">
-              {formatDateShort(match.date)} • {formatTime(match.date)}
-            </p>
-          ) : null}
+            ) : match.date ? (
+              `Match Starts at ${format(new Date(match.date), 'EEE, do MMM, h:mm a')}`
+            ) : (
+              'Time TBD'
+            )}
+          </p>
         </div>
       </div>
     </div>
