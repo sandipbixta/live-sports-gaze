@@ -181,15 +181,17 @@ export const fetchSports = async (): Promise<Sport[]> => {
         // Only include sports that have events
         if (Array.isArray(events) && events.length > 0) {
           const sportId = sportNameMap[sportName] || sportName.toLowerCase().replace(/\s+/g, '-');
+          // Rename Soccer to Football for display
+          const displayName = sportName === 'Soccer' ? 'Football' : sportName;
           sports.push({
             id: sportId,
-            name: sportName
+            name: displayName
           });
         }
       });
     }
     
-    // Sort alphabetically but keep Football/Soccer first
+    // Sort alphabetically but keep Football first (after All Sports)
     sports.sort((a, b) => {
       if (a.id === 'football' || a.id === 'soccer') return -1;
       if (b.id === 'football' || b.id === 'soccer') return 1;
