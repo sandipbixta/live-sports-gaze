@@ -350,7 +350,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {!isLive && !isMatchStarting && countdown && (
             <div className="absolute bottom-2 left-2 z-10">
-              <div className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black text-[10px] font-bold py-1 px-2.5 rounded italic tracking-wide">
+              <div className="bg-primary text-primary-foreground text-[10px] font-bold py-1 px-2.5 rounded italic tracking-wide">
                 WATCH IN {countdown}
               </div>
             </div>
