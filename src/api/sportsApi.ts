@@ -161,17 +161,53 @@ export const fetchSports = async (): Promise<Sport[]> => {
   const cached = getCachedData(cacheKey);
   if (cached) return cached;
 
-  // Return static sports list since the new API uses specific endpoints per sport
-  const sports: Sport[] = [
-    { id: 'football', name: 'Football' },
-    { id: 'basketball', name: 'Basketball' },
-    { id: 'american-football', name: 'American Football' },
-    { id: 'hockey', name: 'Hockey' }
-  ];
+  try {
+    // Fetch from API to get all available sports dynamically
+    const response = await fetch(`${API_BASE}/events/sports/`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const data = await response.json();
+    
+    const sports: Sport[] = [];
+    
+    if (data['cdn-live-tv'] && typeof data['cdn-live-tv'] === 'object') {
+      // Extract sport names from API response keys
+      Object.keys(data['cdn-live-tv']).forEach((sportName) => {
+        const events = data['cdn-live-tv'][sportName];
+        // Only include sports that have events
+        if (Array.isArray(events) && events.length > 0) {
+          const sportId = sportNameMap[sportName] || sportName.toLowerCase().replace(/\s+/g, '-');
+          sports.push({
+            id: sportId,
+            name: sportName
+          });
+        }
+      });
+    }
+    
+    // Sort alphabetically but keep Football/Soccer first
+    sports.sort((a, b) => {
+      if (a.id === 'football' || a.id === 'soccer') return -1;
+      if (b.id === 'football' || b.id === 'soccer') return 1;
+      return a.name.localeCompare(b.name);
+    });
 
-  setCachedData(cacheKey, sports);
-  console.log(`✅ Loaded ${sports.length} sports`);
-  return sports;
+    setCachedData(cacheKey, sports);
+    console.log(`✅ Loaded ${sports.length} sports from API:`, sports.map(s => s.name).join(', '));
+    return sports;
+  } catch (error) {
+    console.error('❌ Error fetching sports:', error);
+    // Fallback to basic sports list
+    const fallbackSports: Sport[] = [
+      { id: 'football', name: 'Football' },
+      { id: 'basketball', name: 'Basketball' }
+    ];
+    return fallbackSports;
+  }
 };
 
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
