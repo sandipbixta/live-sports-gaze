@@ -299,11 +299,8 @@ const StreamSources = ({
           const isActive = activeSource === streamKey;
           const viewerCount = stream.viewers || 0;
           
-          // Use API-provided names with streamNo priority
-          let streamName = stream.name || 
-                          (stream.language && stream.language !== 'Original' ? `${stream.language} ${actualStreamNo}` : null) ||
-                          (stream.source && stream.source !== 'intel' ? `${stream.source.toUpperCase()} ${actualStreamNo}` : null) ||
-                          `Stream ${actualStreamNo}`;
+          // Use API-provided name, fallback to source name
+          const streamName = stream.name || stream.source || `Stream ${actualStreamNo}`;
           
           console.log(`🎯 Rendering stream button: ${streamName}`, { streamNo: actualStreamNo, hd: stream.hd });
           

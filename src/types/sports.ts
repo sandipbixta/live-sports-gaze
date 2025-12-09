@@ -13,6 +13,7 @@ export interface Team {
 export interface Source {
   source: string;
   id: string;
+  name?: string;  // Display name for the stream/channel
 }
 
 export interface Match {
@@ -40,5 +41,7 @@ export interface Stream {
   hd: boolean;
   embedUrl: string;
   source: string;
+  name?: string;  // Display name for the stream
   timestamp?: number;  // Optional timestamp for freshness tracking
+  viewers?: number;  // Viewer count for this stream
 }
