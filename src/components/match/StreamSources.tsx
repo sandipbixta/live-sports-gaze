@@ -319,9 +319,19 @@ const StreamSources = ({
               }}
             >
               <div className="flex items-center gap-2">
+                {stream.image && (
+                  <img 
+                    src={stream.image} 
+                    alt={streamName}
+                    className="w-5 h-5 object-contain rounded"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                )}
                 <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
                 <Play className="w-4 h-4" />
-                <span>{streamName}</span>
+                <span className="truncate max-w-[100px]">{streamName}</span>
                 {stream.hd && <span className="text-xs bg-red-600 px-1 rounded">HD</span>}
               </div>
               {viewerCount > 0 && (

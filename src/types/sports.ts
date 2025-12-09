@@ -14,6 +14,7 @@ export interface Source {
   source: string;
   id: string;
   name?: string;  // Display name for the stream/channel
+  image?: string; // Channel logo URL
 }
 
 export interface Match {
@@ -42,6 +43,7 @@ export interface Stream {
   embedUrl: string;
   source: string;
   name?: string;  // Display name for the stream
+  image?: string; // Channel logo URL
   timestamp?: number;  // Optional timestamp for freshness tracking
   viewers?: number;  // Viewer count for this stream
 }

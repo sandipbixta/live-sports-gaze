@@ -87,7 +87,8 @@ const transformMatch = (event: any, sportId: string): Match => {
       sources.push({
         source: channel.channel_name || channel.channel_code || 'Stream',
         id: channel.url || `channel-${index}`,
-        name: channel.channel_name || channel.channel_code || `Stream ${index + 1}`
+        name: channel.channel_name || channel.channel_code || `Stream ${index + 1}`,
+        image: channel.channel_image || channel.image || undefined
       });
     });
   }
@@ -327,6 +328,7 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
         embedUrl: src.id.startsWith('http') ? src.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(src.source)}&code=us`,
         source: src.source,
         name: src.name || src.source,
+        image: src.image,
         timestamp: Date.now()
       }));
       
@@ -361,6 +363,7 @@ export const fetchAllMatchStreams = async (match: Match): Promise<{
         embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
         source: source.source,
         name: source.name || source.source,
+        image: source.image,
         timestamp: Date.now()
       };
       allStreams.push(stream);
@@ -397,6 +400,7 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
       source: source.source,
       name: source.name || source.source,
+      image: source.image,
       timestamp: Date.now()
     };
     
