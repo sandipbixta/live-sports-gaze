@@ -85,14 +85,27 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   // Get team badges with fallbacks
   const getTeamBadge = (team: any) => {
-    if (team?.badge) {
-      // Check if badge is already a full URL
+    if (!team) return '';
+    
+    // Check badge first (from new API - already full URL)
+    if (team.badge) {
+      // If it's already a full URL, use it directly
       if (team.badge.startsWith('http')) {
         return team.badge;
       }
-      return `https://api.cdn-live.tv/api/v1/images/badge/${team.badge}.webp`;
+      // Otherwise construct the URL
+      return `https://api.cdn-live.tv/api/v1/team/images/${team.badge}`;
     }
-    // Try to get logo from team logo service
+    
+    // Check logo as fallback
+    if (team.logo) {
+      if (team.logo.startsWith('http')) {
+        return team.logo;
+      }
+      return `https://api.cdn-live.tv/api/v1/team/images/${team.logo}`;
+    }
+    
+    // Try to get logo from team logo service as last resort
     const logoFromService = teamLogoService.getTeamLogo(team?.name || '', team?.badge);
     return logoFromService || '';
   };
