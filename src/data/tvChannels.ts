@@ -2,12 +2,55 @@ export interface Channel {
   id: string;
   title: string;
   country: string;
+  countryCode: string;
   embedUrl: string;
   category: 'sports' | 'news' | 'entertainment';
   logo?: string;
+  viewers?: number;
 }
 
 const API_BASE = 'https://api.cdn-live.tv/api/v1/vip/damitv';
+
+// Country code to name mapping
+const countryCodeMap: Record<string, string> = {
+  'us': 'United States',
+  'gb': 'United Kingdom',
+  'ca': 'Canada',
+  'au': 'Australia',
+  'de': 'Germany',
+  'fr': 'France',
+  'es': 'Spain',
+  'it': 'Italy',
+  'pt': 'Portugal',
+  'nl': 'Netherlands',
+  'be': 'Belgium',
+  'at': 'Austria',
+  'ch': 'Switzerland',
+  'br': 'Brazil',
+  'mx': 'Mexico',
+  'ar': 'Argentina',
+  'in': 'India',
+  'pk': 'Pakistan',
+  'ae': 'UAE',
+  'qa': 'Qatar',
+  'sa': 'Saudi Arabia',
+  'tr': 'Turkey',
+  'pl': 'Poland',
+  'ro': 'Romania',
+  'gr': 'Greece',
+  'se': 'Sweden',
+  'no': 'Norway',
+  'dk': 'Denmark',
+  'fi': 'Finland',
+  'ie': 'Ireland',
+  'za': 'South Africa',
+  'nz': 'New Zealand',
+  'jp': 'Japan',
+  'kr': 'South Korea',
+  'cn': 'China',
+  'ru': 'Russia',
+  'ua': 'Ukraine',
+};
 
 // Cache for channels
 let channelsCache: Channel[] | null = null;
@@ -16,13 +59,18 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Transform API channel to our Channel format
 const transformChannel = (apiChannel: any): Channel => {
+  const countryCode = apiChannel.code || 'us';
+  const countryName = countryCodeMap[countryCode] || countryCode.toUpperCase();
+  
   return {
-    id: String(apiChannel.id || apiChannel._id || ''),
-    title: apiChannel.title || apiChannel.name || '',
-    country: apiChannel.country || apiChannel.region || 'International',
-    embedUrl: apiChannel.embedUrl || apiChannel.url || apiChannel.stream_url || '',
-    category: (apiChannel.category || 'sports') as 'sports' | 'news' | 'entertainment',
-    logo: apiChannel.logo || apiChannel.image || apiChannel.thumbnail || undefined
+    id: apiChannel.name?.toLowerCase().replace(/\s+/g, '-') || String(apiChannel.id || ''),
+    title: apiChannel.name || apiChannel.title || '',
+    country: countryName,
+    countryCode: countryCode,
+    embedUrl: apiChannel.url || apiChannel.embedUrl || '',
+    category: 'sports' as const,
+    logo: apiChannel.image || apiChannel.logo || undefined,
+    viewers: apiChannel.viewers || 0
   };
 };
 
@@ -46,18 +94,18 @@ export const fetchChannelsFromAPI = async (): Promise<Channel[]> => {
 
     const data = await response.json();
 
-    // Handle different response formats
+    // Handle different response formats - API returns { total_channels, channels: [] }
     let channels: any[] = [];
-    if (Array.isArray(data)) {
-      channels = data;
-    } else if (data.channels && Array.isArray(data.channels)) {
+    if (data.channels && Array.isArray(data.channels)) {
       channels = data.channels;
+    } else if (Array.isArray(data)) {
+      channels = data;
     } else if (data.data && Array.isArray(data.data)) {
       channels = data.data;
     }
 
     const transformedChannels = channels
-      .filter((ch: any) => ch && (ch.id || ch._id) && (ch.title || ch.name))
+      .filter((ch: any) => ch && (ch.name || ch.title))
       .map(transformChannel);
 
     // Update cache

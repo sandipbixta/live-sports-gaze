@@ -1,9 +1,9 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountrySelector from './CountrySelector';
 import SearchBar from './SearchBar';
 import { getChannelsByCountryAsync, Channel } from '@/data/tvChannels';
+import { Users, Tv } from 'lucide-react';
 
 // Helper for channel initials
 const getInitials = (title: string) =>
@@ -39,7 +39,7 @@ const ChannelsGrid = () => {
   }, []);
 
   const handleSelectChannel = (channel: any, country: string) => {
-    navigate(`/channel/${country}/${channel.id}`);
+    navigate(`/channel/${channel.countryCode || country}/${channel.id}`);
   };
 
   const handleSelectCountry = (country: string) => {
@@ -57,9 +57,9 @@ const ChannelsGrid = () => {
     }
 
     // Search across all countries when there's a search term
-    const allChannels: any[] = [];
+    const allChannels: Channel[] = [];
     Object.entries(channelsByCountry).forEach(([country, channels]) => {
-      channels.forEach((channel: any) => {
+      channels.forEach((channel) => {
         if (channel.title.toLowerCase().includes(searchTerm.toLowerCase())) {
           allChannels.push({ ...channel, country });
         }
@@ -67,6 +67,11 @@ const ChannelsGrid = () => {
     });
     return allChannels;
   }, [searchTerm, selectedCountry, channelsByCountry]);
+
+  // Get total channel count
+  const totalChannels = useMemo(() => {
+    return Object.values(channelsByCountry).reduce((sum, channels) => sum + channels.length, 0);
+  }, [channelsByCountry]);
 
   if (loading) {
     return (
@@ -93,7 +98,12 @@ const ChannelsGrid = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-foreground mb-2">All Channels by Country</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">All Channels by Country</h2>
+        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+          {totalChannels} channels
+        </span>
+      </div>
       
       {/* Search Bar */}
       <div className="bg-card rounded-xl border border-border p-4">
@@ -117,42 +127,62 @@ const ChannelsGrid = () => {
       {/* Channels Display */}
       {(searchTerm.trim() || selectedCountry) && (
         <div className="bg-card/50 rounded-xl border border-border p-4">
-          <h3 className="font-semibold text-foreground text-lg mb-2">
+          <h3 className="font-semibold text-foreground text-lg mb-4">
             {searchTerm.trim() 
               ? `Search Results for "${searchTerm}" (${filteredChannels.length} channels)`
-              : selectedCountry
+              : `${selectedCountry} (${filteredChannels.length} channels)`
             }
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {filteredChannels.map(channel => (
               <div
                 key={`${channel.country || selectedCountry}-${channel.id}`}
-                className="bg-card rounded-xl p-4 cursor-pointer hover:bg-accent transition-all duration-200 border border-border hover:border-sports-primary group"
+                className="bg-card rounded-xl p-3 cursor-pointer hover:bg-accent transition-all duration-200 border border-border hover:border-sports-primary group relative"
                 onClick={() => handleSelectChannel(channel, channel.country || selectedCountry)}
               >
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-xl mb-3 overflow-hidden flex items-center justify-center bg-muted group-hover:scale-110 transition-transform">
-                    {channel.logo ? (
-                      <img
-                        src={channel.logo}
-                        alt={channel.title}
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-full h-full flex items-center justify-center text-xs font-bold text-foreground ${channel.logo ? 'hidden' : ''}`}>
-                      {getInitials(channel.title)}
-                    </div>
+                {/* Viewer badge */}
+                {channel.viewers && channel.viewers > 0 && (
+                  <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-500/90 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    <Users className="w-2.5 h-2.5" />
+                    {channel.viewers}
                   </div>
-                  <h3 className="text-sm font-medium text-foreground group-hover:text-sports-primary transition-colors">
+                )}
+                
+                <div className="flex flex-col items-center text-center">
+                  {/* Channel Logo */}
+                  <div className="w-14 h-14 rounded-xl mb-2 overflow-hidden flex items-center justify-center bg-white p-1.5 group-hover:scale-105 transition-transform shadow-sm">
+                    {channel.logo ? (
+                      <>
+                        <img
+                          src={channel.logo}
+                          alt={channel.title}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="hidden w-full h-full flex items-center justify-center bg-muted rounded-lg">
+                          <Tv className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-muted rounded-lg">
+                        <span className="text-sm font-bold text-muted-foreground">
+                          {getInitials(channel.title)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Channel Name */}
+                  <h3 className="text-xs font-medium text-foreground group-hover:text-sports-primary transition-colors line-clamp-2 leading-tight">
                     {channel.title}
                   </h3>
+                  
                   {/* Show country name when searching */}
                   {searchTerm.trim() && channel.country && (
-                    <p className="text-xs text-muted-foreground mt-1">{channel.country}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{channel.country}</p>
                   )}
                 </div>
               </div>
