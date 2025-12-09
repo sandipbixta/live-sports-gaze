@@ -57,7 +57,7 @@ const incrementRequestCount = () => {
   requestCount++;
 };
 
-// Normalize team name for better matching
+// Normalize team name for better matching across sports
 const normalizeTeamName = (name: string): string => {
   return name
     .toLowerCase()
@@ -69,10 +69,44 @@ const normalizeTeamName = (name: string): string => {
     .trim();
 };
 
+// Format team name for US sports (NBA, NFL, NHL, MLB)
+// These sports use city + team name format
+const formatUSTeamName = (name: string): string => {
+  // Common abbreviations used in streams
+  const teamMappings: Record<string, string> = {
+    // NHL
+    'minnesota wild': 'Minnesota Wild',
+    'seattle kraken': 'Seattle Kraken',
+    'detroit red wings': 'Detroit Red Wings',
+    'vancouver canucks': 'Vancouver Canucks',
+    'buffalo sabres': 'Buffalo Sabres',
+    'calgary flames': 'Calgary Flames',
+    'toronto maple leafs': 'Toronto Maple Leafs',
+    'boston bruins': 'Boston Bruins',
+    'new york rangers': 'New York Rangers',
+    'chicago blackhawks': 'Chicago Blackhawks',
+    // NBA
+    'los angeles lakers': 'Los Angeles Lakers',
+    'golden state warriors': 'Golden State Warriors',
+    'boston celtics': 'Boston Celtics',
+    'miami heat': 'Miami Heat',
+    'chicago bulls': 'Chicago Bulls',
+    // NFL
+    'kansas city chiefs': 'Kansas City Chiefs',
+    'san francisco 49ers': 'San Francisco 49ers',
+    'dallas cowboys': 'Dallas Cowboys',
+    'new england patriots': 'New England Patriots',
+  };
+  
+  const normalized = name.toLowerCase().trim();
+  return teamMappings[normalized] || name;
+};
+
 // Search for event by home and away team names
 export const searchEvent = async (
   homeTeam: string,
-  awayTeam: string
+  awayTeam: string,
+  sport?: string
 ): Promise<SportsDbEvent | null> => {
   const cacheKey = `${normalizeTeamName(homeTeam)}_vs_${normalizeTeamName(awayTeam)}`;
   
@@ -88,27 +122,43 @@ export const searchEvent = async (
   }
 
   try {
-    // Format: HomeTeam_vs_AwayTeam
-    const searchQuery = `${homeTeam.replace(/\s+/g, '_')}_vs_${awayTeam.replace(/\s+/g, '_')}`;
-    const url = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/searchevents.php?e=${encodeURIComponent(searchQuery)}`;
+    // Try multiple search formats for better matching
+    const searchVariations = [
+      // Standard format: HomeTeam_vs_AwayTeam
+      `${homeTeam.replace(/\s+/g, '_')}_vs_${awayTeam.replace(/\s+/g, '_')}`,
+      // US sports format: HomeTeam vs AwayTeam (with @)
+      `${homeTeam.replace(/\s+/g, '_')}_@_${awayTeam.replace(/\s+/g, '_')}`,
+      // Simplified names
+      `${formatUSTeamName(homeTeam).replace(/\s+/g, '_')}_vs_${formatUSTeamName(awayTeam).replace(/\s+/g, '_')}`,
+    ];
     
-    incrementRequestCount();
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      if (response.status === 429) {
-        console.warn('SportsDB API rate limit hit');
+    for (const searchQuery of searchVariations) {
+      const url = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/searchevents.php?e=${encodeURIComponent(searchQuery)}`;
+      
+      incrementRequestCount();
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        if (response.status === 429) {
+          console.warn('SportsDB API rate limit hit');
+          return null;
+        }
+        continue; // Try next variation
       }
-      return null;
-    }
 
-    const data: EventSearchResponse = await response.json();
-    const event = data.event?.[0] || null;
+      const data: EventSearchResponse = await response.json();
+      const event = data.event?.[0] || null;
+      
+      if (event) {
+        // Cache the result
+        eventCache.set(cacheKey, { data: event, timestamp: Date.now() });
+        return event;
+      }
+    }
     
-    // Cache the result
-    eventCache.set(cacheKey, { data: event, timestamp: Date.now() });
-    
-    return event;
+    // No results found, cache null
+    eventCache.set(cacheKey, { data: null, timestamp: Date.now() });
+    return null;
   } catch (error) {
     console.error('Error fetching event from SportsDB:', error);
     return null;
