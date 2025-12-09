@@ -85,8 +85,9 @@ const transformMatch = (event: any, sportId: string): Match => {
   if (event.channels && Array.isArray(event.channels)) {
     event.channels.forEach((channel: any, index: number) => {
       sources.push({
-        source: channel.channel_name || channel.channel_code || 'default',
-        id: channel.url || `channel-${index}`
+        source: channel.channel_name || channel.channel_code || 'Stream',
+        id: channel.url || `channel-${index}`,
+        name: channel.channel_name || channel.channel_code || `Stream ${index + 1}`
       });
     });
   }
@@ -95,7 +96,8 @@ const transformMatch = (event: any, sportId: string): Match => {
   if (sources.length === 0 && event.gameID) {
     sources.push({
       source: 'default',
-      id: event.gameID
+      id: event.gameID,
+      name: 'Stream 1'
     });
   }
 
@@ -322,9 +324,9 @@ export const fetchSimpleStream = async (source: string, id: string): Promise<Str
         streamNo: index + 1,
         language: 'EN',
         hd: true,
-        // The source.id already contains the full player URL from the API
         embedUrl: src.id.startsWith('http') ? src.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(src.source)}&code=us`,
         source: src.source,
+        name: src.name || src.source,
         timestamp: Date.now()
       }));
       
@@ -356,9 +358,9 @@ export const fetchAllMatchStreams = async (match: Match): Promise<{
         streamNo: index + 1,
         language: 'EN',
         hd: true,
-        // The source.id already contains the full player URL from the API
         embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
         source: source.source,
+        name: source.name || source.source,
         timestamp: Date.now()
       };
       allStreams.push(stream);
@@ -392,9 +394,9 @@ export const fetchAllStreams = async (match: Match): Promise<Record<string, Stre
       streamNo: index + 1,
       language: 'EN',
       hd: true,
-      // The source.id already contains the full player URL from the API
       embedUrl: source.id.startsWith('http') ? source.id : `${API_BASE}/channels/player/?name=${encodeURIComponent(source.source)}&code=us`,
       source: source.source,
+      name: source.name || source.source,
       timestamp: Date.now()
     };
     
