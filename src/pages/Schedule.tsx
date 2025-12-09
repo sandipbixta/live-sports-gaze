@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
@@ -14,6 +14,7 @@ import PopularGames from '../components/PopularGames';
 import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
 import TelegramBanner from '../components/TelegramBanner';
+import SportFilterPills from '../components/live/SportFilterPills';
 // import Advertisement from '../components/Advertisement';
 
 const Schedule = () => {
@@ -28,6 +29,27 @@ const Schedule = () => {
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
+  const [activeTournamentFilter, setActiveTournamentFilter] = useState<string | null>(null);
+  
+  // Get unique tournaments from matches
+  const tournaments = useMemo(() => {
+    const tournamentSet = new Set<string>();
+    matches.forEach(match => {
+      if (match.tournament) {
+        tournamentSet.add(match.tournament);
+      }
+    });
+    return Array.from(tournamentSet).sort();
+  }, [matches]);
+  
+  // Filter matches by tournament
+  const displayMatches = useMemo(() => {
+    let result = searchTerm ? filteredMatches : matches;
+    if (activeTournamentFilter) {
+      result = result.filter(m => m.tournament === activeTournamentFilter);
+    }
+    return result;
+  }, [matches, filteredMatches, searchTerm, activeTournamentFilter]);
 
   // Helper function to remove duplicates more strictly
   const removeDuplicatesFromMatches = (matches: Match[]): Match[] => {
@@ -212,7 +234,7 @@ const Schedule = () => {
           />
         </div>
         
-        <div className="mb-8">
+        <div className="mb-4">
           <SportsList 
             sports={sports}
             onSelectSport={handleSelectSport}
@@ -220,6 +242,19 @@ const Schedule = () => {
             isLoading={loadingSports}
           />
         </div>
+        
+        {matches.length > 0 && (
+          <div className="mb-6">
+            <SportFilterPills
+              allMatches={matches}
+              sports={sports}
+              activeSportFilter="all"
+              onSportFilterChange={() => {}}
+              activeTournamentFilter={activeTournamentFilter || 'all'}
+              onTournamentFilterChange={(t) => setActiveTournamentFilter(t === 'all' ? null : t)}
+            />
+          </div>
+        )}
 
         <PopularGames 
           popularMatches={popularMatches}
@@ -238,7 +273,7 @@ const Schedule = () => {
         <div className="mb-8">
           {(selectedSport || loadingMatches) && (
             <MatchesList
-              matches={searchTerm ? filteredMatches : matches}
+              matches={displayMatches}
               sportId={selectedSport || ""}
               isLoading={loadingMatches}
             />
