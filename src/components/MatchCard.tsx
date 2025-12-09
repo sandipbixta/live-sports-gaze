@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Clock, Play, Users, Calendar, Tv, Globe } from 'lucide-react';
@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
+import { sportsDbService } from '../services/sportsDbService';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -28,11 +29,50 @@ const MatchCard: React.FC<MatchCardProps> = ({
   preventNavigation,
   isPriority
 }) => {
-  const [countdown, setCountdown] = React.useState<string>('');
-  const [isMatchStarting, setIsMatchStarting] = React.useState(false);
+  const [countdown, setCountdown] = useState<string>('');
+  const [isMatchStarting, setIsMatchStarting] = useState(false);
+  const [sportsDbPoster, setSportsDbPoster] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
+
+  // Lazy load - only fetch poster when card is visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Fetch poster from TheSportsDB only when visible and no existing poster
+  useEffect(() => {
+    if (!isVisible || match.poster || !home || !away) return;
+
+    const fetchPoster = async () => {
+      try {
+        const event = await sportsDbService.searchEvent(home, away);
+        const poster = sportsDbService.getEventPoster(event, 'medium');
+        if (poster) setSportsDbPoster(poster);
+      } catch (error) {
+        // Silent fail - will use badge fallback
+      }
+    };
+
+    fetchPoster();
+  }, [isVisible, match.poster, home, away]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -119,10 +159,10 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Generate thumbnail background with priority: poster > badges > default
+  // Generate thumbnail background with priority: poster > sportsDbPoster > badges > default
   const generateThumbnail = () => {
-    // Priority 1: Use API poster if available
-    const posterToUse = match.poster;
+    // Priority 1: Use API poster or SportsDB poster if available
+    const posterToUse = match.poster || sportsDbPoster;
     
     if (posterToUse && posterToUse.trim() !== '') {
       const posterUrl = posterToUse.startsWith('http') 
@@ -282,7 +322,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   const cardContent = (
-    <div className="group cursor-pointer h-full">
+    <div ref={cardRef} className="group cursor-pointer h-full">
       <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
         {/* Banner Image Section - 16:9 aspect ratio */}
         <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
