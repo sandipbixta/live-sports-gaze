@@ -153,11 +153,11 @@ const MatchCard: React.FC<MatchCardProps> = ({
         : `https://api.cdn-live.tv${posterToUse}`;
       
       return (
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative flex items-center justify-center bg-black">
           <img
             src={posterUrl}
             alt={match.title}
-            className="w-full h-full object-cover"
+            className="max-w-full max-h-full w-auto h-auto object-contain"
             loading="lazy"
             onError={(e) => {
               console.error('Poster failed to load for:', match.title, 'URL:', posterUrl);
