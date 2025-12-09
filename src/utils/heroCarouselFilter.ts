@@ -144,15 +144,10 @@ export const getCarouselMatches = async (
   allMatches: Match[], 
   limit: number = 8
 ): Promise<Match[]> => {
-  // 1. Filter for matches with posters (visual requirement)
-  const matchesWithPosters = allMatches.filter(
-    match => match.poster && match.poster.trim() !== ''
-  );
+  // 1. Filter for elite matches only (no poster requirement - we can use team badges)
+  const eliteMatches = allMatches.filter(isEliteMatch);
   
-  // 2. Filter for elite matches only
-  const eliteMatches = matchesWithPosters.filter(isEliteMatch);
-  
-  // 3. Filter for live or upcoming within 14 days
+  // 2. Filter for live or upcoming within 14 days
   const now = Date.now();
   const fourteenDaysFromNow = now + (14 * 24 * 60 * 60 * 1000);
   const relevantMatches = eliteMatches.filter(match => {
@@ -160,8 +155,15 @@ export const getCarouselMatches = async (
     return matchTime <= fourteenDaysFromNow;
   });
   
+  // 3. Prioritize matches with posters, but include all elite matches
+  const sortedByPoster = relevantMatches.sort((a, b) => {
+    const aHasPoster = a.poster && a.poster.trim() !== '' ? 1 : 0;
+    const bHasPoster = b.poster && b.poster.trim() !== '' ? 1 : 0;
+    return bHasPoster - aHasPoster;
+  });
+  
   // 4. Enrich with viewer counts
-  const enrichedMatches = await enrichMatchesWithViewers(relevantMatches);
+  const enrichedMatches = await enrichMatchesWithViewers(sortedByPoster);
   
   // 5. Filter for high-profile matches (elite OR high viewers)
   const carouselCandidates = enrichedMatches.filter(match => {
