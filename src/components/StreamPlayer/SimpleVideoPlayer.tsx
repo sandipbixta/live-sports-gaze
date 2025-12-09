@@ -565,6 +565,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           src={stream.embedUrl.startsWith('http://') ? stream.embedUrl.replace(/^http:\/\//i, 'https://') : stream.embedUrl}
           onLoad={() => setError(false)}
           onError={handleError}
+          match={match}
         />
       )}
       {/* External open fallback on Android for non-m3u8 embeds */}

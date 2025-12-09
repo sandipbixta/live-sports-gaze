@@ -4,6 +4,8 @@ import { useIsMobile } from '../../hooks/use-mobile';
 import { Home, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Match } from '../../types/sports';
+import { ManualMatch } from '../../types/manualMatch';
 
 interface IframeVideoPlayerProps {
   src: string;
@@ -11,9 +13,10 @@ interface IframeVideoPlayerProps {
   onError: () => void;
   title?: string;
   matchStartTime?: number | Date | null;
+  match?: Match | ManualMatch | null;
 }
 
-const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onError, title, matchStartTime }) => {
+const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onError, title, matchStartTime, match }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -228,6 +231,35 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
           <span className="font-bold text-xs">DAMITV</span>
         </Button>
       </div>
+
+      {/* Match Title with Team Logos - Bottom of Player */}
+      {match && 'teams' in match && match.teams && (
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-40">
+          <div className="bg-black/80 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2 border border-white/10">
+            {/* Home team logo - only for Match type with Team objects */}
+            {typeof match.teams.home === 'object' && match.teams.home?.badge && (
+              <img 
+                src={match.teams.home.badge} 
+                alt={match.teams.home.name || 'Home'} 
+                className="w-5 h-5 object-contain"
+                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+              />
+            )}
+            <span className="text-white text-xs font-medium max-w-[200px] truncate">
+              {title || match.title}
+            </span>
+            {/* Away team logo - only for Match type with Team objects */}
+            {typeof match.teams.away === 'object' && match.teams.away?.badge && (
+              <img 
+                src={match.teams.away.badge} 
+                alt={match.teams.away.name || 'Away'} 
+                className="w-5 h-5 object-contain"
+                onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );
