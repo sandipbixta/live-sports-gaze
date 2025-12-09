@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
 import { teamLogoService } from '../services/teamLogoService';
+import { sportsDbService } from '../services/sportsDbService';
 import defaultTvLogo from '@/assets/default-tv-logo.jpg';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
@@ -31,6 +32,30 @@ const MatchCard: React.FC<MatchCardProps> = ({
 }) => {
   const [countdown, setCountdown] = React.useState<string>('');
   const [isMatchStarting, setIsMatchStarting] = React.useState(false);
+  const [sportsDbPoster, setSportsDbPoster] = React.useState<string | null>(null);
+
+  const home = match.teams?.home?.name || '';
+  const away = match.teams?.away?.name || '';
+
+  // Fetch poster from TheSportsDB if no poster from main API
+  React.useEffect(() => {
+    const fetchSportsDbPoster = async () => {
+      // Only fetch if we don't have a poster and have team names
+      if (!match.poster && home && away) {
+        try {
+          const event = await sportsDbService.searchEvent(home, away);
+          const poster = sportsDbService.getEventPoster(event, 'medium');
+          if (poster) {
+            setSportsDbPoster(poster);
+          }
+        } catch (error) {
+          console.error('Error fetching SportsDB poster:', error);
+        }
+      }
+    };
+
+    fetchSportsDbPoster();
+  }, [match.poster, home, away]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -114,18 +139,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const homeBadge = getTeamBadge(match.teams?.home);
   const awayBadge = getTeamBadge(match.teams?.away);
 
-  const home = match.teams?.home?.name || '';
-  const away = match.teams?.away?.name || '';
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
 
-  // Generate thumbnail background with priority: poster > badges > default logo
+  // Generate thumbnail background with priority: poster > sportsDbPoster > badges > default logo
   const generateThumbnail = () => {
     // Priority 1: Use API poster if available (as per API docs)
-    if (match.poster && match.poster.trim() !== '') {
-      const posterUrl = match.poster.startsWith('http') 
-        ? match.poster 
-        : `https://api.cdn-live.tv${match.poster}`;
+    const posterToUse = match.poster || sportsDbPoster;
+    
+    if (posterToUse && posterToUse.trim() !== '') {
+      const posterUrl = posterToUse.startsWith('http') 
+        ? posterToUse 
+        : `https://api.cdn-live.tv${posterToUse}`;
       
       return (
         <div className="w-full h-full relative">
