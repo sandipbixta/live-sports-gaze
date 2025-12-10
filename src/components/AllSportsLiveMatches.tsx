@@ -5,6 +5,7 @@ import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '..
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
 import MatchCard from './MatchCard';
+import FeaturedChannels from './FeaturedChannels';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp } from 'lucide-react';
 
@@ -17,7 +18,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
-  const [loading, setLoading] = useState(false); // Start with false - show skeletons
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [mostViewedMatches, setMostViewedMatches] = useState<Match[]>([]);
 
   useEffect(() => {
@@ -84,8 +85,9 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           description: "Failed to load matches.",
           variant: "destructive",
         });
+      } finally {
+        setHasInitialized(true);
       }
-      // NO finally block - no loading state to manage
     };
 
     loadLiveMatches();
@@ -260,23 +262,24 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const hasLiveMatches = filteredLiveMatches.length > 0;
   const hasUpcomingMatches = filteredUpcomingMatches.length > 0;
 
-  // Show skeleton while data is empty, but don't block - let it render
-  if (liveMatches.length === 0 && allMatches.length === 0) {
+  // Show skeleton only during initial load
+  if (!hasInitialized) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
-          <div key={i} className="h-[280px] bg-[#242836] rounded-xl animate-pulse"></div>
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <div key={i} className="h-[280px] bg-card rounded-xl animate-pulse"></div>
         ))}
       </div>
     );
   }
 
+  // Show TV channels when no matches available
   if (!hasLiveMatches && !hasUpcomingMatches) {
     return (
-      <div className="bg-[#242836] border-[#343a4d] rounded-xl p-8 text-center">
-        <div className="text-4xl mb-4">📺</div>
-        <h3 className="text-xl font-bold text-white mb-2">No Matches Available</h3>
-        <p className="text-gray-400">There are currently no matches available.</p>
+      <div>
+        <h2 className="text-xl font-bold mb-3 text-foreground">Live & Upcoming Matches</h2>
+        <p className="text-muted-foreground text-sm mb-6">No live matches available right now. Watch live TV channels instead!</p>
+        <FeaturedChannels />
       </div>
     );
   }
