@@ -11,7 +11,7 @@ declare global {
 }
 
 interface AdvertisementProps {
-  type: 'sidebar' | 'video' | 'direct-link' | 'autotag';
+  type: 'sidebar' | 'video' | 'direct-link' | 'autotag' | 'banner';
   className?: string;
 }
 
@@ -100,6 +100,35 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
           zoneId: 'bz3drbnei2', // Updated zone ID for adblock bypass
         });
       }
+    } else if (type === 'banner') {
+      // Banner ad - 728x90 desktop banner
+      const optionsScript = document.createElement('script');
+      optionsScript.type = 'text/javascript';
+      optionsScript.innerHTML = `
+        atOptions = {
+          'key' : '6f9d1f3d2ad1eb4e3efaf82e5571ea37',
+          'format' : 'iframe',
+          'height' : 90,
+          'width' : 728,
+          'params' : {}
+        };
+      `;
+      adRef.current.appendChild(optionsScript);
+      
+      const invokeScript = document.createElement('script');
+      invokeScript.type = 'text/javascript';
+      invokeScript.src = '//foreseehawancestor.com/6f9d1f3d2ad1eb4e3efaf82e5571ea37/invoke.js';
+      invokeScript.async = true;
+      
+      invokeScript.onerror = () => {
+        console.log('Banner ad script failed to load');
+      };
+      
+      invokeScript.onload = () => {
+        console.log('Banner ad script loaded successfully');
+      };
+      
+      adRef.current.appendChild(invokeScript);
     }
     
     return () => {
@@ -127,7 +156,7 @@ const Advertisement: React.FC<AdvertisementProps> = ({ type, className = '' }) =
       className={`ad-container flex justify-center items-center overflow-hidden min-h-[90px] w-full ${className}`} 
       data-ad-type={type}
       style={{ 
-        minHeight: type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'autotag' ? '100px' : 'auto',
+        minHeight: type === 'video' ? '250px' : type === 'sidebar' ? '200px' : type === 'autotag' ? '100px' : type === 'banner' ? '90px' : 'auto',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center'
