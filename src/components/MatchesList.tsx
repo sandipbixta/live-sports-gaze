@@ -5,7 +5,7 @@ import { consolidateMatches, filterCleanMatches, isMatchLive, sortMatchesByViewe
 import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
-import FeaturedChannels from './FeaturedChannels';
+import AllChannelsGrid from './AllChannelsGrid';
 
 interface MatchesListProps {
   matches: Match[];
@@ -80,9 +80,8 @@ const MatchesList: React.FC<MatchesListProps> = ({
   if (hasInitialized && filteredMatches.length === 0) {
     return (
       <div>
-        <h2 className="text-xl font-bold mb-3 text-foreground">Live & Upcoming Matches</h2>
-        <p className="text-muted-foreground text-sm mb-6">No live matches available right now. Watch live TV channels instead!</p>
-        <FeaturedChannels />
+        <p className="text-muted-foreground text-sm mb-4">No live matches available right now. Watch live TV channels instead!</p>
+        <AllChannelsGrid />
       </div>
     );
   }
