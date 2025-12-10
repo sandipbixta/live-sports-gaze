@@ -275,19 +275,20 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Show TV channels when no matches available
   if (!hasLiveMatches && !hasUpcomingMatches) {
-    return (
-      <div>
-        <p className="text-muted-foreground text-sm mb-4">No live matches available right now. Watch live TV channels instead!</p>
-        <AllChannelsGrid />
-      </div>
-    );
+    return <AllChannelsGrid />;
   }
 
   return (
     <div className="space-y-8">
+      {/* Live TV Channels - Always First */}
+      <AllChannelsGrid />
+
       {/* Live Matches Sections */}
       {hasLiveMatches && (
         <>
+          <div className="border-t border-[#343a4d] pt-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Featured Sports</h2>
+          </div>
           {sortedLiveSports.map(([sportId, matches]) => (
             <div key={sportId} className="space-y-4">
               <div className="flex items-center justify-between">
