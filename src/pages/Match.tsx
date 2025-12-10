@@ -23,15 +23,12 @@ import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
 import AdsterraSidebar from '@/components/AdsterraSidebar';
-import Advertisement from '@/components/Advertisement';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const Match = () => {
   const { toast } = useToast();
   const { sportId, matchId } = useParams();
   const [match, setMatch] = useState<MatchType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isMobile = useIsMobile();
   
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
@@ -253,13 +250,6 @@ const Match = () => {
           </div>
         </div>
         
-        {/* Desktop Banner Ad - Above Video Player */}
-        {!isMobile && (
-          <div className="flex justify-center mb-4">
-            <Advertisement type="banner" className="max-w-[728px]" />
-          </div>
-        )}
-
         {/* Video Player and Ad Sidebar Layout */}
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Video Player Section */}

@@ -14,7 +14,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import { useAutoFallback } from '@/hooks/useAutoFallback';
-import { usePopunderAd } from '@/hooks/usePopunderAd';
 
 interface StreamTabProps {
   match: MatchType;
@@ -48,9 +47,6 @@ const StreamTab = ({
   const { toast } = useToast();
   const [retryCount, setRetryCount] = useState(0);
   const [currentStreamViewers, setCurrentStreamViewers] = useState<number>(0);
-  
-  // Popunder ad trigger on first play
-  const { triggerPopunder } = usePopunderAd();
   
   // Auto-fallback hook
   const { tryNextSource, isAutoRetrying, attemptedSourcesCount, totalSourcesCount } = useAutoFallback({
@@ -225,7 +221,6 @@ const StreamTab = ({
           match={match}
           allStreams={allStreams}
           showMatchDetails={false}
-          onFirstPlay={triggerPopunder}
         />
       )}
       

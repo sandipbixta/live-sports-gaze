@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { 
   adConfig, 
   shouldShowAds, 
@@ -9,17 +9,12 @@ import {
 } from '@/utils/adConfig';
 import { adTracking } from '@/utils/adTracking';
 
-/**
- * Hook that returns a function to trigger popunder ad on play button click
- * Respects 4-hour cooldown and session limits
- */
 export const usePopunderAd = () => {
   const hasTriggeredRef = useRef(false);
 
-  const triggerPopunder = useCallback(() => {
+  useEffect(() => {
     // Prevent multiple triggers in the same component lifecycle
     if (hasTriggeredRef.current) {
-      console.log('⏳ Popunder already triggered this session');
       return;
     }
 
@@ -33,7 +28,7 @@ export const usePopunderAd = () => {
       return;
     }
 
-    // Check if cooldown period has passed (4 hours)
+    // Check if cooldown period has passed (6 hours)
     if (!isAdCooldownPassed(adConfig.popunder.sessionKey, adConfig.popunder.cooldownMinutes)) {
       return;
     }
@@ -42,37 +37,42 @@ export const usePopunderAd = () => {
     hasTriggeredRef.current = true;
     markAdTriggered(adConfig.popunder.sessionKey);
     markAdShownThisSession(adConfig.popunder.sessionKey);
-    console.log('🎯 Popunder ad triggered on play click!');
+    console.log('🎯 Popunder ad scheduled (once per 6 hours)');
 
-    try {
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = adConfig.popunder.scriptSrc;
-      script.async = true;
-      
-      script.onerror = () => {
-        console.warn('Popunder ad script failed to load');
-        adTracking.trackPopunderError('Script failed to load');
-      };
-      
-      script.onload = () => {
-        adTracking.trackPopunderLoad();
-        console.log('✅ Popunder script loaded successfully');
-      };
-      
-      document.head.appendChild(script);
-      
-      // Clean up script after 10 seconds
-      setTimeout(() => {
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      }, 10000);
-      
-    } catch (error) {
-      console.warn('Error loading popunder ad:', error);
-    }
+    // Delay the popunder execution
+    const timer = setTimeout(() => {
+      try {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = adConfig.popunder.scriptSrc;
+        script.async = true;
+        
+        script.onerror = () => {
+          console.warn('Popunder ad script failed to load');
+          adTracking.trackPopunderError('Script failed to load');
+        };
+        
+        script.onload = () => {
+          adTracking.trackPopunderLoad();
+          console.log('✅ Popunder script loaded successfully');
+        };
+        
+        document.head.appendChild(script);
+        
+        // Clean up script after 10 seconds
+        setTimeout(() => {
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
+        }, 10000);
+        
+      } catch (error) {
+        console.warn('Error loading popunder ad:', error);
+      }
+    }, adConfig.popunder.delaySeconds * 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, []);
-
-  return { triggerPopunder };
 };

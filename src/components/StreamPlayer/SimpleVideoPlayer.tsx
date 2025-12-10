@@ -28,7 +28,6 @@ interface SimpleVideoPlayerProps {
   onTheaterModeToggle?: () => void;
   onAutoFallback?: () => void;
   match?: Match | ManualMatch | null;
-  onFirstPlay?: () => void;
 }
 
 const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
@@ -38,8 +37,7 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   isTheaterMode = false,
   onTheaterModeToggle,
   onAutoFallback,
-  match = null,
-  onFirstPlay
+  match = null
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -62,7 +60,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
   const isCasting = detectCasting();
   const progressTrackerRef = useRef<ReturnType<typeof createProgressTracker> | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const hasTriggeredFirstPlayRef = useRef(false);
 
   // Calculate countdown for upcoming matches
   useEffect(() => {
@@ -684,11 +681,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
           onPlay={() => {
             console.log('Video resumed');
             trackVideoResume(match?.id || stream?.embedUrl || 'unknown');
-            // Trigger popunder on first play
-            if (!hasTriggeredFirstPlayRef.current && onFirstPlay) {
-              hasTriggeredFirstPlayRef.current = true;
-              onFirstPlay();
-            }
             // Resume progress tracking
             if (progressTrackerRef.current && !progressIntervalRef.current) {
               progressIntervalRef.current = setInterval(() => {
