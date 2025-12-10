@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Hls from 'hls.js';
 import { Clock } from 'lucide-react';
 
@@ -220,9 +220,16 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
     );
   }
 
-  // For other streams, use iframe with countdown overlay
+  const [iframeLoading, setIframeLoading] = useState(true);
+
+  const handleIframeLoad = useCallback(() => {
+    setIframeLoading(false);
+    onLoad?.();
+  }, [onLoad]);
+
+  // For other streams, use iframe with countdown overlay and improved attributes
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full bg-black">
       {/* Countdown Overlay */}
       {countdown && matchStartTime && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
@@ -253,20 +260,31 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
           </div>
         </div>
       )}
+
+      {/* Loading spinner for iframe */}
+      {iframeLoading && !countdown && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+            <p className="text-sm">Loading stream...</p>
+          </div>
+        </div>
+      )}
       
       <iframe
         src={src}
-        width="100%"
-        height="100%"
+        className="absolute inset-0 w-full h-full"
         allowFullScreen
         title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+        referrerPolicy="origin"
+        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
+        loading="eager"
         style={{ 
           border: 'none',
-          background: 'black',
-          width: '100%',
-          height: '100%'
+          background: 'black'
         }}
-        onLoad={onLoad}
+        onLoad={handleIframeLoad}
         onError={onError}
       />
     </div>
