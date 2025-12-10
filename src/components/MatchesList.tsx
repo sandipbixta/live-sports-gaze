@@ -6,7 +6,6 @@ import { enrichMatchesWithViewerCounts } from '../utils/viewerCount';
 import MatchSection from './MatchSection';
 import LoadingGrid from './LoadingGrid';
 import AllChannelsGrid from './AllChannelsGrid';
-import FeaturedChannels from './FeaturedChannels';
 
 interface MatchesListProps {
   matches: Match[];
@@ -80,12 +79,9 @@ const MatchesList: React.FC<MatchesListProps> = ({
   // Show TV channels when no matches are available
   if (hasInitialized && filteredMatches.length === 0) {
     return (
-      <div className="space-y-8">
-        <div>
-          <p className="text-muted-foreground text-sm mb-4">No live matches available right now. Watch live TV channels instead!</p>
-          <AllChannelsGrid />
-        </div>
-        <FeaturedChannels />
+      <div>
+        <p className="text-muted-foreground text-sm mb-4">No live matches available right now. Watch live TV channels instead!</p>
+        <AllChannelsGrid />
       </div>
     );
   }
