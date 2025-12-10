@@ -159,32 +159,121 @@ const IframeVideoPlayer: React.FC<IframeVideoPlayerProps> = ({ src, onLoad, onEr
     return () => clearTimeout(timer);
   }, [showControls]);
 
+  // Parse countdown into separate parts for styled display
+  const parseCountdown = () => {
+    const countdownParts = countdown.split(/[hms\s]+/).filter(Boolean);
+    const hasHours = countdown.includes('h');
+    const hasMinutes = countdown.includes('m');
+    const hasDays = countdown.includes('d');
+    
+    let hours = '00', minutes = '00', seconds = '00';
+    if (hasDays) {
+      hours = countdownParts[1]?.padStart(2, '0') || '00';
+      minutes = countdownParts[2]?.padStart(2, '0') || '00';
+      seconds = '00';
+    } else if (hasHours) {
+      hours = countdownParts[0]?.padStart(2, '0') || '00';
+      minutes = countdownParts[1]?.padStart(2, '0') || '00';
+      seconds = countdownParts[2]?.padStart(2, '0') || '00';
+    } else if (hasMinutes) {
+      hours = '00';
+      minutes = countdownParts[0]?.padStart(2, '0') || '00';
+      seconds = countdownParts[1]?.padStart(2, '0') || '00';
+    } else {
+      seconds = countdownParts[0]?.padStart(2, '0') || '00';
+    }
+    
+    return { hours, minutes, seconds };
+  };
+
+  const { hours, minutes, seconds } = parseCountdown();
+
+  // Get team info from match
+  const homeTeam = match && 'teams' in match ? match.teams?.home : null;
+  const awayTeam = match && 'teams' in match ? match.teams?.away : null;
+  const tournament = match && 'tournament' in match ? match.tournament : null;
+
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
-      {/* Countdown Display - Show when match hasn't started */}
+      {/* Countdown Display - Mobile-friendly design */}
       {countdown && matchStartTime && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-          {/* Background decoration */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl" />
-            <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl" />
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419]">
+          {/* Background decoration - colorful blurs */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-20 -left-20 w-40 h-40 sm:w-64 sm:h-64 bg-blue-600/30 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -right-20 w-40 h-40 sm:w-64 sm:h-64 bg-red-500/20 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 right-0 w-32 h-32 sm:w-48 sm:h-48 bg-purple-500/20 rounded-full blur-3xl" />
           </div>
           
-          <div className="text-center text-white p-6 z-10">
-            <Clock className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
-            <h3 className="text-xl font-bold mb-2">Match Starting Soon</h3>
-            <p className="text-sm text-gray-400 mb-4">Stream will be available when the match begins</p>
+          <div className="text-center text-white p-3 sm:p-6 z-10 w-full max-w-lg">
+            {/* Watch Live In */}
+            <p className="text-xs sm:text-sm text-gray-300 mb-2 sm:mb-3 tracking-wide">Watch Live In</p>
             
-            {/* Countdown Display */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 inline-block">
-              <div className="text-4xl font-black text-white mb-1 font-mono tracking-wider">
-                {countdown}
+            {/* Countdown Timer Boxes */}
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-4 sm:mb-6">
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {hours}
               </div>
-              <div className="text-xs text-gray-400 uppercase tracking-widest">Until Kickoff</div>
+              <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {minutes}
+              </div>
+              <span className="text-white text-xl sm:text-3xl font-bold">:</span>
+              <div className="bg-white text-black font-bold text-xl sm:text-3xl md:text-4xl px-2 sm:px-4 py-1 sm:py-2 rounded-md min-w-[40px] sm:min-w-[60px]">
+                {seconds}
+              </div>
             </div>
-            
-            {title && (
-              <p className="text-base text-white/80 mt-3 font-semibold">
+
+            {/* Tournament/League Name */}
+            {tournament && (
+              <p className="text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 line-clamp-1">
+                {typeof tournament === 'string' ? tournament : (tournament as { name?: string })?.name || ''}
+              </p>
+            )}
+
+            {/* Teams Display */}
+            {(homeTeam || awayTeam) && (
+              <div className="flex items-center justify-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                {/* Home Team */}
+                <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                  {typeof homeTeam === 'object' && homeTeam?.badge && (
+                    <img 
+                      src={homeTeam.badge} 
+                      alt={homeTeam.name || 'Home'} 
+                      className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain"
+                      onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                    />
+                  )}
+                  <span className="text-white text-xs sm:text-sm font-medium text-center line-clamp-2 max-w-[80px] sm:max-w-[100px]">
+                    {typeof homeTeam === 'object' ? homeTeam?.name : homeTeam}
+                  </span>
+                </div>
+
+                {/* VS Separator */}
+                <div className="bg-orange-500 text-white font-bold text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-md flex-shrink-0">
+                  Vs
+                </div>
+
+                {/* Away Team */}
+                <div className="flex flex-col items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                  {typeof awayTeam === 'object' && awayTeam?.badge && (
+                    <img 
+                      src={awayTeam.badge} 
+                      alt={awayTeam.name || 'Away'} 
+                      className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain"
+                      onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                    />
+                  )}
+                  <span className="text-white text-xs sm:text-sm font-medium text-center line-clamp-2 max-w-[80px] sm:max-w-[100px]">
+                    {typeof awayTeam === 'object' ? awayTeam?.name : awayTeam}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Match Title (if no teams) */}
+            {title && !homeTeam && !awayTeam && (
+              <p className="text-sm sm:text-base text-white/80 font-semibold line-clamp-2">
                 {title}
               </p>
             )}
