@@ -115,7 +115,7 @@ const AllChannelsGrid: React.FC = () => {
             onClick={() => handleSelectChannel(channel)}
           >
             {/* Channel Logo */}
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg mb-1 overflow-hidden flex items-center justify-center bg-muted p-1 transition-transform group-hover:scale-105">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg mb-2 overflow-hidden flex items-center justify-center bg-muted p-1.5 transition-transform group-hover:scale-105">
               {channel.logo ? (
                 <>
                   <img
