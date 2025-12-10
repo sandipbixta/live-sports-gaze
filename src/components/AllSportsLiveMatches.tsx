@@ -5,7 +5,7 @@ import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '..
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import { filterMatchesWithImages } from '../utils/matchImageFilter';
 import MatchCard from './MatchCard';
-import FeaturedChannels from './FeaturedChannels';
+import AllChannelsGrid from './AllChannelsGrid';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp } from 'lucide-react';
 
@@ -277,9 +277,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   if (!hasLiveMatches && !hasUpcomingMatches) {
     return (
       <div>
-        <h2 className="text-xl font-bold mb-3 text-foreground">Live & Upcoming Matches</h2>
-        <p className="text-muted-foreground text-sm mb-6">No live matches available right now. Watch live TV channels instead!</p>
-        <FeaturedChannels />
+        <p className="text-muted-foreground text-sm mb-4">No live matches available right now. Watch live TV channels instead!</p>
+        <AllChannelsGrid />
       </div>
     );
   }
