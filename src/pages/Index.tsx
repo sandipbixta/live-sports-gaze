@@ -246,6 +246,12 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
+        {/* Live TV Channels - First */}
+        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
+          <FeaturedChannels />
+        </React.Suspense>
+
+        {/* Featured Sports - Second */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
@@ -265,10 +271,6 @@ const Index = () => {
             isLoading={loadingSports}
           />
         </div>
-        
-        <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
-          <FeaturedChannels />
-        </React.Suspense>
             
             <Separator className="my-8 bg-[#343a4d]" />
             
