@@ -45,7 +45,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
-          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
+          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
             isActive ? 'ring-2 ring-sports-primary' : ''
           } ${logo ? 'bg-background p-1' : (isActive ? 'bg-sports-primary' : 'bg-muted')}`}>
             {logo ? (
