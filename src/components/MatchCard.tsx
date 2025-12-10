@@ -90,19 +90,16 @@ const MatchCard: React.FC<MatchCardProps> = ({
   };
 
   // Calculate countdown for upcoming matches
-  useEffect(() => {
-    // Skip if no date
-    if (!match.date) {
+  React.useEffect(() => {
+    if (!match.date || match.date <= Date.now()) {
       setCountdown('');
       return;
     }
 
     const updateCountdown = () => {
       const now = Date.now();
-      const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
-      const timeUntilMatch = matchTime - now;
+      const timeUntilMatch = match.date - now;
 
-      // If match has started or passed
       if (timeUntilMatch <= 0) {
         setCountdown('');
         setIsMatchStarting(true);
@@ -113,7 +110,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
       const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
 
-      // Format: "2d : 5h" or "10h : 31m" or "46m : 50s"
+      // Format: "10h : 31m" or "46m : 50s"
       if (hours > 24) {
         const days = Math.floor(hours / 24);
         const remainingHours = hours % 24;
