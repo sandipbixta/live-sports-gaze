@@ -1,5 +1,6 @@
 
 import { Sport, Match, Stream, Source } from '../types/sports';
+import { enhanceMatchesWithLogos, enhanceMatchWithLogos } from '../services/teamLogoService';
 
 // API Base URLs
 const WESTREAM_API = 'https://westream.su';
@@ -138,7 +139,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    const matches = Array.isArray(data) ? data.map(transformWeStreamMatch) : [];
+    let matches = Array.isArray(data) ? data.map(transformWeStreamMatch) : [];
+    
+    // Enhance matches with team logos from TheSportsDB
+    matches = await enhanceMatchesWithLogos(matches);
     
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} live matches from WeStream API`);
@@ -175,6 +179,9 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
         return a.date - b.date;
       });
     
+    // Enhance matches with team logos from TheSportsDB
+    matches = await enhanceMatchesWithLogos(matches);
+    
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} matches from WeStream API`);
     return matches;
@@ -197,7 +204,10 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     const data = await response.json();
     
-    const matches = Array.isArray(data) ? data.map(transformWeStreamMatch) : [];
+    let matches = Array.isArray(data) ? data.map(transformWeStreamMatch) : [];
+    
+    // Enhance matches with team logos from TheSportsDB
+    matches = await enhanceMatchesWithLogos(matches);
     
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} matches for sport ${sportId} from WeStream API`);
@@ -219,9 +229,11 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
     if (cachedMatches) {
       const match = cachedMatches.find((m: Match) => m.id === matchId);
       if (match) {
-        setCachedData(cacheKey, match);
+        // Enhance with logos if not already present
+        const enhancedMatch = await enhanceMatchWithLogos(match);
+        setCachedData(cacheKey, enhancedMatch);
         console.log(`✅ Found match ${matchId} in cache`);
-        return match;
+        return enhancedMatch;
       }
     }
 
@@ -233,6 +245,7 @@ export const fetchMatch = async (sportId: string, matchId: string): Promise<Matc
       throw new Error(`Match ${matchId} not found`);
     }
     
+    // Match already enhanced by fetchAllMatches
     setCachedData(cacheKey, match);
     console.log(`✅ Found match ${matchId} for sport ${sportId}`);
     return match;

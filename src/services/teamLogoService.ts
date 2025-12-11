@@ -1,167 +1,144 @@
-// Service to provide team and country logos for matches
+// Service to fetch team logos from TheSportsDB free API
 
-interface TeamLogoMapping {
-  [key: string]: string;
-}
+const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/3';
 
-interface CountryLogoMapping {
-  [key: string]: string;
-}
+// Cache to avoid repeated API calls
+const logoCache = new Map<string, string>();
 
-// Common team name mappings to logo URLs
-const TEAM_LOGO_MAPPINGS: TeamLogoMapping = {
-  // Football/Soccer
-  'manchester united': 'https://logos-world.net/wp-content/uploads/2020/06/Manchester-United-Logo.png',
-  'manchester city': 'https://logos-world.net/wp-content/uploads/2020/06/Manchester-City-Logo.png',
-  'liverpool': 'https://logos-world.net/wp-content/uploads/2020/06/Liverpool-Logo.png',
-  'chelsea': 'https://logos-world.net/wp-content/uploads/2020/06/Chelsea-Logo.png',
-  'arsenal': 'https://logos-world.net/wp-content/uploads/2020/06/Arsenal-Logo.png',
-  'tottenham': 'https://logos-world.net/wp-content/uploads/2020/06/Tottenham-Logo.png',
-  'real madrid': 'https://logos-world.net/wp-content/uploads/2020/06/Real-Madrid-Logo.png',
-  'barcelona': 'https://logos-world.net/wp-content/uploads/2020/06/Barcelona-Logo.png',
-  'bayern munich': 'https://logos-world.net/wp-content/uploads/2020/06/Bayern-Munich-Logo.png',
-  'paris saint-germain': 'https://logos-world.net/wp-content/uploads/2020/06/Paris-Saint-Germain-Logo.png',
-  'psg': 'https://logos-world.net/wp-content/uploads/2020/06/Paris-Saint-Germain-Logo.png',
-  'juventus': 'https://logos-world.net/wp-content/uploads/2020/06/Juventus-Logo.png',
-  'ac milan': 'https://logos-world.net/wp-content/uploads/2020/06/AC-Milan-Logo.png',
-  'inter milan': 'https://logos-world.net/wp-content/uploads/2020/06/Inter-Milan-Logo.png',
+// Fetch team logo from TheSportsDB
+export const getTeamLogo = async (teamName: string): Promise<string> => {
+  if (!teamName || teamName.trim() === '') return '';
   
-  // Basketball (NBA)
-  'los angeles lakers': 'https://logoeps.com/wp-content/uploads/2013/03/los-angeles-lakers-vector-logo.png',
-  'golden state warriors': 'https://logoeps.com/wp-content/uploads/2013/03/golden-state-warriors-vector-logo.png',
-  'boston celtics': 'https://logoeps.com/wp-content/uploads/2013/03/boston-celtics-vector-logo.png',
-  'miami heat': 'https://logoeps.com/wp-content/uploads/2013/03/miami-heat-vector-logo.png',
-  'chicago bulls': 'https://logoeps.com/wp-content/uploads/2013/03/chicago-bulls-vector-logo.png',
+  // Check cache first
+  const cacheKey = teamName.toLowerCase().trim();
+  if (logoCache.has(cacheKey)) {
+    return logoCache.get(cacheKey) || '';
+  }
   
-  // American Football (NFL)
-  'new england patriots': 'https://logoeps.com/wp-content/uploads/2013/03/new-england-patriots-vector-logo.png',
-  'dallas cowboys': 'https://logoeps.com/wp-content/uploads/2013/03/dallas-cowboys-vector-logo.png',
-  'green bay packers': 'https://logoeps.com/wp-content/uploads/2013/03/green-bay-packers-vector-logo.png',
-  'pittsburgh steelers': 'https://logoeps.com/wp-content/uploads/2013/03/pittsburgh-steelers-vector-logo.png',
+  try {
+    const response = await fetch(
+      `${SPORTSDB_API}/searchteams.php?t=${encodeURIComponent(teamName)}`
+    );
+    const data = await response.json();
+    
+    let logoUrl = '';
+    if (data.teams && data.teams.length > 0) {
+      // Prefer badge over logo
+      logoUrl = data.teams[0].strBadge || data.teams[0].strLogo || '';
+    }
+    
+    // Cache the result (even if empty)
+    logoCache.set(cacheKey, logoUrl);
+    return logoUrl;
+  } catch (error) {
+    console.error('Failed to fetch team logo for:', teamName, error);
+    logoCache.set(cacheKey, '');
+    return '';
+  }
 };
 
-// Country flag mappings using flagpedia or similar service
-const COUNTRY_LOGO_MAPPINGS: CountryLogoMapping = {
-  'england': 'https://flagpedia.net/data/flags/w580/gb-eng.webp',
-  'united kingdom': 'https://flagpedia.net/data/flags/w580/gb.webp',
-  'uk': 'https://flagpedia.net/data/flags/w580/gb.webp',
-  'united states': 'https://flagpedia.net/data/flags/w580/us.webp',
-  'usa': 'https://flagpedia.net/data/flags/w580/us.webp',
-  'spain': 'https://flagpedia.net/data/flags/w580/es.webp',
-  'france': 'https://flagpedia.net/data/flags/w580/fr.webp',
-  'germany': 'https://flagpedia.net/data/flags/w580/de.webp',
-  'italy': 'https://flagpedia.net/data/flags/w580/it.webp',
-  'brazil': 'https://flagpedia.net/data/flags/w580/br.webp',
-  'argentina': 'https://flagpedia.net/data/flags/w580/ar.webp',
-  'mexico': 'https://flagpedia.net/data/flags/w580/mx.webp',
-  'canada': 'https://flagpedia.net/data/flags/w580/ca.webp',
-  'australia': 'https://flagpedia.net/data/flags/w580/au.webp',
-  'india': 'https://flagpedia.net/data/flags/w580/in.webp',
-  'netherlands': 'https://flagpedia.net/data/flags/w580/nl.webp',
-  'portugal': 'https://flagpedia.net/data/flags/w580/pt.webp',
-  'russia': 'https://flagpedia.net/data/flags/w580/ru.webp',
-  'japan': 'https://flagpedia.net/data/flags/w580/jp.webp',
-  'south korea': 'https://flagpedia.net/data/flags/w580/kr.webp',
-  'china': 'https://flagpedia.net/data/flags/w580/cn.webp',
+// Enhance match with team logos
+export const enhanceMatchWithLogos = async (match: any): Promise<any> => {
+  if (!match.teams) return match;
+  
+  // Skip if logos already exist
+  if (match.teams.home?.badge && match.teams.away?.badge) {
+    return match;
+  }
+  
+  const [homeLogo, awayLogo] = await Promise.all([
+    match.teams.home?.name && !match.teams.home?.badge 
+      ? getTeamLogo(match.teams.home.name) 
+      : Promise.resolve(match.teams.home?.badge || ''),
+    match.teams.away?.name && !match.teams.away?.badge 
+      ? getTeamLogo(match.teams.away.name) 
+      : Promise.resolve(match.teams.away?.badge || '')
+  ]);
+  
+  return {
+    ...match,
+    teams: {
+      home: {
+        ...match.teams.home,
+        badge: homeLogo || match.teams.home?.badge || ''
+      },
+      away: {
+        ...match.teams.away,
+        badge: awayLogo || match.teams.away?.badge || ''
+      }
+    }
+  };
 };
 
+// Enhance multiple matches with logos
+export const enhanceMatchesWithLogos = async (matches: any[]): Promise<any[]> => {
+  // Process in batches to avoid too many concurrent requests
+  const batchSize = 5;
+  const results: any[] = [];
+  
+  for (let i = 0; i < matches.length; i += batchSize) {
+    const batch = matches.slice(i, i + batchSize);
+    const enhanced = await Promise.all(batch.map(enhanceMatchWithLogos));
+    results.push(...enhanced);
+  }
+  
+  return results;
+};
+
+// Pre-load common team logos (optional optimization)
+export const preloadCommonTeams = async () => {
+  const commonTeams = [
+    'Manchester United', 'Manchester City', 'Liverpool', 'Arsenal', 'Chelsea',
+    'Barcelona', 'Real Madrid', 'Bayern Munich', 'PSG', 'Juventus',
+    'Los Angeles Lakers', 'Golden State Warriors', 'Boston Celtics',
+    'New York Yankees', 'Dallas Cowboys', 'New England Patriots'
+  ];
+  
+  await Promise.all(commonTeams.map(team => getTeamLogo(team)));
+  console.log('✅ Preloaded common team logos');
+};
+
+// Legacy class-based service for backward compatibility
 class TeamLogoService {
-  private normalizeTeamName(name: string): string {
-    return name.toLowerCase().trim();
-  }
-
-  private extractCountryFromTeamName(teamName: string): string | null {
-    const normalized = this.normalizeTeamName(teamName);
-    
-    // Check if team name contains a country name
-    for (const country of Object.keys(COUNTRY_LOGO_MAPPINGS)) {
-      if (normalized.includes(country.toLowerCase())) {
-        return country;
-      }
-    }
-    
-    // Check for common patterns
-    if (normalized.includes('england') || normalized.includes('premier league')) return 'england';
-    if (normalized.includes('spain') || normalized.includes('la liga')) return 'spain';
-    if (normalized.includes('germany') || normalized.includes('bundesliga')) return 'germany';
-    if (normalized.includes('italy') || normalized.includes('serie a')) return 'italy';
-    if (normalized.includes('france') || normalized.includes('ligue 1')) return 'france';
-    if (normalized.includes('usa') || normalized.includes('mls') || normalized.includes('nfl') || normalized.includes('nba')) return 'usa';
-    
-    return null;
-  }
-
   public getTeamLogo(teamName: string, teamBadge?: string): string | null {
-    if (!teamName) return null;
-    
-    // First priority: Use official Streamed API badge if available
-    if (teamBadge) {
-      return `https://streamed.su/api/images/badge/${teamBadge}.webp`;
+    // If badge already exists, return it
+    if (teamBadge && teamBadge.startsWith('http')) {
+      return teamBadge;
     }
     
-    const normalized = this.normalizeTeamName(teamName);
-    
-    // Second priority: Direct team mapping
-    if (TEAM_LOGO_MAPPINGS[normalized]) {
-      return TEAM_LOGO_MAPPINGS[normalized];
-    }
-    
-    // Third priority: Partial matches for team names
-    for (const [mappedName, logo] of Object.entries(TEAM_LOGO_MAPPINGS)) {
-      if (normalized.includes(mappedName) || mappedName.includes(normalized)) {
-        return logo;
-      }
-    }
-    
-    // Fallback: Country flag if we can determine the country
-    const country = this.extractCountryFromTeamName(teamName);
-    if (country && COUNTRY_LOGO_MAPPINGS[country]) {
-      return COUNTRY_LOGO_MAPPINGS[country];
+    // Check cache for pre-loaded logos
+    const cacheKey = teamName?.toLowerCase().trim();
+    if (cacheKey && logoCache.has(cacheKey)) {
+      return logoCache.get(cacheKey) || null;
     }
     
     return null;
   }
 
-  public getCountryFlag(countryName: string): string | null {
-    if (!countryName) return null;
-    
-    const normalized = this.normalizeTeamName(countryName);
-    return COUNTRY_LOGO_MAPPINGS[normalized] || null;
-  }
-
-  // Method to enhance match data with logos
   public enhanceMatchWithLogos(match: any): any {
+    // Synchronous version - just returns cached logos if available
     if (!match.teams) return match;
-
-    const enhancedMatch = { ...match };
     
-    if (match.teams.home?.name && !match.teams.home.logo) {
-      const logo = this.getTeamLogo(match.teams.home.name, match.teams.home.badge);
-      if (logo) {
-        console.log(`Enhanced home team "${match.teams.home.name}" with logo:`, logo);
-        enhancedMatch.teams.home.logo = logo;
+    const homeLogoFromCache = match.teams.home?.name 
+      ? logoCache.get(match.teams.home.name.toLowerCase().trim()) 
+      : null;
+    const awayLogoFromCache = match.teams.away?.name 
+      ? logoCache.get(match.teams.away.name.toLowerCase().trim()) 
+      : null;
+    
+    return {
+      ...match,
+      teams: {
+        home: {
+          ...match.teams.home,
+          badge: match.teams.home?.badge || homeLogoFromCache || ''
+        },
+        away: {
+          ...match.teams.away,
+          badge: match.teams.away?.badge || awayLogoFromCache || ''
+        }
       }
-    }
-    
-    if (match.teams.away?.name && !match.teams.away.logo) {
-      const logo = this.getTeamLogo(match.teams.away.name, match.teams.away.badge);
-      if (logo) {
-        console.log(`Enhanced away team "${match.teams.away.name}" with logo:`, logo);
-        enhancedMatch.teams.away.logo = logo;
-      }
-    }
-    
-    return enhancedMatch;
-  }
-
-  // Method to add more team mappings dynamically
-  public addTeamMapping(teamName: string, logoUrl: string): void {
-    TEAM_LOGO_MAPPINGS[this.normalizeTeamName(teamName)] = logoUrl;
-  }
-
-  // Method to add more country mappings dynamically
-  public addCountryMapping(countryName: string, flagUrl: string): void {
-    COUNTRY_LOGO_MAPPINGS[this.normalizeTeamName(countryName)] = flagUrl;
+    };
   }
 }
 
