@@ -137,47 +137,51 @@ const calculateCarouselPriority = (match: Match): number => {
 };
 
 /**
+ * Check if match has a valid poster/image
+ */
+const hasValidPoster = (match: Match): boolean => {
+  return match.poster !== undefined && 
+         match.poster !== null && 
+         match.poster.trim() !== '';
+};
+
+/**
  * Get matches for hero carousel with strict filtering
- * Only shows elite matches with high viewer counts or major significance
+ * Only shows popular/elite matches WITH posters/images
  */
 export const getCarouselMatches = async (
   allMatches: Match[], 
   limit: number = 8
 ): Promise<Match[]> => {
-  // 1. Filter for elite matches only (no poster requirement - we can use team badges)
-  const eliteMatches = allMatches.filter(isEliteMatch);
+  // 1. Filter for matches WITH posters only (strict requirement)
+  const matchesWithPosters = allMatches.filter(hasValidPoster);
   
-  // 2. Filter for live or upcoming within 14 days
+  console.log(`🎬 Carousel: ${matchesWithPosters.length}/${allMatches.length} matches have posters`);
+  
+  // 2. Filter for elite/popular matches
+  const eliteMatchesWithPosters = matchesWithPosters.filter(isEliteMatch);
+  
+  console.log(`🎬 Carousel: ${eliteMatchesWithPosters.length} elite matches with posters`);
+  
+  // 3. Filter for live or upcoming within 14 days
   const now = Date.now();
   const fourteenDaysFromNow = now + (14 * 24 * 60 * 60 * 1000);
-  const relevantMatches = eliteMatches.filter(match => {
+  const relevantMatches = eliteMatchesWithPosters.filter(match => {
     const matchTime = new Date(match.date).getTime();
     return matchTime <= fourteenDaysFromNow;
   });
   
-  // 3. Prioritize matches with posters, but include all elite matches
-  const sortedByPoster = relevantMatches.sort((a, b) => {
-    const aHasPoster = a.poster && a.poster.trim() !== '' ? 1 : 0;
-    const bHasPoster = b.poster && b.poster.trim() !== '' ? 1 : 0;
-    return bHasPoster - aHasPoster;
-  });
-  
   // 4. Enrich with viewer counts
-  const enrichedMatches = await enrichMatchesWithViewers(sortedByPoster);
+  const enrichedMatches = await enrichMatchesWithViewers(relevantMatches);
   
-  // 5. Filter for high-profile matches (elite OR high viewers)
-  const carouselCandidates = enrichedMatches.filter(match => {
-    const hasHighViewers = match.viewerCount && match.viewerCount >= HOT_VIEWER_THRESHOLD;
-    const isTopTier = isEliteMatch(match);
-    return hasHighViewers || isTopTier;
-  });
-  
-  // 6. Sort by priority score
-  const sortedMatches = carouselCandidates.sort((a, b) => {
+  // 5. Sort by priority score (live first, then high viewers, then elite)
+  const sortedMatches = enrichedMatches.sort((a, b) => {
     return calculateCarouselPriority(b) - calculateCarouselPriority(a);
   });
   
-  // 7. Return top matches
+  console.log(`🎬 Carousel: Returning ${Math.min(sortedMatches.length, limit)} popular matches with posters`);
+  
+  // 6. Return top matches with posters
   return sortedMatches.slice(0, limit);
 };
 
