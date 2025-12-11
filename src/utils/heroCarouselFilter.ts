@@ -137,36 +137,38 @@ const calculateCarouselPriority = (match: Match): number => {
 };
 
 /**
- * Check if match has a valid poster/image
+ * Check if match has valid visual content (poster OR team names for badges)
  */
-const hasValidPoster = (match: Match): boolean => {
-  return match.poster !== undefined && 
-         match.poster !== null && 
-         match.poster.trim() !== '';
+const hasVisualContent = (match: Match): boolean => {
+  // Has poster
+  if (match.poster && match.poster.trim() !== '') return true;
+  // Has both team names (we can show badges)
+  if (match.teams?.home?.name && match.teams?.away?.name) return true;
+  return false;
 };
 
 /**
  * Get matches for hero carousel with strict filtering
- * Only shows popular/elite matches WITH posters/images
+ * Only shows popular/elite matches with visual content (poster or team badges)
  */
 export const getCarouselMatches = async (
   allMatches: Match[], 
   limit: number = 8
 ): Promise<Match[]> => {
-  // 1. Filter for matches WITH posters only (strict requirement)
-  const matchesWithPosters = allMatches.filter(hasValidPoster);
+  // 1. Filter for elite/popular matches only
+  const eliteMatches = allMatches.filter(isEliteMatch);
   
-  console.log(`🎬 Carousel: ${matchesWithPosters.length}/${allMatches.length} matches have posters`);
+  console.log(`🎬 Carousel: ${eliteMatches.length}/${allMatches.length} elite matches`);
   
-  // 2. Filter for elite/popular matches
-  const eliteMatchesWithPosters = matchesWithPosters.filter(isEliteMatch);
+  // 2. Filter for matches with visual content (poster or team names)
+  const visualMatches = eliteMatches.filter(hasVisualContent);
   
-  console.log(`🎬 Carousel: ${eliteMatchesWithPosters.length} elite matches with posters`);
+  console.log(`🎬 Carousel: ${visualMatches.length} elite matches with visual content`);
   
   // 3. Filter for live or upcoming within 14 days
   const now = Date.now();
   const fourteenDaysFromNow = now + (14 * 24 * 60 * 60 * 1000);
-  const relevantMatches = eliteMatchesWithPosters.filter(match => {
+  const relevantMatches = visualMatches.filter(match => {
     const matchTime = new Date(match.date).getTime();
     return matchTime <= fourteenDaysFromNow;
   });
@@ -174,14 +176,17 @@ export const getCarouselMatches = async (
   // 4. Enrich with viewer counts
   const enrichedMatches = await enrichMatchesWithViewers(relevantMatches);
   
-  // 5. Sort by priority score (live first, then high viewers, then elite)
+  // 5. Sort by priority: poster first, then live, then high viewers
   const sortedMatches = enrichedMatches.sort((a, b) => {
-    return calculateCarouselPriority(b) - calculateCarouselPriority(a);
+    // Prioritize matches with posters
+    const aHasPoster = a.poster && a.poster.trim() !== '' ? 10 : 0;
+    const bHasPoster = b.poster && b.poster.trim() !== '' ? 10 : 0;
+    return (bHasPoster + calculateCarouselPriority(b)) - (aHasPoster + calculateCarouselPriority(a));
   });
   
-  console.log(`🎬 Carousel: Returning ${Math.min(sortedMatches.length, limit)} popular matches with posters`);
+  console.log(`🎬 Carousel: Returning ${Math.min(sortedMatches.length, limit)} popular matches`);
   
-  // 6. Return top matches with posters
+  // 6. Return top matches
   return sortedMatches.slice(0, limit);
 };
 
