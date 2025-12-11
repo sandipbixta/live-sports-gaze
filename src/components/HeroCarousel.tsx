@@ -11,23 +11,18 @@ import { Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
-const STREAMED_BASE = 'https://streamed.pk';
-
-// Build poster URL from match data using streamed.pk Images API
-const getPosterUrl = (match: Match): string | null => {
-  // Use poster field directly if available
-  if (match.poster) {
-    return `${STREAMED_BASE}${match.poster}.webp`;
+// Fetch event thumb from TheSportsDB
+const fetchEventImage = async (homeTeam: string, awayTeam: string): Promise<string | null> => {
+  try {
+    const eventName = `${homeTeam}_vs_${awayTeam}`;
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${encodeURIComponent(eventName)}`);
+    const data = await res.json();
+    if (data.event?.[0]?.strThumb) return data.event[0].strThumb;
+    if (data.event?.[0]?.strPoster) return data.event[0].strPoster;
+    return null;
+  } catch {
+    return null;
   }
-  
-  // Build poster from team badges
-  const homeBadge = match.teams?.home?.badge;
-  const awayBadge = match.teams?.away?.badge;
-  if (homeBadge && awayBadge) {
-    return `${STREAMED_BASE}/api/images/poster/${homeBadge}/${awayBadge}.webp`;
-  }
-  
-  return null;
 };
 
 export const HeroCarousel = () => {
@@ -60,14 +55,20 @@ export const HeroCarousel = () => {
         // Get elite matches (Champions League, Premier League, La Liga, UFC, WWE, etc.)
         const eliteMatches = await getCarouselMatches(allMatches, 8);
         
-        // Enrich with streamed.pk poster URLs
-        const enrichedMatches = eliteMatches.map((match) => {
-          const posterUrl = getPosterUrl(match);
-          if (posterUrl && !match.poster) {
-            return { ...match, poster: posterUrl };
-          }
-          return match;
-        }).filter(match => match.poster || getPosterUrl(match));
+        // Enrich with TheSportsDB images
+        const enrichedMatches = await Promise.all(
+          eliteMatches.map(async (match) => {
+            if (match.poster) return match;
+            
+            const homeName = match.teams?.home?.name || '';
+            const awayName = match.teams?.away?.name || '';
+            if (homeName && awayName) {
+              const thumb = await fetchEventImage(homeName, awayName);
+              if (thumb) return { ...match, poster: thumb };
+            }
+            return match;
+          })
+        );
         
         console.log(`🎬 Carousel: ${enrichedMatches.length} elite matches loaded`);
         setMatchesWithPosters(enrichedMatches);
@@ -104,7 +105,7 @@ export const HeroCarousel = () => {
       <div className="flex">
         {allSlides.map((slide) => {
           const isCover = (slide as any).isCover;
-          const posterUrl = isCover ? slide.poster : getPosterUrl(slide as Match) || slide.poster || '';
+          const posterUrl = isCover ? slide.poster : (slide.poster || '');
           
           return isCover ? (
             // Cover photo slide - not clickable
