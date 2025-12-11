@@ -7,7 +7,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
+import { useAdBlockerDetection } from "./hooks/useAdBlockerDetection";
 import PopupAd from "./components/PopupAd";
+import { AdBlockerWarning } from "./components/AdBlockerWarning";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
@@ -65,6 +67,18 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   // Initialize ad hooks
   usePopunderAd();
+  const { isAdBlockerDetected, isUnsupportedBrowser, isChecking } = useAdBlockerDetection();
+
+  // Show ad blocker warning if detected (blocks the entire site)
+  if (!isChecking && (isAdBlockerDetected || isUnsupportedBrowser)) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <AdBlockerWarning isUnsupportedBrowser={isUnsupportedBrowser} />
+        </HelmetProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
