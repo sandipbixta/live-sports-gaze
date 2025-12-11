@@ -22,7 +22,7 @@ import { generateCompetitorTitle, generateCompetitorDescription } from '../utils
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
-import FeaturedMatchesCarousel from '../components/FeaturedMatchesCarousel';
+
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
@@ -234,9 +234,6 @@ const Index = () => {
 
         {/* Finished Match Results */}
         <FinishedMatches />
-
-        {/* Hero Carousel with Featured Matches */}
-        <FeaturedMatchesCarousel />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
