@@ -1,54 +1,38 @@
 // Re-export everything from sportsLogoService for backward compatibility
 export {
-  getLogoUrl as getTeamLogoUrl,
-  getLogoAsync as getTeamLogo,
-  getLogoUrl as getTeamLogoSync,
-  getSportIcon,
+  getTeamLogo,
+  getTeamLogoSync,
   getLogoUrl,
   getLogoAsync,
+  getSportIcon,
+  searchTeam,
+  searchEvent,
+  enhanceMatchWithLogos,
+  enhanceMatchesWithLogos,
+  getLeagueInfo,
+  searchPlayer,
+  getLivescores,
+  getHighlights,
+  preloadPopularTeams,
 } from './sportsLogoService';
 
-// Also import for use in legacy functions
-import { getLogoAsync, getLogoUrl } from './sportsLogoService';
-
-// Legacy exports for backward compatibility
-export const enhanceMatchWithLogos = async (match: any) => {
-  const homeTeam = match.teams?.home?.name || '';
-  const awayTeam = match.teams?.away?.name || '';
-  const sport = match.category || match.sportId || '';
-
-  const [homeBadge, awayBadge] = await Promise.all([
-    getLogoAsync(homeTeam, sport),
-    getLogoAsync(awayTeam, sport)
-  ]);
-
-  return {
-    ...match,
-    teams: {
-      home: { ...match.teams?.home, badge: match.teams?.home?.badge || homeBadge },
-      away: { ...match.teams?.away, badge: match.teams?.away?.badge || awayBadge }
-    }
-  };
-};
-
-export const enhanceMatchesWithLogos = async (matches: any[]) => {
-  return Promise.all(matches.map(enhanceMatchWithLogos));
-};
-
 // Legacy class-based service for backward compatibility
+import { getTeamLogoSync, enhanceMatchWithLogos as enhanceMatch } from './sportsLogoService';
+
 class TeamLogoService {
   public getTeamLogo(teamName: string, _existingBadge?: string): string | null {
     if (_existingBadge && _existingBadge.startsWith('http')) {
       return _existingBadge;
     }
-    return getLogoUrl(teamName);
+    return getTeamLogoSync(teamName);
   }
 
   public enhanceMatchWithLogos(match: any): any {
+    // Sync version - just returns existing data or null
     if (!match.teams) return match;
     
-    const homeLogo = match.teams.home?.name ? getLogoUrl(match.teams.home.name) : null;
-    const awayLogo = match.teams.away?.name ? getLogoUrl(match.teams.away.name) : null;
+    const homeLogo = match.teams.home?.name ? getTeamLogoSync(match.teams.home.name) : null;
+    const awayLogo = match.teams.away?.name ? getTeamLogoSync(match.teams.away.name) : null;
     
     return {
       ...match,
