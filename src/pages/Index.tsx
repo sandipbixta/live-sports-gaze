@@ -11,7 +11,7 @@ import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
 import SectionHeader from '../components/SectionHeader';
 
 // Lazy load more components to reduce initial bundle
-const PopularMatches = React.lazy(() => import('../components/PopularMatches'));
+
 const PromotionBoxes = React.lazy(() => import('../components/PromotionBoxes'));
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
@@ -260,13 +260,6 @@ const Index = () => {
         </div>
             
         <Separator className="my-8 bg-border" />
-            
-        {/* Popular by Viewers Section */}
-        {(!selectedSport || selectedSport === 'all') && (
-          <React.Suspense fallback={<div className="h-32 bg-card rounded-lg animate-pulse" />}>
-            <PopularMatches />
-          </React.Suspense>
-        )}
             
         <div className="mb-8">
           {selectedSport && (
