@@ -8,6 +8,7 @@ import SportsList from '../components/SportsList';
 import MatchesList from '../components/MatchesList';
 import FeaturedMatches from '../components/FeaturedMatches';
 import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
+import SectionHeader from '../components/SectionHeader';
 
 // Lazy load more components to reduce initial bundle
 const PopularMatches = React.lazy(() => import('../components/PopularMatches'));
@@ -246,23 +247,16 @@ const Index = () => {
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
         {/* Live TV Channels Carousel */}
-        <React.Suspense fallback={<div className="h-32 bg-muted rounded-lg animate-pulse" />}>
-          <FeaturedChannels />
-        </React.Suspense>
-
-        {/* Featured Sports - Second */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-bold text-foreground">Featured Sports</h3>
-            <div className="flex gap-2">
-              <Link to="/schedule">
-                <Button variant="outline" className="text-foreground border-border hover:bg-muted bg-background">
-                  <Calendar className="mr-2 h-4 w-4" /> View Schedule
-                </Button>
-              </Link>
-            </div>
-          </div>
-          
+          <SectionHeader title="Watch Live" seeAllLink="/live" />
+          <React.Suspense fallback={<div className="h-32 bg-card rounded-lg animate-pulse" />}>
+            <FeaturedChannels />
+          </React.Suspense>
+        </div>
+
+        {/* Featured Sports */}
+        <div className="mb-8">
+          <SectionHeader title="Featured Sports" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
           <SportsList 
             sports={sports}
             onSelectSport={handleSelectSport}
@@ -271,100 +265,92 @@ const Index = () => {
           />
         </div>
             
-            <Separator className="my-8 bg-[#343a4d]" />
+        <Separator className="my-8 bg-border" />
             
-            {/* Popular by Viewers Section - Only show on home page (no sport selected or All Sports) */}
-            {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
-              <React.Suspense fallback={<div className="h-32 bg-[#242836] rounded-lg animate-pulse" />}>
-                <div className="mb-8">
-                  <PopularMatches 
-                    popularMatches={liveMatches}
-                    selectedSport={null}
-                  />
-                </div>
-              </React.Suspense>
-            )}
-            
+        {/* Popular by Viewers Section */}
+        {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
+          <React.Suspense fallback={<div className="h-32 bg-card rounded-lg animate-pulse" />}>
             <div className="mb-8">
-              {selectedSport && (
+              <SectionHeader title="Popular by Viewers" seeAllLink="/live" />
+              <PopularMatches 
+                popularMatches={liveMatches}
+                selectedSport={null}
+              />
+            </div>
+          </React.Suspense>
+        )}
+            
+        <div className="mb-8">
+          {selectedSport && (
+            <>
+              {selectedSport === 'all' ? (
+                <div>
+                  <SectionHeader title="Live Matches - All Sports" seeAllLink="/live" />
+                  <AllSportsLiveMatches searchTerm={searchTerm} />
+                </div>
+              ) : (
                 <>
-                  {selectedSport === 'all' ? (
-                    <div>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          Live Matches - All Sports
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          Currently live matches from all sports categories
-                        </p>
-                      </div>
-                      <AllSportsLiveMatches searchTerm={searchTerm} />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <h4 className="text-xl font-bold text-foreground">
-                          {sports.find(s => s.id === selectedSport)?.name || 'Matches'}
-                        </h4>
-                        <p className="text-gray-400 text-sm">
-                          {filteredMatches.length} matches available
-                        </p>
-                      </div>
-                      <MatchesList
-                        matches={filteredMatches}
-                        sportId={selectedSport}
-                        isLoading={loadingMatches}
-                      />
-                    </>
-                  )}
+                  <SectionHeader 
+                    title={sports.find(s => s.id === selectedSport)?.name || 'Matches'} 
+                  />
+                  <p className="text-muted-foreground text-sm mb-4">
+                    {filteredMatches.length} matches available
+                  </p>
+                  <MatchesList
+                    matches={filteredMatches}
+                    sportId={selectedSport}
+                    isLoading={loadingMatches}
+                  />
                 </>
               )}
-            </div>
+            </>
+          )}
+        </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              <div className="lg:col-span-2">
-                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                  <NewsSection />
-                </React.Suspense>
-              </div>
-              <div>
-                <React.Suspense fallback={<div className="h-48 bg-[#242836] rounded-lg animate-pulse" />}>
-                  <TrendingTopics />
-                </React.Suspense>
-              </div>
-            </div>
-            
-            <React.Suspense fallback={<div className="h-24 bg-[#242836] rounded-lg animate-pulse" />}>
-              <PromotionBoxes />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
+              <NewsSection />
             </React.Suspense>
+          </div>
+          <div>
+            <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
+              <TrendingTopics />
+            </React.Suspense>
+          </div>
+        </div>
+            
+        <React.Suspense fallback={<div className="h-24 bg-card rounded-lg animate-pulse" />}>
+          <PromotionBoxes />
+        </React.Suspense>
             
             {/* Hidden SEO content for competitor targeting */}
             <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
             
-            {/* Call to Action Section */}
-            <section className="mb-6 sm:mb-8 mt-8">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 sm:p-8 md:p-10 relative overflow-hidden">
-                <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
-                <div className="relative">
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Start Watching Sports Now</h2>
-                  <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl">
-                    Join thousands of sports fans who trust DamiTV for free live streaming. Access all major leagues and tournaments with crystal clear HD quality on any device.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <Link to="/live">
-                      <Button variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
-                        <Tv className="mr-2 h-4 w-4" /> Watch Live Sports
-                      </Button>
-                    </Link>
-                    <Link to="/channels">
-                      <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-                        <Calendar className="mr-2 h-4 w-4" /> Browse Channels
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+        {/* Call to Action Section */}
+        <section className="mb-6 sm:mb-8 mt-8">
+          <div className="bg-gradient-to-r from-primary to-orange-600 text-primary-foreground rounded-xl p-6 sm:p-8 md:p-10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('/hero-pattern.svg')] opacity-10"></div>
+            <div className="relative">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">Start Watching Sports Now</h2>
+              <p className="text-sm sm:text-base md:text-lg mb-4 sm:mb-6 max-w-2xl opacity-90">
+                Join thousands of sports fans who trust DamiTV for free live streaming. Access all major leagues and tournaments with crystal clear HD quality on any device.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/live">
+                  <Button className="bg-background text-foreground hover:bg-background/90">
+                    <Tv className="mr-2 h-4 w-4" /> Watch Live Sports
+                  </Button>
+                </Link>
+                <Link to="/channels">
+                  <Button variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                    <Calendar className="mr-2 h-4 w-4" /> Browse Channels
+                  </Button>
+                </Link>
               </div>
-            </section>
+            </div>
+          </div>
+        </section>
 
             {/* SEO Content Section - Compact and organized */}
             <section className="mb-8">
