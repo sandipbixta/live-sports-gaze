@@ -26,7 +26,6 @@ import FeaturedMatchesCarousel from '../components/FeaturedMatchesCarousel';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
-import PopularTours from '../components/PopularTours';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -259,9 +258,6 @@ const Index = () => {
             isLoading={loadingSports}
           />
         </div>
-
-        {/* Popular Tours Section - FanCode style */}
-        <PopularTours />
             
         <Separator className="my-8 bg-border" />
             
