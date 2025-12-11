@@ -4,15 +4,26 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
 import { fetchAllMatches } from '@/api/sportsApi';
-import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
-import { filterMatchesWithImages } from '@/utils/matchImageFilter';
+import { getCarouselMatches } from '@/utils/heroCarouselFilter';
 import { isMatchLive } from '@/utils/matchUtils';
 import { ViewerCount } from './ViewerCount';
 import { Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
-const POSTER_BASE_URL = 'https://westream.su';
+// Fetch event thumb from TheSportsDB
+const fetchEventImage = async (homeTeam: string, awayTeam: string): Promise<string | null> => {
+  try {
+    const eventName = `${homeTeam}_vs_${awayTeam}`;
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${encodeURIComponent(eventName)}`);
+    const data = await res.json();
+    if (data.event?.[0]?.strThumb) return data.event[0].strThumb;
+    if (data.event?.[0]?.strPoster) return data.event[0].strPoster;
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 export const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -35,27 +46,32 @@ export const HeroCarousel = () => {
     isCover: true
   };
   
-  // Helper to convert relative poster URL to absolute
-  const getAbsolutePosterUrl = (posterPath: string) => {
-    if (!posterPath) return '';
-    if (posterPath.startsWith('http')) return posterPath;
-    return `${POSTER_BASE_URL}${posterPath}`;
-  };
-  
-  // Fetch featured matches from all sports categories (UFC, Wrestling, Cricket, AFL, etc.)
+  // Fetch elite/popular matches and enrich with TheSportsDB images
   useEffect(() => {
     const loadMatches = async () => {
       try {
         const allMatches = await fetchAllMatches();
         
-        // Get featured matches from all sports (major competitions, popular teams)
-        const featuredMatches = getFeaturedMatches(allMatches, 10);
+        // Get elite matches (Champions League, Premier League, La Liga, UFC, WWE, etc.)
+        const eliteMatches = await getCarouselMatches(allMatches, 8);
         
-        // Only show matches with images on home page
-        const matchesWithImages = filterMatchesWithImages(featuredMatches);
+        // Enrich with TheSportsDB images
+        const enrichedMatches = await Promise.all(
+          eliteMatches.map(async (match) => {
+            if (match.poster) return match;
+            
+            const homeName = match.teams?.home?.name || '';
+            const awayName = match.teams?.away?.name || '';
+            if (homeName && awayName) {
+              const thumb = await fetchEventImage(homeName, awayName);
+              if (thumb) return { ...match, poster: thumb };
+            }
+            return match;
+          })
+        );
         
-        console.log(`⭐ Found ${matchesWithImages.length} featured matches with images from all sports (Football, Basketball, UFC, Cricket, AFL, etc.)`);
-        setMatchesWithPosters(matchesWithImages);
+        console.log(`🎬 Carousel: ${enrichedMatches.length} elite matches loaded`);
+        setMatchesWithPosters(enrichedMatches);
       } catch (error) {
         console.error('Error loading matches for carousel:', error);
       }
@@ -89,7 +105,7 @@ export const HeroCarousel = () => {
       <div className="flex">
         {allSlides.map((slide) => {
           const isCover = (slide as any).isCover;
-          const posterUrl = isCover ? slide.poster : getAbsolutePosterUrl(slide.poster || '');
+          const posterUrl = isCover ? slide.poster : (slide.poster || '');
           
           return isCover ? (
             // Cover photo slide - not clickable
