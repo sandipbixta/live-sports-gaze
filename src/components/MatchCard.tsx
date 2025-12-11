@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
-import { getTeamLogo } from '../services/teamLogoService';
+import { getLogoAsync, getLogoUrl, getSportIcon } from '../services/sportsLogoService';
 import { sportsDbService } from '../services/sportsDbService';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
+import TeamLogo from './TeamLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MatchCardProps {
@@ -39,6 +40,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
+  const sport = match.category || match.sportId || '';
 
   // Lazy load - only fetch poster when card is visible
   useEffect(() => {
@@ -77,18 +79,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
       // Fetch team logos if not provided in match data
       if (home && !match.teams?.home?.badge) {
-        const logo = await getTeamLogo(home);
+        const logo = await getLogoAsync(home, sport);
         if (logo) setFetchedHomeBadge(logo);
       }
       
       if (away && !match.teams?.away?.badge) {
-        const logo = await getTeamLogo(away);
+        const logo = await getLogoAsync(away, sport);
         if (logo) setFetchedAwayBadge(logo);
       }
     };
 
     fetchData();
-  }, [isVisible, match.poster, home, away, match.teams?.home?.badge, match.teams?.away?.badge]);
+  }, [isVisible, match.poster, home, away, match.teams?.home?.badge, match.teams?.away?.badge, sport]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -377,35 +379,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
           
           {/* Team 1 */}
           <div className="flex items-center gap-2">
-            {homeBadge ? (
-              <img 
-                src={homeBadge} 
-                alt={home} 
-                className="w-5 h-5 object-contain rounded-full"
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-[8px] font-bold text-muted-foreground">{home.slice(0, 2).toUpperCase()}</span>
-              </div>
-            )}
+            <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
             <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
           </div>
           
           {/* Team 2 */}
           <div className="flex items-center gap-2">
-            {awayBadge ? (
-              <img 
-                src={awayBadge} 
-                alt={away} 
-                className="w-5 h-5 object-contain rounded-full"
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-[8px] font-bold text-muted-foreground">{away.slice(0, 2).toUpperCase()}</span>
-              </div>
-            )}
+            <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
             <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
           </div>
           
