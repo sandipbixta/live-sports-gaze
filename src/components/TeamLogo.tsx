@@ -1,90 +1,92 @@
 import { useState, useEffect } from 'react';
-import { fetchTeamLogo } from '../services/weStreamService';
+import { getLogoUrl, getLogoAsync, getSportIcon } from '../services/sportsLogoService';
 
 interface TeamLogoProps {
   teamName: string;
-  badge?: string | null;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
   sport?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
+  showFallbackIcon?: boolean;
 }
 
-const SIZES = {
+const sizeClasses = {
   sm: 'w-6 h-6',
   md: 'w-8 h-8',
   lg: 'w-12 h-12',
   xl: 'w-16 h-16'
 };
 
-const SPORT_ICONS: Record<string, string> = {
-  football: '⚽', soccer: '⚽', basketball: '🏀', nba: '🏀',
-  nfl: '🏈', hockey: '🏒', nhl: '🏒', baseball: '⚾', mlb: '⚾',
-  tennis: '🎾', cricket: '🏏', rugby: '🏉', mma: '🥊', ufc: '🥊',
-  boxing: '🥊', f1: '🏎️', motorsport: '🏎️', default: '🏆'
-};
-
-const TeamLogo = ({ teamName, badge, size = 'md', sport = 'default', className = '' }: TeamLogoProps) => {
-  const [logoUrl, setLogoUrl] = useState<string | null>(badge || null);
-  const [loading, setLoading] = useState(!badge);
+const TeamLogo = ({ 
+  teamName, 
+  sport, 
+  size = 'md', 
+  className = '',
+  showFallbackIcon = true 
+}: TeamLogoProps) => {
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => getLogoUrl(teamName, sport));
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(!getLogoUrl(teamName, sport));
 
   useEffect(() => {
-    if (badge) {
-      setLogoUrl(badge);
+    // Reset state when team changes
+    const directUrl = getLogoUrl(teamName, sport);
+    setLogoUrl(directUrl);
+    setError(false);
+    
+    if (directUrl) {
       setLoading(false);
       return;
     }
 
-    const fetchLogo = async () => {
-      setLoading(true);
-      try {
-        const url = await fetchTeamLogo(teamName);
+    let mounted = true;
+    setLoading(true);
+    
+    getLogoAsync(teamName, sport).then(url => {
+      if (mounted) {
         setLogoUrl(url);
-      } catch (err) {
-        setError(true);
-      } finally {
         setLoading(false);
       }
-    };
+    });
+    
+    return () => { mounted = false; };
+  }, [teamName, sport]);
 
-    if (teamName) {
-      fetchLogo();
-    }
-  }, [teamName, badge]);
+  const sizeClass = sizeClasses[size];
 
-  const sizeClass = SIZES[size];
-  const sportKey = sport?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
-  const sportIcon = SPORT_ICONS[sportKey] || SPORT_ICONS.default;
-
-  if (loading) {
-    return (
-      <div className={`${sizeClass} ${className} bg-muted rounded-full animate-pulse flex-shrink-0`} />
-    );
-  }
-
+  // Show logo if available
   if (logoUrl && !error) {
     return (
       <img
         src={logoUrl}
         alt={teamName}
-        className={`${sizeClass} ${className} object-contain flex-shrink-0`}
-        loading="lazy"
+        className={`${sizeClass} object-contain flex-shrink-0 ${className}`}
         onError={() => setError(true)}
+        loading="lazy"
       />
     );
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className={`${sizeClass} rounded-full bg-muted animate-pulse flex-shrink-0 ${className}`} />
+    );
+  }
+
+  // Fallback: sport icon or letter
+  if (showFallbackIcon && sport) {
+    const icon = getSportIcon(sport);
+    return (
+      <div className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-lg flex-shrink-0 ${className}`}>
+        {icon}
+      </div>
+    );
+  }
+
+  // Letter fallback
   return (
-    <div className={`${sizeClass} ${className} bg-muted rounded-full flex items-center justify-center text-foreground font-bold flex-shrink-0`}>
-      {sport !== 'default' ? (
-        <span className={size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-xl' : 'text-base'}>
-          {sportIcon}
-        </span>
-      ) : (
-        <span className={size === 'sm' ? 'text-xs' : 'text-sm'}>
-          {teamName?.charAt(0)?.toUpperCase() || '?'}
-        </span>
-      )}
+    <div className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs flex-shrink-0 ${className}`}>
+      {teamName?.charAt(0)?.toUpperCase() || '?'}
     </div>
   );
 };

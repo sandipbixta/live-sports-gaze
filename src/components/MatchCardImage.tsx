@@ -1,122 +1,93 @@
 import { useState, useEffect } from 'react';
-import { fetchEventPoster, fetchTeamLogo } from '../services/weStreamService';
-import TeamLogo from './TeamLogo';
+import { searchTeam, searchEvent, getSportIcon } from '../services/sportsLogoService';
 
 interface MatchCardImageProps {
   poster?: string | null;
   homeTeam: string;
   awayTeam: string;
+  sport?: string;
   homeBadge?: string | null;
   awayBadge?: string | null;
-  sport?: string;
-  className?: string;
 }
 
-const SPORT_GRADIENTS: Record<string, string> = {
-  football: 'from-green-900 to-green-950',
-  soccer: 'from-green-900 to-green-950',
-  basketball: 'from-orange-900 to-orange-950',
-  nba: 'from-orange-900 to-orange-950',
-  nfl: 'from-blue-900 to-blue-950',
-  hockey: 'from-cyan-900 to-cyan-950',
-  nhl: 'from-cyan-900 to-cyan-950',
-  mma: 'from-red-900 to-red-950',
-  ufc: 'from-red-900 to-red-950',
-  f1: 'from-red-900 to-red-950',
-  default: 'from-gray-800 to-gray-900'
-};
-
-const MatchCardImage = ({ 
-  poster, 
-  homeTeam, 
-  awayTeam, 
-  homeBadge, 
-  awayBadge, 
-  sport = 'default',
-  className = ''
-}: MatchCardImageProps) => {
-  const [imageUrl, setImageUrl] = useState<string | null>(poster || null);
+const MatchCardImage = ({ poster, homeTeam, awayTeam, sport, homeBadge, awayBadge }: MatchCardImageProps) => {
+  const [imageError, setImageError] = useState(false);
+  const [eventPoster, setEventPoster] = useState<string | null>(poster || null);
   const [homeLogo, setHomeLogo] = useState<string | null>(homeBadge || null);
   const [awayLogo, setAwayLogo] = useState<string | null>(awayBadge || null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      setLoading(true);
-      
-      if (!poster && homeTeam && awayTeam) {
-        const eventPoster = await fetchEventPoster(homeTeam, awayTeam);
-        if (eventPoster) {
-          setImageUrl(eventPoster);
-        }
-      }
-      
-      if (!homeBadge && homeTeam) {
-        const logo = await fetchTeamLogo(homeTeam);
-        if (logo) setHomeLogo(logo);
-      }
-      
-      if (!awayBadge && awayTeam) {
-        const logo = await fetchTeamLogo(awayTeam);
-        if (logo) setAwayLogo(logo);
-      }
-      
-      setLoading(false);
-    };
+    // Fetch event poster if not provided
+    if (!poster && homeTeam && awayTeam) {
+      searchEvent(homeTeam, awayTeam).then(data => {
+        if (data) setEventPoster(data.thumb || data.banner || data.poster);
+      });
+    }
 
-    fetchImages();
-  }, [poster, homeTeam, awayTeam, homeBadge, awayBadge]);
+    // Fetch team logos if not provided
+    if (!homeBadge && homeTeam) {
+      searchTeam(homeTeam).then(data => {
+        if (data) setHomeLogo(data.badge || data.logo);
+      });
+    }
+    if (!awayBadge && awayTeam) {
+      searchTeam(awayTeam).then(data => {
+        if (data) setAwayLogo(data.badge || data.logo);
+      });
+    }
+  }, [homeTeam, awayTeam, poster, homeBadge, awayBadge]);
 
-  const sportKey = sport?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
-  const gradient = SPORT_GRADIENTS[sportKey] || SPORT_GRADIENTS.default;
-
-  if (loading) {
+  // Show poster if available
+  if ((poster || eventPoster) && !imageError) {
     return (
-      <div className={`${className} bg-muted animate-pulse`} />
-    );
-  }
-
-  if (imageUrl && !error) {
-    return (
-      <div className={`${className} relative overflow-hidden`}>
+      <div className="relative w-full h-40 overflow-hidden">
         <img
-          src={imageUrl}
+          src={poster || eventPoster || ''}
           alt={`${homeTeam} vs ${awayTeam}`}
           className="w-full h-full object-cover"
-          loading="lazy"
-          onError={() => setError(true)}
+          onError={() => setImageError(true)}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
       </div>
     );
   }
 
+  // Show team logos side by side
+  if (homeLogo || awayLogo) {
+    return (
+      <div className="relative w-full h-40 bg-gradient-to-br from-muted via-background to-muted/50 flex items-center justify-center gap-4 p-4">
+        <div className="flex-1 flex justify-center">
+          {homeLogo ? (
+            <img src={homeLogo} alt={homeTeam} className="w-14 h-14 md:w-16 md:h-16 object-contain" />
+          ) : (
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center text-foreground text-xl font-bold">
+              {homeTeam?.charAt(0) || '?'}
+            </div>
+          )}
+        </div>
+        
+        <div className="text-2xl">{getSportIcon(sport || 'sports')}</div>
+        
+        <div className="flex-1 flex justify-center">
+          {awayLogo ? (
+            <img src={awayLogo} alt={awayTeam} className="w-14 h-14 md:w-16 md:h-16 object-contain" />
+          ) : (
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-muted flex items-center justify-center text-foreground text-xl font-bold">
+              {awayTeam?.charAt(0) || '?'}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // DamiTV fallback
   return (
-    <div className={`${className} relative overflow-hidden bg-gradient-to-br ${gradient}`}>
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)`
-        }} />
+    <div className="relative w-full h-40 bg-gradient-to-br from-primary/20 via-background to-muted flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-4xl mb-2">{getSportIcon(sport || 'sports')}</div>
+        <h3 className="text-xl font-bold text-foreground">DAMITV</h3>
+        <p className="text-muted-foreground text-xs">Live Sports</p>
       </div>
-      
-      <div className="absolute inset-0 flex items-center justify-center gap-4 p-4">
-        <TeamLogo 
-          teamName={homeTeam} 
-          badge={homeLogo} 
-          size="lg" 
-          sport={sport} 
-        />
-        <span className="text-white/50 font-bold text-lg">VS</span>
-        <TeamLogo 
-          teamName={awayTeam} 
-          badge={awayLogo} 
-          size="lg" 
-          sport={sport} 
-        />
-      </div>
-      
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
     </div>
   );
 };
