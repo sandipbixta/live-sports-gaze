@@ -4,15 +4,15 @@ import Autoplay from 'embla-carousel-autoplay';
 import { Link } from 'react-router-dom';
 import { Match } from '@/types/sports';
 import { fetchAllMatches } from '@/api/sportsApi';
-import { getCarouselMatches, isHotMatch, formatViewerCount } from '@/utils/heroCarouselFilter';
+import { getFeaturedMatches } from '@/utils/featuredMatchFilter';
+import { filterMatchesWithImages } from '@/utils/matchImageFilter';
 import { isMatchLive } from '@/utils/matchUtils';
 import { ViewerCount } from './ViewerCount';
-import { Clock, Calendar, Eye } from 'lucide-react';
+import { Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
-import { teamLogoService } from '@/services/teamLogoService';
 
-const POSTER_BASE_URL = 'https://api.cdn-live.tv';
+const POSTER_BASE_URL = 'https://streamed.pk';
 
 export const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
@@ -24,8 +24,7 @@ export const HeroCarousel = () => {
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [carouselMatches, setCarouselMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [matchesWithPosters, setMatchesWithPosters] = useState<Match[]>([]);
   
   // Static cover photo slide
   const coverSlide = {
@@ -42,49 +41,27 @@ export const HeroCarousel = () => {
     if (posterPath.startsWith('http')) return posterPath;
     return `${POSTER_BASE_URL}${posterPath}`;
   };
-
-  // Get team badge URL
-  const getTeamBadge = (team: any) => {
-    if (!team) return '';
-    if (team.badge) {
-      return team.badge.startsWith('http') ? team.badge : `https://api.cdn-live.tv/api/v1/team/images/${team.badge}`;
-    }
-    if (team.logo) {
-      return team.logo.startsWith('http') ? team.logo : `https://api.cdn-live.tv/api/v1/team/images/${team.logo}`;
-    }
-    return teamLogoService.getTeamLogo(team?.name || '', team?.badge) || '';
-  };
   
-  // Fetch ELITE matches only (La Liga, Premier League, Champions League, UFC, WWE, top teams)
+  // Fetch featured matches from all sports categories (UFC, Wrestling, Cricket, AFL, etc.)
   useEffect(() => {
     const loadMatches = async () => {
-      setLoading(true);
       try {
         const allMatches = await fetchAllMatches();
         
-        // Get elite matches with viewer counts (filtered and sorted by importance)
-        const topMatches = await getCarouselMatches(allMatches, 8);
+        // Get featured matches from all sports (major competitions, popular teams)
+        const featuredMatches = getFeaturedMatches(allMatches, 10);
         
-        setCarouselMatches(topMatches);
-        console.log(`🎬 Hero Carousel loaded ${topMatches.length} elite matches:`, 
-          topMatches.map(m => ({
-            title: m.title, 
-            viewers: m.viewerCount,
-            hot: isHotMatch(m)
-          }))
-        );
+        // Only show matches with images on home page
+        const matchesWithImages = filterMatchesWithImages(featuredMatches);
+        
+        console.log(`⭐ Found ${matchesWithImages.length} featured matches with images from all sports (Football, Basketball, UFC, Cricket, AFL, etc.)`);
+        setMatchesWithPosters(matchesWithImages);
       } catch (error) {
-        console.error('Error loading hero carousel matches:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error loading matches for carousel:', error);
       }
     };
-
-    loadMatches();
     
-    // Refresh carousel every 2 minutes to update viewer counts
-    const interval = setInterval(loadMatches, 2 * 60 * 1000);
-    return () => clearInterval(interval);
+    loadMatches();
   }, []);
 
   useEffect(() => {
@@ -102,19 +79,8 @@ export const HeroCarousel = () => {
     };
   }, [emblaApi]);
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="relative mb-6 rounded-xl overflow-hidden">
-        <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] bg-gradient-to-br from-background via-background/95 to-background/90 flex items-center justify-center animate-pulse">
-          <div className="text-muted-foreground text-sm">Loading elite matches...</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Combine cover slide with elite match slides
-  const allSlides = [coverSlide as any, ...carouselMatches];
+  // Combine cover slide with match slides
+  const allSlides = [coverSlide as any, ...matchesWithPosters];
 
   if (allSlides.length === 0) return null;
 
@@ -124,9 +90,6 @@ export const HeroCarousel = () => {
         {allSlides.map((slide) => {
           const isCover = (slide as any).isCover;
           const posterUrl = isCover ? slide.poster : getAbsolutePosterUrl(slide.poster || '');
-          const homeBadge = !isCover ? getTeamBadge(slide.teams?.home) : '';
-          const awayBadge = !isCover ? getTeamBadge(slide.teams?.away) : '';
-          const hasPoster = posterUrl && posterUrl.trim() !== '';
           
           return isCover ? (
             // Cover photo slide - not clickable
@@ -143,10 +106,10 @@ export const HeroCarousel = () => {
                 
                 {/* SEO-optimized header text - positioned at bottom */}
                 <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent">
-                  <h2 className="text-[10px] sm:text-xs md:text-sm font-medium text-white/95 mb-0.5 sm:mb-1 drop-shadow-lg leading-tight">
+                  <h2 className="text-xs sm:text-sm md:text-base font-medium text-white/95 mb-0.5 sm:mb-1 drop-shadow-lg leading-tight">
                     Watch Live Sports Streaming Free - Champions League, Premier League, La Liga & More
                   </h2>
-                  <p className="text-[9px] sm:text-[10px] md:text-xs text-white/75 drop-shadow-md leading-tight">
+                  <p className="text-[10px] sm:text-xs md:text-sm text-white/75 drop-shadow-md leading-tight">
                     Free HD sports streaming for football, basketball, tennis and all major leagues worldwide
                   </p>
                 </div>
@@ -160,46 +123,23 @@ export const HeroCarousel = () => {
               className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
             >
               <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] flex items-center overflow-hidden">
-                {/* Background: poster or team badges fallback */}
-                {hasPoster ? (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${posterUrl})` }}
-                  />
-                ) : (
-                  <div className="absolute inset-0 bg-black flex items-center justify-center gap-8">
-                    {homeBadge && (
-                      <img src={homeBadge} alt="" className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain opacity-80" />
-                    )}
-                    <span className="text-white/60 font-bold text-2xl sm:text-3xl">VS</span>
-                    {awayBadge && (
-                      <img src={awayBadge} alt="" className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain opacity-80" />
-                    )}
-                  </div>
-                )}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${posterUrl})` }}
+                />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
                 <div className="relative z-10 p-3 sm:p-5 md:p-8 max-w-xl">
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3">
+                  <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3">
                     <div className="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full">
                       {isMatchLive(slide) ? 'LIVE NOW' : 'UPCOMING'}
                     </div>
-                    
-                    {/* HOT Badge for high-viewer matches (500+) */}
-                    {isHotMatch(slide) && (
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full animate-pulse">
-                        🔥 HOT
-                      </div>
-                    )}
-                    
-                    {/* Viewer Count Badge */}
-                    {slide.viewerCount && slide.viewerCount > 0 && (
-                      <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] sm:text-xs font-semibold animate-fade-in">
-                        <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                        {formatViewerCount(slide.viewerCount)} watching
+                    {isMatchLive(slide) && (
+                      <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] sm:text-xs font-semibold">
+                        <ViewerCount matchId={slide.id} enableRealtime={true} size="sm" />
                       </div>
                     )}
                   </div>
-                  <h2 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 md:mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
+                  <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 md:mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
                     {slide.title}
                   </h2>
                   <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-3 md:mb-4">
@@ -220,11 +160,16 @@ export const HeroCarousel = () => {
                       </div>
                     )}
                   </div>
-                  {slide.category && (
-                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-white drop-shadow-xl uppercase font-semibold">
-                      {slide.category}
-                    </p>
-                  )}
+                  <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white drop-shadow-xl">
+                    {slide.category && (
+                      <span className="uppercase font-semibold">{slide.category}</span>
+                    )}
+                    {slide.teams?.home?.name && slide.teams?.away?.name && (
+                      <span className="block mt-1 sm:mt-1.5 md:mt-2 text-[10px] sm:text-xs md:text-sm opacity-95">
+                        {slide.teams.home.name} vs {slide.teams.away.name}
+                      </span>
+                    )}
+                  </p>
                 </div>
               </div>
             </Link>
