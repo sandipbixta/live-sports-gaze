@@ -47,13 +47,15 @@ export const HeroCarousel = () => {
   const currentSlide = allSlides[currentIndex] || allSlides[0];
   const isCover = (currentSlide as any).isCover;
 
-  // Get background image - use banner, or gradient with team badges
+  // Get background image - use poster/banner, or gradient with team badges
   const getBackgroundStyle = () => {
     if (isCover) {
       return { backgroundImage: `url(${coverPhoto})` };
     }
-    if (currentSlide.banner) {
-      return { backgroundImage: `url(${currentSlide.banner})` };
+    // Try poster first, then banner
+    const bgImage = currentSlide.poster || currentSlide.banner;
+    if (bgImage) {
+      return { backgroundImage: `url(${bgImage})` };
     }
     // Gradient fallback based on sport
     const sport = currentSlide.category || 'football';
@@ -63,9 +65,17 @@ export const HeroCarousel = () => {
       hockey: 'linear-gradient(135deg, #041e42 0%, #a2aaad 50%, #041e42 100%)',
       baseball: 'linear-gradient(135deg, #bf0d3e 0%, #002d72 50%, #bf0d3e 100%)',
       golf: 'linear-gradient(135deg, #006747 0%, #ffc72c 50%, #006747 100%)',
+      tennis: 'linear-gradient(135deg, #1d4e89 0%, #7ec8e3 50%, #1d4e89 100%)',
+      cricket: 'linear-gradient(135deg, #1b5e20 0%, #81c784 50%, #1b5e20 100%)',
+      rugby: 'linear-gradient(135deg, #2e7d32 0%, #ff5722 50%, #2e7d32 100%)',
+      mma: 'linear-gradient(135deg, #b71c1c 0%, #212121 50%, #b71c1c 100%)',
+      ufc: 'linear-gradient(135deg, #b71c1c 0%, #212121 50%, #b71c1c 100%)',
+      boxing: 'linear-gradient(135deg, #880e4f 0%, #311b92 50%, #880e4f 100%)',
     };
     return { background: gradients[sport] || gradients.football };
   };
+
+  const hasBgImage = isCover || currentSlide.poster || currentSlide.banner;
 
   return (
     <div className="relative w-full h-[280px] md:h-[400px] rounded-xl overflow-hidden group">
@@ -79,7 +89,7 @@ export const HeroCarousel = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
       
       {/* Team badges for matches without banner */}
-      {!isCover && !currentSlide.banner && (currentSlide.homeBadge || currentSlide.awayBadge) && (
+      {!isCover && !hasBgImage && (currentSlide.homeBadge || currentSlide.awayBadge) && (
         <div className="absolute inset-0 flex items-center justify-center gap-8 opacity-20">
           {currentSlide.homeBadge && (
             <img src={currentSlide.homeBadge} alt="" className="w-32 h-32 md:w-48 md:h-48 object-contain" />
@@ -105,6 +115,16 @@ export const HeroCarousel = () => {
         ) : (
           // Match slide content
           <>
+            {/* Live Badge */}
+            {currentSlide.isLive && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  LIVE
+                </span>
+              </div>
+            )}
+            
             {/* Sport & Category */}
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xl md:text-2xl">{getSportIcon(currentSlide.category || 'sports')}</span>
