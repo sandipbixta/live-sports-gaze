@@ -155,11 +155,11 @@ const calculatePopularityScore = (match: any): number => {
 
 // ============================================
 // FETCH EVENT IMAGES FROM THESPORTSDB
+// Try: thumb -> banner -> poster -> fanart
 // ============================================
 
 const fetchEventImages = async (homeTeam: string, awayTeam: string): Promise<{
-  thumb: string | null;
-  banner: string | null;
+  image: string | null;
   homeBadge: string | null;
   awayBadge: string | null;
 }> => {
@@ -174,9 +174,11 @@ const fetchEventImages = async (homeTeam: string, awayTeam: string): Promise<{
       const data = await response.json();
       if (data.event && data.event.length > 0) {
         const event = data.event[0];
+        // Priority: thumb -> banner -> poster -> square -> fanart
+        const image = event.strThumb || event.strBanner || event.strPoster || 
+                      event.strSquare || event.strFanart || null;
         return {
-          thumb: event.strThumb || event.strPoster || null,
-          banner: event.strBanner || null,
+          image,
           homeBadge: event.strHomeTeamBadge || null,
           awayBadge: event.strAwayTeamBadge || null,
         };
@@ -186,15 +188,18 @@ const fetchEventImages = async (homeTeam: string, awayTeam: string): Promise<{
     // Ignore timeout/errors
   }
   
-  return { thumb: null, banner: null, homeBadge: null, awayBadge: null };
+  return { image: null, homeBadge: null, awayBadge: null };
 };
 
 // ============================================
-// FETCH TEAM INFO
+// FETCH TEAM INFO - Try multiple image types
 // ============================================
 
-const fetchTeamInfo = async (teamName: string): Promise<{ badge: string | null; fanart: string | null }> => {
-  if (!teamName || teamName === 'TBA') return { badge: null, fanart: null };
+const fetchTeamInfo = async (teamName: string): Promise<{ 
+  badge: string | null; 
+  image: string | null;
+}> => {
+  if (!teamName || teamName === 'TBA') return { badge: null, image: null };
   
   try {
     const response = await fetch(
@@ -206,9 +211,13 @@ const fetchTeamInfo = async (teamName: string): Promise<{ badge: string | null; 
       const data = await response.json();
       if (data.teams && data.teams.length > 0) {
         const team = data.teams[0];
+        // Priority for background: banner -> fanart1 -> fanart2 -> fanart3 -> fanart4
+        const image = team.strBanner || team.strFanart1 || team.strTeamFanart1 || 
+                      team.strFanart2 || team.strTeamFanart2 || team.strFanart3 || 
+                      team.strFanart4 || team.strStadiumThumb || null;
         return {
           badge: team.strBadge || team.strLogo || null,
-          fanart: team.strFanart1 || team.strBanner || team.strTeamFanart1 || null,
+          image,
         };
       }
     }
@@ -216,7 +225,7 @@ const fetchTeamInfo = async (teamName: string): Promise<{ badge: string | null; 
     // Ignore
   }
   
-  return { badge: null, fanart: null };
+  return { badge: null, image: null };
 };
 
 // ============================================
@@ -295,7 +304,8 @@ export const getFeaturedMatches = async (limit: number = 8): Promise<any[]> => {
         fetchTeamInfo(awayTeam),
       ]);
       
-      const banner = eventImages.thumb || eventImages.banner || homeInfo.fanart || awayInfo.fanart;
+      // Priority: event image -> home team image -> away team image
+      const banner = eventImages.image || homeInfo.image || awayInfo.image;
       const homeBadge = eventImages.homeBadge || homeInfo.badge;
       const awayBadge = eventImages.awayBadge || awayInfo.badge;
       
