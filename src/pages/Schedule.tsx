@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import { Separator } from '../components/ui/separator';
-import { format, addDays, startOfDay } from 'date-fns';
+import { format, startOfDay, isSameDay } from 'date-fns';
 import MatchesList from '../components/MatchesList';
 import PageLayout from '../components/PageLayout';
 import PageHeader from '../components/PageHeader';
@@ -15,54 +14,85 @@ import { isPopularLeague } from '../utils/popularLeagues';
 import { Helmet } from 'react-helmet-async';
 import TelegramBanner from '../components/TelegramBanner';
 import SportFilterPills from '../components/live/SportFilterPills';
-// import Advertisement from '../components/Advertisement';
 
 const Schedule = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [popularMatches, setPopularMatches] = useState<Match[]>([]);
+  const [allMatches, setAllMatches] = useState<Match[]>([]); // All matches from API
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   
   const [loadingSports, setLoadingSports] = useState(true);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [activeTournamentFilter, setActiveTournamentFilter] = useState<string | null>(null);
-  
-  // Get unique tournaments from matches
+
+  // Extract unique dates from all matches
+  const availableDates = useMemo(() => {
+    const dateSet = new Set<string>();
+    allMatches.forEach(match => {
+      if (match.date) {
+        const dateStr = format(startOfDay(new Date(match.date)), 'yyyy-MM-dd');
+        dateSet.add(dateStr);
+      }
+    });
+    return Array.from(dateSet)
+      .map(d => startOfDay(new Date(d)))
+      .sort((a, b) => a.getTime() - b.getTime());
+  }, [allMatches]);
+
+  // Filter matches by current date
+  const matchesForDate = useMemo(() => {
+    return allMatches.filter(match => {
+      const matchDate = startOfDay(new Date(match.date));
+      return isSameDay(matchDate, currentDate);
+    });
+  }, [allMatches, currentDate]);
+
+  // Apply search filter
+  const filteredMatches = useMemo(() => {
+    if (!searchTerm.trim()) return matchesForDate;
+    
+    const lowercaseSearch = searchTerm.toLowerCase();
+    return matchesForDate.filter(match => {
+      return match.title.toLowerCase().includes(lowercaseSearch) || 
+        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
+        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+    });
+  }, [matchesForDate, searchTerm]);
+
+  // Apply tournament filter
+  const displayMatches = useMemo(() => {
+    if (!activeTournamentFilter) return filteredMatches;
+    return filteredMatches.filter(m => m.tournament === activeTournamentFilter);
+  }, [filteredMatches, activeTournamentFilter]);
+
+  // Get unique tournaments
   const tournaments = useMemo(() => {
     const tournamentSet = new Set<string>();
-    matches.forEach(match => {
+    matchesForDate.forEach(match => {
       if (match.tournament) {
         tournamentSet.add(match.tournament);
       }
     });
     return Array.from(tournamentSet).sort();
-  }, [matches]);
-  
-  // Filter matches by tournament
-  const displayMatches = useMemo(() => {
-    let result = searchTerm ? filteredMatches : matches;
-    if (activeTournamentFilter) {
-      result = result.filter(m => m.tournament === activeTournamentFilter);
-    }
-    return result;
-  }, [matches, filteredMatches, searchTerm, activeTournamentFilter]);
+  }, [matchesForDate]);
 
-  // Helper function to remove duplicates more strictly
+  // Popular matches from major leagues
+  const popularMatches = useMemo(() => {
+    return displayMatches.filter(match => isPopularLeague(match.title));
+  }, [displayMatches]);
+
+  // Helper function to remove duplicates
   const removeDuplicatesFromMatches = (matches: Match[]): Match[] => {
     const seen = new Set<string>();
     const uniqueMatches: Match[] = [];
     
     matches.forEach(match => {
-      // Create a unique key based on teams and date
       const homeTeam = match.teams?.home?.name || '';
       const awayTeam = match.teams?.away?.name || '';
-      const matchDate = new Date(match.date).toISOString().split('T')[0];
+      const matchDate = format(new Date(match.date), 'yyyy-MM-dd');
       
-      // Use teams and date for uniqueness, fallback to title if no teams
       const uniqueKey = homeTeam && awayTeam 
         ? `${homeTeam}-vs-${awayTeam}-${matchDate}`.toLowerCase()
         : `${match.title}-${matchDate}`.toLowerCase();
@@ -84,9 +114,8 @@ const Schedule = () => {
         const sportsData = await fetchSports();
         setSports(sportsData);
         
-        // Auto-select first sport
         if (sportsData.length > 0) {
-          handleSelectSport(sportsData[0].id);
+          setSelectedSport(sportsData[0].id);
         }
       } catch (error) {
         toast({
@@ -102,73 +131,66 @@ const Schedule = () => {
     loadSports();
   }, [toast]);
 
-  // Fetch matches when a sport is selected or date changes
+  // Fetch matches when sport changes
   useEffect(() => {
-    if (selectedSport) {
-      handleSelectSport(selectedSport);
-    }
-  }, [currentDate, selectedSport]);
+    if (!selectedSport) return;
+    
+    const loadMatches = async () => {
+      setLoadingMatches(true);
+      try {
+        const matchesData = await fetchMatches(selectedSport);
+        const uniqueMatches = removeDuplicatesFromMatches(matchesData);
+        setAllMatches(uniqueMatches);
+        
+        // Auto-select first available date or today
+        if (uniqueMatches.length > 0) {
+          const today = startOfDay(new Date());
+          const todayHasMatches = uniqueMatches.some(m => 
+            isSameDay(startOfDay(new Date(m.date)), today)
+          );
+          
+          if (!todayHasMatches) {
+            // Find the closest upcoming date with matches
+            const futureDates = uniqueMatches
+              .map(m => startOfDay(new Date(m.date)))
+              .filter(d => d >= today)
+              .sort((a, b) => a.getTime() - b.getTime());
+            
+            if (futureDates.length > 0) {
+              setCurrentDate(futureDates[0]);
+            }
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load matches data.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+
+    loadMatches();
+  }, [selectedSport, toast]);
 
   // Handle sport selection
-  const handleSelectSport = async (sportId: string) => {
+  const handleSelectSport = (sportId: string) => {
     setSelectedSport(sportId);
-    setLoadingMatches(true);
-    
-    try {
-      const matchesData = await fetchMatches(sportId);
-      
-      // Remove duplicates from API data first
-      const uniqueMatches = removeDuplicatesFromMatches(matchesData);
-      
-      // Filter matches by date
-      const dateStr = format(currentDate, 'yyyy-MM-dd');
-      const filtered = uniqueMatches.filter(match => {
-        const matchDate = new Date(match.date);
-        return format(matchDate, 'yyyy-MM-dd') === dateStr;
-      });
-      
-      setMatches(filtered);
-      
-      // Set initial filtered matches
-      setFilteredMatches(filtered);
-      
-      // Identify popular matches from major leagues
-      const popular = filtered.filter(match => isPopularLeague(match.title));
-      setPopularMatches(popular);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load matches data.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingMatches(false);
-    }
+    setActiveTournamentFilter(null);
   };
 
-  // Handle date navigation
+  // Handle date navigation (fallback for when no available dates)
   const navigateDate = (days: number) => {
-    setCurrentDate(prev => startOfDay(addDays(prev, days)));
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + days);
+    setCurrentDate(startOfDay(newDate));
   };
 
   // Handle search
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    
-    if (!value.trim()) {
-      setFilteredMatches(matches);
-      return;
-    }
-    
-    const lowercaseSearch = value.toLowerCase();
-    const results = matches.filter(match => {
-      return match.title.toLowerCase().includes(lowercaseSearch) || 
-        match.teams?.home?.name.toLowerCase().includes(lowercaseSearch) ||
-        match.teams?.away?.name.toLowerCase().includes(lowercaseSearch);
-    });
-    
-    setFilteredMatches(results);
+    setSearchTerm(e.target.value);
   };
 
   return (
@@ -230,7 +252,8 @@ const Schedule = () => {
           <DatePagination 
             currentDate={currentDate} 
             setCurrentDate={setCurrentDate} 
-            navigateDate={navigateDate} 
+            navigateDate={navigateDate}
+            availableDates={availableDates.length > 0 ? availableDates : undefined}
           />
         </div>
         
@@ -243,10 +266,10 @@ const Schedule = () => {
           />
         </div>
         
-        {matches.length > 0 && (
+        {matchesForDate.length > 0 && (
           <div className="mb-6">
             <SportFilterPills
-              allMatches={matches}
+              allMatches={matchesForDate}
               sports={sports}
               activeSportFilter="all"
               onSportFilterChange={() => {}}
@@ -261,13 +284,8 @@ const Schedule = () => {
           selectedSport={selectedSport}
         />
 
-        {/* Direct Link Advertisement removed */}
-        {/* <div className="my-6 sm:my-8">
-          <Advertisement type="direct-link" className="w-full" />
-        </div> */}
-
         {popularMatches.length > 0 && (
-          <Separator className="my-8 bg-black dark:bg-white" />
+          <Separator className="my-8 bg-border" />
         )}
         
         <div className="mb-8">
