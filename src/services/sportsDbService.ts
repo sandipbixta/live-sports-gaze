@@ -2,6 +2,9 @@
 const SPORTS_DB_API_KEY = '751945'; // TheSportsDB API key
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
 
+const LOCALSTORAGE_CACHE_KEY = 'sportsdb_cache';
+const LOCALSTORAGE_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
 interface SportsDbEvent {
   idEvent: string;
   strEvent: string;
@@ -34,15 +37,99 @@ interface TeamSearchResponse {
   teams: SportsDbTeam[] | null;
 }
 
-// Cache for API responses to avoid hitting rate limits
-const eventCache = new Map<string, { data: SportsDbEvent | null; timestamp: number }>();
-const teamCache = new Map<string, { data: SportsDbTeam | null; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+interface CacheEntry<T> {
+  data: T | null;
+  timestamp: number;
+}
+
+interface LocalStorageCache {
+  events: Record<string, CacheEntry<SportsDbEvent>>;
+  teams: Record<string, CacheEntry<SportsDbTeam>>;
+}
+
+// In-memory cache for current session (faster access)
+const eventCache = new Map<string, CacheEntry<SportsDbEvent>>();
+const teamCache = new Map<string, CacheEntry<SportsDbTeam>>();
+const MEMORY_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Rate limiting - 30 requests per minute for free tier
 let requestCount = 0;
 let lastResetTime = Date.now();
 const MAX_REQUESTS_PER_MINUTE = 25; // Leave some buffer
+
+// Load cache from localStorage on init
+const loadLocalStorageCache = (): LocalStorageCache => {
+  try {
+    const cached = localStorage.getItem(LOCALSTORAGE_CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached) as LocalStorageCache;
+      // Clean expired entries
+      const now = Date.now();
+      Object.keys(parsed.events).forEach(key => {
+        if (now - parsed.events[key].timestamp > LOCALSTORAGE_CACHE_DURATION) {
+          delete parsed.events[key];
+        }
+      });
+      Object.keys(parsed.teams).forEach(key => {
+        if (now - parsed.teams[key].timestamp > LOCALSTORAGE_CACHE_DURATION) {
+          delete parsed.teams[key];
+        }
+      });
+      return parsed;
+    }
+  } catch (e) {
+    console.warn('Failed to load SportsDB cache from localStorage');
+  }
+  return { events: {}, teams: {} };
+};
+
+// Save cache to localStorage
+const saveToLocalStorage = (key: string, type: 'event' | 'team', data: SportsDbEvent | SportsDbTeam | null) => {
+  try {
+    const cache = loadLocalStorageCache();
+    const entry: CacheEntry<any> = { data, timestamp: Date.now() };
+    
+    if (type === 'event') {
+      cache.events[key] = entry;
+    } else {
+      cache.teams[key] = entry;
+    }
+    
+    // Limit cache size to prevent localStorage overflow
+    const maxEntries = 500;
+    if (Object.keys(cache.events).length > maxEntries) {
+      const sortedKeys = Object.keys(cache.events).sort((a, b) => 
+        cache.events[a].timestamp - cache.events[b].timestamp
+      );
+      sortedKeys.slice(0, 100).forEach(k => delete cache.events[k]);
+    }
+    if (Object.keys(cache.teams).length > maxEntries) {
+      const sortedKeys = Object.keys(cache.teams).sort((a, b) => 
+        cache.teams[a].timestamp - cache.teams[b].timestamp
+      );
+      sortedKeys.slice(0, 100).forEach(k => delete cache.teams[k]);
+    }
+    
+    localStorage.setItem(LOCALSTORAGE_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    console.warn('Failed to save SportsDB cache to localStorage');
+  }
+};
+
+// Get from localStorage cache
+const getFromLocalStorage = <T>(key: string, type: 'event' | 'team'): CacheEntry<T> | null => {
+  try {
+    const cache = loadLocalStorageCache();
+    const entry = type === 'event' ? cache.events[key] : cache.teams[key];
+    
+    if (entry && Date.now() - entry.timestamp < LOCALSTORAGE_CACHE_DURATION) {
+      return entry as CacheEntry<T>;
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return null;
+};
 
 const checkRateLimit = (): boolean => {
   const now = Date.now();
@@ -70,11 +157,8 @@ const normalizeTeamName = (name: string): string => {
 };
 
 // Format team name for US sports (NBA, NFL, NHL, MLB)
-// These sports use city + team name format
 const formatUSTeamName = (name: string): string => {
-  // Common abbreviations used in streams
   const teamMappings: Record<string, string> = {
-    // NHL
     'minnesota wild': 'Minnesota Wild',
     'seattle kraken': 'Seattle Kraken',
     'detroit red wings': 'Detroit Red Wings',
@@ -85,13 +169,11 @@ const formatUSTeamName = (name: string): string => {
     'boston bruins': 'Boston Bruins',
     'new york rangers': 'New York Rangers',
     'chicago blackhawks': 'Chicago Blackhawks',
-    // NBA
     'los angeles lakers': 'Los Angeles Lakers',
     'golden state warriors': 'Golden State Warriors',
     'boston celtics': 'Boston Celtics',
     'miami heat': 'Miami Heat',
     'chicago bulls': 'Chicago Bulls',
-    // NFL
     'kansas city chiefs': 'Kansas City Chiefs',
     'san francisco 49ers': 'San Francisco 49ers',
     'dallas cowboys': 'Dallas Cowboys',
@@ -108,12 +190,25 @@ export const searchEvent = async (
   awayTeam: string,
   sport?: string
 ): Promise<SportsDbEvent | null> => {
+  // Skip empty team names
+  if (!homeTeam?.trim() || !awayTeam?.trim()) {
+    return null;
+  }
+
   const cacheKey = `${normalizeTeamName(homeTeam)}_vs_${normalizeTeamName(awayTeam)}`;
   
-  // Check cache first
-  const cached = eventCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
+  // Check memory cache first (fastest)
+  const memoryCached = eventCache.get(cacheKey);
+  if (memoryCached && Date.now() - memoryCached.timestamp < MEMORY_CACHE_DURATION) {
+    return memoryCached.data;
+  }
+
+  // Check localStorage cache (persistent)
+  const localCached = getFromLocalStorage<SportsDbEvent>(cacheKey, 'event');
+  if (localCached) {
+    // Update memory cache
+    eventCache.set(cacheKey, localCached);
+    return localCached.data;
   }
 
   if (!checkRateLimit()) {
@@ -122,13 +217,9 @@ export const searchEvent = async (
   }
 
   try {
-    // Try multiple search formats for better matching
     const searchVariations = [
-      // Standard format: HomeTeam_vs_AwayTeam
       `${homeTeam.replace(/\s+/g, '_')}_vs_${awayTeam.replace(/\s+/g, '_')}`,
-      // US sports format: HomeTeam vs AwayTeam (with @)
       `${homeTeam.replace(/\s+/g, '_')}_@_${awayTeam.replace(/\s+/g, '_')}`,
-      // Simplified names
       `${formatUSTeamName(homeTeam).replace(/\s+/g, '_')}_vs_${formatUSTeamName(awayTeam).replace(/\s+/g, '_')}`,
     ];
     
@@ -143,21 +234,25 @@ export const searchEvent = async (
           console.warn('SportsDB API rate limit hit');
           return null;
         }
-        continue; // Try next variation
+        continue;
       }
 
       const data: EventSearchResponse = await response.json();
       const event = data.event?.[0] || null;
       
       if (event) {
-        // Cache the result
-        eventCache.set(cacheKey, { data: event, timestamp: Date.now() });
+        // Cache the result in both memory and localStorage
+        const entry = { data: event, timestamp: Date.now() };
+        eventCache.set(cacheKey, entry);
+        saveToLocalStorage(cacheKey, 'event', event);
         return event;
       }
     }
     
-    // No results found, cache null
-    eventCache.set(cacheKey, { data: null, timestamp: Date.now() });
+    // No results found, cache null to avoid repeated requests
+    const entry = { data: null, timestamp: Date.now() };
+    eventCache.set(cacheKey, entry);
+    saveToLocalStorage(cacheKey, 'event', null);
     return null;
   } catch (error) {
     console.error('Error fetching event from SportsDB:', error);
@@ -167,12 +262,24 @@ export const searchEvent = async (
 
 // Search for team by name
 export const searchTeam = async (teamName: string): Promise<SportsDbTeam | null> => {
+  // Skip empty team names
+  if (!teamName?.trim()) {
+    return null;
+  }
+
   const cacheKey = normalizeTeamName(teamName);
   
-  // Check cache first
-  const cached = teamCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data;
+  // Check memory cache first
+  const memoryCached = teamCache.get(cacheKey);
+  if (memoryCached && Date.now() - memoryCached.timestamp < MEMORY_CACHE_DURATION) {
+    return memoryCached.data;
+  }
+
+  // Check localStorage cache
+  const localCached = getFromLocalStorage<SportsDbTeam>(cacheKey, 'team');
+  if (localCached) {
+    teamCache.set(cacheKey, localCached);
+    return localCached.data;
   }
 
   if (!checkRateLimit()) {
@@ -197,7 +304,9 @@ export const searchTeam = async (teamName: string): Promise<SportsDbTeam | null>
     const team = data.teams?.[0] || null;
     
     // Cache the result
-    teamCache.set(cacheKey, { data: team, timestamp: Date.now() });
+    const entry = { data: team, timestamp: Date.now() };
+    teamCache.set(cacheKey, entry);
+    saveToLocalStorage(cacheKey, 'team', team);
     
     return team;
   } catch (error) {
@@ -206,16 +315,14 @@ export const searchTeam = async (teamName: string): Promise<SportsDbTeam | null>
   }
 };
 
-// Get the best available image for an event (prioritize thumb/banner for 16:9 card layout)
+// Get the best available image for an event
 export const getEventPoster = (event: SportsDbEvent | null, size: 'medium' | 'small' | 'tiny' = 'medium'): string | null => {
   if (!event) return null;
   
-  // Priority for 16:9 banner layout: thumb > banner > fanart > poster > square
   const imageUrl = event.strThumb || event.strBanner || event.strFanart || event.strPoster || event.strSquare;
   
   if (!imageUrl) return null;
   
-  // Append size suffix for optimized loading
   return `${imageUrl}/${size}`;
 };
 
@@ -231,10 +338,12 @@ export const fetchPostersForMatches = async (
 ): Promise<Map<string, string>> => {
   const posterMap = new Map<string, string>();
   
-  // Process in batches to respect rate limits
+  // Filter out matches with empty team names
+  const validMatches = matches.filter(m => m.homeTeam?.trim() && m.awayTeam?.trim());
+  
   const batchSize = 5;
-  for (let i = 0; i < matches.length && checkRateLimit(); i += batchSize) {
-    const batch = matches.slice(i, i + batchSize);
+  for (let i = 0; i < validMatches.length && checkRateLimit(); i += batchSize) {
+    const batch = validMatches.slice(i, i + batchSize);
     
     const results = await Promise.all(
       batch.map(async (match) => {
@@ -250,13 +359,19 @@ export const fetchPostersForMatches = async (
       }
     });
     
-    // Small delay between batches
-    if (i + batchSize < matches.length) {
+    if (i + batchSize < validMatches.length) {
       await new Promise(resolve => setTimeout(resolve, 200));
     }
   }
   
   return posterMap;
+};
+
+// Clear cache (useful for debugging)
+export const clearCache = () => {
+  eventCache.clear();
+  teamCache.clear();
+  localStorage.removeItem(LOCALSTORAGE_CACHE_KEY);
 };
 
 export const sportsDbService = {
@@ -265,4 +380,5 @@ export const sportsDbService = {
   getEventPoster,
   getTeamBadge,
   fetchPostersForMatches,
+  clearCache,
 };
