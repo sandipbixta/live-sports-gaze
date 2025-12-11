@@ -7,7 +7,7 @@
 const ESPN_CDN = 'https://a.espncdn.com/i/teamlogos';
 
 // TheSportsDB - Fallback (rate limited but comprehensive)
-const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/123';
+const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/751945';
 
 // Football-Data.org crests
 const FOOTBALL_DATA_CDN = 'https://crests.football-data.org';

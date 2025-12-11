@@ -1,5 +1,5 @@
 // TheSportsDB API service for fetching match posters and team images
-const SPORTS_DB_API_KEY = '123'; // Free tier API key
+const SPORTS_DB_API_KEY = '751945'; // TheSportsDB API key
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
 
 interface SportsDbEvent {
