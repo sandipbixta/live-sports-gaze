@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches } from '../api/sportsApi';
+import { fetchSports, fetchMatches, fetchAllMatches } from '../api/sportsApi';
 import SportsList from '../components/SportsList';
 import { Separator } from '../components/ui/separator';
 import { format, startOfDay, isSameDay } from 'date-fns';
@@ -19,7 +19,8 @@ const Schedule = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [allMatches, setAllMatches] = useState<Match[]>([]); // All matches from API
+  const [allSportsMatches, setAllSportsMatches] = useState<Match[]>([]); // All matches from ALL sports
+  const [sportMatches, setSportMatches] = useState<Match[]>([]); // Matches for selected sport
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -27,10 +28,10 @@ const Schedule = () => {
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [activeTournamentFilter, setActiveTournamentFilter] = useState<string | null>(null);
 
-  // Extract unique dates from all matches
+  // Extract unique dates from ALL sports matches (for date navigation)
   const availableDates = useMemo(() => {
     const dateSet = new Set<string>();
-    allMatches.forEach(match => {
+    allSportsMatches.forEach(match => {
       if (match.date) {
         const dateStr = format(startOfDay(new Date(match.date)), 'yyyy-MM-dd');
         dateSet.add(dateStr);
@@ -39,15 +40,15 @@ const Schedule = () => {
     return Array.from(dateSet)
       .map(d => startOfDay(new Date(d)))
       .sort((a, b) => a.getTime() - b.getTime());
-  }, [allMatches]);
+  }, [allSportsMatches]);
 
-  // Filter matches by current date
+  // Filter matches by current date (from selected sport's matches)
   const matchesForDate = useMemo(() => {
-    return allMatches.filter(match => {
+    return sportMatches.filter(match => {
       const matchDate = startOfDay(new Date(match.date));
       return isSameDay(matchDate, currentDate);
     });
-  }, [allMatches, currentDate]);
+  }, [sportMatches, currentDate]);
 
   // Apply search filter
   const filteredMatches = useMemo(() => {
@@ -106,14 +107,42 @@ const Schedule = () => {
     return uniqueMatches;
   };
 
-  // Fetch sports on mount
+  // Fetch sports and ALL matches on mount
   useEffect(() => {
-    const loadSports = async () => {
+    const loadInitialData = async () => {
       setLoadingSports(true);
+      setLoadingMatches(true);
+      
       try {
+        // Fetch sports list
         const sportsData = await fetchSports();
         setSports(sportsData);
         
+        // Fetch ALL matches from all sports to get available dates
+        const allMatches = await fetchAllMatches();
+        const uniqueAllMatches = removeDuplicatesFromMatches(allMatches);
+        setAllSportsMatches(uniqueAllMatches);
+        
+        // Auto-select first date with matches if today has none
+        if (uniqueAllMatches.length > 0) {
+          const today = startOfDay(new Date());
+          const todayHasMatches = uniqueAllMatches.some(m => 
+            isSameDay(startOfDay(new Date(m.date)), today)
+          );
+          
+          if (!todayHasMatches) {
+            const futureDates = uniqueAllMatches
+              .map(m => startOfDay(new Date(m.date)))
+              .filter(d => d >= today)
+              .sort((a, b) => a.getTime() - b.getTime());
+            
+            if (futureDates.length > 0) {
+              setCurrentDate(futureDates[0]);
+            }
+          }
+        }
+        
+        // Auto-select first sport
         if (sportsData.length > 0) {
           setSelectedSport(sportsData[0].id);
         }
@@ -125,42 +154,23 @@ const Schedule = () => {
         });
       } finally {
         setLoadingSports(false);
+        setLoadingMatches(false);
       }
     };
 
-    loadSports();
+    loadInitialData();
   }, [toast]);
 
-  // Fetch matches when sport changes
+  // Fetch matches for selected sport
   useEffect(() => {
     if (!selectedSport) return;
     
-    const loadMatches = async () => {
+    const loadSportMatches = async () => {
       setLoadingMatches(true);
       try {
         const matchesData = await fetchMatches(selectedSport);
         const uniqueMatches = removeDuplicatesFromMatches(matchesData);
-        setAllMatches(uniqueMatches);
-        
-        // Auto-select first available date or today
-        if (uniqueMatches.length > 0) {
-          const today = startOfDay(new Date());
-          const todayHasMatches = uniqueMatches.some(m => 
-            isSameDay(startOfDay(new Date(m.date)), today)
-          );
-          
-          if (!todayHasMatches) {
-            // Find the closest upcoming date with matches
-            const futureDates = uniqueMatches
-              .map(m => startOfDay(new Date(m.date)))
-              .filter(d => d >= today)
-              .sort((a, b) => a.getTime() - b.getTime());
-            
-            if (futureDates.length > 0) {
-              setCurrentDate(futureDates[0]);
-            }
-          }
-        }
+        setSportMatches(uniqueMatches);
       } catch (error) {
         toast({
           title: "Error",
@@ -172,7 +182,7 @@ const Schedule = () => {
       }
     };
 
-    loadMatches();
+    loadSportMatches();
   }, [selectedSport, toast]);
 
   // Handle sport selection
