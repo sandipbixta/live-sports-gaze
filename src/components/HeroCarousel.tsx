@@ -12,7 +12,7 @@ import { Clock, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
-const POSTER_BASE_URL = 'https://streamed.pk';
+const POSTER_BASE_URL = 'https://westream.su';
 
 export const HeroCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
