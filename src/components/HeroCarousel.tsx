@@ -1,218 +1,210 @@
-import { useEffect, useState } from 'react';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Match } from '@/types/sports';
-import { fetchAllMatches } from '@/api/sportsApi';
-import { getCarouselMatches } from '@/utils/heroCarouselFilter';
-import { isMatchLive } from '@/utils/matchUtils';
-import { ViewerCount } from './ViewerCount';
-import { Clock, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
+import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useFeaturedMatches } from '../hooks/useFeaturedMatches';
+import { getSportIcon } from '../services/sportsLogoService';
 import coverPhoto from '@/assets/damitv-cover.jpeg';
 
-// Fetch event thumb from TheSportsDB
-const fetchEventImage = async (homeTeam: string, awayTeam: string): Promise<string | null> => {
-  try {
-    const eventName = `${homeTeam}_vs_${awayTeam}`;
-    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/751945/searchevents.php?e=${encodeURIComponent(eventName)}`);
-    const data = await res.json();
-    if (data.event?.[0]?.strThumb) return data.event[0].strThumb;
-    if (data.event?.[0]?.strPoster) return data.event[0].strPoster;
-    return null;
-  } catch {
-    return null;
-  }
-};
-
 export const HeroCarousel = () => {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { 
-      loop: true,
-      duration: 30
-    },
-    [Autoplay({ delay: 6000, stopOnInteraction: false })]
-  );
+  const { matches, loading } = useFeaturedMatches(8);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [matchesWithPosters, setMatchesWithPosters] = useState<Match[]>([]);
-  
-  // Static cover photo slide
-  const coverSlide = {
-    id: 'damitv-cover',
-    title: 'DamiTV - Your Home for Live Sports',
-    category: 'Featured',
-    poster: coverPhoto,
-    isCover: true
-  };
-  
-  // Fetch elite/popular matches and enrich with TheSportsDB images
+  // Auto-rotate every 5 seconds
   useEffect(() => {
-    const loadMatches = async () => {
-      try {
-        const allMatches = await fetchAllMatches();
-        
-        // Get elite matches (Champions League, Premier League, La Liga, UFC, WWE, etc.)
-        const eliteMatches = await getCarouselMatches(allMatches, 8);
-        
-        // Enrich with TheSportsDB images
-        const enrichedMatches = await Promise.all(
-          eliteMatches.map(async (match) => {
-            if (match.poster) return match;
-            
-            const homeName = match.teams?.home?.name || '';
-            const awayName = match.teams?.away?.name || '';
-            if (homeName && awayName) {
-              const thumb = await fetchEventImage(homeName, awayName);
-              if (thumb) return { ...match, poster: thumb };
-            }
-            return match;
-          })
-        );
-        
-        console.log(`🎬 Carousel: ${enrichedMatches.length} elite matches loaded`);
-        setMatchesWithPosters(enrichedMatches);
-      } catch (error) {
-        console.error('Error loading matches for carousel:', error);
-      }
-    };
+    if (matches.length === 0) return;
     
-    loadMatches();
-  }, []);
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % (matches.length + 1)); // +1 for cover slide
+    }, 5000);
+    
+    return () => clearInterval(timer);
+  }, [matches.length]);
 
-  useEffect(() => {
-    if (!emblaApi) return;
+  const goToPrevious = () => {
+    const total = matches.length + 1;
+    setCurrentIndex((prev) => (prev - 1 + total) % total);
+  };
 
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-    };
+  const goToNext = () => {
+    const total = matches.length + 1;
+    setCurrentIndex((prev) => (prev + 1) % total);
+  };
 
-    emblaApi.on('select', onSelect);
-    onSelect();
+  if (loading) {
+    return (
+      <div className="w-full h-[280px] md:h-[400px] bg-muted animate-pulse rounded-xl" />
+    );
+  }
 
-    return () => {
-      emblaApi.off('select', onSelect);
-    };
-  }, [emblaApi]);
+  // Cover slide + match slides
+  const allSlides = [
+    { id: 'cover', isCover: true },
+    ...matches
+  ];
 
-  // Combine cover slide with match slides
-  const allSlides = [coverSlide as any, ...matchesWithPosters];
+  if (allSlides.length <= 1 && matches.length === 0) {
+    // Show only cover if no matches
+    return (
+      <div className="relative w-full h-[280px] md:h-[400px] rounded-xl overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${coverPhoto})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <h2 className="text-white text-xl md:text-2xl font-bold">
+            Watch Live Sports Streaming Free
+          </h2>
+          <p className="text-white/70 text-sm mt-1">
+            Champions League, Premier League, NBA, NFL & More
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  if (allSlides.length === 0) return null;
+  const currentSlide = allSlides[currentIndex];
+  const isCover = (currentSlide as any).isCover;
 
   return (
-    <div className="relative mb-6 rounded-xl overflow-hidden" ref={emblaRef}>
-      <div className="flex">
-        {allSlides.map((slide) => {
-          const isCover = (slide as any).isCover;
-          const posterUrl = isCover ? slide.poster : (slide.poster || '');
-          
-          return isCover ? (
-            // Cover photo slide - not clickable
-            <div
-              key={slide.id}
-              className="relative flex-[0_0_100%] min-w-0"
-            >
-              <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] flex items-center overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${posterUrl})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-black/20" />
+    <div className="relative w-full h-[280px] md:h-[400px] rounded-xl overflow-hidden group">
+      {/* Background Banner Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        style={{ 
+          backgroundImage: `url(${isCover ? coverPhoto : currentSlide.banner})`,
+        }}
+      />
+      
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
+      
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col justify-end p-4 md:p-8">
+        {isCover ? (
+          // Cover slide content
+          <>
+            <h2 className="text-white text-xl md:text-3xl font-bold mb-2">
+              Watch Live Sports Streaming Free
+            </h2>
+            <p className="text-white/70 text-sm md:text-base">
+              Champions League, Premier League, NBA, NFL, UFC & More
+            </p>
+          </>
+        ) : (
+          // Match slide content
+          <>
+            {/* Live Badge */}
+            {currentSlide.isLive && (
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  LIVE
+                </span>
+                {currentSlide.strProgress && (
+                  <span className="text-white/80 text-sm">{currentSlide.strProgress}</span>
+                )}
+              </div>
+            )}
+            
+            {/* Sport & League */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl md:text-2xl">{getSportIcon(currentSlide.sport || currentSlide.category || 'sports')}</span>
+              <span className="text-gray-300 text-xs md:text-sm font-medium uppercase tracking-wide">
+                {currentSlide.strLeague || currentSlide.league || currentSlide.title?.split(':')[0] || currentSlide.category}
+              </span>
+            </div>
+            
+            {/* Teams */}
+            <div className="mb-4">
+              <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+                {/* Home Team */}
+                <div className="flex items-center gap-2 md:gap-3">
+                  {currentSlide.homeBadge && (
+                    <img 
+                      src={currentSlide.homeBadge} 
+                      alt="" 
+                      className="w-8 h-8 md:w-12 md:h-12 object-contain"
+                    />
+                  )}
+                  <span className="text-white text-lg md:text-2xl font-bold">
+                    {currentSlide.homeTeam || currentSlide.strHomeTeam || currentSlide.teams?.home?.name}
+                  </span>
+                  {currentSlide.isLive && currentSlide.intHomeScore !== undefined && (
+                    <span className="text-white text-xl md:text-3xl font-bold ml-1">
+                      {currentSlide.intHomeScore}
+                    </span>
+                  )}
+                </div>
                 
-                {/* SEO-optimized header text - positioned at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 z-10 p-3 sm:p-4 md:p-6 bg-gradient-to-t from-black/80 to-transparent">
-                  <h2 className="text-xs sm:text-sm md:text-base font-medium text-white/95 mb-0.5 sm:mb-1 drop-shadow-lg leading-tight">
-                    Watch Live Sports Streaming Free - Champions League, Premier League, La Liga & More
-                  </h2>
-                  <p className="text-[10px] sm:text-xs md:text-sm text-white/75 drop-shadow-md leading-tight">
-                    Free HD sports streaming for football, basketball, tennis and all major leagues worldwide
-                  </p>
+                <span className="text-gray-400 text-base md:text-xl font-light">vs</span>
+                
+                {/* Away Team */}
+                <div className="flex items-center gap-2 md:gap-3">
+                  {currentSlide.isLive && currentSlide.intAwayScore !== undefined && (
+                    <span className="text-white text-xl md:text-3xl font-bold mr-1">
+                      {currentSlide.intAwayScore}
+                    </span>
+                  )}
+                  <span className="text-white text-lg md:text-2xl font-bold">
+                    {currentSlide.awayTeam || currentSlide.strAwayTeam || currentSlide.teams?.away?.name}
+                  </span>
+                  {currentSlide.awayBadge && (
+                    <img 
+                      src={currentSlide.awayBadge} 
+                      alt="" 
+                      className="w-8 h-8 md:w-12 md:h-12 object-contain"
+                    />
+                  )}
                 </div>
               </div>
             </div>
-          ) : (
-            // Match slides - clickable
+            
+            {/* Watch Button */}
             <Link
-              key={slide.id}
-              to={`/match/${slide.category}/${slide.id}`}
-              className="relative flex-[0_0_100%] min-w-0 cursor-pointer group"
+              to={`/match/${currentSlide.category || currentSlide.sport || 'football'}/${currentSlide.id || currentSlide.idEvent}`}
+              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-colors w-fit"
             >
-              <div className="relative min-h-[200px] sm:min-h-[280px] md:min-h-[350px] flex items-center overflow-hidden">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${posterUrl})` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 via-40% to-black/20" />
-                <div className="relative z-10 p-3 sm:p-5 md:p-8 max-w-xl">
-                  <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 mb-2 sm:mb-3">
-                    <div className="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full">
-                      {isMatchLive(slide) ? 'LIVE NOW' : 'UPCOMING'}
-                    </div>
-                    {isMatchLive(slide) && (
-                      <div className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-white text-[10px] sm:text-xs font-semibold">
-                        <ViewerCount matchId={slide.id} enableRealtime={true} size="sm" />
-                      </div>
-                    )}
-                  </div>
-                  <h2 className="text-base sm:text-xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3 md:mb-4 leading-tight group-hover:text-primary transition-colors drop-shadow-2xl">
-                    {slide.title}
-                  </h2>
-                  <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-3 md:mb-4">
-                    {slide.date && (
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 md:gap-3 text-white/90">
-                        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5">
-                          <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-                          <span className="text-[10px] sm:text-xs md:text-sm font-medium">
-                            {format(new Date(slide.date), 'MMM d, yyyy')}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 md:px-3 md:py-1.5">
-                          <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-                          <span className="text-[10px] sm:text-xs md:text-sm font-medium">
-                            {format(new Date(slide.date), 'h:mm a')}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white drop-shadow-xl">
-                    {slide.category && (
-                      <span className="uppercase font-semibold">{slide.category}</span>
-                    )}
-                    {slide.teams?.home?.name && slide.teams?.away?.name && (
-                      <span className="block mt-1 sm:mt-1.5 md:mt-2 text-[10px] sm:text-xs md:text-sm opacity-95">
-                        {slide.teams.home.name} vs {slide.teams.away.name}
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
+              <Play className="w-4 h-4 fill-current" />
+              Watch Now
             </Link>
-          );
-        })}
-      </div>
-
-      {/* Dots Navigation */}
-      {allSlides.length > 1 && (
-        <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-3 sm:left-5 md:left-8 flex gap-1 sm:gap-1.5 md:gap-2 z-20">
-          {allSlides.map((_, index) => (
+          </>
+        )}
+        
+        {/* Dots Navigation */}
+        <div className="flex gap-1.5 mt-4">
+          {allSlides.map((_, idx) => (
             <button
-              key={index}
-              className={`h-0.5 sm:h-1 rounded-full transition-all ${
-                index === selectedIndex
-                  ? 'bg-white w-6 sm:w-7 md:w-8'
-                  : 'bg-white/50 hover:bg-white/75 w-6 sm:w-7 md:w-8'
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`h-1 rounded-full transition-all ${
+                idx === currentIndex 
+                  ? 'bg-red-600 w-6' 
+                  : 'bg-gray-500 hover:bg-gray-400 w-4'
               }`}
-              onClick={(e) => {
-                e.preventDefault();
-                emblaApi?.scrollTo(index);
-              }}
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
         </div>
-      )}
+      </div>
+      
+      {/* Navigation Arrows */}
+      <button
+        onClick={goToPrevious}
+        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
+      <button
+        onClick={goToNext}
+        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 md:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+      </button>
     </div>
   );
 };
+
+export default HeroCarousel;
