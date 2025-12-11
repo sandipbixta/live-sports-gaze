@@ -22,7 +22,7 @@ import NotFoundState from '@/components/match/NotFoundState';
 import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
-import AdsterraSidebar from '@/components/AdsterraSidebar';
+
 
 const Match = () => {
   const { toast } = useToast();
@@ -272,9 +272,6 @@ const Match = () => {
               <ViewerStats match={match} />
             </div>
           </div>
-
-          {/* Desktop Sidebar Ad (shown only on desktop, next to player) */}
-          <AdsterraSidebar />
         </div>
 
         {/* Match Analysis and Preview Content */}
