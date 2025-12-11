@@ -22,7 +22,6 @@ import { generateCompetitorTitle, generateCompetitorDescription } from '../utils
 import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
-import TelegramBanner from '../components/TelegramBanner';
 import FeaturedMatchesCarousel from '../components/FeaturedMatchesCarousel';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
@@ -232,11 +231,6 @@ const Index = () => {
       <main className="py-4">
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
-        
-        {/* Promotion Links */}
-        <div className="mb-4">
-          <TelegramBanner />
-        </div>
 
         {/* Finished Match Results */}
         <FinishedMatches />

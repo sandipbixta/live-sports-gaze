@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, CalendarDays, Tv2, Radio, Trophy, Download, ChevronDown } from "lucide-react";
+import { Home, CalendarDays, Tv2, Radio, Trophy, Download } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import Clock from "./Clock";
@@ -35,7 +35,7 @@ const MainNav = () => {
           height={48}
           className="h-12 w-12 object-cover" 
         />
-        <span className="text-xl font-bold text-primary tracking-tight">
+        <span className="text-xl font-bold text-white tracking-tight">
           DAMITV
         </span>
       </button>
@@ -47,11 +47,9 @@ const MainNav = () => {
             key={item.path}
             onClick={() => handleNavigate(item.path)}
             className={cn(
-              "px-4 py-2 text-sm font-semibold tracking-wide transition-colors",
-              "hover:text-primary",
-              location.pathname === item.path 
-                ? "text-primary" 
-                : "text-foreground/80"
+              "px-4 py-2 text-sm font-semibold tracking-wide transition-colors text-white",
+              "hover:text-white/80",
+              location.pathname === item.path && "text-white underline underline-offset-4"
             )}
           >
             {item.title}
@@ -60,12 +58,12 @@ const MainNav = () => {
       </nav>
       
       <div className="hidden md:flex items-center gap-3 ml-auto">
-        <span className="text-muted-foreground text-sm">Download the app:</span>
+        <span className="text-white/80 text-sm">Download the app:</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate("/install")}
-          className="text-foreground hover:text-primary p-2"
+          className="text-white hover:text-white/80 hover:bg-white/10 p-2"
           title="Install DamiTV App"
         >
           <Download className="h-5 w-5" />
