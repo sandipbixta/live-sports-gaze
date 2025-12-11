@@ -22,7 +22,6 @@ import MatchesTabContent from '../components/live/MatchesTabContent';
 import MatchSection from '../components/MatchSection';
 import MatchCard from '../components/MatchCard';
 import TelegramBanner from '../components/TelegramBanner';
-import PopularMatches from '../components/PopularMatches';
 
 const Live = () => {
   const { toast } = useToast();
@@ -222,10 +221,6 @@ const Live = () => {
       
       <Separator className="my-8 bg-[#343a4d]" />
       
-      {/* Popular Matches Section - From WeStream */}
-      {!userSelectedMatch && (
-        <PopularMatches />
-      )}
       
       <SportFilterPills
         allMatches={allMatches}
