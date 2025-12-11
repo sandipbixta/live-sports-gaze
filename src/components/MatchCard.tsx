@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
-import { teamLogoService } from '../services/teamLogoService';
+import { getTeamLogo } from '../services/teamLogoService';
 import { sportsDbService } from '../services/sportsDbService';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
@@ -33,6 +33,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const [isMatchStarting, setIsMatchStarting] = useState(false);
   const [sportsDbPoster, setSportsDbPoster] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [fetchedHomeBadge, setFetchedHomeBadge] = useState<string | null>(null);
+  const [fetchedAwayBadge, setFetchedAwayBadge] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const home = match.teams?.home?.name || '';
@@ -57,22 +59,36 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Fetch poster from TheSportsDB only when visible and no existing poster
+  // Fetch poster and team logos from TheSportsDB when visible
   useEffect(() => {
-    if (!isVisible || match.poster || !home || !away) return;
+    if (!isVisible) return;
 
-    const fetchPoster = async () => {
-      try {
-        const event = await sportsDbService.searchEvent(home, away);
-        const poster = sportsDbService.getEventPoster(event, 'medium');
-        if (poster) setSportsDbPoster(poster);
-      } catch (error) {
-        // Silent fail - will use badge fallback
+    const fetchData = async () => {
+      // Fetch poster if not exists
+      if (!match.poster && home && away) {
+        try {
+          const event = await sportsDbService.searchEvent(home, away);
+          const poster = sportsDbService.getEventPoster(event, 'medium');
+          if (poster) setSportsDbPoster(poster);
+        } catch (error) {
+          // Silent fail
+        }
+      }
+
+      // Fetch team logos if not provided in match data
+      if (home && !match.teams?.home?.badge) {
+        const logo = await getTeamLogo(home);
+        if (logo) setFetchedHomeBadge(logo);
+      }
+      
+      if (away && !match.teams?.away?.badge) {
+        const logo = await getTeamLogo(away);
+        if (logo) setFetchedAwayBadge(logo);
       }
     };
 
-    fetchPoster();
-  }, [isVisible, match.poster, home, away]);
+    fetchData();
+  }, [isVisible, match.poster, home, away, match.teams?.home?.badge, match.teams?.away?.badge]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -128,35 +144,30 @@ const MatchCard: React.FC<MatchCardProps> = ({
     return () => clearInterval(interval);
   }, [match.date]);
 
-  // Get team badges with fallbacks
-  const getTeamBadge = (team: any) => {
-    if (!team) return '';
-    
-    // Check badge first (from new API - already full URL)
-    if (team.badge) {
-      // If it's already a full URL, use it directly
+  // Get team badge - prioritize match data, then fetched data
+  const getTeamBadge = (team: any, fetchedBadge: string | null) => {
+    // Check badge from match data first
+    if (team?.badge) {
       if (team.badge.startsWith('http')) {
         return team.badge;
       }
-      // Otherwise construct the URL
       return `https://api.cdn-live.tv/api/v1/team/images/${team.badge}`;
     }
     
-    // Check logo as fallback
-    if (team.logo) {
+    // Check logo from match data
+    if (team?.logo) {
       if (team.logo.startsWith('http')) {
         return team.logo;
       }
       return `https://api.cdn-live.tv/api/v1/team/images/${team.logo}`;
     }
     
-    // Try to get logo from team logo service as last resort
-    const logoFromService = teamLogoService.getTeamLogo(team?.name || '', team?.badge);
-    return logoFromService || '';
+    // Use fetched badge from TheSportsDB
+    return fetchedBadge || '';
   };
 
-  const homeBadge = getTeamBadge(match.teams?.home);
-  const awayBadge = getTeamBadge(match.teams?.away);
+  const homeBadge = getTeamBadge(match.teams?.home, fetchedHomeBadge);
+  const awayBadge = getTeamBadge(match.teams?.away, fetchedAwayBadge);
 
   const hasStream = match.sources?.length > 0;
   const isLive = isMatchLive(match);
