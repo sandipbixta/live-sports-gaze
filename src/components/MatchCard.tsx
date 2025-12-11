@@ -388,7 +388,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Home Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
+              <TeamLogo teamName={home} sport={sport} size="sm" />
               <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
             </div>
             {isLive && homeScore !== undefined && (
@@ -401,7 +401,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Away Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
+              <TeamLogo teamName={away} sport={sport} size="sm" />
               <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
             </div>
             {isLive && awayScore !== undefined && (
