@@ -1,13 +1,5 @@
-
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { Home, CalendarDays, Tv2, Radio, Trophy, Download } from "lucide-react";
+import { Home, CalendarDays, Tv2, Radio, Trophy, Download, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import Clock from "./Clock";
@@ -22,11 +14,11 @@ const MainNav = () => {
   const location = useLocation();
 
   const menuItems = [
-    { title: "Home", icon: Home, path: "/" },
-    { title: "Schedule", icon: CalendarDays, path: "/schedule" },
-    { title: "Live", icon: Tv2, path: "/live" },
-    { title: "Channels", icon: Radio, path: "/channels" },
-    { title: "Leagues", icon: Trophy, path: "/leagues" }
+    { title: "HOME", icon: Home, path: "/" },
+    { title: "SCHEDULE", icon: CalendarDays, path: "/schedule" },
+    { title: "LIVE", icon: Tv2, path: "/live" },
+    { title: "CHANNELS", icon: Radio, path: "/channels" },
+    { title: "LEAGUES", icon: Trophy, path: "/leagues" }
   ];
 
   const handleNavigate = (path: string) => {
@@ -34,49 +26,49 @@ const MainNav = () => {
   };
 
   return (
-    <div className="flex items-center gap-4 w-full md:w-auto">
+    <div className="flex items-center gap-6 w-full md:w-auto">
       <button onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-2 flex-shrink-0">
         <img 
           src={damitvLogo} 
           alt="DAMITV Logo" 
-          width={56}
-          height={56}
-          className="h-14 w-14 object-cover" 
+          width={48}
+          height={48}
+          className="h-12 w-12 object-cover" 
         />
-        <h1 className="text-xl font-bold text-foreground whitespace-nowrap">
+        <span className="text-xl font-bold text-primary tracking-tight">
           DAMITV
-        </h1>
+        </span>
       </button>
       
-      <NavigationMenu className="hidden md:flex">
-        <NavigationMenuList>
-          {menuItems.map((item) => (
-            <NavigationMenuItem key={item.path}>
-              <NavigationMenuLink 
-                className={cn(
-                  navigationMenuTriggerStyle(),
-                  "bg-transparent hover:bg-accent text-foreground cursor-pointer",
-                  location.pathname === item.path && "bg-accent"
-                )}
-                onClick={() => handleNavigate(item.path)}
-              >
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.title}
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          ))}
-        </NavigationMenuList>
-      </NavigationMenu>
+      {/* FanCode-style horizontal nav */}
+      <nav className="hidden md:flex items-center gap-1">
+        {menuItems.map((item) => (
+          <button
+            key={item.path}
+            onClick={() => handleNavigate(item.path)}
+            className={cn(
+              "px-4 py-2 text-sm font-semibold tracking-wide transition-colors",
+              "hover:text-primary",
+              location.pathname === item.path 
+                ? "text-primary" 
+                : "text-foreground/80"
+            )}
+          >
+            {item.title}
+          </button>
+        ))}
+      </nav>
       
-      <div className="hidden md:flex items-center gap-2 ml-auto">
+      <div className="hidden md:flex items-center gap-3 ml-auto">
+        <span className="text-muted-foreground text-sm">Download the app:</span>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate("/install")}
-          className="text-foreground hover:bg-accent"
+          className="text-foreground hover:text-primary p-2"
           title="Install DamiTV App"
         >
-          <Download className="h-4 w-4" />
+          <Download className="h-5 w-5" />
         </Button>
         <PushNotifications />
         <ThemeToggle />

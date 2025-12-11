@@ -63,13 +63,16 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
         },
-        // Updating sports-specific colors
+        // FanCode-inspired sports colors
         sports: {
-          primary: '#ff5a36',  // Changed to #ff5a36
-          secondary: '#0c4a6e', // Darker blue
-          accent: '#ff5a36',   // Changed to #ff5a36
-          dark: '#111827',     // Almost black for backgrounds
-          light: '#f1f5f9',    // Very light gray for contrast
+          primary: 'hsl(var(--sports-primary))',
+          secondary: 'hsl(var(--sports-secondary))',
+          accent: 'hsl(var(--sports-accent))',
+          dark: 'hsl(var(--sports-dark))',
+          light: 'hsl(var(--sports-light))',
+        },
+        section: {
+          accent: 'hsl(var(--section-accent))'
         }
       },
       borderRadius: {
