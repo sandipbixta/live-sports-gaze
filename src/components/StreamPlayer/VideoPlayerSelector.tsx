@@ -278,7 +278,6 @@ const VideoPlayerSelector: React.FC<VideoPlayerSelectorProps> = ({
         title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         referrerPolicy="origin"
-        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
         loading="eager"
         style={{ 
           border: 'none',
