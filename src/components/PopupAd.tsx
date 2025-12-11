@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState, MouseEvent } from "react";
 import instantAccessImage from "@/assets/instant-access-offer.jpeg";
 import { adTracking } from "@/utils/adTracking";
 
-const SMARTLINK_URL = "https://foreseehawancesator.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
+const SMARTLINK_URL = "https://foreseehawancestor.com/gmhn9rc6?key=42fea283e460c45715bc712ec6f5d7e7";
 const SESSION_KEY = "specialOfferClosed";
 const POPUP_DELAY_MS = 5000; // 5 second delay before showing popup
 
