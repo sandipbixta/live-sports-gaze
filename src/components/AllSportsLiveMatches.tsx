@@ -3,7 +3,6 @@ import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
-import { filterMatchesWithImages } from '../utils/matchImageFilter';
 import MatchCard from './MatchCard';
 import AllChannelsGrid from './AllChannelsGrid';
 import { useToast } from '../hooks/use-toast';
@@ -171,8 +170,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Filter matches by search term (ended matches already filtered out in data loading)
   const filteredLiveMatches = React.useMemo(() => {
-    // Only show matches with images on home page
-    let matches = filterMatchesWithImages(liveMatches);
+    // Show all live matches (logos are fetched from TheSportsDB asynchronously)
+    let matches = liveMatches;
     
     // Apply search filter if provided
     if (searchTerm.trim()) {
@@ -189,10 +188,8 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   // Filter upcoming matches (not live)
   const filteredUpcomingMatches = React.useMemo(() => {
-    // Get non-live matches from allMatches
+    // Get non-live matches from allMatches (show all matches, logos fetched from TheSportsDB)
     let upcoming = allMatches.filter(match => !isMatchLive(match));
-    // Only show matches with images
-    upcoming = filterMatchesWithImages(upcoming);
     
     // Apply search filter if provided
     if (searchTerm.trim()) {
