@@ -4,7 +4,6 @@ import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi
 import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import MatchCard from './MatchCard';
-import AllChannelsGrid from './AllChannelsGrid';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp } from 'lucide-react';
 
@@ -270,21 +269,23 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     );
   }
 
-  // Show TV channels when no matches available
+  // Show message when no matches available
   if (!hasLiveMatches && !hasUpcomingMatches) {
-    return <AllChannelsGrid />;
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        <p className="text-lg">No live matches available at the moment.</p>
+        <p className="text-sm mt-2">Check back later for upcoming matches.</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-8">
-      {/* Live TV Channels - Always First */}
-      <AllChannelsGrid />
-
       {/* Live Matches Sections */}
       {hasLiveMatches && (
         <>
-          <div className="border-t border-[#343a4d] pt-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Featured Sports</h2>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Featured Sports</h2>
           </div>
           {sortedLiveSports.map(([sportId, matches]) => (
             <div key={sportId} className="space-y-4">

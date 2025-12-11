@@ -29,7 +29,7 @@ import FinishedMatches from '../components/FinishedMatches';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
-
+const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
 
 const Index = () => {
@@ -245,6 +245,10 @@ const Index = () => {
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
+        {/* Live TV Channels Carousel */}
+        <React.Suspense fallback={<div className="h-32 bg-muted rounded-lg animate-pulse" />}>
+          <FeaturedChannels />
+        </React.Suspense>
 
         {/* Featured Sports - Second */}
         <div className="mb-8">
