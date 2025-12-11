@@ -44,13 +44,9 @@ const StreamIframe: React.FC<StreamIframeProps> = ({ src, onLoad, onError, video
         onError={onError}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         referrerPolicy="origin"
-        sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
         loading="eager"
         style={{ 
           border: 'none',
-          position: 'absolute',
-          top: 0,
-          left: 0,
           width: '100%',
           height: '100%'
         }}
