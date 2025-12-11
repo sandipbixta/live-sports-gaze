@@ -37,6 +37,12 @@ export interface Match {
   country?: string;        // Country name
   countryFlag?: string;    // Country flag URL
   channels?: MatchChannel[]; // Available broadcast channels
+  score?: {                // Live score data
+    home?: number | string;
+    away?: number | string;
+  };
+  progress?: string;       // Match progress (e.g., "45'", "HT", "2nd Quarter")
+  status?: string;         // Match status
 }
 
 export interface MatchChannel {

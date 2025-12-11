@@ -12,6 +12,7 @@ import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
 import TeamLogo from './TeamLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useMatchScore } from '../hooks/useLiveScoreUpdates';
 
 interface MatchCardProps {
   match: Match;
@@ -41,6 +42,13 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const home = match.teams?.home?.name || '';
   const away = match.teams?.away?.name || '';
   const sport = match.category || match.sportId || '';
+  const matchIsLive = isMatchLive(match) || match.isLive;
+  
+  // Get live score for this match
+  const liveScore = useMatchScore(home, away, !!matchIsLive);
+  const homeScore = liveScore?.home ?? match.score?.home;
+  const awayScore = liveScore?.away ?? match.score?.away;
+  const matchProgress = liveScore?.progress || match.progress;
 
   // Lazy load - only fetch poster when card is visible
   useEffect(() => {
@@ -377,28 +385,49 @@ const MatchCard: React.FC<MatchCardProps> = ({
             {match.category || 'Sports'} • {match.tournament || match.title}
           </p>
           
-          {/* Team 1 */}
-          <div className="flex items-center gap-2">
-            <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
-            <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
-          </div>
-          
-          {/* Team 2 */}
-          <div className="flex items-center gap-2">
-            <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
-            <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
-          </div>
-          
-          {/* Match Start Time */}
-          <p className="text-xs text-muted-foreground mt-auto">
-            {isLive ? (
-              <LiveViewerCount match={match} size="sm" />
-            ) : match.date ? (
-              `Match Starts at ${format(new Date(match.date), 'EEE, do MMM, h:mm a')}`
-            ) : (
-              'Time TBD'
+          {/* Home Team with Score */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
+              <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
+            </div>
+            {isLive && homeScore !== undefined && (
+              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {homeScore}
+              </span>
             )}
-          </p>
+          </div>
+          
+          {/* Away Team with Score */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
+              <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
+            </div>
+            {isLive && awayScore !== undefined && (
+              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {awayScore}
+              </span>
+            )}
+          </div>
+          
+          {/* Match Time/Progress */}
+          <div className="flex items-center justify-between mt-auto">
+            {isLive ? (
+              <div className="flex items-center gap-2">
+                <LiveViewerCount match={match} size="sm" />
+                {matchProgress && (
+                  <span className="text-xs text-muted-foreground">• {matchProgress}</span>
+                )}
+              </div>
+            ) : match.date ? (
+              <p className="text-xs text-muted-foreground">
+                {format(new Date(match.date), 'EEE, do MMM, h:mm a')}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">Time TBD</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
