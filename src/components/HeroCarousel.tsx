@@ -15,7 +15,7 @@ import coverPhoto from '@/assets/damitv-cover.jpeg';
 const fetchEventImage = async (homeTeam: string, awayTeam: string): Promise<string | null> => {
   try {
     const eventName = `${homeTeam}_vs_${awayTeam}`;
-    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${encodeURIComponent(eventName)}`);
+    const res = await fetch(`https://www.thesportsdb.com/api/v1/json/751945/searchevents.php?e=${encodeURIComponent(eventName)}`);
     const data = await res.json();
     if (data.event?.[0]?.strThumb) return data.event[0].strThumb;
     if (data.event?.[0]?.strPoster) return data.event[0].strPoster;

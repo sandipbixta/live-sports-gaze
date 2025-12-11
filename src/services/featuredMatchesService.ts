@@ -1,5 +1,5 @@
 const WESTREAM_API = 'https://westream.su';
-const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/3';
+const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/751945';
 
 // League importance scores for ranking
 const LEAGUE_SCORES: Record<string, number> = {
