@@ -22,8 +22,7 @@ import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
 import TelegramBanner from '../components/TelegramBanner';
-import { HeroCarousel } from '../components/HeroCarousel';
-import heroBackground from '../assets/hero-background.jpeg';
+import FeaturedMatchesCarousel from '../components/FeaturedMatchesCarousel';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
@@ -241,8 +240,8 @@ const Index = () => {
         {/* Finished Match Results */}
         <FinishedMatches />
 
-        {/* Hero Carousel with Match Posters */}
-        <HeroCarousel />
+        {/* Hero Carousel with Featured Matches */}
+        <FeaturedMatchesCarousel />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
