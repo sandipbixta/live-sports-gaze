@@ -1,4 +1,5 @@
 const WESTREAM_API = 'https://westream.top';
+const SPORTSDB_API = 'https://www.thesportsdb.com/api/v1/json/751945';
 
 // ============================================
 // TYPES
@@ -20,12 +21,138 @@ export interface WeStreamMatch {
   category: string;
   date: number;
   popular: boolean;
+  poster?: string;
   teams?: {
     home?: WeStreamTeam;
     away?: WeStreamTeam;
   };
   sources: WeStreamSource[];
 }
+
+// ============================================
+// LOGO CACHE (In-Memory + LocalStorage)
+// ============================================
+
+const logoCache = new Map<string, string | null>();
+
+const getCachedLogo = (teamName: string): string | null | undefined => {
+  const key = teamName.toLowerCase().trim();
+  
+  if (logoCache.has(key)) {
+    return logoCache.get(key);
+  }
+  
+  try {
+    const stored = localStorage.getItem(`logo_${key}`);
+    if (stored) {
+      const { url, timestamp } = JSON.parse(stored);
+      if (Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000) {
+        logoCache.set(key, url);
+        return url;
+      }
+    }
+  } catch (e) {
+    // Ignore
+  }
+  
+  return undefined;
+};
+
+const setCachedLogo = (teamName: string, url: string | null) => {
+  const key = teamName.toLowerCase().trim();
+  logoCache.set(key, url);
+  
+  try {
+    localStorage.setItem(`logo_${key}`, JSON.stringify({
+      url,
+      timestamp: Date.now()
+    }));
+  } catch (e) {
+    // Ignore storage errors
+  }
+};
+
+// ============================================
+// FETCH TEAM LOGO FROM THESPORTSDB
+// ============================================
+
+export const fetchTeamLogo = async (teamName: string): Promise<string | null> => {
+  if (!teamName) return null;
+  
+  const cached = getCachedLogo(teamName);
+  if (cached !== undefined) {
+    return cached;
+  }
+  
+  try {
+    const response = await fetch(
+      `${SPORTSDB_API}/searchteams.php?t=${encodeURIComponent(teamName)}`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    
+    if (!response.ok) {
+      setCachedLogo(teamName, null);
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (data.teams && data.teams.length > 0) {
+      const team = data.teams[0];
+      const badge = team.strBadge || team.strTeamBadge || team.strLogo || null;
+      setCachedLogo(teamName, badge);
+      return badge;
+    }
+    
+    setCachedLogo(teamName, null);
+    return null;
+  } catch (error) {
+    console.warn(`Failed to fetch logo for ${teamName}:`, error);
+    setCachedLogo(teamName, null);
+    return null;
+  }
+};
+
+// ============================================
+// FETCH EVENT POSTER FROM THESPORTSDB
+// ============================================
+
+export const fetchEventPoster = async (
+  homeTeam: string, 
+  awayTeam: string
+): Promise<string | null> => {
+  if (!homeTeam || !awayTeam) return null;
+  
+  const cacheKey = `${homeTeam}_vs_${awayTeam}`;
+  const cached = getCachedLogo(cacheKey);
+  if (cached !== undefined) {
+    return cached;
+  }
+  
+  try {
+    const eventName = `${homeTeam} vs ${awayTeam}`;
+    const response = await fetch(
+      `${SPORTSDB_API}/searchevents.php?e=${encodeURIComponent(eventName)}`,
+      { signal: AbortSignal.timeout(5000) }
+    );
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.event && data.event.length > 0) {
+        const event = data.event[0];
+        const poster = event.strThumb || event.strPoster || event.strBanner || null;
+        setCachedLogo(cacheKey, poster);
+        return poster;
+      }
+    }
+    
+    setCachedLogo(cacheKey, null);
+    return null;
+  } catch (error) {
+    setCachedLogo(cacheKey, null);
+    return null;
+  }
+};
 
 export interface WeStreamStream {
   id: string;
