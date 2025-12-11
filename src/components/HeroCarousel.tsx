@@ -220,16 +220,11 @@ export const HeroCarousel = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-white drop-shadow-xl">
-                    {slide.category && (
-                      <span className="uppercase font-semibold">{slide.category}</span>
-                    )}
-                    {slide.teams?.home?.name && slide.teams?.away?.name && (
-                      <span className="block mt-1 sm:mt-1.5 md:mt-2 text-[9px] sm:text-[10px] md:text-xs opacity-95">
-                        {slide.teams.home.name} vs {slide.teams.away.name}
-                      </span>
-                    )}
-                  </p>
+                  {slide.category && (
+                    <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-white drop-shadow-xl uppercase font-semibold">
+                      {slide.category}
+                    </p>
+                  )}
                 </div>
               </div>
             </Link>
