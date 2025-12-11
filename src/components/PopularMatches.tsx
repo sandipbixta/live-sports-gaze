@@ -1,150 +1,209 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Flame, Clock, ChevronRight, Play } from 'lucide-react';
+import { 
+  getFeaturedMatches, 
+  isMatchLive, 
+  formatMatchTime,
+  WeStreamMatch 
+} from '../services/weStreamService';
 
-import React from 'react';
-import { Match } from '../types/sports';
-import MatchCard from './MatchCard';
-import { useIsMobile } from '../hooks/use-mobile';
-import { isTrendingMatch } from '../utils/popularLeagues';
-import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
-import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
+// Sport icons
+const SPORT_ICONS: Record<string, string> = {
+  football: '⚽', soccer: '⚽', basketball: '🏀', nba: '🏀',
+  nfl: '🏈', 'american-football': '🏈', hockey: '🏒', nhl: '🏒',
+  baseball: '⚾', mlb: '⚾', tennis: '🎾', cricket: '🏏',
+  rugby: '🏉', mma: '🥊', ufc: '🥊', fighting: '🥊', boxing: '🥊',
+  wrestling: '🤼', wwe: '🤼', motorsport: '🏎️', f1: '🏎️',
+  motogp: '🏍️', afl: '🏉', golf: '⛳', darts: '🎯', default: '🏆'
+};
 
-interface PopularMatchesProps {
-  popularMatches: Match[];
-  selectedSport: string | null;
-  excludeMatchIds?: string[]; // Add prop to exclude specific match IDs
-}
+const getSportIcon = (sport: string): string => {
+  const key = sport?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
+  return SPORT_ICONS[key] || SPORT_ICONS.default;
+};
 
-const PopularMatches: React.FC<PopularMatchesProps> = ({ 
-  popularMatches, 
-  selectedSport,
-  excludeMatchIds = []
-}) => {
-  const isMobile = useIsMobile();
-  const [enrichedMatches, setEnrichedMatches] = React.useState<Match[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
-  
-  // Filter out matches without sources, advertisements, and excluded IDs, then consolidate
-  const cleanMatches = filterCleanMatches(
-    popularMatches
-      .filter(match => match.sources && match.sources.length > 0) // CRITICAL: Must have sources
-      .filter(match => !excludeMatchIds.includes(match.id))
-  );
-  
-  // Consolidate matches (merges duplicate matches with their stream sources)
-  const consolidatedMatches = React.useMemo(() => consolidateMatches(cleanMatches), [cleanMatches.length, JSON.stringify(cleanMatches.map(m => m.id))]);
+// Sport colors for gradient backgrounds
+const SPORT_COLORS: Record<string, string> = {
+  football: 'from-green-900 to-green-950',
+  soccer: 'from-green-900 to-green-950',
+  basketball: 'from-orange-900 to-orange-950',
+  nba: 'from-orange-900 to-orange-950',
+  nfl: 'from-blue-900 to-blue-950',
+  hockey: 'from-cyan-900 to-cyan-950',
+  nhl: 'from-cyan-900 to-cyan-950',
+  baseball: 'from-red-900 to-red-950',
+  tennis: 'from-lime-900 to-lime-950',
+  cricket: 'from-emerald-900 to-emerald-950',
+  mma: 'from-red-900 to-red-950',
+  ufc: 'from-red-900 to-red-950',
+  boxing: 'from-red-900 to-red-950',
+  f1: 'from-red-900 to-red-950',
+  motorsport: 'from-gray-800 to-gray-900',
+  default: 'from-gray-800 to-gray-900'
+};
 
-  // Enrich matches with viewer counts from stream API and sort
-  React.useEffect(() => {
-    const enrichMatches = async () => {
-      if (consolidatedMatches.length === 0) {
-        setEnrichedMatches([]);
-        return;
-      }
+const getSportGradient = (sport: string): string => {
+  const key = sport?.toLowerCase().replace(/[^a-z]/g, '') || 'default';
+  return SPORT_COLORS[key] || SPORT_COLORS.default;
+};
 
-      setIsLoading(true);
-      
-      // SMART PRIORITIZATION: Sort by likelihood of having viewers BEFORE fetching
-      const liveMatches = consolidatedMatches.filter(m => isMatchLive(m));
-      
-      const prioritizedMatches = liveMatches
-        .map(match => {
-          const trendingInfo = isTrendingMatch(match.title);
-          // Calculate priority score: popular flag + trending score + has poster
-          const priorityScore = 
-            (match.popular ? 100 : 0) + 
-            (trendingInfo.score * 10) + 
-            (match.poster ? 50 : 0);
-          return { match, priorityScore };
-        })
-        .sort((a, b) => b.priorityScore - a.priorityScore)
-        .map(item => item.match);
-      
-      // Only check top 25 most likely popular matches (faster!)
-      const matchesToCheck = prioritizedMatches.slice(0, 25);
-      
-      console.log(`🔥 Checking viewer counts for top ${matchesToCheck.length} prioritized matches`);
-      
+const PopularMatches = () => {
+  const [matches, setMatches] = useState<WeStreamMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMatches = async () => {
       try {
-        const matchesWithViewers = await enrichMatchesWithViewers(matchesToCheck);
-        
-        // Only include matches with viewer counts
-        const liveMatchesWithViewers = matchesWithViewers.filter(m => 
-          (m.viewerCount || 0) > 0
-        );
-        
-        // Sort by viewer count descending (highest first)
-        const sortedMatches = liveMatchesWithViewers.sort((a, b) => {
-          const aViewers = a.viewerCount || 0;
-          const bViewers = b.viewerCount || 0;
-          return bViewers - aViewers;
-        });
-        
-        console.log('🔥 Top 8 matches by viewers:', sortedMatches.slice(0, 8).map(m => ({
-          title: m.title,
-          viewers: m.viewerCount
-        })));
-        
-        setEnrichedMatches(sortedMatches);
+        const data = await getFeaturedMatches(12);
+        setMatches(data);
       } catch (error) {
-        console.error('Error enriching popular matches:', error);
-        // Fallback: use prioritized matches without viewer counts
-        const fallbackMatches = prioritizedMatches.slice(0, 20);
-        setEnrichedMatches(fallbackMatches);
+        console.error('Failed to fetch popular matches:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    enrichMatches();
-    
-    // Refresh every 2 minutes to get updated viewer counts
-    const interval = setInterval(enrichMatches, 120000);
+    fetchMatches();
+    const interval = setInterval(fetchMatches, 60000); // Refresh every minute
     return () => clearInterval(interval);
-  }, [consolidatedMatches.length]);
+  }, []);
 
-  const filteredMatches = enrichedMatches;
-  
-  // Show section immediately with skeleton loaders
-  if (filteredMatches.length === 0 && !isLoading) {
-    return null;
+  if (loading) {
+    return (
+      <section className="py-8">
+        <div className="flex items-center gap-2 mb-6">
+          <Flame className="w-6 h-6 text-orange-500" />
+          <h2 className="text-2xl font-bold text-foreground">POPULAR</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-card rounded-xl h-44 animate-pulse" />
+          ))}
+        </div>
+      </section>
+    );
   }
 
+  if (matches.length === 0) return null;
+
   return (
-    <div className="mb-8">
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-2xl">🔥</span>
-        <h2 className="text-2xl font-bold text-white">Popular by Viewers</h2>
-        <span className="text-sm px-3 py-1 rounded-full bg-red-600 text-white font-semibold animate-pulse">
-          LIVE
-        </span>
+    <section className="py-8">
+      {/* Section Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
+          <h2 className="text-2xl font-bold text-foreground">POPULAR</h2>
+          <span className="text-muted-foreground text-sm ml-2">Top matches right now</span>
+        </div>
+        <Link 
+          to="/live"
+          className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors text-sm"
+        >
+          View All
+          <ChevronRight className="w-4 h-4" />
+        </Link>
       </div>
-      <p className="text-gray-400 text-sm mb-4">
-        Top live matches sorted by viewer count - updated in real-time
-      </p>
-      <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'} gap-3 md:gap-4 auto-rows-fr`}>
-        {isLoading && filteredMatches.length === 0 ? (
-          // Show skeleton loaders while loading
-          Array.from({ length: 8 }).map((_, i) => (
-            <div key={`skeleton-${i}`} className="h-full">
-              <div className="bg-card rounded-lg p-4 animate-pulse">
-                <div className="h-32 bg-muted rounded mb-2"></div>
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-muted rounded w-1/2"></div>
-              </div>
-            </div>
-          ))
-        ) : (
-          filteredMatches.slice(0, 8).map((match, index) => (
-            <div key={`popular-${match.id}-${index}`} className="h-full">
-              <MatchCard 
-                match={match}
-                sportId={selectedSport || ''}
-                isPriority={true}
-              />
-            </div>
-          ))
+
+      {/* Matches Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {matches.map((match) => (
+          <PopularMatchCard key={match.id} match={match} />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+// Match Card Component
+const PopularMatchCard = ({ match }: { match: WeStreamMatch }) => {
+  const sportIcon = getSportIcon(match.category);
+  const sportGradient = getSportGradient(match.category);
+  const live = isMatchLive(match);
+  const homeTeam = match.teams?.home?.name || 'TBD';
+  const awayTeam = match.teams?.away?.name || 'TBD';
+
+  return (
+    <Link
+      to={`/match/${match.category}/${match.id}`}
+      className="group relative bg-card rounded-xl overflow-hidden hover:ring-2 hover:ring-primary hover:scale-[1.02] transition-all duration-300"
+    >
+      {/* Background Gradient */}
+      <div className={`h-28 md:h-32 bg-gradient-to-br ${sportGradient} relative overflow-hidden`}>
+        {/* Pattern overlay */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px)`
+          }} />
+        </div>
+        
+        {/* Large sport icon watermark */}
+        <div className="absolute -right-4 -bottom-4 text-8xl opacity-20 transform rotate-12">
+          {sportIcon}
+        </div>
+        
+        {/* Teams Display */}
+        <div className="absolute inset-0 flex items-center justify-center gap-3 p-4">
+          <div className="text-center">
+            <div className="text-3xl mb-1">{sportIcon}</div>
+            <span className="text-white text-xs font-medium truncate block max-w-[80px]">
+              {homeTeam.split(' ').slice(-1)[0]}
+            </span>
+          </div>
+          <span className="text-white/60 text-sm font-bold">VS</span>
+          <div className="text-center">
+            <div className="text-3xl mb-1">{sportIcon}</div>
+            <span className="text-white text-xs font-medium truncate block max-w-[80px]">
+              {awayTeam.split(' ').slice(-1)[0]}
+            </span>
+          </div>
+        </div>
+        
+        {/* Live Badge */}
+        {live && (
+          <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-lg">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            LIVE
+          </div>
         )}
+        
+        {/* Time Badge */}
+        {!live && (
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded">
+            <Clock className="w-3 h-3" />
+            {formatMatchTime(match.date)}
+          </div>
+        )}
+        
+        {/* Popular Badge */}
+        {match.popular && (
+          <div className="absolute top-2 right-2 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded">
+            🔥
+          </div>
+        )}
+        
+        {/* Play button on hover */}
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <div className="bg-primary rounded-full p-3 transform scale-0 group-hover:scale-100 transition-transform">
+            <Play className="w-6 h-6 text-primary-foreground fill-current" />
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Match Info */}
+      <div className="p-3 bg-card">
+        {/* Category */}
+        <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1.5">
+          {match.category}
+        </p>
+        
+        {/* Teams */}
+        <div className="space-y-0.5">
+          <p className="text-foreground text-sm font-medium truncate">{homeTeam}</p>
+          <p className="text-muted-foreground text-sm truncate">{awayTeam}</p>
+        </div>
+      </div>
+    </Link>
   );
 };
 

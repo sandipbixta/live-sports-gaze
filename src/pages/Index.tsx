@@ -262,15 +262,9 @@ const Index = () => {
         <Separator className="my-8 bg-border" />
             
         {/* Popular by Viewers Section */}
-        {liveMatches.length > 0 && (!selectedSport || selectedSport === 'all') && (
+        {(!selectedSport || selectedSport === 'all') && (
           <React.Suspense fallback={<div className="h-32 bg-card rounded-lg animate-pulse" />}>
-            <div className="mb-8">
-              <SectionHeader title="Popular by Viewers" seeAllLink="/live" />
-              <PopularMatches 
-                popularMatches={liveMatches}
-                selectedSport={null}
-              />
-            </div>
+            <PopularMatches />
           </React.Suspense>
         )}
             

@@ -222,14 +222,9 @@ const Live = () => {
       
       <Separator className="my-8 bg-[#343a4d]" />
       
-      {/* Popular Matches Section - Sorted by Viewer Count */}
-      {!userSelectedMatch && liveMatches.length > 0 && (
-        <div className="mb-8">
-          <PopularMatches
-            popularMatches={liveMatches}
-            selectedSport={activeSportFilter === "all" ? null : activeSportFilter}
-          />
-        </div>
+      {/* Popular Matches Section - From WeStream */}
+      {!userSelectedMatch && (
+        <PopularMatches />
       )}
       
       <SportFilterPills
