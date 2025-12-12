@@ -9,55 +9,56 @@ const SPORTS_DB_API_KEY = Deno.env.get('THESPORTSDB_API_KEY') || '3';
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
 const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1';
 
-// Popular league IDs from TheSportsDB
+// Popular league IDs from TheSportsDB - ONLY TOP TIER GLOBALLY POPULAR LEAGUES
 const POPULAR_LEAGUES = [
-  // Football - Top Leagues
-  { id: '4328', name: 'English Premier League', sport: 'Soccer' },
-  { id: '4335', name: 'La Liga', sport: 'Soccer' },
-  { id: '4331', name: 'German Bundesliga', sport: 'Soccer' },
-  { id: '4332', name: 'Italian Serie A', sport: 'Soccer' },
-  { id: '4334', name: 'French Ligue 1', sport: 'Soccer' },
-  // European Competitions
-  { id: '4480', name: 'UEFA Champions League', sport: 'Soccer' },
-  { id: '4481', name: 'UEFA Europa League', sport: 'Soccer' },
-  { id: '4682', name: 'UEFA Conference League', sport: 'Soccer' },
-  // English Football
-  { id: '4329', name: 'EFL Championship', sport: 'Soccer' },
-  { id: '4346', name: 'FA Cup', sport: 'Soccer' },
-  { id: '4570', name: 'EFL Cup', sport: 'Soccer' },
-  // Other European Leagues
-  { id: '4337', name: 'Eredivisie', sport: 'Soccer' },
-  { id: '4344', name: 'Primeira Liga', sport: 'Soccer' },
-  // South America
-  { id: '4350', name: 'Copa Libertadores', sport: 'Soccer' },
-  { id: '4351', name: 'Copa Sudamericana', sport: 'Soccer' },
-  { id: '4353', name: 'Brazilian Serie A', sport: 'Soccer' },
-  { id: '4355', name: 'Argentine Primera Division', sport: 'Soccer' },
-  // International
-  { id: '4499', name: 'Copa America', sport: 'Soccer' },
-  { id: '4498', name: 'UEFA Euro Championship', sport: 'Soccer' },
-  // North America
-  { id: '4346', name: 'MLS', sport: 'Soccer' },
-  { id: '4350', name: 'Liga MX', sport: 'Soccer' },
-  // US Sports
-  { id: '4387', name: 'NBA', sport: 'Basketball' },
-  { id: '4391', name: 'NFL', sport: 'American Football' },
-  { id: '4380', name: 'NHL', sport: 'Ice Hockey' },
-  { id: '4424', name: 'MLB', sport: 'Baseball' },
-  // Cricket - Leagues & Tournaments
-  { id: '4472', name: 'Indian Premier League', sport: 'Cricket' },
-  { id: '4652', name: 'Big Bash League', sport: 'Cricket' },
-  { id: '4653', name: 'Pakistan Super League', sport: 'Cricket' },
-  { id: '4656', name: 'Caribbean Premier League', sport: 'Cricket' },
-  { id: '4654', name: 'Bangladesh Premier League', sport: 'Cricket' },
-  { id: '4655', name: 'SA20', sport: 'Cricket' },
-  { id: '4651', name: 'The Hundred', sport: 'Cricket' },
-  // Cricket - International
-  { id: '4657', name: 'ICC Cricket World Cup', sport: 'Cricket' },
-  { id: '4658', name: 'ICC T20 World Cup', sport: 'Cricket' },
-  { id: '4659', name: 'ICC Champions Trophy', sport: 'Cricket' },
-  { id: '4660', name: 'The Ashes', sport: 'Cricket' },
+  // Football - Top 5 European Leagues (Most Popular Worldwide)
+  { id: '4328', name: 'English Premier League', sport: 'Soccer', priority: 10 },
+  { id: '4335', name: 'La Liga', sport: 'Soccer', priority: 10 },
+  { id: '4331', name: 'German Bundesliga', sport: 'Soccer', priority: 9 },
+  { id: '4332', name: 'Italian Serie A', sport: 'Soccer', priority: 9 },
+  { id: '4334', name: 'French Ligue 1', sport: 'Soccer', priority: 8 },
+  // UEFA Competitions (Global Interest)
+  { id: '4480', name: 'UEFA Champions League', sport: 'Soccer', priority: 10 },
+  { id: '4481', name: 'UEFA Europa League', sport: 'Soccer', priority: 8 },
+  // International Tournaments
+  { id: '4499', name: 'Copa America', sport: 'Soccer', priority: 9 },
+  { id: '4498', name: 'UEFA Euro Championship', sport: 'Soccer', priority: 10 },
+  // US Major Sports (Global Popularity)
+  { id: '4387', name: 'NBA', sport: 'Basketball', priority: 9 },
+  { id: '4391', name: 'NFL', sport: 'American Football', priority: 8 },
+  // Cricket (Massive Global Following)
+  { id: '4472', name: 'Indian Premier League', sport: 'Cricket', priority: 9 },
+  { id: '4657', name: 'ICC Cricket World Cup', sport: 'Cricket', priority: 10 },
+  { id: '4658', name: 'ICC T20 World Cup', sport: 'Cricket', priority: 10 },
+  // Tennis Grand Slams
+  { id: '4464', name: 'Wimbledon', sport: 'Tennis', priority: 9 },
+  { id: '4465', name: 'US Open Tennis', sport: 'Tennis', priority: 8 },
+  // Formula 1
+  { id: '4370', name: 'Formula 1', sport: 'Motorsport', priority: 9 },
+  // Boxing/UFC
+  { id: '4443', name: 'UFC', sport: 'Fighting', priority: 8 },
 ];
+
+// Elite clubs that always attract global viewers
+const ELITE_CLUBS = [
+  'real madrid', 'barcelona', 'manchester united', 'manchester city', 'liverpool',
+  'chelsea', 'arsenal', 'bayern munich', 'psg', 'paris saint-germain', 'juventus',
+  'inter milan', 'ac milan', 'borussia dortmund', 'atletico madrid', 'tottenham',
+  'lakers', 'warriors', 'celtics', 'bulls', 'heat', 'knicks',
+  'patriots', 'chiefs', 'cowboys', 'packers', '49ers',
+  'mumbai indians', 'chennai super kings', 'royal challengers',
+  'india', 'australia', 'england', 'pakistan', 'south africa' // Cricket national teams
+];
+
+// Check if match involves elite clubs
+function isEliteMatch(match: any): boolean {
+  const homeTeam = (match.homeTeam || match.strHomeTeam || '').toLowerCase();
+  const awayTeam = (match.awayTeam || match.strAwayTeam || '').toLowerCase();
+  
+  return ELITE_CLUBS.some(club => 
+    homeTeam.includes(club) || awayTeam.includes(club)
+  );
+}
 
 interface SportsDbEvent {
   idEvent: string;
@@ -135,6 +136,8 @@ interface TransformedMatch {
   isLive: boolean;
   isFinished: boolean;
   channels: BroadcastChannel[];
+  priority: number;
+  isElite: boolean;
 }
 
 // In-memory cache
@@ -370,6 +373,12 @@ serve(async (req) => {
             };
           });
           
+          const matchData = {
+            homeTeam: event.strHomeTeam,
+            awayTeam: event.strAwayTeam,
+          };
+          const elite = isEliteMatch(matchData);
+          
           return {
             id: event.idEvent,
             title: event.strEvent || `${event.strHomeTeam} vs ${event.strAwayTeam}`,
@@ -393,6 +402,8 @@ serve(async (req) => {
             isLive,
             isFinished,
             channels,
+            priority: league.priority,
+            isElite: elite,
           };
         });
         
@@ -419,11 +430,39 @@ serve(async (req) => {
     // Filter out finished matches
     const upcomingMatches = uniqueMatches.filter(match => !match.isFinished);
     
-    // Sort by date/time (live matches first, then upcoming)
-    upcomingMatches.sort((a, b) => {
+    // Calculate popularity score for each match
+    const scoredMatches = upcomingMatches.map(match => {
+      let score = match.priority || 5;
+      
+      // Boost for elite clubs
+      if (match.isElite) score += 5;
+      
+      // Boost for live matches
+      if (match.isLive) score += 10;
+      
+      // Boost for matches with available streams
+      const hasStream = match.channels.some(ch => ch.cdnChannel);
+      if (hasStream) score += 3;
+      
+      // Boost for matches happening soon (within 24 hours)
+      const matchTime = new Date(match.timestamp).getTime();
+      const hoursUntilMatch = (matchTime - now.getTime()) / (1000 * 60 * 60);
+      if (hoursUntilMatch > 0 && hoursUntilMatch <= 24) score += 2;
+      if (hoursUntilMatch > 0 && hoursUntilMatch <= 6) score += 3;
+      
+      return { ...match, score };
+    });
+    
+    // Sort by score (highest first), then by date
+    scoredMatches.sort((a, b) => {
+      // Live matches always first
       if (a.isLive && !b.isLive) return -1;
       if (!a.isLive && b.isLive) return 1;
       
+      // Then by score
+      if (b.score !== a.score) return b.score - a.score;
+      
+      // Then by date
       const dateA = new Date(a.timestamp);
       const dateB = new Date(b.timestamp);
       return dateA.getTime() - dateB.getTime();
@@ -431,7 +470,7 @@ serve(async (req) => {
     
     // Filter to only show matches within next 7 days
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const filteredMatches = upcomingMatches.filter(match => {
+    const filteredMatches = scoredMatches.filter(match => {
       const matchDate = new Date(match.timestamp);
       return matchDate <= sevenDaysFromNow;
     });
