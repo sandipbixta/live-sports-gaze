@@ -11,15 +11,39 @@ const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1';
 
 // Popular league IDs from TheSportsDB
 const POPULAR_LEAGUES = [
+  // Football - Top Leagues
   { id: '4328', name: 'English Premier League', sport: 'Soccer' },
   { id: '4335', name: 'La Liga', sport: 'Soccer' },
   { id: '4331', name: 'German Bundesliga', sport: 'Soccer' },
   { id: '4332', name: 'Italian Serie A', sport: 'Soccer' },
   { id: '4334', name: 'French Ligue 1', sport: 'Soccer' },
+  // European Competitions
   { id: '4480', name: 'UEFA Champions League', sport: 'Soccer' },
+  { id: '4481', name: 'UEFA Europa League', sport: 'Soccer' },
+  { id: '4682', name: 'UEFA Conference League', sport: 'Soccer' },
+  // English Football
+  { id: '4329', name: 'EFL Championship', sport: 'Soccer' },
+  { id: '4346', name: 'FA Cup', sport: 'Soccer' },
+  { id: '4570', name: 'EFL Cup', sport: 'Soccer' },
+  // Other European Leagues
+  { id: '4337', name: 'Eredivisie', sport: 'Soccer' },
+  { id: '4344', name: 'Primeira Liga', sport: 'Soccer' },
+  // South America
+  { id: '4350', name: 'Copa Libertadores', sport: 'Soccer' },
+  { id: '4351', name: 'Copa Sudamericana', sport: 'Soccer' },
+  { id: '4353', name: 'Brazilian Serie A', sport: 'Soccer' },
+  { id: '4355', name: 'Argentine Primera Division', sport: 'Soccer' },
+  // International
+  { id: '4499', name: 'Copa America', sport: 'Soccer' },
+  { id: '4498', name: 'UEFA Euro Championship', sport: 'Soccer' },
+  // North America
+  { id: '4346', name: 'MLS', sport: 'Soccer' },
+  { id: '4350', name: 'Liga MX', sport: 'Soccer' },
+  // US Sports
   { id: '4387', name: 'NBA', sport: 'Basketball' },
   { id: '4391', name: 'NFL', sport: 'American Football' },
   { id: '4380', name: 'NHL', sport: 'Ice Hockey' },
+  { id: '4424', name: 'MLB', sport: 'Baseball' },
 ];
 
 interface SportsDbEvent {
