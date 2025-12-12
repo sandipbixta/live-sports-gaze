@@ -9,7 +9,7 @@ const SPORTS_DB_API_KEY = Deno.env.get('THESPORTSDB_API_KEY') || '3';
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
 const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1';
 
-// Popular league IDs from TheSportsDB - ONLY TOP TIER GLOBALLY POPULAR LEAGUES
+// Popular league IDs from TheSportsDB - TOP TIER GLOBALLY POPULAR LEAGUES
 const POPULAR_LEAGUES = [
   // Football - Top 5 European Leagues (Most Popular Worldwide)
   { id: '4328', name: 'English Premier League', sport: 'Soccer', priority: 10 },
@@ -20,34 +20,57 @@ const POPULAR_LEAGUES = [
   // UEFA Competitions (Global Interest)
   { id: '4480', name: 'UEFA Champions League', sport: 'Soccer', priority: 10 },
   { id: '4481', name: 'UEFA Europa League', sport: 'Soccer', priority: 8 },
+  { id: '4482', name: 'UEFA Conference League', sport: 'Soccer', priority: 7 },
+  // Other Top European Leagues
+  { id: '4344', name: 'Portuguese Primeira Liga', sport: 'Soccer', priority: 7 },
+  { id: '4337', name: 'Dutch Eredivisie', sport: 'Soccer', priority: 7 },
+  { id: '4359', name: 'Scottish Premiership', sport: 'Soccer', priority: 6 },
+  // South American Leagues
+  { id: '4350', name: 'Brazilian Serie A', sport: 'Soccer', priority: 8 },
+  { id: '4406', name: 'Argentine Primera Division', sport: 'Soccer', priority: 8 },
   // International Tournaments
   { id: '4499', name: 'Copa America', sport: 'Soccer', priority: 9 },
   { id: '4498', name: 'UEFA Euro Championship', sport: 'Soccer', priority: 10 },
+  { id: '4429', name: 'FIFA World Cup', sport: 'Soccer', priority: 10 },
+  { id: '4502', name: 'Africa Cup of Nations', sport: 'Soccer', priority: 8 },
+  { id: '4501', name: 'CONCACAF Gold Cup', sport: 'Soccer', priority: 7 },
+  // MLS & Other
+  { id: '4346', name: 'MLS', sport: 'Soccer', priority: 6 },
+  { id: '4338', name: 'EFL Championship', sport: 'Soccer', priority: 7 },
   // US Major Sports (Global Popularity)
   { id: '4387', name: 'NBA', sport: 'Basketball', priority: 9 },
   { id: '4391', name: 'NFL', sport: 'American Football', priority: 8 },
+  { id: '4380', name: 'NHL', sport: 'Ice Hockey', priority: 7 },
   // Cricket (Massive Global Following)
   { id: '4472', name: 'Indian Premier League', sport: 'Cricket', priority: 9 },
   { id: '4657', name: 'ICC Cricket World Cup', sport: 'Cricket', priority: 10 },
-  { id: '4658', name: 'ICC T20 World Cup', sport: 'Cricket', priority: 10 },
   // Tennis Grand Slams
   { id: '4464', name: 'Wimbledon', sport: 'Tennis', priority: 9 },
   { id: '4465', name: 'US Open Tennis', sport: 'Tennis', priority: 8 },
+  { id: '4520', name: 'Australian Open', sport: 'Tennis', priority: 8 },
+  { id: '4521', name: 'French Open', sport: 'Tennis', priority: 8 },
   // Formula 1
   { id: '4370', name: 'Formula 1', sport: 'Motorsport', priority: 9 },
-  // Boxing/UFC
-  { id: '4443', name: 'UFC', sport: 'Fighting', priority: 8 },
 ];
 
 // Elite clubs that always attract global viewers
 const ELITE_CLUBS = [
+  // Top Football Clubs (Most followed worldwide)
   'real madrid', 'barcelona', 'manchester united', 'manchester city', 'liverpool',
   'chelsea', 'arsenal', 'bayern munich', 'psg', 'paris saint-germain', 'juventus',
   'inter milan', 'ac milan', 'borussia dortmund', 'atletico madrid', 'tottenham',
-  'lakers', 'warriors', 'celtics', 'bulls', 'heat', 'knicks',
-  'patriots', 'chiefs', 'cowboys', 'packers', '49ers',
-  'mumbai indians', 'chennai super kings', 'royal challengers',
-  'india', 'australia', 'england', 'pakistan', 'south africa' // Cricket national teams
+  'napoli', 'roma', 'benfica', 'porto', 'ajax', 'celtic', 'rangers',
+  'flamengo', 'boca juniors', 'river plate', 'palmeiras', 'santos',
+  // Top National Teams
+  'brazil', 'argentina', 'france', 'germany', 'spain', 'england', 'portugal', 'netherlands', 'italy',
+  // US Sports Teams
+  'lakers', 'warriors', 'celtics', 'bulls', 'heat', 'knicks', 'nets',
+  'patriots', 'chiefs', 'cowboys', 'packers', '49ers', 'raiders',
+  // Cricket Teams
+  'mumbai indians', 'chennai super kings', 'royal challengers', 'kolkata knight riders',
+  'india', 'australia', 'england', 'pakistan', 'south africa', 'new zealand',
+  // Tennis Players (as team names in events)
+  'djokovic', 'nadal', 'federer', 'alcaraz', 'sinner', 'medvedev'
 ];
 
 // Check if match involves elite clubs
@@ -349,8 +372,8 @@ serve(async (req) => {
         
         console.log(`Got ${events.length} events for ${league.name}`);
         
-        // Process events and fetch TV channels for each
-        const matchPromises = events.slice(0, 5).map(async (event): Promise<TransformedMatch> => {
+        // Process events (up to 10 per league for better coverage)
+        const matchPromises = events.slice(0, 10).map(async (event): Promise<TransformedMatch> => {
           const eventDate = new Date(event.strTimestamp || `${event.dateEvent}T${event.strTime || '00:00:00'}`);
           const isFinished = event.strStatus === 'Match Finished' || event.strStatus === 'FT';
           const isLive = !isFinished && 
@@ -474,10 +497,10 @@ serve(async (req) => {
       const matchDate = new Date(match.timestamp);
       return matchDate <= sevenDaysFromNow;
     });
-    
-    // Limit to 20 matches
-    const limitedMatches = filteredMatches.slice(0, 20);
-    
+
+    // Limit to 30 matches for better variety
+    const limitedMatches = filteredMatches.slice(0, 30);
+
     // Cache the result
     cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
