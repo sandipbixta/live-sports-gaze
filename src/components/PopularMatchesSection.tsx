@@ -16,6 +16,15 @@ interface CDNChannel {
   embedUrl: string;
 }
 
+interface BroadcastChannel {
+  id: string;
+  name: string;
+  logo: string | null;
+  country: string;
+  language: string | null;
+  cdnChannel: CDNChannel | null;
+}
+
 interface PopularMatch {
   id: string;
   title: string;
@@ -38,7 +47,7 @@ interface PopularMatch {
   banner: string | null;
   isLive: boolean;
   isFinished: boolean;
-  channels: CDNChannel[];
+  channels: BroadcastChannel[];
 }
 
 // Cache for matches
@@ -127,10 +136,16 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
   // Ensure channels is always an array
   const channels = match.channels || [];
   
-  // Build watch URL - if channels available, link to first channel, else to a match page
-  const watchUrl = channels.length > 0 
-    ? `/channel/${channels[0].country}/${channels[0].id}`
+  // Find first channel with a CDN match for streaming
+  const streamableChannel = channels.find(ch => ch.cdnChannel);
+  
+  // Build watch URL - if CDN channel available, link to it, else to live page
+  const watchUrl = streamableChannel?.cdnChannel
+    ? `/channel/${streamableChannel.cdnChannel.country}/${streamableChannel.cdnChannel.id}`
     : `/live`;
+  
+  // Count available streams (channels with CDN matches)
+  const availableStreams = channels.filter(ch => ch.cdnChannel).length;
 
   return (
     <div className="group cursor-pointer h-full min-w-[280px] sm:min-w-[320px]">
@@ -198,8 +213,8 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
             )}
           </div>
           
-          {/* FREE Badge */}
-          {channels.length > 0 && !match.isLive && (
+          {/* FREE Badge - show if we have streamable channels */}
+          {availableStreams > 0 && !match.isLive && (
             <div className="absolute top-2 left-2 z-10">
               <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                 FREE
@@ -276,18 +291,42 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
             </div>
           </div>
           
+          {/* Broadcast channels info */}
+          {channels.length > 0 && (
+            <div className="flex items-center gap-1 mt-2 overflow-x-auto scrollbar-hide">
+              {channels.slice(0, 3).map((ch, idx) => (
+                <div 
+                  key={idx}
+                  className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-[10px] whitespace-nowrap"
+                  title={ch.name}
+                >
+                  {ch.logo && (
+                    <img src={ch.logo} alt={ch.name} className="w-3 h-3 object-contain" />
+                  )}
+                  <span className="truncate max-w-[60px]">{ch.name}</span>
+                  {ch.cdnChannel && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" title="Stream available" />
+                  )}
+                </div>
+              ))}
+              {channels.length > 3 && (
+                <span className="text-[10px] text-muted-foreground">+{channels.length - 3}</span>
+              )}
+            </div>
+          )}
+          
           {/* Watch Button */}
-          <Link to={watchUrl} className="w-full">
+          <Link to={watchUrl} className="w-full mt-2">
             <Button 
               size="sm" 
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Play className="w-4 h-4 mr-2 fill-current" />
               Watch Now
-              {channels.length > 0 && (
+              {availableStreams > 0 && (
                 <Badge variant="secondary" className="ml-2 text-[10px]">
                   <Tv className="w-3 h-3 mr-1" />
-                  {channels.length}
+                  {availableStreams}
                 </Badge>
               )}
             </Button>
