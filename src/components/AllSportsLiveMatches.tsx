@@ -381,9 +381,6 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       {/* Live Matches Sections */}
       {hasLiveMatches && (
         <>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Featured Sports</h2>
-          </div>
           {sortedLiveSports.map(([sportId, matches]) => (
             <div key={sportId} className="space-y-4">
               <div className="flex items-center justify-between">
