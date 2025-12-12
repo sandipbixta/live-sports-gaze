@@ -8,6 +8,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 interface CDNChannel {
@@ -394,24 +396,29 @@ const PopularMatchesSection: React.FC = () => {
         seeAllText="VIEW SCHEDULE"
       />
       
-      <Carousel
-        opts={{
-          align: "start",
-          loop: false,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-3">
-          {matches.map(match => (
-            <CarouselItem 
-              key={match.id} 
-              className="pl-2 md:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
-            >
-              <PopularMatchCard match={match} />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+      <div className="relative group">
+        <Carousel
+          opts={{
+            align: "start",
+            loop: false,
+            dragFree: true,
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-3">
+            {matches.map(match => (
+              <CarouselItem 
+                key={match.id} 
+                className="pl-2 md:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
+              >
+                <PopularMatchCard match={match} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 hidden md:flex h-10 w-10 bg-background/90 border-border hover:bg-background shadow-lg" />
+          <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 hidden md:flex h-10 w-10 bg-background/90 border-border hover:bg-background shadow-lg" />
+        </Carousel>
+      </div>
     </section>
   );
 };
