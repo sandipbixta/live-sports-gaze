@@ -166,12 +166,22 @@ async function fetchTVChannels(eventId: string): Promise<TVChannel[]> {
   }
 
   try {
-    const url = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/lookuptv.php?id=${eventId}`;
-    console.log(`Fetching TV channels for event ${eventId}`);
+    const primaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/lookuptv.php?id=${eventId}`;
+    console.log(`Fetching TV channels for event ${eventId} with key ${SPORTS_DB_API_KEY}`);
     
-    const response = await fetch(url);
+    let response = await fetch(primaryUrl);
     
-    if (!response.ok) {
+    if (!response.ok && response.status === 404 && SPORTS_DB_API_KEY !== '3') {
+      const fallbackUrl = `${SPORTS_DB_BASE_URL}/3/lookuptv.php?id=${eventId}`;
+      console.log(`Primary TV API key failed with 404, retrying with free key for event ${eventId}`);
+      const fallbackResponse = await fetch(fallbackUrl);
+      if (fallbackResponse.ok) {
+        response = fallbackResponse;
+      } else {
+        console.error(`Fallback TV API also failed for event ${eventId}: ${fallbackResponse.status}`);
+        return [];
+      }
+    } else if (!response.ok) {
       console.error(`Failed to fetch TV channels for event ${eventId}: ${response.status}`);
       return [];
     }
@@ -274,12 +284,22 @@ serve(async (req) => {
     // Fetch next events for each popular league
     const fetchPromises = POPULAR_LEAGUES.map(async (league) => {
       try {
-        const url = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${league.id}`;
-        console.log(`Fetching from: ${url}`);
+        const primaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${league.id}`;
+        console.log(`Fetching from: ${primaryUrl}`);
         
-        const response = await fetch(url);
+        let response = await fetch(primaryUrl);
         
-        if (!response.ok) {
+        if (!response.ok && response.status === 404 && SPORTS_DB_API_KEY !== '3') {
+          const fallbackUrl = `${SPORTS_DB_BASE_URL}/3/eventsnextleague.php?id=${league.id}`;
+          console.log(`Primary API key failed with 404 for ${league.name}, retrying with free key...`);
+          const fallbackResponse = await fetch(fallbackUrl);
+          if (fallbackResponse.ok) {
+            response = fallbackResponse;
+          } else {
+            console.error(`Fallback API also failed for league ${league.name}: ${fallbackResponse.status}`);
+            return [];
+          }
+        } else if (!response.ok) {
           console.error(`Failed to fetch league ${league.name}: ${response.status}`);
           return [];
         }
