@@ -369,8 +369,18 @@ serve(async (req) => {
     const results = await Promise.all(fetchPromises);
     results.forEach(matches => allMatches.push(...matches));
     
+    // Deduplicate matches by ID
+    const uniqueMatchesMap = new Map<string, TransformedMatch>();
+    for (const match of allMatches) {
+      if (!uniqueMatchesMap.has(match.id)) {
+        uniqueMatchesMap.set(match.id, match);
+      }
+    }
+    const uniqueMatches = Array.from(uniqueMatchesMap.values());
+    console.log(`Deduplicated ${allMatches.length} matches to ${uniqueMatches.length} unique matches`);
+    
     // Filter out finished matches
-    const upcomingMatches = allMatches.filter(match => !match.isFinished);
+    const upcomingMatches = uniqueMatches.filter(match => !match.isFinished);
     
     // Sort by date/time (live matches first, then upcoming)
     upcomingMatches.sort((a, b) => {
