@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import PageLayout from '@/components/PageLayout';
 
 // New FanCode-style components
+import HeroBanner from '@/components/home/HeroBanner';
 import LiveNowBanner from '@/components/home/LiveNowBanner';
 import SportsTabs from '@/components/home/SportsTabs';
 import MatchesGrid from '@/components/home/MatchesGrid';
@@ -32,7 +33,13 @@ const Index = () => {
       setLoading(true);
       try {
         const data = await getMatchesBySport(activeTab);
-        setMatches(data);
+        // Filter out matches with empty/TBD team names
+        const validMatches = data.filter(m => 
+          m.homeTeam && m.awayTeam && 
+          m.homeTeam !== 'TBD' && m.awayTeam !== 'TBD' &&
+          m.homeTeam.length > 1 && m.awayTeam.length > 1
+        );
+        setMatches(validMatches);
       } catch (err) {
         console.error('Failed to fetch matches:', err);
       } finally {
@@ -93,6 +100,9 @@ const Index = () => {
       <main className="py-6 space-y-8">
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Free Live Sports Streaming - Watch Football, NBA, NFL & More</h1>
+
+        {/* Hero Banner - Main promotional banner */}
+        <HeroBanner />
 
         {/* Live Now Banner - Featured live matches */}
         <LiveNowBanner />
