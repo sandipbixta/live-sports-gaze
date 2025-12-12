@@ -23,12 +23,56 @@ import MatchCard from '@/components/MatchCard';
 import MatchAnalysis from '@/components/match/MatchAnalysis';
 import { ViewerStats } from '@/components/match/ViewerStats';
 
+const MATCH_CACHE_KEY = 'damitv_match_cache';
+const MATCH_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Get cached match from localStorage
+const getCachedMatch = (matchId: string) => {
+  try {
+    const cached = localStorage.getItem(`${MATCH_CACHE_KEY}_${matchId}`);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Date.now() - parsed.timestamp < MATCH_CACHE_DURATION) {
+        return parsed.match;
+      }
+    }
+  } catch (e) {}
+  return null;
+};
+
+// Set cached match to localStorage
+const setCachedMatch = (matchId: string, match: MatchType) => {
+  try {
+    localStorage.setItem(`${MATCH_CACHE_KEY}_${matchId}`, JSON.stringify({
+      match,
+      timestamp: Date.now()
+    }));
+  } catch (e) {}
+};
 
 const Match = () => {
   const { toast } = useToast();
   const { sportId, matchId } = useParams();
-  const [match, setMatch] = useState<MatchType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Initialize with cached match for instant display
+  const [match, setMatch] = useState<MatchType | null>(() => {
+    if (matchId) {
+      const cached = getCachedMatch(matchId);
+      if (cached) {
+        console.log('✅ Using cached match data for instant display');
+        return cached;
+      }
+    }
+    return null;
+  });
+  
+  // Only show loading if no cached match
+  const [isLoading, setIsLoading] = useState(() => {
+    if (matchId) {
+      return !getCachedMatch(matchId);
+    }
+    return true;
+  });
   
   const [allMatches, setAllMatches] = useState<MatchType[]>([]);
   const [recommendedMatches, setRecommendedMatches] = useState<MatchType[]>([]);
@@ -58,16 +102,32 @@ const Match = () => {
       if (!sportId || !matchId) return;
 
       try {
-        setIsLoading(true);
+        // If we have cached match, start loading streams immediately
+        const cachedMatch = getCachedMatch(matchId);
+        if (cachedMatch) {
+          // Start stream loading with cached match immediately
+          handleMatchSelect(cachedMatch);
+        }
+        
+        // Only show loading if no cached data
+        if (!cachedMatch) {
+          setIsLoading(true);
+        }
+        
         console.log(`Loading match: ${sportId}/${matchId}`);
         
         // Fetch the specific match
         const matchData = await fetchMatch(sportId, matchId);
         const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
         setMatch(enhancedMatch);
+        
+        // Cache the match for instant loading next time
+        setCachedMatch(matchId, enhancedMatch);
 
-        // Use the enhanced stream player to load all streams
-        await handleMatchSelect(enhancedMatch);
+        // Only load streams if we didn't already start with cached data
+        if (!cachedMatch) {
+          await handleMatchSelect(enhancedMatch);
+        }
 
         // Auto-scroll to video player after data loads
         setTimeout(() => {
