@@ -362,40 +362,91 @@ export const getHighlights = async (date?: string): Promise<any[]> => {
 };
 
 // ============================================
-// SPORT ICONS (Fallback)
+// SPORT IMAGES FROM THESPORTSDB
 // ============================================
 
-export const getSportIcon = (sport: string): string => {
-  const icons: Record<string, string> = {
-    'football': '⚽', 'soccer': '⚽',
-    'basketball': '🏀', 'nba': '🏀',
-    'nfl': '🏈', 'american football': '🏈',
-    'hockey': '🏒', 'nhl': '🏒', 'ice hockey': '🏒',
-    'baseball': '⚾', 'mlb': '⚾',
-    'tennis': '🎾',
-    'golf': '⛳',
-    'cricket': '🏏',
-    'rugby': '🏉',
-    'mma': '🥊', 'ufc': '🥊', 'boxing': '🥊', 'fighting': '🥊',
-    'wrestling': '🤼', 'wwe': '🤼',
-    'f1': '🏎️', 'motorsport': '🏎️', 'formula': '🏎️', 'racing': '🏎️',
-    'motogp': '🏍️',
-    'cycling': '🚴',
-    'afl': '🏈', 'australian football': '🏈',
-    'volleyball': '🏐',
-    'handball': '🤾',
-    'darts': '🎯',
-    'snooker': '🎱', 'pool': '🎱',
-    'esports': '🎮', 'gaming': '🎮',
-    'swimming': '🏊',
-    'athletics': '🏃',
-    'skiing': '⛷️',
-    'badminton': '🏸',
-    'table tennis': '🏓',
-  };
+// TheSportsDB sport images (official sport thumbnails)
+const SPORT_IMAGES: Record<string, string> = {
+  'soccer': 'https://www.thesportsdb.com/images/sports/soccer.jpg',
+  'football': 'https://www.thesportsdb.com/images/sports/soccer.jpg',
+  'basketball': 'https://www.thesportsdb.com/images/sports/basketball.jpg',
+  'nba': 'https://www.thesportsdb.com/images/sports/basketball.jpg',
+  'american football': 'https://www.thesportsdb.com/images/sports/american_football.jpg',
+  'nfl': 'https://www.thesportsdb.com/images/sports/american_football.jpg',
+  'afl': 'https://www.thesportsdb.com/images/sports/aussie_rules.jpg',
+  'australian football': 'https://www.thesportsdb.com/images/sports/aussie_rules.jpg',
+  'baseball': 'https://www.thesportsdb.com/images/sports/baseball.jpg',
+  'mlb': 'https://www.thesportsdb.com/images/sports/baseball.jpg',
+  'billiards': 'https://www.thesportsdb.com/images/sports/snooker.jpg',
+  'snooker': 'https://www.thesportsdb.com/images/sports/snooker.jpg',
+  'pool': 'https://www.thesportsdb.com/images/sports/snooker.jpg',
+  'cricket': 'https://www.thesportsdb.com/images/sports/cricket.jpg',
+  'darts': 'https://www.thesportsdb.com/images/sports/darts.jpg',
+  'boxing': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'mma': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'ufc': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'wwe': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'wrestling': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'fighting': 'https://www.thesportsdb.com/images/sports/fighting.jpg',
+  'golf': 'https://www.thesportsdb.com/images/sports/golf.jpg',
+  'hockey': 'https://www.thesportsdb.com/images/sports/ice_hockey.jpg',
+  'nhl': 'https://www.thesportsdb.com/images/sports/ice_hockey.jpg',
+  'ice hockey': 'https://www.thesportsdb.com/images/sports/ice_hockey.jpg',
+  'motorsport': 'https://www.thesportsdb.com/images/sports/motorsport.jpg',
+  'f1': 'https://www.thesportsdb.com/images/sports/motorsport.jpg',
+  'formula': 'https://www.thesportsdb.com/images/sports/motorsport.jpg',
+  'racing': 'https://www.thesportsdb.com/images/sports/motorsport.jpg',
+  'motogp': 'https://www.thesportsdb.com/images/sports/motorsport.jpg',
+  'rugby': 'https://www.thesportsdb.com/images/sports/rugby.jpg',
+  'tennis': 'https://www.thesportsdb.com/images/sports/tennis.jpg',
+  'volleyball': 'https://www.thesportsdb.com/images/sports/volleyball.jpg',
+  'handball': 'https://www.thesportsdb.com/images/sports/handball.jpg',
+  'cycling': 'https://www.thesportsdb.com/images/sports/cycling.jpg',
+  'esports': 'https://www.thesportsdb.com/images/sports/esports.jpg',
+  'gaming': 'https://www.thesportsdb.com/images/sports/esports.jpg',
+};
 
+// Get sport image URL from TheSportsDB
+export const getSportImage = (sport: string): string | null => {
   const key = sport.toLowerCase();
-  for (const [k, v] of Object.entries(icons)) {
+  for (const [k, v] of Object.entries(SPORT_IMAGES)) {
+    if (key.includes(k)) return v;
+  }
+  return null;
+};
+
+// Fallback emoji icons
+const SPORT_ICONS: Record<string, string> = {
+  'football': '⚽', 'soccer': '⚽',
+  'basketball': '🏀', 'nba': '🏀',
+  'nfl': '🏈', 'american football': '🏈',
+  'hockey': '🏒', 'nhl': '🏒', 'ice hockey': '🏒',
+  'baseball': '⚾', 'mlb': '⚾',
+  'tennis': '🎾',
+  'golf': '⛳',
+  'cricket': '🏏',
+  'rugby': '🏉',
+  'mma': '🥊', 'ufc': '🥊', 'boxing': '🥊', 'fighting': '🥊',
+  'wrestling': '🤼', 'wwe': '🤼',
+  'f1': '🏎️', 'motorsport': '🏎️', 'formula': '🏎️', 'racing': '🏎️',
+  'motogp': '🏍️',
+  'cycling': '🚴',
+  'afl': '🏈', 'australian football': '🏈',
+  'volleyball': '🏐',
+  'handball': '🤾',
+  'darts': '🎯',
+  'snooker': '🎱', 'pool': '🎱', 'billiards': '🎱',
+  'esports': '🎮', 'gaming': '🎮',
+  'swimming': '🏊',
+  'athletics': '🏃',
+  'skiing': '⛷️',
+  'badminton': '🏸',
+  'table tennis': '🏓',
+};
+
+export const getSportIcon = (sport: string): string => {
+  const key = sport.toLowerCase();
+  for (const [k, v] of Object.entries(SPORT_ICONS)) {
     if (key.includes(k)) return v;
   }
   return '🏆';
