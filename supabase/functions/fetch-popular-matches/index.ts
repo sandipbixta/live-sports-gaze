@@ -167,6 +167,22 @@ function getLeaguePriority(leagueId: string): number {
   return league?.priority || 5;
 }
 
+// Fetch event details to get thumbnail
+async function fetchEventPoster(eventId: string): Promise<string | null> {
+  try {
+    const url = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/lookupevent.php?id=${eventId}`;
+    const response = await fetch(url);
+    if (response.ok) {
+      const data = await response.json();
+      const event = data?.events?.[0];
+      return event?.strThumb || event?.strPoster || event?.strSquare || null;
+    }
+  } catch (e) {
+    console.log(`Failed to fetch poster for event ${eventId}`);
+  }
+  return null;
+}
+
 // In-memory cache
 const cache: { 
   matches?: { data: TransformedMatch[], timestamp: number },
@@ -378,15 +394,30 @@ serve(async (req) => {
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
 
-    // Filter to only show matches within next 7 days
+    // Filter to only show matches within next 7 days and exclude finished
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const filteredMatches = allMatches.filter(match => {
+      if (match.isFinished) return false;
       const matchDate = new Date(match.timestamp);
       return matchDate <= sevenDaysFromNow;
     });
 
     // Limit to 30 matches
     const limitedMatches = filteredMatches.slice(0, 30);
+    
+    // Fetch posters for matches that don't have one (batch up to 10 at a time)
+    const matchesNeedingPosters = limitedMatches.filter(m => !m.poster).slice(0, 10);
+    console.log(`Fetching posters for ${matchesNeedingPosters.length} matches...`);
+    
+    const posterPromises = matchesNeedingPosters.map(async (match) => {
+      const poster = await fetchEventPoster(match.id);
+      if (poster) {
+        const idx = limitedMatches.findIndex(m => m.id === match.id);
+        if (idx !== -1) limitedMatches[idx].poster = poster;
+      }
+    });
+    await Promise.all(posterPromises);
+    
     const liveCount = limitedMatches.filter(m => m.isLive).length;
 
     // Cache the result
