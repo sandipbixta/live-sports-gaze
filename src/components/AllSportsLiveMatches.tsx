@@ -38,27 +38,25 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           liveMatchesData.filter(m => m.sources && m.sources.length > 0)
         );
         const consolidatedLiveMatches = consolidateMatches(cleanLiveMatches);
-        setLiveMatches(consolidatedLiveMatches);
         
         // Filter and consolidate all matches (must have sources)
         const cleanAllMatches = filterCleanMatches(
           allMatchesData.filter(m => m.sources && m.sources.length > 0)
         );
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
-        setAllMatches(consolidatedAllMatches);
         
         console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches from all sports`);
-        console.log('Live matches by sport:', consolidatedLiveMatches.reduce((acc, match) => {
-          const sport = match.sportId || match.category || 'unknown';
-          acc[sport] = (acc[sport] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>));
         
-        // Enrich all matches with viewer counts from stream API
+        // Enrich live matches with viewer counts from stream API
+        const enrichedLiveMatches = await enrichMatchesWithViewers(consolidatedLiveMatches);
+        setLiveMatches(enrichedLiveMatches);
+        
+        // Enrich all matches with viewer counts
         const enrichedAllMatches = await enrichMatchesWithViewers(consolidatedAllMatches);
+        setAllMatches(enrichedAllMatches);
         
         // For "Popular by Viewers", only show live matches with viewers
-        const liveMatchesWithViewers = enrichedAllMatches.filter(m => 
+        const liveMatchesWithViewers = enrichedLiveMatches.filter(m => 
           isMatchLive(m) && 
           (m.viewerCount || 0) > 0
         );
@@ -94,14 +92,17 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   // Refresh viewer counts every 30 seconds
   useEffect(() => {
     const refreshViewerCounts = async () => {
-      if (allMatches.length === 0) return;
+      if (liveMatches.length === 0) return;
       
       try {
-        console.log('🔄 Refreshing viewer counts for', allMatches.length, 'matches');
-        const enrichedAllMatches = await enrichMatchesWithViewers(allMatches);
+        console.log('🔄 Refreshing viewer counts for', liveMatches.length, 'live matches');
+        const enrichedLiveMatches = await enrichMatchesWithViewers(liveMatches);
         
-        // Only show live matches with viewers
-        const liveMatchesWithViewers = enrichedAllMatches.filter(m => 
+        // Update live matches with fresh viewer counts
+        setLiveMatches(enrichedLiveMatches);
+        
+        // Only show live matches with viewers for popular section
+        const liveMatchesWithViewers = enrichedLiveMatches.filter(m => 
           isMatchLive(m) && 
           (m.viewerCount || 0) > 0
         );
@@ -126,7 +127,7 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     const interval = setInterval(refreshViewerCounts, 30000); // Refresh every 30 seconds
     
     return () => clearInterval(interval);
-  }, [allMatches]);
+  }, [liveMatches.length]);
 
   // Define preferred sport order with tennis at the end (excluded: golf, hockey, billiards)
   const getSportPriority = (sportId: string): number => {
@@ -281,6 +282,35 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
+      {/* Popular by Viewers Section */}
+      {mostViewedMatches.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Popular by Viewers
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary text-primary-foreground">
+                TRENDING
+              </span>
+            </h3>
+            <span className="text-sm text-muted-foreground">
+              {mostViewedMatches.length} popular match{mostViewedMatches.length !== 1 ? 'es' : ''}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 auto-rows-fr">
+            {mostViewedMatches.slice(0, 6).map((match) => (
+              <div key={`popular-${match.id}`} className="h-full">
+                <MatchCard
+                  match={match}
+                  sportId={match.sportId || match.category}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Live Matches Sections */}
       {hasLiveMatches && (
         <>
@@ -290,13 +320,13 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           {sortedLiveSports.map(([sportId, matches]) => (
             <div key={sportId} className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                   {getSportName(sportId)}
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-500 text-white animate-pulse">
                     LIVE
                   </span>
                 </h3>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   {matches.length} live match{matches.length !== 1 ? 'es' : ''}
                 </span>
               </div>
@@ -319,16 +349,16 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       {/* Upcoming Matches Sections */}
       {hasUpcomingMatches && (
         <>
-          <div className="border-t border-[#343a4d] pt-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Upcoming Matches</h2>
+          <div className="border-t border-border pt-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Upcoming Matches</h2>
           </div>
           {sortedUpcomingSports.map(([sportId, matches]) => (
             <div key={`upcoming-${sportId}`} className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-xl font-bold text-foreground">
                   {getSportName(sportId)}
                 </h3>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-muted-foreground">
                   {matches.length} upcoming match{matches.length !== 1 ? 'es' : ''}
                 </span>
               </div>
