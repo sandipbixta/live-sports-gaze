@@ -63,10 +63,10 @@ serve(async (req) => {
 
     console.log('Fetching fresh finished matches data from Football-Data.org');
 
-    // Fetch finished matches from today and yesterday
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const dateFrom = yesterday.toISOString().split('T')[0];
+    // Fetch finished matches from the last 7 days for more results
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const dateFrom = weekAgo.toISOString().split('T')[0];
     
     const today = new Date();
     const dateTo = today.toISOString().split('T')[0];
