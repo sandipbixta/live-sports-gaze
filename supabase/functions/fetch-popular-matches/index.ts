@@ -53,6 +53,9 @@ const POPULAR_LEAGUES = [
   { id: '4370', name: 'Formula 1', sport: 'Motorsport', priority: 9 },
 ];
 
+// Derived set of globally popular league names for strict filtering
+const GLOBAL_POPULAR_LEAGUE_NAMES = new Set(POPULAR_LEAGUES.map(l => l.name));
+
 // Elite clubs that always attract global viewers
 const ELITE_CLUBS = [
   // Top Football Clubs (Most followed worldwide)
@@ -481,8 +484,12 @@ serve(async (req) => {
     const uniqueMatches = Array.from(uniqueMatchesMap.values());
     console.log(`Deduplicated ${allMatches.length} matches to ${uniqueMatches.length} unique matches`);
     
-    // Filter out finished matches
-    const upcomingMatches = uniqueMatches.filter(match => !match.isFinished);
+    // Filter out finished matches and keep only truly global top leagues or elite club matches
+    const upcomingMatches = uniqueMatches.filter(match => {
+      if (match.isFinished) return false;
+      const isTopLeague = GLOBAL_POPULAR_LEAGUE_NAMES.has(match.league);
+      return isTopLeague || match.isElite;
+    });
     
     // Calculate popularity score for each match
     const scoredMatches = upcomingMatches.map(match => {
