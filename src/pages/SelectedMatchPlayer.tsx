@@ -12,21 +12,13 @@ import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/Cha
 import TelegramBanner from '@/components/TelegramBanner';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
-interface CDNChannel {
+// Channel directly from API - has embedUrl directly
+interface StreamChannel {
   id: string;
-  title: string;
+  name: string;
   country: string;
   logo: string;
   embedUrl: string;
-}
-
-interface BroadcastChannel {
-  id: string;
-  name: string;
-  logo: string | null;
-  country: string;
-  language: string | null;
-  cdnChannel: CDNChannel | null;
 }
 
 interface SelectedMatch {
@@ -51,7 +43,7 @@ interface SelectedMatch {
   banner: string | null;
   isLive: boolean;
   isFinished: boolean;
-  channels: BroadcastChannel[];
+  channels: StreamChannel[];
 }
 
 const SelectedMatchPlayer = () => {
@@ -61,7 +53,7 @@ const SelectedMatchPlayer = () => {
   
   const [match, setMatch] = useState<SelectedMatch | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<StreamChannel | null>(null);
   const [playerType, setPlayerType] = useState<PlayerType>('simple');
   const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
@@ -83,8 +75,8 @@ const SelectedMatchPlayer = () => {
         
         if (foundMatch) {
           setMatch(foundMatch);
-          // Auto-select first available CDN channel
-          const firstStreamable = foundMatch.channels?.find((ch: BroadcastChannel) => ch.cdnChannel);
+          // Auto-select first available channel with embedUrl
+          const firstStreamable = foundMatch.channels?.find((ch: StreamChannel) => ch.embedUrl);
           if (firstStreamable) {
             setSelectedChannel(firstStreamable);
           }
@@ -106,7 +98,7 @@ const SelectedMatchPlayer = () => {
     }
   }, [selectedChannel]);
 
-  const handleChannelChange = (channel: BroadcastChannel) => {
+  const handleChannelChange = (channel: StreamChannel) => {
     triggerStreamChangeAd();
     setSelectedChannel(channel);
   };
@@ -143,15 +135,15 @@ const SelectedMatchPlayer = () => {
   }
 
   const matchDate = new Date(match.timestamp);
-  const streamableChannels = match.channels?.filter(ch => ch.cdnChannel) || [];
+  const streamableChannels = match.channels?.filter(ch => ch.embedUrl) || [];
 
   // Create stream object for player
-  const currentStream = selectedChannel?.cdnChannel ? {
-    id: selectedChannel.cdnChannel.id,
+  const currentStream = selectedChannel?.embedUrl ? {
+    id: selectedChannel.id,
     streamNo: 1,
-    language: selectedChannel.language || 'English',
+    language: 'English',
     hd: true,
-    embedUrl: selectedChannel.cdnChannel.embedUrl,
+    embedUrl: selectedChannel.embedUrl,
     source: selectedChannel.name
   } : null;
 
@@ -405,7 +397,7 @@ const SelectedMatchPlayer = () => {
               <ScrollArea className="h-[400px]">
                 <div className="p-2">
                   {match.channels.map((channel, index) => {
-                    const hasStream = !!channel.cdnChannel;
+                    const hasStream = !!channel.embedUrl;
                     const isActive = selectedChannel?.id === channel.id;
                     
                     return (
@@ -432,7 +424,6 @@ const SelectedMatchPlayer = () => {
                           </h4>
                           <p className="text-xs text-gray-500">
                             {channel.country}
-                            {channel.language && ` • ${channel.language}`}
                           </p>
                         </div>
                         
