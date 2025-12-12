@@ -77,39 +77,6 @@ export type Database = {
         }
         Relationships: []
       }
-      chat_messages: {
-        Row: {
-          created_at: string
-          display_name: string
-          id: string
-          is_deleted: boolean | null
-          match_id: string
-          message: string
-          session_id: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          display_name?: string
-          id?: string
-          is_deleted?: boolean | null
-          match_id: string
-          message: string
-          session_id: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          display_name?: string
-          id?: string
-          is_deleted?: boolean | null
-          match_id?: string
-          message?: string
-          session_id?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       email_subscriptions: {
         Row: {
           created_at: string
@@ -149,60 +116,6 @@ export type Database = {
           user_id?: string | null
           verification_token?: string | null
           verified?: boolean | null
-        }
-        Relationships: []
-      }
-      head_to_head_stats: {
-        Row: {
-          created_at: string
-          draws: number | null
-          id: string
-          last_5_results: string[] | null
-          last_match_date: string | null
-          last_match_score: string | null
-          sport: string
-          team_a_id: string
-          team_a_name: string
-          team_a_wins: number | null
-          team_b_id: string
-          team_b_name: string
-          team_b_wins: number | null
-          total_matches: number | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          draws?: number | null
-          id?: string
-          last_5_results?: string[] | null
-          last_match_date?: string | null
-          last_match_score?: string | null
-          sport: string
-          team_a_id: string
-          team_a_name: string
-          team_a_wins?: number | null
-          team_b_id: string
-          team_b_name: string
-          team_b_wins?: number | null
-          total_matches?: number | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          draws?: number | null
-          id?: string
-          last_5_results?: string[] | null
-          last_match_date?: string | null
-          last_match_score?: string | null
-          sport?: string
-          team_a_id?: string
-          team_a_name?: string
-          team_a_wins?: number | null
-          team_b_id?: string
-          team_b_name?: string
-          team_b_wins?: number | null
-          total_matches?: number | null
-          updated_at?: string
         }
         Relationships: []
       }

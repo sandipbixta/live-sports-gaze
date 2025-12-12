@@ -129,18 +129,8 @@ const Match = () => {
           await handleMatchSelect(enhancedMatch);
         }
 
-        // Auto-scroll to video player after data loads
-        setTimeout(() => {
-          const streamElement = document.querySelector('[data-stream-container]') || 
-                              document.querySelector('#stream-player') ||
-                              document.querySelector('.stream-player');
-          if (streamElement) {
-            streamElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
-            });
-          }
-        }, 500);
+        // Scroll to top first when page loads
+        window.scrollTo({ top: 0, behavior: 'instant' });
 
         // Load all matches for recommended sections
         const allMatches = await fetchMatches(sportId);

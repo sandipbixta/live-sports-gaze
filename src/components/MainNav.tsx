@@ -22,12 +22,13 @@ const MainNav = () => {
   ];
 
   const handleNavigate = (path: string) => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
     navigate(path);
   };
 
   return (
     <div className="flex items-center gap-6 w-full md:w-auto">
-      <button onClick={() => navigate("/")} className="cursor-pointer flex items-center gap-2 flex-shrink-0">
+      <button onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' }); navigate("/"); }} className="cursor-pointer flex items-center gap-2 flex-shrink-0">
         <img 
           src={damitvLogo} 
           alt="DAMITV Logo" 
