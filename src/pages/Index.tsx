@@ -26,6 +26,8 @@ import { manualMatches } from '../data/manualMatches';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
+import FeaturedCDN from '../components/FeaturedCDN';
+import LiveChannelsCDN from '../components/LiveChannelsCDN';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -236,6 +238,12 @@ const Index = () => {
         <FinishedMatches />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
+
+        {/* Featured Sports from CDN-Live API */}
+        <FeaturedCDN />
+
+        {/* Live Channels from CDN-Live API */}
+        <LiveChannelsCDN />
 
         {/* Live TV Channels Carousel */}
         <div className="mb-8">
