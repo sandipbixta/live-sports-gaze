@@ -8,6 +8,7 @@ const corsHeaders = {
 const SPORTS_DB_API_KEY = '751945';
 const SPORTS_DB_V1_BASE = 'https://www.thesportsdb.com/api/v1/json';
 const SPORTS_DB_V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
+const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1/vip/damitv/channels/';
 
 // Popular football league IDs from TheSportsDB
 const POPULAR_LEAGUES = [
@@ -18,59 +19,12 @@ const POPULAR_LEAGUES = [
   { id: '4334', name: 'French Ligue 1', priority: 8 },
   { id: '4480', name: 'UEFA Champions League', priority: 10 },
   { id: '4481', name: 'UEFA Europa League', priority: 8 },
-  { id: '4350', name: 'Brazilian Serie A', priority: 8 },
+  { id: '4350', name: 'Mexican Primera League', priority: 8 },
   { id: '4406', name: 'Argentine Primera Division', priority: 8 },
   { id: '4346', name: 'MLS', priority: 6 },
-  { id: '4338', name: 'EFL Championship', priority: 7 },
+  { id: '4338', name: 'Belgian Pro League', priority: 7 },
   { id: '4344', name: 'Portuguese Primeira Liga', priority: 7 },
   { id: '4337', name: 'Dutch Eredivisie', priority: 7 },
-];
-
-// CDN-Live channel mapping by league
-const LEAGUE_CHANNELS: Record<string, Array<{ name: string; country: string; priority: number }>> = {
-  'English Premier League': [
-    { name: 'Sky Sports Premier League', country: 'UK', priority: 10 },
-    { name: 'Sky Sports Main Event', country: 'UK', priority: 9 },
-    { name: 'beIN Sports 1', country: 'INT', priority: 8 },
-    { name: 'NBC Sports', country: 'US', priority: 7 },
-    { name: 'Peacock', country: 'US', priority: 6 },
-  ],
-  'La Liga': [
-    { name: 'beIN Sports 1', country: 'INT', priority: 10 },
-    { name: 'ESPN', country: 'US', priority: 9 },
-    { name: 'ESPN Deportes', country: 'US', priority: 8 },
-  ],
-  'UEFA Champions League': [
-    { name: 'beIN Sports 1', country: 'INT', priority: 10 },
-    { name: 'CBS Sports', country: 'US', priority: 9 },
-    { name: 'Paramount+', country: 'US', priority: 8 },
-    { name: 'BT Sport 1', country: 'UK', priority: 7 },
-  ],
-  'UEFA Europa League': [
-    { name: 'beIN Sports 2', country: 'INT', priority: 10 },
-    { name: 'CBS Sports', country: 'US', priority: 9 },
-    { name: 'BT Sport 2', country: 'UK', priority: 8 },
-  ],
-  'German Bundesliga': [
-    { name: 'Sky Sport Bundesliga', country: 'DE', priority: 10 },
-    { name: 'beIN Sports 2', country: 'INT', priority: 9 },
-    { name: 'ESPN+', country: 'US', priority: 8 },
-  ],
-  'Italian Serie A': [
-    { name: 'beIN Sports 3', country: 'INT', priority: 10 },
-    { name: 'CBS Sports', country: 'US', priority: 9 },
-    { name: 'Paramount+', country: 'US', priority: 8 },
-  ],
-  'French Ligue 1': [
-    { name: 'beIN Sports 1', country: 'FR', priority: 10 },
-    { name: 'beIN Sports 2', country: 'INT', priority: 9 },
-  ],
-};
-
-// Default channels for leagues not in the mapping
-const DEFAULT_CHANNELS = [
-  { name: 'beIN Sports 1', country: 'INT', priority: 5 },
-  { name: 'ESPN', country: 'US', priority: 4 },
 ];
 
 interface LiveMatch {
@@ -112,12 +66,26 @@ interface ScheduledMatch {
   strProgress: string | null;
 }
 
+interface TVChannel {
+  strChannel: string;
+  strCountry: string;
+  strLogo: string | null;
+  strTime: string | null;
+}
+
 interface CDNChannel {
   id: string;
   name: string;
   country: string;
   logo: string;
   embedUrl: string;
+}
+
+interface CDNLiveChannel {
+  name: string;
+  country: string;
+  url: string;
+  logo?: string;
 }
 
 interface TransformedMatch {
@@ -143,22 +111,166 @@ interface TransformedMatch {
   priority: number;
 }
 
-// Build CDN-Live embed URL
-function buildCDNUrl(channelName: string, country: string): string {
-  return `https://cdn-live.tv/api/v1/vip/damitv/channels/player/?name=${encodeURIComponent(channelName)}&code=${country}`;
+// Cache for CDN-Live channels
+let cdnChannelsCache: { data: CDNLiveChannel[], timestamp: number } | null = null;
+const CDN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+// Fetch CDN-Live channels
+async function fetchCDNChannels(): Promise<CDNLiveChannel[]> {
+  if (cdnChannelsCache && Date.now() - cdnChannelsCache.timestamp < CDN_CACHE_DURATION) {
+    console.log('Using cached CDN-Live channels');
+    return cdnChannelsCache.data;
+  }
+
+  try {
+    console.log('Fetching CDN-Live channels...');
+    const response = await fetch(CDN_LIVE_API, {
+      headers: { 'Accept': 'application/json' },
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      const channels: CDNLiveChannel[] = data?.channels || data || [];
+      console.log(`Fetched ${channels.length} CDN-Live channels`);
+      cdnChannelsCache = { data: channels, timestamp: Date.now() };
+      return channels;
+    } else {
+      console.error('Failed to fetch CDN-Live channels:', response.status);
+    }
+  } catch (error) {
+    console.error('Error fetching CDN-Live channels:', error);
+  }
+  
+  return cdnChannelsCache?.data || [];
 }
 
-// Get channels for a league
-function getChannelsForLeague(leagueName: string): CDNChannel[] {
-  const leagueChannels = LEAGUE_CHANNELS[leagueName] || DEFAULT_CHANNELS;
+// Normalize channel name for matching
+function normalizeChannelName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim();
+}
+
+// Match TheSportsDB channel with CDN-Live channel
+function matchChannel(tvChannel: TVChannel, cdnChannels: CDNLiveChannel[]): CDNChannel | null {
+  const normalizedTVName = normalizeChannelName(tvChannel.strChannel);
   
-  return leagueChannels.map((ch, index) => ({
-    id: `${ch.name.toLowerCase().replace(/\s+/g, '-')}-${ch.country.toLowerCase()}`,
-    name: ch.name,
-    country: ch.country,
-    logo: '', // Could add logos later
-    embedUrl: buildCDNUrl(ch.name, ch.country),
-  }));
+  // Try exact match first
+  for (const cdn of cdnChannels) {
+    const normalizedCDNName = normalizeChannelName(cdn.name);
+    if (normalizedCDNName === normalizedTVName) {
+      return {
+        id: `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-'),
+        name: cdn.name,
+        country: cdn.country,
+        logo: tvChannel.strLogo || cdn.logo || '',
+        embedUrl: cdn.url,
+      };
+    }
+  }
+  
+  // Try partial match (channel name contains TV name or vice versa)
+  for (const cdn of cdnChannels) {
+    const normalizedCDNName = normalizeChannelName(cdn.name);
+    if (normalizedCDNName.includes(normalizedTVName) || normalizedTVName.includes(normalizedCDNName)) {
+      return {
+        id: `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-'),
+        name: cdn.name,
+        country: cdn.country,
+        logo: tvChannel.strLogo || cdn.logo || '',
+        embedUrl: cdn.url,
+      };
+    }
+  }
+  
+  // Try matching key parts (e.g., "sky sports" in "sky sports main event")
+  const tvParts = normalizedTVName.split(' ');
+  for (const cdn of cdnChannels) {
+    const normalizedCDNName = normalizeChannelName(cdn.name);
+    const cdnParts = normalizedCDNName.split(' ');
+    
+    // Check if at least 2 words match
+    const matchingParts = tvParts.filter(part => 
+      cdnParts.some(cdnPart => cdnPart === part || cdnPart.includes(part) || part.includes(cdnPart))
+    );
+    
+    if (matchingParts.length >= 2) {
+      return {
+        id: `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-'),
+        name: cdn.name,
+        country: cdn.country,
+        logo: tvChannel.strLogo || cdn.logo || '',
+        embedUrl: cdn.url,
+      };
+    }
+  }
+  
+  return null;
+}
+
+// Fetch TV channels for an event from TheSportsDB
+async function fetchTVChannels(eventId: string, cdnChannels: CDNLiveChannel[]): Promise<CDNChannel[]> {
+  try {
+    const url = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/lookuptv.php?id=${eventId}`;
+    const response = await fetch(url);
+    
+    if (response.ok) {
+      const data = await response.json();
+      const tvChannels: TVChannel[] = data?.tvevent || [];
+      
+      if (tvChannels.length === 0) {
+        console.log(`No TV channels found for event ${eventId}`);
+        return [];
+      }
+      
+      console.log(`Found ${tvChannels.length} TV channels for event ${eventId}`);
+      
+      const matchedChannels: CDNChannel[] = [];
+      const seenIds = new Set<string>();
+      
+      for (const tv of tvChannels) {
+        const matched = matchChannel(tv, cdnChannels);
+        if (matched && !seenIds.has(matched.id)) {
+          seenIds.add(matched.id);
+          matchedChannels.push(matched);
+        }
+      }
+      
+      console.log(`Matched ${matchedChannels.length} channels with CDN-Live for event ${eventId}`);
+      return matchedChannels;
+    }
+  } catch (error) {
+    console.error(`Error fetching TV channels for event ${eventId}:`, error);
+  }
+  
+  return [];
+}
+
+// Fallback: Get default channels based on league
+function getDefaultChannels(leagueName: string, cdnChannels: CDNLiveChannel[]): CDNChannel[] {
+  const defaultChannelNames = ['beIN Sports 1', 'ESPN', 'Sky Sports', 'CBS Sports'];
+  const channels: CDNChannel[] = [];
+  
+  for (const channelName of defaultChannelNames) {
+    const normalized = normalizeChannelName(channelName);
+    for (const cdn of cdnChannels) {
+      if (normalizeChannelName(cdn.name).includes(normalized)) {
+        channels.push({
+          id: `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-'),
+          name: cdn.name,
+          country: cdn.country,
+          logo: cdn.logo || '',
+          embedUrl: cdn.url,
+        });
+        break;
+      }
+    }
+    if (channels.length >= 3) break;
+  }
+  
+  return channels;
 }
 
 // Get priority for a league
@@ -219,6 +331,10 @@ serve(async (req) => {
 
     console.log('Fetching fresh football matches from TheSportsDB...');
     
+    // Fetch CDN-Live channels first
+    const cdnChannels = await fetchCDNChannels();
+    console.log(`Got ${cdnChannels.length} CDN-Live channels for matching`);
+    
     const allMatches: TransformedMatch[] = [];
     const matchIds = new Set<string>();
     const now = new Date();
@@ -263,7 +379,7 @@ serve(async (req) => {
             poster: match.strThumb || match.strPoster,
             isLive: true,
             isFinished: false,
-            channels: getChannelsForLeague(match.strLeague),
+            channels: [], // Will be populated with TV lookup
             priority: leaguePriority + 10, // Boost live matches
           });
         }
@@ -314,7 +430,7 @@ serve(async (req) => {
             poster: match.strThumb || match.strPoster || match.strSquare,
             isLive: false,
             isFinished: false,
-            channels: getChannelsForLeague(match.strLeague),
+            channels: [], // Will be populated with TV lookup
             priority: leaguePriority,
           });
         }
@@ -371,7 +487,7 @@ serve(async (req) => {
             poster: match.strThumb || match.strPoster || match.strSquare,
             isLive: false,
             isFinished: false,
-            channels: getChannelsForLeague(league.name),
+            channels: [], // Will be populated with TV lookup
             priority: league.priority,
           });
         }
@@ -404,6 +520,29 @@ serve(async (req) => {
 
     // Limit to 30 matches
     const limitedMatches = filteredMatches.slice(0, 30);
+    
+    // Fetch TV channels for top matches (limit to avoid rate limiting)
+    console.log('Fetching TV channels for matches...');
+    const tvPromises = limitedMatches.slice(0, 20).map(async (match) => {
+      const channels = await fetchTVChannels(match.id, cdnChannels);
+      
+      // If no TV channels found, use default channels
+      if (channels.length === 0) {
+        const defaults = getDefaultChannels(match.league, cdnChannels);
+        match.channels = defaults;
+      } else {
+        match.channels = channels;
+      }
+    });
+    
+    await Promise.all(tvPromises);
+    
+    // For remaining matches without channels, add defaults
+    for (const match of limitedMatches) {
+      if (match.channels.length === 0) {
+        match.channels = getDefaultChannels(match.league, cdnChannels);
+      }
+    }
     
     // Fetch posters for matches that don't have one (batch up to 10 at a time)
     const matchesNeedingPosters = limitedMatches.filter(m => !m.poster).slice(0, 10);
