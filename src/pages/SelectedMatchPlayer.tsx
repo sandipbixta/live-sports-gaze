@@ -9,7 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import TeamLogo from '@/components/TeamLogo';
 import { format } from 'date-fns';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
-import TelegramBanner from '@/components/TelegramBanner';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 import SEOMetaTags from '@/components/SEOMetaTags';
 
@@ -311,11 +310,6 @@ const SelectedMatchPlayer = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Telegram Banner */}
-      <div className="container mx-auto px-4 py-3">
-        <TelegramBanner />
       </div>
 
       {/* Player Settings Panel */}
