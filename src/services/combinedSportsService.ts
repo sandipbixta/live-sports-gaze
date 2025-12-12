@@ -97,6 +97,31 @@ export const fetchEventPoster = async (homeTeam: string, awayTeam: string): Prom
 };
 
 // ============================================
+// PARSE TEAMS FROM TITLE
+// ============================================
+
+const parseTeamsFromTitle = (title: string): { home: string; away: string } => {
+  if (!title) return { home: '', away: '' };
+  
+  // Try different separators: "vs", "v", "-", "@"
+  const separators = [' vs ', ' vs. ', ' v ', ' - ', ' @ ', ' VS ', ' Vs '];
+  
+  for (const sep of separators) {
+    if (title.includes(sep) || title.toLowerCase().includes(sep.toLowerCase())) {
+      const parts = title.split(new RegExp(sep, 'i'));
+      if (parts.length >= 2) {
+        // Clean up team names - remove time/date info in parentheses
+        const home = parts[0].trim().replace(/\s*\([^)]*\)\s*$/, '').trim();
+        const away = parts[1].trim().replace(/\s*\([^)]*\)\s*$/, '').split('(')[0].trim();
+        return { home, away };
+      }
+    }
+  }
+  
+  return { home: title, away: '' };
+};
+
+// ============================================
 // FETCH FROM CDN-LIVE
 // ============================================
 
@@ -104,6 +129,7 @@ export const fetchCDNEvents = async (sport?: string): Promise<CombinedMatch[]> =
   try {
     const endpoint = sport && sport !== 'all' ? `/events/${sport}/` : '/events/sports/';
     const res = await fetch(`${CDN_API}${endpoint}`, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`CDN API error: ${res.status}`);
     const data = await res.json();
     const events = data.events || data.matches || data || [];
     
@@ -111,35 +137,37 @@ export const fetchCDNEvents = async (sport?: string): Promise<CombinedMatch[]> =
     
     return events.map((e: any) => {
       // Parse teams from title if not provided
-      let homeTeam = e.home_team || e.homeTeam || e.team1 || '';
-      let awayTeam = e.away_team || e.awayTeam || e.team2 || '';
+      const parsed = parseTeamsFromTitle(e.title || '');
+      let homeTeam = e.home_team || e.homeTeam || e.team1 || parsed.home || '';
+      let awayTeam = e.away_team || e.awayTeam || e.team2 || parsed.away || '';
       
-      if (!homeTeam && !awayTeam && e.title) {
-        const parts = e.title.split(/\s+vs\.?\s+|\s+-\s+/i);
-        if (parts.length >= 2) {
-          homeTeam = parts[0].trim();
-          awayTeam = parts[1].trim();
-        }
-      }
+      // Skip matches with empty/invalid team names
+      if (!homeTeam && !awayTeam) return null;
+      
+      // Clean up team names
+      homeTeam = homeTeam.replace(/^\d+\.\s*/, '').trim(); // Remove leading numbers
+      awayTeam = awayTeam.replace(/^\d+\.\s*/, '').trim();
       
       return {
         id: `cdn-${e.id || Math.random().toString(36).substr(2, 9)}`,
         title: e.title || `${homeTeam} vs ${awayTeam}`,
-        sport: e.sport || e.category || sport || 'sports',
-        competition: e.competition || e.league || '',
+        sport: (e.sport || e.category || sport || 'sports').toLowerCase(),
+        competition: e.competition || e.league || e.tournament || '',
         homeTeam,
         awayTeam,
-        homeBadge: e.home_badge || null,
-        awayBadge: e.away_badge || null,
-        poster: e.poster || e.image || null,
-        date: new Date(e.start_time || e.date || Date.now()),
-        isLive: e.is_live || e.live || e.status === 'live' || e.status === 'LIVE',
-        score: e.score || undefined,
+        homeBadge: e.home_badge || e.home_logo || null,
+        awayBadge: e.away_badge || e.away_logo || null,
+        poster: e.poster || e.image || e.thumbnail || null,
+        date: new Date(e.start_time || e.date || e.time || Date.now()),
+        isLive: e.is_live === true || e.live === true || e.status === 'live' || e.status === 'LIVE',
+        score: e.score ? { home: e.score.home || 0, away: e.score.away || 0 } : undefined,
         source: 'cdn' as const,
-        streamUrl: e.stream_url || e.url,
+        streamUrl: e.stream_url || e.url || e.embed_url,
         sources: e.sources || e.channels || [],
       };
-    });
+    }).filter((m: CombinedMatch | null): m is CombinedMatch => 
+      m !== null && m.homeTeam !== '' && m.awayTeam !== '' && m.homeTeam !== 'TBD' && m.awayTeam !== 'TBD'
+    );
   } catch (err) {
     console.error('CDN fetch error:', err);
     return [];
@@ -153,6 +181,7 @@ export const fetchCDNEvents = async (sport?: string): Promise<CombinedMatch[]> =
 export const fetchWeStreamMatches = async (): Promise<CombinedMatch[]> => {
   try {
     const res = await fetch(`${WESTREAM_API}/matches`, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`WeStream API error: ${res.status}`);
     const data = await res.json();
     const matches = Array.isArray(data) ? data : data.matches || [];
     
@@ -161,22 +190,31 @@ export const fetchWeStreamMatches = async (): Promise<CombinedMatch[]> => {
       const matchDate = m.date || now;
       const threeHoursAgo = now - 3 * 60 * 60 * 1000;
       
+      // Parse teams from title if not in teams object
+      const parsed = parseTeamsFromTitle(m.title || '');
+      const homeTeam = m.teams?.home?.name || parsed.home || '';
+      const awayTeam = m.teams?.away?.name || parsed.away || '';
+      
+      if (!homeTeam || !awayTeam) return null;
+      
       return {
         id: `ws-${m.id}`,
-        title: m.title || '',
-        sport: m.category?.toLowerCase() || 'sports',
-        competition: m.league || m.category || '',
-        homeTeam: m.teams?.home?.name || '',
-        awayTeam: m.teams?.away?.name || '',
+        title: m.title || `${homeTeam} vs ${awayTeam}`,
+        sport: (m.category || 'sports').toLowerCase(),
+        competition: m.league || m.competition || m.category || '',
+        homeTeam,
+        awayTeam,
         homeBadge: m.teams?.home?.badge || null,
         awayBadge: m.teams?.away?.badge || null,
-        poster: null,
+        poster: m.poster || m.image || null,
         date: new Date(matchDate),
         isLive: matchDate <= now && matchDate > threeHoursAgo,
         source: 'westream' as const,
         sources: m.sources || [],
       };
-    });
+    }).filter((m: CombinedMatch | null): m is CombinedMatch => 
+      m !== null && m.homeTeam !== '' && m.awayTeam !== ''
+    );
   } catch (err) {
     console.error('WeStream fetch error:', err);
     return [];
