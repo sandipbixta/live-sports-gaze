@@ -273,18 +273,58 @@ const MatchCardSkeleton: React.FC = () => (
   </div>
 );
 
+const CACHE_KEY = 'damitv_popular_matches';
+const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
+const getCachedMatches = (): { matches: PopularMatch[]; timestamp: number } | null => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (e) {
+    console.error('Error reading cache:', e);
+  }
+  return null;
+};
+
+const setCachedMatches = (matches: PopularMatch[]) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ matches, timestamp: Date.now() }));
+  } catch (e) {
+    console.error('Error setting cache:', e);
+  }
+};
+
 const PopularMatchesSection: React.FC = () => {
   const navigate = useNavigate();
-  const [matches, setMatches] = useState<PopularMatch[]>([]);
-  const [liveCount, setLiveCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [matches, setMatches] = useState<PopularMatch[]>(() => {
+    // Initialize with cached data immediately
+    const cached = getCachedMatches();
+    if (cached) {
+      const activeMatches = cached.matches.filter((m: PopularMatch) => !m.isFinished);
+      return activeMatches;
+    }
+    return [];
+  });
+  const [liveCount, setLiveCount] = useState(() => {
+    const cached = getCachedMatches();
+    if (cached) {
+      return cached.matches.filter((m: PopularMatch) => m.isLive && !m.isFinished).length;
+    }
+    return 0;
+  });
+  const [loading, setLoading] = useState(() => {
+    // Only show loading if no cached data
+    return !getCachedMatches();
+  });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
   const fetchMatches = useCallback(async (showLoading = false) => {
     try {
-      if (showLoading) setLoading(true);
+      if (showLoading && matches.length === 0) setLoading(true);
       
       const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
       
@@ -294,11 +334,13 @@ const PopularMatchesSection: React.FC = () => {
       }
       
       const fetchedMatches = data?.matches || [];
-      // Filter out finished matches
       const activeMatches = fetchedMatches.filter((m: PopularMatch) => !m.isFinished);
+      
+      // Cache the fresh data
+      setCachedMatches(activeMatches);
+      
       setMatches(activeMatches);
       
-      // Count only live matches from active matches
       const liveMatches = activeMatches.filter((m: PopularMatch) => m.isLive);
       setLiveCount(liveMatches.length);
       
@@ -308,10 +350,11 @@ const PopularMatchesSection: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [matches.length]);
 
   useEffect(() => {
-    fetchMatches(true);
+    // Fetch fresh data in background (even if we have cache)
+    fetchMatches(matches.length === 0);
     
     // Full data refresh every 2 minutes
     const fullRefreshInterval = setInterval(() => fetchMatches(false), 2 * 60 * 1000);
