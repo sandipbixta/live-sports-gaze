@@ -1,28 +1,82 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
 import MatchCard from './MatchCard';
+import SkeletonCard from './SkeletonCard';
 import { useToast } from '../hooks/use-toast';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Loader2 } from 'lucide-react';
+
+// LocalStorage cache keys for instant loading
+const CACHE_KEY_LIVE = 'damitv_live_matches_cache';
+const CACHE_KEY_ALL = 'damitv_all_matches_cache';
 
 interface AllSportsLiveMatchesProps {
   searchTerm?: string;
 }
 
+// Load cached data instantly
+const getCachedLiveMatches = (): Match[] => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY_LIVE);
+    if (!cached) return [];
+    return JSON.parse(cached);
+  } catch {
+    return [];
+  }
+};
+
+const getCachedAllMatches = (): Match[] => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY_ALL);
+    if (!cached) return [];
+    return JSON.parse(cached);
+  } catch {
+    return [];
+  }
+};
+
+const setCachedLiveMatches = (matches: Match[]) => {
+  try {
+    localStorage.setItem(CACHE_KEY_LIVE, JSON.stringify(matches.slice(0, 100)));
+  } catch {
+    // Storage might be full
+  }
+};
+
+const setCachedAllMatches = (matches: Match[]) => {
+  try {
+    localStorage.setItem(CACHE_KEY_ALL, JSON.stringify(matches.slice(0, 100)));
+  } catch {
+    // Storage might be full
+  }
+};
+
 const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm = '' }) => {
   const { toast } = useToast();
-  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
-  const [allMatches, setAllMatches] = useState<Match[]>([]);
+  
+  // Initialize with cached data immediately
+  const [liveMatches, setLiveMatches] = useState<Match[]>(() => getCachedLiveMatches());
+  const [allMatches, setAllMatches] = useState<Match[]>(() => getCachedAllMatches());
   const [sports, setSports] = useState<Sport[]>([]);
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(() => getCachedLiveMatches().length > 0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [mostViewedMatches, setMostViewedMatches] = useState<Match[]>([]);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+    
     const loadLiveMatches = async () => {
       try {
-        // NO setLoading(true) - let content render immediately
+        // Show refreshing indicator only if we have cached data
+        if (liveMatches.length > 0) {
+          setIsRefreshing(true);
+        }
+        
+        console.log('🔄 Fetching fresh matches...');
         
         // Fetch sports, live matches, and all matches in parallel
         const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
@@ -45,15 +99,17 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         );
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         
-        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches from all sports`);
+        console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches`);
         
         // Enrich live matches with viewer counts from stream API
         const enrichedLiveMatches = await enrichMatchesWithViewers(consolidatedLiveMatches);
         setLiveMatches(enrichedLiveMatches);
+        setCachedLiveMatches(enrichedLiveMatches);
         
         // Enrich all matches with viewer counts
         const enrichedAllMatches = await enrichMatchesWithViewers(consolidatedAllMatches);
         setAllMatches(enrichedAllMatches);
+        setCachedAllMatches(enrichedAllMatches);
         
         // For "Popular by Viewers", only show live matches with viewers
         const liveMatchesWithViewers = enrichedLiveMatches.filter(m => 
@@ -66,23 +122,21 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           (b.viewerCount || 0) - (a.viewerCount || 0)
         );
         
-        console.log('🔥 Popular live matches with viewers:', sortedByViewers.map(m => ({ 
-          id: m.id, 
-          title: m.title, 
-          viewers: m.viewerCount 
-        })));
-        
         setMostViewedMatches(sortedByViewers.slice(0, 12));
         
       } catch (error) {
         console.error('Error loading matches:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load matches.",
-          variant: "destructive",
-        });
+        // Only show error toast if we have no cached data
+        if (liveMatches.length === 0) {
+          toast({
+            title: "Error",
+            description: "Failed to load matches.",
+            variant: "destructive",
+          });
+        }
       } finally {
         setHasInitialized(true);
+        setIsRefreshing(false);
       }
     };
 
@@ -259,13 +313,19 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const hasLiveMatches = filteredLiveMatches.length > 0;
   const hasUpcomingMatches = filteredUpcomingMatches.length > 0;
 
-  // Show skeleton only during initial load
-  if (!hasInitialized) {
+  // Show skeleton only during initial load with no cache
+  if (!hasInitialized && liveMatches.length === 0) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="h-[280px] bg-card rounded-xl animate-pulse"></div>
-        ))}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
+          <span className="text-muted-foreground text-sm">Loading matches...</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -282,6 +342,13 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
 
   return (
     <div className="space-y-8">
+      {/* Refreshing indicator */}
+      {isRefreshing && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span>Updating matches...</span>
+        </div>
+      )}
       {/* Popular by Viewers Section */}
       {mostViewedMatches.length > 0 && (
         <div className="space-y-4">
