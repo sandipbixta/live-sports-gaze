@@ -44,6 +44,19 @@ const POPULAR_LEAGUES = [
   { id: '4391', name: 'NFL', sport: 'American Football' },
   { id: '4380', name: 'NHL', sport: 'Ice Hockey' },
   { id: '4424', name: 'MLB', sport: 'Baseball' },
+  // Cricket - Leagues & Tournaments
+  { id: '4472', name: 'Indian Premier League', sport: 'Cricket' },
+  { id: '4652', name: 'Big Bash League', sport: 'Cricket' },
+  { id: '4653', name: 'Pakistan Super League', sport: 'Cricket' },
+  { id: '4656', name: 'Caribbean Premier League', sport: 'Cricket' },
+  { id: '4654', name: 'Bangladesh Premier League', sport: 'Cricket' },
+  { id: '4655', name: 'SA20', sport: 'Cricket' },
+  { id: '4651', name: 'The Hundred', sport: 'Cricket' },
+  // Cricket - International
+  { id: '4657', name: 'ICC Cricket World Cup', sport: 'Cricket' },
+  { id: '4658', name: 'ICC T20 World Cup', sport: 'Cricket' },
+  { id: '4659', name: 'ICC Champions Trophy', sport: 'Cricket' },
+  { id: '4660', name: 'The Ashes', sport: 'Cricket' },
 ];
 
 interface SportsDbEvent {
