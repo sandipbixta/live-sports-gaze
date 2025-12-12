@@ -193,48 +193,48 @@ const PopularMatchCard: React.FC<{
     if ((match.homeTeamBadge && !imgError.home) || (match.awayTeamBadge && !imgError.away)) {
       return (
         <div className="w-full h-full relative overflow-hidden bg-black">
-          <div className="flex items-center gap-4 z-10 relative h-full justify-center">
+          <div className="flex items-center gap-3 z-10 relative h-full justify-center">
             {match.homeTeamBadge && !imgError.home ? (
               <div className="flex flex-col items-center">
                 <img
                   src={match.homeTeamBadge}
                   alt={match.homeTeam}
-                  className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
+                  className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, home: true }))}
                 />
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
                   {match.homeTeam}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
                   {match.homeTeam.substring(0, 2).toUpperCase()}
                 </div>
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
                   {match.homeTeam}
                 </span>
               </div>
             )}
-            <span className="text-white font-bold text-lg drop-shadow-sm">VS</span>
+            <span className="text-white font-bold text-sm drop-shadow-sm">VS</span>
             {match.awayTeamBadge && !imgError.away ? (
               <div className="flex flex-col items-center">
                 <img
                   src={match.awayTeamBadge}
                   alt={match.awayTeam}
-                  className="w-14 h-14 object-contain drop-shadow-md filter brightness-110"
+                  className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, away: true }))}
                 />
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
                   {match.awayTeam}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
                   {match.awayTeam.substring(0, 2).toUpperCase()}
                 </div>
-                <span className="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">
+                <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
                   {match.awayTeam}
                 </span>
               </div>
@@ -259,11 +259,11 @@ const PopularMatchCard: React.FC<{
   return (
     <div 
       onClick={onClick}
-      className="group cursor-pointer h-full min-w-[280px] flex-shrink-0"
+      className="group cursor-pointer flex-shrink-0 w-[240px] md:w-[260px]"
     >
       <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
-        {/* Banner Image Section - 16:9 aspect ratio */}
-        <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
+        {/* Banner Image Section - smaller aspect ratio */}
+        <div className="relative aspect-[16/10] overflow-hidden rounded-t-xl flex-shrink-0">
           {generateThumbnail()}
           
           {/* FREE Badge - Top left */}
@@ -295,20 +295,20 @@ const PopularMatchCard: React.FC<{
         </div>
 
         {/* Info Section */}
-        <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
+        <div className="p-2.5 flex flex-col gap-1.5 flex-1 bg-card">
           {/* Sport • Tournament */}
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-[10px] text-muted-foreground truncate">
             Football • {match.league}
           </p>
           
           {/* Home Team with Score */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <TeamLogo teamName={match.homeTeam} sport="Soccer" size="sm" showFallbackIcon={false} />
-              <span className="text-sm font-medium text-foreground truncate">{match.homeTeam}</span>
+              <span className="text-xs font-medium text-foreground truncate">{match.homeTeam}</span>
             </div>
             {match.isLive && match.homeScore && (
-              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+              <span className="text-foreground font-bold text-sm ml-2 min-w-[24px] text-right tabular-nums">
                 {match.homeScore}
               </span>
             )}
@@ -316,12 +316,12 @@ const PopularMatchCard: React.FC<{
           
           {/* Away Team with Score */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <TeamLogo teamName={match.awayTeam} sport="Soccer" size="sm" showFallbackIcon={false} />
-              <span className="text-sm font-medium text-foreground truncate">{match.awayTeam}</span>
+              <span className="text-xs font-medium text-foreground truncate">{match.awayTeam}</span>
             </div>
             {match.isLive && match.awayScore && (
-              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+              <span className="text-foreground font-bold text-sm ml-2 min-w-[24px] text-right tabular-nums">
                 {match.awayScore}
               </span>
             )}
@@ -330,11 +330,11 @@ const PopularMatchCard: React.FC<{
           {/* Match Time/Progress */}
           <div className="flex items-center justify-between mt-auto">
             {match.isLive ? (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground">
                 {match.progress || 'Live'}
               </span>
             ) : (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 {format(matchDate, 'EEE, do MMM, h:mm a')}
               </p>
             )}
