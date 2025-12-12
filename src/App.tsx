@@ -50,6 +50,7 @@ import Leagues from "./pages/Leagues";
 import LeagueDetail from "./pages/LeagueDetail";
 import FootballLeagues from "./pages/FootballLeagues";
 import FootballLeagueDetail from "./pages/FootballLeagueDetail";
+import SelectedMatchPlayer from "./pages/SelectedMatchPlayer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Optimized query client configuration
@@ -140,6 +141,11 @@ const App: React.FC = () => {
               <Route path="/football-league/:competitionId" element={
                 <SEOPageTracker contentType="home">
                   <FootballLeagueDetail />
+                </SEOPageTracker>
+              } />
+              <Route path="/selected-match/:matchId" element={
+                <SEOPageTracker contentType="match">
+                  <SelectedMatchPlayer />
                 </SEOPageTracker>
               } />
               <Route path="/analytics" element={
