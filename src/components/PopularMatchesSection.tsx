@@ -416,8 +416,20 @@ const PopularMatchesSection: React.FC = () => {
     );
   }
 
-  if (matches.length === 0) {
-    return null;
+  if (matches.length === 0 && !loading) {
+    return (
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-foreground">Selected Matches</h2>
+          <a href="/schedule" className="text-sm text-primary hover:underline">
+            VIEW SCHEDULE →
+          </a>
+        </div>
+        <div className="bg-card rounded-xl p-6 border border-border text-center">
+          <p className="text-muted-foreground">No major matches live right now. Check back later!</p>
+        </div>
+      </section>
+    );
   }
 
   return (
