@@ -1,3 +1,5 @@
+import { cachedFetch, getCachedData } from './cachedFetch';
+
 const WESTREAM_API = 'https://westream.top';
 
 // ============================================
@@ -42,31 +44,40 @@ export interface Sport {
 }
 
 // ============================================
-// API FUNCTIONS
+// API FUNCTIONS WITH CACHING
 // ============================================
 
 const fetchApi = async <T>(endpoint: string): Promise<T | null> => {
+  const url = `${WESTREAM_API}${endpoint}`;
+  
   try {
-    const response = await fetch(`${WESTREAM_API}${endpoint}`, {
-      signal: AbortSignal.timeout(10000),
-    });
+    // Use cachedFetch with localStorage for persistence
+    const data = await cachedFetch<T>(url, {
+      signal: AbortSignal.timeout(8000), // 8 second timeout
+    }, true);
     
-    if (!response.ok) {
-      console.warn(`WeStream API error: ${response.status} for ${endpoint}`);
-      return null;
-    }
-    
-    return await response.json();
+    return data;
   } catch (error) {
     console.error(`Failed to fetch ${endpoint}:`, error);
     return null;
   }
 };
 
-// Get all matches
+// Get cached data instantly (for initial render)
+const getInstantData = <T>(endpoint: string): T | null => {
+  const url = `${WESTREAM_API}${endpoint}`;
+  return getCachedData<T>(url);
+};
+
+// Get all matches (with instant cache fallback)
 export const getAllMatches = async (): Promise<WeStreamMatch[]> => {
   const data = await fetchApi<WeStreamMatch[]>('/matches');
   return data || [];
+};
+
+// Get instant cached matches (for initial render)
+export const getInstantMatches = (): WeStreamMatch[] => {
+  return getInstantData<WeStreamMatch[]>('/matches') || [];
 };
 
 // Get live matches
