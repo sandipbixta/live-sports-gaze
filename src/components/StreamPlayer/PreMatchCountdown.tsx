@@ -12,9 +12,26 @@ const PreMatchCountdown: React.FC<PreMatchCountdownProps> = ({ match, onMatchSta
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
 
-  // Handle both Match and ManualMatch types
-  const home = (match as Match).teams?.home?.name || (match as ManualMatch).teams?.home || '';
-  const away = (match as Match).teams?.away?.name || (match as ManualMatch).teams?.away || '';
+  // Parse team names from title as fallback (format: "Team A vs Team B")
+  const parseTeamsFromTitle = (title: string): { home: string; away: string } => {
+    const vsMatch = title.match(/^(.+?)\s+(?:vs?\.?|versus)\s+(.+)$/i);
+    if (vsMatch) {
+      return { home: vsMatch[1].trim(), away: vsMatch[2].trim() };
+    }
+    return { home: '', away: '' };
+  };
+
+  // Handle both Match and ManualMatch types with fallback to title parsing
+  const rawHome = (match as Match).teams?.home?.name || (match as ManualMatch).teams?.home || '';
+  const rawAway = (match as Match).teams?.away?.name || (match as ManualMatch).teams?.away || '';
+  
+  // Use parsed title names if team names are generic placeholders
+  const isGenericName = (name: string) => ['home', 'away', 'tba', 'tbd', ''].includes(name.toLowerCase().trim());
+  const parsedTeams = parseTeamsFromTitle(match.title || '');
+  
+  const home = isGenericName(rawHome) && parsedTeams.home ? parsedTeams.home : rawHome;
+  const away = isGenericName(rawAway) && parsedTeams.away ? parsedTeams.away : rawAway;
+  
   const matchDate = typeof match.date === 'string' ? new Date(match.date).getTime() : (match.date || 0);
   const tournament = (match as Match).tournament || (match as ManualMatch).title || '';
 
