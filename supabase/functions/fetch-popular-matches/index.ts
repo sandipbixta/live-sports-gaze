@@ -5,138 +5,119 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SPORTS_DB_API_KEY = Deno.env.get('THESPORTSDB_API_KEY') || '3';
-const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
-const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1';
+const SPORTS_DB_API_KEY = '751945';
+const SPORTS_DB_V1_BASE = 'https://www.thesportsdb.com/api/v1/json';
+const SPORTS_DB_V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
 
-// Popular league IDs from TheSportsDB - TOP TIER GLOBALLY POPULAR LEAGUES
+// Popular football league IDs from TheSportsDB
 const POPULAR_LEAGUES = [
-  // Football - Top 5 European Leagues (Most Popular Worldwide)
-  { id: '4328', name: 'English Premier League', sport: 'Soccer', priority: 10 },
-  { id: '4335', name: 'La Liga', sport: 'Soccer', priority: 10 },
-  { id: '4331', name: 'German Bundesliga', sport: 'Soccer', priority: 9 },
-  { id: '4332', name: 'Italian Serie A', sport: 'Soccer', priority: 9 },
-  { id: '4334', name: 'French Ligue 1', sport: 'Soccer', priority: 8 },
-  // UEFA Competitions (Global Interest)
-  { id: '4480', name: 'UEFA Champions League', sport: 'Soccer', priority: 10 },
-  { id: '4481', name: 'UEFA Europa League', sport: 'Soccer', priority: 8 },
-  { id: '4482', name: 'UEFA Conference League', sport: 'Soccer', priority: 7 },
-  // Other Top European Leagues
-  { id: '4344', name: 'Portuguese Primeira Liga', sport: 'Soccer', priority: 7 },
-  { id: '4337', name: 'Dutch Eredivisie', sport: 'Soccer', priority: 7 },
-  { id: '4359', name: 'Scottish Premiership', sport: 'Soccer', priority: 6 },
-  // South American Leagues
-  { id: '4350', name: 'Brazilian Serie A', sport: 'Soccer', priority: 8 },
-  { id: '4406', name: 'Argentine Primera Division', sport: 'Soccer', priority: 8 },
-  // International Tournaments
-  { id: '4499', name: 'Copa America', sport: 'Soccer', priority: 9 },
-  { id: '4498', name: 'UEFA Euro Championship', sport: 'Soccer', priority: 10 },
-  { id: '4429', name: 'FIFA World Cup', sport: 'Soccer', priority: 10 },
-  { id: '4502', name: 'Africa Cup of Nations', sport: 'Soccer', priority: 8 },
-  { id: '4501', name: 'CONCACAF Gold Cup', sport: 'Soccer', priority: 7 },
-  // MLS & Other
-  { id: '4346', name: 'MLS', sport: 'Soccer', priority: 6 },
-  { id: '4338', name: 'EFL Championship', sport: 'Soccer', priority: 7 },
-  // US Major Sports (Global Popularity)
-  { id: '4387', name: 'NBA', sport: 'Basketball', priority: 9 },
-  { id: '4391', name: 'NFL', sport: 'American Football', priority: 8 },
-  { id: '4380', name: 'NHL', sport: 'Ice Hockey', priority: 7 },
-  // Cricket (Massive Global Following)
-  { id: '4472', name: 'Indian Premier League', sport: 'Cricket', priority: 9 },
-  { id: '4657', name: 'ICC Cricket World Cup', sport: 'Cricket', priority: 10 },
-  // Tennis Grand Slams
-  { id: '4464', name: 'Wimbledon', sport: 'Tennis', priority: 9 },
-  { id: '4465', name: 'US Open Tennis', sport: 'Tennis', priority: 8 },
-  { id: '4520', name: 'Australian Open', sport: 'Tennis', priority: 8 },
-  { id: '4521', name: 'French Open', sport: 'Tennis', priority: 8 },
-  // Formula 1
-  { id: '4370', name: 'Formula 1', sport: 'Motorsport', priority: 9 },
+  { id: '4328', name: 'English Premier League', priority: 10 },
+  { id: '4335', name: 'La Liga', priority: 10 },
+  { id: '4331', name: 'German Bundesliga', priority: 9 },
+  { id: '4332', name: 'Italian Serie A', priority: 9 },
+  { id: '4334', name: 'French Ligue 1', priority: 8 },
+  { id: '4480', name: 'UEFA Champions League', priority: 10 },
+  { id: '4481', name: 'UEFA Europa League', priority: 8 },
+  { id: '4350', name: 'Brazilian Serie A', priority: 8 },
+  { id: '4406', name: 'Argentine Primera Division', priority: 8 },
+  { id: '4346', name: 'MLS', priority: 6 },
+  { id: '4338', name: 'EFL Championship', priority: 7 },
+  { id: '4344', name: 'Portuguese Primeira Liga', priority: 7 },
+  { id: '4337', name: 'Dutch Eredivisie', priority: 7 },
 ];
 
-// Derived set of globally popular league names for strict filtering
-const GLOBAL_POPULAR_LEAGUE_NAMES = new Set(POPULAR_LEAGUES.map(l => l.name));
+// CDN-Live channel mapping by league
+const LEAGUE_CHANNELS: Record<string, Array<{ name: string; country: string; priority: number }>> = {
+  'English Premier League': [
+    { name: 'Sky Sports Premier League', country: 'UK', priority: 10 },
+    { name: 'Sky Sports Main Event', country: 'UK', priority: 9 },
+    { name: 'beIN Sports 1', country: 'INT', priority: 8 },
+    { name: 'NBC Sports', country: 'US', priority: 7 },
+    { name: 'Peacock', country: 'US', priority: 6 },
+  ],
+  'La Liga': [
+    { name: 'beIN Sports 1', country: 'INT', priority: 10 },
+    { name: 'ESPN', country: 'US', priority: 9 },
+    { name: 'ESPN Deportes', country: 'US', priority: 8 },
+  ],
+  'UEFA Champions League': [
+    { name: 'beIN Sports 1', country: 'INT', priority: 10 },
+    { name: 'CBS Sports', country: 'US', priority: 9 },
+    { name: 'Paramount+', country: 'US', priority: 8 },
+    { name: 'BT Sport 1', country: 'UK', priority: 7 },
+  ],
+  'UEFA Europa League': [
+    { name: 'beIN Sports 2', country: 'INT', priority: 10 },
+    { name: 'CBS Sports', country: 'US', priority: 9 },
+    { name: 'BT Sport 2', country: 'UK', priority: 8 },
+  ],
+  'German Bundesliga': [
+    { name: 'Sky Sport Bundesliga', country: 'DE', priority: 10 },
+    { name: 'beIN Sports 2', country: 'INT', priority: 9 },
+    { name: 'ESPN+', country: 'US', priority: 8 },
+  ],
+  'Italian Serie A': [
+    { name: 'beIN Sports 3', country: 'INT', priority: 10 },
+    { name: 'CBS Sports', country: 'US', priority: 9 },
+    { name: 'Paramount+', country: 'US', priority: 8 },
+  ],
+  'French Ligue 1': [
+    { name: 'beIN Sports 1', country: 'FR', priority: 10 },
+    { name: 'beIN Sports 2', country: 'INT', priority: 9 },
+  ],
+};
 
-// Elite clubs that always attract global viewers
-const ELITE_CLUBS = [
-  // Top Football Clubs (Most followed worldwide)
-  'real madrid', 'barcelona', 'manchester united', 'manchester city', 'liverpool',
-  'chelsea', 'arsenal', 'bayern munich', 'psg', 'paris saint-germain', 'juventus',
-  'inter milan', 'ac milan', 'borussia dortmund', 'atletico madrid', 'tottenham',
-  'napoli', 'roma', 'benfica', 'porto', 'ajax', 'celtic', 'rangers',
-  'flamengo', 'boca juniors', 'river plate', 'palmeiras', 'santos',
-  // Top National Teams
-  'brazil', 'argentina', 'france', 'germany', 'spain', 'england', 'portugal', 'netherlands', 'italy',
-  // US Sports Teams
-  'lakers', 'warriors', 'celtics', 'bulls', 'heat', 'knicks', 'nets',
-  'patriots', 'chiefs', 'cowboys', 'packers', '49ers', 'raiders',
-  // Cricket Teams
-  'mumbai indians', 'chennai super kings', 'royal challengers', 'kolkata knight riders',
-  'india', 'australia', 'england', 'pakistan', 'south africa', 'new zealand',
-  // Tennis Players (as team names in events)
-  'djokovic', 'nadal', 'federer', 'alcaraz', 'sinner', 'medvedev'
+// Default channels for leagues not in the mapping
+const DEFAULT_CHANNELS = [
+  { name: 'beIN Sports 1', country: 'INT', priority: 5 },
+  { name: 'ESPN', country: 'US', priority: 4 },
 ];
 
-// Check if match involves elite clubs
-function isEliteMatch(match: any): boolean {
-  const homeTeam = (match.homeTeam || match.strHomeTeam || '').toLowerCase();
-  const awayTeam = (match.awayTeam || match.strAwayTeam || '').toLowerCase();
-  
-  return ELITE_CLUBS.some(club => 
-    homeTeam.includes(club) || awayTeam.includes(club)
-  );
-}
-
-interface SportsDbEvent {
+interface LiveMatch {
   idEvent: string;
+  idLeague: string;
   strEvent: string;
-  strEventAlternate: string;
-  strFilename: string;
-  strSport: string;
-  strLeague: string;
-  strSeason: string;
   strHomeTeam: string;
   strAwayTeam: string;
   strHomeTeamBadge: string | null;
   strAwayTeamBadge: string | null;
   intHomeScore: string | null;
   intAwayScore: string | null;
+  strLeague: string;
+  strProgress: string | null;
+  strStatus: string | null;
   strThumb: string | null;
   strPoster: string | null;
-  strBanner: string | null;
+}
+
+interface ScheduledMatch {
+  idEvent: string;
+  idLeague: string;
+  strEvent: string;
+  strEventAlternate: string;
+  strHomeTeam: string;
+  strAwayTeam: string;
+  strHomeTeamBadge: string | null;
+  strAwayTeamBadge: string | null;
+  intHomeScore: string | null;
+  intAwayScore: string | null;
+  strLeague: string;
+  strThumb: string | null;
+  strPoster: string | null;
   strSquare: string | null;
   dateEvent: string;
   strTime: string;
   strTimestamp: string;
-  strVenue: string | null;
-  strCountry: string | null;
   strStatus: string | null;
   strProgress: string | null;
 }
 
-interface TVChannel {
-  idChannel: string;
-  strChannel: string;
-  strLogo: string | null;
-  strCountry: string;
-  strLanguage: string | null;
-  strWebsite: string | null;
-}
-
 interface CDNChannel {
   id: string;
-  title: string;
+  name: string;
   country: string;
   logo: string;
   embedUrl: string;
-}
-
-interface BroadcastChannel {
-  id: string;
-  name: string;
-  logo: string | null;
-  country: string;
-  language: string | null;
-  cdnChannel: CDNChannel | null;
 }
 
 interface TransformedMatch {
@@ -148,170 +129,50 @@ interface TransformedMatch {
   awayTeamBadge: string | null;
   homeScore: string | null;
   awayScore: string | null;
-  sport: string;
   league: string;
+  leagueId: string;
   date: string;
   time: string;
   timestamp: string;
-  venue: string | null;
-  country: string | null;
   status: string | null;
   progress: string | null;
   poster: string | null;
-  banner: string | null;
   isLive: boolean;
   isFinished: boolean;
-  channels: BroadcastChannel[];
+  channels: CDNChannel[];
   priority: number;
-  isElite: boolean;
+}
+
+// Build CDN-Live embed URL
+function buildCDNUrl(channelName: string, country: string): string {
+  return `https://cdn-live.tv/api/v1/vip/damitv/channels/player/?name=${encodeURIComponent(channelName)}&code=${country}`;
+}
+
+// Get channels for a league
+function getChannelsForLeague(leagueName: string): CDNChannel[] {
+  const leagueChannels = LEAGUE_CHANNELS[leagueName] || DEFAULT_CHANNELS;
+  
+  return leagueChannels.map((ch, index) => ({
+    id: `${ch.name.toLowerCase().replace(/\s+/g, '-')}-${ch.country.toLowerCase()}`,
+    name: ch.name,
+    country: ch.country,
+    logo: '', // Could add logos later
+    embedUrl: buildCDNUrl(ch.name, ch.country),
+  }));
+}
+
+// Get priority for a league
+function getLeaguePriority(leagueId: string): number {
+  const league = POPULAR_LEAGUES.find(l => l.id === leagueId);
+  return league?.priority || 5;
 }
 
 // In-memory cache
 const cache: { 
   matches?: { data: TransformedMatch[], timestamp: number },
-  cdnChannels?: { data: CDNChannel[], timestamp: number },
-  tvChannels?: Map<string, { data: TVChannel[], timestamp: number }>
-} = {
-  tvChannels: new Map()
-};
+} = {};
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const TV_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes for TV data (changes less frequently)
-
-// Fetch CDN channels
-async function fetchCDNChannels(): Promise<CDNChannel[]> {
-  if (cache.cdnChannels && Date.now() - cache.cdnChannels.timestamp < CACHE_DURATION) {
-    console.log('Using cached CDN channels');
-    return cache.cdnChannels.data;
-  }
-
-  try {
-    console.log('Fetching CDN channels...');
-    const response = await fetch(`${CDN_LIVE_API}/channels/`);
-    
-    if (!response.ok) {
-      console.error('Failed to fetch CDN channels:', response.status);
-      return [];
-    }
-    
-    const data = await response.json();
-    let channels: any[] = [];
-    
-    if (Array.isArray(data)) {
-      channels = data;
-    } else if (data.channels && Array.isArray(data.channels)) {
-      channels = data.channels;
-    } else if (data.data && Array.isArray(data.data)) {
-      channels = data.data;
-    }
-    
-    const transformedChannels: CDNChannel[] = channels.map((ch: any) => ({
-      id: ch.id || ch.name || '',
-      title: ch.title || ch.name || '',
-      country: ch.country || ch.code || 'INT',
-      logo: ch.logo || ch.image || '',
-      embedUrl: `${CDN_LIVE_API}/channels/player/?name=${encodeURIComponent(ch.title || ch.name)}&code=${ch.country || ch.code || 'INT'}`
-    }));
-    
-    cache.cdnChannels = { data: transformedChannels, timestamp: Date.now() };
-    console.log(`Fetched ${transformedChannels.length} CDN channels`);
-    
-    return transformedChannels;
-  } catch (error) {
-    console.error('Error fetching CDN channels:', error);
-    return [];
-  }
-}
-
-// Fetch TV broadcast channels for a specific event from TheSportsDB
-async function fetchTVChannels(eventId: string): Promise<TVChannel[]> {
-  // Check cache
-  const cached = cache.tvChannels?.get(eventId);
-  if (cached && Date.now() - cached.timestamp < TV_CACHE_DURATION) {
-    return cached.data;
-  }
-
-  try {
-    const primaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/lookuptv.php?id=${eventId}`;
-    console.log(`Fetching TV channels for event ${eventId} with key ${SPORTS_DB_API_KEY}`);
-    
-    let response = await fetch(primaryUrl);
-    
-    if (!response.ok && response.status === 404 && SPORTS_DB_API_KEY !== '3') {
-      const fallbackUrl = `${SPORTS_DB_BASE_URL}/3/lookuptv.php?id=${eventId}`;
-      console.log(`Primary TV API key failed with 404, retrying with free key for event ${eventId}`);
-      const fallbackResponse = await fetch(fallbackUrl);
-      if (fallbackResponse.ok) {
-        response = fallbackResponse;
-      } else {
-        console.error(`Fallback TV API also failed for event ${eventId}: ${fallbackResponse.status}`);
-        return [];
-      }
-    } else if (!response.ok) {
-      console.error(`Failed to fetch TV channels for event ${eventId}: ${response.status}`);
-      return [];
-    }
-    
-    const data = await response.json();
-    const tvChannels: TVChannel[] = data.tvchannel || [];
-    
-    // Cache the result
-    if (!cache.tvChannels) cache.tvChannels = new Map();
-    cache.tvChannels.set(eventId, { data: tvChannels, timestamp: Date.now() });
-    
-    console.log(`Got ${tvChannels.length} TV channels for event ${eventId}`);
-    return tvChannels;
-  } catch (error) {
-    console.error(`Error fetching TV channels for event ${eventId}:`, error);
-    return [];
-  }
-}
-
-// Normalize channel name for matching
-function normalizeChannelName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
-    .replace(/hd$/, '')
-    .replace(/uk$/, '')
-    .replace(/us$/, '')
-    .trim();
-}
-
-// Match TheSportsDB TV channels with CDN channels
-function matchTVToCDN(tvChannel: TVChannel, cdnChannels: CDNChannel[]): CDNChannel | null {
-  const normalizedTVName = normalizeChannelName(tvChannel.strChannel);
-  
-  // Try exact match first
-  for (const cdn of cdnChannels) {
-    const normalizedCDNName = normalizeChannelName(cdn.title);
-    if (normalizedTVName === normalizedCDNName) {
-      return cdn;
-    }
-  }
-  
-  // Try partial match
-  for (const cdn of cdnChannels) {
-    const normalizedCDNName = normalizeChannelName(cdn.title);
-    if (normalizedTVName.includes(normalizedCDNName) || normalizedCDNName.includes(normalizedTVName)) {
-      return cdn;
-    }
-  }
-  
-  // Try keyword-based matching for common channels
-  const keywords = ['sky', 'espn', 'fox', 'bt sport', 'bein', 'dazn', 'tnt', 'nbc', 'cbs', 'paramount'];
-  for (const keyword of keywords) {
-    if (normalizedTVName.includes(keyword.replace(/\s/g, ''))) {
-      for (const cdn of cdnChannels) {
-        if (normalizeChannelName(cdn.title).includes(keyword.replace(/\s/g, ''))) {
-          return cdn;
-        }
-      }
-    }
-  }
-  
-  return null;
-}
+const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes for fresher data
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -321,10 +182,11 @@ serve(async (req) => {
   try {
     // Check cache first
     if (cache.matches && Date.now() - cache.matches.timestamp < CACHE_DURATION) {
-      console.log('Returning cached popular matches');
+      console.log('Returning cached matches');
       return new Response(
         JSON.stringify({ 
           matches: cache.matches.data,
+          liveCount: cache.matches.data.filter(m => m.isLive).length,
           total: cache.matches.data.length,
           fetchedAt: new Date(cache.matches.timestamp).toISOString(),
           cached: true
@@ -333,220 +195,209 @@ serve(async (req) => {
           headers: { 
             ...corsHeaders, 
             'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=300'
+            'Cache-Control': 'public, max-age=60'
           } 
         }
       );
     }
 
-    console.log('Fetching popular matches from TheSportsDB...');
-    
-    // Fetch CDN channels
-    const cdnChannels = await fetchCDNChannels();
+    console.log('Fetching fresh football matches from TheSportsDB...');
     
     const allMatches: TransformedMatch[] = [];
+    const matchIds = new Set<string>();
     const now = new Date();
-    
-    // Fetch next events for each popular league
-    const fetchPromises = POPULAR_LEAGUES.map(async (league) => {
+    const today = now.toISOString().slice(0, 10);
+
+    // 1. Fetch LIVE matches using V2 API
+    console.log('Fetching live soccer matches from V2 API...');
+    try {
+      const liveResponse = await fetch(`${SPORTS_DB_V2_BASE}/livescore/soccer`, {
+        headers: {
+          'X-API-KEY': SPORTS_DB_API_KEY,
+        },
+      });
+      
+      if (liveResponse.ok) {
+        const liveData = await liveResponse.json();
+        const liveMatches: LiveMatch[] = liveData?.livescore || liveData?.events || [];
+        console.log(`Got ${liveMatches.length} live matches from V2 API`);
+        
+        for (const match of liveMatches) {
+          if (matchIds.has(match.idEvent)) continue;
+          matchIds.add(match.idEvent);
+          
+          const leaguePriority = getLeaguePriority(match.idLeague);
+          
+          allMatches.push({
+            id: match.idEvent,
+            title: match.strEvent || `${match.strHomeTeam} vs ${match.strAwayTeam}`,
+            homeTeam: match.strHomeTeam,
+            awayTeam: match.strAwayTeam,
+            homeTeamBadge: match.strHomeTeamBadge,
+            awayTeamBadge: match.strAwayTeamBadge,
+            homeScore: match.intHomeScore,
+            awayScore: match.intAwayScore,
+            league: match.strLeague,
+            leagueId: match.idLeague,
+            date: today,
+            time: new Date().toTimeString().slice(0, 8),
+            timestamp: now.toISOString(),
+            status: 'Live',
+            progress: match.strProgress || 'LIVE',
+            poster: match.strThumb || match.strPoster,
+            isLive: true,
+            isFinished: false,
+            channels: getChannelsForLeague(match.strLeague),
+            priority: leaguePriority + 10, // Boost live matches
+          });
+        }
+      } else {
+        console.error('Failed to fetch live matches:', liveResponse.status);
+      }
+    } catch (error) {
+      console.error('Error fetching live matches:', error);
+    }
+
+    // 2. Fetch today's matches using V1 API
+    console.log(`Fetching today's soccer matches (${today}) from V1 API...`);
+    try {
+      const todayUrl = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsday.php?d=${today}&s=Soccer`;
+      const todayResponse = await fetch(todayUrl);
+      
+      if (todayResponse.ok) {
+        const todayData = await todayResponse.json();
+        const todayMatches: ScheduledMatch[] = todayData?.events || [];
+        console.log(`Got ${todayMatches.length} matches for today from V1 API`);
+        
+        for (const match of todayMatches) {
+          if (matchIds.has(match.idEvent)) continue;
+          matchIds.add(match.idEvent);
+          
+          const isFinished = match.strStatus === 'Match Finished' || match.strStatus === 'FT';
+          if (isFinished) continue;
+          
+          const leaguePriority = getLeaguePriority(match.idLeague);
+          const matchTime = match.strTimestamp || `${match.dateEvent}T${match.strTime || '00:00:00'}`;
+          
+          allMatches.push({
+            id: match.idEvent,
+            title: match.strEvent || `${match.strHomeTeam} vs ${match.strAwayTeam}`,
+            homeTeam: match.strHomeTeam,
+            awayTeam: match.strAwayTeam,
+            homeTeamBadge: match.strHomeTeamBadge,
+            awayTeamBadge: match.strAwayTeamBadge,
+            homeScore: match.intHomeScore,
+            awayScore: match.intAwayScore,
+            league: match.strLeague,
+            leagueId: match.idLeague,
+            date: match.dateEvent,
+            time: match.strTime || '00:00:00',
+            timestamp: matchTime,
+            status: match.strStatus,
+            progress: match.strProgress,
+            poster: match.strThumb || match.strPoster || match.strSquare,
+            isLive: false,
+            isFinished: false,
+            channels: getChannelsForLeague(match.strLeague),
+            priority: leaguePriority,
+          });
+        }
+      } else {
+        console.error('Failed to fetch today matches:', todayResponse.status);
+      }
+    } catch (error) {
+      console.error('Error fetching today matches:', error);
+    }
+
+    // 3. Fetch upcoming matches from popular leagues using V1 API
+    console.log('Fetching upcoming matches from popular leagues...');
+    const upcomingPromises = POPULAR_LEAGUES.slice(0, 8).map(async (league) => {
       try {
-        const primaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${league.id}`;
-        console.log(`Fetching from: ${primaryUrl}`);
+        const url = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${league.id}`;
+        const response = await fetch(url);
         
-        let response = await fetch(primaryUrl);
-        
-        if (!response.ok && response.status === 404 && SPORTS_DB_API_KEY !== '3') {
-          const fallbackUrl = `${SPORTS_DB_BASE_URL}/3/eventsnextleague.php?id=${league.id}`;
-          console.log(`Primary API key failed with 404 for ${league.name}, retrying with free key...`);
-          const fallbackResponse = await fetch(fallbackUrl);
-          if (fallbackResponse.ok) {
-            response = fallbackResponse;
-          } else {
-            console.error(`Fallback API also failed for league ${league.name}: ${fallbackResponse.status}`);
-            return [];
-          }
-        } else if (!response.ok) {
+        if (!response.ok) {
           console.error(`Failed to fetch league ${league.name}: ${response.status}`);
           return [];
         }
         
         const data = await response.json();
-        let events: SportsDbEvent[] = data.events || [];
-        
+        const events: ScheduledMatch[] = data?.events || [];
         console.log(`Got ${events.length} upcoming events for ${league.name}`);
         
-        // Also fetch today's events to capture currently live matches
-        try {
-          const today = new Date().toISOString().slice(0, 10);
-          const dayPrimaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/eventsday.php?d=${today}&l=${encodeURIComponent(league.name)}`;
-          console.log(`Fetching today's events from: ${dayPrimaryUrl}`);
+        const matches: TransformedMatch[] = [];
+        
+        for (const match of events.slice(0, 5)) {
+          if (matchIds.has(match.idEvent)) continue;
+          matchIds.add(match.idEvent);
           
-          let dayResponse = await fetch(dayPrimaryUrl);
+          const isFinished = match.strStatus === 'Match Finished' || match.strStatus === 'FT';
+          if (isFinished) continue;
           
-          if (!dayResponse.ok && dayResponse.status === 404 && SPORTS_DB_API_KEY !== '3') {
-            const dayFallbackUrl = `${SPORTS_DB_BASE_URL}/3/eventsday.php?d=${today}&l=${encodeURIComponent(league.name)}`;
-            console.log(`Primary day API key failed with 404 for ${league.name}, retrying with free key...`);
-            const dayFallbackResponse = await fetch(dayFallbackUrl);
-            if (dayFallbackResponse.ok) {
-              dayResponse = dayFallbackResponse;
-            } else {
-              console.error(`Fallback day API also failed for league ${league.name}: ${dayFallbackResponse.status}`);
-            }
-          }
+          const matchTime = match.strTimestamp || `${match.dateEvent}T${match.strTime || '00:00:00'}`;
           
-          if (dayResponse.ok) {
-            const dayData = await dayResponse.json();
-            const dayEvents: SportsDbEvent[] = dayData.events || [];
-            console.log(`Got ${dayEvents.length} events today for ${league.name}`);
-            events = [...events, ...dayEvents];
-          }
-        } catch (dayError) {
-          console.error(`Error fetching today's events for league ${league.name}:`, dayError);
+          matches.push({
+            id: match.idEvent,
+            title: match.strEvent || `${match.strHomeTeam} vs ${match.strAwayTeam}`,
+            homeTeam: match.strHomeTeam,
+            awayTeam: match.strAwayTeam,
+            homeTeamBadge: match.strHomeTeamBadge,
+            awayTeamBadge: match.strAwayTeamBadge,
+            homeScore: match.intHomeScore,
+            awayScore: match.intAwayScore,
+            league: match.strLeague || league.name,
+            leagueId: match.idLeague || league.id,
+            date: match.dateEvent,
+            time: match.strTime || '00:00:00',
+            timestamp: matchTime,
+            status: match.strStatus,
+            progress: match.strProgress,
+            poster: match.strThumb || match.strPoster || match.strSquare,
+            isLive: false,
+            isFinished: false,
+            channels: getChannelsForLeague(league.name),
+            priority: league.priority,
+          });
         }
         
-        console.log(`Total combined events for ${league.name}: ${events.length}`);
-        
-        // Process events (up to 10 per league for better coverage)
-        const matchPromises = events.slice(0, 10).map(async (event): Promise<TransformedMatch> => {
-          const eventDate = new Date(event.strTimestamp || `${event.dateEvent}T${event.strTime || '00:00:00'}`);
-          const isFinished = event.strStatus === 'Match Finished' || event.strStatus === 'FT';
-          const isLive = !isFinished && 
-                        ((event.strProgress && event.strProgress !== 'NS') ||
-                        (eventDate <= now && eventDate.getTime() + 3 * 60 * 60 * 1000 > now.getTime()));
-          
-          // Fetch TV broadcast channels from TheSportsDB
-          const tvChannels = await fetchTVChannels(event.idEvent);
-          
-          // Match TV channels with CDN channels
-          const channels: BroadcastChannel[] = tvChannels.map(tv => {
-            const cdnMatch = matchTVToCDN(tv, cdnChannels);
-            return {
-              id: tv.idChannel || tv.strChannel,
-              name: tv.strChannel,
-              logo: tv.strLogo,
-              country: tv.strCountry || '',
-              language: tv.strLanguage,
-              cdnChannel: cdnMatch
-            };
-          });
-          
-          const matchData = {
-            homeTeam: event.strHomeTeam,
-            awayTeam: event.strAwayTeam,
-          };
-          const elite = isEliteMatch(matchData);
-          
-          return {
-            id: event.idEvent,
-            title: event.strEvent || `${event.strHomeTeam} vs ${event.strAwayTeam}`,
-            homeTeam: event.strHomeTeam,
-            awayTeam: event.strAwayTeam,
-            homeTeamBadge: event.strHomeTeamBadge,
-            awayTeamBadge: event.strAwayTeamBadge,
-            homeScore: event.intHomeScore,
-            awayScore: event.intAwayScore,
-            sport: event.strSport || league.sport,
-            league: event.strLeague || league.name,
-            date: event.dateEvent,
-            time: event.strTime || '00:00:00',
-            timestamp: event.strTimestamp || `${event.dateEvent}T${event.strTime || '00:00:00'}`,
-            venue: event.strVenue,
-            country: event.strCountry,
-            status: event.strStatus,
-            progress: event.strProgress,
-            poster: event.strThumb || event.strPoster || event.strSquare,
-            banner: event.strBanner,
-            isLive,
-            isFinished,
-            channels,
-            priority: league.priority,
-            isElite: elite,
-          };
-        });
-        
-        return Promise.all(matchPromises);
+        return matches;
       } catch (error) {
         console.error(`Error fetching league ${league.name}:`, error);
         return [];
       }
     });
     
-    const results = await Promise.all(fetchPromises);
-    results.forEach(matches => allMatches.push(...matches));
-    
-    // Deduplicate matches by ID
-    const uniqueMatchesMap = new Map<string, TransformedMatch>();
-    for (const match of allMatches) {
-      if (!uniqueMatchesMap.has(match.id)) {
-        uniqueMatchesMap.set(match.id, match);
-      }
-    }
-    const uniqueMatches = Array.from(uniqueMatchesMap.values());
-    console.log(`Deduplicated ${allMatches.length} matches to ${uniqueMatches.length} unique matches`);
-    
-    // Filter out finished matches and keep only truly global top leagues or elite club matches
-    const upcomingMatches = uniqueMatches.filter(match => {
-      if (match.isFinished) return false;
-      const isTopLeague = GLOBAL_POPULAR_LEAGUE_NAMES.has(match.league);
-      return isTopLeague || match.isElite;
-    });
-    
-    // Calculate popularity score for each match
-    const scoredMatches = upcomingMatches.map(match => {
-      let score = match.priority || 5;
-      
-      // Boost for elite clubs
-      if (match.isElite) score += 5;
-      
-      // Boost for live matches
-      if (match.isLive) score += 10;
-      
-      // Boost for matches with available streams
-      const hasStream = match.channels.some(ch => ch.cdnChannel);
-      if (hasStream) score += 3;
-      
-      // Boost for matches happening soon (within 24 hours)
-      const matchTime = new Date(match.timestamp).getTime();
-      const hoursUntilMatch = (matchTime - now.getTime()) / (1000 * 60 * 60);
-      if (hoursUntilMatch > 0 && hoursUntilMatch <= 24) score += 2;
-      if (hoursUntilMatch > 0 && hoursUntilMatch <= 6) score += 3;
-      
-      return { ...match, score };
-    });
-    
-    // Sort by score (highest first), then by date
-    scoredMatches.sort((a, b) => {
-      // Live matches always first
+    const upcomingResults = await Promise.all(upcomingPromises);
+    upcomingResults.forEach(matches => allMatches.push(...matches));
+
+    // Sort: Live first, then by priority, then by date
+    allMatches.sort((a, b) => {
       if (a.isLive && !b.isLive) return -1;
       if (!a.isLive && b.isLive) return 1;
-      
-      // Then by score
-      if (b.score !== a.score) return b.score - a.score;
-      
-      // Then by date
-      const dateA = new Date(a.timestamp);
-      const dateB = new Date(b.timestamp);
-      return dateA.getTime() - dateB.getTime();
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
-    
+
     // Filter to only show matches within next 7 days
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const filteredMatches = scoredMatches.filter(match => {
+    const filteredMatches = allMatches.filter(match => {
       const matchDate = new Date(match.timestamp);
       return matchDate <= sevenDaysFromNow;
     });
 
-    // Limit to 30 matches for better variety
+    // Limit to 30 matches
     const limitedMatches = filteredMatches.slice(0, 30);
+    const liveCount = limitedMatches.filter(m => m.isLive).length;
 
     // Cache the result
     cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
-    console.log(`Returning ${limitedMatches.length} popular matches with TV channel data`);
+    console.log(`Returning ${limitedMatches.length} matches (${liveCount} live)`);
     
     return new Response(
       JSON.stringify({ 
         matches: limitedMatches,
+        liveCount,
         total: limitedMatches.length,
         fetchedAt: new Date().toISOString(),
         cached: false
@@ -555,14 +406,14 @@ serve(async (req) => {
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=300'
+          'Cache-Control': 'public, max-age=60'
         } 
       }
     );
   } catch (error) {
-    console.error('Error fetching popular matches:', error);
+    console.error('Error fetching matches:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch popular matches', details: error.message }),
+      JSON.stringify({ error: 'Failed to fetch matches', details: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
