@@ -50,6 +50,8 @@ interface PopularMatch {
   isLive: boolean;
   isFinished: boolean;
   channels: BroadcastChannel[];
+  priority?: number;
+  isElite?: boolean;
 }
 
 // Cache for matches
@@ -106,6 +108,9 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
   const channels = match.channels || [];
   const streamableChannel = channels.find(ch => ch.cdnChannel);
   const hasStream = streamableChannel !== undefined;
+  
+  // Determine if match is trending (elite clubs or high priority)
+  const isTrending = match.isElite || (match.priority && match.priority >= 9);
   
   // Link to dedicated page to show all stream options
   const watchUrl = `/selected-match/${match.id}`;
@@ -201,8 +206,20 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
           <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
             {generateThumbnail()}
             
-            {/* FREE Badge - Top left */}
-            {hasStream && !match.isLive && (
+            {/* Trending Badge - Top left */}
+            {isTrending && !match.isLive && (
+              <div className="absolute top-2 left-2 z-10">
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded flex items-center gap-1">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2Z"/>
+                  </svg>
+                  TRENDING
+                </span>
+              </div>
+            )}
+            
+            {/* FREE Badge - Top left (only if not trending) */}
+            {hasStream && !match.isLive && !isTrending && (
               <div className="absolute top-2 left-2 z-10">
                 <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                   FREE
@@ -215,6 +232,18 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
               <div className="absolute top-2 right-2 z-10">
                 <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                   ● LIVE
+                </span>
+              </div>
+            )}
+            
+            {/* Trending Badge - Top right when live */}
+            {isTrending && match.isLive && (
+              <div className="absolute top-2 left-2 z-10">
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded flex items-center gap-1">
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.66 11.2C17.43 10.9 17.15 10.64 16.89 10.38C16.22 9.78 15.46 9.35 14.82 8.72C13.33 7.26 13 4.85 13.95 3C13 3.23 12.17 3.75 11.46 4.32C8.87 6.4 7.85 10.07 9.07 13.22C9.11 13.32 9.15 13.42 9.15 13.55C9.15 13.77 9 13.97 8.8 14.05C8.57 14.15 8.33 14.09 8.14 13.93C8.08 13.88 8.04 13.83 8 13.76C6.87 12.33 6.69 10.28 7.45 8.64C5.78 10 4.87 12.3 5 14.47C5.06 14.97 5.12 15.47 5.29 15.97C5.43 16.57 5.7 17.17 6 17.7C7.08 19.43 8.95 20.67 10.96 20.92C13.1 21.19 15.39 20.8 17.03 19.32C18.86 17.66 19.5 15 18.56 12.72L18.43 12.46C18.22 12 17.66 11.2 17.66 11.2Z"/>
+                  </svg>
+                  🔥
                 </span>
               </div>
             )}
