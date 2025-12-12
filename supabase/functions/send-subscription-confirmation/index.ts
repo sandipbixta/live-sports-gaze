@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -13,6 +14,22 @@ interface SubscriptionEmailRequest {
   selectedTeams: string[];
 }
 
+// Generate a secure random token
+function generateToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// Hash the token using SHA-256
+async function hashToken(token: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -22,16 +39,50 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, selectedTeams }: SubscriptionEmailRequest = await req.json();
 
-    console.log("Sending confirmation email to:", email);
+    // Input validation
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Invalid email address" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
-    const teamsText = selectedTeams.length > 0 
-      ? `<p>You've subscribed to match alerts for: <strong>${selectedTeams.join(", ")}</strong></p>`
+    // Sanitize email - trim and lowercase
+    const sanitizedEmail = email.trim().toLowerCase();
+
+    console.log("Processing subscription for:", sanitizedEmail);
+
+    // Generate verification token and hash it
+    const rawToken = generateToken();
+    const hashedToken = await hashToken(rawToken);
+
+    // Create Supabase client with service role key
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Update the subscription with the hashed verification token
+    const { error: updateError } = await supabase
+      .from('email_subscriptions')
+      .update({ verification_token: hashedToken })
+      .eq('email', sanitizedEmail);
+
+    if (updateError) {
+      console.error("Error updating verification token:", updateError);
+      // Continue anyway - email might still be useful
+    }
+
+    const teamsText = selectedTeams && selectedTeams.length > 0 
+      ? `<p>You've subscribed to match alerts for: <strong>${selectedTeams.map(t => t.replace(/[<>]/g, '')).join(", ")}</strong></p>`
       : `<p>You'll receive alerts for all major matches.</p>`;
+
+    // Create verification URL with the raw token (user will click this)
+    const verificationUrl = `${supabaseUrl}/functions/v1/verify-email?token=${encodeURIComponent(rawToken)}&email=${encodeURIComponent(sanitizedEmail)}`;
 
     const emailResponse = await resend.emails.send({
       from: "Sports Stream <onboarding@resend.dev>",
-      to: [email],
-      subject: "Welcome to Match Alerts! 🏆",
+      to: [sanitizedEmail],
+      subject: "Verify your Match Alerts subscription! 🏆",
       html: `
         <!DOCTYPE html>
         <html>
@@ -51,19 +102,22 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="container">
               <div class="header">
                 <div class="icon">🏆</div>
-                <h1>Welcome to Match Alerts!</h1>
+                <h1>Verify Your Subscription</h1>
               </div>
               <div class="content">
-                <h2>You're all set! 🎉</h2>
-                <p>Thank you for subscribing to our match alert service. You'll never miss an important game again!</p>
+                <h2>Almost there! 🎉</h2>
+                <p>Thank you for subscribing to our match alert service. Please click the button below to verify your email address:</p>
+                <p style="text-align: center;">
+                  <a href="${verificationUrl}" class="button" style="color: white;">Verify Email Address</a>
+                </p>
                 ${teamsText}
-                <p>We'll send you notifications about:</p>
+                <p>Once verified, we'll send you notifications about:</p>
                 <ul>
                   <li>📅 Upcoming matches</li>
                   <li>🔴 Live match streams</li>
                   <li>⚽ Match results and highlights</li>
                 </ul>
-                <p>Stay tuned for exciting updates!</p>
+                <p><small>This verification link will expire in 24 hours.</small></p>
               </div>
               <div class="footer">
                 <p>You're receiving this email because you subscribed to match alerts.</p>
