@@ -6,83 +6,62 @@ const corsHeaders = {
 };
 
 const SPORTS_DB_API_KEY = '751945';
-const SPORTS_DB_V1_BASE = 'https://www.thesportsdb.com/api/v1/json';
 const SPORTS_DB_V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
+const SPORTS_DB_V1_BASE = 'https://www.thesportsdb.com/api/v1/json';
 const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1/vip/damitv/channels/';
 
-// Sports endpoints to fetch from
+// STRICT TOP-TIER LEAGUES ONLY
+const TOP_LEAGUES = [
+  // Football/Soccer
+  { name: "English Premier League", sport: "Soccer", icon: "⚽", priority: 10 },
+  { name: "Spanish La Liga", sport: "Soccer", icon: "⚽", priority: 10 },
+  { name: "German Bundesliga", sport: "Soccer", icon: "⚽", priority: 9 },
+  { name: "Italian Serie A", sport: "Soccer", icon: "⚽", priority: 9 },
+  { name: "French Ligue 1", sport: "Soccer", icon: "⚽", priority: 8 },
+  { name: "UEFA Champions League", sport: "Soccer", icon: "⚽", priority: 10 },
+  { name: "UEFA Europa League", sport: "Soccer", icon: "⚽", priority: 8 },
+  { name: "English FA Cup", sport: "Soccer", icon: "⚽", priority: 7 },
+  { name: "English League Cup", sport: "Soccer", icon: "⚽", priority: 7 },
+  { name: "Copa del Rey", sport: "Soccer", icon: "⚽", priority: 7 },
+  { name: "MLS", sport: "Soccer", icon: "⚽", priority: 6 },
+  { name: "Major League Soccer", sport: "Soccer", icon: "⚽", priority: 6 },
+  // Basketball
+  { name: "NBA", sport: "Basketball", icon: "🏀", priority: 10 },
+  // American Football
+  { name: "NFL", sport: "American Football", icon: "🏈", priority: 10 },
+  // Ice Hockey
+  { name: "NHL", sport: "Ice Hockey", icon: "🏒", priority: 10 },
+  // Tennis
+  { name: "ATP", sport: "Tennis", icon: "🎾", priority: 9 },
+  { name: "WTA", sport: "Tennis", icon: "🎾", priority: 9 },
+  { name: "Australian Open", sport: "Tennis", icon: "🎾", priority: 10 },
+  { name: "French Open", sport: "Tennis", icon: "🎾", priority: 10 },
+  { name: "Wimbledon", sport: "Tennis", icon: "🎾", priority: 10 },
+  { name: "US Open", sport: "Tennis", icon: "🎾", priority: 10 },
+  // MMA
+  { name: "UFC", sport: "MMA", icon: "🥊", priority: 10 },
+  // Baseball
+  { name: "MLB", sport: "Baseball", icon: "⚾", priority: 10 },
+];
+
+// Sports endpoints to fetch
 const SPORTS_ENDPOINTS = [
   { sport: 'Soccer', endpoint: 'soccer', icon: '⚽' },
   { sport: 'Basketball', endpoint: 'basketball', icon: '🏀' },
   { sport: 'American Football', endpoint: 'nfl', icon: '🏈' },
   { sport: 'Ice Hockey', endpoint: 'hockey', icon: '🏒' },
   { sport: 'Tennis', endpoint: 'tennis', icon: '🎾' },
-  { sport: 'Cricket', endpoint: 'cricket', icon: '🏏' },
   { sport: 'MMA', endpoint: 'mma', icon: '🥊' },
   { sport: 'Baseball', endpoint: 'baseball', icon: '⚾' },
 ];
 
-// Popular leagues by sport with priority
-const POPULAR_LEAGUES: Record<string, { names: string[], priority: number }[]> = {
-  'Soccer': [
-    { names: ['English Premier League', 'Premier League'], priority: 10 },
-    { names: ['La Liga', 'Spanish La Liga'], priority: 10 },
-    { names: ['German Bundesliga', 'Bundesliga'], priority: 9 },
-    { names: ['Italian Serie A', 'Serie A'], priority: 9 },
-    { names: ['French Ligue 1', 'Ligue 1'], priority: 8 },
-    { names: ['UEFA Champions League', 'Champions League'], priority: 10 },
-    { names: ['UEFA Europa League', 'Europa League'], priority: 8 },
-    { names: ['FIFA World Cup', 'World Cup'], priority: 10 },
-    { names: ['MLS', 'Major League Soccer'], priority: 6 },
-  ],
-  'Basketball': [
-    { names: ['NBA', 'National Basketball Association'], priority: 10 },
-    { names: ['EuroLeague', 'Euroleague Basketball'], priority: 7 },
-    { names: ['NCAA', 'NCAA Basketball'], priority: 6 },
-  ],
-  'American Football': [
-    { names: ['NFL', 'National Football League'], priority: 10 },
-    { names: ['NCAA', 'College Football'], priority: 7 },
-  ],
-  'Ice Hockey': [
-    { names: ['NHL', 'National Hockey League'], priority: 10 },
-    { names: ['KHL', 'Kontinental Hockey League'], priority: 6 },
-  ],
-  'Tennis': [
-    { names: ['ATP Tour', 'ATP'], priority: 9 },
-    { names: ['WTA Tour', 'WTA'], priority: 9 },
-    { names: ['Australian Open'], priority: 10 },
-    { names: ['French Open', 'Roland Garros'], priority: 10 },
-    { names: ['Wimbledon'], priority: 10 },
-    { names: ['US Open'], priority: 10 },
-  ],
-  'Cricket': [
-    { names: ['IPL', 'Indian Premier League'], priority: 10 },
-    { names: ['ICC World Cup', 'Cricket World Cup'], priority: 10 },
-    { names: ['The Ashes', 'Ashes'], priority: 9 },
-    { names: ['Big Bash League', 'BBL'], priority: 7 },
-    { names: ['T20 World Cup'], priority: 9 },
-  ],
-  'MMA': [
-    { names: ['UFC', 'Ultimate Fighting Championship'], priority: 10 },
-    { names: ['Bellator', 'Bellator MMA'], priority: 7 },
-    { names: ['ONE Championship'], priority: 6 },
-  ],
-  'Baseball': [
-    { names: ['MLB', 'Major League Baseball'], priority: 10 },
-    { names: ['World Series'], priority: 10 },
-    { names: ['NPB', 'Nippon Professional Baseball'], priority: 6 },
-  ],
-};
-
-// Default channels by sport/league
+// Default channels by sport
 const SPORT_CHANNELS: Record<string, string[]> = {
   'Soccer': ['sky sports', 'bein', 'espn', 'nbc', 'usa network', 'peacock', 'paramount', 'cbs'],
   'Basketball': ['nba tv', 'espn', 'tnt', 'nba'],
   'American Football': ['nfl network', 'espn', 'fox', 'cbs', 'nbc', 'nfl'],
   'Ice Hockey': ['espn', 'tnt', 'nhl network', 'nhl'],
   'Tennis': ['tennis channel', 'espn', 'eurosport'],
-  'Cricket': ['willow', 'sky sports cricket', 'star sports', 'cricket'],
   'MMA': ['espn', 'ufc', 'bt sport'],
   'Baseball': ['mlb network', 'espn', 'fox', 'mlb'],
 };
@@ -103,9 +82,6 @@ interface LiveMatch {
   strStatus: string | null;
   strThumb: string | null;
   strPoster: string | null;
-  strTime?: string;
-  strTimestamp?: string;
-  dateEvent?: string;
 }
 
 interface CDNChannel {
@@ -148,58 +124,46 @@ interface TransformedMatch {
   priority: number;
 }
 
+// STRICT filter - only top leagues
+function isTopLeague(leagueName: string): { isTop: boolean; config: typeof TOP_LEAGUES[0] | null } {
+  const normalizedLeague = leagueName.toLowerCase().trim();
+  
+  for (const league of TOP_LEAGUES) {
+    const normalizedTop = league.name.toLowerCase();
+    // Check if league name contains the top league name
+    if (normalizedLeague.includes(normalizedTop) || normalizedTop.includes(normalizedLeague)) {
+      return { isTop: true, config: league };
+    }
+  }
+  
+  return { isTop: false, config: null };
+}
+
 // Cache for CDN-Live channels
 let cdnChannelsCache: { data: CDNLiveChannel[], timestamp: number } | null = null;
-const CDN_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const CDN_CACHE_DURATION = 10 * 60 * 1000;
 
 async function fetchCDNChannels(): Promise<CDNLiveChannel[]> {
   if (cdnChannelsCache && Date.now() - cdnChannelsCache.timestamp < CDN_CACHE_DURATION) {
-    console.log('Using cached CDN-Live channels');
     return cdnChannelsCache.data;
   }
 
   try {
-    console.log('Fetching CDN-Live channels...');
-    const response = await fetch(CDN_LIVE_API, {
-      headers: { 'Accept': 'application/json' },
-    });
-    
+    const response = await fetch(CDN_LIVE_API, { headers: { 'Accept': 'application/json' } });
     if (response.ok) {
       const data = await response.json();
       const channels: CDNLiveChannel[] = data?.channels || data || [];
-      console.log(`Fetched ${channels.length} CDN-Live channels`);
       cdnChannelsCache = { data: channels, timestamp: Date.now() };
       return channels;
     }
   } catch (error) {
     console.error('Error fetching CDN-Live channels:', error);
   }
-  
   return cdnChannelsCache?.data || [];
 }
 
 function normalizeChannelName(name: string): string {
   return name.toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9\s]/g, '').trim();
-}
-
-function isPopularLeague(sport: string, leagueName: string): { isPopular: boolean; priority: number } {
-  const sportLeagues = POPULAR_LEAGUES[sport] || [];
-  const normalizedLeague = leagueName.toLowerCase();
-  
-  for (const league of sportLeagues) {
-    for (const name of league.names) {
-      if (normalizedLeague.includes(name.toLowerCase()) || name.toLowerCase().includes(normalizedLeague)) {
-        return { isPopular: true, priority: league.priority };
-      }
-    }
-  }
-  
-  return { isPopular: false, priority: 0 };
-}
-
-function getSportIcon(sport: string): string {
-  const sportConfig = SPORTS_ENDPOINTS.find(s => s.sport === sport);
-  return sportConfig?.icon || '🎯';
 }
 
 function getChannelsForSport(sport: string, cdnChannels: CDNLiveChannel[]): CDNChannel[] {
@@ -216,7 +180,7 @@ function getChannelsForSport(sport: string, cdnChannels: CDNLiveChannel[]): CDNC
       
       if (seenIds.has(id)) continue;
       
-      if (normalizedCDN.includes(normalizedKeyword) || normalizedKeyword.includes(normalizedCDN)) {
+      if (normalizedCDN.includes(normalizedKeyword)) {
         seenIds.add(id);
         matched.push({
           id,
@@ -225,11 +189,9 @@ function getChannelsForSport(sport: string, cdnChannels: CDNLiveChannel[]): CDNC
           logo: cdn.logo || '',
           embedUrl: cdn.url,
         });
-        
         if (matched.length >= 15) break;
       }
     }
-    
     if (matched.length >= 15) break;
   }
   
@@ -259,8 +221,7 @@ async function fetchTVChannels(eventId: string, cdnChannels: CDNLiveChannel[]): 
           
           if (seenIds.has(id)) continue;
           
-          if (normalizedCDN.includes(normalizedTV) || normalizedTV.includes(normalizedCDN) ||
-              normalizedTV.split(' ').filter(p => normalizedCDN.includes(p)).length >= 2) {
+          if (normalizedCDN.includes(normalizedTV) || normalizedTV.includes(normalizedCDN)) {
             seenIds.add(id);
             matchedChannels.push({
               id,
@@ -284,7 +245,7 @@ async function fetchTVChannels(eventId: string, cdnChannels: CDNLiveChannel[]): 
 
 // In-memory cache
 const cache: { matches?: { data: TransformedMatch[], timestamp: number } } = {};
-const CACHE_DURATION = 60 * 1000; // 1 minute for fresher data
+const CACHE_DURATION = 60 * 1000;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -292,7 +253,7 @@ serve(async (req) => {
   }
 
   try {
-    // Check cache first
+    // Check cache
     if (cache.matches && Date.now() - cache.matches.timestamp < CACHE_DURATION) {
       console.log('Returning cached matches');
       return new Response(
@@ -300,16 +261,14 @@ serve(async (req) => {
           matches: cache.matches.data,
           liveCount: cache.matches.data.filter(m => m.isLive).length,
           total: cache.matches.data.length,
-          fetchedAt: new Date(cache.matches.timestamp).toISOString(),
           cached: true
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Fetching matches from all sports...');
+    console.log('Fetching matches from all sports (TOP LEAGUES ONLY)...');
     
-    // Fetch CDN-Live channels first
     const cdnChannels = await fetchCDNChannels();
     console.log(`Got ${cdnChannels.length} CDN-Live channels`);
     
@@ -318,7 +277,6 @@ serve(async (req) => {
     const now = new Date();
 
     // Fetch live matches from all sports in parallel
-    console.log('Fetching live matches from all sports...');
     const livePromises = SPORTS_ENDPOINTS.map(async ({ sport, endpoint, icon }) => {
       try {
         const response = await fetch(`${SPORTS_DB_V2_BASE}/livescore/${endpoint}`, {
@@ -332,15 +290,17 @@ serve(async (req) => {
         
         const data = await response.json();
         const liveMatches: LiveMatch[] = data?.livescore || data?.events || [];
-        console.log(`Got ${liveMatches.length} live ${sport} matches`);
+        console.log(`Got ${liveMatches.length} live ${sport} matches, filtering for top leagues...`);
         
         const matches: TransformedMatch[] = [];
         
         for (const match of liveMatches) {
-          const { isPopular, priority } = isPopularLeague(sport, match.strLeague);
+          // STRICT FILTER: Only top leagues
+          const { isTop, config } = isTopLeague(match.strLeague);
           
-          // Only include popular leagues
-          if (!isPopular) continue;
+          if (!isTop) {
+            continue; // Skip non-top league matches
+          }
           
           if (matchIds.has(match.idEvent)) continue;
           matchIds.add(match.idEvent);
@@ -354,8 +314,8 @@ serve(async (req) => {
             awayTeamBadge: match.strAwayTeamBadge,
             homeScore: match.intHomeScore,
             awayScore: match.intAwayScore,
-            sport,
-            sportIcon: icon,
+            sport: config?.sport || sport,
+            sportIcon: config?.icon || icon,
             league: match.strLeague,
             leagueId: match.idLeague,
             date: now.toISOString().slice(0, 10),
@@ -367,10 +327,11 @@ serve(async (req) => {
             isLive: true,
             isFinished: false,
             channels: [],
-            priority: priority + 10, // Boost live matches
+            priority: (config?.priority || 5) + 10,
           });
         }
         
+        console.log(`${sport}: ${matches.length} matches passed top league filter`);
         return matches;
       } catch (error) {
         console.error(`Error fetching ${sport} live matches:`, error);
@@ -381,12 +342,10 @@ serve(async (req) => {
     const liveResults = await Promise.all(livePromises);
     liveResults.forEach(matches => allMatches.push(...matches));
     
-    console.log(`Total live matches from popular leagues: ${allMatches.length}`);
+    console.log(`Total matches from TOP LEAGUES: ${allMatches.length}`);
 
-    // Sort: Live first, then by priority, then by timestamp
+    // Sort: by priority then by timestamp
     allMatches.sort((a, b) => {
-      if (a.isLive && !b.isLive) return -1;
-      if (!a.isLive && b.isLive) return 1;
       if (a.priority !== b.priority) return b.priority - a.priority;
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
@@ -395,25 +354,21 @@ serve(async (req) => {
     const limitedMatches = allMatches.slice(0, 20);
     
     // Fetch TV channels for matches
-    console.log('Fetching TV channels for matches...');
-    const tvPromises = limitedMatches.map(async (match) => {
-      const channels = await fetchTVChannels(match.id, cdnChannels);
-      
-      if (channels.length > 0) {
-        match.channels = channels;
-      } else {
-        match.channels = getChannelsForSport(match.sport, cdnChannels);
-      }
-    });
-    
-    await Promise.all(tvPromises);
+    if (limitedMatches.length > 0) {
+      console.log('Fetching TV channels for matches...');
+      const tvPromises = limitedMatches.map(async (match) => {
+        const channels = await fetchTVChannels(match.id, cdnChannels);
+        match.channels = channels.length > 0 ? channels : getChannelsForSport(match.sport, cdnChannels);
+      });
+      await Promise.all(tvPromises);
+    }
     
     const liveCount = limitedMatches.filter(m => m.isLive).length;
 
-    // Cache the result
+    // Cache result
     cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
-    console.log(`Returning ${limitedMatches.length} matches (${liveCount} live)`);
+    console.log(`Returning ${limitedMatches.length} TOP LEAGUE matches (${liveCount} live)`);
     
     return new Response(
       JSON.stringify({ 
@@ -423,7 +378,7 @@ serve(async (req) => {
         fetchedAt: new Date().toISOString(),
         cached: false
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Error fetching matches:', error);
