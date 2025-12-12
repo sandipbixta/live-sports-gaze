@@ -385,31 +385,41 @@ const MatchCard: React.FC<MatchCardProps> = ({
             {match.category || 'Sports'} • {match.tournament || match.title}
           </p>
           
-          {/* Home Team with Score */}
-          <div className="flex items-center justify-between">
+          {/* Show match title if no team names, otherwise show teams */}
+          {home && away ? (
+            <>
+              {/* Home Team with Score */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
+                  <span className="text-sm font-medium text-foreground truncate">{home}</span>
+                </div>
+                {isLive && homeScore !== undefined && (
+                  <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                    {homeScore}
+                  </span>
+                )}
+              </div>
+              
+              {/* Away Team with Score */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
+                  <span className="text-sm font-medium text-foreground truncate">{away}</span>
+                </div>
+                {isLive && awayScore !== undefined && (
+                  <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                    {awayScore}
+                  </span>
+                )}
+              </div>
+            </>
+          ) : (
+            /* Show match title when team names are not available */
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
-              <span className="text-sm font-medium text-foreground truncate">{home || 'Team 1'}</span>
+              <span className="text-sm font-medium text-foreground line-clamp-2">{match.title}</span>
             </div>
-            {isLive && homeScore !== undefined && (
-              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
-                {homeScore}
-              </span>
-            )}
-          </div>
-          
-          {/* Away Team with Score */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
-              <span className="text-sm font-medium text-foreground truncate">{away || 'Team 2'}</span>
-            </div>
-            {isLive && awayScore !== undefined && (
-              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
-                {awayScore}
-              </span>
-            )}
-          </div>
+          )}
           
           {/* Match Time/Progress */}
           <div className="flex items-center justify-between mt-auto">
