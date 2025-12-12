@@ -174,11 +174,11 @@ const PopularMatchCard: React.FC<{
   return (
     <div 
       onClick={onClick}
-      className="group cursor-pointer flex-shrink-0 w-[240px] md:w-[260px]"
+      className="group cursor-pointer flex-shrink-0 w-[180px] md:w-[200px]"
     >
-      <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
+      <div className="relative overflow-hidden rounded-lg bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
         {/* Banner Image Section - smaller aspect ratio */}
-        <div className="relative aspect-[16/10] overflow-hidden rounded-t-xl flex-shrink-0">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-t-lg flex-shrink-0">
           {generateThumbnail()}
           
           {/* FREE Badge - Top left */}
@@ -210,7 +210,7 @@ const PopularMatchCard: React.FC<{
         </div>
 
         {/* Info Section */}
-        <div className="p-2.5 flex flex-col gap-1.5 flex-1 bg-card">
+        <div className="p-2 flex flex-col gap-1 flex-1 bg-card">
           {/* Sport • Tournament */}
           <p className="text-[10px] text-muted-foreground truncate">
             Football • {match.league}
@@ -262,13 +262,13 @@ const PopularMatchCard: React.FC<{
 
 // Skeleton Component
 const MatchCardSkeleton: React.FC = () => (
-  <div className="min-w-[280px] flex-shrink-0 rounded-xl bg-card overflow-hidden border border-border/50">
-    <div className="aspect-video bg-muted animate-pulse" />
-    <div className="p-3 space-y-2">
+  <div className="w-[180px] md:w-[200px] flex-shrink-0 rounded-lg bg-card overflow-hidden border border-border/50">
+    <div className="aspect-[16/10] bg-muted animate-pulse" />
+    <div className="p-2 space-y-1.5">
+      <div className="h-2.5 w-20 bg-muted animate-pulse rounded" />
       <div className="h-3 w-24 bg-muted animate-pulse rounded" />
-      <div className="h-4 w-32 bg-muted animate-pulse rounded" />
-      <div className="h-4 w-28 bg-muted animate-pulse rounded" />
-      <div className="h-3 w-36 bg-muted animate-pulse rounded" />
+      <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+      <div className="h-2.5 w-28 bg-muted animate-pulse rounded" />
     </div>
   </div>
 );
