@@ -124,9 +124,12 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
   const [imgError, setImgError] = useState({ home: false, away: false, poster: false });
   const countdown = useCountdown(match.timestamp);
   
+  // Ensure channels is always an array
+  const channels = match.channels || [];
+  
   // Build watch URL - if channels available, link to first channel, else to a match page
-  const watchUrl = match.channels.length > 0 
-    ? `/channel/${match.channels[0].country}/${match.channels[0].id}`
+  const watchUrl = channels.length > 0 
+    ? `/channel/${channels[0].country}/${channels[0].id}`
     : `/live`;
 
   return (
@@ -196,7 +199,7 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
           </div>
           
           {/* FREE Badge */}
-          {match.channels.length > 0 && !match.isLive && (
+          {channels.length > 0 && !match.isLive && (
             <div className="absolute top-2 left-2 z-10">
               <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                 FREE
@@ -281,10 +284,10 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
             >
               <Play className="w-4 h-4 mr-2 fill-current" />
               Watch Now
-              {match.channels.length > 0 && (
+              {channels.length > 0 && (
                 <Badge variant="secondary" className="ml-2 text-[10px]">
                   <Tv className="w-3 h-3 mr-1" />
-                  {match.channels.length}
+                  {channels.length}
                 </Badge>
               )}
             </Button>
