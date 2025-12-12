@@ -7,18 +7,19 @@ const corsHeaders = {
 
 const SPORTS_DB_API_KEY = '3'; // Free tier API key
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
+const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1';
 
 // Popular league IDs from TheSportsDB
 const POPULAR_LEAGUES = [
-  { id: '4328', name: 'English Premier League', sport: 'Soccer' },
-  { id: '4335', name: 'La Liga', sport: 'Soccer' },
-  { id: '4331', name: 'German Bundesliga', sport: 'Soccer' },
-  { id: '4332', name: 'Italian Serie A', sport: 'Soccer' },
-  { id: '4334', name: 'French Ligue 1', sport: 'Soccer' },
-  { id: '4480', name: 'UEFA Champions League', sport: 'Soccer' },
-  { id: '4387', name: 'NBA', sport: 'Basketball' },
-  { id: '4391', name: 'NFL', sport: 'American Football' },
-  { id: '4380', name: 'NHL', sport: 'Ice Hockey' },
+  { id: '4328', name: 'English Premier League', sport: 'Soccer', channelKeywords: ['sky sports', 'bt sport', 'nbc', 'usa network', 'peacock'] },
+  { id: '4335', name: 'La Liga', sport: 'Soccer', channelKeywords: ['espn', 'dazn', 'movistar'] },
+  { id: '4331', name: 'German Bundesliga', sport: 'Soccer', channelKeywords: ['sky sports', 'espn'] },
+  { id: '4332', name: 'Italian Serie A', sport: 'Soccer', channelKeywords: ['paramount', 'cbs', 'bt sport'] },
+  { id: '4334', name: 'French Ligue 1', sport: 'Soccer', channelKeywords: ['bein', 'espn'] },
+  { id: '4480', name: 'UEFA Champions League', sport: 'Soccer', channelKeywords: ['paramount', 'cbs', 'bt sport', 'tnt'] },
+  { id: '4387', name: 'NBA', sport: 'Basketball', channelKeywords: ['espn', 'tnt', 'nba tv', 'abc'] },
+  { id: '4391', name: 'NFL', sport: 'American Football', channelKeywords: ['espn', 'fox', 'cbs', 'nfl network', 'nbc'] },
+  { id: '4380', name: 'NHL', sport: 'Ice Hockey', channelKeywords: ['espn', 'tnt', 'nhl network'] },
 ];
 
 interface SportsDbEvent {
@@ -48,6 +49,14 @@ interface SportsDbEvent {
   strProgress: string | null;
 }
 
+interface CDNChannel {
+  id: string;
+  title: string;
+  country: string;
+  logo: string;
+  embedUrl: string;
+}
+
 interface TransformedMatch {
   id: string;
   title: string;
@@ -69,6 +78,98 @@ interface TransformedMatch {
   poster: string | null;
   banner: string | null;
   isLive: boolean;
+  isFinished: boolean;
+  channels: CDNChannel[];
+}
+
+// In-memory cache
+const cache: { 
+  matches?: { data: TransformedMatch[], timestamp: number },
+  channels?: { data: CDNChannel[], timestamp: number }
+} = {};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Fetch CDN channels
+async function fetchCDNChannels(): Promise<CDNChannel[]> {
+  // Check cache
+  if (cache.channels && Date.now() - cache.channels.timestamp < CACHE_DURATION) {
+    console.log('Using cached CDN channels');
+    return cache.channels.data;
+  }
+
+  try {
+    console.log('Fetching CDN channels...');
+    const response = await fetch(`${CDN_LIVE_API}/channels/`);
+    
+    if (!response.ok) {
+      console.error('Failed to fetch CDN channels:', response.status);
+      return [];
+    }
+    
+    const data = await response.json();
+    let channels: any[] = [];
+    
+    if (Array.isArray(data)) {
+      channels = data;
+    } else if (data.channels && Array.isArray(data.channels)) {
+      channels = data.channels;
+    } else if (data.data && Array.isArray(data.data)) {
+      channels = data.data;
+    }
+    
+    const transformedChannels: CDNChannel[] = channels.map((ch: any) => ({
+      id: ch.id || ch.name || '',
+      title: ch.title || ch.name || '',
+      country: ch.country || ch.code || 'INT',
+      logo: ch.logo || ch.image || '',
+      embedUrl: `${CDN_LIVE_API}/channels/player/?name=${encodeURIComponent(ch.title || ch.name)}&code=${ch.country || ch.code || 'INT'}`
+    }));
+    
+    // Cache the result
+    cache.channels = { data: transformedChannels, timestamp: Date.now() };
+    console.log(`Fetched ${transformedChannels.length} CDN channels`);
+    
+    return transformedChannels;
+  } catch (error) {
+    console.error('Error fetching CDN channels:', error);
+    return [];
+  }
+}
+
+// Match channels to a match based on sport/league keywords
+function matchChannelsToEvent(
+  sport: string, 
+  league: string, 
+  allChannels: CDNChannel[],
+  leagueConfig: typeof POPULAR_LEAGUES[0] | undefined
+): CDNChannel[] {
+  if (!allChannels.length) return [];
+  
+  const keywords = leagueConfig?.channelKeywords || [];
+  const sportKeywords = sport.toLowerCase().split(' ');
+  
+  // Find channels that match the keywords
+  const matchedChannels = allChannels.filter(channel => {
+    const channelTitle = channel.title.toLowerCase();
+    
+    // Check league-specific keywords
+    if (keywords.some(kw => channelTitle.includes(kw.toLowerCase()))) {
+      return true;
+    }
+    
+    // Check sport-specific keywords
+    if (sportKeywords.some(kw => channelTitle.includes(kw))) {
+      return true;
+    }
+    
+    // Check for common sports channels
+    const sportsChannelKeywords = ['sport', 'espn', 'fox', 'sky', 'bt', 'bein', 'dazn', 'tnt'];
+    return sportsChannelKeywords.some(kw => channelTitle.includes(kw));
+  });
+  
+  // Return top 5 matched channels
+  return matchedChannels.slice(0, 5);
 }
 
 serve(async (req) => {
@@ -78,7 +179,32 @@ serve(async (req) => {
   }
 
   try {
+    // Check cache first
+    if (cache.matches && Date.now() - cache.matches.timestamp < CACHE_DURATION) {
+      console.log('Returning cached popular matches');
+      return new Response(
+        JSON.stringify({ 
+          matches: cache.matches.data,
+          total: cache.matches.data.length,
+          fetchedAt: new Date(cache.matches.timestamp).toISOString(),
+          cached: true
+        }),
+        { 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, max-age=300'
+          } 
+        }
+      );
+    }
+
     console.log('Fetching popular matches from TheSportsDB...');
+    
+    // Fetch CDN channels in parallel
+    const [cdnChannels] = await Promise.all([
+      fetchCDNChannels()
+    ]);
     
     const allMatches: TransformedMatch[] = [];
     const now = new Date();
@@ -103,9 +229,18 @@ serve(async (req) => {
         
         return events.map((event): TransformedMatch => {
           const eventDate = new Date(event.strTimestamp || `${event.dateEvent}T${event.strTime || '00:00:00'}`);
-          const isLive = event.strStatus === 'Match Finished' ? false : 
-                        (event.strProgress && event.strProgress !== 'NS') ? true :
-                        (eventDate <= now && eventDate.getTime() + 3 * 60 * 60 * 1000 > now.getTime());
+          const isFinished = event.strStatus === 'Match Finished' || event.strStatus === 'FT';
+          const isLive = !isFinished && 
+                        ((event.strProgress && event.strProgress !== 'NS') ||
+                        (eventDate <= now && eventDate.getTime() + 3 * 60 * 60 * 1000 > now.getTime()));
+          
+          // Match channels for this event
+          const channels = matchChannelsToEvent(
+            event.strSport || league.sport,
+            event.strLeague || league.name,
+            cdnChannels,
+            league
+          );
           
           return {
             id: event.idEvent,
@@ -128,6 +263,8 @@ serve(async (req) => {
             poster: event.strThumb || event.strPoster || event.strSquare,
             banner: event.strBanner,
             isLive,
+            isFinished,
+            channels,
           };
         });
       } catch (error) {
@@ -139,8 +276,15 @@ serve(async (req) => {
     const results = await Promise.all(fetchPromises);
     results.forEach(matches => allMatches.push(...matches));
     
-    // Sort by date/time (upcoming first)
-    allMatches.sort((a, b) => {
+    // Filter out finished matches
+    const upcomingMatches = allMatches.filter(match => !match.isFinished);
+    
+    // Sort by date/time (upcoming first, then live matches priority)
+    upcomingMatches.sort((a, b) => {
+      // Live matches first
+      if (a.isLive && !b.isLive) return -1;
+      if (!a.isLive && b.isLive) return 1;
+      
       const dateA = new Date(a.timestamp);
       const dateB = new Date(b.timestamp);
       return dateA.getTime() - dateB.getTime();
@@ -148,13 +292,16 @@ serve(async (req) => {
     
     // Filter to only show matches within next 7 days
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const filteredMatches = allMatches.filter(match => {
+    const filteredMatches = upcomingMatches.filter(match => {
       const matchDate = new Date(match.timestamp);
-      return matchDate >= now && matchDate <= sevenDaysFromNow;
+      return matchDate <= sevenDaysFromNow;
     });
     
     // Limit to 20 matches
     const limitedMatches = filteredMatches.slice(0, 20);
+    
+    // Cache the result
+    cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
     console.log(`Returning ${limitedMatches.length} popular matches`);
     
@@ -162,13 +309,14 @@ serve(async (req) => {
       JSON.stringify({ 
         matches: limitedMatches,
         total: limitedMatches.length,
-        fetchedAt: new Date().toISOString()
+        fetchedAt: new Date().toISOString(),
+        cached: false
       }),
       { 
         headers: { 
           ...corsHeaders, 
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=300' // Cache for 5 minutes
+          'Cache-Control': 'public, max-age=300'
         } 
       }
     );

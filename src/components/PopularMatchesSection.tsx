@@ -1,12 +1,20 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import SectionHeader from './SectionHeader';
-import { Calendar, Clock, MapPin, Trophy, Play } from 'lucide-react';
-import { format, parseISO, isToday, isTomorrow, formatDistanceToNow } from 'date-fns';
+import { Calendar, Clock, Play, ChevronLeft, ChevronRight, Tv } from 'lucide-react';
+import { format, parseISO, isToday, isTomorrow } from 'date-fns';
+import TeamLogo from './TeamLogo';
+
+interface CDNChannel {
+  id: string;
+  title: string;
+  country: string;
+  logo: string;
+  embedUrl: string;
+}
 
 interface PopularMatch {
   id: string;
@@ -29,7 +37,16 @@ interface PopularMatch {
   poster: string | null;
   banner: string | null;
   isLive: boolean;
+  isFinished: boolean;
+  channels: CDNChannel[];
 }
+
+// Cache for matches
+const matchesCache: { data: PopularMatch[] | null; timestamp: number } = {
+  data: null,
+  timestamp: 0,
+};
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const SPORT_ICONS: Record<string, string> = {
   'Soccer': '⚽',
@@ -38,18 +55,9 @@ const SPORT_ICONS: Record<string, string> = {
   'Ice Hockey': '🏒',
   'Tennis': '🎾',
   'Baseball': '⚾',
-  'Rugby': '🏉',
-  'Cricket': '🏏',
-  'Golf': '⛳',
-  'MMA': '🥊',
-  'Boxing': '🥊',
-  'Formula 1': '🏎️',
-  'Motorsport': '🏎️',
 };
 
-const getSportIcon = (sport: string): string => {
-  return SPORT_ICONS[sport] || '🏆';
-};
+const getSportIcon = (sport: string): string => SPORT_ICONS[sport] || '🏆';
 
 const formatMatchDate = (timestamp: string, date: string): string => {
   try {
@@ -73,159 +81,234 @@ const formatMatchTime = (time: string): string => {
   }
 };
 
-const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
-  const [imgError, setImgError] = useState({ home: false, away: false });
+// Calculate countdown
+const useCountdown = (timestamp: string) => {
+  const [countdown, setCountdown] = useState('');
   
-  const handleImageError = (team: 'home' | 'away') => {
-    setImgError(prev => ({ ...prev, [team]: true }));
-  };
+  useEffect(() => {
+    const matchDate = new Date(timestamp);
+    
+    const updateCountdown = () => {
+      const now = Date.now();
+      const timeUntilMatch = matchDate.getTime() - now;
+      
+      if (timeUntilMatch <= 0) {
+        setCountdown('');
+        return;
+      }
+      
+      const hours = Math.floor(timeUntilMatch / (1000 * 60 * 60));
+      const minutes = Math.floor((timeUntilMatch % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeUntilMatch % (1000 * 60)) / 1000);
+      
+      if (hours > 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        setCountdown(`${days}d : ${remainingHours}h`);
+      } else if (hours > 0) {
+        setCountdown(`${hours}h : ${minutes.toString().padStart(2, '0')}m`);
+      } else {
+        setCountdown(`${minutes}m : ${seconds.toString().padStart(2, '0')}s`);
+      }
+    };
+    
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [timestamp]);
+  
+  return countdown;
+};
 
-  const matchUrl = `/match/sportsdb/${match.id}`;
+const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
+  const [imgError, setImgError] = useState({ home: false, away: false, poster: false });
+  const countdown = useCountdown(match.timestamp);
   
+  // Build watch URL - if channels available, link to first channel, else to a match page
+  const watchUrl = match.channels.length > 0 
+    ? `/channel/${match.channels[0].country}/${match.channels[0].id}`
+    : `/live`;
+
   return (
-    <Link to={matchUrl}>
-      <Card className="group relative overflow-hidden bg-card hover:bg-accent/50 transition-all duration-300 border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
-        {/* Match poster background */}
-        {match.poster && (
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
-            <img 
-              src={match.poster} 
-              alt="" 
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
-        )}
-        
-        <CardContent className="relative p-4">
-          {/* League and Sport */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{getSportIcon(match.sport)}</span>
-              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                {match.league}
-              </span>
-            </div>
-            {match.isLive && (
-              <Badge className="bg-destructive text-destructive-foreground animate-pulse">
-                LIVE
-              </Badge>
+    <div className="group cursor-pointer h-full min-w-[280px] sm:min-w-[320px]">
+      <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
+        {/* Banner Image Section */}
+        <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
+          {/* Background */}
+          <div className="w-full h-full relative bg-black">
+            {match.poster && !imgError.poster ? (
+              <img
+                src={match.poster}
+                alt={match.title}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={() => setImgError(prev => ({ ...prev, poster: true }))}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center gap-4">
+                {match.homeTeamBadge && !imgError.home ? (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={match.homeTeamBadge}
+                      alt={match.homeTeam}
+                      className="w-14 h-14 object-contain drop-shadow-md"
+                      onError={() => setImgError(prev => ({ ...prev, home: true }))}
+                    />
+                    <span className="text-white text-xs font-medium mt-1 truncate max-w-[60px]">
+                      {match.homeTeam}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      {match.homeTeam.substring(0, 2).toUpperCase()}
+                    </div>
+                    <span className="text-white text-xs font-medium mt-1 truncate max-w-[60px]">
+                      {match.homeTeam}
+                    </span>
+                  </div>
+                )}
+                <span className="text-white font-bold text-lg">VS</span>
+                {match.awayTeamBadge && !imgError.away ? (
+                  <div className="flex flex-col items-center">
+                    <img
+                      src={match.awayTeamBadge}
+                      alt={match.awayTeam}
+                      className="w-14 h-14 object-contain drop-shadow-md"
+                      onError={() => setImgError(prev => ({ ...prev, away: true }))}
+                    />
+                    <span className="text-white text-xs font-medium mt-1 truncate max-w-[60px]">
+                      {match.awayTeam}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      {match.awayTeam.substring(0, 2).toUpperCase()}
+                    </div>
+                    <span className="text-white text-xs font-medium mt-1 truncate max-w-[60px]">
+                      {match.awayTeam}
+                    </span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
           
-          {/* Teams */}
-          <div className="space-y-3">
-            {/* Home Team */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                {match.homeTeamBadge && !imgError.home ? (
-                  <img 
-                    src={match.homeTeamBadge} 
-                    alt={match.homeTeam}
-                    className="w-6 h-6 object-contain"
-                    loading="lazy"
-                    onError={() => handleImageError('home')}
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                    <Trophy className="w-3 h-3 text-muted-foreground" />
-                  </div>
-                )}
-                <span className="text-sm font-medium text-foreground truncate">
-                  {match.homeTeam}
-                </span>
-              </div>
-              {match.homeScore && (
-                <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right">
-                  {match.homeScore}
-                </span>
-              )}
-            </div>
-            
-            {/* Away Team */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                {match.awayTeamBadge && !imgError.away ? (
-                  <img 
-                    src={match.awayTeamBadge} 
-                    alt={match.awayTeam}
-                    className="w-6 h-6 object-contain"
-                    loading="lazy"
-                    onError={() => handleImageError('away')}
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                    <Trophy className="w-3 h-3 text-muted-foreground" />
-                  </div>
-                )}
-                <span className="text-sm font-medium text-foreground truncate">
-                  {match.awayTeam}
-                </span>
-              </div>
-              {match.awayScore && (
-                <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right">
-                  {match.awayScore}
-                </span>
-              )}
-            </div>
-          </div>
-          
-          {/* Match Info */}
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <span>{formatMatchDate(match.timestamp, match.date)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>{formatMatchTime(match.time)}</span>
-              </div>
-            </div>
-            
-            {/* Play button on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <Play className="w-4 h-4 text-primary-foreground fill-current" />
-              </div>
-            </div>
-          </div>
-          
-          {/* Venue */}
-          {match.venue && (
-            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-              <MapPin className="w-3 h-3" />
-              <span className="truncate">{match.venue}</span>
+          {/* FREE Badge */}
+          {match.channels.length > 0 && !match.isLive && (
+            <div className="absolute top-2 left-2 z-10">
+              <span className="bg-green-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded">
+                FREE
+              </span>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </Link>
+          
+          {/* LIVE Badge */}
+          {match.isLive && (
+            <div className="absolute top-2 right-2 z-10">
+              <span className="bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
+                ● LIVE
+              </span>
+            </div>
+          )}
+          
+          {/* Countdown */}
+          {!match.isLive && countdown && (
+            <div className="absolute bottom-2 left-2 z-10">
+              <div className="bg-primary text-primary-foreground text-[10px] font-bold py-1 px-2.5 rounded italic tracking-wide">
+                WATCH IN {countdown}
+              </div>
+            </div>
+          )}
+          
+          {/* Play overlay on hover */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center">
+              <Play className="w-6 h-6 text-primary-foreground fill-current" />
+            </div>
+          </div>
+        </div>
+
+        {/* Info Section */}
+        <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
+          {/* Sport • League */}
+          <p className="text-xs text-muted-foreground truncate">
+            {getSportIcon(match.sport)} {match.sport} • {match.league}
+          </p>
+          
+          {/* Home Team */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <TeamLogo teamName={match.homeTeam} sport={match.sport} size="sm" showFallbackIcon={false} />
+              <span className="text-sm font-medium text-foreground truncate">{match.homeTeam}</span>
+            </div>
+            {match.isLive && match.homeScore && (
+              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {match.homeScore}
+              </span>
+            )}
+          </div>
+          
+          {/* Away Team */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <TeamLogo teamName={match.awayTeam} sport={match.sport} size="sm" showFallbackIcon={false} />
+              <span className="text-sm font-medium text-foreground truncate">{match.awayTeam}</span>
+            </div>
+            {match.isLive && match.awayScore && (
+              <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {match.awayScore}
+              </span>
+            )}
+          </div>
+          
+          {/* Date/Time and Watch Button */}
+          <div className="flex items-center justify-between mt-auto pt-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Calendar className="w-3 h-3" />
+              <span>{formatMatchDate(match.timestamp, match.date)}</span>
+              <Clock className="w-3 h-3 ml-1" />
+              <span>{formatMatchTime(match.time)}</span>
+            </div>
+          </div>
+          
+          {/* Watch Button */}
+          <Link to={watchUrl} className="w-full">
+            <Button 
+              size="sm" 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Play className="w-4 h-4 mr-2 fill-current" />
+              Watch Now
+              {match.channels.length > 0 && (
+                <Badge variant="secondary" className="ml-2 text-[10px]">
+                  <Tv className="w-3 h-3 mr-1" />
+                  {match.channels.length}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 
 const PopularMatchesSkeleton: React.FC = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-    {Array.from({ length: 8 }).map((_, i) => (
-      <Card key={i} className="overflow-hidden">
-        <CardContent className="p-4">
-          <Skeleton className="h-4 w-24 mb-3" />
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Skeleton className="w-6 h-6 rounded-full" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Skeleton className="w-6 h-6 rounded-full" />
-              <Skeleton className="h-4 w-28" />
-            </div>
+  <div className="flex gap-4 overflow-hidden">
+    {Array.from({ length: 5 }).map((_, i) => (
+      <div key={i} className="min-w-[280px] sm:min-w-[320px]">
+        <div className="rounded-xl bg-card overflow-hidden">
+          <div className="aspect-video bg-muted animate-pulse" />
+          <div className="p-3 space-y-2">
+            <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-28 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-full bg-muted animate-pulse rounded mt-2" />
           </div>
-          <div className="flex gap-3 mt-3 pt-3 border-t border-border">
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-12" />
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     ))}
   </div>
 );
@@ -233,27 +316,43 @@ const PopularMatchesSkeleton: React.FC = () => (
 const PopularMatchesSection: React.FC = () => {
   const [matches, setMatches] = useState<PopularMatch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     const fetchPopularMatches = async () => {
       try {
+        // Check local cache first
+        if (matchesCache.data && Date.now() - matchesCache.timestamp < CACHE_DURATION) {
+          console.log('Using cached popular matches');
+          setMatches(matchesCache.data);
+          setLoading(false);
+          return;
+        }
+        
         setLoading(true);
-        setError(null);
         
         const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
         
         if (error) {
           console.error('Error fetching popular matches:', error);
-          setError('Failed to load matches');
           return;
         }
         
-        console.log('Popular matches data:', data);
-        setMatches(data?.matches || []);
+        const fetchedMatches = data?.matches || [];
+        
+        // Filter out finished matches on client side too
+        const activeMatches = fetchedMatches.filter((m: PopularMatch) => !m.isFinished);
+        
+        // Update cache
+        matchesCache.data = activeMatches;
+        matchesCache.timestamp = Date.now();
+        
+        console.log('Popular matches:', activeMatches.length);
+        setMatches(activeMatches);
       } catch (err) {
         console.error('Error fetching popular matches:', err);
-        setError('Failed to load matches');
       } finally {
         setLoading(false);
       }
@@ -266,11 +365,33 @@ const PopularMatchesSection: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Group matches by sport for filtering
-  const sportFilters = useMemo(() => {
-    const sports = new Set(matches.map(m => m.sport));
-    return Array.from(sports);
+  // Check scroll position
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const ref = scrollRef.current;
+    if (ref) {
+      ref.addEventListener('scroll', checkScroll);
+      return () => ref.removeEventListener('scroll', checkScroll);
+    }
   }, [matches]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 340;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -281,8 +402,8 @@ const PopularMatchesSection: React.FC = () => {
     );
   }
 
-  if (error || matches.length === 0) {
-    return null; // Don't show section if no matches
+  if (matches.length === 0) {
+    return null;
   }
 
   return (
@@ -292,14 +413,37 @@ const PopularMatchesSection: React.FC = () => {
         seeAllLink="/schedule" 
         seeAllText="VIEW SCHEDULE"
       />
-      <p className="text-muted-foreground text-sm mb-4">
-        {matches.length} upcoming matches from top leagues worldwide
-      </p>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {matches.map(match => (
-          <PopularMatchCard key={match.id} match={match} />
-        ))}
+      <div className="relative">
+        {/* Scroll buttons */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center hover:bg-background transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+        
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border shadow-lg flex items-center justify-center hover:bg-background transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
+        
+        {/* Scrollable container */}
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {matches.map(match => (
+            <PopularMatchCard key={match.id} match={match} />
+          ))}
+        </div>
       </div>
     </section>
   );
