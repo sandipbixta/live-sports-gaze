@@ -26,6 +26,7 @@ import { manualMatches } from '../data/manualMatches';
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import FinishedMatches from '../components/FinishedMatches';
+import FeaturedFootball from '../components/FeaturedFootball';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -234,6 +235,9 @@ const Index = () => {
 
         {/* Finished Match Results */}
         <FinishedMatches />
+
+        {/* CDN-Live Featured Football */}
+        <FeaturedFootball />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
