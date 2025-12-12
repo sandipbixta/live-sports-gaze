@@ -107,9 +107,8 @@ const PopularMatchCard: React.FC<{ match: PopularMatch }> = ({ match }) => {
   const streamableChannel = channels.find(ch => ch.cdnChannel);
   const hasStream = streamableChannel !== undefined;
   
-  const watchUrl = streamableChannel?.cdnChannel
-    ? `/channel/${streamableChannel.cdnChannel.country}/${streamableChannel.cdnChannel.id}`
-    : `/live`;
+  // Link to dedicated page to show all stream options
+  const watchUrl = `/selected-match/${match.id}`;
 
   // Generate thumbnail - same logic as MatchCard
   const generateThumbnail = () => {
