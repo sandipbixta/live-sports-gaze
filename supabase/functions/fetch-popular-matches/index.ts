@@ -368,9 +368,40 @@ serve(async (req) => {
         }
         
         const data = await response.json();
-        const events: SportsDbEvent[] = data.events || [];
+        let events: SportsDbEvent[] = data.events || [];
         
-        console.log(`Got ${events.length} events for ${league.name}`);
+        console.log(`Got ${events.length} upcoming events for ${league.name}`);
+        
+        // Also fetch today's events to capture currently live matches
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const dayPrimaryUrl = `${SPORTS_DB_BASE_URL}/${SPORTS_DB_API_KEY}/eventsday.php?d=${today}&l=${encodeURIComponent(league.name)}`;
+          console.log(`Fetching today's events from: ${dayPrimaryUrl}`);
+          
+          let dayResponse = await fetch(dayPrimaryUrl);
+          
+          if (!dayResponse.ok && dayResponse.status === 404 && SPORTS_DB_API_KEY !== '3') {
+            const dayFallbackUrl = `${SPORTS_DB_BASE_URL}/3/eventsday.php?d=${today}&l=${encodeURIComponent(league.name)}`;
+            console.log(`Primary day API key failed with 404 for ${league.name}, retrying with free key...`);
+            const dayFallbackResponse = await fetch(dayFallbackUrl);
+            if (dayFallbackResponse.ok) {
+              dayResponse = dayFallbackResponse;
+            } else {
+              console.error(`Fallback day API also failed for league ${league.name}: ${dayFallbackResponse.status}`);
+            }
+          }
+          
+          if (dayResponse.ok) {
+            const dayData = await dayResponse.json();
+            const dayEvents: SportsDbEvent[] = dayData.events || [];
+            console.log(`Got ${dayEvents.length} events today for ${league.name}`);
+            events = [...events, ...dayEvents];
+          }
+        } catch (dayError) {
+          console.error(`Error fetching today's events for league ${league.name}:`, dayError);
+        }
+        
+        console.log(`Total combined events for ${league.name}: ${events.length}`);
         
         // Process events (up to 10 per league for better coverage)
         const matchPromises = events.slice(0, 10).map(async (event): Promise<TransformedMatch> => {
