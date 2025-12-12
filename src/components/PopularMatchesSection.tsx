@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import SectionHeader from './SectionHeader';
 import { format } from 'date-fns';
 import TeamLogo from './TeamLogo';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { searchTeam, searchEvent } from '@/services/sportsLogoService';
 
 interface CDNChannel {
   id: string;
@@ -86,17 +87,65 @@ const PopularMatchCard: React.FC<{
   onClick: () => void;
 }> = ({ match, onClick }) => {
   const [imgError, setImgError] = useState({ home: false, away: false, poster: false });
+  const [fetchedPoster, setFetchedPoster] = useState<string | null>(null);
+  const [fetchedBadges, setFetchedBadges] = useState<{ home: string | null; away: string | null }>({ home: null, away: null });
   const countdown = useCountdown(match.timestamp);
   
   const hasStream = match.channels.length > 0;
 
+  // Fetch poster and badges if not provided
+  useEffect(() => {
+    const fetchImages = async () => {
+      // Try to get event poster first
+      if (!match.poster && match.homeTeam && match.awayTeam) {
+        try {
+          const eventData = await searchEvent(match.homeTeam, match.awayTeam);
+          if (eventData?.poster || eventData?.thumb) {
+            setFetchedPoster(eventData.poster || eventData.thumb);
+          }
+        } catch (e) {
+          console.log('Could not fetch event poster');
+        }
+      }
+
+      // Fetch team badges if not provided
+      if (!match.homeTeamBadge && match.homeTeam) {
+        try {
+          const homeTeamData = await searchTeam(match.homeTeam);
+          if (homeTeamData?.badge) {
+            setFetchedBadges(prev => ({ ...prev, home: homeTeamData.badge }));
+          }
+        } catch (e) {
+          console.log('Could not fetch home team badge');
+        }
+      }
+
+      if (!match.awayTeamBadge && match.awayTeam) {
+        try {
+          const awayTeamData = await searchTeam(match.awayTeam);
+          if (awayTeamData?.badge) {
+            setFetchedBadges(prev => ({ ...prev, away: awayTeamData.badge }));
+          }
+        } catch (e) {
+          console.log('Could not fetch away team badge');
+        }
+      }
+    };
+
+    fetchImages();
+  }, [match.homeTeam, match.awayTeam, match.poster, match.homeTeamBadge, match.awayTeamBadge]);
+
+  const posterToUse = match.poster || fetchedPoster;
+  const homeBadge = match.homeTeamBadge || fetchedBadges.home;
+  const awayBadge = match.awayTeamBadge || fetchedBadges.away;
+
   const generateThumbnail = () => {
     // Priority 1: Use poster/thumb image
-    if (match.poster && !imgError.poster) {
+    if (posterToUse && !imgError.poster) {
       return (
         <div className="w-full h-full relative bg-black">
           <img
-            src={match.poster}
+            src={posterToUse}
             alt={match.title}
             className="w-full h-full object-cover"
             loading="lazy"
@@ -107,14 +156,14 @@ const PopularMatchCard: React.FC<{
     }
 
     // Priority 2: Use team badges with black background
-    if ((match.homeTeamBadge && !imgError.home) || (match.awayTeamBadge && !imgError.away)) {
+    if ((homeBadge && !imgError.home) || (awayBadge && !imgError.away)) {
       return (
         <div className="w-full h-full relative overflow-hidden bg-black">
           <div className="flex items-center gap-3 z-10 relative h-full justify-center">
-            {match.homeTeamBadge && !imgError.home ? (
+            {homeBadge && !imgError.home ? (
               <div className="flex flex-col items-center">
                 <img
-                  src={match.homeTeamBadge}
+                  src={homeBadge}
                   alt={match.homeTeam}
                   className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, home: true }))}
@@ -134,10 +183,10 @@ const PopularMatchCard: React.FC<{
               </div>
             )}
             <span className="text-white font-bold text-sm drop-shadow-sm">VS</span>
-            {match.awayTeamBadge && !imgError.away ? (
+            {awayBadge && !imgError.away ? (
               <div className="flex flex-col items-center">
                 <img
-                  src={match.awayTeamBadge}
+                  src={awayBadge}
                   alt={match.awayTeam}
                   className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, away: true }))}
@@ -419,12 +468,7 @@ const PopularMatchesSection: React.FC = () => {
   if (matches.length === 0 && !loading) {
     return (
       <section className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-foreground">Selected Matches</h2>
-          <a href="/schedule" className="text-sm text-primary hover:underline">
-            VIEW SCHEDULE →
-          </a>
-        </div>
+        <SectionHeader title="Selected Matches" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
         <div className="bg-card rounded-xl p-6 border border-border text-center">
           <p className="text-muted-foreground">No major matches live right now. Check back later!</p>
         </div>
@@ -435,20 +479,21 @@ const PopularMatchesSection: React.FC = () => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold text-foreground">Selected Matches</h2>
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-6 bg-primary rounded-full" />
+          <h2 className="text-lg md:text-xl font-bold text-foreground">Selected Matches</h2>
           {liveCount > 0 && (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
               {liveCount} LIVE
             </span>
           )}
         </div>
-        <a 
-          href="/schedule" 
-          className="text-sm text-primary hover:underline"
+        <Link 
+          to="/schedule" 
+          className="text-primary text-sm font-semibold hover:underline transition-colors"
         >
-          VIEW SCHEDULE →
-        </a>
+          VIEW SCHEDULE
+        </Link>
       </div>
       
       <div className="relative group">
