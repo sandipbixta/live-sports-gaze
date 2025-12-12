@@ -30,6 +30,7 @@ interface SelectedMatch {
   homeScore: string | null;
   awayScore: string | null;
   sport: string;
+  sportIcon: string;
   league: string;
   date: string;
   time: string;

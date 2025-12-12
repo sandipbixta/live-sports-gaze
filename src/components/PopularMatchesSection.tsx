@@ -23,6 +23,8 @@ interface PopularMatch {
   awayTeamBadge: string | null;
   homeScore: string | null;
   awayScore: string | null;
+  sport: string;
+  sportIcon: string;
   league: string;
   leagueId: string;
   date: string;
@@ -211,15 +213,15 @@ const PopularMatchCard: React.FC<{
 
         {/* Info Section */}
         <div className="p-2 flex flex-col gap-1 flex-1 bg-card">
-          {/* Sport • Tournament */}
+          {/* Sport Icon • Tournament */}
           <p className="text-[10px] text-muted-foreground truncate">
-            Football • {match.league}
+            {match.sportIcon || '⚽'} {match.league}
           </p>
           
           {/* Home Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <TeamLogo teamName={match.homeTeam} sport="Soccer" size="sm" showFallbackIcon={false} />
+              <TeamLogo teamName={match.homeTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
               <span className="text-xs font-medium text-foreground truncate">{match.homeTeam}</span>
             </div>
             {match.isLive && match.homeScore && (
@@ -232,7 +234,7 @@ const PopularMatchCard: React.FC<{
           {/* Away Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <TeamLogo teamName={match.awayTeam} sport="Soccer" size="sm" showFallbackIcon={false} />
+              <TeamLogo teamName={match.awayTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
               <span className="text-xs font-medium text-foreground truncate">{match.awayTeam}</span>
             </div>
             {match.isLive && match.awayScore && (
