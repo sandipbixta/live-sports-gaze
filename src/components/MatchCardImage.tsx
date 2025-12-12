@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTeamBadge, getEventPoster, getSportIcon, getSportThumbnail } from '../services/sportsImageService';
+import { searchTeam, searchEvent, getSportIcon } from '../services/sportsLogoService';
 
 interface MatchCardImageProps {
   poster?: string | null;
@@ -19,20 +19,20 @@ const MatchCardImage = ({ poster, homeTeam, awayTeam, sport, homeBadge, awayBadg
   useEffect(() => {
     // Fetch event poster if not provided
     if (!poster && homeTeam && awayTeam) {
-      getEventPoster(homeTeam, awayTeam).then(posterUrl => {
-        if (posterUrl) setEventPoster(posterUrl);
+      searchEvent(homeTeam, awayTeam).then(data => {
+        if (data) setEventPoster(data.thumb || data.banner || data.poster);
       });
     }
 
     // Fetch team logos if not provided
     if (!homeBadge && homeTeam) {
-      getTeamBadge(homeTeam).then(badge => {
-        if (badge) setHomeLogo(badge);
+      searchTeam(homeTeam).then(data => {
+        if (data) setHomeLogo(data.badge || data.logo);
       });
     }
     if (!awayBadge && awayTeam) {
-      getTeamBadge(awayTeam).then(badge => {
-        if (badge) setAwayLogo(badge);
+      searchTeam(awayTeam).then(data => {
+        if (data) setAwayLogo(data.badge || data.logo);
       });
     }
   }, [homeTeam, awayTeam, poster, homeBadge, awayBadge]);

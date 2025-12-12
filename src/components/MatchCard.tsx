@@ -6,7 +6,8 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
-import { getTeamBadge as fetchTeamBadge, getEventPoster, getSportIcon } from '../services/sportsImageService';
+import { getLogoAsync, getLogoUrl, getSportIcon } from '../services/sportsLogoService';
+import { sportsDbService } from '../services/sportsDbService';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
 import TeamLogo from './TeamLogo';
@@ -76,7 +77,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
       // Fetch poster if not exists
       if (!match.poster && home && away) {
         try {
-          const poster = await getEventPoster(home, away);
+          const event = await sportsDbService.searchEvent(home, away);
+          const poster = sportsDbService.getEventPoster(event, 'medium');
           if (poster) setSportsDbPoster(poster);
         } catch (error) {
           // Silent fail
@@ -85,20 +87,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
       // Fetch team logos if not provided in match data
       if (home && !match.teams?.home?.badge) {
-        fetchTeamBadge(home).then(logo => {
-          if (logo) setFetchedHomeBadge(logo);
-        });
+        const logo = await getLogoAsync(home, sport);
+        if (logo) setFetchedHomeBadge(logo);
       }
       
       if (away && !match.teams?.away?.badge) {
-        fetchTeamBadge(away).then(logo => {
-          if (logo) setFetchedAwayBadge(logo);
-        });
+        const logo = await getLogoAsync(away, sport);
+        if (logo) setFetchedAwayBadge(logo);
       }
     };
 
     fetchData();
-  }, [isVisible, match.poster, home, away, match.teams?.home?.badge, match.teams?.away?.badge]);
+  }, [isVisible, match.poster, home, away, match.teams?.home?.badge, match.teams?.away?.badge, sport]);
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
