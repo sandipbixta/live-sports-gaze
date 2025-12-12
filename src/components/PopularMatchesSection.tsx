@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import SectionHeader from './SectionHeader';
 import { format } from 'date-fns';
 import TeamLogo from './TeamLogo';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { X, Play, Tv, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface CDNChannel {
   id: string;
@@ -77,91 +76,7 @@ const useCountdown = (timestamp: string) => {
   return countdown;
 };
 
-// Stream Modal Component
-const StreamModal: React.FC<{
-  match: PopularMatch | null;
-  isOpen: boolean;
-  onClose: () => void;
-}> = ({ match, isOpen, onClose }) => {
-  const [selectedChannel, setSelectedChannel] = useState<CDNChannel | null>(null);
-  
-  useEffect(() => {
-    if (match && match.channels.length > 0) {
-      setSelectedChannel(match.channels[0]);
-    }
-  }, [match]);
-  
-  if (!match) return null;
-  
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl w-[95vw] p-0 bg-background border-border overflow-hidden">
-        <DialogHeader className="p-4 pb-2 border-b border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {match.isLive && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded animate-pulse">
-                  ● LIVE
-                </span>
-              )}
-              <DialogTitle className="text-lg font-bold">{match.title}</DialogTitle>
-            </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          {match.isLive && match.homeScore && match.awayScore && (
-            <div className="flex items-center justify-center gap-4 py-2">
-              <span className="font-bold text-2xl">{match.homeScore}</span>
-              <span className="text-muted-foreground">-</span>
-              <span className="font-bold text-2xl">{match.awayScore}</span>
-            </div>
-          )}
-        </DialogHeader>
-        
-        {/* Stream Player */}
-        <div className="aspect-video bg-black relative">
-          {selectedChannel ? (
-            <iframe
-              src={selectedChannel.embedUrl}
-              className="w-full h-full border-0"
-              allowFullScreen
-              allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <Tv className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Select a channel to start watching</p>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* Channel Selection */}
-        {match.channels.length > 1 && (
-          <div className="p-4 border-t border-border">
-            <p className="text-sm text-muted-foreground mb-2">Available Channels:</p>
-            <div className="flex flex-wrap gap-2">
-              {match.channels.map((channel) => (
-                <Button
-                  key={channel.id}
-                  variant={selectedChannel?.id === channel.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedChannel(channel)}
-                  className="text-xs"
-                >
-                  <Play className="w-3 h-3 mr-1" />
-                  {channel.name} ({channel.country})
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
+// Stream Modal Component removed - now navigates to dedicated match page
 
 // Match Card Component - styled like MatchCard.tsx
 const PopularMatchCard: React.FC<{ 
@@ -359,10 +274,10 @@ const MatchCardSkeleton: React.FC = () => (
 );
 
 const PopularMatchesSection: React.FC = () => {
+  const navigate = useNavigate();
   const [matches, setMatches] = useState<PopularMatch[]>([]);
   const [liveCount, setLiveCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState<PopularMatch | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -510,18 +425,11 @@ const PopularMatchesSection: React.FC = () => {
             <PopularMatchCard 
               key={match.id} 
               match={match} 
-              onClick={() => setSelectedMatch(match)}
+              onClick={() => navigate(`/selected-match/${match.id}`)}
             />
           ))}
         </div>
       </div>
-      
-      {/* Stream Modal */}
-      <StreamModal
-        match={selectedMatch}
-        isOpen={selectedMatch !== null}
-        onClose={() => setSelectedMatch(null)}
-      />
     </section>
   );
 };
