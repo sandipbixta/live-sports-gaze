@@ -25,6 +25,7 @@ import { manualMatches } from '../data/manualMatches';
 
 import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
+import PopularMatchesSection from '../components/PopularMatchesSection';
 import FinishedMatches from '../components/FinishedMatches';
 
 // Lazy load heavy components
@@ -234,6 +235,9 @@ const Index = () => {
 
         {/* Finished Match Results */}
         <FinishedMatches />
+
+        {/* Selected/Popular Matches from TheSportsDB */}
+        <PopularMatchesSection />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
