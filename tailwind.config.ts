@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -15,10 +14,18 @@ export default {
       center: true,
       padding: '1rem',
       screens: {
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
         '2xl': '1400px'
       }
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -27,7 +34,8 @@ export default {
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))'
+          foreground: 'hsl(var(--primary-foreground))',
+          glow: 'hsl(var(--primary-glow))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
@@ -51,7 +59,18 @@ export default {
         },
         card: {
           DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))'
+          foreground: 'hsl(var(--card-foreground))',
+          hover: 'hsl(var(--card-hover))',
+        },
+        // Status colors
+        live: 'hsl(var(--live))',
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        // Sports specific
+        sports: {
+          live: 'hsl(var(--sports-live))',
+          upcoming: 'hsl(var(--sports-upcoming))',
+          finished: 'hsl(var(--sports-finished))',
         },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
@@ -63,49 +82,55 @@ export default {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))'
         },
-        // FanCode-inspired sports colors
-        sports: {
-          primary: 'hsl(var(--sports-primary))',
-          secondary: 'hsl(var(--sports-secondary))',
-          accent: 'hsl(var(--sports-accent))',
-          dark: 'hsl(var(--sports-dark))',
-          light: 'hsl(var(--sports-light))',
-        },
-        section: {
-          accent: 'hsl(var(--section-accent))'
-        }
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        sm: 'calc(var(--radius) - 4px)',
+        xl: 'calc(var(--radius) + 4px)',
+        '2xl': 'calc(var(--radius) + 8px)',
+      },
+      boxShadow: {
+        'glow': 'var(--shadow-glow)',
+        'card': 'var(--shadow-md)',
       },
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0'
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)'
-          }
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' }
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)'
-          },
-          to: {
-            height: '0'
-          }
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' }
         },
-        'pulse-subtle': {
+        'pulse-live': {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' }
+          '50%': { opacity: '0.5' }
+        },
+        'slide-in-right': {
+          from: { transform: 'translateX(100%)', opacity: '0' },
+          to: { transform: 'translateX(0)', opacity: '1' }
+        },
+        'slide-in-up': {
+          from: { transform: 'translateY(20px)', opacity: '0' },
+          to: { transform: 'translateY(0)', opacity: '1' }
+        },
+        'shimmer': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' }
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'pulse-subtle': 'pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        'pulse-live': 'pulse-live 1.5s ease-in-out infinite',
+        'slide-in-right': 'slide-in-right 0.3s ease-out',
+        'slide-in-up': 'slide-in-up 0.4s ease-out',
+        'shimmer': 'shimmer 2s linear infinite',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
       }
     }
   },
