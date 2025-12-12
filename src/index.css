@@ -1,3 +1,4 @@
+
 @import url('./components/ui/animations.css');
 @tailwind base;
 @tailwind components;
@@ -6,24 +7,24 @@
 @layer base {
   :root {
     /* Dark mode colors (default) - FanCode inspired deep navy */
-    --background: 222 22% 5%;
+    --background: 220 20% 7%;
     --foreground: 210 40% 98%;
-    --card: 222 20% 8%;
+    --card: 220 18% 10%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 22% 5%;
+    --popover: 220 20% 7%;
     --popover-foreground: 210 40% 98%;
     --primary: 24 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 18% 12%;
+    --primary-foreground: 220 20% 7%;
+    --secondary: 220 18% 14%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 222 18% 12%;
+    --muted: 220 18% 14%;
     --muted-foreground: 215 20% 55%;
     --accent: 24 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 222 14% 16%;
-    --input: 222 18% 12%;
+    --accent-foreground: 220 20% 7%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 14% 18%;
+    --input: 220 18% 14%;
     --ring: 24 100% 50%;
     --chart-1: 24 100% 50%;
     --chart-2: 160 60% 45%;
@@ -31,45 +32,45 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     
-    /* Sports-specific colors */
+    /* Sports-specific colors - FanCode orange */
     --sports-primary: 24 100% 50%;
-    --sports-secondary: 222 18% 12%;
+    --sports-secondary: 220 18% 14%;
     --sports-accent: 24 100% 50%;
-    --sports-dark: 222 22% 5%;
+    --sports-dark: 220 20% 7%;
     --sports-light: 210 40% 98%;
     
+    /* Section accent */
     --section-accent: 24 100% 50%;
-    
-    --radius: 0.75rem;
   }
 
   .light {
     /* Light mode colors */
-    --background: 0 0% 100%;
-    --foreground: 222 22% 10%;
-    --card: 0 0% 98%;
-    --card-foreground: 222 22% 10%;
+    --background: 210 20% 98%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 22% 10%;
+    --popover-foreground: 220 20% 10%;
     --primary: 24 100% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 22% 10%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8% 46%;
+    --secondary: 210 20% 94%;
+    --secondary-foreground: 220 20% 10%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 47%;
     --accent: 24 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 24 100% 50%;
     
+    /* Sports colors for light mode */
     --sports-primary: 24 100% 50%;
-    --sports-secondary: 220 14% 96%;
+    --sports-secondary: 210 20% 94%;
     --sports-accent: 24 100% 50%;
-    --sports-dark: 0 0% 100%;
-    --sports-light: 222 22% 10%;
+    --sports-dark: 210 20% 98%;
+    --sports-light: 220 20% 10%;
     
     --section-accent: 24 100% 50%;
   }
@@ -80,17 +81,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-  }
-  
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
+    @apply bg-background text-foreground;
   }
 }
 
 @layer utilities {
-  /* Fade in animation */
+  /* Fade in animation for viewer counts */
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -106,7 +102,7 @@
     animation: fadeIn 0.5s ease-out forwards;
   }
 
-  /* Scale in animation */
+  /* Scale in animation for popular badges */
   @keyframes scaleIn {
     from {
       transform: scale(0.8);
@@ -122,7 +118,7 @@
     animation: scaleIn 0.3s ease-out forwards;
   }
 
-  /* Glow pulse animation */
+  /* Glow pulse animation for HOT badges */
   @keyframes glowPulse {
     0%, 100% {
       box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
@@ -136,7 +132,7 @@
     animation: glowPulse 2s ease-in-out infinite;
   }
 
-  /* Counter animation */
+  /* Counter increment animation */
   @keyframes counterUp {
     from {
       opacity: 0.5;
@@ -149,33 +145,14 @@
   .animate-counter-up {
     animation: counterUp 0.5s ease-out;
   }
-  
-  /* Pulse glow for live indicators */
-  @keyframes pulseGlow {
-    0%, 100% {
-      box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.4);
-    }
-    50% {
-      box-shadow: 0 0 0 8px hsl(var(--destructive) / 0);
-    }
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 2s infinite;
-  }
 
   /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
   
   .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Glass effect */
-  .glass {
-    @apply bg-background/80 backdrop-blur-md;
+    display: none;  /* Chrome, Safari and Opera */
   }
 }
