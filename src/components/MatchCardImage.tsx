@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { searchTeam, searchEvent, getSportIcon } from '../services/sportsLogoService';
+import { searchTeam, searchEvent, getSportIcon, getSportImage } from '../services/sportsLogoService';
 
 interface MatchCardImageProps {
   poster?: string | null;
@@ -80,13 +80,25 @@ const MatchCardImage = ({ poster, homeTeam, awayTeam, sport, homeBadge, awayBadg
     );
   }
 
-  // DamiTV fallback
+  // DamiTV fallback with sport image
+  const sportImage = getSportImage(sport || 'soccer');
+  
   return (
-    <div className="relative w-full h-40 bg-gradient-to-br from-primary/20 via-background to-muted flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-4xl mb-2">{getSportIcon(sport || 'sports')}</div>
-        <h3 className="text-xl font-bold text-foreground">DAMITV</h3>
-        <p className="text-muted-foreground text-xs">Live Sports</p>
+    <div className="relative w-full h-40 overflow-hidden">
+      {sportImage ? (
+        <>
+          <img src={sportImage} alt={sport || 'Sport'} className="w-full h-full object-cover opacity-60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+        </>
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-primary/20 via-background to-muted" />
+      )}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-2">{getSportIcon(sport || 'sports')}</div>
+          <h3 className="text-xl font-bold text-white drop-shadow-lg">DAMITV</h3>
+          <p className="text-white/70 text-xs">Live Sports</p>
+        </div>
       </div>
     </div>
   );
