@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Play, Tv, Users, Calendar, MapPin, Loader, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Play, Tv, Calendar, MapPin, Loader, Settings, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import TeamLogo from '@/components/TeamLogo';
 import { format } from 'date-fns';
-import MainNav from '@/components/MainNav';
-import Footer from '@/components/Footer';
-import MobileBottomNav from '@/components/MobileBottomNav';
+import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
+import TelegramBanner from '@/components/TelegramBanner';
+import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
 interface CDNChannel {
   id: string;
@@ -55,9 +56,14 @@ interface SelectedMatch {
 
 const SelectedMatchPlayer = () => {
   const { matchId } = useParams();
+  const navigate = useNavigate();
+  const playerRef = useRef<HTMLDivElement>(null);
+  
   const [match, setMatch] = useState<SelectedMatch | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
+  const [playerType, setPlayerType] = useState<PlayerType>('simple');
+  const [showPlayerSettings, setShowPlayerSettings] = useState(false);
 
   useEffect(() => {
     const fetchMatch = async () => {
@@ -93,247 +99,357 @@ const SelectedMatchPlayer = () => {
     fetchMatch();
   }, [matchId]);
 
+  // Scroll to player when channel is selected
+  useEffect(() => {
+    if (selectedChannel && playerRef.current) {
+      playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [selectedChannel]);
+
+  const handleChannelChange = (channel: BroadcastChannel) => {
+    triggerStreamChangeAd();
+    setSelectedChannel(channel);
+  };
+
+  const handleRetry = () => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1000);
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <MainNav />
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-[#0A0F1C] flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader className="w-12 h-12 animate-spin text-[#ff5a36] mx-auto mb-4" />
+          <p>Loading match...</p>
         </div>
-        <MobileBottomNav />
       </div>
     );
   }
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-background">
-        <MainNav />
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Match Not Found</h1>
-          <p className="text-muted-foreground mb-6">The match you're looking for is not available.</p>
-          <Link to="/">
-            <Button>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-        <MobileBottomNav />
+      <div className="min-h-screen bg-[#0A0F1C] flex flex-col items-center justify-center text-white">
+        <h1 className="text-2xl font-bold mb-4">Match Not Found</h1>
+        <p className="text-gray-400 mb-6">The match you're looking for is not available.</p>
+        <Link to="/">
+          <Button className="bg-[#ff5a36] hover:bg-[#ff5a36]/90">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Home
+          </Button>
+        </Link>
       </div>
     );
   }
 
   const matchDate = new Date(match.timestamp);
   const streamableChannels = match.channels?.filter(ch => ch.cdnChannel) || [];
-  const allBroadcastChannels = match.channels || [];
+
+  // Create stream object for player
+  const currentStream = selectedChannel?.cdnChannel ? {
+    id: selectedChannel.cdnChannel.id,
+    streamNo: 1,
+    language: selectedChannel.language || 'English',
+    hd: true,
+    embedUrl: selectedChannel.cdnChannel.embedUrl,
+    source: selectedChannel.name
+  } : null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#0A0F1C] text-white">
       <Helmet>
         <title>{match.title} - Watch Live | DamiTV</title>
-        <meta name="description" content={`Watch ${match.title} live stream. ${match.league} match available on DamiTV with multiple broadcast channels.`} />
+        <meta name="description" content={`Watch ${match.title} live stream. ${match.league} match available on DamiTV.`} />
       </Helmet>
-      
-      <MainNav />
-      
-      <main className="container mx-auto px-4 py-6 pb-24 md:pb-6">
-        {/* Back Button */}
-        <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Link>
 
-        {/* Match Header */}
-        <div className="bg-card rounded-xl overflow-hidden mb-6">
-          {/* Banner/Poster */}
-          {match.poster && (
-            <div className="aspect-video max-h-[300px] overflow-hidden">
-              <img 
-                src={match.poster} 
-                alt={match.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+      {/* Header */}
+      <div className="sticky top-0 z-50 bg-[#0A0F1C]/95 backdrop-blur-sm border-b border-[#343a4d]">
+        <div className="flex items-center justify-between p-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="text-white hover:bg-[#242836]"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back
+          </Button>
           
-          {/* Match Info */}
-          <div className="p-6">
-            {/* League & Status */}
-            <div className="flex items-center gap-3 mb-4">
-              <Badge variant="secondary" className="text-xs">
+          <div className="flex-1 text-center">
+            <h1 className="text-sm md:text-lg font-bold text-white truncate px-2">{match.title}</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {currentStream && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPlayerSettings(!showPlayerSettings)}
+                className="text-white hover:bg-[#242836]"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            )}
+            {match.isLive && (
+              <Badge className="bg-red-500 text-white text-xs animate-pulse">
+                ● LIVE
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Telegram Banner */}
+      <div className="px-4 pt-4">
+        <TelegramBanner />
+      </div>
+
+      {/* Player Settings Panel */}
+      {showPlayerSettings && currentStream && (
+        <div className="px-4 pb-4">
+          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+            <h3 className="text-white font-semibold mb-3">Video Player Settings</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working option' },
+                { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Shows provider controls' },
+                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls' },
+                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe' },
+              ].map((player) => (
+                <button
+                  key={player.type}
+                  onClick={() => setPlayerType(player.type)}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    playerType === player.type
+                      ? 'bg-[#ff5a36] border-[#ff5a36] text-white'
+                      : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d]'
+                  }`}
+                >
+                  <div className="font-medium text-sm">{player.name}</div>
+                  <div className="text-xs text-gray-400 mt-1">{player.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Player */}
+      {currentStream ? (
+        <div ref={playerRef} className="w-full">
+          <ChannelPlayerSelector
+            stream={currentStream}
+            isLoading={false}
+            onRetry={handleRetry}
+            playerType={playerType}
+            title={`${match.homeTeam} vs ${match.awayTeam}`}
+          />
+        </div>
+      ) : (
+        <div className="px-4 py-8">
+          <div className="bg-[#151922] rounded-xl p-8 text-center border border-[#343a4d]">
+            <Tv className="w-16 h-16 mx-auto text-gray-500 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">No Stream Selected</h3>
+            <p className="text-gray-400 mb-4">
+              {streamableChannels.length > 0 
+                ? 'Select a channel below to start watching'
+                : 'No streams available for this match yet'}
+            </p>
+            {streamableChannels.length === 0 && (
+              <Link to="/live">
+                <Button className="bg-[#ff5a36] hover:bg-[#ff5a36]/90">
+                  <Tv className="w-4 h-4 mr-2" />
+                  Browse All Live Streams
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col lg:flex-row gap-4 p-4">
+        {/* Left Column - Match Info & Stream Sources */}
+        <div className="flex-1 space-y-4">
+          {/* Match Info Card */}
+          <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+            {/* League Info */}
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant="secondary" className="bg-[#242836] text-gray-300 text-xs">
                 {match.sport}
               </Badge>
-              <span className="text-muted-foreground text-sm">{match.league}</span>
-              {match.isLive && (
-                <Badge className="bg-red-500 text-white animate-pulse">
-                  ● LIVE
-                </Badge>
-              )}
-              {streamableChannels.length > 0 && !match.isLive && (
-                <Badge className="bg-green-500 text-white">
-                  FREE
-                </Badge>
-              )}
+              <span className="text-gray-400 text-sm">{match.league}</span>
             </div>
 
             {/* Teams */}
-            <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
               {/* Home Team */}
               <div className="flex-1 text-center">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-2">
                   {match.homeTeamBadge ? (
                     <img 
                       src={match.homeTeamBadge} 
                       alt={match.homeTeam}
-                      className="w-20 h-20 object-contain"
+                      className="w-16 h-16 object-contain"
                     />
                   ) : (
                     <TeamLogo teamName={match.homeTeam} sport={match.sport} size="lg" />
                   )}
-                  <h2 className="text-lg font-bold text-foreground">{match.homeTeam}</h2>
+                  <h2 className="text-sm font-bold text-white">{match.homeTeam}</h2>
                 </div>
               </div>
 
               {/* Score or VS */}
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-1">
                 {match.isLive && match.homeScore !== null && match.awayScore !== null ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl font-bold text-foreground">{match.homeScore}</span>
-                    <span className="text-2xl text-muted-foreground">-</span>
-                    <span className="text-4xl font-bold text-foreground">{match.awayScore}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-3xl font-bold text-white">{match.homeScore}</span>
+                    <span className="text-xl text-gray-500">-</span>
+                    <span className="text-3xl font-bold text-white">{match.awayScore}</span>
                   </div>
                 ) : (
-                  <span className="text-2xl font-bold text-muted-foreground">VS</span>
+                  <span className="text-xl font-bold text-gray-500">VS</span>
                 )}
                 {match.progress && match.isLive && (
-                  <span className="text-sm text-red-500">{match.progress}</span>
+                  <span className="text-xs text-red-500">{match.progress}</span>
                 )}
               </div>
 
               {/* Away Team */}
               <div className="flex-1 text-center">
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-2">
                   {match.awayTeamBadge ? (
                     <img 
                       src={match.awayTeamBadge} 
                       alt={match.awayTeam}
-                      className="w-20 h-20 object-contain"
+                      className="w-16 h-16 object-contain"
                     />
                   ) : (
                     <TeamLogo teamName={match.awayTeam} sport={match.sport} size="lg" />
                   )}
-                  <h2 className="text-lg font-bold text-foreground">{match.awayTeam}</h2>
+                  <h2 className="text-sm font-bold text-white">{match.awayTeam}</h2>
                 </div>
               </div>
             </div>
 
-            {/* Match Details */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                <span>{format(matchDate, 'EEE, do MMM yyyy, h:mm a')}</span>
+            {/* Match Time & Venue */}
+            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                <span>{format(matchDate, 'EEE, do MMM, h:mm a')}</span>
               </div>
               {match.venue && (
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
                   <span>{match.venue}</span>
                 </div>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Stream Links Section */}
-        <div className="bg-card rounded-xl p-6 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Tv className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold text-foreground">Stream Links</h3>
-            {streamableChannels.length > 0 && (
-              <Badge variant="secondary">{streamableChannels.length} available</Badge>
-            )}
-          </div>
+          {/* Stream Links */}
+          {streamableChannels.length > 0 && (
+            <div className="bg-[#151922] rounded-xl p-4 border border-[#343a4d]">
+              <div className="flex items-center gap-2 mb-4">
+                <Tv className="w-5 h-5 text-[#ff5a36]" />
+                <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+                <Badge className="bg-green-500/20 text-green-400 text-xs">
+                  {streamableChannels.length} available
+                </Badge>
+              </div>
 
-          {streamableChannels.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {streamableChannels.map((channel, index) => (
-                <Link
-                  key={channel.id || index}
-                  to={`/channel/${channel.cdnChannel?.country}/${channel.cdnChannel?.id}`}
-                  className="group"
-                >
-                  <Button
-                    variant="outline"
-                    className="w-full h-auto py-3 px-4 flex flex-col items-center gap-2 bg-background hover:bg-primary/10 hover:border-primary transition-all"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                      <Play className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm font-medium truncate max-w-full">
-                      {channel.name}
-                    </span>
-                    {channel.country && (
-                      <span className="text-xs text-muted-foreground">
-                        {channel.country}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {streamableChannels.map((channel, index) => {
+                  const isActive = selectedChannel?.id === channel.id;
+                  return (
+                    <Button
+                      key={channel.id || index}
+                      variant="outline"
+                      onClick={() => handleChannelChange(channel)}
+                      className={`h-auto py-3 px-4 flex flex-col items-center gap-1 transition-all ${
+                        isActive
+                          ? 'bg-[#ff5a36] border-[#ff5a36] text-white hover:bg-[#ff5a36]/90'
+                          : 'bg-[#242836] border-[#343a4d] text-white hover:bg-[#343a4d] hover:border-[#ff5a36]/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-green-500'} animate-pulse`} />
+                        <Play className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-medium truncate max-w-full">
+                        {channel.name}
                       </span>
-                    )}
-                  </Button>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No direct streams available for this match yet.</p>
-              <Link to="/live">
-                <Button>
-                  <Tv className="w-4 h-4 mr-2" />
-                  Browse All Live Streams
-                </Button>
-              </Link>
+                      {channel.country && (
+                        <span className="text-[10px] text-gray-400">
+                          {channel.country}
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
 
-        {/* All Broadcast Channels */}
-        {allBroadcastChannels.length > 0 && (
-          <div className="bg-card rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <ExternalLink className="w-5 h-5 text-muted-foreground" />
-              <h3 className="text-lg font-semibold text-foreground">All Broadcast Channels</h3>
-            </div>
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {allBroadcastChannels.map((channel, index) => (
-                <div
-                  key={channel.id || index}
-                  className={`p-3 rounded-lg border ${
-                    channel.cdnChannel 
-                      ? 'border-green-500/30 bg-green-500/5' 
-                      : 'border-border bg-muted/30'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    {channel.cdnChannel && (
-                      <span className="w-2 h-2 rounded-full bg-green-500" title="Stream available" />
-                    )}
-                    <span className="text-sm font-medium text-foreground truncate">
-                      {channel.name}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {channel.country}
-                    {channel.language && ` • ${channel.language}`}
-                  </div>
+        {/* Right Column - All Channels Sidebar */}
+        {match.channels && match.channels.length > 0 && (
+          <div className="lg:w-80">
+            <div className="bg-[#151922] rounded-xl border border-[#343a4d] overflow-hidden">
+              <div className="p-4 border-b border-[#343a4d]">
+                <h3 className="font-semibold text-white text-sm">All Broadcast Channels</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  {streamableChannels.length} with streams • {match.channels.length} total
+                </p>
+              </div>
+              
+              <ScrollArea className="h-[400px]">
+                <div className="p-2">
+                  {match.channels.map((channel, index) => {
+                    const hasStream = !!channel.cdnChannel;
+                    const isActive = selectedChannel?.id === channel.id;
+                    
+                    return (
+                      <div
+                        key={channel.id || index}
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors group ${
+                          isActive 
+                            ? 'bg-[#ff5a36]/20 border border-[#ff5a36]' 
+                            : hasStream 
+                              ? 'hover:bg-[#242836]' 
+                              : 'opacity-50'
+                        }`}
+                        onClick={() => hasStream && handleChannelChange(channel)}
+                      >
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          hasStream ? 'bg-green-500' : 'bg-gray-600'
+                        }`} />
+                        
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-sm font-medium truncate transition-colors ${
+                            isActive ? 'text-[#ff5a36]' : hasStream ? 'text-white group-hover:text-[#ff5a36]' : 'text-gray-500'
+                          }`}>
+                            {channel.name}
+                          </h4>
+                          <p className="text-xs text-gray-500">
+                            {channel.country}
+                            {channel.language && ` • ${channel.language}`}
+                          </p>
+                        </div>
+                        
+                        {hasStream && (
+                          <ChevronRight className={`h-4 w-4 transition-colors ${
+                            isActive ? 'text-[#ff5a36]' : 'text-gray-400 group-hover:text-[#ff5a36]'
+                          }`} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              </ScrollArea>
             </div>
           </div>
         )}
-      </main>
-
-      <Footer />
-      <MobileBottomNav />
+      </div>
     </div>
   );
 };
