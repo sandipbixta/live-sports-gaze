@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Match } from '../types/sports';
 import { isMatchLive } from '../utils/matchUtils';
-import { getLogoAsync, getLogoUrl, getSportIcon } from '../services/sportsLogoService';
+import { getLogoAsync, getLogoUrl, getSportIcon, getSportImage } from '../services/sportsLogoService';
 import { sportsDbService } from '../services/sportsDbService';
 import { ViewerCount } from './ViewerCount';
 import { LiveViewerCount } from './LiveViewerCount';
@@ -253,6 +253,18 @@ const MatchCard: React.FC<MatchCardProps> = ({
     `;
 
     const defaultImageHTML = () => {
+      const sportImage = getSportImage(sport || match.category || 'soccer');
+      if (sportImage) {
+        return `
+          <div class="w-full h-full relative overflow-hidden bg-black">
+            <img src="${sportImage}" alt="${sport || 'Sport'}" class="w-full h-full object-cover opacity-60" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute inset-0 flex items-center justify-center z-10">
+              <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
+            </div>
+          </div>
+        `;
+      }
       return `
         <div class="w-full h-full relative overflow-hidden bg-black">
           <div class="absolute inset-0 flex items-center justify-center z-10">
@@ -333,9 +345,17 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use plain black background with DAMITV text for matches without logos/badges or posters
+    // Priority 3: Use sport image background with DAMITV text for matches without logos/badges or posters
+    const sportImage = getSportImage(sport || match.category || 'soccer');
+    
     return (
       <div className="w-full h-full relative overflow-hidden bg-black">
+        {sportImage && (
+          <>
+            <img src={sportImage} alt={sport || 'Sport'} className="w-full h-full object-cover opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          </>
+        )}
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
