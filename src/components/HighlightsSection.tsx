@@ -3,6 +3,7 @@ import { Play, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SectionHeader from './SectionHeader';
 import TeamLogo from './TeamLogo';
+import HighlightVideoModal from './HighlightVideoModal';
 
 interface HighlightEvent {
   idEvent: string;
@@ -16,6 +17,7 @@ interface HighlightEvent {
   strLeague: string;
   dateEvent: string;
   strSport: string;
+  leagueName?: string;
 }
 
 interface LeagueHighlights {
@@ -41,6 +43,8 @@ const HighlightsSection: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLeague, setSelectedLeague] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [selectedHighlight, setSelectedHighlight] = useState<HighlightEvent | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchHighlights = useCallback(async () => {
     setLoading(true);
@@ -109,6 +113,11 @@ const HighlightsSection: React.FC = () => {
     lh.highlights.map(h => ({ ...h, leagueName: lh.leagueName }))
   );
 
+  // All highlights for recommendations (not filtered)
+  const allHighlightsForRecommendations = leagueHighlights.flatMap(lh => 
+    lh.highlights.map(h => ({ ...h, leagueName: lh.leagueName }))
+  );
+
   const extractYoutubeId = (url: string): string | null => {
     if (!url) return null;
     const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s]+)/);
@@ -121,6 +130,17 @@ const HighlightsSection: React.FC = () => {
       return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
     }
     return null;
+  };
+
+  const handleCardClick = (highlight: HighlightEvent, hasVideo: boolean) => {
+    if (hasVideo) {
+      setSelectedHighlight(highlight);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleSelectHighlight = (highlight: HighlightEvent) => {
+    setSelectedHighlight(highlight);
   };
 
   return (
@@ -201,12 +221,10 @@ const HighlightsSection: React.FC = () => {
             const hasVideo = highlight.strVideo && highlight.strVideo.trim() !== '';
             
             return (
-              <a
+              <div
                 key={highlight.idEvent}
-                href={highlight.strVideo || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group cursor-pointer h-full"
+                onClick={() => handleCardClick(highlight, hasVideo)}
+                className={`group h-full ${hasVideo ? 'cursor-pointer' : 'cursor-default'}`}
               >
                 <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
                   {/* Banner Image Section */}
@@ -245,7 +263,7 @@ const HighlightsSection: React.FC = () => {
                   <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
                     {/* Sport • League */}
                     <p className="text-xs text-muted-foreground truncate">
-                      football • {(highlight as any).leagueName}
+                      football • {highlight.leagueName}
                     </p>
                     
                     {/* Home Team with Score */}
@@ -289,11 +307,20 @@ const HighlightsSection: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>
       )}
+
+      {/* Video Modal */}
+      <HighlightVideoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        highlight={selectedHighlight}
+        allHighlights={allHighlightsForRecommendations}
+        onSelectHighlight={handleSelectHighlight}
+      />
     </div>
   );
 };
