@@ -469,7 +469,7 @@ const PopularMatchesSection: React.FC = () => {
   if (loading) {
     return (
       <section className="mb-8">
-        <SectionHeader title="Selected Matches" />
+        <SectionHeader title="Popular Matches" />
         <div className="relative">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -484,7 +484,7 @@ const PopularMatchesSection: React.FC = () => {
   if (matches.length === 0 && !loading) {
     return (
       <section className="mb-8">
-        <SectionHeader title="Selected Matches" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
+        <SectionHeader title="Popular Matches" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
         <div className="bg-card rounded-xl p-6 border border-border text-center">
           <p className="text-muted-foreground">No major matches live right now. Check back later!</p>
         </div>
@@ -497,7 +497,7 @@ const PopularMatchesSection: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-1 h-6 bg-primary rounded-full" />
-          <h2 className="text-lg md:text-xl font-bold text-foreground">Selected Matches</h2>
+          <h2 className="text-lg md:text-xl font-bold text-foreground">Popular Matches</h2>
           {liveCount > 0 && (
             <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
               {liveCount} LIVE
