@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from './use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
@@ -7,8 +6,8 @@ import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/ma
 import { useLiveScoreUpdates } from './useLiveScoreUpdates';
 
 // LocalStorage cache keys
-const CACHE_KEY_MATCHES = 'damitv_matches_cache';
-const CACHE_KEY_SPORTS = 'damitv_sports_cache';
+const CACHE_KEY_MATCHES = 'damitv_matches_cache_v2';
+const CACHE_KEY_SPORTS = 'damitv_sports_cache_v2';
 const CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
 
 interface CachedData<T> {
@@ -49,7 +48,20 @@ const setCachedMatches = (all: Match[], live: Match[], upcoming: Match[]) => {
     };
     localStorage.setItem(CACHE_KEY_MATCHES, JSON.stringify(cacheData));
   } catch (e) {
-    console.warn('Failed to cache matches:', e);
+    // Storage full, try to clear old caches
+    try {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('cache_') || key.includes('_cache')) {
+          localStorage.removeItem(key);
+        }
+      });
+      localStorage.setItem(CACHE_KEY_MATCHES, JSON.stringify({
+        data: { all, live, upcoming },
+        timestamp: Date.now()
+      }));
+    } catch {
+      console.warn('Failed to cache matches');
+    }
   }
 };
 

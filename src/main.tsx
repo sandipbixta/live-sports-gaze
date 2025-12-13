@@ -3,6 +3,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import PerformanceOptimizer from './components/PerformanceOptimizer'
 
 // Register PWA service worker
 if ('serviceWorker' in navigator) {
@@ -25,6 +26,7 @@ if (!viewportMeta) {
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
+    <PerformanceOptimizer />
     <App />
   </React.StrictMode>
 );
