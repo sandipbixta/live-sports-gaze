@@ -313,17 +313,20 @@ export const searchPlayer = async (playerName: string): Promise<{
 };
 
 // ============================================
-// GET LIVESCORES (V2 Premium API)
+// GET LIVESCORES (via Edge Function)
 // ============================================
 
 export const getLivescores = async (sport: string = 'soccer'): Promise<any[]> => {
   try {
     const response = await fetch(
-      `${SPORTSDB_API_V2}/livescore/${sport}`,
+      `${import.meta.env.VITE_SUPABASE_URL || 'https://bnlyosmqvmmhpfissuqx.supabase.co'}/functions/v1/fetch-livescores`,
       {
+        method: 'POST',
         headers: {
-          'X-API-KEY': API_KEY
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJubHlvc21xdm1taHBmaXNzdXF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM3NzUzNzksImV4cCI6MjA0OTM1MTM3OX0.UQ8SXNpmAmhONfpAKNWNQE7RIOSeOKNB5_pw7o_4pzA'}`
         },
+        body: JSON.stringify({ sport }),
         signal: AbortSignal.timeout(10000)
       }
     );
@@ -331,7 +334,7 @@ export const getLivescores = async (sport: string = 'soccer'): Promise<any[]> =>
     if (!response.ok) return [];
 
     const data = await response.json();
-    return data.livescore || data.events || [];
+    return data.livescores || [];
   } catch (error) {
     console.error('Failed to get livescores:', error);
     return [];
