@@ -16,11 +16,13 @@ import MonetizationTracker from "./components/MonetizationTracker";
 import { queryClient } from "./lib/queryClient";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
-// Critical pages - load immediately
-import Index from "./pages/Index";
-import Live from "./pages/Live";
-import Match from "./pages/Match";
+// Only NotFound is critical - all other pages lazy loaded
 import NotFound from "./pages/NotFound";
+
+// Lazy load ALL pages including home for faster initial load
+const Index = lazy(() => import("./pages/Index"));
+const Live = lazy(() => import("./pages/Live"));
+const Match = lazy(() => import("./pages/Match"));
 
 // Lazy load non-critical pages for faster initial load
 const Schedule = lazy(() => import("./pages/Schedule"));
@@ -95,12 +97,12 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/" element={
                 <SEOPageTracker pageTitle="DamiTV - Free Live Football Streaming" contentType="home">
-                  <Index />
+                  <Suspense fallback={<PageLoader />}><Index /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/match/:sportId/:matchId" element={
                 <SEOPageTracker contentType="match">
-                  <Match />
+                  <Suspense fallback={<PageLoader />}><Match /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/manual-match/:matchId" element={
@@ -115,7 +117,7 @@ const App: React.FC = () => {
               } />
               <Route path="/live" element={
                 <SEOPageTracker pageTitle="Live Sports Streaming Now" contentType="live">
-                  <Live />
+                  <Suspense fallback={<PageLoader />}><Live /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/channels" element={

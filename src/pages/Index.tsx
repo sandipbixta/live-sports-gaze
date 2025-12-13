@@ -1,38 +1,37 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
 import { fetchSports, fetchMatches, fetchLiveMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches } from '../utils/matchUtils';
-import SportsList from '../components/SportsList';
-import MatchesList from '../components/MatchesList';
-import FeaturedMatches from '../components/FeaturedMatches';
-import AllSportsLiveMatches from '../components/AllSportsLiveMatches';
-import SectionHeader from '../components/SectionHeader';
-
-// Lazy load more components to reduce initial bundle
-
-const PromotionBoxes = React.lazy(() => import('../components/PromotionBoxes'));
 import { Separator } from '../components/ui/separator';
 import { Calendar, Tv } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PageLayout from '../components/PageLayout';
 import { isPopularLeague } from '../utils/popularLeagues';
-import { generateCompetitorTitle, generateCompetitorDescription } from '../utils/competitorSEO';
-import CompetitorSEOContent from '../components/CompetitorSEOContent';
 import { Helmet } from 'react-helmet-async';
 import { manualMatches } from '../data/manualMatches';
+import SectionHeader from '../components/SectionHeader';
 
-import HomepageContent from '../components/HomepageContent';
-import EmailSubscription from '../components/EmailSubscription';
-import PopularMatchesSection from '../components/PopularMatchesSection';
-import FinishedMatches from '../components/FinishedMatches';
-import LiveScoresTicker from '../components/LiveScoresTicker';
-import WeStreamLogos from '../components/WeStreamLogos';
+// Lazy load ALL heavy components for smaller initial bundle
+const SportsList = lazy(() => import('../components/SportsList'));
+const MatchesList = lazy(() => import('../components/MatchesList'));
+const FeaturedMatches = lazy(() => import('../components/FeaturedMatches'));
+const AllSportsLiveMatches = lazy(() => import('../components/AllSportsLiveMatches'));
+const PromotionBoxes = lazy(() => import('../components/PromotionBoxes'));
+const FeaturedChannels = lazy(() => import('../components/FeaturedChannels'));
+const TrendingTopics = lazy(() => import('../components/TrendingTopics'));
+const HomepageContent = lazy(() => import('../components/HomepageContent'));
+const EmailSubscription = lazy(() => import('../components/EmailSubscription'));
+const PopularMatchesSection = lazy(() => import('../components/PopularMatchesSection'));
+const LiveScoresTicker = lazy(() => import('../components/LiveScoresTicker'));
+const WeStreamLogos = lazy(() => import('../components/WeStreamLogos'));
+const CompetitorSEOContent = lazy(() => import('../components/CompetitorSEOContent'));
 
-// Lazy load heavy components
-const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
-const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
+// Simple loading placeholder
+const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
+  <div className={`${height} bg-card rounded-lg animate-pulse`} />
+);
 
 const Index = () => {
   const { toast } = useToast();
@@ -231,34 +230,42 @@ const Index = () => {
       </Helmet>
       
       {/* Live Scores Ticker */}
-      <LiveScoresTicker />
+      <Suspense fallback={<LoadingPlaceholder height="h-12" />}>
+        <LiveScoresTicker />
+      </Suspense>
 
       <main className="py-4">
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
 
         {/* Popular Matches from TheSportsDB */}
-        <PopularMatchesSection />
+        <Suspense fallback={<LoadingPlaceholder height="h-48" />}>
+          <PopularMatchesSection />
+        </Suspense>
 
-        <FeaturedMatches visibleManualMatches={visibleManualMatches} />
+        <Suspense fallback={<LoadingPlaceholder height="h-64" />}>
+          <FeaturedMatches visibleManualMatches={visibleManualMatches} />
+        </Suspense>
 
         {/* Live TV Channels Carousel */}
         <div className="mb-8">
           <SectionHeader title="Watch Live" seeAllLink="/live" />
-          <React.Suspense fallback={<div className="h-32 bg-card rounded-lg animate-pulse" />}>
+          <Suspense fallback={<LoadingPlaceholder />}>
             <FeaturedChannels />
-          </React.Suspense>
+          </Suspense>
         </div>
 
         {/* Featured Sports */}
         <div className="mb-8">
           <SectionHeader title="Featured Sports" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
-          <SportsList 
-            sports={sports}
-            onSelectSport={handleSelectSport}
-            selectedSport={selectedSport}
-            isLoading={loadingSports}
-          />
+          <Suspense fallback={<LoadingPlaceholder height="h-20" />}>
+            <SportsList 
+              sports={sports}
+              onSelectSport={handleSelectSport}
+              selectedSport={selectedSport}
+              isLoading={loadingSports}
+            />
+          </Suspense>
         </div>
             
         <Separator className="my-8 bg-border" />
@@ -269,7 +276,9 @@ const Index = () => {
               {selectedSport === 'all' ? (
                 <div>
                   <SectionHeader title="Live Matches - All Sports" seeAllLink="/live" />
-                  <AllSportsLiveMatches searchTerm={searchTerm} />
+                  <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
+                    <AllSportsLiveMatches searchTerm={searchTerm} />
+                  </Suspense>
                 </div>
               ) : (
                 <>
@@ -279,11 +288,13 @@ const Index = () => {
                   <p className="text-muted-foreground text-sm mb-4">
                     {filteredMatches.length} matches available
                   </p>
-                  <MatchesList
-                    matches={filteredMatches}
-                    sportId={selectedSport}
-                    isLoading={loadingMatches}
-                  />
+                  <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
+                    <MatchesList
+                      matches={filteredMatches}
+                      sportId={selectedSport}
+                      isLoading={loadingMatches}
+                    />
+                  </Suspense>
                 </>
               )}
             </>
@@ -291,21 +302,25 @@ const Index = () => {
         </div>
             
         <div className="mb-8">
-          <WeStreamLogos />
+          <Suspense fallback={<LoadingPlaceholder height="h-16" />}>
+            <WeStreamLogos />
+          </Suspense>
         </div>
         
         <div className="mb-8">
-          <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
+          <Suspense fallback={<LoadingPlaceholder height="h-48" />}>
             <TrendingTopics />
-          </React.Suspense>
+          </Suspense>
         </div>
             
-        <React.Suspense fallback={<div className="h-24 bg-card rounded-lg animate-pulse" />}>
+        <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
           <PromotionBoxes />
-        </React.Suspense>
+        </Suspense>
             
-            {/* Hidden SEO content for competitor targeting */}
-            <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
+        {/* Hidden SEO content for competitor targeting */}
+        <Suspense fallback={null}>
+          <CompetitorSEOContent showFAQ={true} showCompetitorMentions={true} />
+        </Suspense>
             
         {/* Call to Action Section */}
         <section className="mb-6 sm:mb-8 mt-8">
@@ -381,17 +396,23 @@ const Index = () => {
         </section>
 
         {/* SEO Content - Competitor keywords */}
-        <CompetitorSEOContent />
+        <Suspense fallback={null}>
+          <CompetitorSEOContent />
+        </Suspense>
         
         {/* Email Subscription Section */}
         <section className="container mx-auto px-4 py-12">
           <div className="max-w-2xl mx-auto">
-            <EmailSubscription />
+            <Suspense fallback={<LoadingPlaceholder height="h-32" />}>
+              <EmailSubscription />
+            </Suspense>
           </div>
         </section>
         
         {/* Rich Homepage Content for AdSense Approval */}
-        <HomepageContent />
+        <Suspense fallback={null}>
+          <HomepageContent />
+        </Suspense>
       </main>
     </PageLayout>
   );

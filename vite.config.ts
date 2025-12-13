@@ -10,6 +10,42 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core - essential for all pages
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          
+          // Radix UI components - loaded on demand
+          'ui-radix': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-toast',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-select',
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-scroll-area',
+          ],
+          
+          // Query/State management
+          'query': ['@tanstack/react-query'],
+          
+          // Date utilities
+          'date-utils': ['date-fns'],
+          
+          // Charts - only loaded on analytics pages
+          'charts': ['recharts'],
+          
+          // Video player
+          'video': ['hls.js'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+  },
   plugins: [
     react(),
     mode === 'development' &&
