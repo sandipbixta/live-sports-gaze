@@ -87,7 +87,7 @@ const MatchCardImage = ({ poster, homeTeam, awayTeam, sport, homeBadge, awayBadg
       <img 
         src={fallbackBg} 
         alt="" 
-        className="absolute inset-0 w-full h-full object-cover opacity-30"
+        className="absolute inset-0 w-full h-full object-cover opacity-60"
       />
       <div className="relative text-center z-10">
         <div className="text-4xl mb-2">{getSportIcon(sport || 'sports')}</div>
