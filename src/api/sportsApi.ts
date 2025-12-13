@@ -1,10 +1,12 @@
 
 import { Sport, Match, Stream, Source } from '../types/sports';
 import { enhanceMatchesWithLogos, enhanceMatchWithLogos } from '../services/teamLogoService';
+import { getLiveScoreByTeams } from '../hooks/useLiveScoreUpdates';
 
 // API Base URLs
 const WESTREAM_API = 'https://westream.su';
 const CHANNELS_API = 'https://api.cdn-live.tv/api/v1/vip/damitv';
+const CDN_LIVE_API = 'https://cdn-live.tv/api/v1/vip/damitv';
 
 // Cache for API responses to avoid repeated calls
 const cache = new Map<string, { data: any; timestamp: number }>();
@@ -45,6 +47,42 @@ const getCachedData = (key: string) => {
 // Helper function to set cached data
 const setCachedData = (key: string, data: any) => {
   cache.set(key, { data, timestamp: Date.now() });
+};
+
+// Enhance match with live scores from TheSportsDB
+const enhanceMatchWithLiveScore = (match: Match): Match => {
+  if (!match.isLive && !isMatchCurrentlyLive(match)) return match;
+  
+  const homeTeam = match.teams?.home?.name || '';
+  const awayTeam = match.teams?.away?.name || '';
+  
+  if (!homeTeam || !awayTeam) return match;
+  
+  const liveScore = getLiveScoreByTeams(homeTeam, awayTeam);
+  
+  if (liveScore) {
+    return {
+      ...match,
+      score: {
+        home: liveScore.homeScore,
+        away: liveScore.awayScore
+      },
+      progress: liveScore.progress,
+      isLive: true
+    };
+  }
+  
+  return match;
+};
+
+// Check if match is currently live based on time
+const isMatchCurrentlyLive = (match: Match): boolean => {
+  const matchTime = typeof match.date === 'number' ? match.date : new Date(match.date).getTime();
+  const now = Date.now();
+  const threeHoursAgo = now - (3 * 60 * 60 * 1000);
+  const oneHourFromNow = now + (60 * 60 * 1000);
+  
+  return matchTime <= oneHourFromNow && matchTime > threeHoursAgo;
 };
 
 // Transform WeStream match to our Match format
@@ -129,7 +167,10 @@ export const fetchSports = async (): Promise<Sport[]> => {
 export const fetchLiveMatches = async (): Promise<Match[]> => {
   const cacheKey = 'westream-live-matches';
   const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    // Still enhance with live scores even if cached
+    return cached.map(enhanceMatchWithLiveScore);
+  }
 
   try {
     const response = await fetch(`${WESTREAM_API}/matches/live`, {
@@ -144,6 +185,9 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
     // Enhance matches with team logos from TheSportsDB
     matches = await enhanceMatchesWithLogos(matches);
     
+    // Enhance with live scores
+    matches = matches.map(enhanceMatchWithLiveScore);
+    
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} live matches from WeStream API`);
     return matches;
@@ -156,7 +200,10 @@ export const fetchLiveMatches = async (): Promise<Match[]> => {
 export const fetchAllMatches = async (): Promise<Match[]> => {
   const cacheKey = 'westream-all-matches';
   const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    // Still enhance with live scores even if cached
+    return cached.map(enhanceMatchWithLiveScore);
+  }
 
   try {
     const response = await fetch(`${WESTREAM_API}/matches`, {
@@ -182,6 +229,9 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
     // Enhance matches with team logos from TheSportsDB
     matches = await enhanceMatchesWithLogos(matches);
     
+    // Enhance with live scores
+    matches = matches.map(enhanceMatchWithLiveScore);
+    
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} matches from WeStream API`);
     return matches;
@@ -194,7 +244,10 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
 export const fetchMatches = async (sportId: string): Promise<Match[]> => {
   const cacheKey = `westream-matches-${sportId}`;
   const cached = getCachedData(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    // Still enhance with live scores even if cached
+    return cached.map(enhanceMatchWithLiveScore);
+  }
 
   try {
     const response = await fetch(`${WESTREAM_API}/matches/${sportId}`, {
@@ -208,6 +261,9 @@ export const fetchMatches = async (sportId: string): Promise<Match[]> => {
     
     // Enhance matches with team logos from TheSportsDB
     matches = await enhanceMatchesWithLogos(matches);
+    
+    // Enhance with live scores
+    matches = matches.map(enhanceMatchWithLiveScore);
     
     setCachedData(cacheKey, matches);
     console.log(`✅ Fetched ${matches.length} matches for sport ${sportId} from WeStream API`);

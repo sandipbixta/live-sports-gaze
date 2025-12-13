@@ -4,6 +4,7 @@ import { useToast } from './use-toast';
 import { Match, Stream, Source, Sport } from '../types/sports';
 import { fetchMatches, fetchStream, fetchSports, fetchLiveMatches, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, isMatchLive } from '../utils/matchUtils';
+import { useLiveScoreUpdates } from './useLiveScoreUpdates';
 
 // LocalStorage cache keys
 const CACHE_KEY_MATCHES = 'damitv_matches_cache';
@@ -101,6 +102,9 @@ export const useLiveMatches = () => {
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const initialLoadDone = useRef(false);
+  
+  // Initialize live score updates from TheSportsDB
+  useLiveScoreUpdates(30000); // Update every 30 seconds
 
   // Load cached data immediately on mount
   useEffect(() => {
