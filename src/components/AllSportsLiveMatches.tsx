@@ -7,6 +7,7 @@ import MatchCard from './MatchCard';
 import SkeletonCard from './SkeletonCard';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 // LocalStorage cache keys for instant loading
 const CACHE_KEY_LIVE = 'damitv_live_matches_cache';
@@ -15,6 +16,69 @@ const CACHE_KEY_ALL = 'damitv_all_matches_cache';
 interface AllSportsLiveMatchesProps {
   searchTerm?: string;
 }
+
+// Normalize team name for matching
+const normalizeTeamName = (name: string): string => {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/fc$/i, '')
+    .replace(/^fc /i, '')
+    .replace(/ fc$/i, '')
+    .replace(/\./g, '')
+    .replace(/'/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Interface for popular match scores
+interface PopularMatchScore {
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: string | null;
+  awayScore: string | null;
+  progress: string | null;
+  isLive: boolean;
+}
+
+// Merge scores from popular matches into WeStream matches
+const mergeScoresIntoMatches = (matches: Match[], popularScores: PopularMatchScore[]): Match[] => {
+  if (popularScores.length === 0) return matches;
+  
+  return matches.map(match => {
+    const homeTeam = match.teams?.home?.name || '';
+    const awayTeam = match.teams?.away?.name || '';
+    
+    if (!homeTeam || !awayTeam) return match;
+    
+    const normalizedHome = normalizeTeamName(homeTeam);
+    const normalizedAway = normalizeTeamName(awayTeam);
+    
+    // Find matching score data
+    const scoreData = popularScores.find(ps => {
+      const psHome = normalizeTeamName(ps.homeTeam);
+      const psAway = normalizeTeamName(ps.awayTeam);
+      
+      // Check for match in either direction
+      return (psHome.includes(normalizedHome) || normalizedHome.includes(psHome)) &&
+             (psAway.includes(normalizedAway) || normalizedAway.includes(psAway));
+    });
+    
+    if (scoreData && scoreData.homeScore && scoreData.awayScore) {
+      return {
+        ...match,
+        score: {
+          home: scoreData.homeScore,
+          away: scoreData.awayScore
+        },
+        progress: scoreData.progress || match.progress,
+        isLive: scoreData.isLive || match.isLive
+      };
+    }
+    
+    return match;
+  });
+};
 
 // Load cached data instantly
 const getCachedLiveMatches = (): Match[] => {
@@ -63,7 +127,27 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
   const [hasInitialized, setHasInitialized] = useState(() => getCachedLiveMatches().length > 0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mostViewedMatches, setMostViewedMatches] = useState<Match[]>([]);
+  const [popularScores, setPopularScores] = useState<PopularMatchScore[]>([]);
   const initialLoadDone = useRef(false);
+
+  // Fetch popular matches scores from edge function
+  const fetchPopularScores = async (): Promise<PopularMatchScore[]> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
+      if (error || !data?.matches) return [];
+      
+      return data.matches.map((m: any) => ({
+        homeTeam: m.homeTeam || '',
+        awayTeam: m.awayTeam || '',
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        progress: m.progress,
+        isLive: m.isLive
+      }));
+    } catch {
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (initialLoadDone.current) return;
@@ -78,14 +162,16 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         
         console.log('🔄 Fetching fresh matches...');
         
-        // Fetch sports, live matches, and all matches in parallel
-        const [sportsData, liveMatchesData, allMatchesData] = await Promise.all([
+        // Fetch sports, live matches, all matches, AND popular scores in parallel
+        const [sportsData, liveMatchesData, allMatchesData, scores] = await Promise.all([
           fetchSports(),
           fetchLiveMatches(),
-          fetchAllMatches()
+          fetchAllMatches(),
+          fetchPopularScores()
         ]);
         
         setSports(sportsData);
+        setPopularScores(scores);
         
         // Filter and consolidate live matches (remove matches without sources)
         const cleanLiveMatches = filterCleanMatches(
@@ -100,14 +186,19 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         const consolidatedAllMatches = consolidateMatches(cleanAllMatches);
         
         console.log(`✅ Loaded ${consolidatedLiveMatches.length} live matches and ${consolidatedAllMatches.length} total matches`);
+        console.log(`📊 Got ${scores.length} popular match scores for merging`);
+        
+        // Merge live scores from popular matches into the WeStream matches
+        const liveMatchesWithScores = mergeScoresIntoMatches(consolidatedLiveMatches, scores);
+        const allMatchesWithScores = mergeScoresIntoMatches(consolidatedAllMatches, scores);
         
         // Enrich live matches with viewer counts from stream API
-        const enrichedLiveMatches = await enrichMatchesWithViewers(consolidatedLiveMatches);
+        const enrichedLiveMatches = await enrichMatchesWithViewers(liveMatchesWithScores);
         setLiveMatches(enrichedLiveMatches);
         setCachedLiveMatches(enrichedLiveMatches);
         
         // Enrich all matches with viewer counts
-        const enrichedAllMatches = await enrichMatchesWithViewers(consolidatedAllMatches);
+        const enrichedAllMatches = await enrichMatchesWithViewers(allMatchesWithScores);
         setAllMatches(enrichedAllMatches);
         setCachedAllMatches(enrichedAllMatches);
         
@@ -143,16 +234,27 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
     loadLiveMatches();
   }, [toast]);
 
-  // Refresh viewer counts every 30 seconds
+  // Refresh viewer counts and scores every 30 seconds
   useEffect(() => {
-    const refreshViewerCounts = async () => {
+    const refreshData = async () => {
       if (liveMatches.length === 0) return;
       
       try {
-        console.log('🔄 Refreshing viewer counts for', liveMatches.length, 'live matches');
-        const enrichedLiveMatches = await enrichMatchesWithViewers(liveMatches);
+        console.log('🔄 Refreshing viewer counts and scores for', liveMatches.length, 'live matches');
         
-        // Update live matches with fresh viewer counts
+        // Fetch fresh scores
+        const freshScores = await fetchPopularScores();
+        if (freshScores.length > 0) {
+          setPopularScores(freshScores);
+        }
+        
+        // Merge fresh scores into live matches
+        const matchesWithScores = mergeScoresIntoMatches(liveMatches, freshScores.length > 0 ? freshScores : popularScores);
+        
+        // Enrich with viewer counts
+        const enrichedLiveMatches = await enrichMatchesWithViewers(matchesWithScores);
+        
+        // Update live matches with fresh viewer counts and scores
         setLiveMatches(enrichedLiveMatches);
         
         // Only show live matches with viewers for popular section
@@ -174,14 +276,14 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
         
         setMostViewedMatches(sortedByViewers.slice(0, 12));
       } catch (error) {
-        console.error('Error refreshing viewer counts:', error);
+        console.error('Error refreshing data:', error);
       }
     };
 
-    const interval = setInterval(refreshViewerCounts, 30000); // Refresh every 30 seconds
+    const interval = setInterval(refreshData, 30000); // Refresh every 30 seconds
     
     return () => clearInterval(interval);
-  }, [liveMatches.length]);
+  }, [liveMatches.length, popularScores]);
 
   // Define preferred sport order with tennis at the end (excluded: golf, hockey, billiards)
   const getSportPriority = (sportId: string): number => {
