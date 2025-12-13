@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
 import { useAdBlockerDetection } from "./hooks/useAdBlockerDetection";
+import { useLiveScoreUpdates } from "./hooks/useLiveScoreUpdates";
 import PopupAd from "./components/PopupAd";
 import { AdBlockerWarning } from "./components/AdBlockerWarning";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
@@ -69,6 +70,9 @@ const App: React.FC = () => {
   // Initialize ad hooks
   usePopunderAd();
   const { isAdBlockerDetected, isUnsupportedBrowser, isChecking } = useAdBlockerDetection();
+  
+  // Initialize live score updates globally (populates the global score store)
+  useLiveScoreUpdates(30000); // Update every 30 seconds
 
   // Show ad blocker warning if detected (blocks the entire site)
   if (!isChecking && (isAdBlockerDetected || isUnsupportedBrowser)) {
