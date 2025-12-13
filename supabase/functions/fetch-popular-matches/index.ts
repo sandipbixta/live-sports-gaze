@@ -353,11 +353,134 @@ serve(async (req) => {
     const liveResults = await Promise.all(livePromises);
     liveResults.forEach(matches => allMatches.push(...matches));
     
-    console.log(`Total matches from TOP LEAGUES: ${allMatches.length}`);
+    console.log(`Total live matches from TOP LEAGUES: ${allMatches.length}`);
 
-    // Sort: by priority then by timestamp
+    // If no live matches, fetch upcoming matches from top leagues
+    if (allMatches.length === 0) {
+      console.log('No live matches found, fetching upcoming matches...');
+      
+      // Fetch upcoming events from top leagues
+      const upcomingPromises = TOP_LEAGUES.slice(0, 10).map(async (league) => {
+        try {
+          // Search for league to get ID
+          const searchUrl = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/searchevents.php?e=${encodeURIComponent(league.name)}`;
+          const response = await fetch(`${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=4328`); // Premier League as default
+          
+          if (!response.ok) return [];
+          
+          const data = await response.json();
+          const events = data?.events || [];
+          
+          const matches: TransformedMatch[] = [];
+          for (const event of events.slice(0, 5)) {
+            const { isTop, config } = isTopLeague(event.strLeague || league.name);
+            if (!isTop && !league.name.toLowerCase().includes('premier')) continue;
+            
+            if (matchIds.has(event.idEvent)) continue;
+            matchIds.add(event.idEvent);
+            
+            const eventDate = new Date(`${event.dateEvent}T${event.strTime || '00:00:00'}`);
+            
+            matches.push({
+              id: event.idEvent,
+              title: event.strEvent || `${event.strHomeTeam} vs ${event.strAwayTeam}`,
+              homeTeam: event.strHomeTeam,
+              awayTeam: event.strAwayTeam,
+              homeTeamBadge: event.strHomeTeamBadge,
+              awayTeamBadge: event.strAwayTeamBadge,
+              homeScore: null,
+              awayScore: null,
+              sport: config?.sport || league.sport,
+              sportIcon: config?.icon || league.icon,
+              league: event.strLeague || league.name,
+              leagueId: event.idLeague,
+              date: event.dateEvent,
+              time: event.strTime || '00:00:00',
+              timestamp: eventDate.toISOString(),
+              status: 'Upcoming',
+              progress: 'NS',
+              poster: event.strThumb || event.strPoster,
+              isLive: false,
+              isFinished: false,
+              channels: [],
+              priority: config?.priority || league.priority,
+            });
+          }
+          return matches;
+        } catch (error) {
+          console.error(`Error fetching upcoming for ${league.name}:`, error);
+          return [];
+        }
+      });
+      
+      // Also fetch from specific top league IDs
+      const topLeagueIds = ['4328', '4335', '4331', '4332', '4334', '4387']; // EPL, La Liga, Bundesliga, Serie A, Ligue 1, NBA
+      const leaguePromises = topLeagueIds.map(async (leagueId) => {
+        try {
+          const response = await fetch(`${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${leagueId}`);
+          if (!response.ok) return [];
+          
+          const data = await response.json();
+          const events = data?.events || [];
+          
+          const matches: TransformedMatch[] = [];
+          for (const event of events.slice(0, 3)) {
+            if (matchIds.has(event.idEvent)) continue;
+            matchIds.add(event.idEvent);
+            
+            const { isTop, config } = isTopLeague(event.strLeague);
+            const eventDate = new Date(`${event.dateEvent}T${event.strTime || '00:00:00'}`);
+            
+            matches.push({
+              id: event.idEvent,
+              title: event.strEvent || `${event.strHomeTeam} vs ${event.strAwayTeam}`,
+              homeTeam: event.strHomeTeam,
+              awayTeam: event.strAwayTeam,
+              homeTeamBadge: event.strHomeTeamBadge,
+              awayTeamBadge: event.strAwayTeamBadge,
+              homeScore: null,
+              awayScore: null,
+              sport: config?.sport || 'Soccer',
+              sportIcon: config?.icon || '⚽',
+              league: event.strLeague,
+              leagueId: event.idLeague,
+              date: event.dateEvent,
+              time: event.strTime || '00:00:00',
+              timestamp: eventDate.toISOString(),
+              status: 'Upcoming',
+              progress: 'NS',
+              poster: event.strThumb || event.strPoster,
+              isLive: false,
+              isFinished: false,
+              channels: [],
+              priority: config?.priority || 7,
+            });
+          }
+          return matches;
+        } catch (error) {
+          console.error(`Error fetching league ${leagueId}:`, error);
+          return [];
+        }
+      });
+      
+      const [upcomingResults, leagueResults] = await Promise.all([
+        Promise.all(upcomingPromises),
+        Promise.all(leaguePromises)
+      ]);
+      
+      upcomingResults.forEach(matches => allMatches.push(...matches));
+      leagueResults.forEach(matches => allMatches.push(...matches));
+      
+      console.log(`Fetched ${allMatches.length} upcoming matches as fallback`);
+    }
+
+    // Sort: live first, then by priority, then by timestamp (soonest first for upcoming)
     allMatches.sort((a, b) => {
+      // Live matches first
+      if (a.isLive !== b.isLive) return a.isLive ? -1 : 1;
+      // Then by priority
       if (a.priority !== b.priority) return b.priority - a.priority;
+      // Then by timestamp (soonest first)
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
 
@@ -375,16 +498,18 @@ serve(async (req) => {
     }
     
     const liveCount = limitedMatches.filter(m => m.isLive).length;
+    const upcomingCount = limitedMatches.filter(m => !m.isLive && !m.isFinished).length;
 
     // Cache result
     cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
-    console.log(`Returning ${limitedMatches.length} TOP LEAGUE matches (${liveCount} live)`);
+    console.log(`Returning ${limitedMatches.length} TOP LEAGUE matches (${liveCount} live, ${upcomingCount} upcoming)`);
     
     return new Response(
       JSON.stringify({ 
         matches: limitedMatches,
         liveCount,
+        upcomingCount,
         total: limitedMatches.length,
         fetchedAt: new Date().toISOString(),
         cached: false
