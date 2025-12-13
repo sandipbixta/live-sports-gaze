@@ -1,9 +1,8 @@
-
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { usePopunderAd } from "./hooks/usePopunderAd";
@@ -14,57 +13,58 @@ import { AdBlockerWarning } from "./components/AdBlockerWarning";
 import AdsterraSocialBar from "./components/AdsterraSocialBar";
 import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
-
-// Import pages directly instead of lazy loading to avoid module import errors
-import Index from "./pages/Index";
-import Match from "./pages/Match";
-import Schedule from "./pages/Schedule";
-import Live from "./pages/Live";
-import Channels from "./pages/Channels";
-import ChannelPlayer from "./pages/ChannelPlayer";
-import ManualMatchPlayer from "./pages/ManualMatchPlayer";
-import Analytics from "./pages/Analytics";
-import DMCANotice from "./pages/DMCANotice";
-import NotFound from "./pages/NotFound";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import Install from "./pages/Install";
-import DaddylivehdAlternatives from "./pages/DaddylivehdAlternatives";
-import BatmanstreamAlternatives from "./pages/BatmanstreamAlternatives";
-import HesgoalAlternatives from "./pages/HesgoalAlternatives";
-import Hesgoal from "./pages/Hesgoal";
-import Vipleague from "./pages/Vipleague";
-import Myp2p from "./pages/Myp2p";
-import CrackstreamsAlternative from "./pages/CrackstreamsAlternative";
-import FreestreamsLive1 from "./pages/FreestreamsLive1";
-import TotalsportekFormula1 from "./pages/TotalsportekFormula1";
-import TotalsportekTennis from "./pages/TotalsportekTennis";
-import HesgoalLiveStream from "./pages/HesgoalLiveStream";
-import HesgoalTV from "./pages/HesgoalTV";
-import Sport365Live from "./pages/Sport365Live";
-import WatchPremierLeague from "./pages/WatchPremierLeague";
-import NbaStreaming from "./pages/NbaStreaming";
-import UfcStreaming from "./pages/UfcStreaming";
-import Leagues from "./pages/Leagues";
-import LeagueDetail from "./pages/LeagueDetail";
-import FootballLeagues from "./pages/FootballLeagues";
-import FootballLeagueDetail from "./pages/FootballLeagueDetail";
-import SelectedMatchPlayer from "./pages/SelectedMatchPlayer";
+import { queryClient } from "./lib/queryClient";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
-// Optimized query client configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes (v4 uses cacheTime, not gcTime)
-    }
-  }
-});
+// Critical pages - load immediately
+import Index from "./pages/Index";
+import Live from "./pages/Live";
+import Match from "./pages/Match";
+import NotFound from "./pages/NotFound";
+
+// Lazy load non-critical pages for faster initial load
+const Schedule = lazy(() => import("./pages/Schedule"));
+const Channels = lazy(() => import("./pages/Channels"));
+const ChannelPlayer = lazy(() => import("./pages/ChannelPlayer"));
+const ManualMatchPlayer = lazy(() => import("./pages/ManualMatchPlayer"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const DMCANotice = lazy(() => import("./pages/DMCANotice"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const Install = lazy(() => import("./pages/Install"));
+const DaddylivehdAlternatives = lazy(() => import("./pages/DaddylivehdAlternatives"));
+const BatmanstreamAlternatives = lazy(() => import("./pages/BatmanstreamAlternatives"));
+const HesgoalAlternatives = lazy(() => import("./pages/HesgoalAlternatives"));
+const Hesgoal = lazy(() => import("./pages/Hesgoal"));
+const Vipleague = lazy(() => import("./pages/Vipleague"));
+const Myp2p = lazy(() => import("./pages/Myp2p"));
+const CrackstreamsAlternative = lazy(() => import("./pages/CrackstreamsAlternative"));
+const FreestreamsLive1 = lazy(() => import("./pages/FreestreamsLive1"));
+const TotalsportekFormula1 = lazy(() => import("./pages/TotalsportekFormula1"));
+const TotalsportekTennis = lazy(() => import("./pages/TotalsportekTennis"));
+const HesgoalLiveStream = lazy(() => import("./pages/HesgoalLiveStream"));
+const HesgoalTV = lazy(() => import("./pages/HesgoalTV"));
+const Sport365Live = lazy(() => import("./pages/Sport365Live"));
+const WatchPremierLeague = lazy(() => import("./pages/WatchPremierLeague"));
+const NbaStreaming = lazy(() => import("./pages/NbaStreaming"));
+const UfcStreaming = lazy(() => import("./pages/UfcStreaming"));
+const Leagues = lazy(() => import("./pages/Leagues"));
+const LeagueDetail = lazy(() => import("./pages/LeagueDetail"));
+const FootballLeagues = lazy(() => import("./pages/FootballLeagues"));
+const FootballLeagueDetail = lazy(() => import("./pages/FootballLeagueDetail"));
+const SelectedMatchPlayer = lazy(() => import("./pages/SelectedMatchPlayer"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="animate-pulse flex flex-col items-center gap-4">
+      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="text-muted-foreground text-sm">Loading...</p>
+    </div>
+  </div>
+);
 
 const App: React.FC = () => {
   // Initialize ad hooks
@@ -109,12 +109,12 @@ const App: React.FC = () => {
               } />
               <Route path="/manual-match/:matchId" element={
                 <SEOPageTracker contentType="match">
-                  <ManualMatchPlayer />
+                  <Suspense fallback={<PageLoader />}><ManualMatchPlayer /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/schedule" element={
                 <SEOPageTracker pageTitle="Sports Schedule - Live Matches Today" contentType="schedule">
-                  <Schedule />
+                  <Suspense fallback={<PageLoader />}><Schedule /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/live" element={
@@ -124,87 +124,87 @@ const App: React.FC = () => {
               } />
               <Route path="/channels" element={
                 <SEOPageTracker pageTitle="Free Sports TV Channels" contentType="channels">
-                  <Channels />
+                  <Suspense fallback={<PageLoader />}><Channels /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/channel/:country/:channelId" element={
                 <SEOPageTracker contentType="channels">
-                  <ChannelPlayer />
+                  <Suspense fallback={<PageLoader />}><ChannelPlayer /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/leagues" element={
                 <SEOPageTracker pageTitle="Football Leagues & Competitions" contentType="home">
-                  <FootballLeagues />
+                  <Suspense fallback={<PageLoader />}><FootballLeagues /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/league/:leagueId" element={
                 <SEOPageTracker contentType="home">
-                  <LeagueDetail />
+                  <Suspense fallback={<PageLoader />}><LeagueDetail /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/football-league/:competitionId" element={
                 <SEOPageTracker contentType="home">
-                  <FootballLeagueDetail />
+                  <Suspense fallback={<PageLoader />}><FootballLeagueDetail /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/selected-match/:matchId" element={
                 <SEOPageTracker contentType="match">
-                  <SelectedMatchPlayer />
+                  <Suspense fallback={<PageLoader />}><SelectedMatchPlayer /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/analytics" element={
                 <SEOPageTracker pageTitle="Website Analytics" contentType="home">
-                  <Analytics />
+                  <Suspense fallback={<PageLoader />}><Analytics /></Suspense>
                 </SEOPageTracker>
               } />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/dmca" element={<DMCANotice />} />
+              <Route path="/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
+              <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
+              <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPolicy /></Suspense>} />
+              <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsOfService /></Suspense>} />
+              <Route path="/dmca" element={<Suspense fallback={<PageLoader />}><DMCANotice /></Suspense>} />
               <Route path="/install" element={
                 <SEOPageTracker pageTitle="Install DamiTV App" contentType="home">
-                  <Install />
+                  <Suspense fallback={<PageLoader />}><Install /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/daddylivehd-alternatives" element={
                 <SEOPageTracker pageTitle="DaddyliveHD Alternatives - Best Sports Streaming Sites" contentType="home">
-                  <DaddylivehdAlternatives />
+                  <Suspense fallback={<PageLoader />}><DaddylivehdAlternatives /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/batmanstream-alternatives" element={
                 <SEOPageTracker pageTitle="Batmanstream Alternatives - Safe Sports Streaming Sites" contentType="home">
-                  <BatmanstreamAlternatives />
+                  <Suspense fallback={<PageLoader />}><BatmanstreamAlternatives /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/hesgoal-alternatives" element={
                 <SEOPageTracker pageTitle="Hesgoal Alternatives - Legal Sports Streaming Sites" contentType="home">
-                  <HesgoalAlternatives />
+                  <Suspense fallback={<PageLoader />}><HesgoalAlternatives /></Suspense>
                 </SEOPageTracker>
               } />
-              <Route path="/hesgoal" element={<Hesgoal />} />
-              <Route path="/vipleague" element={<Vipleague />} />
-              <Route path="/myp2p" element={<Myp2p />} />
-              <Route path="/crackstreams-alternative" element={<CrackstreamsAlternative />} />
-              <Route path="/freestreams-live1" element={<FreestreamsLive1 />} />
-              <Route path="/totalsportek-formula-1" element={<TotalsportekFormula1 />} />
-              <Route path="/totalsportek-tennis" element={<TotalsportekTennis />} />
-              <Route path="/hesgoal-live-stream" element={<HesgoalLiveStream />} />
-              <Route path="/hesgoal-tv" element={<HesgoalTV />} />
-              <Route path="/sport365-live" element={<Sport365Live />} />
+              <Route path="/hesgoal" element={<Suspense fallback={<PageLoader />}><Hesgoal /></Suspense>} />
+              <Route path="/vipleague" element={<Suspense fallback={<PageLoader />}><Vipleague /></Suspense>} />
+              <Route path="/myp2p" element={<Suspense fallback={<PageLoader />}><Myp2p /></Suspense>} />
+              <Route path="/crackstreams-alternative" element={<Suspense fallback={<PageLoader />}><CrackstreamsAlternative /></Suspense>} />
+              <Route path="/freestreams-live1" element={<Suspense fallback={<PageLoader />}><FreestreamsLive1 /></Suspense>} />
+              <Route path="/totalsportek-formula-1" element={<Suspense fallback={<PageLoader />}><TotalsportekFormula1 /></Suspense>} />
+              <Route path="/totalsportek-tennis" element={<Suspense fallback={<PageLoader />}><TotalsportekTennis /></Suspense>} />
+              <Route path="/hesgoal-live-stream" element={<Suspense fallback={<PageLoader />}><HesgoalLiveStream /></Suspense>} />
+              <Route path="/hesgoal-tv" element={<Suspense fallback={<PageLoader />}><HesgoalTV /></Suspense>} />
+              <Route path="/sport365-live" element={<Suspense fallback={<PageLoader />}><Sport365Live /></Suspense>} />
               <Route path="/watch-premier-league-free" element={
                 <SEOPageTracker pageTitle="Watch Premier League Free" contentType="home">
-                  <WatchPremierLeague />
+                  <Suspense fallback={<PageLoader />}><WatchPremierLeague /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/nba-streaming-free" element={
                 <SEOPageTracker pageTitle="NBA Streaming Free" contentType="home">
-                  <NbaStreaming />
+                  <Suspense fallback={<PageLoader />}><NbaStreaming /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/ufc-streaming-free" element={
                 <SEOPageTracker pageTitle="UFC Streaming Free" contentType="home">
-                  <UfcStreaming />
+                  <Suspense fallback={<PageLoader />}><UfcStreaming /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="*" element={<NotFound />} />
