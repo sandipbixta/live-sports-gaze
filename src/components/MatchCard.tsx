@@ -180,7 +180,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
   const awayBadge = getTeamBadge(match.teams?.away, fetchedAwayBadge);
 
   const hasStream = match.sources?.length > 0;
-  const isLive = isMatchLive(match);
+  const isLive = matchIsLive;
+  const hasLiveScore = isLive && homeScore !== undefined && awayScore !== undefined;
 
   // Generate thumbnail background with priority: poster > sportsDbPoster > badges > default
   const generateThumbnail = () => {
@@ -360,12 +361,28 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
           
-          {/* LIVE Badge - Top right */}
+           {/* LIVE Badge with Match Progress - Top right */}
           {(isLive || isMatchStarting) && (
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+              {matchProgress && (
+                <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">
+                  {matchProgress}
+                </span>
+              )}
               <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
+            </div>
+          )}
+          
+          {/* Live Score Overlay - Center bottom of image */}
+          {(isLive || isMatchStarting) && homeScore !== undefined && awayScore !== undefined && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
+              <div className="bg-black/80 backdrop-blur-sm text-white font-bold text-xl px-4 py-1.5 rounded-lg flex items-center gap-3 shadow-lg">
+                <span className="tabular-nums">{homeScore}</span>
+                <span className="text-xs text-gray-400">-</span>
+                <span className="tabular-nums">{awayScore}</span>
+              </div>
             </div>
           )}
           
@@ -392,10 +409,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <TeamLogo teamName={home} sport={sport} size="sm" showFallbackIcon={false} />
-                  <span className="text-sm font-medium text-foreground truncate">{home}</span>
+                  <span className={`text-sm font-medium truncate ${hasLiveScore ? 'text-foreground' : 'text-foreground'}`}>
+                    {home}
+                  </span>
                 </div>
-                {isLive && homeScore !== undefined && (
-                  <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {hasLiveScore && (
+                  <span className="text-primary font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
                     {homeScore}
                   </span>
                 )}
@@ -405,10 +424,12 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <TeamLogo teamName={away} sport={sport} size="sm" showFallbackIcon={false} />
-                  <span className="text-sm font-medium text-foreground truncate">{away}</span>
+                  <span className={`text-sm font-medium truncate ${hasLiveScore ? 'text-foreground' : 'text-foreground'}`}>
+                    {away}
+                  </span>
                 </div>
-                {isLive && awayScore !== undefined && (
-                  <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                {hasLiveScore && (
+                  <span className="text-primary font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
                     {awayScore}
                   </span>
                 )}
