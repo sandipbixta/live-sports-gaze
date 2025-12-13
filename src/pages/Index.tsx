@@ -27,6 +27,7 @@ import HomepageContent from '../components/HomepageContent';
 import EmailSubscription from '../components/EmailSubscription';
 import PopularMatchesSection from '../components/PopularMatchesSection';
 import FinishedMatches from '../components/FinishedMatches';
+import LiveScoresTicker from '../components/LiveScoresTicker';
 
 // Lazy load heavy components
 const NewsSection = React.lazy(() => import('../components/NewsSection'));
@@ -229,6 +230,9 @@ const Index = () => {
         </script>
       </Helmet>
       
+      {/* Live Scores Ticker */}
+      <LiveScoresTicker />
+
       <main className="py-4">
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
