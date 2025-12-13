@@ -8,6 +8,7 @@ import SkeletonCard from './SkeletonCard';
 import { useToast } from '../hooks/use-toast';
 import { TrendingUp, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import HighlightsSection from './HighlightsSection';
 
 // LocalStorage cache keys for instant loading
 const CACHE_KEY_LIVE = 'damitv_live_matches_cache';
@@ -511,6 +512,9 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
           ))}
         </>
       )}
+
+      {/* Match Highlights Section - Before Upcoming Matches */}
+      <HighlightsSection />
 
       {/* Upcoming Matches Sections */}
       {hasUpcomingMatches && (

@@ -28,7 +28,6 @@ import EmailSubscription from '../components/EmailSubscription';
 import PopularMatchesSection from '../components/PopularMatchesSection';
 import FinishedMatches from '../components/FinishedMatches';
 import LiveScoresTicker from '../components/LiveScoresTicker';
-import HighlightsSection from '../components/HighlightsSection';
 import UpcomingMatchesSection from '../components/UpcomingMatchesSection';
 
 // Lazy load heavy components
@@ -290,9 +289,6 @@ const Index = () => {
             </>
           )}
         </div>
-
-        {/* Match Highlights by League - After Live Matches */}
-        <HighlightsSection />
             
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
