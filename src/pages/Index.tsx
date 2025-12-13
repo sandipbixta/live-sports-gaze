@@ -237,10 +237,7 @@ const Index = () => {
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
 
-        {/* Finished Match Results */}
-        <FinishedMatches />
-
-        {/* Selected/Popular Matches from TheSportsDB */}
+        {/* Popular Matches from TheSportsDB */}
         <PopularMatchesSection />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
