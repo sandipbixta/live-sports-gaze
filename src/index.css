@@ -146,6 +146,20 @@
     animation: counterUp 0.5s ease-out;
   }
 
+  /* Ticker marquee animation */
+  @keyframes ticker {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-ticker {
+    animation: ticker linear infinite;
+  }
+
   /* Hide scrollbar but keep functionality */
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */

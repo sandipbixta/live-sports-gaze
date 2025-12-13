@@ -414,7 +414,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   </span>
                 </div>
                 {hasLiveScore && (
-                  <span className="text-primary font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                  <span className="text-white font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
                     {homeScore}
                   </span>
                 )}
@@ -429,7 +429,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   </span>
                 </div>
                 {hasLiveScore && (
-                  <span className="text-primary font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                  <span className="text-white font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
                     {awayScore}
                   </span>
                 )}
