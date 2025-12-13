@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType } from '@/types/sports';
@@ -8,20 +8,27 @@ import { useViewerTracking } from '@/hooks/useViewerTracking';
 import { useWatchHistory } from '@/hooks/useWatchHistory';
 import { Helmet } from 'react-helmet-async';
 import { isTrendingMatch } from '@/utils/popularLeagues';
-import TelegramBanner from '@/components/TelegramBanner';
 import { teamLogoService } from '@/services/teamLogoService';
-import SEOMetaTags from '@/components/SEOMetaTags';
-import SocialShare from '@/components/SocialShare';
-import FavoriteButton from '@/components/FavoriteButton';
 
-// Component imports
-import MatchHeader from '@/components/match/MatchHeader';
-import StreamTab from '@/components/match/StreamTab';
+// Lazy load heavy components
+const TelegramBanner = lazy(() => import('@/components/TelegramBanner'));
+const SEOMetaTags = lazy(() => import('@/components/SEOMetaTags'));
+const SocialShare = lazy(() => import('@/components/SocialShare'));
+const FavoriteButton = lazy(() => import('@/components/FavoriteButton'));
+const MatchHeader = lazy(() => import('@/components/match/MatchHeader'));
+const StreamTab = lazy(() => import('@/components/match/StreamTab'));
+const MatchCard = lazy(() => import('@/components/MatchCard'));
+const MatchAnalysis = lazy(() => import('@/components/match/MatchAnalysis'));
+const ViewerStats = lazy(() => import('@/components/match/ViewerStats').then(m => ({ default: m.ViewerStats })));
+
+// Keep loading states as regular imports
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
-import MatchCard from '@/components/MatchCard';
-import MatchAnalysis from '@/components/match/MatchAnalysis';
-import { ViewerStats } from '@/components/match/ViewerStats';
+
+// Loading placeholder
+const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
+  <div className={`${height} bg-card rounded-lg animate-pulse`} />
+);
 
 const MATCH_CACHE_KEY = 'damitv_match_cache';
 const MATCH_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -195,24 +202,26 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
-      <SEOMetaTags
-        title={`${matchTitle} - Live Stream | DamiTV`}
-        description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
-        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
-        canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
-        ogImage={matchPosterUrl}
-        matchInfo={{
-          homeTeam,
-          awayTeam,
-          league: match.category || 'Football',
-          date: match.date ? new Date(match.date) : new Date(),
-        }}
-        breadcrumbs={[
-          { name: 'Home', url: 'https://damitv.pro/' },
-          { name: 'Live Matches', url: 'https://damitv.pro/live' },
-          { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/match/${sportId}/${matchId}` }
-        ]}
-      />
+      <Suspense fallback={null}>
+        <SEOMetaTags
+          title={`${matchTitle} - Live Stream | DamiTV`}
+          description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
+          keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
+          canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
+          ogImage={matchPosterUrl}
+          matchInfo={{
+            homeTeam,
+            awayTeam,
+            league: match.category || 'Football',
+            date: match.date ? new Date(match.date) : new Date(),
+          }}
+          breadcrumbs={[
+            { name: 'Home', url: 'https://damitv.pro/' },
+            { name: 'Live Matches', url: 'https://damitv.pro/live' },
+            { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/match/${sportId}/${matchId}` }
+          ]}
+        />
+      </Suspense>
 
       <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
@@ -249,30 +258,38 @@ const Match = () => {
         </script>
       </Helmet>
       
-      <MatchHeader 
-        match={match} 
-        streamAvailable={!!stream && stream.id !== "error"}
-        socialShare={
-          <div className="flex items-center gap-2">
-            <FavoriteButton
-              type="match"
-              id={matchId || ''}
-              name={matchTitle}
-              variant="outline"
-            />
-            <SocialShare 
-              title={matchTitle}
-              description={matchDescription}
-              image={matchPosterUrl}
-              url={`https://damitv.pro/match/${sportId}/${matchId}`}
-            />
-          </div>
-        }
-      />
+      <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
+        <MatchHeader 
+          match={match} 
+          streamAvailable={!!stream && stream.id !== "error"}
+          socialShare={
+            <div className="flex items-center gap-2">
+              <Suspense fallback={null}>
+                <FavoriteButton
+                  type="match"
+                  id={matchId || ''}
+                  name={matchTitle}
+                  variant="outline"
+                />
+              </Suspense>
+              <Suspense fallback={null}>
+                <SocialShare 
+                  title={matchTitle}
+                  description={matchDescription}
+                  image={matchPosterUrl}
+                  url={`https://damitv.pro/match/${sportId}/${matchId}`}
+                />
+              </Suspense>
+            </div>
+          }
+        />
+      </Suspense>
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
-          <TelegramBanner />
+          <Suspense fallback={<LoadingPlaceholder height="h-16" />}>
+            <TelegramBanner />
+          </Suspense>
         </div>
         
         <div className="w-full flex justify-center mb-4">
@@ -304,29 +321,35 @@ const Match = () => {
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Video Player Section */}
           <div className="flex-1 min-w-0" id="stream-container" data-stream-container>
-            <StreamTab
-              match={match}
-              stream={stream}
-              loadingStream={loadingStream}
-              activeSource={activeSource}
-              handleSourceChange={handleSourceChange}
-              popularMatches={[]}
-              sportId={sportId || ''}
-              allStreams={allStreams}
-              streamDiscovery={streamDiscovery}
-              onRefreshStreams={handleRefreshStreams}
-            />
+            <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
+              <StreamTab
+                match={match}
+                stream={stream}
+                loadingStream={loadingStream}
+                activeSource={activeSource}
+                handleSourceChange={handleSourceChange}
+                popularMatches={[]}
+                sportId={sportId || ''}
+                allStreams={allStreams}
+                streamDiscovery={streamDiscovery}
+                onRefreshStreams={handleRefreshStreams}
+              />
+            </Suspense>
 
             {/* Viewer Statistics */}
             <div className="mt-6">
-              <ViewerStats match={match} />
+              <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
+                <ViewerStats match={match} />
+              </Suspense>
             </div>
           </div>
         </div>
 
         {/* Match Analysis and Preview Content */}
         <div className="mt-8">
-          <MatchAnalysis match={match} />
+          <Suspense fallback={<LoadingPlaceholder height="h-48" />}>
+            <MatchAnalysis match={match} />
+          </Suspense>
         </div>
 
         {/* Recommended Matches */}
@@ -334,9 +357,11 @@ const Match = () => {
           <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Similar Matches You Might Like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recommendedMatches.map((relatedMatch) => (
-                <MatchCard key={relatedMatch.id} match={relatedMatch} />
-              ))}
+              <Suspense fallback={<LoadingPlaceholder />}>
+                {recommendedMatches.map((relatedMatch) => (
+                  <MatchCard key={relatedMatch.id} match={relatedMatch} />
+                ))}
+              </Suspense>
             </div>
           </div>
         )}
