@@ -355,12 +355,11 @@ serve(async (req) => {
     
     console.log(`Total live matches from TOP LEAGUES: ${allMatches.length}`);
 
-    // If no live matches, fetch upcoming matches from top leagues
-    if (allMatches.length === 0) {
-      console.log('No live matches found, fetching upcoming matches...');
-      
-      // Fetch upcoming events from top leagues
-      const upcomingPromises = TOP_LEAGUES.slice(0, 10).map(async (league) => {
+    // ALWAYS fetch upcoming matches to show alongside live matches
+    console.log('Fetching upcoming matches from top leagues...');
+    
+    // Fetch upcoming events from top leagues
+    const upcomingPromises = TOP_LEAGUES.slice(0, 10).map(async (league) => {
         try {
           // Search for league to get ID
           const searchUrl = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/searchevents.php?e=${encodeURIComponent(league.name)}`;
@@ -468,11 +467,10 @@ serve(async (req) => {
         Promise.all(leaguePromises)
       ]);
       
-      upcomingResults.forEach(matches => allMatches.push(...matches));
-      leagueResults.forEach(matches => allMatches.push(...matches));
-      
-      console.log(`Fetched ${allMatches.length} upcoming matches as fallback`);
-    }
+    upcomingResults.forEach(matches => allMatches.push(...matches));
+    leagueResults.forEach(matches => allMatches.push(...matches));
+    
+    console.log(`Fetched ${allMatches.length} total matches (live + upcoming)`);
 
     // Sort: live first, then by priority, then by timestamp (soonest first for upcoming)
     allMatches.sort((a, b) => {
