@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Play, RefreshCw, Film, Calendar, Trophy } from 'lucide-react';
+import { Play, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import SectionHeader from './SectionHeader';
 import TeamLogo from './TeamLogo';
 
@@ -173,16 +172,20 @@ const HighlightsSection: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {[...Array(5)].map((_, i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="bg-card rounded-xl animate-pulse">
-              <div className="aspect-[4/3] bg-muted rounded-t-xl" />
-              <div className="p-4 space-y-3">
-                <div className="flex justify-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-muted" />
-                  <div className="w-10 h-10 rounded-full bg-muted" />
+              <div className="aspect-video bg-muted rounded-t-xl" />
+              <div className="p-3 space-y-2">
+                <div className="h-3 bg-muted rounded w-1/2" />
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-muted" />
+                  <div className="h-4 bg-muted rounded flex-1" />
                 </div>
-                <div className="h-4 bg-muted rounded w-3/4 mx-auto" />
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-muted" />
+                  <div className="h-4 bg-muted rounded flex-1" />
+                </div>
               </div>
             </div>
           ))}
@@ -192,8 +195,8 @@ const HighlightsSection: React.FC = () => {
           No highlights available at the moment. Check back later.
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {allHighlightsFlat.slice(0, 10).map((highlight) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+          {allHighlightsFlat.slice(0, 12).map((highlight) => {
             const thumbnail = highlight.strThumb || getYoutubeThumbnail(highlight.strVideo || '') || '/placeholder.svg';
             const hasVideo = highlight.strVideo && highlight.strVideo.trim() !== '';
             
@@ -203,82 +206,87 @@ const HighlightsSection: React.FC = () => {
                 href={highlight.strVideo || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative bg-gradient-to-b from-card to-card/80 rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1"
+                className="group cursor-pointer h-full"
               >
-                {/* Thumbnail with overlay */}
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
-                    src={thumbnail}
-                    alt={highlight.strEvent}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                  
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  
-                  {/* Play button */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className={`w-14 h-14 rounded-full ${hasVideo ? 'bg-primary' : 'bg-muted'} flex items-center justify-center shadow-lg transform transition-all duration-300 ${hasVideo ? 'group-hover:scale-110 group-hover:bg-primary/90' : ''}`}>
-                      {hasVideo ? (
-                        <Play className="w-7 h-7 text-primary-foreground fill-current ml-1" />
-                      ) : (
-                        <Film className="w-6 h-6 text-muted-foreground" />
+                <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
+                  {/* Banner Image Section */}
+                  <div className="relative aspect-video overflow-hidden rounded-t-xl flex-shrink-0">
+                    <img
+                      src={thumbnail}
+                      alt={highlight.strEvent}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                    
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* HIGHLIGHTS Badge - Top left */}
+                    <div className="absolute top-2 left-2 z-10">
+                      <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded flex items-center gap-1">
+                        <Play className="w-3 h-3 fill-current" />
+                        {hasVideo ? 'HIGHLIGHTS' : 'RESULT'}
+                      </span>
+                    </div>
+                    
+                    {/* Play button overlay */}
+                    {hasVideo && (
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center shadow-lg">
+                          <Play className="w-6 h-6 text-primary-foreground fill-current ml-0.5" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info Section */}
+                  <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
+                    {/* Sport • League */}
+                    <p className="text-xs text-muted-foreground truncate">
+                      football • {(highlight as any).leagueName}
+                    </p>
+                    
+                    {/* Home Team with Score */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <TeamLogo teamName={highlight.strHomeTeam} sport="football" size="sm" showFallbackIcon={false} />
+                        <span className="text-sm font-medium truncate text-foreground">
+                          {highlight.strHomeTeam}
+                        </span>
+                      </div>
+                      <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                        {highlight.intHomeScore ?? '-'}
+                      </span>
+                    </div>
+                    
+                    {/* Away Team with Score */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <TeamLogo teamName={highlight.strAwayTeam} sport="football" size="sm" showFallbackIcon={false} />
+                        <span className="text-sm font-medium truncate text-foreground">
+                          {highlight.strAwayTeam}
+                        </span>
+                      </div>
+                      <span className="text-foreground font-bold text-lg ml-2 min-w-[28px] text-right tabular-nums">
+                        {highlight.intAwayScore ?? '-'}
+                      </span>
+                    </div>
+                    
+                    {/* Date */}
+                    <div className="flex items-center justify-between mt-auto">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(highlight.dateEvent).toLocaleDateString('en-US', { 
+                          weekday: 'short', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </p>
+                      {hasVideo && (
+                        <span className="text-xs text-primary font-medium">Watch →</span>
                       )}
                     </div>
-                  </div>
-                  
-                  {/* League badge */}
-                  <Badge className="absolute top-3 left-3 bg-primary/90 text-primary-foreground text-[10px] font-semibold shadow-md">
-                    <Trophy className="w-3 h-3 mr-1" />
-                    {(highlight as any).leagueName}
-                  </Badge>
-                  
-                  {/* Highlights label */}
-                  {hasVideo && (
-                    <Badge className="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-semibold animate-pulse">
-                      HIGHLIGHTS
-                    </Badge>
-                  )}
-                  
-                  {/* Score overlay at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="flex flex-col items-center">
-                        <TeamLogo teamName={highlight.strHomeTeam} sport="football" size="sm" className="w-8 h-8 bg-white/10 backdrop-blur-sm rounded-full p-1" />
-                        <span className="text-white text-[10px] font-medium mt-1 truncate max-w-[60px]">
-                          {highlight.strHomeTeam?.split(' ').slice(-1)[0]}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm rounded-lg px-3 py-1.5">
-                        <span className="text-white text-lg font-bold">{highlight.intHomeScore ?? '-'}</span>
-                        <span className="text-white/60 text-sm">-</span>
-                        <span className="text-white text-lg font-bold">{highlight.intAwayScore ?? '-'}</span>
-                      </div>
-                      
-                      <div className="flex flex-col items-center">
-                        <TeamLogo teamName={highlight.strAwayTeam} sport="football" size="sm" className="w-8 h-8 bg-white/10 backdrop-blur-sm rounded-full p-1" />
-                        <span className="text-white text-[10px] font-medium mt-1 truncate max-w-[60px]">
-                          {highlight.strAwayTeam?.split(' ').slice(-1)[0]}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Bottom info */}
-                <div className="p-3 bg-card">
-                  <p className="text-xs font-medium text-foreground text-center line-clamp-1 mb-1">
-                    {highlight.strHomeTeam} vs {highlight.strAwayTeam}
-                  </p>
-                  <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                    <Calendar className="w-3 h-3" />
-                    <span className="text-[10px]">
-                      {new Date(highlight.dateEvent).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </span>
                   </div>
                 </div>
               </a>
