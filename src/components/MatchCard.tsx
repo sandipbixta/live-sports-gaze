@@ -13,6 +13,7 @@ import { LiveViewerCount } from './LiveViewerCount';
 import TeamLogo from './TeamLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMatchScore } from '../hooks/useLiveScoreUpdates';
+import fallbackBg from '@/assets/match-card-fallback-bg.jpg';
 
 // Convert progress like "1H", "2H", "HT" to minutes
 const convertProgressToMinutes = (progress: string): string => {
@@ -373,9 +374,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Priority 3: Use plain black background with DAMITV text for matches without logos/badges or posters
+    // Priority 3: Use textured background with DAMITV text for matches without logos/badges or posters
     return (
-      <div className="w-full h-full relative overflow-hidden bg-black">
+      <div className="w-full h-full relative overflow-hidden">
+        <img 
+          src={fallbackBg} 
+          alt="" 
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <span className="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
