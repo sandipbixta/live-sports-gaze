@@ -241,14 +241,9 @@ const PopularMatchCard: React.FC<{
             </div>
           )}
           
-          {/* LIVE Badge with Match Progress - Top right */}
+          {/* LIVE Badge - Top right */}
           {match.isLive && (
-            <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
-              {match.progress && (
-                <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">
-                  {match.progress}
-                </span>
-              )}
+            <div className="absolute top-2 right-2 z-10">
               <span className="bg-red-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
