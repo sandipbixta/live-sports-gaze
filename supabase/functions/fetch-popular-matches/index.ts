@@ -302,6 +302,17 @@ serve(async (req) => {
             continue; // Skip non-top league matches
           }
           
+          // Skip finished matches - they should not appear in "live" section
+          const progress = (match.strProgress || '').toUpperCase();
+          const status = (match.strStatus || '').toUpperCase();
+          const isFinished = progress === 'FT' || progress === 'AOT' || progress === 'AP' ||
+                            status === 'FT' || status.includes('FINISHED') || 
+                            status.includes('MATCH FINISHED') || status === 'POST';
+          
+          if (isFinished) {
+            continue; // Skip finished matches
+          }
+          
           if (matchIds.has(match.idEvent)) continue;
           matchIds.add(match.idEvent);
           
