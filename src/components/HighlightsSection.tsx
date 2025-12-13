@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Play, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Play, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SectionHeader from './SectionHeader';
 import TeamLogo from './TeamLogo';
@@ -59,6 +59,19 @@ const HighlightsSection: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [selectedHighlight, setSelectedHighlight] = useState<HighlightEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -420, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 420, behavior: 'smooth' });
+    }
+  };
 
   const fetchHighlights = useCallback(async () => {
     setLoading(true);
@@ -229,7 +242,24 @@ const HighlightsSection: React.FC = () => {
           No highlights available at the moment. Check back later.
         </div>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+        <div className="relative group/scroll">
+          {/* Left Arrow */}
+          <button
+            onClick={scrollLeft}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-background/90 border border-border rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover/scroll:opacity-100 transition-opacity hover:bg-background"
+          >
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </button>
+          
+          {/* Right Arrow */}
+          <button
+            onClick={scrollRight}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-background/90 border border-border rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover/scroll:opacity-100 transition-opacity hover:bg-background"
+          >
+            <ChevronRight className="w-5 h-5 text-foreground" />
+          </button>
+          
+          <div ref={scrollContainerRef} className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-1">
           {allHighlightsFlat.map((highlight) => {
             const thumbnail = highlight.strThumb || getYoutubeThumbnail(highlight.strVideo || '') || '/placeholder.svg';
             const hasVideo = highlight.strVideo && highlight.strVideo.trim() !== '';
@@ -324,6 +354,7 @@ const HighlightsSection: React.FC = () => {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 
