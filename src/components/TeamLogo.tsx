@@ -23,13 +23,22 @@ const TeamLogo = ({
   className = '',
   showFallbackIcon = true 
 }: TeamLogoProps) => {
-  const [logoUrl, setLogoUrl] = useState<string | null>(() => getLogoUrl(teamName, sport));
+  // Handle null/undefined teamName
+  const safeTeamName = teamName || '';
+  
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => safeTeamName ? getLogoUrl(safeTeamName, sport) : null);
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(!getLogoUrl(teamName, sport));
+  const [loading, setLoading] = useState(!safeTeamName ? false : !getLogoUrl(safeTeamName, sport));
 
   useEffect(() => {
+    if (!safeTeamName) {
+      setLogoUrl(null);
+      setLoading(false);
+      return;
+    }
+    
     // Reset state when team changes
-    const directUrl = getLogoUrl(teamName, sport);
+    const directUrl = getLogoUrl(safeTeamName, sport);
     setLogoUrl(directUrl);
     setError(false);
     
@@ -41,7 +50,7 @@ const TeamLogo = ({
     let mounted = true;
     setLoading(true);
     
-    getLogoAsync(teamName, sport).then(url => {
+    getLogoAsync(safeTeamName, sport).then(url => {
       if (mounted) {
         setLogoUrl(url);
         setLoading(false);
@@ -49,7 +58,7 @@ const TeamLogo = ({
     });
     
     return () => { mounted = false; };
-  }, [teamName, sport]);
+  }, [safeTeamName, sport]);
 
   const sizeClass = sizeClasses[size];
 
