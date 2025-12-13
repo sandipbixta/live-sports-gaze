@@ -57,15 +57,20 @@ const HighlightsSection: React.FC = () => {
           const data = await response.json();
           const events = data.events || [];
           
-          // Filter events that have video highlights
+          // Get past matches - prioritize those with video highlights
           const eventsWithVideo = events.filter((event: HighlightEvent) => 
             event.strVideo && event.strVideo.trim() !== ''
-          ).slice(0, 5); // Get max 5 highlights per league
+          ).slice(0, 5);
 
-          if (eventsWithVideo.length > 0) {
+          // If no videos available, show recent matches anyway
+          const eventsToShow = eventsWithVideo.length > 0 
+            ? eventsWithVideo 
+            : events.slice(0, 5);
+
+          if (eventsToShow.length > 0) {
             allHighlights.push({
               leagueName: league.name,
-              highlights: eventsWithVideo
+              highlights: eventsToShow
             });
           }
         } catch (err) {
