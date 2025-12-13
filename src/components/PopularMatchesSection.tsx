@@ -249,7 +249,7 @@ const PopularMatchCard: React.FC<{
                   {match.progress}
                 </span>
               )}
-              <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
+              <span className="bg-red-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
             </div>
@@ -301,11 +301,11 @@ const PopularMatchCard: React.FC<{
           {/* Match Time/Progress */}
           <div className="flex items-center justify-between mt-auto">
             {match.isLive ? (
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] text-red-500 font-medium">
                 {match.progress || 'Live'}
               </span>
             ) : (
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[10px] text-red-500 font-medium">
                 {format(matchDate, 'EEE, do MMM, h:mm a')}
               </p>
             )}

@@ -369,7 +369,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
                   {matchProgress}
                 </span>
               )}
-              <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
+              <span className="bg-red-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
             </div>
@@ -438,15 +438,15 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <div className="flex items-center gap-2">
                 <LiveViewerCount match={match} size="sm" />
                 {matchProgress && (
-                  <span className="text-xs text-muted-foreground">• {matchProgress}</span>
+                  <span className="text-xs text-red-500 font-medium">• {matchProgress}</span>
                 )}
               </div>
             ) : match.date ? (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-red-500 font-medium">
                 {format(new Date(match.date), 'EEE, do MMM, h:mm a')}
               </p>
             ) : (
-              <p className="text-xs text-muted-foreground">Time TBD</p>
+              <p className="text-xs text-red-500 font-medium">Time TBD</p>
             )}
           </div>
         </div>

@@ -74,12 +74,12 @@ const LiveScoresTicker: React.FC = () => {
         </div>
         
         {/* Scrolling Ticker */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative group">
           <div 
             ref={tickerRef}
-            className="flex animate-ticker whitespace-nowrap"
+            className="flex animate-ticker whitespace-nowrap group-hover:[animation-play-state:paused]"
             style={{
-              animationDuration: `${duplicatedMatches.length * 8}s`
+              animationDuration: `${duplicatedMatches.length * 4}s`
             }}
           >
             {duplicatedMatches.map((match, index) => (
