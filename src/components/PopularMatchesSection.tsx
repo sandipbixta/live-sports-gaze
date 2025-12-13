@@ -7,6 +7,45 @@ import TeamLogo from './TeamLogo';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { searchTeam, searchEvent } from '@/services/sportsLogoService';
 
+// Convert progress like "1H", "2H", "HT" to minutes
+const convertProgressToMinutes = (progress: string): string => {
+  if (!progress) return '';
+  const trimmed = progress.trim().toUpperCase();
+  
+  // Already in minutes format (e.g., "45'", "45")
+  if (/^\d+['′]?$/.test(trimmed)) {
+    return trimmed.replace(/['′]/g, '');
+  }
+  
+  // Half time
+  if (trimmed === 'HT' || trimmed === 'HALF TIME' || trimmed === 'HALFTIME') {
+    return '45+';
+  }
+  
+  // Full time
+  if (trimmed === 'FT' || trimmed === 'FULL TIME' || trimmed === 'FULLTIME' || trimmed === 'AET') {
+    return '90+';
+  }
+  
+  // First half (1H, 1ST HALF)
+  if (trimmed === '1H' || trimmed === '1ST HALF' || trimmed === 'FIRST HALF') {
+    return '45';
+  }
+  
+  // Second half (2H, 2ND HALF)
+  if (trimmed === '2H' || trimmed === '2ND HALF' || trimmed === 'SECOND HALF') {
+    return '90';
+  }
+  
+  // Extra time
+  if (trimmed === 'ET' || trimmed === 'EXTRA TIME') {
+    return '120';
+  }
+  
+  // Return original if no conversion needed
+  return progress;
+};
+
 interface CDNChannel {
   id: string;
   name: string;
@@ -297,7 +336,7 @@ const PopularMatchCard: React.FC<{
           <div className="flex items-center justify-between mt-auto">
             {match.isLive ? (
               <span className="text-[10px] text-red-500 font-medium">
-                {match.progress ? `${match.progress} min` : 'Live'}
+                {match.progress ? `${convertProgressToMinutes(match.progress)} min` : 'Live'}
               </span>
             ) : (
               <p className="text-[10px] text-red-500 font-medium">

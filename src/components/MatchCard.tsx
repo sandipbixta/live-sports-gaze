@@ -14,6 +14,45 @@ import TeamLogo from './TeamLogo';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMatchScore } from '../hooks/useLiveScoreUpdates';
 
+// Convert progress like "1H", "2H", "HT" to minutes
+const convertProgressToMinutes = (progress: string): string => {
+  if (!progress) return '';
+  const trimmed = progress.trim().toUpperCase();
+  
+  // Already in minutes format (e.g., "45'", "45")
+  if (/^\d+['′]?$/.test(trimmed)) {
+    return trimmed.replace(/['′]/g, '');
+  }
+  
+  // Half time
+  if (trimmed === 'HT' || trimmed === 'HALF TIME' || trimmed === 'HALFTIME') {
+    return '45+';
+  }
+  
+  // Full time
+  if (trimmed === 'FT' || trimmed === 'FULL TIME' || trimmed === 'FULLTIME' || trimmed === 'AET') {
+    return '90+';
+  }
+  
+  // First half (1H, 1ST HALF)
+  if (trimmed === '1H' || trimmed === '1ST HALF' || trimmed === 'FIRST HALF') {
+    return '45';
+  }
+  
+  // Second half (2H, 2ND HALF)
+  if (trimmed === '2H' || trimmed === '2ND HALF' || trimmed === 'SECOND HALF') {
+    return '90';
+  }
+  
+  // Extra time
+  if (trimmed === 'ET' || trimmed === 'EXTRA TIME') {
+    return '120';
+  }
+  
+  // Return original if no conversion needed
+  return progress;
+};
+
 interface MatchCardProps {
   match: Match;
   className?: string;
@@ -433,7 +472,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <div className="flex items-center gap-2">
                 <LiveViewerCount match={match} size="sm" />
                 {matchProgress && (
-                  <span className="text-xs text-red-500 font-medium">• {matchProgress} min</span>
+                  <span className="text-xs text-red-500 font-medium">• {convertProgressToMinutes(matchProgress)} min</span>
                 )}
               </div>
             ) : match.date ? (
