@@ -28,7 +28,7 @@ import EmailSubscription from '../components/EmailSubscription';
 import PopularMatchesSection from '../components/PopularMatchesSection';
 import FinishedMatches from '../components/FinishedMatches';
 import LiveScoresTicker from '../components/LiveScoresTicker';
-import UpcomingMatchesSection from '../components/UpcomingMatchesSection';
+import WeStreamLogos from '../components/WeStreamLogos';
 
 // Lazy load heavy components
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
@@ -290,15 +290,14 @@ const Index = () => {
           )}
         </div>
             
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <UpcomingMatchesSection />
-          </div>
-          <div>
-            <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
-              <TrendingTopics />
-            </React.Suspense>
-          </div>
+        <div className="mb-8">
+          <WeStreamLogos />
+        </div>
+        
+        <div className="mb-8">
+          <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
+            <TrendingTopics />
+          </React.Suspense>
         </div>
             
         <React.Suspense fallback={<div className="h-24 bg-card rounded-lg animate-pulse" />}>
