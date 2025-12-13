@@ -206,9 +206,9 @@ const HighlightsSection: React.FC = () => {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-card rounded-xl animate-pulse">
+            <div key={i} className="bg-card rounded-xl animate-pulse flex-shrink-0 w-[200px]">
               <div className="aspect-video bg-muted rounded-t-xl" />
               <div className="p-3 space-y-2">
                 <div className="h-3 bg-muted rounded w-1/2" />
@@ -229,8 +229,8 @@ const HighlightsSection: React.FC = () => {
           No highlights available at the moment. Check back later.
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-          {allHighlightsFlat.slice(0, 12).map((highlight) => {
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          {allHighlightsFlat.map((highlight) => {
             const thumbnail = highlight.strThumb || getYoutubeThumbnail(highlight.strVideo || '') || '/placeholder.svg';
             const hasVideo = highlight.strVideo && highlight.strVideo.trim() !== '';
             
@@ -238,7 +238,7 @@ const HighlightsSection: React.FC = () => {
               <div
                 key={highlight.idEvent}
                 onClick={() => handleCardClick(highlight, hasVideo)}
-                className={`group h-full ${hasVideo ? 'cursor-pointer' : 'cursor-default'}`}
+                className={`group flex-shrink-0 w-[200px] ${hasVideo ? 'cursor-pointer' : 'cursor-default'}`}
               >
                 <div className="relative overflow-hidden rounded-xl bg-card transition-all duration-300 hover:opacity-90 h-full flex flex-col">
                   {/* Banner Image Section */}
