@@ -29,10 +29,6 @@ const ChannelPlayer = lazy(() => import("./pages/ChannelPlayer"));
 const ManualMatchPlayer = lazy(() => import("./pages/ManualMatchPlayer"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const DMCANotice = lazy(() => import("./pages/DMCANotice"));
-const About = lazy(() => import("./pages/About"));
-const Contact = lazy(() => import("./pages/Contact"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const Install = lazy(() => import("./pages/Install"));
 const DaddylivehdAlternatives = lazy(() => import("./pages/DaddylivehdAlternatives"));
 const BatmanstreamAlternatives = lazy(() => import("./pages/BatmanstreamAlternatives"));
@@ -157,10 +153,6 @@ const App: React.FC = () => {
                   <Suspense fallback={<PageLoader />}><Analytics /></Suspense>
                 </SEOPageTracker>
               } />
-              <Route path="/about" element={<Suspense fallback={<PageLoader />}><About /></Suspense>} />
-              <Route path="/contact" element={<Suspense fallback={<PageLoader />}><Contact /></Suspense>} />
-              <Route path="/privacy" element={<Suspense fallback={<PageLoader />}><PrivacyPolicy /></Suspense>} />
-              <Route path="/terms" element={<Suspense fallback={<PageLoader />}><TermsOfService /></Suspense>} />
               <Route path="/dmca" element={<Suspense fallback={<PageLoader />}><DMCANotice /></Suspense>} />
               <Route path="/install" element={
                 <SEOPageTracker pageTitle="Install DamiTV App" contentType="home">
