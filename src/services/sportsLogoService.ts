@@ -319,21 +319,25 @@ export const searchPlayer = async (playerName: string): Promise<{
 export const getLivescores = async (sport: string = 'soccer'): Promise<any[]> => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL || 'https://bnlyosmqvmmhpfissuqx.supabase.co'}/functions/v1/fetch-livescores`,
+      'https://wxvsteaayxgygihpshoz.supabase.co/functions/v1/fetch-livescores',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJubHlvc21xdm1taHBmaXNzdXF4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM3NzUzNzksImV4cCI6MjA0OTM1MTM3OX0.UQ8SXNpmAmhONfpAKNWNQE7RIOSeOKNB5_pw7o_4pzA'}`
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dnN0ZWFheXhneWdpaHBzaG96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3NzMzNDMsImV4cCI6MjA2NDM0OTM0M30.L2OVGuYiiynekERIwZceuH42iKVAD_YPJL25HXV6ing'
         },
         body: JSON.stringify({ sport }),
         signal: AbortSignal.timeout(10000)
       }
     );
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.error('Livescores API error:', response.status);
+      return [];
+    }
 
     const data = await response.json();
+    console.log(`✅ Fetched ${data.livescores?.length || 0} live scores for ${sport}`);
     return data.livescores || [];
   } catch (error) {
     console.error('Failed to get livescores:', error);

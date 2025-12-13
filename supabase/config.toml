@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.fetch-popular-matches]
 verify_jwt = false
+
+[functions.fetch-livescores]
+verify_jwt = false
+
+[functions.fetch-team-data]
+verify_jwt = false
