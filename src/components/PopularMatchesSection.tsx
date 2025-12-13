@@ -255,17 +255,6 @@ const PopularMatchCard: React.FC<{
             </div>
           )}
           
-          {/* Live Score Overlay - Center bottom of image */}
-          {match.isLive && match.homeScore && match.awayScore && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
-              <div className="bg-black/80 backdrop-blur-sm text-white font-bold text-lg px-3 py-1 rounded-lg flex items-center gap-2 shadow-lg">
-                <span className="tabular-nums">{match.homeScore}</span>
-                <span className="text-xs text-gray-400">-</span>
-                <span className="tabular-nums">{match.awayScore}</span>
-              </div>
-            </div>
-          )}
-          
           {/* Countdown - WATCH IN style like MatchCard */}
           {!match.isLive && countdown && (
             <div className="absolute bottom-2 left-2 z-10">
