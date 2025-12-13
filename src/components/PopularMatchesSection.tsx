@@ -309,7 +309,11 @@ const PopularMatchCard: React.FC<{
           {/* Home Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <TeamLogo teamName={match.homeTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+              {homeBadge ? (
+                <img src={homeBadge} alt={match.homeTeam} className="w-6 h-6 object-contain flex-shrink-0" />
+              ) : (
+                <TeamLogo teamName={match.homeTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+              )}
               <span className="text-xs font-medium text-foreground truncate">{match.homeTeam}</span>
             </div>
             {match.isLive && match.homeScore && (
@@ -322,7 +326,11 @@ const PopularMatchCard: React.FC<{
           {/* Away Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <TeamLogo teamName={match.awayTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+              {awayBadge ? (
+                <img src={awayBadge} alt={match.awayTeam} className="w-6 h-6 object-contain flex-shrink-0" />
+              ) : (
+                <TeamLogo teamName={match.awayTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+              )}
               <span className="text-xs font-medium text-foreground truncate">{match.awayTeam}</span>
             </div>
             {match.isLive && match.awayScore && (
