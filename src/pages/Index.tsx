@@ -238,8 +238,8 @@ const Index = () => {
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
 
-        {/* Match Highlights by League */}
-        <HighlightsSection />
+        {/* Popular Matches from TheSportsDB */}
+        <PopularMatchesSection />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
@@ -290,6 +290,9 @@ const Index = () => {
             </>
           )}
         </div>
+
+        {/* Match Highlights by League - After Live Matches */}
+        <HighlightsSection />
             
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
