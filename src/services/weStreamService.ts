@@ -1,4 +1,5 @@
 import { cachedFetch, getCachedData } from './cachedFetch';
+import { getLiveScoreByTeams } from '../hooks/useLiveScoreUpdates';
 
 const WESTREAM_API = 'https://westream.top';
 
@@ -27,6 +28,13 @@ export interface WeStreamMatch {
     away?: WeStreamTeam;
   };
   sources: WeStreamSource[];
+  // Live score fields
+  score?: {
+    home?: number | string;
+    away?: number | string;
+  };
+  progress?: string;
+  isLive?: boolean;
 }
 
 export interface WeStreamStream {
@@ -42,6 +50,46 @@ export interface Sport {
   id: string;
   name: string;
 }
+
+// ============================================
+// LIVE SCORE ENHANCEMENT
+// ============================================
+
+// Check if match is currently live based on time
+const isMatchCurrentlyLive = (match: WeStreamMatch): boolean => {
+  const now = Date.now();
+  const threeHoursAgo = now - (3 * 60 * 60 * 1000);
+  const oneHourFromNow = now + (60 * 60 * 1000);
+  
+  return match.date <= oneHourFromNow && match.date > threeHoursAgo;
+};
+
+// Enhance match with live score from TheSportsDB
+const enhanceWithLiveScore = (match: WeStreamMatch): WeStreamMatch => {
+  const isLive = isMatchCurrentlyLive(match);
+  if (!isLive) return { ...match, isLive: false };
+  
+  const homeTeam = match.teams?.home?.name || '';
+  const awayTeam = match.teams?.away?.name || '';
+  
+  if (!homeTeam || !awayTeam) return { ...match, isLive };
+  
+  const liveScore = getLiveScoreByTeams(homeTeam, awayTeam);
+  
+  if (liveScore) {
+    return {
+      ...match,
+      score: {
+        home: liveScore.homeScore,
+        away: liveScore.awayScore
+      },
+      progress: liveScore.progress,
+      isLive: true
+    };
+  }
+  
+  return { ...match, isLive };
+};
 
 // ============================================
 // API FUNCTIONS WITH CACHING
@@ -69,27 +117,32 @@ const getInstantData = <T>(endpoint: string): T | null => {
   return getCachedData<T>(url);
 };
 
-// Get all matches (with instant cache fallback)
+// Get all matches (with instant cache fallback) - enhanced with live scores
 export const getAllMatches = async (): Promise<WeStreamMatch[]> => {
   const data = await fetchApi<WeStreamMatch[]>('/matches');
-  return data || [];
+  const matches = data || [];
+  // Enhance all matches with live scores
+  return matches.map(enhanceWithLiveScore);
 };
 
-// Get instant cached matches (for initial render)
+// Get instant cached matches (for initial render) - enhanced with live scores
 export const getInstantMatches = (): WeStreamMatch[] => {
-  return getInstantData<WeStreamMatch[]>('/matches') || [];
+  const matches = getInstantData<WeStreamMatch[]>('/matches') || [];
+  return matches.map(enhanceWithLiveScore);
 };
 
-// Get live matches
+// Get live matches - enhanced with live scores
 export const getLiveMatches = async (): Promise<WeStreamMatch[]> => {
   const data = await fetchApi<WeStreamMatch[]>('/matches/live');
-  return Array.isArray(data) ? data : data ? [data] : [];
+  const matches = Array.isArray(data) ? data : data ? [data] : [];
+  return matches.map(enhanceWithLiveScore);
 };
 
-// Get matches by sport
+// Get matches by sport - enhanced with live scores
 export const getMatchesBySport = async (sport: string): Promise<WeStreamMatch[]> => {
   const data = await fetchApi<WeStreamMatch[]>(`/matches/${sport}`);
-  return data || [];
+  const matches = data || [];
+  return matches.map(enhanceWithLiveScore);
 };
 
 // Get all sports categories
