@@ -115,15 +115,15 @@ const WeStreamLogos: React.FC = () => {
   const duplicatedLeagues = [...leagues, ...leagues];
 
   return (
-    <div className="bg-gradient-to-r from-card via-card/80 to-card rounded-xl p-6 border border-border overflow-hidden">
-      <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+    <div className="overflow-hidden py-4">
+      <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
         <span className="w-1 h-5 bg-primary rounded-full" />
         We Stream
       </h3>
       
       <div
         ref={scrollRef}
-        className="flex gap-8 overflow-hidden"
+        className="flex gap-10 overflow-hidden"
         style={{ scrollBehavior: 'auto' }}
       >
         {duplicatedLeagues.map((league, index) => (
@@ -131,12 +131,12 @@ const WeStreamLogos: React.FC = () => {
             key={`${league.id}-${index}`}
             className="flex-shrink-0 group cursor-pointer"
           >
-            <div className="w-16 h-16 rounded-lg bg-background/50 flex items-center justify-center p-2 transition-all duration-300 group-hover:scale-110 group-hover:bg-background">
+            <div className="w-20 h-20 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
               {league.badge ? (
                 <img
                   src={league.badge}
                   alt={league.name}
-                  className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
+                  className="w-full h-full object-contain filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                   loading="lazy"
                 />
               ) : (
@@ -148,10 +148,6 @@ const WeStreamLogos: React.FC = () => {
           </div>
         ))}
       </div>
-      
-      <p className="text-xs text-muted-foreground mt-4 text-center">
-        Live streams from 50+ leagues worldwide
-      </p>
     </div>
   );
 };
