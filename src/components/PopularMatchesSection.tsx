@@ -297,7 +297,7 @@ const PopularMatchCard: React.FC<{
           <div className="flex items-center justify-between mt-auto">
             {match.isLive ? (
               <span className="text-[10px] text-red-500 font-medium">
-                {match.progress || 'Live'}
+                {match.progress ? `${match.progress} min` : 'Live'}
               </span>
             ) : (
               <p className="text-[10px] text-red-500 font-medium">

@@ -433,7 +433,7 @@ const MatchCard: React.FC<MatchCardProps> = ({
               <div className="flex items-center gap-2">
                 <LiveViewerCount match={match} size="sm" />
                 {matchProgress && (
-                  <span className="text-xs text-red-500 font-medium">• {matchProgress}</span>
+                  <span className="text-xs text-red-500 font-medium">• {matchProgress} min</span>
                 )}
               </div>
             ) : match.date ? (
