@@ -241,12 +241,28 @@ const PopularMatchCard: React.FC<{
             </div>
           )}
           
-          {/* LIVE Badge - Top right */}
+          {/* LIVE Badge with Match Progress - Top right */}
           {match.isLive && (
-            <div className="absolute top-2 right-2 z-10">
+            <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+              {match.progress && (
+                <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">
+                  {match.progress}
+                </span>
+              )}
               <span className="bg-red-500 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
+            </div>
+          )}
+          
+          {/* Live Score Overlay - Center bottom of image */}
+          {match.isLive && match.homeScore && match.awayScore && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
+              <div className="bg-black/80 backdrop-blur-sm text-white font-bold text-lg px-3 py-1 rounded-lg flex items-center gap-2 shadow-lg">
+                <span className="tabular-nums">{match.homeScore}</span>
+                <span className="text-xs text-gray-400">-</span>
+                <span className="tabular-nums">{match.awayScore}</span>
+              </div>
             </div>
           )}
           
