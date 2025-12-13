@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Play, Calendar, Trophy } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Play, Calendar, Trophy, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import TeamLogo from './TeamLogo';
 
@@ -88,15 +88,29 @@ const HighlightVideoModal: React.FC<HighlightVideoModalProps> = ({
           {/* Main Video Section */}
           <div className="lg:col-span-2">
             {/* Video Player */}
-            <div className="aspect-video bg-black">
+            <div className="aspect-video bg-black relative">
               {videoId ? (
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-                  title={highlight.strEvent}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+                <>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                    title={highlight.strEvent}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  {/* Fallback overlay for blocked videos */}
+                  <div className="absolute bottom-4 right-4">
+                    <a
+                      href={highlight.strVideo || `https://www.youtube.com/watch?v=${videoId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Watch on YouTube
+                    </a>
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                   <p>Video not available</p>
