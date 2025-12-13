@@ -28,9 +28,10 @@ import EmailSubscription from '../components/EmailSubscription';
 import PopularMatchesSection from '../components/PopularMatchesSection';
 import FinishedMatches from '../components/FinishedMatches';
 import LiveScoresTicker from '../components/LiveScoresTicker';
+import HighlightsSection from '../components/HighlightsSection';
+import UpcomingMatchesSection from '../components/UpcomingMatchesSection';
 
 // Lazy load heavy components
-const NewsSection = React.lazy(() => import('../components/NewsSection'));
 const FeaturedChannels = React.lazy(() => import('../components/FeaturedChannels'));
 const TrendingTopics = React.lazy(() => import('../components/TrendingTopics'));
 
@@ -237,8 +238,8 @@ const Index = () => {
         {/* SEO H1 - Hidden but present for SEO */}
         <h1 className="sr-only">Top 10 Sports Streaming Site Alternatives - Free HD Streams</h1>
 
-        {/* Popular Matches from TheSportsDB */}
-        <PopularMatchesSection />
+        {/* Match Highlights by League */}
+        <HighlightsSection />
 
         <FeaturedMatches visibleManualMatches={visibleManualMatches} />
 
@@ -292,9 +293,7 @@ const Index = () => {
             
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
-            <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
-              <NewsSection />
-            </React.Suspense>
+            <UpcomingMatchesSection />
           </div>
           <div>
             <React.Suspense fallback={<div className="h-48 bg-card rounded-lg animate-pulse" />}>
