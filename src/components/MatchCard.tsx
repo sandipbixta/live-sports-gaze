@@ -361,14 +361,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
           
-           {/* LIVE Badge with Match Progress - Top right */}
+           {/* LIVE Badge - Top right */}
           {(isLive || isMatchStarting) && (
-            <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
-              {matchProgress && (
-                <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-sm">
-                  {matchProgress}
-                </span>
-              )}
+            <div className="absolute top-2 right-2 z-10">
               <span className="bg-red-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded animate-pulse">
                 ● LIVE
               </span>
