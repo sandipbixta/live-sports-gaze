@@ -28,14 +28,28 @@ interface LeagueHighlights {
 const SPORTS_DB_API_KEY = '751945';
 const SPORTS_DB_BASE_URL = 'https://www.thesportsdb.com/api/v1/json';
 
-// Popular leagues to fetch highlights for
+// Popular leagues across all sports
 const POPULAR_LEAGUES = [
-  { id: '4328', name: 'Premier League' },
-  { id: '4335', name: 'La Liga' },
-  { id: '4331', name: 'Bundesliga' },
-  { id: '4332', name: 'Serie A' },
-  { id: '4334', name: 'Ligue 1' },
-  { id: '4480', name: 'Champions League' },
+  // Football
+  { id: '4328', name: 'Premier League', sport: 'Soccer' },
+  { id: '4335', name: 'La Liga', sport: 'Soccer' },
+  { id: '4331', name: 'Bundesliga', sport: 'Soccer' },
+  { id: '4332', name: 'Serie A', sport: 'Soccer' },
+  { id: '4480', name: 'Champions League', sport: 'Soccer' },
+  // Basketball
+  { id: '4387', name: 'NBA', sport: 'Basketball' },
+  // American Football
+  { id: '4391', name: 'NFL', sport: 'American Football' },
+  // Cricket
+  { id: '4424', name: 'IPL', sport: 'Cricket' },
+  // Ice Hockey
+  { id: '4380', name: 'NHL', sport: 'Ice Hockey' },
+  // Fighting
+  { id: '4443', name: 'UFC', sport: 'Fighting' },
+  // Motorsport
+  { id: '4370', name: 'Formula 1', sport: 'Motorsport' },
+  // Tennis
+  { id: '4464', name: 'ATP Tour', sport: 'Tennis' },
 ];
 
 const HighlightsSection: React.FC = () => {
@@ -74,7 +88,7 @@ const HighlightsSection: React.FC = () => {
           if (eventsToShow.length > 0) {
             allHighlights.push({
               leagueName: league.name,
-              highlights: eventsToShow
+              highlights: eventsToShow.map((e: HighlightEvent) => ({ ...e, strSport: league.sport }))
             });
           }
         } catch (err) {
@@ -263,13 +277,13 @@ const HighlightsSection: React.FC = () => {
                   <div className="p-3 flex flex-col gap-2 flex-1 bg-card">
                     {/* Sport • League */}
                     <p className="text-xs text-muted-foreground truncate">
-                      football • {highlight.leagueName}
+                      {highlight.strSport?.toLowerCase() || 'sports'} • {highlight.leagueName}
                     </p>
                     
                     {/* Home Team with Score */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamLogo teamName={highlight.strHomeTeam} sport="football" size="sm" showFallbackIcon={false} />
+                        <TeamLogo teamName={highlight.strHomeTeam} sport={highlight.strSport?.toLowerCase() || 'football'} size="sm" showFallbackIcon={false} />
                         <span className="text-sm font-medium truncate text-foreground">
                           {highlight.strHomeTeam}
                         </span>
@@ -282,7 +296,7 @@ const HighlightsSection: React.FC = () => {
                     {/* Away Team with Score */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <TeamLogo teamName={highlight.strAwayTeam} sport="football" size="sm" showFallbackIcon={false} />
+                        <TeamLogo teamName={highlight.strAwayTeam} sport={highlight.strSport?.toLowerCase() || 'football'} size="sm" showFallbackIcon={false} />
                         <span className="text-sm font-medium truncate text-foreground">
                           {highlight.strAwayTeam}
                         </span>
