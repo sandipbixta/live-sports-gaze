@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { searchTeam, searchEvent, getSportIcon } from '../services/sportsLogoService';
+import fallbackBg from '@/assets/match-card-fallback-bg.jpg';
 
 interface MatchCardImageProps {
   poster?: string | null;
@@ -82,8 +83,13 @@ const MatchCardImage = ({ poster, homeTeam, awayTeam, sport, homeBadge, awayBadg
 
   // DamiTV fallback
   return (
-    <div className="relative w-full h-40 bg-gradient-to-br from-primary/20 via-background to-muted flex items-center justify-center">
-      <div className="text-center">
+    <div className="relative w-full h-40 flex items-center justify-center overflow-hidden">
+      <img 
+        src={fallbackBg} 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-cover opacity-30"
+      />
+      <div className="relative text-center z-10">
         <div className="text-4xl mb-2">{getSportIcon(sport || 'sports')}</div>
         <h3 className="text-xl font-bold text-foreground">DAMITV</h3>
         <p className="text-muted-foreground text-xs">Live Sports</p>
