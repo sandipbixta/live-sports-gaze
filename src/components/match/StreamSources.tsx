@@ -299,10 +299,13 @@ const StreamSources = ({
           const isActive = activeSource === streamKey;
           const viewerCount = stream.viewers || 0;
           
+          // Check if this is a TV channel fallback
+          const isTvChannel = stream.source === 'TV Channel' || stream.source === 'CDN Channel';
+          
           // Use API-provided name, fallback to source name
           const streamName = stream.name || stream.source || `Stream ${actualStreamNo}`;
           
-          console.log(`🎯 Rendering stream button: ${streamName}`, { streamNo: actualStreamNo, hd: stream.hd });
+          console.log(`🎯 Rendering stream button: ${streamName}`, { streamNo: actualStreamNo, hd: stream.hd, isTvChannel });
           
           return (
             <Button
@@ -311,7 +314,9 @@ const StreamSources = ({
               className={`rounded-full px-3 sm:px-5 py-2.5 sm:min-w-[120px] flex-col h-auto gap-1 ${
                 isActive 
                   ? 'bg-[#ff5722] hover:bg-[#ff5722]/90 text-white border-[#ff5722]' 
-                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
+                  : isTvChannel
+                    ? 'bg-blue-900/50 hover:bg-blue-800/60 text-blue-100 border-blue-600 hover:border-blue-500'
+                    : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600 hover:border-[#ff5722]/50'
               }`}
               onClick={() => {
                 triggerStreamChangeAd();
@@ -322,7 +327,8 @@ const StreamSources = ({
                 <span className={`w-2 h-2 rounded-full ${getConnectionDotColor()} animate-pulse`} />
                 <Play className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="truncate max-w-[60px] sm:max-w-[100px] text-xs sm:text-sm">{streamName}</span>
-                {stream.hd && <span className="text-[10px] sm:text-xs bg-red-600 px-1 rounded">HD</span>}
+                {isTvChannel && <span className="text-[10px] sm:text-xs bg-blue-600 px-1 rounded">TV</span>}
+                {stream.hd && !isTvChannel && <span className="text-[10px] sm:text-xs bg-red-600 px-1 rounded">HD</span>}
               </div>
               {viewerCount > 0 && (
                 <div className="flex items-center gap-1 text-[10px] sm:text-xs font-semibold">

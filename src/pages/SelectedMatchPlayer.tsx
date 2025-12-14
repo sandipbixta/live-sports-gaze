@@ -188,7 +188,7 @@ const SelectedMatchPlayer = () => {
   }, []);
 
   // Fetch CDN channels as fallback
-  const fetchCDNChannelsFallback = async (sport: string) => {
+  const fetchCDNChannelsFallback = async (sport: string): Promise<Record<string, Stream[]>> => {
     try {
       console.log('📺 Fetching CDN channels as fallback for sport:', sport);
       const channels = await getChannelsBySport(sport || 'football');
@@ -207,7 +207,7 @@ const SelectedMatchPlayer = () => {
             language: 'English',
             hd: true,
             embedUrl: channel.url,
-            source: 'CDN Channel',
+            source: 'TV Channel',
             name: channel.name,
             image: channel.image || ''
           }];
@@ -219,6 +219,38 @@ const SelectedMatchPlayer = () => {
       console.error('Failed to fetch CDN channels:', error);
     }
     return {};
+  };
+
+  // Convert TV channels from API to stream format
+  const convertTvChannelsToStreams = (tvChannels: { name: string; code: string }[] | undefined, cdnChannels: CDNChannel[]): Record<string, Stream[]> => {
+    const tvStreams: Record<string, Stream[]> = {};
+    
+    if (!tvChannels || tvChannels.length === 0) return tvStreams;
+    
+    // Match API-recommended channels with CDN channels
+    tvChannels.forEach((tvChannel, idx) => {
+      // Try to find matching CDN channel
+      const matchingCdn = cdnChannels.find(cdn => 
+        cdn.name.toLowerCase().includes(tvChannel.name.toLowerCase().split(' ')[0]) ||
+        cdn.code.toLowerCase().includes(tvChannel.code.toLowerCase())
+      );
+      
+      if (matchingCdn) {
+        const streamKey = `tv-${tvChannel.code}`;
+        tvStreams[streamKey] = [{
+          id: tvChannel.code,
+          streamNo: idx + 1,
+          language: 'English',
+          hd: true,
+          embedUrl: matchingCdn.url,
+          source: 'TV Channel',
+          name: tvChannel.name,
+          image: matchingCdn.image || ''
+        }];
+      }
+    });
+    
+    return tvStreams;
   };
 
   const fetchMatch = async () => {
@@ -279,21 +311,34 @@ const SelectedMatchPlayer = () => {
         setMatch(convertedMatch);
         const { streams, groupedStreams } = setupStreams(convertedMatch);
         
-        // If no streams available, fetch CDN channels as fallback
+        // If no streams available, use TV channels from API + CDN fallback
         if (streams.length === 0) {
-          console.log('⚠️ No streams from API, fetching CDN channels as fallback...');
+          console.log('⚠️ No streams from API, fetching fallback channels...');
+          
+          // First, get CDN channels for this sport
           const cdnStreams = await fetchCDNChannelsFallback(foundMatch.category || 'football');
           
-          const combinedStreams = { ...groupedStreams, ...cdnStreams };
+          // Then, try to match with API-recommended TV channels
+          const tvChannelStreams = convertTvChannelsToStreams(foundMatch.tvChannels, cdnChannels);
+          
+          // Combine: prioritize matched TV channels, then CDN channels
+          const combinedStreams = { 
+            ...groupedStreams, 
+            ...cdnStreams,
+            ...tvChannelStreams  // TV channels override CDN if they match
+          };
+          
           setAllStreams(combinedStreams);
           
-          // Set first CDN channel as active if no current stream
-          const cdnStreamList = Object.values(cdnStreams).flat();
-          if (!currentStream && cdnStreamList.length > 0) {
-            const firstStream = cdnStreamList[0];
+          // Set first available stream as active
+          const allStreamsList = Object.values(combinedStreams).flat();
+          if (!currentStream && allStreamsList.length > 0) {
+            const firstStream = allStreamsList[0];
             setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
             setCurrentStream(firstStream);
           }
+          
+          console.log(`📺 Loaded ${Object.keys(combinedStreams).length} fallback channel sources`);
         } else {
           setAllStreams(groupedStreams);
           
