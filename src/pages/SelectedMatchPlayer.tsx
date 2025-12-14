@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
-import { usePopularMatchesCache, PopularMatch } from '@/hooks/usePopularMatches';
+import { usePopularMatchesCache } from '@/hooks/usePopularMatches';
 
 // Direct imports for faster initial load
 import TelegramBanner from '@/components/TelegramBanner';
@@ -54,36 +54,36 @@ interface SelectedMatch {
   channels: StreamChannel[];
 }
 
-// Convert PopularMatch to SelectedMatch format
-const convertPopularToSelected = (pm: PopularMatch): SelectedMatch => ({
-  id: pm.id,
-  title: pm.title,
-  homeTeam: pm.homeTeam,
-  awayTeam: pm.awayTeam,
-  homeTeamBadge: pm.homeTeamBadge || null,
-  awayTeamBadge: pm.awayTeamBadge || null,
-  homeScore: pm.homeScore || null,
-  awayScore: pm.awayScore || null,
-  sport: pm.sport,
-  sportIcon: pm.sportIcon,
-  league: pm.league,
-  date: pm.date,
-  time: pm.time,
-  timestamp: pm.timestamp,
+// Convert cached Match to SelectedMatch format
+const convertCachedToSelected = (match: MatchType): SelectedMatch => ({
+  id: match.id,
+  title: match.title,
+  homeTeam: match.teams?.home?.name || 'TBD',
+  awayTeam: match.teams?.away?.name || 'TBD',
+  homeTeamBadge: match.teams?.home?.badge || null,
+  awayTeamBadge: match.teams?.away?.badge || null,
+  homeScore: match.score?.home?.toString() || null,
+  awayScore: match.score?.away?.toString() || null,
+  sport: match.category || '',
+  sportIcon: '⚽',
+  league: match.tournament || match.category || '',
+  date: new Date(match.date).toISOString().split('T')[0],
+  time: new Date(match.date).toTimeString().slice(0, 8),
+  timestamp: new Date(match.date).toISOString(),
   venue: null,
   country: null,
-  status: pm.status,
-  progress: pm.progress,
-  poster: null,
+  status: match.isLive ? 'Live' : 'Upcoming',
+  progress: match.progress || null,
+  poster: match.poster || null,
   banner: null,
-  isLive: pm.isLive,
-  isFinished: pm.isFinished,
-  channels: pm.channels?.map(ch => ({
-    id: ch.id,
-    name: ch.name,
-    country: '',
-    logo: ch.logo,
-    embedUrl: ch.embedUrl
+  isLive: match.isLive || false,
+  isFinished: false,
+  channels: match.sources?.map((s, idx) => ({
+    id: s.id || `stream-${idx}`,
+    name: s.name || `Stream ${idx + 1}`,
+    country: 'English',
+    logo: s.image || '',
+    embedUrl: `https://westream.su/embed/${s.source}/${s.id}/1`
   })) || []
 });
 
@@ -152,7 +152,7 @@ const SelectedMatchPlayer = () => {
   
   // Try to get cached match immediately for instant display
   const cachedMatch = matchId ? cache.getMatch(matchId) : null;
-  const initialMatch = cachedMatch ? convertPopularToSelected(cachedMatch) : null;
+  const initialMatch = cachedMatch ? convertCachedToSelected(cachedMatch) : null;
   
   const [match, setMatch] = useState<SelectedMatch | null>(initialMatch);
   const [loading, setLoading] = useState(!initialMatch);

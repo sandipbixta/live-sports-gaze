@@ -1,49 +1,71 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/lib/queryClient';
+import { Match } from '@/types/sports';
 
-export interface PopularMatch {
+// Edge function response type
+interface PopularMatchResponse {
   id: string;
   title: string;
-  homeTeam: string;
-  awayTeam: string;
-  homeTeamBadge?: string;
-  awayTeamBadge?: string;
-  homeScore?: string;
-  awayScore?: string;
-  sport: string;
-  sportIcon: string;
-  league: string;
-  leagueId: string;
-  date: string;
-  time: string;
-  timestamp: string;
-  status: string;
-  progress: string;
+  category: string;
+  date: number;
+  popular: boolean;
+  teams: {
+    home: { name: string; badge?: string };
+    away: { name: string; badge?: string };
+  };
+  sources: { source: string; id: string }[];
+  poster?: string;
+  tournament?: string;
   isLive: boolean;
-  isFinished: boolean;
-  channels: Array<{
-    id: string;
-    name: string;
-    logo: string;
-    embedUrl: string;
-  }>;
+  score?: { home?: string; away?: string };
+  progress?: string;
   priority: number;
 }
 
 // Memory cache for instant access
-let cachedMatches: PopularMatch[] | null = null;
+let cachedMatches: Match[] | null = null;
 let cacheTimestamp = 0;
 const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
-const fetchPopularMatches = async (): Promise<PopularMatch[]> => {
+// Transform edge function response to Match type for MatchCard compatibility
+function transformToMatch(data: PopularMatchResponse): Match {
+  return {
+    id: data.id,
+    title: data.title,
+    category: data.category,
+    date: data.date,
+    popular: data.popular,
+    teams: {
+      home: {
+        name: data.teams.home.name,
+        badge: data.teams.home.badge,
+      },
+      away: {
+        name: data.teams.away.name,
+        badge: data.teams.away.badge,
+      },
+    },
+    sources: data.sources,
+    poster: data.poster,
+    tournament: data.tournament,
+    isLive: data.isLive,
+    score: data.score ? {
+      home: data.score.home,
+      away: data.score.away,
+    } : undefined,
+    progress: data.progress,
+  };
+}
+
+const fetchPopularMatches = async (): Promise<Match[]> => {
   // Return memory cache if fresh
   if (cachedMatches && Date.now() - cacheTimestamp < CACHE_DURATION) {
     console.log('⚡ Using memory cache for popular matches');
     return cachedMatches;
   }
 
-  console.log('🌐 Fetching fresh popular matches...');
+  console.log('🌐 Fetching popular matches from edge function...');
   
   const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
   
@@ -57,12 +79,14 @@ const fetchPopularMatches = async (): Promise<PopularMatch[]> => {
     throw error;
   }
   
-  const matches = data?.matches || [];
+  const rawMatches: PopularMatchResponse[] = data?.matches || [];
+  const matches = rawMatches.map(transformToMatch);
   
   // Update memory cache
   cachedMatches = matches;
   cacheTimestamp = Date.now();
   
+  console.log(`✅ Fetched ${matches.length} popular matches`);
   return matches;
 };
 
