@@ -90,10 +90,10 @@ const convertCachedToSelected = (match: MatchType): SelectedMatch => {
     isFinished: false,
     channels: match.sources?.map((s, idx) => ({
       id: s.id || `stream-${idx}`,
-      name: s.name || `${(s.source || 'Stream').charAt(0).toUpperCase() + (s.source || 'stream').slice(1)} ${idx + 1}`,
+      name: s.name || `Stream ${idx + 1}`,
       country: 'English',
       logo: s.image || '',
-      embedUrl: `https://westream.top/embed/${s.source}/${s.id}/1`
+      embedUrl: `https://westream.su/embed/${s.source}/${s.id}/1`
     })) || []
   };
 };
@@ -202,46 +202,11 @@ const SelectedMatchPlayer = () => {
       }
       
       const matches = data?.matches || [];
-      const foundMatch = matches.find((m: any) => m.id === matchId);
+      const foundMatch = matches.find((m: SelectedMatch) => m.id === matchId);
       
       if (foundMatch) {
-        // Convert API response format to SelectedMatch format
-        // API returns { sources: [{ source, id }] } but we need channels format
-        const convertedMatch: SelectedMatch = {
-          id: foundMatch.id,
-          title: foundMatch.title,
-          homeTeam: foundMatch.teams?.home?.name || 'TBD',
-          awayTeam: foundMatch.teams?.away?.name || 'TBD',
-          homeTeamBadge: foundMatch.teams?.home?.badge || null,
-          awayTeamBadge: foundMatch.teams?.away?.badge || null,
-          homeScore: foundMatch.score?.home?.toString() || null,
-          awayScore: foundMatch.score?.away?.toString() || null,
-          sport: foundMatch.category || '',
-          sportIcon: '⚽',
-          league: foundMatch.tournament || foundMatch.category || '',
-          date: safeDate(foundMatch.date).toISOString().split('T')[0],
-          time: safeDate(foundMatch.date).toTimeString().slice(0, 8),
-          timestamp: safeDate(foundMatch.date).toISOString(),
-          venue: null,
-          country: null,
-          status: foundMatch.isLive ? 'Live' : 'Upcoming',
-          progress: foundMatch.progress || null,
-          poster: foundMatch.poster || null,
-          banner: null,
-          isLive: foundMatch.isLive || false,
-          isFinished: false,
-          // Convert sources to channels format
-          channels: (foundMatch.sources || []).map((s: { source: string; id: string }, idx: number) => ({
-            id: s.id || `stream-${idx}`,
-            name: `${s.source.charAt(0).toUpperCase() + s.source.slice(1)} Stream ${idx + 1}`,
-            country: 'English',
-            logo: '',
-            embedUrl: `https://westream.top/embed/${s.source}/${s.id}/1`
-          }))
-        };
-        
-        setMatch(convertedMatch);
-        const { streams, groupedStreams } = setupStreams(convertedMatch);
+        setMatch(foundMatch);
+        const { streams, groupedStreams } = setupStreams(foundMatch);
         setAllStreams(groupedStreams);
         
         // Only set streams if not already set

@@ -277,10 +277,9 @@ const MatchCard: React.FC<MatchCardProps> = ({
         <div className="w-full h-full relative bg-black">
           <img
             src={posterUrl}
-            alt={`${match.title || 'Sports match'} poster`}
+            alt={match.title}
             className="w-full h-full object-cover"
             loading="lazy"
-            decoding="async"
             onError={(e) => {
               console.error('Poster failed to load for:', match.title, 'URL:', posterUrl);
               // Hide the image and show badge fallback
@@ -372,10 +371,8 @@ const MatchCard: React.FC<MatchCardProps> = ({
       <div className="w-full h-full relative overflow-hidden">
         <img 
           src={fallbackBg} 
-          alt={`${match.title || 'Sports'} match background`}
+          alt="" 
           className="absolute inset-0 w-full h-full object-cover opacity-60"
-          loading="lazy"
-          decoding="async"
         />
         {/* DAMITV Text */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
