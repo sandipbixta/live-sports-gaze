@@ -145,6 +145,18 @@ const EXCLUDED_LEAGUES = [
   'echl',
 ];
 
+// Maximum match duration by sport (in hours) - matches "live" longer than this are likely stale
+const MAX_MATCH_DURATION: Record<string, number> = {
+  'Basketball': 3,
+  'Soccer': 2.5,
+  'American Football': 4,
+  'Ice Hockey': 3,
+  'Tennis': 5,
+  'MMA': 5,
+  'Baseball': 4,
+  'default': 3,
+};
+
 // STRICT filter - only top leagues
 function isTopLeague(leagueName: string): { isTop: boolean; config: typeof TOP_LEAGUES[0] | null } {
   const normalizedLeague = leagueName.toLowerCase().trim();
@@ -367,6 +379,17 @@ serve(async (req) => {
           
           if (isFinished) {
             continue;
+          }
+          
+          // Check if match has been "live" for too long (stale data)
+          const maxDuration = MAX_MATCH_DURATION[config?.sport || sport] || MAX_MATCH_DURATION['default'];
+          const matchTimestamp = match.strTimestamp ? new Date(match.strTimestamp) : null;
+          if (matchTimestamp) {
+            const hoursElapsed = (now.getTime() - matchTimestamp.getTime()) / (1000 * 60 * 60);
+            if (hoursElapsed > maxDuration) {
+              console.log(`Skipping stale match ${match.strEvent}: ${hoursElapsed.toFixed(1)}h elapsed (max: ${maxDuration}h)`);
+              continue;
+            }
           }
           
           if (matchIds.has(match.idEvent)) continue;
