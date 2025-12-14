@@ -135,6 +135,14 @@ const EXCLUDED_LEAGUES = [
   'g league',
   'nba g-league',
   'g-league',
+  'ahl',
+  'american hockey league',
+  'ncaa',
+  'college',
+  'ncaab',
+  'ncaaf',
+  'ushl',
+  'echl',
 ];
 
 // STRICT filter - only top leagues
