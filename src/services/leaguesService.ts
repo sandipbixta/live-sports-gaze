@@ -53,7 +53,9 @@ export const leaguesService = {
         .order('league_name');
       
       if (sport) {
-        query = query.ilike('sport', `%${sport.toLowerCase().replace(/\s+/g, '_')}%`);
+        // Convert sport name to lowercase for matching (e.g., "Soccer" -> "soccer")
+        const sportFilter = sport.toLowerCase().replace(/\s+/g, '_');
+        query = query.eq('sport', sportFilter);
       }
 
       const { data, error } = await query;
