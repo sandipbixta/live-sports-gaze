@@ -6,115 +6,100 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Popular football leagues from TheSportsDB with their IDs
+const FOOTBALL_LEAGUES = [
+  // Top European Leagues
+  { id: '4328', name: 'English Premier League', country: 'England', sportKey: 'soccer_epl' },
+  { id: '4335', name: 'Spanish La Liga', country: 'Spain', sportKey: 'soccer_spain_la_liga' },
+  { id: '4331', name: 'German Bundesliga', country: 'Germany', sportKey: 'soccer_germany_bundesliga' },
+  { id: '4332', name: 'Italian Serie A', country: 'Italy', sportKey: 'soccer_italy_serie_a' },
+  { id: '4334', name: 'French Ligue 1', country: 'France', sportKey: 'soccer_france_ligue_one' },
+  
+  // European Competitions
+  { id: '4480', name: 'UEFA Champions League', country: 'Europe', sportKey: 'soccer_uefa_champs_league' },
+  { id: '4481', name: 'UEFA Europa League', country: 'Europe', sportKey: 'soccer_uefa_europa_league' },
+  { id: '5149', name: 'UEFA Conference League', country: 'Europe', sportKey: 'soccer_uefa_conference_league' },
+  
+  // Other Major European Leagues
+  { id: '4344', name: 'Dutch Eredivisie', country: 'Netherlands', sportKey: 'soccer_netherlands_eredivisie' },
+  { id: '4358', name: 'Portuguese Primeira Liga', country: 'Portugal', sportKey: 'soccer_portugal_primeira_liga' },
+  { id: '4359', name: 'Scottish Premiership', country: 'Scotland', sportKey: 'soccer_scotland_premiership' },
+  { id: '4355', name: 'Belgian Pro League', country: 'Belgium', sportKey: 'soccer_belgium_first_div' },
+  { id: '4330', name: 'English Championship', country: 'England', sportKey: 'soccer_efl_champ' },
+  { id: '4346', name: 'American MLS', country: 'USA', sportKey: 'soccer_usa_mls' },
+  
+  // South American
+  { id: '4351', name: 'Brazilian Serie A', country: 'Brazil', sportKey: 'soccer_brazil_serie_a' },
+  { id: '4406', name: 'Argentine Primera División', country: 'Argentina', sportKey: 'soccer_argentina_primera' },
+  { id: '4350', name: 'Copa Libertadores', country: 'South America', sportKey: 'soccer_copa_libertadores' },
+  
+  // International
+  { id: '4429', name: 'FIFA World Cup', country: 'World', sportKey: 'soccer_fifa_world_cup' },
+  { id: '4424', name: 'UEFA Euro Championship', country: 'Europe', sportKey: 'soccer_uefa_euro' },
+  { id: '4497', name: 'Copa America', country: 'South America', sportKey: 'soccer_copa_america' },
+  { id: '4502', name: 'Africa Cup of Nations', country: 'Africa', sportKey: 'soccer_africa_cup' },
+  
+  // Asian Leagues
+  { id: '4356', name: 'Saudi Pro League', country: 'Saudi Arabia', sportKey: 'soccer_saudi_pro_league' },
+  { id: '4397', name: 'J1 League', country: 'Japan', sportKey: 'soccer_japan_j1' },
+  { id: '4396', name: 'K League 1', country: 'South Korea', sportKey: 'soccer_korea_k1' },
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Fetching all sports from The Odds API');
-
-    const apiKey = Deno.env.get('ODDS_API_KEY');
-    if (!apiKey) {
-      throw new Error('ODDS_API_KEY not configured');
-    }
-    
-    // Fetch all sports from The Odds API
-    const sportsUrl = `https://api.the-odds-api.com/v4/sports?apiKey=${apiKey}`;
-    console.log(`Calling API: ${sportsUrl.replace(apiKey, 'API_KEY_HIDDEN')}`);
-    
-    const sportsResponse = await fetch(sportsUrl);
-    
-    // Check if response is OK
-    if (!sportsResponse.ok) {
-      const errorText = await sportsResponse.text();
-      console.error(`API Error (${sportsResponse.status}):`, errorText);
-      throw new Error(`API returned ${sportsResponse.status}: ${errorText.substring(0, 200)}`);
-    }
-    
-    // Check content type before parsing JSON
-    const contentType = sportsResponse.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const responseText = await sportsResponse.text();
-      console.error('Non-JSON response:', responseText.substring(0, 500));
-      throw new Error(`API returned non-JSON response (${contentType})`);
-    }
-    
-    const sportsData = await sportsResponse.json();
-
-    if (!sportsData || sportsData.length === 0) {
-      console.log('No sports found');
-      return new Response(
-        JSON.stringify({ success: false, message: 'No sports found', leagues: [] }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    console.log('Fetching football leagues from TheSportsDB...');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Transform sports into leagues format and fetch logos
-    console.log('Fetching league badges from TheSportsDB...');
+    // Fetch league details from TheSportsDB
     const leaguesWithLogos = await Promise.all(
-      sportsData
-        .filter((sport: any) => sport.active)
-        .map(async (sport: any) => {
-          const league = {
-            league_id: sport.key,
-            league_name: sport.title,
-            sport: sport.group.toLowerCase().replace(/\s+/g, '_'),
-            country: null,
-            logo_url: null,
-            description: sport.description,
-            website: null,
-            year_founded: null,
-          };
-
-          // Try to fetch logo from TheSportsDB
-          try {
-            // First try searching by league name
-            let searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?l=${encodeURIComponent(sport.title)}`;
-            let response = await fetch(searchUrl);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.countries && data.countries.length > 0) {
-                const matchedLeague = data.countries[0]; // Take first match
-                league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
-                league.country = matchedLeague.strCountry || null;
-              }
+      FOOTBALL_LEAGUES.map(async (league) => {
+        try {
+          const apiUrl = `https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=${league.id}`;
+          const response = await fetch(apiUrl);
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.leagues && data.leagues[0]) {
+              const leagueData = data.leagues[0];
+              return {
+                league_id: league.sportKey,
+                league_name: leagueData.strLeague || league.name,
+                sport: 'soccer',
+                country: leagueData.strCountry || league.country,
+                logo_url: leagueData.strBadge || leagueData.strLogo || null,
+                description: leagueData.strDescriptionEN ? leagueData.strDescriptionEN.substring(0, 500) : null,
+                website: leagueData.strWebsite || null,
+                year_founded: leagueData.intFormedYear ? parseInt(leagueData.intFormedYear) : null,
+              };
             }
-            
-            // If no logo found, try searching by sport group
-            if (!league.logo_url) {
-              searchUrl = `https://www.thesportsdb.com/api/v1/json/3/search_all_leagues.php?s=${encodeURIComponent(sport.group)}`;
-              response = await fetch(searchUrl);
-              
-              if (response.ok) {
-                const data = await response.json();
-                if (data.countries && data.countries.length > 0) {
-                  // Try to find matching league by title
-                  const matchedLeague = data.countries.find((l: any) => 
-                    l.strLeague?.toLowerCase().includes(sport.title.toLowerCase()) ||
-                    sport.title.toLowerCase().includes(l.strLeague?.toLowerCase())
-                  );
-                  
-                  if (matchedLeague) {
-                    league.logo_url = matchedLeague.strBadge || matchedLeague.strLogo || null;
-                    league.country = matchedLeague.strCountry || null;
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`Error fetching logo for ${sport.title}:`, error);
           }
-
-          return league;
-        })
+        } catch (error) {
+          console.error(`Error fetching league ${league.name}:`, error);
+        }
+        
+        // Fallback to basic info if API fails
+        return {
+          league_id: league.sportKey,
+          league_name: league.name,
+          sport: 'soccer',
+          country: league.country,
+          logo_url: null,
+          description: null,
+          website: null,
+          year_founded: null,
+        };
+      })
     );
+
+    console.log(`Fetched ${leaguesWithLogos.length} leagues from TheSportsDB`);
 
     // Upsert leagues into database
     const { data, error } = await supabase
@@ -127,7 +112,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Successfully fetched and stored ${leaguesWithLogos.length} leagues with logos`);
+    console.log(`Successfully stored ${leaguesWithLogos.length} football leagues`);
 
     return new Response(
       JSON.stringify({ 
