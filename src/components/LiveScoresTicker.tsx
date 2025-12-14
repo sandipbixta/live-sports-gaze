@@ -30,15 +30,19 @@ const LiveScoresTicker: React.FC = () => {
 
         if (data?.matches) {
           const live = data.matches
-            .filter((m: any) => m.isLive && m.homeScore && m.awayScore)
+            .filter((m: any) => {
+              const homeScore = m.score?.home || m.homeScore;
+              const awayScore = m.score?.away || m.awayScore;
+              return m.isLive && homeScore !== undefined && awayScore !== undefined;
+            })
             .map((m: any) => ({
-              id: m.id || `${m.homeTeam}-${m.awayTeam}`,
-              homeTeam: m.homeTeam,
-              awayTeam: m.awayTeam,
-              homeScore: m.homeScore,
-              awayScore: m.awayScore,
+              id: m.id || `${m.teams?.home?.name || m.homeTeam}-${m.teams?.away?.name || m.awayTeam}`,
+              homeTeam: m.teams?.home?.name || m.homeTeam || 'Home',
+              awayTeam: m.teams?.away?.name || m.awayTeam || 'Away',
+              homeScore: m.score?.home || m.homeScore,
+              awayScore: m.score?.away || m.awayScore,
               progress: m.progress,
-              league: m.league || 'Live',
+              league: m.tournament || m.league || m.category || 'Live',
               isLive: true
             }));
           setLiveMatches(live);
