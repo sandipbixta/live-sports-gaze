@@ -89,6 +89,7 @@ const useCountdown = (timestamp: string) => {
   
   useEffect(() => {
     const matchDate = new Date(timestamp);
+    if (isNaN(matchDate.getTime())) return; // Guard against invalid dates
     
     const updateCountdown = () => {
       const now = Date.now();
@@ -138,13 +139,37 @@ const PopularMatchCard: React.FC<{
   const awayTeam = match.teams?.away?.name || match.awayTeam || 'TBD';
   const homeBadgeFromMatch = match.teams?.home?.badge || match.homeTeamBadge;
   const awayBadgeFromMatch = match.teams?.away?.badge || match.awayTeamBadge;
-  const matchDate = typeof match.date === 'number' ? match.date : new Date(match.timestamp || match.date).getTime();
+  
+  // Safe date parsing to prevent Invalid time value errors
+  const getMatchDate = (): number => {
+    if (typeof match.date === 'number' && !isNaN(match.date)) return match.date;
+    if (match.timestamp) {
+      const parsed = new Date(match.timestamp).getTime();
+      if (!isNaN(parsed)) return parsed;
+    }
+    if (match.date) {
+      const parsed = new Date(match.date).getTime();
+      if (!isNaN(parsed)) return parsed;
+    }
+    return Date.now(); // fallback to current time
+  };
+  const matchDate = getMatchDate();
+  
   const league = match.tournament || match.league || match.category || '';
   const sportIcon = match.sportIcon || '⚽';
   const homeScore = match.score?.home || match.homeScore;
   const awayScore = match.score?.away || match.awayScore;
   
-  const countdown = useCountdown(new Date(matchDate).toISOString());
+  // Safe ISO string conversion
+  const safeIsoString = (() => {
+    try {
+      const date = new Date(matchDate);
+      return !isNaN(date.getTime()) ? date.toISOString() : new Date().toISOString();
+    } catch {
+      return new Date().toISOString();
+    }
+  })();
+  const countdown = useCountdown(safeIsoString);
   
   // Check for streams - support both new format (sources) and old format (channels)
   const hasStream = (match.sources?.length || 0) > 0 || (match.channels?.length || 0) > 0;
