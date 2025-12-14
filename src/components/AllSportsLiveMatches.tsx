@@ -3,6 +3,7 @@ import { Sport, Match } from '../types/sports';
 import { fetchLiveMatches, fetchSports, fetchAllMatches } from '../api/sportsApi';
 import { consolidateMatches, filterCleanMatches, sortMatchesByViewers } from '../utils/matchUtils';
 import { enrichMatchesWithViewers, isMatchLive } from '../services/viewerCountService';
+import { getLiveScoreByTeams, useLiveScoreUpdates } from '../hooks/useLiveScoreUpdates';
 import MatchCard from './MatchCard';
 import SkeletonCard from './SkeletonCard';
 import { useToast } from '../hooks/use-toast';
@@ -42,10 +43,8 @@ interface PopularMatchScore {
   isLive: boolean;
 }
 
-// Merge scores from popular matches into WeStream matches
+// Merge scores from popular matches AND live score store into WeStream matches
 const mergeScoresIntoMatches = (matches: Match[], popularScores: PopularMatchScore[]): Match[] => {
-  if (popularScores.length === 0) return matches;
-  
   return matches.map(match => {
     const homeTeam = match.teams?.home?.name || '';
     const awayTeam = match.teams?.away?.name || '';
@@ -55,17 +54,31 @@ const mergeScoresIntoMatches = (matches: Match[], popularScores: PopularMatchSco
     const normalizedHome = normalizeTeamName(homeTeam);
     const normalizedAway = normalizeTeamName(awayTeam);
     
-    // Find matching score data
-    const scoreData = popularScores.find(ps => {
+    // First try to find in popular scores
+    let scoreData = popularScores.find(ps => {
       const psHome = normalizeTeamName(ps.homeTeam);
       const psAway = normalizeTeamName(ps.awayTeam);
       
-      // Check for match in either direction
       return (psHome.includes(normalizedHome) || normalizedHome.includes(psHome)) &&
              (psAway.includes(normalizedAway) || normalizedAway.includes(psAway));
     });
     
-    if (scoreData && scoreData.homeScore && scoreData.awayScore) {
+    // If not found in popular scores, try the live score store
+    if (!scoreData || (!scoreData.homeScore && !scoreData.awayScore)) {
+      const liveScore = getLiveScoreByTeams(homeTeam, awayTeam);
+      if (liveScore) {
+        scoreData = {
+          homeTeam: liveScore.homeTeam,
+          awayTeam: liveScore.awayTeam,
+          homeScore: String(liveScore.homeScore),
+          awayScore: String(liveScore.awayScore),
+          progress: liveScore.progress,
+          isLive: true
+        };
+      }
+    }
+    
+    if (scoreData && scoreData.homeScore !== null && scoreData.awayScore !== null) {
       return {
         ...match,
         score: {
@@ -121,6 +134,9 @@ const setCachedAllMatches = (matches: Match[]) => {
 const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm = '' }) => {
   const { toast } = useToast();
   
+  // Initialize live score updates to populate the global store
+  const { lastUpdate: liveScoreLastUpdate } = useLiveScoreUpdates(30000);
+  
   // Initialize with cached data immediately
   const [liveMatches, setLiveMatches] = useState<Match[]>(() => getCachedLiveMatches());
   const [allMatches, setAllMatches] = useState<Match[]>(() => getCachedAllMatches());
@@ -138,12 +154,12 @@ const AllSportsLiveMatches: React.FC<AllSportsLiveMatchesProps> = ({ searchTerm 
       if (error || !data?.matches) return [];
       
       return data.matches.map((m: any) => ({
-        homeTeam: m.homeTeam || '',
-        awayTeam: m.awayTeam || '',
-        homeScore: m.homeScore,
-        awayScore: m.awayScore,
-        progress: m.progress,
-        isLive: m.isLive
+        homeTeam: m.teams?.home?.name || m.homeTeam || '',
+        awayTeam: m.teams?.away?.name || m.awayTeam || '',
+        homeScore: m.score?.home ?? m.homeScore ?? null,
+        awayScore: m.score?.away ?? m.awayScore ?? null,
+        progress: m.progress ?? null,
+        isLive: m.isLive ?? false
       }));
     } catch {
       return [];
