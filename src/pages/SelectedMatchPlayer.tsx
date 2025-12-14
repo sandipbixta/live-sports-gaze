@@ -1,16 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef, lazy, Suspense } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Play, Tv, Calendar, MapPin, Loader, Settings, Radio } from 'lucide-react';
+import { ChevronLeft, Home, Loader, Clock, RefreshCw, Play, Tv } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 import TeamLogo from '@/components/TeamLogo';
 import { format } from 'date-fns';
 import ChannelPlayerSelector, { PlayerType } from '@/components/StreamPlayer/ChannelPlayerSelector';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 import SEOMetaTags from '@/components/SEOMetaTags';
+import { useToast } from '@/hooks/use-toast';
+
+// Lazy load components
+const TelegramBanner = lazy(() => import('@/components/TelegramBanner'));
+const SocialShare = lazy(() => import('@/components/SocialShare'));
+const FavoriteButton = lazy(() => import('@/components/FavoriteButton'));
+
+// Loading placeholder
+const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
+  <div className={`${height} bg-card rounded-lg animate-pulse`} />
+);
 
 interface StreamChannel {
   id: string;
@@ -49,44 +60,45 @@ interface SelectedMatch {
 const SelectedMatchPlayer = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const playerRef = useRef<HTMLDivElement>(null);
   
   const [match, setMatch] = useState<SelectedMatch | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState<StreamChannel | null>(null);
   const [playerType, setPlayerType] = useState<PlayerType>('simple');
-  const [showPlayerSettings, setShowPlayerSettings] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchMatch = async () => {
+    if (!matchId) return;
+    
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
+      
+      if (error) {
+        console.error('Error fetching matches:', error);
+        return;
+      }
+      
+      const matches = data?.matches || [];
+      const foundMatch = matches.find((m: SelectedMatch) => m.id === matchId);
+      
+      if (foundMatch) {
+        setMatch(foundMatch);
+        const firstStreamable = foundMatch.channels?.find((ch: StreamChannel) => ch.embedUrl);
+        if (firstStreamable) {
+          setSelectedChannel(firstStreamable);
+        }
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMatch = async () => {
-      if (!matchId) return;
-      
-      try {
-        setLoading(true);
-        const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
-        
-        if (error) {
-          console.error('Error fetching matches:', error);
-          return;
-        }
-        
-        const matches = data?.matches || [];
-        const foundMatch = matches.find((m: SelectedMatch) => m.id === matchId);
-        
-        if (foundMatch) {
-          setMatch(foundMatch);
-          const firstStreamable = foundMatch.channels?.find((ch: StreamChannel) => ch.embedUrl);
-          if (firstStreamable) {
-            setSelectedChannel(firstStreamable);
-          }
-        }
-      } catch (err) {
-        console.error('Error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMatch();
   }, [matchId]);
 
@@ -101,6 +113,20 @@ const SelectedMatchPlayer = () => {
     setSelectedChannel(channel);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    toast({
+      title: "Refreshing streams...",
+      description: "Scanning for available streams",
+    });
+    await fetchMatch();
+    setRefreshing(false);
+    toast({
+      title: "Refresh complete",
+      description: `Found ${match?.channels?.filter(c => c.embedUrl).length || 0} streams`,
+    });
+  };
+
   const handleRetry = () => {
     setLoading(true);
     setTimeout(() => setLoading(false), 1000);
@@ -108,8 +134,8 @@ const SelectedMatchPlayer = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground text-center">
+      <div className="min-h-screen bg-sports-dark flex items-center justify-center">
+        <div className="text-white text-center">
           <Loader className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
           <p>Loading match...</p>
         </div>
@@ -119,15 +145,14 @@ const SelectedMatchPlayer = () => {
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center text-foreground">
+      <div className="min-h-screen bg-sports-dark flex flex-col items-center justify-center text-white">
+        <Tv className="w-16 h-16 text-muted-foreground mb-4" />
         <h1 className="text-2xl font-bold mb-4">Match Not Found</h1>
-        <p className="text-muted-foreground mb-6">The match you're looking for is not available.</p>
-        <Link to="/">
-          <Button className="bg-primary hover:bg-primary/90">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-        </Link>
+        <p className="text-gray-400 mb-6">The match you're looking for is not available.</p>
+        <Button onClick={() => navigate('/')} className="bg-primary hover:bg-primary/90">
+          <Home className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
       </div>
     );
   }
@@ -147,7 +172,7 @@ const SelectedMatchPlayer = () => {
   } : null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-sports-dark text-sports-light">
       <SEOMetaTags
         title={`${matchTitle} - Live Stream | DamiTV`}
         description={matchDescription}
@@ -195,159 +220,95 @@ const SelectedMatchPlayer = () => {
         </script>
       </Helmet>
 
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between p-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="text-foreground hover:bg-muted"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
-          </Button>
-          
-          <div className="flex items-center gap-2">
-            {currentStream && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPlayerSettings(!showPlayerSettings)}
-                className="text-foreground hover:bg-muted"
+      {/* Header - Same style as Match.tsx */}
+      <header className="bg-sports-darker shadow-md">
+        <div className="container mx-auto py-2 sm:py-4 px-2 sm:px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate(-1)}
+                className="text-gray-300 hover:text-white touch-manipulation min-h-[44px] min-w-[44px]"
               >
-                <Settings className="h-4 w-4" />
+                <ChevronLeft className="mr-1" />
+                Back
               </Button>
-            )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="text-gray-300 hover:text-white touch-manipulation min-h-[44px] min-w-[44px]"
+              >
+                <Home className="mr-1" />
+                Home
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Suspense fallback={null}>
+                <FavoriteButton
+                  type="match"
+                  id={matchId || ''}
+                  name={matchTitle}
+                  variant="outline"
+                />
+              </Suspense>
+              <Suspense fallback={null}>
+                <SocialShare 
+                  title={matchTitle}
+                  description={matchDescription}
+                  image={match.poster || 'https://i.imgur.com/m4nV9S8.png'}
+                  url={`https://damitv.pro/selected-match/${matchId}`}
+                />
+              </Suspense>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Match Score Bar */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col items-center gap-2">
-            {/* League & Status */}
-            <div className="flex items-center gap-2 flex-wrap justify-center">
-              <Badge variant="secondary" className="text-xs">
-                {match.sport}
-              </Badge>
-              <span className="text-muted-foreground text-sm">{match.league}</span>
-              {match.isLive && (
-                <Badge className="bg-red-500 text-white text-xs animate-pulse">
-                  ● LIVE
-                </Badge>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        {/* Telegram Banner */}
+        <div className="mb-4">
+          <Suspense fallback={<LoadingPlaceholder height="h-16" />}>
+            <TelegramBanner />
+          </Suspense>
+        </div>
+        
+        {/* Match Title with Badges */}
+        <div className="w-full flex justify-center mb-4">
+          <div className="text-center max-w-4xl px-4">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              {match.homeTeamBadge ? (
+                <img 
+                  src={match.homeTeamBadge} 
+                  alt={match.homeTeam}
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                  onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                />
+              ) : (
+                <TeamLogo teamName={match.homeTeam} sport={match.sport} size="md" />
+              )}
+              <h1 className="text-2xl md:text-3xl font-bold text-white">{match.title}</h1>
+              {match.awayTeamBadge ? (
+                <img 
+                  src={match.awayTeamBadge} 
+                  alt={match.awayTeam}
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                  onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                />
+              ) : (
+                <TeamLogo teamName={match.awayTeam} sport={match.sport} size="md" />
               )}
             </div>
-
-            {/* Teams & Score */}
-            <div className="flex items-center justify-center gap-4 md:gap-8 w-full max-w-lg">
-              {/* Home Team */}
-              <div className="flex-1 flex flex-col items-center gap-1">
-                {match.homeTeamBadge ? (
-                  <img 
-                    src={match.homeTeamBadge} 
-                    alt={match.homeTeam}
-                    className="w-10 h-10 md:w-14 md:h-14 object-contain"
-                  />
-                ) : (
-                  <TeamLogo teamName={match.homeTeam} sport={match.sport} size="md" />
-                )}
-                <span className="text-xs md:text-sm font-medium text-foreground text-center line-clamp-2">
-                  {match.homeTeam}
-                </span>
-              </div>
-
-              {/* Score */}
-              <div className="flex flex-col items-center">
-                {match.isLive && match.homeScore !== null && match.awayScore !== null ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl md:text-4xl font-bold text-foreground">{match.homeScore}</span>
-                    <span className="text-lg md:text-2xl text-muted-foreground">-</span>
-                    <span className="text-2xl md:text-4xl font-bold text-foreground">{match.awayScore}</span>
-                  </div>
-                ) : (
-                  <span className="text-lg md:text-xl font-bold text-muted-foreground">VS</span>
-                )}
-                {match.progress && match.isLive && (
-                  <span className="text-xs text-red-500 font-medium">{match.progress}</span>
-                )}
-                {!match.isLive && (
-                  <span className="text-xs text-muted-foreground">
-                    {format(matchDate, 'h:mm a')}
-                  </span>
-                )}
-              </div>
-
-              {/* Away Team */}
-              <div className="flex-1 flex flex-col items-center gap-1">
-                {match.awayTeamBadge ? (
-                  <img 
-                    src={match.awayTeamBadge} 
-                    alt={match.awayTeam}
-                    className="w-10 h-10 md:w-14 md:h-14 object-contain"
-                  />
-                ) : (
-                  <TeamLogo teamName={match.awayTeam} sport={match.sport} size="md" />
-                )}
-                <span className="text-xs md:text-sm font-medium text-foreground text-center line-clamp-2">
-                  {match.awayTeam}
-                </span>
-              </div>
-            </div>
-
-            {/* Match Info */}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap justify-center">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                <span>{format(matchDate, 'EEE, do MMM')}</span>
-              </div>
-              {match.venue && (
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  <span>{match.venue}</span>
-                </div>
-              )}
-            </div>
+            <p className="text-sm md:text-base text-gray-400">{match.league} • {format(matchDate, 'EEE, do MMM h:mm a')}</p>
           </div>
         </div>
-      </div>
-
-      {/* Player Settings Panel */}
-      {showPlayerSettings && currentStream && (
-        <div className="container mx-auto px-4 pb-4">
-          <div className="bg-card rounded-xl p-4 border border-border">
-            <h3 className="text-foreground font-semibold mb-3">Video Player Settings</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {[
-                { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working option' },
-                { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Shows provider controls' },
-                { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls' },
-                { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe' },
-              ].map((player) => (
-                <button
-                  key={player.type}
-                  onClick={() => setPlayerType(player.type)}
-                  className={`p-3 rounded-lg border text-left transition-all ${
-                    playerType === player.type
-                      ? 'bg-primary border-primary text-primary-foreground'
-                      : 'bg-muted border-border text-foreground hover:bg-accent'
-                  }`}
-                >
-                  <div className="font-medium text-sm">{player.name}</div>
-                  <div className="text-xs opacity-70 mt-1">{player.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content: Video + Broadcasters */}
-      <div className="container mx-auto px-4 pb-8">
+        
+        {/* Video Player Section - Same layout as Match.tsx */}
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Left: Video Player */}
-          <div className="flex-1 min-w-0" ref={playerRef}>
+          <div className="flex-1 min-w-0" ref={playerRef} id="stream-container" data-stream-container>
             {currentStream ? (
               <div className="rounded-xl overflow-hidden border border-border">
                 <ChannelPlayerSelector
@@ -359,125 +320,186 @@ const SelectedMatchPlayer = () => {
                 />
               </div>
             ) : (
-              <div className="bg-card rounded-xl p-8 text-center border border-border aspect-video flex flex-col items-center justify-center">
-                <Tv className="w-16 h-16 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-bold text-foreground mb-2">No Stream Selected</h3>
-                <p className="text-muted-foreground mb-4">
+              <div className="bg-sports-card rounded-xl p-8 text-center border border-border aspect-video flex flex-col items-center justify-center">
+                <Tv className="w-16 h-16 text-gray-500 mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">No Stream Selected</h3>
+                <p className="text-gray-400 mb-4">
                   {streamableChannels.length > 0 
-                    ? 'Select a broadcaster to start watching'
+                    ? 'Select a stream source below to start watching'
                     : 'No streams available for this match yet'}
                 </p>
                 {streamableChannels.length === 0 && (
-                  <Link to="/live">
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Tv className="w-4 h-4 mr-2" />
-                      Browse All Live Streams
-                    </Button>
-                  </Link>
+                  <Button onClick={() => navigate('/live')} className="bg-primary hover:bg-primary/90">
+                    <Tv className="w-4 h-4 mr-2" />
+                    Browse All Live Streams
+                  </Button>
                 )}
               </div>
             )}
-          </div>
-
-          {/* Right: Broadcasters List (Desktop) */}
-          <div className="hidden lg:block lg:w-80">
-            <div className="bg-card rounded-xl border border-border overflow-hidden sticky top-20">
-              <div className="p-4 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <Radio className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-foreground">Broadcasters</h3>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {streamableChannels.length} available channels
-                </p>
-              </div>
-              
-              <ScrollArea className="h-[400px]">
-                <div className="p-2 space-y-1">
-                  {match.channels?.map((channel, index) => {
-                    const hasStream = !!channel.embedUrl;
-                    const isActive = selectedChannel?.id === channel.id;
-                    
-                    return (
-                      <button
-                        key={channel.id || index}
-                        disabled={!hasStream}
-                        onClick={() => hasStream && handleChannelChange(channel)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${
-                          isActive 
-                            ? 'bg-primary text-primary-foreground' 
-                            : hasStream 
-                              ? 'hover:bg-muted text-foreground' 
-                              : 'opacity-40 cursor-not-allowed text-muted-foreground'
-                        }`}
-                      >
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                          isActive ? 'bg-primary-foreground' : hasStream ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground'
-                        }`} />
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">
-                            {channel.name}
+            
+            {/* Stream Sources - Similar to StreamSources component */}
+            {streamableChannels.length > 0 && (
+              <Card className="bg-sports-card border-border mt-4">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-semibold flex items-center gap-2">
+                      <Play className="w-4 h-4 text-primary" />
+                      Available Streams
+                      <Badge variant="secondary" className="ml-2">
+                        {streamableChannels.length}
+                      </Badge>
+                    </h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </Button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    {streamableChannels.map((channel, index) => {
+                      const isActive = selectedChannel?.id === channel.id;
+                      
+                      return (
+                        <button
+                          key={channel.id || index}
+                          onClick={() => handleChannelChange(channel)}
+                          className={`p-3 rounded-lg border transition-all text-left ${
+                            isActive 
+                              ? 'bg-primary border-primary text-white' 
+                              : 'bg-sports-darker border-border text-gray-300 hover:border-primary hover:bg-sports-dark'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                              isActive ? 'bg-white' : 'bg-green-500 animate-pulse'
+                            }`} />
+                            <span className="text-sm font-medium truncate">{channel.name}</span>
                           </div>
                           {channel.country && (
-                            <div className="text-xs opacity-70">
-                              {channel.country}
-                            </div>
+                            <span className="text-xs opacity-60 mt-1 block">{channel.country}</span>
                           )}
-                        </div>
-                        
-                        {hasStream && (
-                          <Play className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-primary-foreground' : 'text-primary'}`} />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile: Broadcasters List */}
-        <div className="lg:hidden mt-4">
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            <div className="p-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Radio className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Broadcasters</h3>
-                <Badge variant="secondary" className="ml-auto text-xs">
-                  {streamableChannels.length} live
-                </Badge>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Live/Status Badge - Same as StreamTab */}
+            <div className="flex items-center justify-center gap-4 mt-4">
+              <div className="flex items-center gap-3">
+                {match.isLive ? (
+                  <Badge variant="destructive" className="flex items-center gap-1.5 px-3 py-1">
+                    <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+                    LIVE NOW
+                    {match.progress && ` - ${match.progress}`}
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1">
+                    <Clock size={14} />
+                    {format(matchDate, 'h:mm a')}
+                  </Badge>
+                )}
               </div>
             </div>
             
-            <div className="p-3 grid grid-cols-2 gap-2">
-              {streamableChannels.map((channel, index) => {
-                const isActive = selectedChannel?.id === channel.id;
-                
-                return (
-                  <Button
-                    key={channel.id || index}
-                    variant={isActive ? "default" : "outline"}
-                    onClick={() => handleChannelChange(channel)}
-                    className={`h-auto py-3 flex flex-col items-center gap-1 ${
-                      isActive ? 'bg-primary text-primary-foreground' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-primary-foreground' : 'bg-green-500'} animate-pulse`} />
-                      <Play className="w-3 h-3" />
-                    </div>
-                    <span className="text-xs font-medium truncate max-w-full">
-                      {channel.name}
-                    </span>
-                  </Button>
-                );
-              })}
-            </div>
+            {/* Player Type Selector */}
+            <Card className="bg-sports-card border-border mt-4">
+              <CardContent className="p-4">
+                <h3 className="text-white font-semibold mb-3">Player Options</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {[
+                    { type: 'simple' as PlayerType, name: 'Smart Player', desc: 'Best working' },
+                    { type: 'iframe' as PlayerType, name: 'Direct Embed', desc: 'Provider controls' },
+                    { type: 'custom' as PlayerType, name: 'Custom Overlay', desc: 'Visual controls' },
+                    { type: 'basic' as PlayerType, name: 'Basic Player', desc: 'Simple iframe' },
+                  ].map((player) => (
+                    <button
+                      key={player.type}
+                      onClick={() => setPlayerType(player.type)}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        playerType === player.type
+                          ? 'bg-primary border-primary text-white'
+                          : 'bg-sports-darker border-border text-gray-300 hover:border-primary'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{player.name}</div>
+                      <div className="text-xs opacity-70 mt-1">{player.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
+
+        {/* Match Details */}
+        <Card className="bg-sports-card border-border mt-8">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-bold text-white mb-4">Match Information</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <span className="text-gray-400 text-sm">Competition</span>
+                <p className="text-white font-medium">{match.league}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-sm">Sport</span>
+                <p className="text-white font-medium">{match.sportIcon} {match.sport}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-sm">Date</span>
+                <p className="text-white font-medium">{format(matchDate, 'EEEE, MMMM do')}</p>
+              </div>
+              <div>
+                <span className="text-gray-400 text-sm">Time</span>
+                <p className="text-white font-medium">{format(matchDate, 'h:mm a')}</p>
+              </div>
+            </div>
+            
+            {/* Score Section for Live Matches */}
+            {match.isLive && match.homeScore !== null && match.awayScore !== null && (
+              <div className="mt-6 pt-6 border-t border-border">
+                <div className="flex items-center justify-center gap-8">
+                  <div className="text-center">
+                    {match.homeTeamBadge && (
+                      <img src={match.homeTeamBadge} alt={match.homeTeam} className="w-12 h-12 mx-auto mb-2 object-contain" />
+                    )}
+                    <p className="text-white font-medium">{match.homeTeam}</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-white">
+                      {match.homeScore} - {match.awayScore}
+                    </div>
+                    {match.progress && (
+                      <Badge variant="destructive" className="mt-2">{match.progress}</Badge>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    {match.awayTeamBadge && (
+                      <img src={match.awayTeamBadge} alt={match.awayTeam} className="w-12 h-12 mx-auto mb-2 object-contain" />
+                    )}
+                    <p className="text-white font-medium">{match.awayTeam}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
+        <div className="container mx-auto px-4 text-center">
+          <p>© 2025 DamiTV - All rights reserved</p>
+        </div>
+      </footer>
     </div>
   );
 };
