@@ -225,6 +225,46 @@ const MatchCard: React.FC<MatchCardProps> = ({
 
   // Generate thumbnail background with priority: poster > sportsDbPoster > badges > default
   const generateThumbnail = () => {
+    // Helper function to create badge fallback - defined first to avoid hoisting issues
+    const badgeFallbackHTML = () => {
+      if (homeBadge || awayBadge) {
+        return badgeLayoutHTML();
+      }
+      return defaultImageHTML();
+    };
+
+    const createBadgeFallback = () => {
+      const div = document.createElement('div');
+      div.innerHTML = badgeFallbackHTML();
+      return div.firstElementChild as HTMLElement;
+    };
+
+    const badgeLayoutHTML = () => `
+      <div class="w-full h-full relative overflow-hidden bg-black">
+        <div class="flex items-center gap-4 z-10 relative h-full justify-center">
+          ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
+          <span class="text-white font-bold text-lg drop-shadow-sm">VS</span>
+          ${awayBadge ? badgeHTML(awayBadge, away || 'Away Team') : ''}
+        </div>
+      </div>
+    `;
+
+    const defaultImageHTML = () => `
+      <div class="w-full h-full relative overflow-hidden">
+        <img src="${fallbackBg}" alt="Match background" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black/60" />
+      </div>
+    `;
+
+    const badgeHTML = (badgeUrl: string, teamName: string) => `
+      <img 
+        src="${badgeUrl}" 
+        alt="${teamName}" 
+        class="w-12 h-12 object-contain drop-shadow-md"
+        onerror="this.style.display='none'"
+      />
+    `;
+
     // Priority 1: Use API poster or SportsDB poster if available
     const posterToUse = match.poster || sportsDbPoster;
     
@@ -254,54 +294,6 @@ const MatchCard: React.FC<MatchCardProps> = ({
       );
     }
 
-    // Helper function to create badge fallback
-    const createBadgeFallback = () => {
-      const div = document.createElement('div');
-      div.innerHTML = badgeFallbackHTML();
-      return div.firstElementChild as HTMLElement;
-    };
-
-    const badgeFallbackHTML = () => {
-      if (homeBadge || awayBadge) {
-        return badgeLayoutHTML();
-      }
-      return defaultImageHTML();
-    };
-
-    const badgeLayoutHTML = () => `
-      <div class="w-full h-full relative overflow-hidden bg-black">
-        <div class="flex items-center gap-4 z-10 relative h-full justify-center">
-          ${homeBadge ? badgeHTML(homeBadge, home || 'Home Team') : ''}
-          <span class="text-white font-bold text-lg drop-shadow-sm">VS</span>
-          ${awayBadge ? badgeHTML(awayBadge, away || 'Away Team') : ''}
-        </div>
-      </div>
-    `;
-
-    const badgeHTML = (badgeUrl: string, altText: string) => `
-      <div class="flex flex-col items-center">
-        <img 
-          src="${badgeUrl}" 
-          alt="${altText}" 
-          class="w-14 h-14 object-contain drop-shadow-md filter brightness-110" 
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
-        />
-        <div class="w-14 h-14 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold" style="display:none;">
-          ${altText.substring(0, 2).toUpperCase()}
-        </div>
-        <span class="text-white text-xs font-medium mt-1 text-center truncate max-w-[60px] drop-shadow-sm">${altText}</span>
-      </div>
-    `;
-
-    const defaultImageHTML = () => {
-      return `
-        <div class="w-full h-full relative overflow-hidden bg-black">
-          <div class="absolute inset-0 flex items-center justify-center z-10">
-            <span class="text-white font-bold text-2xl drop-shadow-lg tracking-wide">DAMITV</span>
-          </div>
-        </div>
-      `;
-    };
 
     // Priority 2: Use team badges with plain black background if available
     if (homeBadge || awayBadge) {
