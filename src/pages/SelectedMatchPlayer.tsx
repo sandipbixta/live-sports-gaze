@@ -6,6 +6,7 @@ import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
 import { usePopularMatchesCache } from '@/hooks/usePopularMatches';
+import { getChannelsBySport, CDNChannel } from '@/services/cdnLiveService';
 
 // Direct imports for faster initial load
 import TelegramBanner from '@/components/TelegramBanner';
@@ -171,6 +172,7 @@ const SelectedMatchPlayer = () => {
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
+  const [cdnChannels, setCdnChannels] = useState<CDNChannel[]>([]);
 
   // Initialize streams from cached match instantly
   useEffect(() => {
@@ -184,6 +186,40 @@ const SelectedMatchPlayer = () => {
       }
     }
   }, []);
+
+  // Fetch CDN channels as fallback
+  const fetchCDNChannelsFallback = async (sport: string) => {
+    try {
+      console.log('📺 Fetching CDN channels as fallback for sport:', sport);
+      const channels = await getChannelsBySport(sport || 'football');
+      
+      if (channels.length > 0) {
+        setCdnChannels(channels);
+        console.log(`✅ Found ${channels.length} CDN channels as fallback`);
+        
+        // Convert CDN channels to streams format
+        const cdnStreams: Record<string, Stream[]> = {};
+        channels.forEach((channel, idx) => {
+          const streamKey = `cdn-${channel.code}`;
+          cdnStreams[streamKey] = [{
+            id: channel.code,
+            streamNo: idx + 1,
+            language: 'English',
+            hd: true,
+            embedUrl: channel.url,
+            source: 'CDN Channel',
+            name: channel.name,
+            image: channel.image || ''
+          }];
+        });
+        
+        return cdnStreams;
+      }
+    } catch (error) {
+      console.error('Failed to fetch CDN channels:', error);
+    }
+    return {};
+  };
 
   const fetchMatch = async () => {
     if (!matchId) return;
@@ -242,13 +278,31 @@ const SelectedMatchPlayer = () => {
         
         setMatch(convertedMatch);
         const { streams, groupedStreams } = setupStreams(convertedMatch);
-        setAllStreams(groupedStreams);
         
-        // Only set streams if not already set
-        if (!currentStream && streams.length > 0) {
-          const firstStream = streams[0];
-          setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
-          setCurrentStream(firstStream);
+        // If no streams available, fetch CDN channels as fallback
+        if (streams.length === 0) {
+          console.log('⚠️ No streams from API, fetching CDN channels as fallback...');
+          const cdnStreams = await fetchCDNChannelsFallback(foundMatch.category || 'football');
+          
+          const combinedStreams = { ...groupedStreams, ...cdnStreams };
+          setAllStreams(combinedStreams);
+          
+          // Set first CDN channel as active if no current stream
+          const cdnStreamList = Object.values(cdnStreams).flat();
+          if (!currentStream && cdnStreamList.length > 0) {
+            const firstStream = cdnStreamList[0];
+            setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
+            setCurrentStream(firstStream);
+          }
+        } else {
+          setAllStreams(groupedStreams);
+          
+          // Only set streams if not already set
+          if (!currentStream && streams.length > 0) {
+            const firstStream = streams[0];
+            setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
+            setCurrentStream(firstStream);
+          }
         }
       }
     } catch (err) {
