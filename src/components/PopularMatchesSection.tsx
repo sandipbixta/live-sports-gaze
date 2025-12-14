@@ -46,37 +46,41 @@ const convertProgressToMinutes = (progress: string): string => {
   return progress;
 };
 
-interface CDNChannel {
+interface StreamSource {
+  source: string;
   id: string;
-  name: string;
-  country: string;
-  logo: string;
-  embedUrl: string;
 }
 
 interface PopularMatch {
   id: string;
   title: string;
-  homeTeam: string;
-  awayTeam: string;
-  homeTeamBadge: string | null;
-  awayTeamBadge: string | null;
-  homeScore: string | null;
-  awayScore: string | null;
-  sport: string;
-  sportIcon: string;
-  league: string;
-  leagueId: string;
-  date: string;
-  time: string;
-  timestamp: string;
-  status: string | null;
-  progress: string | null;
-  poster: string | null;
+  category: string;
+  date: number;
+  popular: boolean;
+  teams: {
+    home: { name: string; badge?: string };
+    away: { name: string; badge?: string };
+  };
+  sources: StreamSource[];
+  poster?: string;
+  tournament?: string;
   isLive: boolean;
-  isFinished: boolean;
-  channels: CDNChannel[];
+  score?: { home?: string; away?: string };
+  progress?: string;
   priority: number;
+  // Legacy fields for backward compatibility
+  homeTeam?: string;
+  awayTeam?: string;
+  homeTeamBadge?: string;
+  awayTeamBadge?: string;
+  homeScore?: string;
+  awayScore?: string;
+  sport?: string;
+  sportIcon?: string;
+  league?: string;
+  timestamp?: string;
+  isFinished?: boolean;
+  channels?: { id: string; name: string; embedUrl: string }[];
 }
 
 // Countdown hook
@@ -128,17 +132,30 @@ const PopularMatchCard: React.FC<{
   const [imgError, setImgError] = useState({ home: false, away: false, poster: false });
   const [fetchedPoster, setFetchedPoster] = useState<string | null>(null);
   const [fetchedBadges, setFetchedBadges] = useState<{ home: string | null; away: string | null }>({ home: null, away: null });
-  const countdown = useCountdown(match.timestamp);
   
-  const hasStream = match.channels.length > 0;
+  // Extract data with backward compatibility
+  const homeTeam = match.teams?.home?.name || match.homeTeam || 'TBD';
+  const awayTeam = match.teams?.away?.name || match.awayTeam || 'TBD';
+  const homeBadgeFromMatch = match.teams?.home?.badge || match.homeTeamBadge;
+  const awayBadgeFromMatch = match.teams?.away?.badge || match.awayTeamBadge;
+  const matchDate = typeof match.date === 'number' ? match.date : new Date(match.timestamp || match.date).getTime();
+  const league = match.tournament || match.league || match.category || '';
+  const sportIcon = match.sportIcon || '⚽';
+  const homeScore = match.score?.home || match.homeScore;
+  const awayScore = match.score?.away || match.awayScore;
+  
+  const countdown = useCountdown(new Date(matchDate).toISOString());
+  
+  // Check for streams - support both new format (sources) and old format (channels)
+  const hasStream = (match.sources?.length || 0) > 0 || (match.channels?.length || 0) > 0;
 
   // Fetch poster and badges if not provided
   useEffect(() => {
     const fetchImages = async () => {
       // Try to get event poster first
-      if (!match.poster && match.homeTeam && match.awayTeam) {
+      if (!match.poster && homeTeam && awayTeam) {
         try {
-          const eventData = await searchEvent(match.homeTeam, match.awayTeam);
+          const eventData = await searchEvent(homeTeam, awayTeam);
           if (eventData?.poster || eventData?.thumb) {
             setFetchedPoster(eventData.poster || eventData.thumb);
           }
@@ -148,9 +165,9 @@ const PopularMatchCard: React.FC<{
       }
 
       // Fetch team badges if not provided
-      if (!match.homeTeamBadge && match.homeTeam) {
+      if (!homeBadgeFromMatch && homeTeam) {
         try {
-          const homeTeamData = await searchTeam(match.homeTeam);
+          const homeTeamData = await searchTeam(homeTeam);
           if (homeTeamData?.badge) {
             setFetchedBadges(prev => ({ ...prev, home: homeTeamData.badge }));
           }
@@ -159,9 +176,9 @@ const PopularMatchCard: React.FC<{
         }
       }
 
-      if (!match.awayTeamBadge && match.awayTeam) {
+      if (!awayBadgeFromMatch && awayTeam) {
         try {
-          const awayTeamData = await searchTeam(match.awayTeam);
+          const awayTeamData = await searchTeam(awayTeam);
           if (awayTeamData?.badge) {
             setFetchedBadges(prev => ({ ...prev, away: awayTeamData.badge }));
           }
@@ -172,11 +189,11 @@ const PopularMatchCard: React.FC<{
     };
 
     fetchImages();
-  }, [match.homeTeam, match.awayTeam, match.poster, match.homeTeamBadge, match.awayTeamBadge]);
+  }, [homeTeam, awayTeam, match.poster, homeBadgeFromMatch, awayBadgeFromMatch]);
 
   const posterToUse = match.poster || fetchedPoster;
-  const homeBadge = match.homeTeamBadge || fetchedBadges.home;
-  const awayBadge = match.awayTeamBadge || fetchedBadges.away;
+  const homeBadge = homeBadgeFromMatch || fetchedBadges.home;
+  const awayBadge = awayBadgeFromMatch || fetchedBadges.away;
 
   const generateThumbnail = () => {
     // Priority 1: Use poster/thumb image
@@ -203,21 +220,21 @@ const PopularMatchCard: React.FC<{
               <div className="flex flex-col items-center">
                 <img
                   src={homeBadge}
-                  alt={match.homeTeam}
+                  alt={homeTeam}
                   className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, home: true }))}
                 />
                 <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
-                  {match.homeTeam}
+                  {homeTeam}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
                 <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                  {match.homeTeam.substring(0, 2).toUpperCase()}
+                  {homeTeam.substring(0, 2).toUpperCase()}
                 </div>
                 <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
-                  {match.homeTeam}
+                  {homeTeam}
                 </span>
               </div>
             )}
@@ -226,21 +243,21 @@ const PopularMatchCard: React.FC<{
               <div className="flex flex-col items-center">
                 <img
                   src={awayBadge}
-                  alt={match.awayTeam}
+                  alt={awayTeam}
                   className="w-10 h-10 object-contain drop-shadow-md filter brightness-110"
                   onError={() => setImgError(prev => ({ ...prev, away: true }))}
                 />
                 <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
-                  {match.awayTeam}
+                  {awayTeam}
                 </span>
               </div>
             ) : (
               <div className="flex flex-col items-center">
                 <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">
-                  {match.awayTeam.substring(0, 2).toUpperCase()}
+                  {awayTeam.substring(0, 2).toUpperCase()}
                 </div>
                 <span className="text-white text-[10px] font-medium mt-1 text-center truncate max-w-[50px] drop-shadow-sm">
-                  {match.awayTeam}
+                  {awayTeam}
                 </span>
               </div>
             )}
@@ -259,7 +276,7 @@ const PopularMatchCard: React.FC<{
     );
   };
 
-  const matchDate = new Date(match.timestamp);
+  const displayDate = new Date(matchDate);
 
   return (
     <div 
@@ -303,22 +320,22 @@ const PopularMatchCard: React.FC<{
         <div className="p-2 flex flex-col gap-1 flex-1 bg-card">
           {/* Sport Icon • Tournament */}
           <p className="text-[10px] text-muted-foreground truncate">
-            {match.sportIcon || '⚽'} {match.league}
+            {sportIcon} {league}
           </p>
           
           {/* Home Team with Score */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               {homeBadge ? (
-                <img src={homeBadge} alt={match.homeTeam} className="w-6 h-6 object-contain flex-shrink-0" />
+                <img src={homeBadge} alt={homeTeam} className="w-6 h-6 object-contain flex-shrink-0" />
               ) : (
-                <TeamLogo teamName={match.homeTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+                <TeamLogo teamName={homeTeam} sport={match.category || "Soccer"} size="sm" showFallbackIcon={false} />
               )}
-              <span className="text-xs font-medium text-foreground truncate">{match.homeTeam}</span>
+              <span className="text-xs font-medium text-foreground truncate">{homeTeam}</span>
             </div>
-            {match.isLive && match.homeScore && (
+            {match.isLive && homeScore && (
               <span className="text-foreground font-bold text-sm ml-2 min-w-[24px] text-right tabular-nums">
-                {match.homeScore}
+                {homeScore}
               </span>
             )}
           </div>
@@ -327,15 +344,15 @@ const PopularMatchCard: React.FC<{
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
               {awayBadge ? (
-                <img src={awayBadge} alt={match.awayTeam} className="w-6 h-6 object-contain flex-shrink-0" />
+                <img src={awayBadge} alt={awayTeam} className="w-6 h-6 object-contain flex-shrink-0" />
               ) : (
-                <TeamLogo teamName={match.awayTeam} sport={match.sport || "Soccer"} size="sm" showFallbackIcon={false} />
+                <TeamLogo teamName={awayTeam} sport={match.category || "Soccer"} size="sm" showFallbackIcon={false} />
               )}
-              <span className="text-xs font-medium text-foreground truncate">{match.awayTeam}</span>
+              <span className="text-xs font-medium text-foreground truncate">{awayTeam}</span>
             </div>
-            {match.isLive && match.awayScore && (
+            {match.isLive && awayScore && (
               <span className="text-foreground font-bold text-sm ml-2 min-w-[24px] text-right tabular-nums">
-                {match.awayScore}
+                {awayScore}
               </span>
             )}
           </div>
@@ -348,7 +365,7 @@ const PopularMatchCard: React.FC<{
               </span>
             ) : (
               <p className="text-[10px] text-red-500 font-medium">
-                {format(matchDate, 'EEE, do MMM, h:mm a')}
+                {format(displayDate, 'EEE, do MMM, h:mm a')}
               </p>
             )}
           </div>
@@ -400,7 +417,8 @@ const PopularMatchesSection: React.FC = () => {
     // Initialize with cached data immediately
     const cached = getCachedMatches();
     if (cached) {
-      const activeMatches = cached.matches.filter((m: PopularMatch) => !m.isFinished);
+      // Filter out finished matches - isFinished may not exist in new format
+      const activeMatches = cached.matches.filter((m: PopularMatch) => m.isFinished !== true);
       return activeMatches;
     }
     return [];
@@ -408,7 +426,7 @@ const PopularMatchesSection: React.FC = () => {
   const [liveCount, setLiveCount] = useState(() => {
     const cached = getCachedMatches();
     if (cached) {
-      return cached.matches.filter((m: PopularMatch) => m.isLive && !m.isFinished).length;
+      return cached.matches.filter((m: PopularMatch) => m.isLive && m.isFinished !== true).length;
     }
     return 0;
   });
@@ -432,7 +450,8 @@ const PopularMatchesSection: React.FC = () => {
       }
       
       const fetchedMatches = data?.matches || [];
-      const activeMatches = fetchedMatches.filter((m: PopularMatch) => !m.isFinished);
+      // Filter out finished matches - isFinished may not exist in new format
+      const activeMatches = fetchedMatches.filter((m: PopularMatch) => m.isFinished !== true);
       
       // Cache the fresh data
       setCachedMatches(activeMatches);
