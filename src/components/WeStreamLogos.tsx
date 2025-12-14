@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface LeagueInfo {
   id: string;
@@ -6,66 +6,33 @@ interface LeagueInfo {
   badge: string;
 }
 
-const POPULAR_LEAGUES = [
-  { id: '4328', name: 'Premier League' },
-  { id: '4335', name: 'La Liga' },
-  { id: '4331', name: 'Bundesliga' },
-  { id: '4332', name: 'Serie A' },
-  { id: '4334', name: 'Ligue 1' },
-  { id: '4480', name: 'Champions League' },
-  { id: '4387', name: 'NBA' },
-  { id: '4391', name: 'NFL' },
-  { id: '4424', name: 'IPL' },
-  { id: '4488', name: 'BBL' },
-  { id: '4370', name: 'Formula 1' },
-  { id: '4443', name: 'UFC' },
-  { id: '4380', name: 'NHL' },
-  { id: '4346', name: 'MLS' },
-  { id: '4344', name: 'Eredivisie' },
-  { id: '4358', name: 'Liga Portugal' },
+// Use reliable CDN logos that don't have CORS issues
+const POPULAR_LEAGUES: LeagueInfo[] = [
+  { id: '4328', name: 'Premier League', badge: 'https://www.thesportsdb.com/images/media/league/badge/i6o0kh1549879062.png' },
+  { id: '4335', name: 'La Liga', badge: 'https://www.thesportsdb.com/images/media/league/badge/7onmyv1534768460.png' },
+  { id: '4331', name: 'Bundesliga', badge: 'https://www.thesportsdb.com/images/media/league/badge/0j55yv1534764799.png' },
+  { id: '4332', name: 'Serie A', badge: 'https://www.thesportsdb.com/images/media/league/badge/ocy2fe1566216901.png' },
+  { id: '4334', name: 'Ligue 1', badge: 'https://www.thesportsdb.com/images/media/league/badge/8f5jmf1516458074.png' },
+  { id: '4480', name: 'Champions League', badge: 'https://www.thesportsdb.com/images/media/league/badge/2hwqmm1720696754.png' },
+  { id: '4387', name: 'NBA', badge: 'https://www.thesportsdb.com/images/media/league/badge/g6btoc1723153568.png' },
+  { id: '4391', name: 'NFL', badge: 'https://www.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png' },
+  { id: '4424', name: 'IPL', badge: 'https://www.thesportsdb.com/images/media/league/badge/5r1opy1462466689.png' },
+  { id: '4488', name: 'BBL', badge: 'https://www.thesportsdb.com/images/media/league/badge/48q4te1529416122.png' },
+  { id: '4370', name: 'Formula 1', badge: 'https://www.thesportsdb.com/images/media/league/badge/w28ts61708717496.png' },
+  { id: '4443', name: 'UFC', badge: 'https://www.thesportsdb.com/images/media/league/badge/xxutry1421792574.png' },
+  { id: '4380', name: 'NHL', badge: 'https://www.thesportsdb.com/images/media/league/badge/w2qyaq1723157441.png' },
+  { id: '4346', name: 'MLS', badge: 'https://www.thesportsdb.com/images/media/league/badge/dqo85z1549879260.png' },
+  { id: '4344', name: 'Eredivisie', badge: 'https://www.thesportsdb.com/images/media/league/badge/5j6p9b1637840460.png' },
+  { id: '4358', name: 'Liga Portugal', badge: 'https://www.thesportsdb.com/images/media/league/badge/k8pert1692469958.png' },
 ];
 
-const SPORTS_DB_API_KEY = '751945';
-
 const WeStreamLogos: React.FC = () => {
-  const [leagues, setLeagues] = useState<LeagueInfo[]>([]);
-  const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const fetchLeagueLogos = async () => {
-      const fetchedLeagues: LeagueInfo[] = [];
-
-      for (const league of POPULAR_LEAGUES) {
-        try {
-          const response = await fetch(
-            `https://www.thesportsdb.com/api/v1/json/${SPORTS_DB_API_KEY}/lookupleague.php?id=${league.id}`
-          );
-          const data = await response.json();
-          if (data.leagues && data.leagues[0]) {
-            const leagueData = data.leagues[0];
-            fetchedLeagues.push({
-              id: league.id,
-              name: leagueData.strLeague || league.name,
-              badge: leagueData.strBadge || leagueData.strLogo || '',
-            });
-          }
-        } catch (err) {
-          console.error(`Error fetching logo for ${league.name}:`, err);
-        }
-      }
-
-      setLeagues(fetchedLeagues);
-      setLoading(false);
-    };
-
-    fetchLeagueLogos();
-  }, []);
 
   // Auto-scroll animation
   useEffect(() => {
     const scrollContainer = scrollRef.current;
-    if (!scrollContainer || leagues.length === 0) return;
+    if (!scrollContainer) return;
 
     let animationId: number;
     let scrollPosition = 0;
@@ -96,23 +63,10 @@ const WeStreamLogos: React.FC = () => {
       scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
       scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [leagues]);
-
-  if (loading) {
-    return (
-      <div className="bg-card/50 rounded-xl p-6 border border-border">
-        <div className="h-6 w-32 bg-muted rounded animate-pulse mb-4" />
-        <div className="flex gap-8">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="w-16 h-16 rounded-lg bg-muted animate-pulse flex-shrink-0" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   // Duplicate leagues for seamless infinite scroll
-  const duplicatedLeagues = [...leagues, ...leagues];
+  const duplicatedLeagues = [...POPULAR_LEAGUES, ...POPULAR_LEAGUES];
 
   return (
     <div className="overflow-hidden py-4">
@@ -132,18 +86,12 @@ const WeStreamLogos: React.FC = () => {
             className="flex-shrink-0 group cursor-pointer"
           >
             <div className="w-20 h-20 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-              {league.badge ? (
-                <img
-                  src={league.badge}
-                  alt={league.name}
-                  className="w-full h-full object-contain filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
-                  loading="lazy"
-                />
-              ) : (
-                <span className="text-xs text-muted-foreground text-center">
-                  {league.name}
-                </span>
-              )}
+              <img
+                src={league.badge}
+                alt={league.name}
+                className="w-full h-full object-contain filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                loading="lazy"
+              />
             </div>
           </div>
         ))}
