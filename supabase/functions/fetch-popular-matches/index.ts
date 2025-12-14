@@ -224,46 +224,77 @@ async function fetchWeStreamStream(source: string, id: string): Promise<WeStream
   return [];
 }
 
-// Normalize team name for matching
+// Normalize team name for matching - more aggressive normalization
 function normalizeTeamName(name: string): string {
   return name
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\b(fc|sc|cf|afc|united|city|club)\b/g, '')
+    .replace(/\b(fc|sc|cf|afc|united|city|club|the|de|la|los|las|el|real|sporting|athletic|atletico|inter|ac|as|ss|us|fk|sk|bk|if|gk)\b/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-// Find matching WeStream match by team names
-function findWeStreamMatch(homeTeam: string, awayTeam: string, weStreamMatches: WeStreamMatch[]): WeStreamMatch | null {
-  const normalizedHome = normalizeTeamName(homeTeam);
-  const normalizedAway = normalizeTeamName(awayTeam);
-  
-  for (const match of weStreamMatches) {
-    const wsHome = normalizeTeamName(match.teams?.home?.name || '');
-    const wsAway = normalizeTeamName(match.teams?.away?.name || '');
-    
-    // Check if team names match (either order)
-    const homeMatch = (wsHome && normalizedHome && (wsHome.includes(normalizedHome) || normalizedHome.includes(wsHome))) ||
-                      (wsHome && normalizedAway && (wsHome.includes(normalizedAway) || normalizedAway.includes(wsHome)));
-    const awayMatch = (wsAway && normalizedAway && (wsAway.includes(normalizedAway) || normalizedAway.includes(wsAway))) ||
-                      (wsAway && normalizedHome && (wsAway.includes(normalizedHome) || normalizedHome.includes(wsAway)));
-    
-    // Also check match title
-    const normalizedTitle = normalizeTeamName(match.title || '');
-    const titleMatch = normalizedTitle.includes(normalizedHome) && normalizedTitle.includes(normalizedAway);
-    
-    if ((homeMatch && awayMatch) || titleMatch) {
-      console.log(`Found WeStream match for ${homeTeam} vs ${awayTeam}: ${match.title}`);
-      return match;
-    }
-  }
-  return null;
+// Extract key words from team name for fuzzy matching
+function getTeamKeywords(name: string): string[] {
+  const normalized = normalizeTeamName(name);
+  return normalized.split(' ').filter(word => word.length >= 3);
 }
 
-// Get stream channels from WeStream match
+// Find matching WeStream match by team names - improved fuzzy matching
+function findWeStreamMatch(homeTeam: string, awayTeam: string, weStreamMatches: WeStreamMatch[]): WeStreamMatch | null {
+  const homeKeywords = getTeamKeywords(homeTeam);
+  const awayKeywords = getTeamKeywords(awayTeam);
+  
+  let bestMatch: WeStreamMatch | null = null;
+  let bestScore = 0;
+  
+  for (const match of weStreamMatches) {
+    let score = 0;
+    
+    // Check teams object
+    const wsHome = match.teams?.home?.name || '';
+    const wsAway = match.teams?.away?.name || '';
+    const wsHomeKeywords = getTeamKeywords(wsHome);
+    const wsAwayKeywords = getTeamKeywords(wsAway);
+    
+    // Check keyword matches in teams
+    for (const keyword of homeKeywords) {
+      if (wsHomeKeywords.some(wk => wk.includes(keyword) || keyword.includes(wk))) score += 2;
+      if (wsAwayKeywords.some(wk => wk.includes(keyword) || keyword.includes(wk))) score += 1;
+    }
+    for (const keyword of awayKeywords) {
+      if (wsAwayKeywords.some(wk => wk.includes(keyword) || keyword.includes(wk))) score += 2;
+      if (wsHomeKeywords.some(wk => wk.includes(keyword) || keyword.includes(wk))) score += 1;
+    }
+    
+    // Also check match title
+    const titleKeywords = getTeamKeywords(match.title || '');
+    for (const keyword of homeKeywords) {
+      if (titleKeywords.some(tk => tk.includes(keyword) || keyword.includes(tk))) score += 1;
+    }
+    for (const keyword of awayKeywords) {
+      if (titleKeywords.some(tk => tk.includes(keyword) || keyword.includes(tk))) score += 1;
+    }
+    
+    // Require minimum score to consider it a match
+    if (score > bestScore && score >= 3) {
+      bestScore = score;
+      bestMatch = match;
+    }
+  }
+  
+  if (bestMatch) {
+    console.log(`Found WeStream match for "${homeTeam} vs ${awayTeam}" -> "${bestMatch.title}" (score: ${bestScore})`);
+  }
+  
+  return bestMatch;
+}
+
+// Get stream channels from WeStream match - create embed URLs directly
 async function getWeStreamChannels(weStreamMatch: WeStreamMatch): Promise<StreamChannel[]> {
   const channels: StreamChannel[] = [];
+  const WESTREAM_EMBED = 'https://westream.su/embed';
   
   if (!weStreamMatch.sources || weStreamMatch.sources.length === 0) {
     console.log(`No sources for match: ${weStreamMatch.title}`);
@@ -272,41 +303,30 @@ async function getWeStreamChannels(weStreamMatch: WeStreamMatch): Promise<Stream
   
   console.log(`Getting streams for ${weStreamMatch.title} with ${weStreamMatch.sources.length} sources`);
   
-  // Fetch streams for each source (limit to first 3 sources for performance)
-  const sourcesToFetch = weStreamMatch.sources.slice(0, 3);
-  
-  for (const source of sourcesToFetch) {
-    try {
-      const streams = await fetchWeStreamStream(source.source, source.id);
-      
-      for (const stream of streams) {
-        channels.push({
-          id: `${source.source}-${stream.id || stream.streamNo}`,
-          name: `${stream.language || 'Stream'} ${stream.hd ? 'HD' : 'SD'} #${stream.streamNo}`,
-          country: stream.language || 'EN',
-          logo: '', // WeStream doesn't provide channel logos
-          embedUrl: stream.embedUrl || `${WESTREAM_API}/embed/${source.source}/${source.id}/${stream.streamNo}`,
-        });
-      }
-    } catch (error) {
-      console.error(`Error fetching streams for ${source.source}/${source.id}:`, error);
-    }
-  }
-  
-  // If no streams fetched via API, create embed URLs from sources directly
-  if (channels.length === 0) {
-    for (const source of weStreamMatch.sources.slice(0, 5)) {
+  // Create embed URLs directly from sources (more reliable than fetching stream details)
+  for (const source of weStreamMatch.sources.slice(0, 5)) {
+    // Add primary stream
+    channels.push({
+      id: `${source.source}-${source.id}`,
+      name: `English HD #${channels.length + 1}`,
+      country: 'English',
+      logo: '',
+      embedUrl: `${WESTREAM_EMBED}/${source.source}/${source.id}/1`,
+    });
+    
+    // Add secondary stream for variety
+    if (channels.length < 3) {
       channels.push({
-        id: `${source.source}-${source.id}`,
-        name: `${source.source.toUpperCase()} Stream`,
-        country: 'EN',
+        id: `${source.source}-${source.id}-2`,
+        name: `English SD #${channels.length + 1}`,
+        country: 'English',
         logo: '',
-        embedUrl: `${WESTREAM_API}/embed/${source.source}/${source.id}/1`,
+        embedUrl: `${WESTREAM_EMBED}/${source.source}/${source.id}/2`,
       });
     }
   }
   
-  console.log(`Got ${channels.length} stream channels for ${weStreamMatch.title}`);
+  console.log(`Created ${channels.length} stream channels for ${weStreamMatch.title}`);
   return channels;
 }
 
