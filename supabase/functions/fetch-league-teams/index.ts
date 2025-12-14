@@ -6,6 +6,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map sport keys to TheSportsDB league IDs
+const LEAGUE_MAPPINGS: Record<string, { leagueId: string; sport: string }> = {
+  'soccer_epl': { leagueId: '4328', sport: 'Soccer' },
+  'soccer_spain_la_liga': { leagueId: '4335', sport: 'Soccer' },
+  'soccer_germany_bundesliga': { leagueId: '4331', sport: 'Soccer' },
+  'soccer_italy_serie_a': { leagueId: '4332', sport: 'Soccer' },
+  'soccer_france_ligue_one': { leagueId: '4334', sport: 'Soccer' },
+  'soccer_uefa_champs_league': { leagueId: '4480', sport: 'Soccer' },
+  'soccer_usa_mls': { leagueId: '4346', sport: 'Soccer' },
+  'soccer_netherlands_eredivisie': { leagueId: '4344', sport: 'Soccer' },
+  'soccer_portugal_primeira_liga': { leagueId: '4358', sport: 'Soccer' },
+  'soccer_brazil_serie_a': { leagueId: '4351', sport: 'Soccer' },
+  'soccer_argentina_primera': { leagueId: '4406', sport: 'Soccer' },
+  'basketball_nba': { leagueId: '4387', sport: 'Basketball' },
+  'americanfootball_nfl': { leagueId: '4391', sport: 'American Football' },
+  'icehockey_nhl': { leagueId: '4380', sport: 'Ice Hockey' },
+  'baseball_mlb': { leagueId: '4424', sport: 'Baseball' },
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,51 +35,40 @@ serve(async (req) => {
     
     console.log(`Fetching teams for sport: ${sportKey}`);
 
-    const apiKey = Deno.env.get('ODDS_API_KEY');
-    if (!apiKey) {
-      throw new Error('ODDS_API_KEY not configured');
-    }
+    const leagueMapping = LEAGUE_MAPPINGS[sportKey];
     
-    // Fetch events (matches) from The Odds API to extract team names
-    const eventsUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds?apiKey=${apiKey}&regions=us`;
-    console.log(`Calling API: ${eventsUrl.replace(apiKey, 'API_KEY_HIDDEN')}`);
-    
-    const eventsResponse = await fetch(eventsUrl);
-    
-    // Check if response is OK
-    if (!eventsResponse.ok) {
-      const errorText = await eventsResponse.text();
-      console.error(`API Error (${eventsResponse.status}):`, errorText);
-      throw new Error(`API returned ${eventsResponse.status}: ${errorText.substring(0, 200)}`);
-    }
-    
-    // Check content type before parsing JSON
-    const contentType = eventsResponse.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      const responseText = await eventsResponse.text();
-      console.error('Non-JSON response:', responseText.substring(0, 500));
-      throw new Error(`API returned non-JSON response (${contentType})`);
-    }
-    
-    const eventsData = await eventsResponse.json();
-
-    // Check if API returned an error object
-    if (eventsData.error) {
-      console.error('API error:', eventsData.error);
+    if (!leagueMapping) {
+      console.log(`No league mapping found for: ${sportKey}, trying to search...`);
+      // Return empty but successful response for unmapped leagues
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          message: `API Error: ${eventsData.error}`,
+          success: true, 
+          message: `No predefined mapping for ${sportKey}`,
+          count: 0,
           teams: [] 
         }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Use TheSportsDB API (free tier with API key 3)
+    const apiUrl = `https://www.thesportsdb.com/api/v1/json/3/lookup_all_teams.php?id=${leagueMapping.leagueId}`;
+    console.log(`Calling TheSportsDB API for league ID: ${leagueMapping.leagueId}`);
     
-    if (!eventsData || !Array.isArray(eventsData) || eventsData.length === 0) {
-      console.log(`No events found for sport: ${sportKey}`);
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`TheSportsDB API Error (${response.status}):`, errorText);
+      throw new Error(`TheSportsDB API returned ${response.status}`);
+    }
+    
+    const data = await response.json();
+
+    if (!data.teams || data.teams.length === 0) {
+      console.log(`No teams found for league: ${sportKey}`);
       return new Response(
-        JSON.stringify({ success: false, message: 'No events found for this sport', teams: [] }),
+        JSON.stringify({ success: true, message: 'No teams found for this league', count: 0, teams: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -70,78 +78,26 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Extract unique teams from events
-    const teamsMap = new Map();
-    
-    eventsData.forEach((event: any) => {
-      // Add home team
-      if (!teamsMap.has(event.home_team)) {
-        teamsMap.set(event.home_team, {
-          team_id: `${sportKey}_${event.home_team.toLowerCase().replace(/\s+/g, '_')}`,
-          team_name: event.home_team,
-          league_name: sportKey,
-          sport: event.sport_key,
-          logo_url: null,
-          stadium: null,
-          description: null,
-          year_founded: null,
-          country: null,
-          website: null,
-        });
-      }
-      
-      // Add away team
-      if (!teamsMap.has(event.away_team)) {
-        teamsMap.set(event.away_team, {
-          team_id: `${sportKey}_${event.away_team.toLowerCase().replace(/\s+/g, '_')}`,
-          team_name: event.away_team,
-          league_name: sportKey,
-          sport: event.sport_key,
-          logo_url: null,
-          stadium: null,
-          description: null,
-          year_founded: null,
-          country: null,
-          website: null,
-        });
-      }
-    });
+    // Transform teams data
+    const teams = data.teams.map((team: any) => ({
+      team_id: `${sportKey}_${team.idTeam}`,
+      team_name: team.strTeam,
+      league_name: sportKey,
+      sport: leagueMapping.sport,
+      logo_url: team.strBadge || team.strLogo || null,
+      stadium: team.strStadium || null,
+      description: team.strDescriptionEN ? team.strDescriptionEN.substring(0, 1000) : null,
+      year_founded: team.intFormedYear ? parseInt(team.intFormedYear) : null,
+      country: team.strCountry || null,
+      website: team.strWebsite || null,
+    }));
 
-    const teams = Array.from(teamsMap.values());
-
-    // Fetch logos from TheSportsDB for each team
-    console.log('Fetching logos from TheSportsDB...');
-    const teamsWithLogos = await Promise.all(
-      teams.map(async (team) => {
-        try {
-          const logoUrl = `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(team.team_name)}`;
-          const logoResponse = await fetch(logoUrl);
-          
-          if (logoResponse.ok) {
-            const logoData = await logoResponse.json();
-            if (logoData.teams && logoData.teams.length > 0) {
-              const teamData = logoData.teams[0];
-              return {
-                ...team,
-                logo_url: teamData.strBadge || teamData.strLogo || null,
-                stadium: teamData.strStadium || team.stadium,
-                country: teamData.strCountry || team.country,
-                year_founded: teamData.intFormedYear || team.year_founded,
-                description: teamData.strDescriptionEN || team.description
-              };
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching logo for ${team.team_name}:`, error);
-        }
-        return team;
-      })
-    );
+    console.log(`Found ${teams.length} teams from TheSportsDB`);
 
     // Upsert teams into database
-    const { data, error } = await supabase
+    const { data: upsertedData, error } = await supabase
       .from('league_teams')
-      .upsert(teamsWithLogos, { onConflict: 'team_id' })
+      .upsert(teams, { onConflict: 'team_id' })
       .select();
 
     if (error) {
@@ -149,13 +105,13 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Successfully fetched and stored ${teams.length} teams with logos`);
+    console.log(`Successfully stored ${teams.length} teams`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
         count: teams.length,
-        teams: data 
+        teams: upsertedData 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
