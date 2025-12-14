@@ -254,13 +254,6 @@ const StreamTab = ({
         </div>
       )}
       
-      {!stream && !loadingStream && (
-        <Card className="bg-sports-card border-sports mt-6">
-          <CardContent className="p-6 text-center">
-            <p className="text-gray-400">Stream will be available closer to match time.</p>
-          </CardContent>
-        </Card>
-      )}
       
       {/* Trending Matches */}
       {sortedPopularMatches.length > 0 && (
