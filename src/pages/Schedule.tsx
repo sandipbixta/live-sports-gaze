@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../hooks/use-toast';
 import { Sport, Match } from '../types/sports';
-import { fetchSports, fetchMatches, fetchAllMatches } from '../api/sportsApi';
+import { getAllMatches, getSports, getMatchesBySport, WeStreamMatch } from '../services/weStreamService';
 import SportsList from '../components/SportsList';
 import { Separator } from '../components/ui/separator';
 import { format, startOfDay, isSameDay } from 'date-fns';
@@ -15,12 +15,30 @@ import { Helmet } from 'react-helmet-async';
 import TelegramBanner from '../components/TelegramBanner';
 import SportFilterPills from '../components/live/SportFilterPills';
 
+// Convert WeStream match to our Match type
+const convertWeStreamMatch = (wsMatch: WeStreamMatch): Match => ({
+  id: wsMatch.id,
+  title: wsMatch.title,
+  category: wsMatch.category,
+  date: wsMatch.date, // WeStream date is already a timestamp (number)
+  popular: wsMatch.popular,
+  teams: wsMatch.teams ? {
+    home: wsMatch.teams.home ? { name: wsMatch.teams.home.name, badge: wsMatch.teams.home.badge } : undefined,
+    away: wsMatch.teams.away ? { name: wsMatch.teams.away.name, badge: wsMatch.teams.away.badge } : undefined,
+  } : undefined,
+  sources: wsMatch.sources,
+  tournament: wsMatch.category,
+  isLive: wsMatch.isLive,
+  score: wsMatch.score,
+  progress: wsMatch.progress,
+});
+
 const Schedule = () => {
   const { toast } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [allSportsMatches, setAllSportsMatches] = useState<Match[]>([]); // All matches from ALL sports
-  const [sportMatches, setSportMatches] = useState<Match[]>([]); // Matches for selected sport
+  const [allSportsMatches, setAllSportsMatches] = useState<Match[]>([]);
+  const [sportMatches, setSportMatches] = useState<Match[]>([]);
   const [currentDate, setCurrentDate] = useState(startOfDay(new Date()));
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -107,21 +125,27 @@ const Schedule = () => {
     return uniqueMatches;
   };
 
-  // Fetch sports and ALL matches on mount
+  // Fetch sports and ALL matches on mount using WeStream API
   useEffect(() => {
     const loadInitialData = async () => {
       setLoadingSports(true);
       setLoadingMatches(true);
       
       try {
-        // Fetch sports list
-        const sportsData = await fetchSports();
+        // Fetch sports list from WeStream
+        const weStreamSports = await getSports();
+        const sportsData: Sport[] = weStreamSports.map(s => ({
+          id: s.id,
+          name: s.name,
+        }));
         setSports(sportsData);
         
-        // Fetch ALL matches from all sports to get available dates
-        const allMatches = await fetchAllMatches();
+        // Fetch ALL matches from WeStream
+        const weStreamMatches = await getAllMatches();
+        const allMatches = weStreamMatches.map(convertWeStreamMatch);
         const uniqueAllMatches = removeDuplicatesFromMatches(allMatches);
         setAllSportsMatches(uniqueAllMatches);
+        setSportMatches(uniqueAllMatches); // Show all matches initially
         
         // Auto-select first date with matches if today has none
         if (uniqueAllMatches.length > 0) {
@@ -161,14 +185,15 @@ const Schedule = () => {
     loadInitialData();
   }, [toast]);
 
-  // Fetch matches for selected sport
+  // Fetch matches for selected sport using WeStream API
   useEffect(() => {
     if (!selectedSport) return;
     
     const loadSportMatches = async () => {
       setLoadingMatches(true);
       try {
-        const matchesData = await fetchMatches(selectedSport);
+        const weStreamMatches = await getMatchesBySport(selectedSport);
+        const matchesData = weStreamMatches.map(convertWeStreamMatch);
         const uniqueMatches = removeDuplicatesFromMatches(matchesData);
         setSportMatches(uniqueMatches);
       } catch (error) {
