@@ -17,13 +17,13 @@ import MonetizationTracker from "./components/MonetizationTracker";
 import { queryClient } from "./lib/queryClient";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 
-// Only NotFound is critical - all other pages lazy loaded
+// Only NotFound and Match are critical - other pages lazy loaded
 import NotFound from "./pages/NotFound";
+import Match from "./pages/Match";
 
-// Lazy load ALL pages including home for faster initial load
+// Lazy load ALL other pages for faster initial load
 const Index = lazy(() => import("./pages/Index"));
 const Live = lazy(() => import("./pages/Live"));
-const Match = lazy(() => import("./pages/Match"));
 
 // Lazy load non-critical pages for faster initial load
 const Schedule = lazy(() => import("./pages/Schedule"));
