@@ -54,38 +54,49 @@ interface SelectedMatch {
   channels: StreamChannel[];
 }
 
+// Safe date conversion helper
+const safeDate = (dateValue: number | string | undefined): Date => {
+  if (!dateValue) return new Date();
+  const date = new Date(dateValue);
+  return isNaN(date.getTime()) ? new Date() : date;
+};
+
 // Convert cached Match to SelectedMatch format
-const convertCachedToSelected = (match: MatchType): SelectedMatch => ({
-  id: match.id,
-  title: match.title,
-  homeTeam: match.teams?.home?.name || 'TBD',
-  awayTeam: match.teams?.away?.name || 'TBD',
-  homeTeamBadge: match.teams?.home?.badge || null,
-  awayTeamBadge: match.teams?.away?.badge || null,
-  homeScore: match.score?.home?.toString() || null,
-  awayScore: match.score?.away?.toString() || null,
-  sport: match.category || '',
-  sportIcon: '⚽',
-  league: match.tournament || match.category || '',
-  date: new Date(match.date).toISOString().split('T')[0],
-  time: new Date(match.date).toTimeString().slice(0, 8),
-  timestamp: new Date(match.date).toISOString(),
-  venue: null,
-  country: null,
-  status: match.isLive ? 'Live' : 'Upcoming',
-  progress: match.progress || null,
-  poster: match.poster || null,
-  banner: null,
-  isLive: match.isLive || false,
-  isFinished: false,
-  channels: match.sources?.map((s, idx) => ({
-    id: s.id || `stream-${idx}`,
-    name: s.name || `Stream ${idx + 1}`,
-    country: 'English',
-    logo: s.image || '',
-    embedUrl: `https://westream.su/embed/${s.source}/${s.id}/1`
-  })) || []
-});
+const convertCachedToSelected = (match: MatchType): SelectedMatch => {
+  const matchDate = safeDate(match.date);
+  
+  return {
+    id: match.id,
+    title: match.title,
+    homeTeam: match.teams?.home?.name || 'TBD',
+    awayTeam: match.teams?.away?.name || 'TBD',
+    homeTeamBadge: match.teams?.home?.badge || null,
+    awayTeamBadge: match.teams?.away?.badge || null,
+    homeScore: match.score?.home?.toString() || null,
+    awayScore: match.score?.away?.toString() || null,
+    sport: match.category || '',
+    sportIcon: '⚽',
+    league: match.tournament || match.category || '',
+    date: matchDate.toISOString().split('T')[0],
+    time: matchDate.toTimeString().slice(0, 8),
+    timestamp: matchDate.toISOString(),
+    venue: null,
+    country: null,
+    status: match.isLive ? 'Live' : 'Upcoming',
+    progress: match.progress || null,
+    poster: match.poster || null,
+    banner: null,
+    isLive: match.isLive || false,
+    isFinished: false,
+    channels: match.sources?.map((s, idx) => ({
+      id: s.id || `stream-${idx}`,
+      name: s.name || `Stream ${idx + 1}`,
+      country: 'English',
+      logo: s.image || '',
+      embedUrl: `https://westream.su/embed/${s.source}/${s.id}/1`
+    })) || []
+  };
+};
 
 // Convert SelectedMatch to MatchType for shared components
 const convertToMatchType = (match: SelectedMatch): MatchType => ({
@@ -252,7 +263,7 @@ const SelectedMatchPlayer = () => {
     return <NotFoundState />;
   }
 
-  const matchDate = new Date(match.timestamp);
+  const matchDate = safeDate(match.timestamp);
   const matchTitle = `${match.homeTeam} vs ${match.awayTeam}`;
   const matchDescription = `Watch ${matchTitle} live stream online for free on DamiTV. ${match.league} match with HD quality streaming.`;
 
