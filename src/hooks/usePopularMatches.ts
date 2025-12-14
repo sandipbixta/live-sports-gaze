@@ -84,3 +84,17 @@ export const usePopularMatches = (enabled: boolean = true) => {
 export const preloadPopularMatches = () => {
   fetchPopularMatches().catch(console.error);
 };
+
+// Get cached match instantly without network request
+export const usePopularMatchesCache = () => {
+  return {
+    getMatch: (matchId: string) => {
+      if (cachedMatches) {
+        return cachedMatches.find(m => m.id === matchId) || null;
+      }
+      return null;
+    },
+    getAllCached: () => cachedMatches,
+    isCached: () => !!cachedMatches
+  };
+};

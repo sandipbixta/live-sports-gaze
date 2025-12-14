@@ -10,21 +10,21 @@ import { Helmet } from 'react-helmet-async';
 import { isTrendingMatch } from '@/utils/popularLeagues';
 import { teamLogoService } from '@/services/teamLogoService';
 
-// Lazy load heavy components
-const TelegramBanner = lazy(() => import('@/components/TelegramBanner'));
-const SEOMetaTags = lazy(() => import('@/components/SEOMetaTags'));
-const SocialShare = lazy(() => import('@/components/SocialShare'));
-const FavoriteButton = lazy(() => import('@/components/FavoriteButton'));
-const MatchHeader = lazy(() => import('@/components/match/MatchHeader'));
-const StreamTab = lazy(() => import('@/components/match/StreamTab'));
-const MatchCard = lazy(() => import('@/components/MatchCard'));
-const MatchAnalysis = lazy(() => import('@/components/match/MatchAnalysis'));
-const ViewerStats = lazy(() => import('@/components/match/ViewerStats').then(m => ({ default: m.ViewerStats })));
-const StreamViewerDisplay = lazy(() => import('@/components/StreamViewerDisplay'));
-
-// Keep loading states as regular imports
+// Direct imports for critical components - faster initial render
+import TelegramBanner from '@/components/TelegramBanner';
+import SEOMetaTags from '@/components/SEOMetaTags';
+import SocialShare from '@/components/SocialShare';
+import FavoriteButton from '@/components/FavoriteButton';
+import MatchHeader from '@/components/match/MatchHeader';
+import StreamTab from '@/components/match/StreamTab';
+import StreamViewerDisplay from '@/components/StreamViewerDisplay';
+import { ViewerStats } from '@/components/match/ViewerStats';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
+
+// Lazy load non-critical components
+const MatchCard = lazy(() => import('@/components/MatchCard'));
+const MatchAnalysis = lazy(() => import('@/components/match/MatchAnalysis'));
 
 // Loading placeholder
 const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
@@ -203,26 +203,24 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
-      <Suspense fallback={null}>
-        <SEOMetaTags
-          title={`${matchTitle} - Live Stream | DamiTV`}
-          description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
-          keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
-          canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
-          ogImage={matchPosterUrl}
-          matchInfo={{
-            homeTeam,
-            awayTeam,
-            league: match.category || 'Football',
-            date: match.date ? new Date(match.date) : new Date(),
-          }}
-          breadcrumbs={[
-            { name: 'Home', url: 'https://damitv.pro/' },
-            { name: 'Live Matches', url: 'https://damitv.pro/live' },
-            { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/match/${sportId}/${matchId}` }
-          ]}
-        />
-      </Suspense>
+      <SEOMetaTags
+        title={`${matchTitle} - Live Stream | DamiTV`}
+        description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
+        keywords={`${homeTeam} live stream, ${awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
+        canonicalUrl={`https://damitv.pro/match/${sportId}/${matchId}`}
+        ogImage={matchPosterUrl}
+        matchInfo={{
+          homeTeam,
+          awayTeam,
+          league: match.category || 'Football',
+          date: match.date ? new Date(match.date) : new Date(),
+        }}
+        breadcrumbs={[
+          { name: 'Home', url: 'https://damitv.pro/' },
+          { name: 'Live Matches', url: 'https://damitv.pro/live' },
+          { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/match/${sportId}/${matchId}` }
+        ]}
+      />
 
       <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
@@ -259,38 +257,30 @@ const Match = () => {
         </script>
       </Helmet>
       
-      <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
-        <MatchHeader 
-          match={match} 
-          streamAvailable={!!stream && stream.id !== "error"}
-          socialShare={
-            <div className="flex items-center gap-2">
-              <Suspense fallback={null}>
-                <FavoriteButton
-                  type="match"
-                  id={matchId || ''}
-                  name={matchTitle}
-                  variant="outline"
-                />
-              </Suspense>
-              <Suspense fallback={null}>
-                <SocialShare 
-                  title={matchTitle}
-                  description={matchDescription}
-                  image={matchPosterUrl}
-                  url={`https://damitv.pro/match/${sportId}/${matchId}`}
-                />
-              </Suspense>
-            </div>
-          }
-        />
-      </Suspense>
+      <MatchHeader 
+        match={match} 
+        streamAvailable={!!stream && stream.id !== "error"}
+        socialShare={
+          <div className="flex items-center gap-2">
+            <FavoriteButton
+              type="match"
+              id={matchId || ''}
+              name={matchTitle}
+              variant="outline"
+            />
+            <SocialShare 
+              title={matchTitle}
+              description={matchDescription}
+              image={matchPosterUrl}
+              url={`https://damitv.pro/match/${sportId}/${matchId}`}
+            />
+          </div>
+        }
+      />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
-          <Suspense fallback={<LoadingPlaceholder height="h-16" />}>
-            <TelegramBanner />
-          </Suspense>
+          <TelegramBanner />
         </div>
         
         <div className="w-full flex justify-center mb-4">
@@ -322,33 +312,27 @@ const Match = () => {
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Video Player Section */}
           <div className="flex-1 min-w-0" id="stream-container" data-stream-container>
-            <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
-              <StreamTab
-                match={match}
-                stream={stream}
-                loadingStream={loadingStream}
-                activeSource={activeSource}
-                handleSourceChange={handleSourceChange}
-                popularMatches={[]}
-                sportId={sportId || ''}
-                allStreams={allStreams}
-                streamDiscovery={streamDiscovery}
-                onRefreshStreams={handleRefreshStreams}
-              />
-            </Suspense>
+            <StreamTab
+              match={match}
+              stream={stream}
+              loadingStream={loadingStream}
+              activeSource={activeSource}
+              handleSourceChange={handleSourceChange}
+              popularMatches={[]}
+              sportId={sportId || ''}
+              allStreams={allStreams}
+              streamDiscovery={streamDiscovery}
+              onRefreshStreams={handleRefreshStreams}
+            />
 
             {/* Live Viewer Count Display */}
             <div className="mt-4">
-              <Suspense fallback={<LoadingPlaceholder height="h-20" />}>
-                <StreamViewerDisplay matchId={matchId || ''} isLive={true} />
-              </Suspense>
+              <StreamViewerDisplay matchId={matchId || ''} isLive={true} />
             </div>
 
             {/* Viewer Statistics */}
             <div className="mt-4">
-              <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
-                <ViewerStats match={match} />
-              </Suspense>
+              <ViewerStats match={match} />
             </div>
           </div>
         </div>
