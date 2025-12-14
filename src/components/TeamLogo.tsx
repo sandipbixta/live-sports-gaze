@@ -67,10 +67,13 @@ const TeamLogo = ({
     return (
       <img
         src={logoUrl}
-        alt={teamName}
+        alt={`${teamName} team logo`}
         className={`${sizeClass} object-contain flex-shrink-0 ${className}`}
         onError={() => setError(true)}
         loading="lazy"
+        decoding="async"
+        width={size === 'sm' ? 24 : size === 'md' ? 32 : size === 'lg' ? 48 : 64}
+        height={size === 'sm' ? 24 : size === 'md' ? 32 : size === 'lg' ? 48 : 64}
       />
     );
   }
@@ -86,7 +89,11 @@ const TeamLogo = ({
   if (showFallbackIcon && sport) {
     const icon = getSportIcon(sport);
     return (
-      <div className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-lg flex-shrink-0 ${className}`}>
+      <div 
+        className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-lg flex-shrink-0 ${className}`}
+        role="img"
+        aria-label={`${teamName} - ${sport}`}
+      >
         {icon}
       </div>
     );
@@ -94,7 +101,11 @@ const TeamLogo = ({
 
   // Letter fallback
   return (
-    <div className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs flex-shrink-0 ${className}`}>
+    <div 
+      className={`${sizeClass} rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-xs flex-shrink-0 ${className}`}
+      role="img"
+      aria-label={teamName || 'Unknown team'}
+    >
       {teamName?.charAt(0)?.toUpperCase() || '?'}
     </div>
   );

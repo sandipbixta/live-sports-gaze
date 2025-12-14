@@ -23,7 +23,7 @@ const MobileBottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t border-border shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t border-border shadow-lg" aria-label="Mobile navigation">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           const isActive = currentPath === item.path;
@@ -32,12 +32,15 @@ const MobileBottomNav = () => {
               key={item.path}
               onClick={() => handleNavigate(item.path)}
               className="flex flex-col items-center justify-center py-1 w-full"
+              aria-label={`Navigate to ${item.title}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               <item.icon 
                 className={cn(
                   "h-5 w-5 transition-colors", 
                   isActive ? "text-foreground" : "text-muted-foreground"
-                )} 
+                )}
+                aria-hidden="true"
               />
               <span className={cn(
                 "text-xs mt-1 transition-colors",
@@ -49,7 +52,7 @@ const MobileBottomNav = () => {
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };
 

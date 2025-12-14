@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Tv } from 'lucide-react';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 
@@ -42,6 +40,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
           : 'bg-card/50 border-border hover:bg-card/80 hover:border-sports-primary/30'
       }`}
       onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label={`Watch ${title} channel`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
     >
       <CardContent className="p-2">
         <div className="flex items-center gap-2">
@@ -51,8 +58,12 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
             {logo ? (
               <img 
                 src={logo} 
-                alt={title}
+                alt={`${title} channel logo`}
                 className="w-full h-full object-contain rounded-full"
+                loading="lazy"
+                decoding="async"
+                width={48}
+                height={48}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                   const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
@@ -66,7 +77,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
             ) : null}
             <div className={`w-full h-full flex items-center justify-center ${logo ? 'hidden' : ''}`}>
               {isActive ? (
-                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" />
+                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" aria-hidden="true" />
               ) : (
                 <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-muted-foreground">
                   {generateInitials()}

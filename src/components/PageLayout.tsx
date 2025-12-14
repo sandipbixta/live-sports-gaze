@@ -26,12 +26,20 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   
   return (
     <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-      <header className="bg-[#ff5a36] shadow-md">
+      {/* Skip to main content link for accessibility */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md"
+      >
+        Skip to main content
+      </a>
+      
+      <header className="bg-[#ff5a36] shadow-md" role="banner">
         <div className="container mx-auto py-1 px-2">
           <div className="flex flex-row justify-between items-center gap-2">
             {isMobile ? (
               <>
-                <Link to="/" className="flex-shrink-0">
+                <Link to="/" className="flex-shrink-0" aria-label="DamiTV Home">
                   <h1 className="text-2xl font-bold text-white">
                     DAMITV
                   </h1>
@@ -71,11 +79,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       </header>
 
 
-      <main className="container mx-auto py-4 px-2 pb-16 md:pb-4">
+      <main id="main-content" className="container mx-auto py-4 px-2 pb-16 md:pb-4" role="main">
         {children}
       </main>
       
-      <footer className="bg-white dark:bg-black text-black dark:text-white py-6 mt-10 pb-20 md:pb-6 border-t border-black dark:border-white">
+      <footer className="bg-white dark:bg-black text-black dark:text-white py-6 mt-10 pb-20 md:pb-6 border-t border-black dark:border-white" role="contentinfo">
         <div className="container mx-auto px-2">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
