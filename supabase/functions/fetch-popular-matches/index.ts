@@ -9,35 +9,83 @@ const SPORTS_DB_API_KEY = '751945';
 const SPORTS_DB_V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
 const WESTREAM_API = 'https://westream.top';
 
+// PRIORITY SPORTS (in order of importance)
+const PRIORITY_SPORTS = [
+  'football', 'soccer',
+  'cricket',
+  'basketball', 'nba',
+  'american-football', 'nfl',
+  'mma', 'ufc', 'fighting', 'boxing',
+  'motorsport', 'f1', 'motogp', 'racing'
+];
+
+// Sport-specific LIVE duration in hours (how long a match can be considered "live")
+const SPORT_LIVE_DURATION: Record<string, number> = {
+  'football': 2.5,
+  'soccer': 2.5,
+  'cricket': 6,
+  'basketball': 3,
+  'nba': 3,
+  'american-football': 4,
+  'nfl': 4,
+  'mma': 5,
+  'ufc': 5,
+  'fighting': 5,
+  'boxing': 4,
+  'motorsport': 3,
+  'f1': 2.5,
+  'motogp': 2,
+  'racing': 3,
+  'tennis': 5,
+  'hockey': 3,
+  'nhl': 3,
+  'baseball': 4,
+  'mlb': 4,
+  'rugby': 2,
+  'default': 3,
+};
+
 // TOP-TIER LEAGUES for priority ranking
 const TOP_LEAGUES = [
   "english premier league", "spanish la liga", "german bundesliga", "italian serie a",
   "french ligue 1", "uefa champions league", "uefa europa league", "fa cup",
   "copa del rey", "mls", "major league soccer", "nba", "nfl", "nhl",
-  "atp", "wta", "australian open", "french open", "wimbledon", "us open",
-  "ufc", "mlb", "bundesliga", "premier league", "la liga", "serie a", "ligue 1"
+  "ipl", "bbl", "psl", "t20", "test", "odi", // Cricket
+  "ufc", "bellator", "pfl", // MMA
+  "formula 1", "f1", "motogp", "nascar", "indycar", // Motorsport
+  "bundesliga", "premier league", "la liga", "serie a", "ligue 1"
 ];
 
-// Sport category to SportsDB sport mapping
-const SPORT_MAPPING: Record<string, string> = {
-  'football': 'soccer',
-  'soccer': 'soccer',
-  'basketball': 'basketball',
-  'nba': 'basketball',
-  'american-football': 'nfl',
-  'nfl': 'nfl',
-  'hockey': 'hockey',
-  'nhl': 'hockey',
-  'ice-hockey': 'hockey',
-  'tennis': 'tennis',
-  'mma': 'mma',
-  'ufc': 'mma',
-  'fighting': 'mma',
-  'baseball': 'baseball',
-  'mlb': 'baseball',
-  'cricket': 'cricket',
-  'rugby': 'rugby',
-};
+// Sport category normalization
+function normalizeSportCategory(category: string): string {
+  const cat = category?.toLowerCase().replace(/[^a-z]/g, '') || '';
+  
+  if (cat.includes('football') || cat.includes('soccer')) return 'football';
+  if (cat.includes('cricket')) return 'cricket';
+  if (cat.includes('basketball') || cat.includes('nba')) return 'basketball';
+  if (cat.includes('american') || cat.includes('nfl')) return 'nfl';
+  if (cat.includes('mma') || cat.includes('ufc') || cat.includes('fight') || cat.includes('boxing')) return 'fighting';
+  if (cat.includes('motor') || cat.includes('f1') || cat.includes('racing') || cat.includes('motogp')) return 'motorsport';
+  if (cat.includes('hockey') || cat.includes('nhl')) return 'hockey';
+  if (cat.includes('tennis')) return 'tennis';
+  if (cat.includes('baseball') || cat.includes('mlb')) return 'baseball';
+  if (cat.includes('rugby')) return 'rugby';
+  
+  return cat;
+}
+
+// Check if sport is in priority list
+function isPrioritySport(category: string): boolean {
+  const normalized = normalizeSportCategory(category);
+  return ['football', 'cricket', 'basketball', 'nfl', 'fighting', 'motorsport'].includes(normalized);
+}
+
+// Get live duration for a sport in milliseconds
+function getLiveDuration(category: string): number {
+  const normalized = normalizeSportCategory(category);
+  const hours = SPORT_LIVE_DURATION[normalized] || SPORT_LIVE_DURATION['default'];
+  return hours * 60 * 60 * 1000;
+}
 
 // WeStream types
 interface WeStreamMatch {
@@ -109,7 +157,7 @@ async function fetchWeStreamMatches(): Promise<WeStreamMatch[]> {
       const data = await response.json();
       const matches: WeStreamMatch[] = Array.isArray(data) ? data : [];
       weStreamCache = { data: matches, timestamp: Date.now() };
-      console.log(`Fetched ${matches.length} matches from WeStream (primary source)`);
+      console.log(`Fetched ${matches.length} matches from WeStream`);
       return matches;
     }
   } catch (error) {
@@ -118,14 +166,15 @@ async function fetchWeStreamMatches(): Promise<WeStreamMatch[]> {
   return weStreamCache?.data || [];
 }
 
-// Fetch live matches from SportsDB for popularity enrichment
+// Fetch live matches from SportsDB for enrichment
 async function fetchSportsDbLiveMatches(): Promise<SportsDbLiveMatch[]> {
   if (sportsDbCache && Date.now() - sportsDbCache.timestamp < CACHE_DURATION) {
     console.log('Using cached SportsDB live matches');
     return sportsDbCache.data;
   }
 
-  const endpoints = ['soccer', 'basketball', 'nfl', 'hockey', 'tennis', 'mma', 'baseball'];
+  // Focus on priority sports
+  const endpoints = ['soccer', 'basketball', 'nfl', 'cricket', 'mma'];
   const allLiveMatches: SportsDbLiveMatch[] = [];
 
   try {
@@ -140,7 +189,7 @@ async function fetchSportsDbLiveMatches(): Promise<SportsDbLiveMatch[]> {
           return data?.livescore || data?.events || [];
         }
       } catch (e) {
-        console.log(`Failed to fetch ${sport} from SportsDB:`, e);
+        console.log(`Failed to fetch ${sport} from SportsDB`);
       }
       return [];
     });
@@ -149,7 +198,7 @@ async function fetchSportsDbLiveMatches(): Promise<SportsDbLiveMatch[]> {
     results.forEach(matches => allLiveMatches.push(...matches));
     
     sportsDbCache = { data: allLiveMatches, timestamp: Date.now() };
-    console.log(`Fetched ${allLiveMatches.length} live matches from SportsDB for enrichment`);
+    console.log(`Fetched ${allLiveMatches.length} live matches from SportsDB`);
   } catch (error) {
     console.error('Error fetching SportsDB matches:', error);
   }
@@ -173,7 +222,7 @@ function getTeamKeywords(name: string): string[] {
   return normalizeTeamName(name).split(' ').filter(w => w.length >= 3);
 }
 
-// Find SportsDB match for a WeStream match (for enrichment)
+// Find SportsDB match for enrichment
 function findSportsDbMatch(weStreamMatch: WeStreamMatch, sportsDbMatches: SportsDbLiveMatch[]): SportsDbLiveMatch | null {
   const homeTeam = weStreamMatch.teams?.home?.name || '';
   const awayTeam = weStreamMatch.teams?.away?.name || '';
@@ -210,12 +259,32 @@ function findSportsDbMatch(weStreamMatch: WeStreamMatch, sportsDbMatches: Sports
   return bestMatch;
 }
 
-// Check if match is currently live based on timestamp
+// Check if match is currently live based on sport-specific duration
 function isMatchLive(match: WeStreamMatch): boolean {
   const now = Date.now();
   const matchStart = match.date;
-  const matchEnd = matchStart + (3 * 60 * 60 * 1000); // Assume 3 hours max
+  const liveDuration = getLiveDuration(match.category);
+  const matchEnd = matchStart + liveDuration;
+  
   return now >= matchStart && now <= matchEnd;
+}
+
+// Check if match has valid team names
+function hasValidTeamNames(match: WeStreamMatch): boolean {
+  const homeTeam = match.teams?.home?.name?.trim() || '';
+  const awayTeam = match.teams?.away?.name?.trim() || '';
+  
+  // Must have both team names with at least 2 characters each
+  if (homeTeam.length < 2 || awayTeam.length < 2) return false;
+  
+  // Filter out placeholder names
+  const invalidNames = ['tbd', 'tba', 'unknown', 'n/a', 'winner', 'loser', 'team 1', 'team 2', 'player 1', 'player 2'];
+  const homeLower = homeTeam.toLowerCase();
+  const awayLower = awayTeam.toLowerCase();
+  
+  if (invalidNames.some(inv => homeLower === inv || awayLower === inv)) return false;
+  
+  return true;
 }
 
 // Calculate match priority
@@ -223,25 +292,25 @@ function calculatePriority(match: WeStreamMatch, sportsDbMatch: SportsDbLiveMatc
   let priority = 0;
   
   // Live matches get highest priority
-  if (isLive) priority += 20;
+  if (isLive) priority += 25;
+  
+  // Priority sports bonus
+  if (isPrioritySport(match.category)) priority += 15;
   
   // WeStream popular flag
-  if (match.popular) priority += 15;
+  if (match.popular) priority += 10;
   
-  // Has SportsDB match (means it's a recognized event)
-  if (sportsDbMatch) priority += 10;
+  // Has SportsDB match (recognized event)
+  if (sportsDbMatch) priority += 8;
   
   // Top league bonus
   const league = sportsDbMatch?.strLeague?.toLowerCase() || '';
-  if (TOP_LEAGUES.some(tl => league.includes(tl))) priority += 8;
+  if (TOP_LEAGUES.some(tl => league.includes(tl))) priority += 5;
   
   // Has poster
   if (sportsDbMatch?.strThumb || sportsDbMatch?.strPoster || match.poster) priority += 3;
   
-  // Has team badges
-  if (sportsDbMatch?.strHomeTeamBadge || match.teams?.home?.badge) priority += 2;
-  
-  // Has multiple sources (more stream options)
+  // Multiple stream sources
   if (match.sources.length >= 3) priority += 2;
   
   return priority;
@@ -269,7 +338,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('Fetching popular matches (WeStream primary + SportsDB enrichment)...');
+    console.log('Fetching popular matches (priority sports focus)...');
     
     // Fetch both sources in parallel
     const [weStreamMatches, sportsDbMatches] = await Promise.all([
@@ -277,19 +346,36 @@ serve(async (req) => {
       fetchSportsDbLiveMatches(),
     ]);
 
-    console.log(`Processing ${weStreamMatches.length} WeStream matches with ${sportsDbMatches.length} SportsDB enrichments`);
+    console.log(`Processing ${weStreamMatches.length} WeStream matches`);
 
-    // Process WeStream matches and enrich with SportsDB
     const now = Date.now();
     const enrichedMatches: EnrichedMatch[] = [];
     
     for (const wsMatch of weStreamMatches) {
-      // Skip matches without sources (no streams)
-      if (!wsMatch.sources || wsMatch.sources.length === 0) continue;
+      // FILTER 1: Must have stream sources
+      if (!wsMatch.sources || wsMatch.sources.length === 0) {
+        continue;
+      }
       
-      // Skip matches that ended more than 2 hours ago
-      const matchEnd = wsMatch.date + (3 * 60 * 60 * 1000);
-      if (now > matchEnd + (2 * 60 * 60 * 1000)) continue;
+      // FILTER 2: Must have valid team names
+      if (!hasValidTeamNames(wsMatch)) {
+        console.log(`Skipping match without valid team names: ${wsMatch.title}`);
+        continue;
+      }
+      
+      // FILTER 3: Check if match is within valid time window
+      const liveDuration = getLiveDuration(wsMatch.category);
+      const matchEnd = wsMatch.date + liveDuration;
+      
+      // Skip if match ended more than 1 hour ago
+      if (now > matchEnd + (60 * 60 * 1000)) {
+        continue;
+      }
+      
+      // Skip if match is more than 24 hours in the future
+      if (wsMatch.date > now + (24 * 60 * 60 * 1000)) {
+        continue;
+      }
       
       // Find matching SportsDB event for enrichment
       const sdbMatch = findSportsDbMatch(wsMatch, sportsDbMatches);
@@ -328,10 +414,6 @@ serve(async (req) => {
         };
       }
       
-      if (sdbMatch) {
-        console.log(`Enriched: ${wsMatch.title} -> ${sdbMatch.strLeague} (priority: ${enrichedMatch.priority})`);
-      }
-      
       enrichedMatches.push(enrichedMatch);
     }
 
@@ -348,15 +430,15 @@ serve(async (req) => {
     responseCache = { data: topMatches, timestamp: Date.now() };
     
     const liveCount = topMatches.filter(m => m.isLive).length;
-    const popularCount = topMatches.filter(m => m.popular).length;
+    const prioritySportCount = topMatches.filter(m => isPrioritySport(m.category)).length;
     
-    console.log(`Returning ${topMatches.length} popular matches (${liveCount} live, ${popularCount} popular)`);
+    console.log(`Returning ${topMatches.length} matches (${liveCount} live, ${prioritySportCount} priority sports)`);
     
     return new Response(
       JSON.stringify({ 
         matches: topMatches,
         liveCount,
-        popularCount,
+        prioritySportCount,
         total: topMatches.length,
         fetchedAt: new Date().toISOString(),
         cached: false
