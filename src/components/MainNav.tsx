@@ -28,12 +28,14 @@ const MainNav = () => {
 
   return (
     <div className="flex items-center gap-6 w-full md:w-auto">
-      <button onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' }); navigate("/"); }} className="cursor-pointer flex items-center gap-2 flex-shrink-0">
+      <button onClick={() => { window.scrollTo({ top: 0, behavior: 'instant' }); navigate("/"); }} className="cursor-pointer flex items-center gap-2 flex-shrink-0" aria-label="Go to homepage">
         <img 
           src={damitvLogo} 
-          alt="DAMITV Logo" 
+          alt="DamiTV - Free Sports Streaming" 
           width={48}
           height={48}
+          loading="eager"
+          decoding="async"
           className="h-12 w-12 object-cover" 
         />
         <span className="text-xl font-bold text-white tracking-tight">
@@ -42,7 +44,7 @@ const MainNav = () => {
       </button>
       
       {/* FanCode-style horizontal nav */}
-      <nav className="hidden md:flex items-center gap-1">
+      <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
         {menuItems.map((item) => (
           <button
             key={item.path}
@@ -52,6 +54,8 @@ const MainNav = () => {
               "hover:text-white/80",
               location.pathname === item.path && "text-white underline underline-offset-4"
             )}
+            aria-label={`Navigate to ${item.title}`}
+            aria-current={location.pathname === item.path ? 'page' : undefined}
           >
             {item.title}
           </button>

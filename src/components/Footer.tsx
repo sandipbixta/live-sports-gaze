@@ -17,17 +17,17 @@ const Footer = () => {
               tennis, and more in HD quality.
             </p>
             <div className="flex gap-3">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                <Facebook className="h-5 w-5" />
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="Visit DamiTV on Facebook">
+                <Facebook className="h-5 w-5" aria-hidden="true" />
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="Visit DamiTV on Twitter">
+                <Twitter className="h-5 w-5" aria-hidden="true" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                <Instagram className="h-5 w-5" />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="Visit DamiTV on Instagram">
+                <Instagram className="h-5 w-5" aria-hidden="true" />
               </a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                <Youtube className="h-5 w-5" />
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="Visit DamiTV on YouTube">
+                <Youtube className="h-5 w-5" aria-hidden="true" />
               </a>
             </div>
           </div>
