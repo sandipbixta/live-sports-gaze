@@ -129,9 +129,24 @@ interface TransformedMatch {
   priority: number;
 }
 
+// Leagues to exclude (minor/development leagues)
+const EXCLUDED_LEAGUES = [
+  'nba g league',
+  'g league',
+  'nba g-league',
+  'g-league',
+];
+
 // STRICT filter - only top leagues
 function isTopLeague(leagueName: string): { isTop: boolean; config: typeof TOP_LEAGUES[0] | null } {
   const normalizedLeague = leagueName.toLowerCase().trim();
+  
+  // Check if league is in excluded list
+  for (const excluded of EXCLUDED_LEAGUES) {
+    if (normalizedLeague.includes(excluded)) {
+      return { isTop: false, config: null };
+    }
+  }
   
   for (const league of TOP_LEAGUES) {
     const normalizedTop = league.name.toLowerCase();
