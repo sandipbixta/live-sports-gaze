@@ -1,30 +1,24 @@
-import React, { useEffect, useState, lazy, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Helmet } from 'react-helmet-async';
 import { triggerStreamChangeAd } from '@/utils/streamAdTrigger';
 import { useToast } from '@/hooks/use-toast';
 import { Match as MatchType, Stream } from '@/types/sports';
+import { usePopularMatchesCache, PopularMatch } from '@/hooks/usePopularMatches';
 
-// Lazy load components - same as Match.tsx
-const TelegramBanner = lazy(() => import('@/components/TelegramBanner'));
-const SEOMetaTags = lazy(() => import('@/components/SEOMetaTags'));
-const SocialShare = lazy(() => import('@/components/SocialShare'));
-const FavoriteButton = lazy(() => import('@/components/FavoriteButton'));
-const MatchHeader = lazy(() => import('@/components/match/MatchHeader'));
-const StreamTab = lazy(() => import('@/components/match/StreamTab'));
-const MatchAnalysis = lazy(() => import('@/components/match/MatchAnalysis'));
-const ViewerStats = lazy(() => import('@/components/match/ViewerStats').then(m => ({ default: m.ViewerStats })));
-const StreamViewerDisplay = lazy(() => import('@/components/StreamViewerDisplay'));
-
-// Loading states
+// Direct imports for faster initial load
+import TelegramBanner from '@/components/TelegramBanner';
+import SEOMetaTags from '@/components/SEOMetaTags';
+import SocialShare from '@/components/SocialShare';
+import FavoriteButton from '@/components/FavoriteButton';
+import MatchHeader from '@/components/match/MatchHeader';
+import StreamTab from '@/components/match/StreamTab';
+import MatchAnalysis from '@/components/match/MatchAnalysis';
+import { ViewerStats } from '@/components/match/ViewerStats';
+import StreamViewerDisplay from '@/components/StreamViewerDisplay';
 import LoadingState from '@/components/match/LoadingState';
 import NotFoundState from '@/components/match/NotFoundState';
-
-// Loading placeholder
-const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
-  <div className={`${height} bg-card rounded-lg animate-pulse`} />
-);
 
 interface StreamChannel {
   id: string;
@@ -60,6 +54,39 @@ interface SelectedMatch {
   channels: StreamChannel[];
 }
 
+// Convert PopularMatch to SelectedMatch format
+const convertPopularToSelected = (pm: PopularMatch): SelectedMatch => ({
+  id: pm.id,
+  title: pm.title,
+  homeTeam: pm.homeTeam,
+  awayTeam: pm.awayTeam,
+  homeTeamBadge: pm.homeTeamBadge || null,
+  awayTeamBadge: pm.awayTeamBadge || null,
+  homeScore: pm.homeScore || null,
+  awayScore: pm.awayScore || null,
+  sport: pm.sport,
+  sportIcon: pm.sportIcon,
+  league: pm.league,
+  date: pm.date,
+  time: pm.time,
+  timestamp: pm.timestamp,
+  venue: null,
+  country: null,
+  status: pm.status,
+  progress: pm.progress,
+  poster: null,
+  banner: null,
+  isLive: pm.isLive,
+  isFinished: pm.isFinished,
+  channels: pm.channels?.map(ch => ({
+    id: ch.id,
+    name: ch.name,
+    country: '',
+    logo: ch.logo,
+    embedUrl: ch.embedUrl
+  })) || []
+});
+
 // Convert SelectedMatch to MatchType for shared components
 const convertToMatchType = (match: SelectedMatch): MatchType => ({
   id: match.id,
@@ -91,23 +118,71 @@ const convertToMatchType = (match: SelectedMatch): MatchType => ({
   })) || []
 });
 
+// Setup streams from match channels
+const setupStreams = (match: SelectedMatch) => {
+  const streamableChannels = match.channels?.filter((ch) => ch.embedUrl) || [];
+  const streams: Stream[] = streamableChannels.map((ch, idx) => ({
+    id: ch.id || `stream-${idx}`,
+    streamNo: idx + 1,
+    language: ch.country || 'English',
+    hd: true,
+    embedUrl: ch.embedUrl,
+    source: ch.name,
+    name: ch.name,
+    image: ch.logo
+  }));
+  
+  const groupedStreams: Record<string, Stream[]> = {};
+  streams.forEach(stream => {
+    const source = stream.source || 'default';
+    if (!groupedStreams[source]) {
+      groupedStreams[source] = [];
+    }
+    groupedStreams[source].push(stream);
+  });
+  
+  return { streams, groupedStreams };
+};
+
 const SelectedMatchPlayer = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const cache = usePopularMatchesCache();
   
-  const [match, setMatch] = useState<SelectedMatch | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Try to get cached match immediately for instant display
+  const cachedMatch = matchId ? cache.getMatch(matchId) : null;
+  const initialMatch = cachedMatch ? convertPopularToSelected(cachedMatch) : null;
+  
+  const [match, setMatch] = useState<SelectedMatch | null>(initialMatch);
+  const [loading, setLoading] = useState(!initialMatch);
   const [activeSource, setActiveSource] = useState<string | null>(null);
   const [currentStream, setCurrentStream] = useState<Stream | null>(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [allStreams, setAllStreams] = useState<Record<string, Stream[]>>({});
 
+  // Initialize streams from cached match instantly
+  useEffect(() => {
+    if (initialMatch) {
+      const { streams, groupedStreams } = setupStreams(initialMatch);
+      setAllStreams(groupedStreams);
+      if (streams.length > 0) {
+        const firstStream = streams[0];
+        setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
+        setCurrentStream(firstStream);
+      }
+    }
+  }, []);
+
   const fetchMatch = async () => {
     if (!matchId) return;
     
     try {
-      setLoading(true);
+      // Only show loading if we don't have cached data
+      if (!match) {
+        setLoading(true);
+      }
+      
       const { data, error } = await supabase.functions.invoke('fetch-popular-matches');
       
       if (error) {
@@ -120,33 +195,11 @@ const SelectedMatchPlayer = () => {
       
       if (foundMatch) {
         setMatch(foundMatch);
-        
-        // Build streams from channels
-        const streamableChannels = foundMatch.channels?.filter((ch: StreamChannel) => ch.embedUrl) || [];
-        const streams: Stream[] = streamableChannels.map((ch: StreamChannel, idx: number) => ({
-          id: ch.id || `stream-${idx}`,
-          streamNo: idx + 1,
-          language: ch.country || 'English',
-          hd: true,
-          embedUrl: ch.embedUrl,
-          source: ch.name,
-          name: ch.name,
-          image: ch.logo
-        }));
-        
-        // Group streams by source
-        const groupedStreams: Record<string, Stream[]> = {};
-        streams.forEach(stream => {
-          const source = stream.source || 'default';
-          if (!groupedStreams[source]) {
-            groupedStreams[source] = [];
-          }
-          groupedStreams[source].push(stream);
-        });
+        const { streams, groupedStreams } = setupStreams(foundMatch);
         setAllStreams(groupedStreams);
         
-        // Set first stream as active
-        if (streams.length > 0) {
+        // Only set streams if not already set
+        if (!currentStream && streams.length > 0) {
           const firstStream = streams[0];
           setActiveSource(`${firstStream.source}/${firstStream.id}/1`);
           setCurrentStream(firstStream);
@@ -160,6 +213,7 @@ const SelectedMatchPlayer = () => {
   };
 
   useEffect(() => {
+    // Always fetch fresh data in background, but don't block UI
     fetchMatch();
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [matchId]);
@@ -169,14 +223,13 @@ const SelectedMatchPlayer = () => {
     setLoadingStream(true);
     setActiveSource(`${source}/${id}/${streamNo || 1}`);
     
-    // Find the stream from allStreams
     const streams = allStreams[source] || [];
     const stream = streams.find(s => s.id === id) || streams[0];
     if (stream) {
       setCurrentStream(stream);
     }
     
-    setTimeout(() => setLoadingStream(false), 500);
+    setTimeout(() => setLoadingStream(false), 300);
   };
 
   const handleRefreshStreams = async () => {
@@ -203,7 +256,6 @@ const SelectedMatchPlayer = () => {
   const matchTitle = `${match.homeTeam} vs ${match.awayTeam}`;
   const matchDescription = `Watch ${matchTitle} live stream online for free on DamiTV. ${match.league} match with HD quality streaming.`;
 
-  // Convert to MatchType for shared components
   const matchData = convertToMatchType(match);
 
   const getMatchPosterUrl = () => {
@@ -215,7 +267,6 @@ const SelectedMatchPlayer = () => {
 
   const matchPosterUrl = getMatchPosterUrl();
 
-  // Stream discovery info
   const streamDiscovery = {
     sourcesChecked: Object.keys(allStreams).length,
     sourcesWithStreams: Object.values(allStreams).filter(s => s.length > 0).length,
@@ -224,26 +275,24 @@ const SelectedMatchPlayer = () => {
 
   return (
     <div className="min-h-screen bg-sports-dark text-sports-light">
-      <Suspense fallback={null}>
-        <SEOMetaTags
-          title={`${matchTitle} - Live Stream | DamiTV`}
-          description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
-          keywords={`${match.homeTeam} live stream, ${match.awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
-          canonicalUrl={`https://damitv.pro/selected-match/${matchId}`}
-          ogImage={matchPosterUrl}
-          matchInfo={{
-            homeTeam: match.homeTeam,
-            awayTeam: match.awayTeam,
-            league: match.league,
-            date: matchDate,
-          }}
-          breadcrumbs={[
-            { name: 'Home', url: 'https://damitv.pro/' },
-            { name: 'Live Matches', url: 'https://damitv.pro/live' },
-            { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/selected-match/${matchId}` }
-          ]}
-        />
-      </Suspense>
+      <SEOMetaTags
+        title={`${matchTitle} - Live Stream | DamiTV`}
+        description={`${matchDescription} - Watch ${matchTitle} on damitv.pro with HD quality streaming.`}
+        keywords={`${match.homeTeam} live stream, ${match.awayTeam} online, ${matchTitle}, ${matchTitle} on damitv.pro, live football streaming`}
+        canonicalUrl={`https://damitv.pro/selected-match/${matchId}`}
+        ogImage={matchPosterUrl}
+        matchInfo={{
+          homeTeam: match.homeTeam,
+          awayTeam: match.awayTeam,
+          league: match.league,
+          date: matchDate,
+        }}
+        breadcrumbs={[
+          { name: 'Home', url: 'https://damitv.pro/' },
+          { name: 'Live Matches', url: 'https://damitv.pro/live' },
+          { name: `${matchTitle} on damitv.pro`, url: `https://damitv.pro/selected-match/${matchId}` }
+        ]}
+      />
 
       <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
@@ -274,42 +323,32 @@ const SelectedMatchPlayer = () => {
         </script>
       </Helmet>
       
-      {/* Header - Same as Match.tsx */}
-      <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
-        <MatchHeader 
-          match={matchData} 
-          streamAvailable={!!currentStream}
-          socialShare={
-            <div className="flex items-center gap-2">
-              <Suspense fallback={null}>
-                <FavoriteButton
-                  type="match"
-                  id={matchId || ''}
-                  name={matchTitle}
-                  variant="outline"
-                />
-              </Suspense>
-              <Suspense fallback={null}>
-                <SocialShare 
-                  title={matchTitle}
-                  description={matchDescription}
-                  image={matchPosterUrl}
-                  url={`https://damitv.pro/selected-match/${matchId}`}
-                />
-              </Suspense>
-            </div>
-          }
-        />
-      </Suspense>
+      <MatchHeader 
+        match={matchData} 
+        streamAvailable={!!currentStream}
+        socialShare={
+          <div className="flex items-center gap-2">
+            <FavoriteButton
+              type="match"
+              id={matchId || ''}
+              name={matchTitle}
+              variant="outline"
+            />
+            <SocialShare 
+              title={matchTitle}
+              description={matchDescription}
+              image={matchPosterUrl}
+              url={`https://damitv.pro/selected-match/${matchId}`}
+            />
+          </div>
+        }
+      />
       
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="mb-4">
-          <Suspense fallback={<LoadingPlaceholder height="h-16" />}>
-            <TelegramBanner />
-          </Suspense>
+          <TelegramBanner />
         </div>
         
-        {/* Match Title with Badges - Same as Match.tsx */}
         <div className="w-full flex justify-center mb-4">
           <div className="text-center max-w-4xl px-4">
             <div className="flex items-center justify-center gap-3 mb-2">
@@ -335,49 +374,36 @@ const SelectedMatchPlayer = () => {
           </div>
         </div>
         
-        {/* Video Player and Layout - Same as Match.tsx */}
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1 min-w-0" id="stream-container" data-stream-container>
-            <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
-              <StreamTab
-                match={matchData}
-                stream={currentStream}
-                loadingStream={loadingStream}
-                activeSource={activeSource}
-                handleSourceChange={handleSourceChange}
-                popularMatches={[]}
-                sportId={match.sport || 'football'}
-                allStreams={allStreams}
-                streamDiscovery={streamDiscovery}
-                onRefreshStreams={handleRefreshStreams}
-              />
-            </Suspense>
+            <StreamTab
+              match={matchData}
+              stream={currentStream}
+              loadingStream={loadingStream}
+              activeSource={activeSource}
+              handleSourceChange={handleSourceChange}
+              popularMatches={[]}
+              sportId={match.sport || 'football'}
+              allStreams={allStreams}
+              streamDiscovery={streamDiscovery}
+              onRefreshStreams={handleRefreshStreams}
+            />
 
-            {/* Live Viewer Count Display */}
             <div className="mt-4">
-              <Suspense fallback={<LoadingPlaceholder height="h-20" />}>
-                <StreamViewerDisplay matchId={matchId || ''} isLive={match.isLive} />
-              </Suspense>
+              <StreamViewerDisplay matchId={matchId || ''} isLive={match.isLive} />
             </div>
 
-            {/* Viewer Statistics - Same as Match.tsx */}
             <div className="mt-4">
-              <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
-                <ViewerStats match={matchData} />
-              </Suspense>
+              <ViewerStats match={matchData} />
             </div>
           </div>
         </div>
 
-        {/* Match Analysis - Same as Match.tsx */}
         <div className="mt-8">
-          <Suspense fallback={<LoadingPlaceholder height="h-48" />}>
-            <MatchAnalysis match={matchData} />
-          </Suspense>
+          <MatchAnalysis match={matchData} />
         </div>
       </div>
       
-      {/* Footer - Same as Match.tsx */}
       <footer className="bg-sports-darker text-gray-400 py-6 mt-10">
         <div className="container mx-auto px-4 text-center">
           <p>© 2025 DamiTV - All rights reserved</p>
