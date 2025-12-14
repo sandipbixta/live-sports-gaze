@@ -104,21 +104,27 @@ const Match = () => {
     handleRefreshStreams
   } = useStreamPlayer();
 
-  // Load match data and streams
+  // Store handleMatchSelect in a ref to avoid dependency issues
+  const handleMatchSelectRef = React.useRef(handleMatchSelect);
+  handleMatchSelectRef.current = handleMatchSelect;
+
+  // Load match data and streams - only runs when sportId or matchId changes
   useEffect(() => {
+    let isMounted = true;
+    
     const loadMatchData = async () => {
       if (!sportId || !matchId) return;
 
       try {
         // If we have cached match, start loading streams immediately
         const cachedMatch = getCachedMatch(matchId);
-        if (cachedMatch) {
+        if (cachedMatch && isMounted) {
           // Start stream loading with cached match immediately
-          handleMatchSelect(cachedMatch);
+          handleMatchSelectRef.current(cachedMatch);
         }
         
         // Only show loading if no cached data
-        if (!cachedMatch) {
+        if (!cachedMatch && isMounted) {
           setIsLoading(true);
         }
         
@@ -126,6 +132,8 @@ const Match = () => {
         
         // Fetch the specific match
         const matchData = await fetchMatch(sportId, matchId);
+        if (!isMounted) return;
+        
         const enhancedMatch = teamLogoService.enhanceMatchWithLogos(matchData);
         setMatch(enhancedMatch);
         
@@ -134,14 +142,18 @@ const Match = () => {
 
         // Only load streams if we didn't already start with cached data
         if (!cachedMatch) {
-          await handleMatchSelect(enhancedMatch);
+          await handleMatchSelectRef.current(enhancedMatch);
         }
+
+        if (!isMounted) return;
 
         // Scroll to top first when page loads
         window.scrollTo({ top: 0, behavior: 'instant' });
 
         // Load all matches for recommended sections
         const allMatches = await fetchMatches(sportId);
+        if (!isMounted) return;
+        
         const otherMatches = allMatches.filter(m => m.id !== matchId);
         setAllMatches(allMatches);
         
@@ -160,19 +172,27 @@ const Match = () => {
         
       } catch (error) {
         console.error('Error loading match:', error);
-        setMatch(null);
-        toast({
-          title: "Error loading match",
-          description: "Failed to load match details. Please try again.",
-          variant: "destructive",
-        });
+        if (isMounted) {
+          setMatch(null);
+          toast({
+            title: "Error loading match",
+            description: "Failed to load match details. Please try again.",
+            variant: "destructive",
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadMatchData();
-  }, [sportId, matchId, toast, handleMatchSelect]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [sportId, matchId, toast]); // Removed handleMatchSelect from dependencies
 
   if (isLoading) {
     return <LoadingState />;
