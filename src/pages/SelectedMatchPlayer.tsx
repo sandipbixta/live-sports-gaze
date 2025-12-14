@@ -61,6 +61,18 @@ const safeDate = (dateValue: number | string | undefined): Date => {
   return isNaN(date.getTime()) ? new Date() : date;
 };
 
+// Clean team name by removing league prefixes/suffixes
+const cleanTeamName = (name: string): string => {
+  if (!name) return 'TBD';
+  // Remove common league prefixes/suffixes patterns
+  return name
+    .replace(/^(Serie A|La Liga|Premier League|Bundesliga|Ligue 1|Champions League|Europa League|MLS|NBA|NFL|NHL|MLB)[\s:\-]+/i, '')
+    .replace(/[\s:\-]+(Serie A|La Liga|Premier League|Bundesliga|Ligue 1|Champions League|Europa League|MLS|NBA|NFL|NHL|MLB)$/i, '')
+    .replace(/\s*\([^)]*\)\s*$/, '') // Remove trailing parentheses like "(Serie A)"
+    .replace(/\s*-\s*(Home|Away)$/i, '') // Remove Home/Away suffixes
+    .trim() || 'TBD';
+};
+
 // Convert cached Match to SelectedMatch format
 const convertCachedToSelected = (match: MatchType): SelectedMatch => {
   const matchDate = safeDate(match.date);
@@ -68,8 +80,8 @@ const convertCachedToSelected = (match: MatchType): SelectedMatch => {
   return {
     id: match.id,
     title: match.title,
-    homeTeam: match.teams?.home?.name || 'TBD',
-    awayTeam: match.teams?.away?.name || 'TBD',
+    homeTeam: cleanTeamName(match.teams?.home?.name || ''),
+    awayTeam: cleanTeamName(match.teams?.away?.name || ''),
     homeTeamBadge: match.teams?.home?.badge || null,
     awayTeamBadge: match.teams?.away?.badge || null,
     homeScore: match.score?.home?.toString() || null,
@@ -210,8 +222,8 @@ const SelectedMatchPlayer = () => {
         const convertedMatch: SelectedMatch = {
           id: foundMatch.id,
           title: foundMatch.title,
-          homeTeam: foundMatch.teams?.home?.name || 'TBD',
-          awayTeam: foundMatch.teams?.away?.name || 'TBD',
+          homeTeam: cleanTeamName(foundMatch.teams?.home?.name || ''),
+          awayTeam: cleanTeamName(foundMatch.teams?.away?.name || ''),
           homeTeamBadge: foundMatch.teams?.home?.badge || null,
           awayTeamBadge: foundMatch.teams?.away?.badge || null,
           homeScore: foundMatch.score?.home?.toString() || null,
