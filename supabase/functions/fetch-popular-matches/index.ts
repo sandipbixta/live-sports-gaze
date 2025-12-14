@@ -8,7 +8,7 @@ const corsHeaders = {
 const SPORTS_DB_API_KEY = '751945';
 const SPORTS_DB_V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
 const SPORTS_DB_V1_BASE = 'https://www.thesportsdb.com/api/v1/json';
-const CDN_LIVE_API = 'https://api.cdn-live.tv/api/v1/vip/damitv/channels/';
+const WESTREAM_API = 'https://westream.top';
 
 // STRICT TOP-TIER LEAGUES ONLY
 const TOP_LEAGUES = [
@@ -55,16 +55,36 @@ const SPORTS_ENDPOINTS = [
   { sport: 'Baseball', endpoint: 'baseball', icon: '⚾' },
 ];
 
-// Default channels by sport
-const SPORT_CHANNELS: Record<string, string[]> = {
-  'Soccer': ['sky sports', 'bein', 'espn', 'nbc', 'usa network', 'peacock', 'paramount', 'cbs'],
-  'Basketball': ['nba tv', 'espn', 'tnt', 'nba'],
-  'American Football': ['nfl network', 'espn', 'fox', 'cbs', 'nbc', 'nfl'],
-  'Ice Hockey': ['espn', 'tnt', 'nhl network', 'nhl'],
-  'Tennis': ['tennis channel', 'espn', 'eurosport'],
-  'MMA': ['espn', 'ufc', 'bt sport'],
-  'Baseball': ['mlb network', 'espn', 'fox', 'mlb'],
-};
+// WeStream types
+interface WeStreamMatch {
+  id: string;
+  title: string;
+  category: string;
+  date: number;
+  popular: boolean;
+  teams?: {
+    home?: { name: string; badge?: string };
+    away?: { name: string; badge?: string };
+  };
+  sources: { source: string; id: string }[];
+}
+
+interface WeStreamStream {
+  id: string;
+  streamNo: number;
+  language: string;
+  hd: boolean;
+  source: string;
+  embedUrl: string;
+}
+
+interface StreamChannel {
+  id: string;
+  name: string;
+  country: string;
+  logo: string;
+  embedUrl: string;
+}
 
 interface LiveMatch {
   idEvent: string;
@@ -82,21 +102,6 @@ interface LiveMatch {
   strStatus: string | null;
   strThumb: string | null;
   strPoster: string | null;
-}
-
-interface CDNChannel {
-  id: string;
-  name: string;
-  country: string;
-  logo: string;
-  embedUrl: string;
-}
-
-interface CDNLiveChannel {
-  name: string;
-  country: string;
-  url: string;
-  logo?: string;
 }
 
 interface TransformedMatch {
@@ -120,7 +125,7 @@ interface TransformedMatch {
   poster: string | null;
   isLive: boolean;
   isFinished: boolean;
-  channels: CDNChannel[];
+  channels: StreamChannel[];
   priority: number;
 }
 
@@ -130,7 +135,6 @@ function isTopLeague(leagueName: string): { isTop: boolean; config: typeof TOP_L
   
   for (const league of TOP_LEAGUES) {
     const normalizedTop = league.name.toLowerCase();
-    // Check if league name contains the top league name
     if (normalizedLeague.includes(normalizedTop) || normalizedTop.includes(normalizedLeague)) {
       return { isTop: true, config: league };
     }
@@ -139,108 +143,136 @@ function isTopLeague(leagueName: string): { isTop: boolean; config: typeof TOP_L
   return { isTop: false, config: null };
 }
 
-// Cache for CDN-Live channels
-let cdnChannelsCache: { data: CDNLiveChannel[], timestamp: number } | null = null;
-const CDN_CACHE_DURATION = 10 * 60 * 1000;
+// Cache for WeStream matches
+let weStreamCache: { data: WeStreamMatch[], timestamp: number } | null = null;
+const WESTREAM_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-async function fetchCDNChannels(): Promise<CDNLiveChannel[]> {
-  if (cdnChannelsCache && Date.now() - cdnChannelsCache.timestamp < CDN_CACHE_DURATION) {
-    return cdnChannelsCache.data;
+// Fetch all matches from WeStream API
+async function fetchWeStreamMatches(): Promise<WeStreamMatch[]> {
+  if (weStreamCache && Date.now() - weStreamCache.timestamp < WESTREAM_CACHE_DURATION) {
+    console.log('Using cached WeStream matches');
+    return weStreamCache.data;
   }
 
   try {
-    const response = await fetch(CDN_LIVE_API, { headers: { 'Accept': 'application/json' } });
+    const response = await fetch(`${WESTREAM_API}/matches`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    
     if (response.ok) {
       const data = await response.json();
-      const channels: CDNLiveChannel[] = data?.channels || data || [];
-      cdnChannelsCache = { data: channels, timestamp: Date.now() };
-      return channels;
+      const matches: WeStreamMatch[] = Array.isArray(data) ? data : [];
+      weStreamCache = { data: matches, timestamp: Date.now() };
+      console.log(`Fetched ${matches.length} matches from WeStream`);
+      return matches;
     }
   } catch (error) {
-    console.error('Error fetching CDN-Live channels:', error);
+    console.error('Error fetching WeStream matches:', error);
   }
-  return cdnChannelsCache?.data || [];
+  return weStreamCache?.data || [];
 }
 
-function normalizeChannelName(name: string): string {
-  return name.toLowerCase().replace(/\s+/g, ' ').replace(/[^a-z0-9\s]/g, '').trim();
-}
-
-function getChannelsForSport(sport: string, cdnChannels: CDNLiveChannel[]): CDNChannel[] {
-  const channelKeywords = SPORT_CHANNELS[sport] || ['espn', 'sky sports'];
-  const matched: CDNChannel[] = [];
-  const seenIds = new Set<string>();
-  
-  for (const keyword of channelKeywords) {
-    const normalizedKeyword = normalizeChannelName(keyword);
-    
-    for (const cdn of cdnChannels) {
-      const normalizedCDN = normalizeChannelName(cdn.name);
-      const id = `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-');
-      
-      if (seenIds.has(id)) continue;
-      
-      if (normalizedCDN.includes(normalizedKeyword)) {
-        seenIds.add(id);
-        matched.push({
-          id,
-          name: cdn.name,
-          country: cdn.country,
-          logo: cdn.logo || '',
-          embedUrl: cdn.url,
-        });
-        if (matched.length >= 15) break;
-      }
-    }
-    if (matched.length >= 15) break;
-  }
-  
-  return matched;
-}
-
-async function fetchTVChannels(eventId: string, cdnChannels: CDNLiveChannel[]): Promise<CDNChannel[]> {
+// Get stream info from WeStream
+async function fetchWeStreamStream(source: string, id: string): Promise<WeStreamStream[]> {
   try {
-    const url = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/lookuptv.php?id=${eventId}`;
-    const response = await fetch(url);
+    const response = await fetch(`${WESTREAM_API}/stream/${source}/${id}`, {
+      headers: { 'Accept': 'application/json' },
+    });
     
     if (response.ok) {
       const data = await response.json();
-      const tvChannels = data?.tvevent || [];
-      
-      if (tvChannels.length === 0) return [];
-      
-      const matchedChannels: CDNChannel[] = [];
-      const seenIds = new Set<string>();
-      
-      for (const tv of tvChannels) {
-        const normalizedTV = normalizeChannelName(tv.strChannel);
-        
-        for (const cdn of cdnChannels) {
-          const normalizedCDN = normalizeChannelName(cdn.name);
-          const id = `${cdn.name}-${cdn.country}`.toLowerCase().replace(/\s+/g, '-');
-          
-          if (seenIds.has(id)) continue;
-          
-          if (normalizedCDN.includes(normalizedTV) || normalizedTV.includes(normalizedCDN)) {
-            seenIds.add(id);
-            matchedChannels.push({
-              id,
-              name: cdn.name,
-              country: cdn.country,
-              logo: tv.strLogo || cdn.logo || '',
-              embedUrl: cdn.url,
-            });
-          }
-        }
-      }
-      
-      return matchedChannels;
+      return Array.isArray(data) ? data : [];
     }
   } catch (error) {
-    console.error(`Error fetching TV channels for event ${eventId}:`, error);
+    console.error(`Error fetching stream ${source}/${id}:`, error);
   }
-  
   return [];
+}
+
+// Normalize team name for matching
+function normalizeTeamName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\b(fc|sc|cf|afc|united|city|club)\b/g, '')
+    .trim();
+}
+
+// Find matching WeStream match by team names
+function findWeStreamMatch(homeTeam: string, awayTeam: string, weStreamMatches: WeStreamMatch[]): WeStreamMatch | null {
+  const normalizedHome = normalizeTeamName(homeTeam);
+  const normalizedAway = normalizeTeamName(awayTeam);
+  
+  for (const match of weStreamMatches) {
+    const wsHome = normalizeTeamName(match.teams?.home?.name || '');
+    const wsAway = normalizeTeamName(match.teams?.away?.name || '');
+    
+    // Check if team names match (either order)
+    const homeMatch = (wsHome && normalizedHome && (wsHome.includes(normalizedHome) || normalizedHome.includes(wsHome))) ||
+                      (wsHome && normalizedAway && (wsHome.includes(normalizedAway) || normalizedAway.includes(wsHome)));
+    const awayMatch = (wsAway && normalizedAway && (wsAway.includes(normalizedAway) || normalizedAway.includes(wsAway))) ||
+                      (wsAway && normalizedHome && (wsAway.includes(normalizedHome) || normalizedHome.includes(wsAway)));
+    
+    // Also check match title
+    const normalizedTitle = normalizeTeamName(match.title || '');
+    const titleMatch = normalizedTitle.includes(normalizedHome) && normalizedTitle.includes(normalizedAway);
+    
+    if ((homeMatch && awayMatch) || titleMatch) {
+      console.log(`Found WeStream match for ${homeTeam} vs ${awayTeam}: ${match.title}`);
+      return match;
+    }
+  }
+  return null;
+}
+
+// Get stream channels from WeStream match
+async function getWeStreamChannels(weStreamMatch: WeStreamMatch): Promise<StreamChannel[]> {
+  const channels: StreamChannel[] = [];
+  
+  if (!weStreamMatch.sources || weStreamMatch.sources.length === 0) {
+    console.log(`No sources for match: ${weStreamMatch.title}`);
+    return channels;
+  }
+  
+  console.log(`Getting streams for ${weStreamMatch.title} with ${weStreamMatch.sources.length} sources`);
+  
+  // Fetch streams for each source (limit to first 3 sources for performance)
+  const sourcesToFetch = weStreamMatch.sources.slice(0, 3);
+  
+  for (const source of sourcesToFetch) {
+    try {
+      const streams = await fetchWeStreamStream(source.source, source.id);
+      
+      for (const stream of streams) {
+        channels.push({
+          id: `${source.source}-${stream.id || stream.streamNo}`,
+          name: `${stream.language || 'Stream'} ${stream.hd ? 'HD' : 'SD'} #${stream.streamNo}`,
+          country: stream.language || 'EN',
+          logo: '', // WeStream doesn't provide channel logos
+          embedUrl: stream.embedUrl || `${WESTREAM_API}/embed/${source.source}/${source.id}/${stream.streamNo}`,
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching streams for ${source.source}/${source.id}:`, error);
+    }
+  }
+  
+  // If no streams fetched via API, create embed URLs from sources directly
+  if (channels.length === 0) {
+    for (const source of weStreamMatch.sources.slice(0, 5)) {
+      channels.push({
+        id: `${source.source}-${source.id}`,
+        name: `${source.source.toUpperCase()} Stream`,
+        country: 'EN',
+        logo: '',
+        embedUrl: `${WESTREAM_API}/embed/${source.source}/${source.id}/1`,
+      });
+    }
+  }
+  
+  console.log(`Got ${channels.length} stream channels for ${weStreamMatch.title}`);
+  return channels;
 }
 
 // In-memory cache
@@ -269,8 +301,9 @@ serve(async (req) => {
 
     console.log('Fetching matches from all sports (TOP LEAGUES ONLY)...');
     
-    const cdnChannels = await fetchCDNChannels();
-    console.log(`Got ${cdnChannels.length} CDN-Live channels`);
+    // Fetch WeStream matches first
+    const weStreamMatches = await fetchWeStreamMatches();
+    console.log(`Got ${weStreamMatches.length} WeStream matches for stream matching`);
     
     const allMatches: TransformedMatch[] = [];
     const matchIds = new Set<string>();
@@ -302,7 +335,7 @@ serve(async (req) => {
             continue; // Skip non-top league matches
           }
           
-          // Skip finished matches - they should not appear in "live" section
+          // Skip finished matches
           const progress = (match.strProgress || '').toUpperCase();
           const status = (match.strStatus || '').toUpperCase();
           const isFinished = progress === 'FT' || progress === 'AOT' || progress === 'AP' ||
@@ -310,7 +343,7 @@ serve(async (req) => {
                             status.includes('MATCH FINISHED') || status === 'POST';
           
           if (isFinished) {
-            continue; // Skip finished matches
+            continue;
           }
           
           if (matchIds.has(match.idEvent)) continue;
@@ -361,9 +394,7 @@ serve(async (req) => {
     // Fetch upcoming events from top leagues
     const upcomingPromises = TOP_LEAGUES.slice(0, 10).map(async (league) => {
         try {
-          // Search for league to get ID
-          const searchUrl = `${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/searchevents.php?e=${encodeURIComponent(league.name)}`;
-          const response = await fetch(`${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=4328`); // Premier League as default
+          const response = await fetch(`${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=4328`);
           
           if (!response.ok) return [];
           
@@ -413,7 +444,7 @@ serve(async (req) => {
       });
       
       // Also fetch from specific top league IDs
-      const topLeagueIds = ['4328', '4335', '4331', '4332', '4334', '4387']; // EPL, La Liga, Bundesliga, Serie A, Ligue 1, NBA
+      const topLeagueIds = ['4328', '4335', '4331', '4332', '4334', '4387'];
       const leaguePromises = topLeagueIds.map(async (leagueId) => {
         try {
           const response = await fetch(`${SPORTS_DB_V1_BASE}/${SPORTS_DB_API_KEY}/eventsnextleague.php?id=${leagueId}`);
@@ -472,42 +503,43 @@ serve(async (req) => {
     
     console.log(`Fetched ${allMatches.length} total matches (live + upcoming)`);
 
-    // Sort: live first, then by priority, then by timestamp (soonest first for upcoming)
+    // Sort: live first, then by priority, then by timestamp
     allMatches.sort((a, b) => {
-      // Live matches first
       if (a.isLive !== b.isLive) return a.isLive ? -1 : 1;
-      // Then by priority
       if (a.priority !== b.priority) return b.priority - a.priority;
-      // Then by timestamp (soonest first)
       return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
     });
 
     // Limit to 20 matches
     const limitedMatches = allMatches.slice(0, 20);
     
-    // Fetch TV channels for matches
+    // Match with WeStream and get stream links
     if (limitedMatches.length > 0) {
-      console.log('Fetching TV channels for matches...');
-      const tvPromises = limitedMatches.map(async (match) => {
-        const channels = await fetchTVChannels(match.id, cdnChannels);
-        match.channels = channels.length > 0 ? channels : getChannelsForSport(match.sport, cdnChannels);
+      console.log('Matching with WeStream for stream links...');
+      const streamPromises = limitedMatches.map(async (match) => {
+        const weStreamMatch = findWeStreamMatch(match.homeTeam, match.awayTeam, weStreamMatches);
+        if (weStreamMatch) {
+          match.channels = await getWeStreamChannels(weStreamMatch);
+        }
       });
-      await Promise.all(tvPromises);
+      await Promise.all(streamPromises);
     }
     
     const liveCount = limitedMatches.filter(m => m.isLive).length;
     const upcomingCount = limitedMatches.filter(m => !m.isLive && !m.isFinished).length;
+    const matchesWithStreams = limitedMatches.filter(m => m.channels.length > 0).length;
 
     // Cache result
     cache.matches = { data: limitedMatches, timestamp: Date.now() };
     
-    console.log(`Returning ${limitedMatches.length} TOP LEAGUE matches (${liveCount} live, ${upcomingCount} upcoming)`);
+    console.log(`Returning ${limitedMatches.length} TOP LEAGUE matches (${liveCount} live, ${upcomingCount} upcoming, ${matchesWithStreams} with streams)`);
     
     return new Response(
       JSON.stringify({ 
         matches: limitedMatches,
         liveCount,
         upcomingCount,
+        matchesWithStreams,
         total: limitedMatches.length,
         fetchedAt: new Date().toISOString(),
         cached: false
