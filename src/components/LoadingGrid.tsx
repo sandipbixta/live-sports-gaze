@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIsMobile } from '../hooks/use-mobile';
-import SkeletonCard from './SkeletonCard';
+import { MatchCardSkeleton } from '@/components/skeletons';
 
 interface LoadingGridProps {
   title?: string;
@@ -22,7 +22,7 @@ const LoadingGrid: React.FC<LoadingGridProps> = ({
       </div>
       <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'} gap-3 md:gap-4`}>
         {Array.from({ length: count }).map((_, i) => (
-          <SkeletonCard key={i} />
+          <MatchCardSkeleton key={i} />
         ))}
       </div>
     </div>
