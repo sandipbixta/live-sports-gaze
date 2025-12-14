@@ -1,3 +1,5 @@
+import { indiaChannels, HLSChannel } from './indianChannels';
+
 export interface Channel {
   id: string;
   title: string;
@@ -7,6 +9,11 @@ export interface Channel {
   category: 'sports' | 'news' | 'entertainment';
   logo?: string;
   viewers?: number;
+  hlsUrl?: string;
+  headers?: {
+    userAgent?: string;
+    referer?: string;
+  };
 }
 
 const API_BASE = 'https://api.cdn-live.tv/api/v1/vip/damitv';
@@ -117,16 +124,19 @@ export const fetchChannelsFromAPI = async (): Promise<Channel[]> => {
       .filter((ch: any) => ch && (ch.name || ch.title))
       .map(transformChannel);
 
+    // Add Indian channels from FanCode
+    const allChannels = [...transformedChannels, ...indiaChannels];
+
     // Update cache
-    channelsCache = transformedChannels;
+    channelsCache = allChannels;
     cacheTimestamp = Date.now();
 
-    console.log(`✅ Fetched ${transformedChannels.length} channels from cdn-live.tv API`);
-    return transformedChannels;
+    console.log(`✅ Fetched ${transformedChannels.length} channels from cdn-live.tv API + ${indiaChannels.length} Indian channels`);
+    return allChannels;
   } catch (error) {
     console.error('❌ Error fetching channels:', error);
-    // Return cached data if available, otherwise empty array
-    return channelsCache || [];
+    // Return cached data if available, otherwise just Indian channels
+    return channelsCache || indiaChannels;
   }
 };
 

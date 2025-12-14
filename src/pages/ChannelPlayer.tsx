@@ -104,13 +104,19 @@ const ChannelPlayer = () => {
     );
   }
 
+  // Build stream object - use HLS URL if available
+  const streamUrl = channel.hlsUrl || channel.embedUrl;
+  const isHlsStream = !!channel.hlsUrl;
+  
   const stream = {
     id: channel.id,
     streamNo: 1,
     language: 'English',
     hd: true,
-    embedUrl: channel.embedUrl,
-    source: 'TV Channel'
+    embedUrl: streamUrl,
+    source: 'TV Channel',
+    isHls: isHlsStream,
+    headers: channel.headers
   };
 
   return (

@@ -98,6 +98,7 @@ const ChannelPlayerSelector: React.FC<ChannelPlayerSelectorProps> = ({
             onLoad={handleLoad}
             onError={handleError}
             videoRef={videoRef}
+            headers={(stream as any)?.headers}
           />
         </div>
       );
