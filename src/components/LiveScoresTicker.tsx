@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Activity } from 'lucide-react';
+import { getLiveScoreByTeams } from '@/hooks/useLiveScoreUpdates';
 
 interface LiveMatch {
   id: string;
@@ -29,22 +30,34 @@ const LiveScoresTicker: React.FC = () => {
         }
 
         if (data?.matches) {
+          // Get ALL live matches, then try to enrich with scores from live score store
           const live = data.matches
-            .filter((m: any) => {
-              const homeScore = m.score?.home || m.homeScore;
-              const awayScore = m.score?.away || m.awayScore;
-              return m.isLive && homeScore !== undefined && awayScore !== undefined;
-            })
-            .map((m: any) => ({
-              id: m.id || `${m.teams?.home?.name || m.homeTeam}-${m.teams?.away?.name || m.awayTeam}`,
-              homeTeam: m.teams?.home?.name || m.homeTeam || 'Home',
-              awayTeam: m.teams?.away?.name || m.awayTeam || 'Away',
-              homeScore: m.score?.home || m.homeScore,
-              awayScore: m.score?.away || m.awayScore,
-              progress: m.progress,
-              league: m.tournament || m.league || m.category || 'Live',
-              isLive: true
-            }));
+            .filter((m: any) => m.isLive)
+            .map((m: any) => {
+              const homeTeam = m.teams?.home?.name || m.homeTeam || 'Home';
+              const awayTeam = m.teams?.away?.name || m.awayTeam || 'Away';
+              
+              // Try to get live score from the live score store
+              const liveScore = getLiveScoreByTeams(homeTeam, awayTeam);
+              
+              // Use score from API response, or from live score store, or null
+              const homeScore = m.score?.home ?? m.homeScore ?? liveScore?.homeScore ?? null;
+              const awayScore = m.score?.away ?? m.awayScore ?? liveScore?.awayScore ?? null;
+              const progress = m.progress ?? liveScore?.progress ?? null;
+              
+              return {
+                id: m.id || `${homeTeam}-${awayTeam}`,
+                homeTeam,
+                awayTeam,
+                homeScore,
+                awayScore,
+                progress,
+                league: m.tournament || m.league || m.category || 'Live',
+                isLive: true
+              };
+            });
+          
+          console.log(`Ticker: Found ${live.length} live matches`);
           setLiveMatches(live);
         }
       } catch (error) {
@@ -56,8 +69,8 @@ const LiveScoresTicker: React.FC = () => {
 
     fetchLiveMatches();
     
-    // Refresh every 60 seconds
-    const interval = setInterval(fetchLiveMatches, 60000);
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchLiveMatches, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -101,15 +114,21 @@ const LiveScoresTicker: React.FC = () => {
                   {match.homeTeam}
                 </span>
                 
-                {/* Score */}
+                {/* Score or LIVE indicator */}
                 <div className="mx-2 bg-primary/20 px-2 py-0.5 rounded flex items-center gap-1">
-                  <span className="text-white font-bold text-sm tabular-nums">
-                    {match.homeScore}
-                  </span>
-                  <span className="text-muted-foreground text-xs">-</span>
-                  <span className="text-white font-bold text-sm tabular-nums">
-                    {match.awayScore}
-                  </span>
+                  {match.homeScore !== null && match.awayScore !== null ? (
+                    <>
+                      <span className="text-white font-bold text-sm tabular-nums">
+                        {match.homeScore}
+                      </span>
+                      <span className="text-muted-foreground text-xs">-</span>
+                      <span className="text-white font-bold text-sm tabular-nums">
+                        {match.awayScore}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-red-400 font-bold text-xs animate-pulse">LIVE</span>
+                  )}
                 </div>
                 
                 {/* Away Team */}
