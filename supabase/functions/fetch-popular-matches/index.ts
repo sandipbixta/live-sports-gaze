@@ -117,6 +117,62 @@ interface SportsDbLiveMatch {
   intAwayScore: string | null;
 }
 
+// TV Channel recommendations by sport and league
+const TV_CHANNELS: Record<string, { name: string; code: string }[]> = {
+  'football': [
+    { name: 'Sky Sports Premier League', code: 'sky-sports-pl' },
+    { name: 'Sky Sports Football', code: 'sky-sports-football' },
+    { name: 'BT Sport 1', code: 'bt-sport-1' },
+    { name: 'beIN Sports 1', code: 'bein-sports-1' },
+    { name: 'ESPN', code: 'espn' },
+    { name: 'TNT Sports', code: 'tnt-sports' },
+  ],
+  'cricket': [
+    { name: 'Sky Sports Cricket', code: 'sky-sports-cricket' },
+    { name: 'Star Sports 1', code: 'star-sports-1' },
+    { name: 'Willow Cricket', code: 'willow-cricket' },
+    { name: 'Sony Six', code: 'sony-six' },
+  ],
+  'basketball': [
+    { name: 'ESPN', code: 'espn' },
+    { name: 'TNT', code: 'tnt' },
+    { name: 'NBA TV', code: 'nba-tv' },
+    { name: 'ABC', code: 'abc' },
+  ],
+  'nfl': [
+    { name: 'NFL Network', code: 'nfl-network' },
+    { name: 'ESPN', code: 'espn' },
+    { name: 'Fox Sports', code: 'fox-sports' },
+    { name: 'CBS Sports', code: 'cbs-sports' },
+  ],
+  'fighting': [
+    { name: 'ESPN+ UFC', code: 'espn-ufc' },
+    { name: 'BT Sport', code: 'bt-sport' },
+    { name: 'DAZN', code: 'dazn' },
+  ],
+  'motorsport': [
+    { name: 'Sky Sports F1', code: 'sky-sports-f1' },
+    { name: 'ESPN', code: 'espn' },
+    { name: 'Fox Sports', code: 'fox-sports' },
+  ],
+  'hockey': [
+    { name: 'ESPN', code: 'espn' },
+    { name: 'NHL Network', code: 'nhl-network' },
+    { name: 'TNT', code: 'tnt' },
+  ],
+  'tennis': [
+    { name: 'ESPN', code: 'espn' },
+    { name: 'Tennis Channel', code: 'tennis-channel' },
+    { name: 'Eurosport', code: 'eurosport' },
+  ],
+};
+
+// Get recommended TV channels for a sport
+function getRecommendedChannels(category: string): { name: string; code: string }[] {
+  const normalized = normalizeSportCategory(category);
+  return TV_CHANNELS[normalized] || TV_CHANNELS['football'];
+}
+
 interface EnrichedMatch {
   id: string;
   title: string;
@@ -134,6 +190,7 @@ interface EnrichedMatch {
   score?: { home?: string; away?: string };
   progress?: string;
   priority: number;
+  tvChannels?: { name: string; code: string }[];
 }
 
 // Cache for WeStream and SportsDB data
@@ -404,6 +461,8 @@ serve(async (req) => {
         isLive,
         progress: sdbMatch?.strProgress || undefined,
         priority: calculatePriority(wsMatch, sdbMatch, isLive),
+        // Add recommended TV channels for this sport
+        tvChannels: getRecommendedChannels(wsMatch.category),
       };
       
       // Add live score if available
