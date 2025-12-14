@@ -7,39 +7,59 @@ import TeamLogo from './TeamLogo';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { searchTeam, searchEvent } from '@/services/sportsLogoService';
 
-// Convert progress like "1H", "2H", "HT" to minutes
-const convertProgressToMinutes = (progress: string): string => {
+// Calculate real-time minutes based on match start time and current period
+const calculateLiveMinutes = (progress: string, matchStartTime?: number): string => {
   if (!progress) return '';
   const trimmed = progress.trim().toUpperCase();
   
   // Already in minutes format (e.g., "45'", "45")
   if (/^\d+['′]?$/.test(trimmed)) {
-    return trimmed.replace(/['′]/g, '');
+    return trimmed.replace(/['′]/g, '') + "'";
   }
   
   // Half time
   if (trimmed === 'HT' || trimmed === 'HALF TIME' || trimmed === 'HALFTIME') {
-    return '45+';
+    return "HT";
   }
   
-  // Full time
-  if (trimmed === 'FT' || trimmed === 'FULL TIME' || trimmed === 'FULLTIME' || trimmed === 'AET') {
-    return '90+';
+  // Full time / Match Finished
+  if (trimmed === 'FT' || trimmed === 'FULL TIME' || trimmed === 'FULLTIME' || 
+      trimmed === 'AET' || trimmed === 'MATCH FINISHED' || trimmed.includes('FINISHED')) {
+    return "FT";
   }
   
-  // First half (1H, 1ST HALF)
+  // Calculate elapsed time if we have match start time
+  if (matchStartTime) {
+    const now = Date.now();
+    const elapsedMs = now - matchStartTime;
+    const elapsedMinutes = Math.floor(elapsedMs / 60000);
+    
+    // First half (1H, 1ST HALF) - 0 to 45 minutes
+    if (trimmed === '1H' || trimmed === '1ST HALF' || trimmed === 'FIRST HALF') {
+      const minute = Math.min(elapsedMinutes, 45);
+      return minute > 45 ? "45+'" : `${Math.max(1, minute)}'`;
+    }
+    
+    // Second half (2H, 2ND HALF) - 45 to 90 minutes (started ~60 min after kickoff including HT)
+    if (trimmed === '2H' || trimmed === '2ND HALF' || trimmed === 'SECOND HALF') {
+      // Assume halftime is ~15 min, so 2H starts at ~60 min after kickoff
+      const secondHalfMinute = Math.max(0, elapsedMinutes - 60);
+      const minute = 45 + Math.min(secondHalfMinute, 45);
+      return minute >= 90 ? "90+'" : `${Math.max(46, minute)}'`;
+    }
+  }
+  
+  // Fallback for 1H/2H without start time - show period indicator
   if (trimmed === '1H' || trimmed === '1ST HALF' || trimmed === 'FIRST HALF') {
-    return '45';
+    return "1H";
   }
-  
-  // Second half (2H, 2ND HALF)
   if (trimmed === '2H' || trimmed === '2ND HALF' || trimmed === 'SECOND HALF') {
-    return '90';
+    return "2H";
   }
   
   // Extra time
   if (trimmed === 'ET' || trimmed === 'EXTRA TIME') {
-    return '120';
+    return "ET";
   }
   
   // Return original if no conversion needed
@@ -386,7 +406,7 @@ const PopularMatchCard: React.FC<{
           <div className="flex items-center justify-between mt-auto">
             {match.isLive ? (
               <span className="text-[10px] text-red-500 font-medium">
-                {match.progress ? `${convertProgressToMinutes(match.progress)} min` : 'Live'}
+                {match.progress ? calculateLiveMinutes(match.progress, matchDate) : 'Live'}
               </span>
             ) : (
               <p className="text-[10px] text-red-500 font-medium">
