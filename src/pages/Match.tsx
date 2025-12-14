@@ -20,6 +20,7 @@ const StreamTab = lazy(() => import('@/components/match/StreamTab'));
 const MatchCard = lazy(() => import('@/components/MatchCard'));
 const MatchAnalysis = lazy(() => import('@/components/match/MatchAnalysis'));
 const ViewerStats = lazy(() => import('@/components/match/ViewerStats').then(m => ({ default: m.ViewerStats })));
+const StreamViewerDisplay = lazy(() => import('@/components/StreamViewerDisplay'));
 
 // Keep loading states as regular imports
 import LoadingState from '@/components/match/LoadingState';
@@ -336,8 +337,15 @@ const Match = () => {
               />
             </Suspense>
 
+            {/* Live Viewer Count Display */}
+            <div className="mt-4">
+              <Suspense fallback={<LoadingPlaceholder height="h-20" />}>
+                <StreamViewerDisplay matchId={matchId || ''} isLive={true} />
+              </Suspense>
+            </div>
+
             {/* Viewer Statistics */}
-            <div className="mt-6">
+            <div className="mt-4">
               <Suspense fallback={<LoadingPlaceholder height="h-24" />}>
                 <ViewerStats match={match} />
               </Suspense>
