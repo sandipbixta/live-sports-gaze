@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const FOOTBALL_DATA_SPORT_KEY = "football_data";
+
 // Football-data.org competition codes
 // Free tier supports: PL, BL1, SA, PD, FL1, ELC, PPL, DED, BSA, CL, EC, WC
 const FOOTBALL_DATA_COMPETITIONS = [
@@ -42,23 +44,32 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Delete existing soccer leagues to refresh with correct data
-    const { error: deleteError } = await supabase
+    const supportedCodes = FOOTBALL_DATA_COMPETITIONS.map((c) => c.code);
+
+    // Delete existing football-data leagues (and legacy rows inserted under sport='soccer')
+    const { error: deleteFootballDataError } = await supabase
       .from("leagues")
       .delete()
-      .eq("sport", "soccer");
+      .eq("sport", FOOTBALL_DATA_SPORT_KEY);
 
-    if (deleteError) {
-      console.error("Error deleting old leagues:", deleteError);
+    if (deleteFootballDataError) {
+      console.error("Error deleting old football-data leagues:", deleteFootballDataError);
+    }
+
+    const { error: deleteLegacyCodesError } = await supabase
+      .from("leagues")
+      .delete()
+      .eq("sport", "soccer")
+      .in("league_id", supportedCodes);
+
+    if (deleteLegacyCodesError) {
+      console.error("Error deleting legacy competition-code rows:", deleteLegacyCodesError);
     }
 
     // Fetch all competitions from football-data.org
-    const competitionsRes = await fetch(
-      "https://api.football-data.org/v4/competitions",
-      {
-        headers: { "X-Auth-Token": apiKey },
-      }
-    );
+    const competitionsRes = await fetch("https://api.football-data.org/v4/competitions", {
+      headers: { "X-Auth-Token": apiKey },
+    });
 
     if (!competitionsRes.ok) {
       const errorText = await competitionsRes.text();
@@ -67,13 +78,14 @@ serve(async (req) => {
     }
 
     const competitionsData = await competitionsRes.json();
-    console.log(`Fetched ${competitionsData.competitions?.length || 0} competitions from API`);
+    console.log(
+      `Fetched ${competitionsData.competitions?.length || 0} competitions from API`
+    );
 
     // Filter to only supported competitions (free tier)
-    const supportedCodes = FOOTBALL_DATA_COMPETITIONS.map((c) => c.code);
-    const competitions = competitionsData.competitions?.filter(
-      (c: any) => supportedCodes.includes(c.code)
-    ) || [];
+    const competitions =
+      competitionsData.competitions?.filter((c: any) => supportedCodes.includes(c.code)) ||
+      [];
 
     console.log(`Filtered to ${competitions.length} supported competitions`);
 
@@ -82,7 +94,7 @@ serve(async (req) => {
       return {
         league_id: comp.code, // Use the competition code as league_id
         league_name: comp.name,
-        sport: "soccer",
+        sport: FOOTBALL_DATA_SPORT_KEY,
         country: comp.area?.name || mapping?.country || "Unknown",
         logo_url: comp.emblem || null,
         description: null,
@@ -96,10 +108,7 @@ serve(async (req) => {
     console.log(`Prepared ${leaguesWithLogos.length} leagues for insertion`);
 
     // Insert leagues into database
-    const { data, error } = await supabase
-      .from("leagues")
-      .insert(leaguesWithLogos)
-      .select();
+    const { data, error } = await supabase.from("leagues").insert(leaguesWithLogos).select();
 
     if (error) {
       console.error("Error inserting leagues:", error);

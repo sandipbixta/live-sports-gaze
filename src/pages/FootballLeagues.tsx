@@ -32,7 +32,7 @@ const FootballLeagues = () => {
       const { data: dbLeagues, error: dbError } = await supabase
         .from("leagues")
         .select("*")
-        .eq("sport", "soccer")
+        .eq("sport", "football_data")
         .order("league_name");
 
       if (dbError) throw dbError;
