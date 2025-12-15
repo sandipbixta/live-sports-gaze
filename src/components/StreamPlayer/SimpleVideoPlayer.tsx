@@ -761,21 +761,15 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
       </div>
       
-      {/* Live Viewer Count - Below Player */}
+      {/* Viewer Count - Below Player */}
       {match && (
-        <div className="flex items-center justify-end mt-3 px-1">
-          <div className="flex items-center gap-2 bg-card/90 backdrop-blur-sm px-4 py-2 rounded-lg border border-border/50 shadow-sm">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-            <span className="text-xs font-medium text-red-500">LIVE</span>
-            <span className="text-muted-foreground">•</span>
-            <LiveViewerCount 
-              match={match as Match} 
-              size="md" 
-              showTrend={true}
-              className="text-foreground font-semibold" 
-            />
-            <span className="text-xs text-muted-foreground">watching</span>
-          </div>
+        <div className="flex items-center justify-end mt-2 px-1">
+          <LiveViewerCount 
+            match={match as Match} 
+            size="md" 
+            showTrend={true}
+            className="text-muted-foreground" 
+          />
         </div>
       )}
     </div>
