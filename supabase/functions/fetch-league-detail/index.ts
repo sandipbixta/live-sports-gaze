@@ -5,6 +5,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Map internal league IDs to football-data.org competition codes
+const LEAGUE_ID_TO_CODE: Record<string, string> = {
+  'soccer_england_premier_league': 'PL',
+  'soccer_spain_la_liga': 'PD',
+  'soccer_germany_bundesliga': 'BL1',
+  'soccer_italy_serie_a': 'SA',
+  'soccer_france_ligue_1': 'FL1',
+  'soccer_netherlands_eredivisie': 'DED',
+  'soccer_portugal_primeira_liga': 'PPL',
+  'soccer_brazil_serie_a': 'BSA',
+  'soccer_england_championship': 'ELC',
+  'soccer_uefa_champions_league': 'CL',
+  'soccer_uefa_europa_league': 'EL',
+  'soccer_fifa_world_cup': 'WC',
+  'soccer_uefa_euro': 'EC',
+  // Direct codes also work
+  'PL': 'PL', 'PD': 'PD', 'BL1': 'BL1', 'SA': 'SA', 'FL1': 'FL1',
+  'DED': 'DED', 'PPL': 'PPL', 'BSA': 'BSA', 'ELC': 'ELC', 'CL': 'CL',
+  'EL': 'EL', 'WC': 'WC', 'EC': 'EC',
+};
+
 // In-memory cache per competition
 const cache: Map<string, { data: any; timestamp: number }> = new Map();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -27,8 +48,10 @@ serve(async (req) => {
       throw new Error('Competition ID is required');
     }
 
-    // competitionId can be a code (PL, PD) or a number - football-data.org accepts both
-    const competitionCode = competitionId;
+    // Map internal league ID to football-data.org code
+    const competitionCode = LEAGUE_ID_TO_CODE[competitionId] || competitionId;
+    
+    console.log(`Mapping ${competitionId} -> ${competitionCode}`);
 
     const cacheKey = `league-${competitionCode}`;
     const now = Date.now();
