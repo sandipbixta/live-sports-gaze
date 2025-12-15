@@ -90,6 +90,42 @@ const TrendingTopics: React.FC = () => {
     }
     return views.toString();
   };
-  return;
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-primary" />
+          Trending Now
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {trends.map((topic, index) => (
+          <Link
+            key={index}
+            to={topic.url}
+            className="flex items-start justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                {getTrendIcon(topic.trend)}
+                <span className="text-sm font-medium text-foreground truncate">
+                  {topic.title}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                  {topic.category}
+                </Badge>
+                <span>{topic.timeAgo}</span>
+              </div>
+            </div>
+            <span className="text-xs text-muted-foreground ml-2">
+              {formatViews(topic.views)} views
+            </span>
+          </Link>
+        ))}
+      </CardContent>
+    </Card>
+  );
 };
 export default TrendingTopics;
