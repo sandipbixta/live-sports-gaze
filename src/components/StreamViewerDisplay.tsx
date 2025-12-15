@@ -50,6 +50,21 @@ const StreamViewerDisplay: React.FC<StreamViewerDisplayProps> = ({
       clearInterval(interval);
     };
   }, [matchId]);
-  return;
+  return (
+    <div className={cn("flex items-center gap-1.5 text-muted-foreground", className)}>
+      <Users className="h-4 w-4" />
+      <span className={cn(
+        "text-sm font-medium transition-all duration-300",
+        isAnimating && "scale-110 text-sports-primary"
+      )}>
+        {viewerCount.toLocaleString()}
+      </span>
+      {isLive && (
+        <span className="flex items-center gap-1 text-xs text-sports-live">
+          <Radio className="h-3 w-3 animate-pulse" />
+        </span>
+      )}
+    </div>
+  );
 };
 export default StreamViewerDisplay;

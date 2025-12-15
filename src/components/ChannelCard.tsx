@@ -50,11 +50,11 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
         }
       }}
     >
-      <CardContent className="p-2">
-        <div className="flex items-center gap-2">
-          <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
+      <CardContent className="p-1.5">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center ${
             isActive ? 'ring-2 ring-sports-primary' : ''
-          } ${logo ? 'bg-background p-1' : (isActive ? 'bg-sports-primary' : 'bg-muted')}`}>
+          } ${logo ? 'bg-background p-0.5' : (isActive ? 'bg-sports-primary' : 'bg-muted')}`}>
             {logo ? (
               <img 
                 src={logo} 
@@ -62,8 +62,8 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
                 className="w-full h-full object-contain rounded-full"
                 loading="lazy"
                 decoding="async"
-                width={48}
-                height={48}
+                width={32}
+                height={32}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                   const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
@@ -77,15 +77,15 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
             ) : null}
             <div className={`w-full h-full flex items-center justify-center ${logo ? 'hidden' : ''}`}>
               {isActive ? (
-                <Tv className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary-foreground" aria-hidden="true" />
+                <Tv className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-primary-foreground" aria-hidden="true" />
               ) : (
-                <div className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex items-center justify-center text-xs font-bold text-muted-foreground">
+                <div className="h-3 w-3 sm:h-3.5 sm:w-3.5 flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                   {generateInitials()}
                 </div>
               )}
             </div>
           </div>
-          <div className="font-medium text-xs sm:text-sm text-foreground truncate">{title}</div>
+          <div className="font-medium text-[10px] sm:text-xs text-foreground truncate">{title}</div>
         </div>
       </CardContent>
     </Card>
