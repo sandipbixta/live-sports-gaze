@@ -490,14 +490,14 @@ const MatchCard: React.FC<MatchCardProps> = ({
           {/* Match Time/Progress */}
           <div className="flex items-center justify-between mt-auto">
             {isLive ? (
-              <div className="flex items-center gap-2">
-                <LiveViewerCount match={match} size="sm" showTrend={true} />
+              <>
                 {matchProgress && (
                   <span className="text-xs text-red-500 font-medium animate-pulse">
                     • {calculateLiveMinutes(matchProgress, match.date)}
                   </span>
                 )}
-              </div>
+                <LiveViewerCount match={match} size="sm" showTrend={true} />
+              </>
             ) : match.date ? (
               <p className="text-xs text-red-500 font-medium">
                 {format(new Date(match.date), 'EEE, do MMM, h:mm a')}
