@@ -212,27 +212,29 @@ const StreamSources = ({
       </div>;
   }
   return <div className="mt-6">
-      <div className="flex items-center gap-3 mb-2">
-        <h3 className="text-lg font-semibold text-white">Stream Links</h3>
-        {onRefresh && <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600">
-            {isRefreshing ? <>
-                <Loader className="w-3 h-3 mr-1.5 animate-spin" />
-                Scanning...
-              </> : <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                </svg>
-                Refresh
-              </>}
-          </Button>}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-white">Stream Links</h3>
+          {onRefresh && <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing} className="h-8 px-3 text-xs bg-gray-800 hover:bg-gray-700 border-gray-600">
+              {isRefreshing ? <>
+                  <Loader className="w-3 h-3 mr-1.5 animate-spin" />
+                  Scanning...
+                </> : <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                  </svg>
+                  Refresh
+                </>}
+            </Button>}
+        </div>
+        {currentStreamViewers > 0 && <div className="flex items-center gap-2 text-lg animate-fade-in">
+            <Users className="w-5 h-5 text-red-500 animate-pulse" />
+            <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
+              {currentStreamViewers.toLocaleString()}
+            </span>
+            <span className="text-muted-foreground text-sm ml-1">watching</span>
+          </div>}
       </div>
-      {currentStreamViewers > 0 && <div className="flex items-center gap-2 text-lg animate-fade-in mb-4">
-          <Users className="w-5 h-5 text-red-500 animate-pulse" />
-          <span className="font-bold text-white animate-counter-up" title="Live viewers from stream source">
-            {currentStreamViewers.toLocaleString()}
-          </span>
-          <span className="text-muted-foreground text-sm ml-1">watching</span>
-        </div>}
       
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
         {allAvailableStreams.map(({
