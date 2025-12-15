@@ -760,18 +760,6 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
       <BufferIndicator isBuffering={isBuffering} />
 
       </div>
-      
-      {/* Viewer Count - Below Player */}
-      {match && (
-        <div className="flex items-center justify-end mt-2 px-1">
-          <LiveViewerCount 
-            match={match as Match} 
-            size="md" 
-            showTrend={true}
-            className="text-muted-foreground" 
-          />
-        </div>
-      )}
     </div>
   );
 };
