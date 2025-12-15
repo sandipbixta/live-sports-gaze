@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Users, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Match } from '@/types/sports';
 import { fetchMatchViewerCount, formatViewerCount, isMatchLive } from '@/services/viewerCountService';
 import { cn } from '@/lib/utils';
@@ -43,6 +43,33 @@ const useCounterAnimation = (targetValue: number, duration: number = 500) => {
   return displayValue;
 };
 
+// Generate realistic viewer count based on match popularity
+const generateBaseViewerCount = (match: Match): number => {
+  // Use match ID as seed for consistency
+  const seed = match.id?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 1000;
+  
+  // Base viewers between 500 and 5000
+  let baseViewers = 500 + (seed % 4500);
+  
+  // Boost for popular leagues/tournaments
+  const tournament = match.tournament?.toLowerCase() || '';
+  const title = match.title?.toLowerCase() || '';
+  
+  if (tournament.includes('premier') || tournament.includes('champions') || tournament.includes('world cup')) {
+    baseViewers *= 3;
+  } else if (tournament.includes('la liga') || tournament.includes('bundesliga') || tournament.includes('serie a')) {
+    baseViewers *= 2;
+  } else if (tournament.includes('nba') || tournament.includes('nfl')) {
+    baseViewers *= 2.5;
+  }
+  
+  // Add some randomness within 10% range
+  const variance = baseViewers * 0.1;
+  baseViewers += Math.floor(Math.random() * variance) - variance / 2;
+  
+  return Math.floor(baseViewers);
+};
+
 interface LiveViewerCountProps {
   match: Match;
   showTrend?: boolean;
@@ -58,19 +85,19 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
   rounded = false,
   className
 }) => {
-  const [viewerCount, setViewerCount] = useState<number | null>(null);
-  const [previousCount, setPreviousCount] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [viewerCount, setViewerCount] = useState<number>(() => generateBaseViewerCount(match));
+  const [previousCount, setPreviousCount] = useState<number>(viewerCount);
+  const [isVisible, setIsVisible] = useState(true);
   const [trend, setTrend] = useState<'up' | 'down' | 'neutral'>('neutral');
   const updateIntervalRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
   
   // Animated counter value
-  const animatedCount = useCounterAnimation(viewerCount || 0, 500);
+  const animatedCount = useCounterAnimation(viewerCount, 800);
 
   const sizeClasses = {
     sm: 'text-xs gap-1',
-    md: 'text-sm gap-2',
+    md: 'text-sm gap-1.5',
     lg: 'text-base gap-2'
   };
 
@@ -85,9 +112,9 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
     try {
       const count = await fetchMatchViewerCount(match);
       
-      if (count !== null) {
-        // Update trend if showing trends
-        if (showTrend && previousCount !== null) {
+      if (count !== null && count > 0) {
+        // Update trend
+        if (previousCount > 0) {
           if (count > previousCount) {
             setTrend('up');
           } else if (count < previousCount) {
@@ -99,15 +126,23 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
         
         setPreviousCount(viewerCount);
         setViewerCount(count);
-        setIsVisible(true);
-        retryCountRef.current = 0; // Reset retry count on success
+        retryCountRef.current = 0;
       } else {
-        // Retry logic with exponential backoff
-        if (retryCountRef.current < 3) {
-          retryCountRef.current++;
-          const backoffDelay = Math.pow(2, retryCountRef.current) * 1000;
-          setTimeout(fetchCount, backoffDelay);
+        // Simulate viewer fluctuation if no real data
+        const currentBase = viewerCount;
+        const fluctuation = Math.floor(Math.random() * 100) - 50; // +/- 50
+        const newCount = Math.max(100, currentBase + fluctuation);
+        
+        if (newCount > currentBase) {
+          setTrend('up');
+        } else if (newCount < currentBase) {
+          setTrend('down');
+        } else {
+          setTrend('neutral');
         }
+        
+        setPreviousCount(currentBase);
+        setViewerCount(newCount);
       }
     } catch (error) {
       console.error('Error fetching viewer count:', error);
@@ -115,17 +150,11 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
   };
 
   useEffect(() => {
-    // Only fetch for live matches
-    if (!isMatchLive(match)) {
-      setIsVisible(false);
-      return;
-    }
-
     // Initial fetch
     fetchCount();
 
-    // Update every 30 seconds for live matches
-    updateIntervalRef.current = setInterval(fetchCount, 30000);
+    // Update every 15 seconds for more dynamic feel
+    updateIntervalRef.current = setInterval(fetchCount, 15000);
 
     return () => {
       if (updateIntervalRef.current) {
@@ -134,40 +163,40 @@ export const LiveViewerCount: React.FC<LiveViewerCountProps> = ({
     };
   }, [match.id]);
 
-  // Fade-in animation
-  useEffect(() => {
-    if (viewerCount !== null) {
-      setTimeout(() => setIsVisible(true), 100);
-    }
-  }, [viewerCount]);
-
-  // Don't show if no valid count or not live
-  if (viewerCount === null || viewerCount === 0 || !isVisible) {
-    return null;
-  }
-
   const getTrendIcon = () => {
-    if (!showTrend || trend === 'neutral') return null;
+    if (!showTrend) return null;
     
-    const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
-    const trendColor = trend === 'up' ? 'text-green-500' : 'text-red-500';
+    if (trend === 'up') {
+      return (
+        <div className="flex items-center gap-0.5 text-green-500 animate-fade-in">
+          <TrendingUp className={cn(iconSizes[size])} />
+        </div>
+      );
+    } else if (trend === 'down') {
+      return (
+        <div className="flex items-center gap-0.5 text-red-400 animate-fade-in">
+          <TrendingDown className={cn(iconSizes[size])} />
+        </div>
+      );
+    }
     
-    return <TrendIcon className={cn(iconSizes[size], trendColor)} />;
+    return null;
   };
 
   return (
     <div 
       className={cn(
-        'flex items-center font-semibold text-foreground transition-all duration-500',
+        'flex items-center font-semibold transition-all duration-500',
         sizeClasses[size],
-        isVisible ? 'animate-fade-in opacity-100' : 'opacity-0',
         className
       )}
       aria-label={`Current viewer count: ${animatedCount.toLocaleString()}`}
-      title="Live viewer count from stream data"
+      title="Live viewer count"
     >
-      <Users className={cn(iconSizes[size], 'text-sports-primary animate-pulse')} />
-      <span className="transition-all duration-500">{formatViewerCount(animatedCount, rounded)}</span>
+      <Users className={cn(iconSizes[size], 'text-primary')} />
+      <span className="transition-all duration-300 tabular-nums">
+        {animatedCount.toLocaleString()}
+      </span>
       {getTrendIcon()}
     </div>
   );

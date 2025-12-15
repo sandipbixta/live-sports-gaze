@@ -112,34 +112,6 @@ const MonetizationTracker: React.FC<MonetizationTrackerProps> = ({ children }) =
 
     trackRevenueOpportunities();
 
-    // Track ad blocker detection
-    const detectAdBlocker = () => {
-      const adTest = document.createElement('div');
-      adTest.innerHTML = '&nbsp;';
-      adTest.className = 'adsbox';
-      adTest.style.cssText = 'position: absolute; left: -10000px;';
-      document.body.appendChild(adTest);
-      
-      setTimeout(() => {
-        const isBlocked = adTest.offsetHeight === 0;
-        document.body.removeChild(adTest);
-        
-        if (isBlocked) {
-          analytics.track({
-            action: 'adblock_detected',
-            category: 'Monetization',
-            label: 'revenue_impact',
-            custom_parameters: {
-              user_agent: navigator.userAgent.substring(0, 100),
-              page_url: window.location.href
-            }
-          });
-        }
-      }, 100);
-    };
-
-    detectAdBlocker();
-
     // Cleanup
     return () => {
       clearInterval(valueTrackingInterval);
