@@ -53,6 +53,10 @@ const LeagueDetail = lazy(() => import("./pages/LeagueDetail"));
 const FootballLeagues = lazy(() => import("./pages/FootballLeagues"));
 const FootballLeagueDetail = lazy(() => import("./pages/FootballLeagueDetail"));
 const SelectedMatchPlayer = lazy(() => import("./pages/SelectedMatchPlayer"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const AdminBlog = lazy(() => import("./pages/AdminBlog"));
+const AdminBlogEditor = lazy(() => import("./pages/AdminBlogEditor"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -195,6 +199,21 @@ const App: React.FC = () => {
                   <Suspense fallback={<PageLoader />}><UfcStreaming /></Suspense>
                 </SEOPageTracker>
               } />
+              {/* Blog Pages */}
+              <Route path="/blog" element={
+                <SEOPageTracker pageTitle="Blog - Sports News & Updates" contentType="home">
+                  <Suspense fallback={<PageLoader />}><Blog /></Suspense>
+                </SEOPageTracker>
+              } />
+              <Route path="/blog/:slug" element={
+                <SEOPageTracker contentType="home">
+                  <Suspense fallback={<PageLoader />}><BlogPost /></Suspense>
+                </SEOPageTracker>
+              } />
+              {/* Admin Blog Pages */}
+              <Route path="/admin/blog" element={<Suspense fallback={<PageLoader />}><AdminBlog /></Suspense>} />
+              <Route path="/admin/blog/new" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
+              <Route path="/admin/blog/edit/:id" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
