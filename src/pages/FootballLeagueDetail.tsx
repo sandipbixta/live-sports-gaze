@@ -54,8 +54,9 @@ const FootballLeagueDetail = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['football-league-detail', competitionId],
     queryFn: async () => {
+      // competitionId can be a code (PL, PD) or a number
       const { data, error } = await supabase.functions.invoke('fetch-league-detail', {
-        body: { competitionId: Number(competitionId) }
+        body: { competitionId }
       });
       if (error) throw error;
       return data as CompetitionData;
