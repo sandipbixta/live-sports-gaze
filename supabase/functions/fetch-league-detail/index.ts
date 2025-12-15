@@ -43,7 +43,23 @@ const isCompetitionIdNumber = (value: string) => /^\d+$/.test(value);
 
 // In-memory cache per competition
 const cache: Map<string, { data: any; timestamp: number }> = new Map();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes - longer cache to avoid rate limits
+
+// Helper to fetch with retry on 429
+async function fetchWithRetry(url: string, headers: Record<string, string>, retries = 3): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    const res = await fetch(url, { headers });
+    if (res.status === 429) {
+      const retryAfter = parseInt(res.headers.get("Retry-After") || "30", 10);
+      console.log(`Rate limited, waiting ${retryAfter}s before retry ${i + 1}/${retries}`);
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      continue;
+    }
+    return res;
+  }
+  // Last attempt
+  return fetch(url, { headers });
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -102,38 +118,41 @@ serve(async (req) => {
 
     console.log(`Fetching league detail for competition ${competitionCode}`);
 
-    // Fetch competition info, standings, and matches in parallel
-    const [competitionRes, standingsRes, matchesRes] = await Promise.all([
-      fetch(`https://api.football-data.org/v4/competitions/${competitionCode}`, {
-        headers: { "X-Auth-Token": apiKey },
-      }),
-      fetch(
-        `https://api.football-data.org/v4/competitions/${competitionCode}/standings`,
-        {
-          headers: { "X-Auth-Token": apiKey },
-        }
-      ),
-      fetch(
-        `https://api.football-data.org/v4/competitions/${competitionCode}/matches?status=SCHEDULED,FINISHED`,
-        {
-          headers: { "X-Auth-Token": apiKey },
-        }
-      ),
-    ]);
+    const authHeaders = { "X-Auth-Token": apiKey };
+
+    // Fetch sequentially to avoid hitting rate limit with parallel requests
+    const competitionRes = await fetchWithRetry(
+      `https://api.football-data.org/v4/competitions/${competitionCode}`,
+      authHeaders
+    );
 
     if (!competitionRes.ok) {
       const errorText = await competitionRes.text();
       console.error(`Competition API error: ${competitionRes.status}`, errorText);
+      
+      // On rate limit, return a friendly message
+      if (competitionRes.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Rate limited. Please try again in 30 seconds.", retryAfter: 30 }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       return new Response(
-        JSON.stringify({
-          error: `Failed to fetch competition info: ${competitionRes.status} - ${errorText}`,
-        }),
-        {
-          status: competitionRes.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: `Failed to fetch competition info: ${competitionRes.status} - ${errorText}` }),
+        { status: competitionRes.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const standingsRes = await fetchWithRetry(
+      `https://api.football-data.org/v4/competitions/${competitionCode}/standings`,
+      authHeaders
+    );
+
+    const matchesRes = await fetchWithRetry(
+      `https://api.football-data.org/v4/competitions/${competitionCode}/matches?status=SCHEDULED,FINISHED`,
+      authHeaders
+    );
 
     if (!standingsRes.ok) {
       const errorText = await standingsRes.text();
