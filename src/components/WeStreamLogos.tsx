@@ -8,24 +8,29 @@ interface LeagueInfo {
   route: string;
 }
 
-// Use reliable CDN logos that don't have CORS issues
+// Use local assets + CDN fallbacks for reliability
+import premierLeague from '../assets/leagues/premier-league.webp';
+import laLiga from '../assets/leagues/laliga.png';
+import bundesliga from '../assets/leagues/bundesliga.png';
+import serieA from '../assets/leagues/serie-a.png';
+import ligue1 from '../assets/leagues/ligue-1.png';
+import championsLeague from '../assets/leagues/champions-league.png';
+import mls from '../assets/leagues/mls.png';
+
 const POPULAR_LEAGUES: LeagueInfo[] = [
-  { id: '4328', name: 'Premier League', badge: 'https://www.thesportsdb.com/images/media/league/badge/i6o0kh1549879062.png', route: '/league/soccer_epl' },
-  { id: '4335', name: 'La Liga', badge: 'https://www.thesportsdb.com/images/media/league/badge/7onmyv1534768460.png', route: '/league/soccer_spain_la_liga' },
-  { id: '4331', name: 'Bundesliga', badge: 'https://www.thesportsdb.com/images/media/league/badge/0j55yv1534764799.png', route: '/league/soccer_germany_bundesliga' },
-  { id: '4332', name: 'Serie A', badge: 'https://www.thesportsdb.com/images/media/league/badge/ocy2fe1566216901.png', route: '/league/soccer_italy_serie_a' },
-  { id: '4334', name: 'Ligue 1', badge: 'https://www.thesportsdb.com/images/media/league/badge/8f5jmf1516458074.png', route: '/league/soccer_france_ligue_one' },
-  { id: '4480', name: 'Champions League', badge: 'https://www.thesportsdb.com/images/media/league/badge/2hwqmm1720696754.png', route: '/league/soccer_uefa_champs_league' },
+  { id: '4328', name: 'Premier League', badge: premierLeague, route: '/league/soccer_epl' },
+  { id: '4335', name: 'La Liga', badge: laLiga, route: '/league/soccer_spain_la_liga' },
+  { id: '4331', name: 'Bundesliga', badge: bundesliga, route: '/league/soccer_germany_bundesliga' },
+  { id: '4332', name: 'Serie A', badge: serieA, route: '/league/soccer_italy_serie_a' },
+  { id: '4334', name: 'Ligue 1', badge: ligue1, route: '/league/soccer_france_ligue_one' },
+  { id: '4480', name: 'Champions League', badge: championsLeague, route: '/league/soccer_uefa_champs_league' },
   { id: '4387', name: 'NBA', badge: 'https://www.thesportsdb.com/images/media/league/badge/g6btoc1723153568.png', route: '/nba-streaming' },
   { id: '4391', name: 'NFL', badge: 'https://www.thesportsdb.com/images/media/league/badge/dqo6r91549878326.png', route: '/live' },
   { id: '4424', name: 'IPL', badge: 'https://www.thesportsdb.com/images/media/league/badge/5r1opy1462466689.png', route: '/live' },
-  { id: '4488', name: 'BBL', badge: 'https://www.thesportsdb.com/images/media/league/badge/48q4te1529416122.png', route: '/live' },
   { id: '4370', name: 'Formula 1', badge: 'https://www.thesportsdb.com/images/media/league/badge/w28ts61708717496.png', route: '/totalsportek-formula1' },
   { id: '4443', name: 'UFC', badge: 'https://www.thesportsdb.com/images/media/league/badge/xxutry1421792574.png', route: '/ufc-streaming' },
   { id: '4380', name: 'NHL', badge: 'https://www.thesportsdb.com/images/media/league/badge/w2qyaq1723157441.png', route: '/live' },
-  { id: '4346', name: 'MLS', badge: 'https://www.thesportsdb.com/images/media/league/badge/dqo85z1549879260.png', route: '/league/soccer_usa_mls' },
-  { id: '4344', name: 'Eredivisie', badge: 'https://www.thesportsdb.com/images/media/league/badge/5j6p9b1637840460.png', route: '/league/soccer_netherlands_eredivisie' },
-  { id: '4358', name: 'Liga Portugal', badge: 'https://www.thesportsdb.com/images/media/league/badge/k8pert1692469958.png', route: '/league/soccer_portugal_primeira_liga' },
+  { id: '4346', name: 'MLS', badge: mls, route: '/league/soccer_usa_mls' },
 ];
 
 const WeStreamLogos: React.FC = () => {
