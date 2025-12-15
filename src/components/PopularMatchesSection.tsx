@@ -495,12 +495,34 @@ const PopularMatchesSection: React.FC = () => {
       }
       
       const fetchedMatches = data?.matches || [];
-      // Filter out finished matches - isFinished may not exist in new format
+      // Filter out finished matches
       const activeMatches = fetchedMatches.filter((m: PopularMatch) => m.isFinished !== true);
       
-      // Fetch viewer counts for all matches and sort by viewers
+      // Show matches immediately
+      setCachedMatches(activeMatches);
+      setMatches(activeMatches);
+      
+      const liveMatches = activeMatches.filter((m: PopularMatch) => m.isLive);
+      setLiveCount(liveMatches.length);
+      
+      console.log(`Popular matches: ${activeMatches.length} (${liveMatches.length} live)`);
+      
+      // Fetch viewer counts in background and re-sort (non-blocking)
+      if (activeMatches.length > 0) {
+        fetchViewerCountsAndSort(activeMatches);
+      }
+    } catch (err) {
+      console.error('Error fetching popular matches:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [matches.length]);
+
+  // Background function to fetch viewer counts and sort
+  const fetchViewerCountsAndSort = async (matchList: PopularMatch[]) => {
+    try {
       const matchesWithViewers = await Promise.all(
-        activeMatches.map(async (match: PopularMatch) => {
+        matchList.map(async (match) => {
           try {
             const { data: viewerCount } = await supabase.rpc('get_viewer_count', { match_id_param: match.id });
             return { ...match, viewerCount: viewerCount || 0 };
@@ -511,23 +533,13 @@ const PopularMatchesSection: React.FC = () => {
       );
       
       // Sort by viewer count (highest first)
-      const sortedMatches = matchesWithViewers.sort((a, b) => b.viewerCount - a.viewerCount);
-      
-      // Cache the fresh data
-      setCachedMatches(sortedMatches);
-      
+      const sortedMatches = matchesWithViewers.sort((a, b) => (b.viewerCount || 0) - (a.viewerCount || 0));
       setMatches(sortedMatches);
-      
-      const liveMatches = sortedMatches.filter((m: PopularMatch) => m.isLive);
-      setLiveCount(liveMatches.length);
-      
-      console.log(`Popular matches: ${sortedMatches.length} (${liveMatches.length} live)`);
+      setCachedMatches(sortedMatches);
     } catch (err) {
-      console.error('Error fetching popular matches:', err);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching viewer counts:', err);
     }
-  }, [matches.length]);
+  };
 
   useEffect(() => {
     // Fetch fresh data in background (even if we have cache)
@@ -536,18 +548,10 @@ const PopularMatchesSection: React.FC = () => {
     // Full data refresh every 2 minutes
     const fullRefreshInterval = setInterval(() => fetchMatches(false), 2 * 60 * 1000);
     
-    // Live score refresh every 30 seconds (only if there are live matches)
-    const liveRefreshInterval = setInterval(() => {
-      if (liveCount > 0) {
-        fetchMatches(false);
-      }
-    }, 30 * 1000);
-    
     return () => {
       clearInterval(fullRefreshInterval);
-      clearInterval(liveRefreshInterval);
     };
-  }, [fetchMatches, liveCount]);
+  }, [fetchMatches]);
 
   const checkScrollButtons = useCallback(() => {
     if (scrollContainerRef.current) {
