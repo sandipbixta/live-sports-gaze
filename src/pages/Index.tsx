@@ -29,19 +29,23 @@ const WeStreamLogos = lazy(() => import('../components/WeStreamLogos'));
 const CompetitorSEOContent = lazy(() => import('../components/CompetitorSEOContent'));
 
 // Simple loading placeholder
-const LoadingPlaceholder = ({ height = "h-32" }: { height?: string }) => (
-  <div className={`${height} bg-card rounded-lg animate-pulse`} />
-);
-
+const LoadingPlaceholder = ({
+  height = "h-32"
+}: {
+  height?: string;
+}) => <div className={`${height} bg-card rounded-lg animate-pulse`} />;
 const Index = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [allMatches, setAllMatches] = useState<{[sportId: string]: Match[]}>({});
+  const [allMatches, setAllMatches] = useState<{
+    [sportId: string]: Match[];
+  }>({});
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  
   const [loadingSports, setLoadingSports] = useState(false); // Start false for instant render
   const [loadingMatches, setLoadingMatches] = useState(false);
 
@@ -56,23 +60,15 @@ const Index = () => {
     if (selectedSport === 'all') {
       return [];
     }
-    
-    return matches.filter(match => 
-      isPopularLeague(match.title) && 
-      !match.title.toLowerCase().includes('sky sports news') && 
-      !match.id.includes('sky-sports-news')
-    );
+    return matches.filter(match => isPopularLeague(match.title) && !match.title.toLowerCase().includes('sky sports news') && !match.id.includes('sky-sports-news'));
   }, [matches, selectedSport]);
 
   // Memoize filtered matches
   const filteredMatches = useMemo(() => {
     if (!searchTerm.trim()) return matches;
-    
     const lowercaseSearch = searchTerm.toLowerCase();
     return matches.filter(match => {
-      return match.title.toLowerCase().includes(lowercaseSearch) || 
-        match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) ||
-        match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
+      return match.title.toLowerCase().includes(lowercaseSearch) || match.teams?.home?.name?.toLowerCase().includes(lowercaseSearch) || match.teams?.away?.name?.toLowerCase().includes(lowercaseSearch);
     });
   }, [matches, searchTerm]);
 
@@ -81,13 +77,9 @@ const Index = () => {
     const loadInitialData = async () => {
       try {
         // Load sports AND live matches in parallel for instant display
-        const [sportsData, liveMatchesData] = await Promise.all([
-          fetchSports(),
-          fetchLiveMatches()
-        ]);
-        
+        const [sportsData, liveMatchesData] = await Promise.all([fetchSports(), fetchLiveMatches()]);
         console.log('📊 Sports data loaded:', sportsData);
-        
+
         // Sort with football first for better UX
         const sortedSports = sportsData.sort((a, b) => {
           if (a.name.toLowerCase() === 'football') return -1;
@@ -96,26 +88,22 @@ const Index = () => {
           if (b.name.toLowerCase() === 'basketball') return 1;
           return a.name.localeCompare(b.name);
         });
-        
         setSports(sortedSports);
-        
+
         // Display all live matches from API
         setLiveMatches(liveMatchesData);
-        
         console.log(`✅ Loaded ${liveMatchesData.length} live matches instantly`);
-        
       } catch (error) {
         console.error('Sports loading error:', error);
         toast({
           title: "Connection Issue",
           description: "Slow connection detected. Retrying...",
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setLoadingSports(false);
       }
     };
-
     loadInitialData();
   }, []);
 
@@ -136,19 +124,16 @@ const Index = () => {
   const handleSelectSport = async (sportId: string) => {
     console.log(`🎯 Selecting sport: ${sportId}, current: ${selectedSport}`);
     if (selectedSport === sportId) return;
-    
     setSelectedSport(sportId);
-    
+
     // For "All Sports", we don't need to load specific matches
     // as AllSportsLiveMatches component handles its own data fetching
     if (sportId === 'all') {
       setMatches([]);
       return;
     }
-    
     setLoadingMatches(true);
     console.log('🔄 Loading matches for sport:', sportId);
-    
     try {
       if (allMatches[sportId]) {
         console.log('📁 Using cached matches:', allMatches[sportId].length);
@@ -156,15 +141,13 @@ const Index = () => {
       } else {
         const rawMatchesData = await fetchMatches(sportId);
         console.log('📥 Raw matches data:', rawMatchesData.length);
-        
+
         // Filter and consolidate matches to remove duplicates and combine stream sources
         const cleanMatches = filterCleanMatches(rawMatchesData);
         console.log('🧹 Clean matches:', cleanMatches.length);
         const consolidatedMatches = consolidateMatches(cleanMatches);
         console.log('🔗 Consolidated matches:', consolidatedMatches.length);
-        
         setMatches(consolidatedMatches);
-        
         setAllMatches(prev => ({
           ...prev,
           [sportId]: consolidatedMatches
@@ -175,16 +158,14 @@ const Index = () => {
       toast({
         title: "Error",
         description: "Failed to load matches data.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoadingMatches(false);
       console.log('✅ Finished loading matches');
     }
   };
-
-  return (
-    <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
+  return <PageLayout searchTerm={searchTerm} onSearch={handleSearch}>
       <Helmet>
         <title>Best Sports Streaming Site Alternatives | DamiTV</title>
         <meta name="description" content="Discover the best sports streaming site alternatives. Free HD streams for football, basketball & more. Top vipleague & totalsportek alternative." />
@@ -194,38 +175,36 @@ const Index = () => {
         {/* Organization Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "DamiTV",
-            "url": "https://damitv.pro",
-            "logo": "https://damitv.pro/favicon.png",
-            "description": "Leading sports streaming site alternative offering free HD streams for all major sports",
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.7",
-              "reviewCount": "15847",
-              "bestRating": "5",
-              "worstRating": "1"
-            },
-            "sameAs": [
-              "https://t.me/damitv_official"
-            ]
-          })}
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "DamiTV",
+          "url": "https://damitv.pro",
+          "logo": "https://damitv.pro/favicon.png",
+          "description": "Leading sports streaming site alternative offering free HD streams for all major sports",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.7",
+            "reviewCount": "15847",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "sameAs": ["https://t.me/damitv_official"]
+        })}
         </script>
         
         {/* WebSite Schema */}
         <script type="application/ld+json">
           {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "DamiTV - Best Sports Streaming Alternative",
-            "url": "https://damitv.pro",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": "https://damitv.pro/live?q={search_term_string}",
-              "query-input": "required name=search_term_string"
-            }
-          })}
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "DamiTV - Best Sports Streaming Alternative",
+          "url": "https://damitv.pro",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://damitv.pro/live?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}
         </script>
       </Helmet>
       
@@ -249,7 +228,7 @@ const Index = () => {
 
         {/* Live TV Channels Carousel */}
         <div className="mb-8">
-          <SectionHeader title="Watch Live" seeAllLink="/live" />
+          
           <Suspense fallback={<LoadingPlaceholder />}>
             <FeaturedChannels />
           </Suspense>
@@ -259,46 +238,29 @@ const Index = () => {
         <div className="mb-8">
           <SectionHeader title="Featured Sports" seeAllLink="/schedule" seeAllText="VIEW SCHEDULE" />
           <Suspense fallback={<LoadingPlaceholder height="h-20" />}>
-            <SportsList 
-              sports={sports}
-              onSelectSport={handleSelectSport}
-              selectedSport={selectedSport}
-              isLoading={loadingSports}
-            />
+            <SportsList sports={sports} onSelectSport={handleSelectSport} selectedSport={selectedSport} isLoading={loadingSports} />
           </Suspense>
         </div>
             
         <Separator className="my-8 bg-border" />
             
         <div className="mb-8">
-          {selectedSport && (
-            <>
-              {selectedSport === 'all' ? (
-                <div>
+          {selectedSport && <>
+              {selectedSport === 'all' ? <div>
                   <SectionHeader title="Live Matches - All Sports" seeAllLink="/live" />
                   <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
                     <AllSportsLiveMatches searchTerm={searchTerm} />
                   </Suspense>
-                </div>
-              ) : (
-                <>
-                  <SectionHeader 
-                    title={sports.find(s => s.id === selectedSport)?.name || 'Matches'} 
-                  />
+                </div> : <>
+                  <SectionHeader title={sports.find(s => s.id === selectedSport)?.name || 'Matches'} />
                   <p className="text-muted-foreground text-sm mb-4">
                     {filteredMatches.length} matches available
                   </p>
                   <Suspense fallback={<LoadingPlaceholder height="h-96" />}>
-                    <MatchesList
-                      matches={filteredMatches}
-                      sportId={selectedSport}
-                      isLoading={loadingMatches}
-                    />
+                    <MatchesList matches={filteredMatches} sportId={selectedSport} isLoading={loadingMatches} />
                   </Suspense>
-                </>
-              )}
-            </>
-          )}
+                </>}
+            </>}
         </div>
             
         <div className="mb-8">
@@ -401,21 +363,13 @@ const Index = () => {
         </Suspense>
         
         {/* Email Subscription Section */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <Suspense fallback={<LoadingPlaceholder height="h-32" />}>
-              <EmailSubscription />
-            </Suspense>
-          </div>
-        </section>
+        
         
         {/* Rich Homepage Content for AdSense Approval */}
         <Suspense fallback={null}>
           <HomepageContent />
         </Suspense>
       </main>
-    </PageLayout>
-  );
+    </PageLayout>;
 };
-
 export default Index;
