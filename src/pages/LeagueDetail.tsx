@@ -82,7 +82,7 @@ const LeagueDetail = () => {
   const handleRefresh = () => {
     if (league) {
       toast.info("Refreshing teams...");
-      leaguesService.fetchLeagueTeams(league.league_id).then(() => {
+      leaguesService.fetchLeagueTeams(league.league_id, { force: true }).then(() => {
         loadLeagueData();
         toast.success("Teams updated!");
       });
