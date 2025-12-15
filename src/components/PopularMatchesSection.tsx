@@ -498,15 +498,30 @@ const PopularMatchesSection: React.FC = () => {
       // Filter out finished matches - isFinished may not exist in new format
       const activeMatches = fetchedMatches.filter((m: PopularMatch) => m.isFinished !== true);
       
+      // Fetch viewer counts for all matches and sort by viewers
+      const matchesWithViewers = await Promise.all(
+        activeMatches.map(async (match: PopularMatch) => {
+          try {
+            const { data: viewerCount } = await supabase.rpc('get_viewer_count', { match_id_param: match.id });
+            return { ...match, viewerCount: viewerCount || 0 };
+          } catch {
+            return { ...match, viewerCount: 0 };
+          }
+        })
+      );
+      
+      // Sort by viewer count (highest first)
+      const sortedMatches = matchesWithViewers.sort((a, b) => b.viewerCount - a.viewerCount);
+      
       // Cache the fresh data
-      setCachedMatches(activeMatches);
+      setCachedMatches(sortedMatches);
       
-      setMatches(activeMatches);
+      setMatches(sortedMatches);
       
-      const liveMatches = activeMatches.filter((m: PopularMatch) => m.isLive);
+      const liveMatches = sortedMatches.filter((m: PopularMatch) => m.isLive);
       setLiveCount(liveMatches.length);
       
-      console.log(`Popular matches: ${activeMatches.length} (${liveMatches.length} live)`);
+      console.log(`Popular matches: ${sortedMatches.length} (${liveMatches.length} live)`);
     } catch (err) {
       console.error('Error fetching popular matches:', err);
     } finally {
