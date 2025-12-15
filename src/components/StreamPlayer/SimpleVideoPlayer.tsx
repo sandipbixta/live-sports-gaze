@@ -3,10 +3,11 @@ import Hls from 'hls.js';
 import { Stream, Match } from '../../types/sports';
 import { ManualMatch } from '../../types/manualMatch';
 import { Button } from '../ui/button';
-import { Play, RotateCcw, Maximize, ExternalLink, Monitor, Clock } from 'lucide-react';
+import { Play, RotateCcw, Maximize, ExternalLink, Monitor, Clock, Users } from 'lucide-react';
 import StreamIframe from './StreamIframe';
 import StreamQualitySelector from '../StreamQualitySelector';
 import BufferIndicator from '../BufferIndicator';
+import { LiveViewerCount } from '../LiveViewerCount';
 import { getConnectionInfo, getOptimizedHLSConfig, detectCasting, onConnectionChange, detectGeographicLatency } from '../../utils/connectionOptimizer';
 import { 
   trackVideoStart, 
@@ -760,6 +761,16 @@ const SimpleVideoPlayer: React.FC<SimpleVideoPlayerProps> = ({
 
       </div>
       
+      {/* Live Viewer Count - Below Player */}
+      {match && (
+        <div className="flex items-center justify-end mt-2 px-1">
+          <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border/50">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-xs text-muted-foreground">LIVE</span>
+            <LiveViewerCount match={match as Match} size="sm" className="text-foreground" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
