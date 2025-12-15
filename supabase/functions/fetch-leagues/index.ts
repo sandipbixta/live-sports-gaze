@@ -58,35 +58,85 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch league details from TheSportsDB
-    const leaguesWithLogos = await Promise.all(
-      FOOTBALL_LEAGUES.map(async (league) => {
-        try {
-          const apiUrl = `https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=${league.id}`;
-          const response = await fetch(apiUrl);
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.leagues && data.leagues[0]) {
-              const leagueData = data.leagues[0];
-              return {
-                league_id: league.sportKey,
-                league_name: leagueData.strLeague || league.name,
-                sport: 'soccer',
-                country: leagueData.strCountry || league.country,
-                logo_url: leagueData.strBadge || leagueData.strLogo || null,
-                description: leagueData.strDescriptionEN ? leagueData.strDescriptionEN.substring(0, 500) : null,
-                website: leagueData.strWebsite || null,
-                year_founded: leagueData.intFormedYear ? parseInt(leagueData.intFormedYear) : null,
-              };
+    // Delete existing soccer leagues to refresh with correct data
+    const { error: deleteError } = await supabase
+      .from('leagues')
+      .delete()
+      .eq('sport', 'soccer');
+
+    if (deleteError) {
+      console.error('Error deleting old leagues:', deleteError);
+    }
+
+    // Fetch league details from TheSportsDB one by one to avoid mixing data
+    const leaguesWithLogos = [];
+    
+    for (const league of FOOTBALL_LEAGUES) {
+      try {
+        const apiUrl = `https://www.thesportsdb.com/api/v1/json/3/lookupleague.php?id=${league.id}`;
+        console.log(`Fetching league ${league.name} (${league.id})...`);
+        
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.leagues && data.leagues[0]) {
+            const leagueData = data.leagues[0];
+            
+            // Ensure website has protocol
+            let website = leagueData.strWebsite || null;
+            if (website && !website.startsWith('http')) {
+              website = 'https://' + website;
             }
+            
+            leaguesWithLogos.push({
+              league_id: league.sportKey,
+              league_name: leagueData.strLeague || league.name,
+              sport: 'soccer',
+              country: leagueData.strCountry || league.country,
+              logo_url: leagueData.strBadge || leagueData.strLogo || null,
+              description: leagueData.strDescriptionEN ? leagueData.strDescriptionEN.substring(0, 500) : null,
+              website: website,
+              year_founded: leagueData.intFormedYear ? parseInt(leagueData.intFormedYear) : null,
+            });
+            
+            console.log(`✓ Fetched: ${leagueData.strLeague} -> ${league.sportKey}`);
+          } else {
+            // Fallback if API returns empty
+            leaguesWithLogos.push({
+              league_id: league.sportKey,
+              league_name: league.name,
+              sport: 'soccer',
+              country: league.country,
+              logo_url: null,
+              description: null,
+              website: null,
+              year_founded: null,
+            });
+            console.log(`✗ No data for ${league.name}, using fallback`);
           }
-        } catch (error) {
-          console.error(`Error fetching league ${league.name}:`, error);
+        } else {
+          // Fallback on API error
+          leaguesWithLogos.push({
+            league_id: league.sportKey,
+            league_name: league.name,
+            sport: 'soccer',
+            country: league.country,
+            logo_url: null,
+            description: null,
+            website: null,
+            year_founded: null,
+          });
+          console.log(`✗ API error for ${league.name}, using fallback`);
         }
         
+        // Small delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`Error fetching league ${league.name}:`, error);
         // Fallback to basic info if API fails
-        return {
+        leaguesWithLogos.push({
           league_id: league.sportKey,
           league_name: league.name,
           sport: 'soccer',
@@ -95,20 +145,20 @@ serve(async (req) => {
           description: null,
           website: null,
           year_founded: null,
-        };
-      })
-    );
+        });
+      }
+    }
 
     console.log(`Fetched ${leaguesWithLogos.length} leagues from TheSportsDB`);
 
-    // Upsert leagues into database
+    // Insert leagues into database
     const { data, error } = await supabase
       .from('leagues')
-      .upsert(leaguesWithLogos, { onConflict: 'league_id' })
+      .insert(leaguesWithLogos)
       .select();
 
     if (error) {
-      console.error('Error upserting leagues:', error);
+      console.error('Error inserting leagues:', error);
       throw error;
     }
 
