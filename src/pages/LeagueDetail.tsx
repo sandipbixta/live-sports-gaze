@@ -170,7 +170,7 @@ const LeagueDetail = () => {
                 )}
                 {league.website && (
                   <a
-                    href={league.website}
+                    href={league.website.startsWith('http') ? league.website : `https://${league.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center text-primary hover:underline"
