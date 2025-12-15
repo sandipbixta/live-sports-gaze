@@ -34,6 +34,7 @@ const Install = lazy(() => import("./pages/Install"));
 const DaddylivehdAlternatives = lazy(() => import("./pages/DaddylivehdAlternatives"));
 const BatmanstreamAlternatives = lazy(() => import("./pages/BatmanstreamAlternatives"));
 const HesgoalAlternatives = lazy(() => import("./pages/HesgoalAlternatives"));
+const StreameastAlternatives = lazy(() => import("./pages/StreameastAlternatives"));
 const Hesgoal = lazy(() => import("./pages/Hesgoal"));
 const Vipleague = lazy(() => import("./pages/Vipleague"));
 const Myp2p = lazy(() => import("./pages/Myp2p"));
@@ -162,6 +163,11 @@ const App: React.FC = () => {
               <Route path="/hesgoal-alternatives" element={
                 <SEOPageTracker pageTitle="Hesgoal Alternatives - Legal Sports Streaming Sites" contentType="home">
                   <Suspense fallback={<PageLoader />}><HesgoalAlternatives /></Suspense>
+                </SEOPageTracker>
+              } />
+              <Route path="/streameast-alternatives" element={
+                <SEOPageTracker pageTitle="StreamEast Alternatives - Best Free Sports Streaming Sites" contentType="home">
+                  <Suspense fallback={<PageLoader />}><StreameastAlternatives /></Suspense>
                 </SEOPageTracker>
               } />
               <Route path="/hesgoal" element={<Suspense fallback={<PageLoader />}><Hesgoal /></Suspense>} />
