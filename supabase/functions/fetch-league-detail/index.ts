@@ -27,28 +27,31 @@ serve(async (req) => {
       throw new Error('Competition ID is required');
     }
 
-    const cacheKey = `league-${competitionId}`;
+    // competitionId can be a code (PL, PD) or a number - football-data.org accepts both
+    const competitionCode = competitionId;
+
+    const cacheKey = `league-${competitionCode}`;
     const now = Date.now();
     const cached = cache.get(cacheKey);
     
     if (cached && (now - cached.timestamp) < CACHE_DURATION) {
-      console.log(`Returning cached data for competition ${competitionId}`);
+      console.log(`Returning cached data for competition ${competitionCode}`);
       return new Response(JSON.stringify(cached.data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log(`Fetching league detail for competition ${competitionId}`);
+    console.log(`Fetching league detail for competition ${competitionCode}`);
 
     // Fetch competition info, standings, and matches in parallel
     const [competitionRes, standingsRes, matchesRes] = await Promise.all([
-      fetch(`https://api.football-data.org/v4/competitions/${competitionId}`, {
+      fetch(`https://api.football-data.org/v4/competitions/${competitionCode}`, {
         headers: { 'X-Auth-Token': apiKey },
       }),
-      fetch(`https://api.football-data.org/v4/competitions/${competitionId}/standings`, {
+      fetch(`https://api.football-data.org/v4/competitions/${competitionCode}/standings`, {
         headers: { 'X-Auth-Token': apiKey },
       }),
-      fetch(`https://api.football-data.org/v4/competitions/${competitionId}/matches?status=SCHEDULED,FINISHED`, {
+      fetch(`https://api.football-data.org/v4/competitions/${competitionCode}/matches?status=SCHEDULED,FINISHED`, {
         headers: { 'X-Auth-Token': apiKey },
       }),
     ]);

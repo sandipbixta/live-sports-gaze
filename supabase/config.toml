@@ -18,6 +18,9 @@ verify_jwt = false
 [functions.fetch-leagues]
 verify_jwt = false
 
+[functions.fetch-football-leagues]
+verify_jwt = false
+
 [functions.fetch-league-teams]
 verify_jwt = false
 
