@@ -8,6 +8,7 @@ const corsHeaders = {
 // Map internal league IDs to football-data.org competition codes
 const LEAGUE_ID_TO_CODE: Record<string, string> = {
   soccer_england_premier_league: "PL",
+  soccer_epl: "PL",
   soccer_spain_la_liga: "PD",
   soccer_germany_bundesliga: "BL1",
   soccer_italy_serie_a: "SA",
