@@ -1,5 +1,4 @@
 import { indiaChannels, HLSChannel } from './indianChannels';
-import { premiumChannels, getChannelLogo } from './premiumChannels';
 
 export interface Channel {
   id: string;
@@ -79,16 +78,14 @@ const transformChannel = (apiChannel: any): Channel => {
     embedUrl = embedUrl.replace(/&amp;/g, '&');
   }
   
-  const channelName = apiChannel.name || apiChannel.title || '';
-  
   return {
-    id: channelName.toLowerCase().replace(/\s+/g, '-') || String(apiChannel.id || ''),
-    title: channelName,
+    id: apiChannel.name?.toLowerCase().replace(/\s+/g, '-') || String(apiChannel.id || ''),
+    title: apiChannel.name || apiChannel.title || '',
     country: countryName,
     countryCode: countryCode,
     embedUrl: embedUrl,
     category: 'sports' as const,
-    logo: apiChannel.image || apiChannel.logo || getChannelLogo(channelName) || undefined,
+    logo: apiChannel.image || apiChannel.logo || undefined,
     viewers: apiChannel.viewers || 0
   };
 };
@@ -127,19 +124,19 @@ export const fetchChannelsFromAPI = async (): Promise<Channel[]> => {
       .filter((ch: any) => ch && (ch.name || ch.title))
       .map(transformChannel);
 
-    // Add Indian channels from FanCode and premium channels
-    const allChannels = [...premiumChannels, ...transformedChannels, ...indiaChannels];
+    // Add Indian channels from FanCode
+    const allChannels = [...transformedChannels, ...indiaChannels];
 
     // Update cache
     channelsCache = allChannels;
     cacheTimestamp = Date.now();
 
-    console.log(`✅ Fetched ${transformedChannels.length} channels from cdn-live.tv API + ${premiumChannels.length} premium + ${indiaChannels.length} Indian channels`);
+    console.log(`✅ Fetched ${transformedChannels.length} channels from cdn-live.tv API + ${indiaChannels.length} Indian channels`);
     return allChannels;
   } catch (error) {
     console.error('❌ Error fetching channels:', error);
-    // Return cached data if available, otherwise premium + Indian channels
-    return channelsCache || [...premiumChannels, ...indiaChannels];
+    // Return cached data if available, otherwise just Indian channels
+    return channelsCache || indiaChannels;
   }
 };
 
