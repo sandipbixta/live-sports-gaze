@@ -120,6 +120,23 @@ const AdminBlogEditor = () => {
 
   const saveMutation = useMutation({
     mutationFn: async (publish: boolean) => {
+      // Preflight: make the RLS failure understandable
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!sessionData.session?.user) {
+        throw new Error('You must sign in as an admin to publish blog posts.');
+      }
+
+      const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
+        _user_id: sessionData.session.user.id,
+        _role: 'admin',
+      });
+
+      if (roleError) throw roleError;
+      if (!isAdmin) {
+        throw new Error('Your account is not an admin, so publishing is blocked. Add your user to user_roles as admin.');
+      }
+
       const tagsArray = form.tags
         .split(',')
         .map(t => t.trim())
@@ -157,7 +174,11 @@ const AdminBlogEditor = () => {
       navigate('/admin/blog');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Failed to save post');
+      const msg = error?.message || 'Failed to save post';
+      toast.error(msg);
+      if (typeof msg === 'string' && msg.toLowerCase().includes('sign in')) {
+        navigate('/auth');
+      }
     },
   });
 
