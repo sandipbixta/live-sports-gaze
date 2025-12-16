@@ -14,6 +14,7 @@ import SEOPageTracker from "./components/SEOPageTracker";
 import MonetizationTracker from "./components/MonetizationTracker";
 import { queryClient } from "./lib/queryClient";
 import GoogleAnalytics from "./components/GoogleAnalytics";
+import RequireAdmin from "./components/admin/RequireAdmin";
 
 // Only NotFound and Match are critical - other pages lazy loaded
 import NotFound from "./pages/NotFound";
@@ -212,9 +213,36 @@ const App: React.FC = () => {
                 </SEOPageTracker>
               } />
               {/* Admin Blog Pages */}
-              <Route path="/admin/blog" element={<Suspense fallback={<PageLoader />}><AdminBlog /></Suspense>} />
-              <Route path="/admin/blog/new" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
-              <Route path="/admin/blog/edit/:id" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
+              <Route
+                path="/admin/blog"
+                element={
+                  <RequireAdmin>
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminBlog />
+                    </Suspense>
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/blog/new"
+                element={
+                  <RequireAdmin>
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminBlogEditor />
+                    </Suspense>
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/blog/edit/:id"
+                element={
+                  <RequireAdmin>
+                    <Suspense fallback={<PageLoader />}>
+                      <AdminBlogEditor />
+                    </Suspense>
+                  </RequireAdmin>
+                }
+              />
               {/* Auth */}
               <Route path="/auth" element={<Suspense fallback={<PageLoader />}><Auth /></Suspense>} />
               <Route path="*" element={<NotFound />} />
