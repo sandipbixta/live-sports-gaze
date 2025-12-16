@@ -57,6 +57,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const AdminBlogEditor = lazy(() => import("./pages/AdminBlogEditor"));
+const Auth = lazy(() => import("./pages/Auth"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -214,6 +215,8 @@ const App: React.FC = () => {
               <Route path="/admin/blog" element={<Suspense fallback={<PageLoader />}><AdminBlog /></Suspense>} />
               <Route path="/admin/blog/new" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
               <Route path="/admin/blog/edit/:id" element={<Suspense fallback={<PageLoader />}><AdminBlogEditor /></Suspense>} />
+              {/* Auth */}
+              <Route path="/auth" element={<Suspense fallback={<PageLoader />}><Auth /></Suspense>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
